@@ -1,0 +1,46 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <?php if(!is_user_logged_in()) { ?>
+        <div id="<?php echo $this->args['id'] . '-error'; ?>" style="display: none; margin-bottom: 15px; border-left: 4px solid #dc3232; padding: 12px;"></div>
+
+        <div id="<?php echo $this->args['id'] . '-loginform'; ?>">
+            <p>
+                <label for="user_login">Username or Email Address<br>
+                    <input id="<?php echo $this->args['id'] . '-log'; ?>" class="input login-input" value="" size="20" type="text" />
+                </label>
+            </p>
+
+            <p>
+                <label for="user_pass">Password<br>
+                    <input id="<?php echo $this->args['id'] . '-pwd'; ?>" class="input login-input" value="" size="20" type="password" />
+                </label>
+            </p>
+
+            <p class="forgetmenot">
+                <label for="rememberme">
+                    <input id="<?php echo  $this->args['id'] . '-rememberme'; ?>" value="forever" type="checkbox"/> Remember Me
+                </label>
+            </p>
+
+            <p class="submit">
+                <button class="button button-primary button-large aam-login-submit" data-prefix="<?php echo  $this->args['id'] . '-'; ?>">Login</button>
+                <input id="<?php echo  $this->args['id'] . '-redirect'; ?>" value="<?php echo $this->args['redirect']; ?>" type="hidden" />
+            </p>
+        </div>
+
+        <p id="<?php echo $this->args['id'] . '-nav'; ?>">
+            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>">Lost your password?</a>
+        </p>
+    <?php } else { ?>
+        <div style="text-align: center;">
+            <div style="padding: 30px;">
+                <h3><?php echo str_replace('%username%', AAM::getUser()->display_name, $this->args['user-title']); ?></h3>
+                <?php echo get_avatar(AAM::getUser()->ID, "200"); ?>
+            </div>
+            <div>
+                <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard'); ?></a>&nbsp;|&nbsp;
+                <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile'); ?></a>&nbsp;|&nbsp;
+                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out'); ?></a>
+            </div>
+        </div>
+    <?php }
+}

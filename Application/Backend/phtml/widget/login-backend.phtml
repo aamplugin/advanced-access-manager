@@ -1,0 +1,27 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <p>
+        <label for="<?php echo $this->get_field_id('login-title'); ?>"><?php echo __('Login Title', AAM_KEY); ?>: </label>
+        <input type="text" class="widefat" id="<?php echo $this->get_field_id('login-title'); ?>" name="<?php echo $this->get_field_name('login-title'); ?>" value="<?php echo esc_attr($instance['login-title']); ?>" />
+    </p>
+
+    <p>
+        <label for="<?php echo $this->get_field_id('user-title'); ?>"><?php echo __('Logged In Title', AAM_KEY); ?>: </label>
+        <input type="text" class="widefat" id="<?php echo $this->get_field_id('user-title'); ?>" name="<?php echo $this->get_field_name('user-title'); ?>" value="<?php echo esc_attr($instance['user-title']); ?>" />
+    </p>
+
+    <p>
+        <input type="checkbox" id="<?php echo $this->get_field_id('login-timeout'); ?>" name="<?php echo $this->get_field_name('login-timeout'); ?>" value="1" <?php echo !empty($instance['login-timeout']) ? 'checked="checked"' : ""; ?> />
+        <label for="<?php echo $this->get_field_id('login-timeout'); ?>"><strong><?php echo __('Login Timeout', AAM_KEY); ?></strong></label>
+        <small style="line-height:1.35em; display:block; margin-top: 5px;">Delay the login process for 1 second to significantly reduce the chance for brute force or dictionary attack.</small>
+    </p>
+
+    <p style="margin-bottom: 1em;">
+        <input type="checkbox" id="<?php echo $this->get_field_id('brute-force-lockout'); ?>" name="<?php echo $this->get_field_name('brute-force-lockout'); ?>" value="1" <?php echo !empty($instance['brute-force-lockout']) ? 'checked="checked"' : ""; ?> />
+        <label for="<?php echo $this->get_field_id('brute-force-lockout'); ?>"><strong><?php echo __('Brute Force Lockout', AAM_KEY); ?></strong></label>
+        <small style="line-height:1.35em; display:block; margin-top: 5px;">Automatically reject login attempts if number of unsuccessful login attempts is more than 20 over the period of 2 minutes.</small>
+    </p>
+
+    <p style="background-color: #fafafa; border-left: 3px solid #337ab7; font-size: 1em; line-height: 1.35em; margin-bottom: 1em; padding: 10px; font-size: 0.8em;">
+        <?php echo sprintf(__('For more advanced setup like login/logout redirects or custom styling, please check %sthis article%s.', AAM_KEY), '<a href="https://aamplugin.com/help/how-does-aam-secure-login-works" target="_blank">', '</a>'); ?>
+    </p>
+<?php }

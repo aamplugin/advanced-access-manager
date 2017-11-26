@@ -1,0 +1,31 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <?php $features = AAM_Backend_Feature::retriveList($type); ?>
+    <div class="row">
+        <?php if (count($features)) { ?>
+            <div class="col-xs-12 col-md-4">
+                <ul class="list-group" id="feature-list">
+                    <?php
+                    foreach ($features as $i => $feature) {
+                        echo '<li class="list-group-item' . (isset($feature->class) ? ' ' . $feature->class : '') . '" data-feature="' . $feature->uid . '">';
+                        echo $feature->title;
+                        echo (empty($feature->notification) ? '' : ' <span class="badge">' . $feature->notification . '</span>');
+                        echo '</li>';
+                    }
+                    ?>
+                </ul>
+            </div>
+            <div class="col-xs-12 col-md-8">
+                <?php
+                    foreach ($features as $feature) {
+                        echo $feature->view->getContent();
+                    }
+                    do_action('aam-content-action');
+                ?>
+            </div>
+        <?php } else { ?>
+            <div class="col-xs-12">
+                <p class="aam-notification text-center"><?php echo __('You are not allowed to manage any of the existing features.', 'AAM_KEY'); ?></p>
+            </div>
+        <?php } ?>
+    </div>
+<?php }

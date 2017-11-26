@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+    <head>
+        <title>Post Access</title>
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel='stylesheet' href='<?php echo AAM_MEDIA; ?>/css/bootstrap.min.css' type='text/css' media='all' />
+        <link rel='stylesheet' href='<?php echo AAM_MEDIA; ?>/css/datatables.min.css' type='text/css' media='all' />
+        <link rel='stylesheet' href='<?php echo AAM_MEDIA; ?>/css/aam.css' type='text/css' media='all' />
+
+        <?php do_action( 'admin_print_scripts' ); ?>
+        
+        <?php $object = AAM_Backend_Feature_Main_Post::getCurrentObject(); ?>
+    </head>
+
+    <body id="aam-container">
+        <div class="row" style="margin: 10px 0 0 0;">
+            <div class="col-sm-4" style="padding: 0;">
+                <div class="panel panel-default" style="border-radius:0;">
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <?php if (current_user_can('aam_list_roles')) { ?>
+                            <li role="presentation" class="active"><a href="#roles" aria-controls="roles" role="tab" data-toggle="tab"><i class="icon-users" data-toggle="tooltip" data-placement="top" title="Roles"></i></a></li>
+                            <?php } ?>
+                            <?php if (current_user_can('list_users')) { ?>
+                            <li role="presentation"><a href="#users" aria-controls="users" role="tab" data-toggle="tab"><i class="icon-user" data-toggle="tooltip" data-placement="top" title="Users"></i></a></li>
+                            <?php } ?>
+                            <?php if (current_user_can('aam_manage_visitors')) { ?>
+                            <li role="presentation"><a href="#visitor" aria-controls="visitor" role="tab" data-toggle="tab"><i class="icon-user-secret" data-toggle="tooltip" data-placement="top" title="Visitor"></i></a></li>
+                            <?php } ?>
+                            <?php if (current_user_can('aam_manage_default')) { ?>
+                            <li role="presentation"><a href="#default" aria-controls="default" role="tab" data-toggle="tab" class="text-danger"><i class="icon-asterisk" data-toggle="tooltip" data-placement="top" title="Default"></i></a></li>
+                            <?php } ?>
+                        </ul>
+                        <div class="tab-content">
+                            <?php if (current_user_can('aam_list_roles')) { ?>
+                            <div role="tabpanel" class="tab-pane active" id="roles">
+                                <table id="role-list" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Users</th>
+                                            <th width="80%"><?php echo __('Role', AAM_KEY); ?></th>
+                                            <th>&nbsp;</th>
+                                            <th>Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <?php } ?>
+                            <?php if (current_user_can('list_users')) { ?>
+                            <div role="tabpanel" class="tab-pane" id="users">
+                                <table id="user-list" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Roles</th>
+                                            <th width="80%"><?php echo __('Username', AAM_KEY); ?></th>
+                                            <th>&nbsp;</th>
+                                            <th>Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <?php } ?>
+                            <?php if (current_user_can('aam_manage_visitors')) { ?>
+                            <div role="tabpanel" class="tab-pane" id="visitor">
+                                <div class="visitor-message">
+                                    <span class="aam-bordered"><?php echo sprintf(__('Manage access to %s for visitors (any user that is not authenticated)', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
+                                    <button class="btn btn-primary btn-block" id="manage-visitor"><i class="icon-cog"></i> <?php echo __('Manage Visitors', AAM_KEY); ?></button>
+                                </div>
+                            </div>
+                            <?php } ?>
+                            <?php if (current_user_can('aam_manage_default')) { ?>
+                            <div role="tabpanel" class="tab-pane" id="default">
+                                <div class="visitor-message">
+                                    <span class="aam-bordered"><?php echo sprintf(__('Manage default access to %s for all users, roles and visitor. This includes Administrator role and yourself', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
+                                    <?php if (defined('AAM_PLUS_PACKAGE')) { ?>
+                                    <button class="btn btn-danger btn-block" id="manage-default"><i class="icon-cog"></i> <?php echo __('Manage Default Access', AAM_KEY); ?></button>
+                                    <?php } else { ?>
+                                    <p class="aam-notification">
+                                        <?php echo AAM_Backend_View_Helper::preparePhrase('This feature is allowed only with [AAM Plus Package] extension.', 'b'); ?>
+                                    </p>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-8" id="post-content">
+                <div class="aam-overwrite hidden" id="post-overwritten">
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
+                    <span><a href="#" id="post-reset" class="btn btn-xs btn-primary" style="margin-top: -4px;"><?php echo __('Reset To Default', AAM_KEY); ?></a></span>
+                </div>
+
+                <?php if ($object->id) { ?>
+                    <input type="hidden" id="load-post-object" value="<?php echo ($object->type == 'post' ? $object->post->ID : $object->term->term_id . '|' . $object->term->taxonomy); ?>" />
+                    <input type="hidden" id="load-post-object-type" value="<?php echo $object->type; ?>" />
+                    <input type="hidden" id="load-post-object-title" value="<?php echo ($object->type == 'post' ? $object->post->post_title : $object->term->name); ?>" />
+                <?php } ?>
+                
+                <div class="aam-access-form" data-type="<?php echo $object->type; ?>">
+                    <?php if ($object->type == 'post') { ?>
+                        <table class="table table-striped table-bordered">
+                            <tbody>
+                                <?php $frontend = AAM_Backend_Feature_Main_Post::getAccessOptionList('frontend'); ?>
+                                <?php $backend = AAM_Backend_Feature_Main_Post::getAccessOptionList('backend'); ?>
+                                
+                                <?php if (count($frontend) && AAM_Core_Config::get('frontend-access-control', true)) { ?>
+                                    <tr>
+                                        <td colspan="2" class="aam-table-group">
+                                            <i class="icon-doc-text-inv"></i> <strong><?php echo __('Frontend', AAM_KEY); ?></strong>
+                                        </td>
+                                    </tr>
+
+                                    <?php foreach ($frontend as $option => $data) { ?>
+                                        <tr>
+                                            <td width="90%">
+                                                <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
+                                                <?php if (!empty($data['sub'])) { ?>
+                                                    <small><?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> <a href="#modal-<?php echo str_replace('.', '-', $data['option']); ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>"><?php echo __('change', AAM_KEY); ?></a></small>
+                                                <?php } ?>
+                                                <p class="aam-hint" data-dynamic-post-label="<?php echo $data['descr']; ?>">---</p>
+                                            </td>
+                                            <td>
+                                                <div class="aam-row-actions">
+                                                    <i class="aam-row-action text-muted icon-check-empty" data-property="frontend.<?php echo $option; ?>"></i>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                <?php } ?>
+
+                                <?php if (count($backend) && AAM_Core_Config::get('backend-access-control', true)) { ?>
+                                    <tr class="aam-backend-post-access">
+                                        <td colspan="2" class="aam-table-group">
+                                            <i class="icon-doc-text-inv"></i> <strong><?php echo __('Backend', AAM_KEY); ?></strong>
+                                        </td>
+                                    </tr>
+
+                                    <?php foreach ($backend as $option => $data) { ?>
+                                        <tr class="aam-backend-post-access">
+                                            <td width="90%">
+                                                <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
+                                                <?php if (!empty($data['sub'])) { ?>
+                                                    <small><?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> <a href="#modal-<?php echo str_replace('.', '-', $data['option']); ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>"><?php echo __('change', AAM_KEY); ?></a></small>
+                                                <?php } ?>
+                                                <p class="aam-hint" data-dynamic-post-label="<?php echo $data['descr']; ?>">---</p>
+                                            </td>
+                                            <td>
+                                                <div class="aam-row-actions">
+                                                    <i class="aam-row-action text-muted icon-check-empty" data-property="backend.<?php echo $option; ?>"></i>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    <?php } else {
+                        echo apply_filters('aam-term-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('term-type.phtml'));
+                    } ?>
+                    <div class="aam-overlay"></div>
+                </div>
+                
+                <?php require dirname(__FILE__) . '/partial/post-advanced-settings.phtml'; ?>
+            </div>
+        </div>
+        
+        <p style="margin: 5px; text-align: left; font-size: 0.9em;">
+           <b>Please help us</b> and submit your review <a href="https://wordpress.org/support/plugin/advanced-access-manager/reviews/" target="_blank"><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i></a>
+        </p>
+    </body>
+</html>

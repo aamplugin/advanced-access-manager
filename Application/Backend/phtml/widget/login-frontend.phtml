@@ -1,0 +1,61 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <?php 
+        echo $this->args['before_widget'];
+
+        if(!is_user_logged_in()) {
+            echo $this->args['before_title'];
+            echo apply_filters('widget_title', $this->args['login-title'], $this->args, $this->id_base);
+            echo $this->args['after_title'];
+        }elseif(is_user_logged_in()) {
+            echo $this->args['before_title'];
+            echo str_replace('%username%', AAM::getUser()->display_name, $this->args['user-title']);
+            echo $this->args['after_title'];
+        }
+    ?>
+
+    <?php if(!is_user_logged_in()) { ?>
+        <div id="<?php echo $this->get_field_id('error'); ?>" style="display: none; margin-bottom: 15px; border-left: 4px solid #dc3232; padding: 6px;"></div>
+
+        <div id="<?php echo $this->get_field_id('loginform'); ?>">
+            <p>
+                <label for="user_login">Username or Email Address<br>
+                    <input id="<?php echo $this->get_field_id('log'); ?>" class="input login-input" value="" size="20" type="text" />
+                </label>
+            </p>
+
+            <p>
+                <label for="user_pass">Password<br>
+                    <input id="<?php echo $this->get_field_id('pwd'); ?>" class="input login-input" value="" size="20" type="password" />
+                </label>
+            </p>
+
+            <p class="forgetmenot">
+                <label for="rememberme">
+                    <input id="<?php echo  $this->get_field_id('rememberme'); ?>" value="forever" type="checkbox"/> Remember Me
+                </label>
+            </p>
+
+            <p class="submit">
+                <input class="button button-primary button-large aam-login-submit" data-prefix="<?php echo  $this->get_field_id(''); ?>" value="Log In" type="submit" />
+                <input id="<?php echo  $this->get_field_id('redirect'); ?>" value="<?php echo $this->args['redirect']; ?>" type="hidden" />
+            </p>
+        </div>
+
+        <p id="<?php echo $this->get_field_id('nav'); ?>">
+            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>">Lost your password?</a>
+        </p>
+    <?php } else { ?>
+        <div style="display: table; width: 100%;">
+            <div style="display:table-cell; width: 30%; text-align: center; vertical-align: middle;">
+                <?php echo get_avatar(AAM::getUser()->ID, "50"); ?>
+            </div>
+            <div style="display:table-cell;">
+                <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard'); ?></a><br/>
+                <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile'); ?></a><br/>
+                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out'); ?></a>
+            </div>
+        </div>
+    <?php } ?>
+
+    <?php echo $this->args['after_widget'];
+}

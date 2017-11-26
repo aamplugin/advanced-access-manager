@@ -1,0 +1,1335 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: AAM\n"
+"POT-Creation-Date: 2017-11-26 16:25-0500\n"
+"PO-Revision-Date: \n"
+"Last-Translator: WPAAM <support@wpaam.com>\n"
+"Language-Team: WP AAM <vasyl@vasyltech.com>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: Application/Backend/Feature/Extension/Manager.php:106
+msgid "Enter license key to update extension."
+msgstr ""
+
+#: Application/Backend/Feature/Main/404Redirect.php:53
+msgid "404 Redirect"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:98
+msgid "Capability already exists"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:127
+msgid "Can not remove the capability"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:218
+#: Application/Backend/Feature/Main/Capability.php:259
+msgid "System"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:219
+#: Application/Backend/Feature/Main/Capability.php:261
+#: Application/Backend/Feature/Main/Post.php:549
+msgid "Posts & Pages"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:220
+#: Application/Backend/Feature/Main/Capability.php:263
+#: Application/Backend/phtml/frame.phtml:145
+#: Application/Backend/phtml/main/post.phtml:105
+msgid "Backend"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:221
+#: Application/Backend/Feature/Main/Capability.php:265
+msgid "AAM Interface"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:222
+#: Application/Backend/Feature/Main/Capability.php:267
+msgid "Miscellaneous"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Capability.php:299
+msgid "Capabilities"
+msgstr ""
+
+#: Application/Backend/Feature/Main/LoginRedirect.php:73
+msgid "Login Redirect"
+msgstr ""
+
+#: Application/Backend/Feature/Main/LogoutRedirect.php:73
+msgid "Logout Redirect"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Menu.php:195
+msgid "Backend Menu"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Metabox.php:236
+msgid "Metaboxes & Widgets"
+msgstr ""
+
+#: Application/Backend/Feature/Main/Redirect.php:83
+msgid "Access Denied Redirect"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:32
+msgid "Media Files Access Control"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:37
+msgid "Check Post Visibility"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:38
+msgid ""
+"For performance reasons, keep this option uncheck if do not use LIST or LIST "
+"TO OTHERS access options on Posts & Pages tab. When it is checked, AAM will "
+"filter list of posts that are hidden for a user on both frontend and backend."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:42
+msgid "Manage Hidden Post Types"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:43
+msgid ""
+"By default AAM allows you to manage access only to public post types on "
+"Posts & Pages tab. By enabling this feature, you also will be able to manage "
+"access to hidden post types like revisions, navigation menus or any other "
+"custom post types that are not registered as public."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Content.php:62
+msgid "Content Settings"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:32
+msgid "Edit/Delete Capabilities"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:37
+msgid "Backend Access Control"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:38
+msgid ""
+"Allow AAM to manage access to the backend. Keep this option disabled if "
+"there is no needs to restrict backend features for other users. This option "
+"may reduce your website backend performance."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:42
+msgid "Frontend Access Control"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:43
+msgid ""
+"Allow AAM to manage access to frontend resources. If there is no need to "
+"manage access to the website frontend then keep this option unchecked as it "
+"may increase your webiste performance."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:47
+msgid "Render Access Manager Metabox"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:48
+msgid ""
+"Render Access Manager metabox on all post and category edit pages. Access "
+"Manager metabox is the quick way to manage access to any post or category "
+"without leaving an edit page."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:52
+msgid "Render Access Link"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:53
+msgid ""
+"Render Access shortcut link under any post, page, custom post type, "
+"category, custom taxonomy title or user name."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:57
+msgid "Secure Login"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:58
+msgid ""
+"AAM comes with its own user login handler. With this feature you can add "
+"AJAX login widget to your frontend page that significantly enhance your "
+"website security."
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Core.php:77
+msgid "Core Settings"
+msgstr ""
+
+#: Application/Backend/Feature/Settings/Tools.php:102
+msgid "Tools"
+msgstr ""
+
+#: Application/Backend/Manager.php:314
+msgid "Access Manager"
+msgstr ""
+
+#: Application/Backend/Manager.php:401 Application/Backend/Manager.php:419
+#: Application/Backend/Manager.php:442
+msgid "Access"
+msgstr ""
+
+#: Application/Backend/Manager.php:592 Application/Backend/Manager.php:615
+#: Application/Core/API.php:247
+msgid "Access Denied"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:26 media/js/aam.js:1140
+msgid "Search Capability"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:27 media/js/aam.js:1141
+msgid "_TOTAL_ capability(s)"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:28 media/js/aam.js:326
+#: media/js/aam.js:387 media/js/aam.js:1243 media/js/aam.js:1287
+#: media/js/aam.js:1805
+msgid "Saving..."
+msgstr ""
+
+#: Application/Backend/View/Localization.php:29 media/js/aam.js:1251
+msgid "Failed to add new capability"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:30 media/js/aam.js:346
+#: media/js/aam.js:399 media/js/aam.js:436 media/js/aam.js:530
+#: media/js/aam.js:562 media/js/aam.js:958 media/js/aam.js:994
+#: media/js/aam.js:1028 media/js/aam.js:1256 media/js/aam.js:1300
+#: media/js/aam.js:1339 media/js/aam.js:1422 media/js/aam.js:1567
+#: media/js/aam.js:2071 media/js/aam.js:2147 media/js/aam.js:2176
+#: media/js/aam.js:2865 media/js/aam.js:2890
+msgid "Application error"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:31 media/js/aam.js:1259
+msgid "Add Capability"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:32 media/js/aam.js:872
+#: Application/Backend/phtml/main/menu.phtml:67
+msgid "Show Menu"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:33 media/js/aam.js:882
+#: Application/Backend/phtml/main/menu.phtml:71
+msgid "Restrict Menu"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:34 media/js/aam.js:989
+msgid "Failed to retrieve mataboxes"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:35 media/js/aam.js:1610
+msgid "Search"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:36 media/js/aam.js:1611
+msgid "_TOTAL_ object(s)"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:37
+msgid "Failed"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:38 media/js/aam.js:58
+msgid "Loading..."
+msgstr ""
+
+#: Application/Backend/View/Localization.php:39 media/js/aam.js:63
+msgid "No Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:40 media/js/aam.js:120
+msgid "Search Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:41 media/js/aam.js:121
+msgid "_TOTAL_ role(s)"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:42 media/js/aam.js:129
+#: media/js/aam.js:602 Application/Backend/phtml/index.phtml:170
+#: Application/Backend/phtml/main/capability.phtml:26
+#: Application/Backend/phtml/main/capability.phtml:64
+msgid "Create"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:43 media/js/aam.js:153
+#: Application/Backend/phtml/index.phtml:124
+#: Application/Backend/phtml/index.phtml:267
+msgid "Users"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:44 media/js/aam.js:341
+msgid "Failed to add new role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:45 media/js/aam.js:349
+msgid "Add Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:46 media/js/aam.js:394
+msgid "Failed to update role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:47 media/js/aam.js:403
+#: Application/Backend/phtml/extensions.phtml:51
+#: Application/Backend/phtml/extensions.phtml:78
+#: Application/Backend/phtml/index.phtml:196
+#: Application/Backend/phtml/main/capability.phtml:86
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:16
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:37
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:59
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:86
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:130
+msgid "Update"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:48 media/js/aam.js:426
+#: media/js/aam.js:1326
+msgid "Deleting..."
+msgstr ""
+
+#: Application/Backend/View/Localization.php:49 media/js/aam.js:432
+msgid "Failed to delete role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:50
+#: Application/Backend/View/Localization.php:62 media/js/aam.js:251
+#: media/js/aam.js:440 Application/Backend/phtml/index.phtml:208
+msgid "Delete Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:51 media/js/aam.js:526
+msgid "Failed to block user"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:52 media/js/aam.js:593
+msgid "Search User"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:53 media/js/aam.js:594
+msgid "_TOTAL_ user(s)"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:54 media/js/aam.js:619
+#: Application/Backend/phtml/frame.phtml:46
+#: Application/Backend/phtml/index.phtml:141
+msgid "Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:55
+#: Application/Core/Subject/Visitor.php:79 media/js/aam.js:758
+msgid "Anonymous"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:56
+msgid "Current user"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:57
+msgid "Current role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:58 media/js/aam.js:1699
+msgid "Manage Access"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:59
+#: Application/Backend/View/PostOptionList.php:91 media/js/aam.js:1711
+msgid "Edit"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:60 media/js/aam.js:192
+msgid "Manage Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:61 media/js/aam.js:214
+msgid "Edit Role"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:63 media/js/aam.js:651
+msgid "Manage User"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:64 media/js/aam.js:665
+msgid "Edit User"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:65 media/js/aam.js:521
+#: media/js/aam.js:522 media/js/aam.js:678
+msgid "Lock User"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:66 media/js/aam.js:515
+#: media/js/aam.js:516 media/js/aam.js:691
+msgid "Unlock User"
+msgstr ""
+
+#: Application/Backend/View/Localization.php:67
+msgid "Failed to grand capability - WordPress policy"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:26
+#: Application/Backend/View/PostOptionList.php:85
+msgid "List"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:27
+#, php-format
+msgid ""
+"Hide %s however access with a direct URL will be still allowed. When there "
+"are more than 500 posts, this option may not be applied immediately because, "
+"for performance reasons, AAM checks limited number of posts per request."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:27
+#: Application/Backend/View/PostOptionList.php:32
+#, php-format
+msgid " %sSee in action.%s"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:31
+msgid "Read"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:32
+#, php-format
+msgid ""
+"Restrict access to read the %s. Any attempts to read, view or open the %s "
+"will be denied and redirected based on the Access Denied Redirect rule."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:35
+msgid "Limit"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:36
+msgid "Teaser message"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:39
+#, php-format
+msgid "When checked, show defined teaser message instead of the %s content."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:42
+msgid "Read Counter"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:43
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:11
+msgid "Threshold"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:47
+#, php-format
+msgid ""
+"Define how many times the %s can be opened to read, view or download. After "
+"number of time exceeds the defined threshold, the access will be denied to "
+"the %s and redirected based on the Access Denied Redirect rule."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:50
+msgid "Comment"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:51
+#, php-format
+msgid "Restrict access to comment on %s when commenting feature is enabled."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:54
+msgid "Redirect"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:55
+msgid "Redirect Rule"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:58
+#, php-format
+msgid ""
+"Redirect user based on the defined redirect rule when user tries to read the "
+"%s. The REDIRECT option will be ignored if READ option checked. For more "
+"information about this option please refer to the %sHelp Section%s."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:61
+msgid "Password Protected"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:62
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:32
+msgid "Password"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:65
+#, php-format
+msgid "Password protect the %s. Available with WordPress 4.7.0 or higher."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:68
+msgid "Access Expiration"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:69
+msgid "Expires:"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:72
+#, php-format
+msgid "Define when access expires for %s."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:72
+#, php-format
+msgid ""
+"After expiration, the access to %s will be denied and user will be "
+"redirected based on the Access Denied Redirect rule. For more information "
+"%scheck this article%s or "
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:72
+#, php-format
+msgid " %ssee in action.%s"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:75
+msgid "Monetized Access"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:76
+msgid "E-Product"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:87
+#, php-format
+msgid ""
+"Hide %s however access with a direct URL is still allowed. When there are "
+"more than 500 posts, this option may not be applied immediately because, for "
+"performance reasons, AAM checks limited number of posts per request."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:93
+#, php-format
+msgid ""
+"Restrict access to edit the %s. Any attempts to edit %s will result in "
+"redirecting user based on the Access Denied Redirect rule."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:96
+#: Application/Backend/phtml/index.phtml:214
+#: Application/Backend/phtml/main/capability.phtml:104
+msgid "Delete"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:98
+#, php-format
+msgid "Restrict access to trash or permanently delete %s."
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:101
+msgid "Publish"
+msgstr ""
+
+#: Application/Backend/View/PostOptionList.php:103
+#, php-format
+msgid ""
+"Restrict access to publish the %s. User will be allowed only submit the %s "
+"for review."
+msgstr ""
+
+#: Application/Backend/Widget/Login.php:19
+msgid "AAM Secure Login Widget"
+msgstr ""
+
+#: Application/Backend/Widget/Login.php:80
+msgid "Login"
+msgstr ""
+
+#: Application/Backend/Widget/Login.php:84
+#: Application/Shortcode/Strategy/Login.php:55
+msgid "Howdy, %username%"
+msgstr ""
+
+#: Application/Core/Login.php:113
+msgid "Access denied. Please login to get access."
+msgstr ""
+
+#: Application/Core/Login.php:247
+msgid "Username and password are required"
+msgstr ""
+
+#: Application/Core/Subject/Default.php:78 media/js/aam.js:789
+msgid "All Users, Roles and Visitor"
+msgstr ""
+
+#: Application/Extension/Repository.php:128
+#, php-format
+msgid ""
+"The [%s] file is missing. Update all your extensions to the latest version."
+msgstr ""
+
+#: Application/Extension/Repository.php:304
+#, php-format
+msgid "Failed to create %s"
+msgstr ""
+
+#: Application/Extension/Repository.php:308
+#, php-format
+msgid "Directory %s is not writable"
+msgstr ""
+
+#: Application/Frontend/Filter.php:301
+msgid "[No teaser message provided]"
+msgstr ""
+
+#: Application/Shortcode/Factory.php:52
+msgid "No valid strategy found for the given context"
+msgstr ""
+
+#: aam.php:173
+msgid "PHP 5.2 or higher is required."
+msgstr ""
+
+#: aam.php:175
+msgid "WP 3.8 or higher is required."
+msgstr ""
+
+#: media/js/aam.js:230
+msgid "Clone Role"
+msgstr ""
+
+#: media/js/aam.js:704
+msgid "Switch To User"
+msgstr ""
+
+#: media/js/aam.js:837 media/js/aam.js:2346 media/js/aam.js:2391
+#: media/js/aam.js:2422 media/js/aam.js:2455 media/js/aam.js:2507
+msgid "Application Error"
+msgstr ""
+
+#: media/js/aam.js:906 Application/Backend/phtml/main/menu.phtml:54
+msgid "Uncheck to allow"
+msgstr ""
+
+#: media/js/aam.js:908 Application/Backend/phtml/main/menu.phtml:54
+msgid "Check to restrict"
+msgstr ""
+
+#: media/js/aam.js:1015
+msgid "Processing"
+msgstr ""
+
+#: media/js/aam.js:1023
+msgid "Failed to initialize URL"
+msgstr ""
+
+#: media/js/aam.js:1031 Application/Backend/phtml/main/metabox.phtml:102
+msgid "Initialize"
+msgstr ""
+
+#: media/js/aam.js:1055 Application/Backend/phtml/main/metabox.phtml:65
+msgid "Uncheck to show"
+msgstr ""
+
+#: media/js/aam.js:1057 Application/Backend/phtml/main/metabox.phtml:65
+msgid "Check to hide"
+msgstr ""
+
+#: media/js/aam.js:1103
+msgid "WordPress core does not allow to grant this capability"
+msgstr ""
+
+#: media/js/aam.js:1143
+msgid "Nothing to show"
+msgstr ""
+
+#: media/js/aam.js:1295
+msgid "Failed to update capability"
+msgstr ""
+
+#: media/js/aam.js:1303 Application/Backend/phtml/main/capability.phtml:76
+msgid "Update Capability"
+msgstr ""
+
+#: media/js/aam.js:1334
+msgid "Failed to delete capability"
+msgstr ""
+
+#: media/js/aam.js:1342 Application/Backend/phtml/main/capability.phtml:98
+msgid "Delete Capability"
+msgstr ""
+
+#: media/js/aam.js:1685
+msgid "Drill-Down"
+msgstr ""
+
+#: media/js/aam.js:2169
+msgid "Extension status was updated successfully"
+msgstr ""
+
+#: media/js/aam.js:2381 media/js/aam.js:2412 media/js/aam.js:2443
+#: media/js/aam.js:2496
+msgid "Wait..."
+msgstr ""
+
+#: media/js/aam.js:2385
+msgid "All settings were cleared successfully"
+msgstr ""
+
+#: media/js/aam.js:2395 media/js/aam.js:2426
+#: Application/Backend/phtml/settings/tools.phtml:66
+msgid "Clear"
+msgstr ""
+
+#: media/js/aam.js:2416
+msgid "The cache was cleared successfully"
+msgstr ""
+
+#: media/js/aam.js:2503
+msgid "Invalid data format"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:11
+msgid "Install/Update Extension"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:15
+msgid "License Key"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:19
+msgid "Submit"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:28
+msgid "Premium"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:29
+#: Application/Backend/phtml/extensions.phtml:69
+msgid "Free"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:30
+msgid "Check for Updates"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:49
+#: Application/Backend/phtml/extensions.phtml:76
+msgid "Deactivate"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:53
+#: Application/Backend/phtml/extensions.phtml:80
+msgid "Activate"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:55
+#: Application/Backend/phtml/index.phtml:89
+msgid "Read More"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:82
+#: Application/Backend/phtml/extensions.phtml:117
+msgid "Download"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:97
+#: Application/Backend/phtml/extensions.phtml:128
+#: Application/Backend/phtml/extensions.phtml:139
+#: Application/Backend/phtml/index.phtml:154
+#: Application/Backend/phtml/index.phtml:171
+#: Application/Backend/phtml/index.phtml:181
+#: Application/Backend/phtml/index.phtml:197
+#: Application/Backend/phtml/index.phtml:207
+#: Application/Backend/phtml/index.phtml:215
+#: Application/Backend/phtml/main/capability.phtml:54
+#: Application/Backend/phtml/main/capability.phtml:65
+#: Application/Backend/phtml/main/capability.phtml:75
+#: Application/Backend/phtml/main/capability.phtml:87
+#: Application/Backend/phtml/main/capability.phtml:97
+#: Application/Backend/phtml/main/capability.phtml:105
+#: Application/Backend/phtml/main/menu.phtml:86
+#: Application/Backend/phtml/main/metabox.phtml:89
+#: Application/Backend/phtml/main/metabox.phtml:103
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:6
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:17
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:27
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:38
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:48
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:60
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:70
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:87
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:97
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:108
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:118
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:131
+#: Application/Backend/phtml/settings/tools.phtml:59
+msgid "Close"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:98
+msgid "Notification"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:102
+msgid ""
+"Extension requires manual installation. Please follow few simple steps below."
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:118
+#: Application/Backend/phtml/settings/tools.phtml:67
+msgid "Cancel"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:129
+msgid "Install Extension"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:133
+msgid ""
+"Insert license key that you recieved after the payment (find the email "
+"example below). It might take up to 2 hours to process the payment. Please "
+"remember that license key is limited only to one life domain."
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:62
+#: Application/Backend/phtml/index.phtml:229
+msgid "Username"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:74
+#, php-format
+msgid "Manage access to %s for visitors (any user that is not authenticated)"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:75
+#: Application/Backend/phtml/index.phtml:242
+msgid "Manage Visitors"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:82
+#, php-format
+msgid ""
+"Manage default access to %s for all users, roles and visitor. This includes "
+"Administrator role and yourself"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:84
+#: Application/Backend/phtml/index.phtml:250
+msgid "Manage Default Access"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:100
+#: Application/Backend/phtml/main/menu.phtml:13
+#: Application/Backend/phtml/main/metabox.phtml:19
+#: Application/Backend/phtml/main/post.phtml:35
+msgid "Settings are customized"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:101
+#: Application/Backend/phtml/main/capability.phtml:33
+#: Application/Backend/phtml/main/menu.phtml:14
+#: Application/Backend/phtml/main/metabox.phtml:20
+#: Application/Backend/phtml/main/post.phtml:36
+msgid "Reset To Default"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:120
+#: Application/Backend/phtml/main/post.phtml:80
+msgid "Frontend"
+msgstr ""
+
+#: Application/Backend/phtml/frame.phtml:129
+#: Application/Backend/phtml/frame.phtml:154
+#: Application/Backend/phtml/main/post.phtml:89
+#: Application/Backend/phtml/main/post.phtml:114
+msgid "change"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:14
+msgid "Main Panel"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:23
+msgid ""
+"Appreciate your interest in Advanced Access Manager (AAM). With strong "
+"knowledge and experience in WordPress, AAM becomes a very powerful tool to "
+"manage access to your frontend and backend."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:24
+msgid "Please Note!"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:25
+msgid ""
+"AAM was thoroughly tested on the fresh installation of WordPress and in the "
+"latest versions of Chrome, Safari, IE and Firefox. If you have any issues, "
+"the most typical case is the conflict with other plugins or themes."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:26
+#, php-format
+msgid ""
+"Check our %sHelp%s section to find some useful articles about AAM "
+"functionality or %scontact us%s directly."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:40
+msgid "Notifications"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:99
+msgid "AAM Multisite"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:103
+msgid "Install AAM Multisite"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:114
+msgid "Users/Roles Manager"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:121
+#: Application/Backend/phtml/index.phtml:262
+msgid "Roles"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:127
+#: Application/Backend/phtml/index.phtml:272
+msgid "Visitor"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:130
+#: Application/Backend/phtml/index.phtml:277
+msgid "Default"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:142
+#: Application/Backend/phtml/index.phtml:230
+msgid "Action"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:155
+msgid "Create Role"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:159
+#: Application/Backend/phtml/index.phtml:186
+msgid "Role Name"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:160
+#: Application/Backend/phtml/index.phtml:187
+msgid "Enter Role Name"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:163
+#: Application/Backend/phtml/index.phtml:190
+msgid "Role Expiration"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:164
+#: Application/Backend/phtml/index.phtml:191
+msgid "Enter Expiration Rule"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:182
+msgid "Update Role"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:211
+#, php-format
+msgid "Are you sure that you want to delete the %s role?"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:241
+msgid ""
+"Manage access to your website for visitors (any user that is not "
+"authenticated)"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:249
+msgid ""
+"Manage default access to your website resources for all users, roles and "
+"visitor. This includes Administrator role and your user"
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:263
+msgid ""
+"With Roles tab you can manage access for any defined role, edit role's name, "
+"create new role or even delete existing (but only when there is no users "
+"assigned to it). You are not allowed to delete Administrator role."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:268
+msgid ""
+"Manage access for any user. As a bonus feature, you can block user. It means "
+"that user will be not able to login to your website anymore."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:273
+msgid ""
+"Visitor can be considered any user that is not authenticated to your website."
+msgstr ""
+
+#: Application/Backend/phtml/index.phtml:278
+msgid ""
+"Manage default access settings to your website resources for all users, "
+"roles and visitors."
+msgstr ""
+
+#: Application/Backend/phtml/main-panel.phtml:27
+msgid "You are not allowed to manage any of the existing features."
+msgstr ""
+
+#: Application/Backend/phtml/main/404redirect.phtml:36
+#: Application/Backend/phtml/main/login-redirect.phtml:43
+#: Application/Backend/phtml/main/logout-redirect.phtml:43
+#: Application/Backend/phtml/main/redirect.phtml:67
+#: Application/Backend/phtml/main/redirect.phtml:119
+msgid "Existing Page"
+msgstr ""
+
+#: Application/Backend/phtml/main/404redirect.phtml:45
+#: Application/Backend/phtml/main/login-redirect.phtml:52
+#: Application/Backend/phtml/main/logout-redirect.phtml:52
+#: Application/Backend/phtml/main/redirect.phtml:76
+#: Application/Backend/phtml/main/redirect.phtml:128
+msgid "-- Select Page --"
+msgstr ""
+
+#: Application/Backend/phtml/main/404redirect.phtml:51
+#: Application/Backend/phtml/main/login-redirect.phtml:58
+#: Application/Backend/phtml/main/logout-redirect.phtml:58
+#: Application/Backend/phtml/main/redirect.phtml:82
+#: Application/Backend/phtml/main/redirect.phtml:134
+msgid "The URL"
+msgstr ""
+
+#: Application/Backend/phtml/main/404redirect.phtml:56
+#: Application/Backend/phtml/main/login-redirect.phtml:63
+#: Application/Backend/phtml/main/logout-redirect.phtml:63
+#: Application/Backend/phtml/main/redirect.phtml:87
+#: Application/Backend/phtml/main/redirect.phtml:139
+msgid "PHP Callback Function"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:16
+msgid "Filter"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:23
+msgid "All Capabilities"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:32
+msgid "Capabilities are customized"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:42
+msgid "Category"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:43
+#: Application/Backend/phtml/main/capability.phtml:59
+#: Application/Backend/phtml/main/capability.phtml:80
+msgid "Capability"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:44
+#: Application/Backend/phtml/main/post.phtml:52
+msgid "Actions"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:55
+msgid "Create Capability"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:60
+#: Application/Backend/phtml/main/capability.phtml:81
+msgid "Enter Capability"
+msgstr ""
+
+#: Application/Backend/phtml/main/capability.phtml:101
+#, php-format
+msgid "Are you sure that you want to delete %s capability for all roles?"
+msgstr ""
+
+#: Application/Backend/phtml/main/login-redirect.phtml:27
+#: Application/Backend/phtml/main/logout-redirect.phtml:27
+msgid "WordPress default behavior"
+msgstr ""
+
+#: Application/Backend/phtml/main/menu.phtml:87
+msgid "Dashboard Lockdown"
+msgstr ""
+
+#: Application/Backend/phtml/main/menu.phtml:91
+msgid "You cannot restrict access to Dashboard home page."
+msgstr ""
+
+#: Application/Backend/phtml/main/menu.phtml:96
+msgid "OK"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:12
+msgid "Refresh"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:13
+msgid "Init URL"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:43
+msgid "Dashboard Widgets"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:47
+msgid "Frontend Widgets"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:78
+msgid "The list is not initialized. Click Refresh button above."
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:90
+msgid "Initialize URL"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:94
+msgid ""
+"Some metaboxes are \"conditional\" and appear on the Edit screen when "
+"certain conditions are met. For example metabox \"Comments\" appears only "
+"for existing page and not for new page. If you do not see a desired metabox, "
+"try to copy & paste the full URL to the backend page where that metabox "
+"appears."
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:97
+msgid "Backend page URL"
+msgstr ""
+
+#: Application/Backend/phtml/main/metabox.phtml:98
+msgid "Insert valid URL"
+msgstr ""
+
+#: Application/Backend/phtml/main/post.phtml:15
+#, php-format
+msgid ""
+"Manage access to posts, pages and custom post types. For more information "
+"about this functionality check %sHow to manage access to the WordPress "
+"content%s article."
+msgstr ""
+
+#: Application/Backend/phtml/main/post.phtml:25
+msgid "Root"
+msgstr ""
+
+#: Application/Backend/phtml/main/post.phtml:51
+msgid "Title"
+msgstr ""
+
+#: Application/Backend/phtml/main/post.phtml:59
+#: Application/Backend/phtml/main/post.phtml:61
+#: Application/Backend/phtml/main/post.phtml:65
+#: Application/Backend/phtml/main/post.phtml:67
+#: Application/Backend/phtml/main/post.phtml:71
+#: Application/Backend/phtml/main/post.phtml:129
+msgid "Go Back"
+msgstr ""
+
+#: Application/Backend/phtml/main/redirect.phtml:25
+msgid "Frontend Redirect"
+msgstr ""
+
+#: Application/Backend/phtml/main/redirect.phtml:26
+msgid "Backend Redirect"
+msgstr ""
+
+#: Application/Backend/phtml/main/redirect.phtml:62
+#: Application/Backend/phtml/main/redirect.phtml:114
+msgid "Customized Message"
+msgstr ""
+
+#: Application/Backend/phtml/main/redirect.phtml:63
+#: Application/Backend/phtml/main/redirect.phtml:115
+msgid "Enter message..."
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:7
+msgid "Define Threshold"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:12
+msgid "Enter digital number"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:28
+msgid "Set Password"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:33
+msgid "Enter Password"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:49
+msgid "Define Redirect Rule"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:54
+msgid "Enter Redirect Rule"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:55
+msgid "Enter rule"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:71
+msgid "Set Expiration"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:81
+msgid "Enter expiration critiria"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:82
+msgid "Enter critiria"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:98
+msgid "Teaser Message"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:102
+msgid "Simple text or valid HTML"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:103
+msgid "Enter your teaser"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:107
+msgid "Save"
+msgstr ""
+
+#: Application/Backend/phtml/partial/post-advanced-settings.phtml:119
+msgid "E-Commerce Setup"
+msgstr ""
+
+#: Application/Backend/phtml/partial/role-inheritance.phtml:3
+msgid "Inherit Capabilities From"
+msgstr ""
+
+#: Application/Backend/phtml/partial/role-inheritance.phtml:5
+msgid "Select Role"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:8
+msgid "Export AAM Settings"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:10
+#, php-format
+msgid ""
+"Export selected AAM settings to the file. For more information about this "
+"feature check %sHow to export and import AAM settings%s article."
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:19
+msgid "Import AAM Settings"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:21
+msgid "Import AAM settings from the file."
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:31
+msgid "Clear Cache"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:33
+msgid "Clear all AAM cache."
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:42
+msgid "Clear All Settings"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:44
+msgid "Remove all the settings related to AAM from the database."
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:60
+msgid "Clear all settings"
+msgstr ""
+
+#: Application/Backend/phtml/settings/tools.phtml:63
+msgid "All AAM settings will be removed."
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-backend.phtml:3
+msgid "Login Title"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-backend.phtml:8
+msgid "Logged In Title"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-backend.phtml:14
+msgid "Login Timeout"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-backend.phtml:20
+msgid "Brute Force Lockout"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-backend.phtml:25
+#, php-format
+msgid ""
+"For more advanced setup like login/logout redirects or custom styling, "
+"please check %sthis article%s."
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-frontend.phtml:53
+#: Application/Frontend/phtml/login.phtml:40
+msgid "Dashboard"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-frontend.phtml:54
+#: Application/Frontend/phtml/login.phtml:41
+msgid "Edit My Profile"
+msgstr ""
+
+#: Application/Backend/phtml/widget/login-frontend.phtml:55
+#: Application/Frontend/phtml/login.phtml:42
+msgid "Log Out"
+msgstr ""

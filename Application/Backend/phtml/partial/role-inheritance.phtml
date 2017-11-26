@@ -1,0 +1,14 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <div class="form-group">
+        <label><?php echo __('Inherit Capabilities From', AAM_KEY); ?></label>
+        <select class="form-control inherit-role-list" name="inherit" id="inherit-role">
+            <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
+        </select>
+    </div>
+    <div class="checkbox">
+        <label for="clone">
+            <input type="checkbox" value="1" id="clone-role" name="clone" />
+            Also clone all access settings
+        </label>
+    </div>
+<?php }

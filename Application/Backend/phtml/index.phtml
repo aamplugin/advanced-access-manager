@@ -1,0 +1,288 @@
+<?php if (defined('AAM_KEY')) { ?>
+    <div class="wrap" id="aam-container">
+        <div class="row" id="aam-subject-banner">
+            <div class="col-xs-12 col-md-8">
+                <div class="aam-current-subject"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-md-8">
+                <div class="metabox-holder">
+                    <div class="postbox">
+                        <h3 class="hndle">
+                            <span><?php echo __('Main Panel', AAM_KEY); ?></span>
+                            <span class="aam-help-menu" data-target="#access-manager-inside"><i class="icon-help-circled"></i></span>
+                        </h3>
+                        <div class="inside" id="access-manager-inside">
+                            <div class="aam-postbox-inside" id="aam-content">
+                                <p class="alert alert-info text-larger text-center" id="aam-initial-load"><?php echo AAM_Backend_View_Helper::preparePhrase('[Loading AAM UI]. Please wait few seconds. If content will not load within next 30 seconds, clear your browser cache and reload the page. If still nothing, it is most likely some sort of JavaScript or CSS conflict with one your active plugins or theme.', 'strong'); ?></p>
+                            </div>
+                            <div class="aam-help-context" >
+                                <div class="text-justify aam-large-padding">
+                                    <p class="text-larger"><?php echo __('Appreciate your interest in Advanced Access Manager (AAM). With strong knowledge and experience in WordPress, AAM becomes a very powerful tool to manage access to your frontend and backend.', AAM_KEY); ?></p>
+                                    <p class="text-larger"><span class="aam-highlight"><?php echo __('Please Note!', AAM_KEY); ?></span> <?php echo AAM_Backend_View_Helper::preparePhrase('Power comes with responsibility. Make sure you have enough knowledge in WordPress Roles & Capabilities because AAM is very closely intergrated with WordPress core. It is also very important [to have backup of your database before you start working with AAM] (there is no need to backup your files, AAM does not modify any physical files on your server and never did).', 'b'); ?></p>
+                                    <p class="text-larger"><?php echo __('AAM was thoroughly tested on the fresh installation of WordPress and in the latest versions of Chrome, Safari, IE and Firefox. If you have any issues, the most typical case is the conflict with other plugins or themes.', AAM_KEY); ?></p>
+                                    <p class="text-larger"><?php echo sprintf(__('Check our %sHelp%s section to find some useful articles about AAM functionality or %scontact us%s directly.', AAM_KEY), '<a href="https://aamplugin.com/help" target="_blank">', '</a>', '<a href="mailto:support@aamplugin.com">', '</a>'); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-md-4 aam-sidebar">
+                <?php if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) { ?>
+                    <div class="metabox-holder shared-metabox">
+                        <div class="postbox">
+                            <h3 class="hndle text-danger">
+                                <i class='icon-attention-circled'></i> <span><?php echo __('Notifications', AAM_KEY); ?></span>
+                            </h3>
+                            <div class="inside">
+                                <div class="aam-postbox-inside">
+                                    <ul class="aam-error-list">
+                                        <?php foreach (AAM_Core_Console::getAll() as $message) { ?>
+                                            <li><?php echo $message; ?></li>
+                                        <?php } ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                
+                <div class="metabox-holder shared-metabox">
+                    <div class="postbox">
+                        <div class="inside">
+                            <div class="aam-social">
+                                <a href="#" title="Access" data-type="main" class="aam-area text-danger">
+                                    <i class="icon-cog-alt"></i>
+                                    <span>Access</span>
+                                </a>
+                                <?php if (current_user_can('aam_manage_settings')) { ?>
+                                    <a href="#" title="Settings" data-type="settings" class="aam-area">
+                                        <i class="icon-wrench"></i>
+                                        <span>Settings</span>
+                                    </a>
+                                <?php } ?>
+                                <?php if (current_user_can('aam_manage_extensions')) { ?>
+                                    <a href="#" title="Extensions" data-type="extensions" class="aam-area">
+                                        <i class="icon-cubes"></i>
+                                        <span>Extensions</span>
+                                    </a>
+                                <?php } ?>
+                                <a href="https://aamplugin.com/help" title="Help" target="_blank">
+                                    <i class="icon-help-circled"></i>
+                                    <span>Help</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metabox-holder extensions-metabox" style="display:none;">
+                    <div class="postbox">
+                        <div class="inside">
+                            <div class="aam-postbox-inside text-center">
+                                <p class="alert alert-info text-larger"><?php echo AAM_Backend_View_Helper::preparePhrase('The [Development Package] allows you to get all premium extensions for [unlimited number of websites].', 'i', 'b'); ?></p>
+                                <a href="https://aamplugin.com/development-package" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php if (is_network_admin() && !defined('AAM_MULTISITE')) { ?>
+                    <div class="metabox-holder main-metabox">
+                        <div class="postbox">
+                            <h3 class="hndle text-warning">
+                                <i class='icon-attention-circled'></i> <span><?php echo __('AAM Multisite', AAM_KEY); ?></span>
+                            </h3>
+                            <div class="inside">
+                                <p class="aam-info"><?php echo AAM_Backend_View_Helper::preparePhrase('Install free [AAM Multisite extension] in order to manage all your sites from Network Admin', 'b'); ?></p>
+                                <p class="text-center"><a href="#" class="btn btn-sm btn-primary aam-download-extension" data-license="AAMMULTISITE"><i class="icon-download-cloud"></i> <?php echo __('Install AAM Multisite', AAM_KEY); ?></a></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                
+                <?php do_action('aam-sidebar-ui-action', 'top'); ?>
+
+                <div class="metabox-holder main-metabox">
+                    <div class="postbox">
+                        <h3 class="hndle">
+                            <span><?php echo __('Users/Roles Manager', AAM_KEY); ?></span>
+                            <span class="aam-help-menu" data-target="#user-role-manager-inside"><i class="icon-help-circled"></i></span>
+                        </h3>
+                        <div class="inside" id="user-role-manager-inside">
+                            <div class="aam-postbox-inside">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <?php if (current_user_can('aam_list_roles')) { ?>
+                                        <li role="presentation" class="active text-center"><a href="#roles" aria-controls="roles" role="tab" data-toggle="tab"><i class="icon-users"></i><br/><?php echo __('Roles', AAM_KEY); ?></a></li>
+                                    <?php } ?>
+                                    <?php if (current_user_can('list_users')) { ?>
+                                        <li role="presentation" class="text-center"><a href="#users" aria-controls="users" role="tab" data-toggle="tab"><i class="icon-user"></i><br/><?php echo __('Users', AAM_KEY); ?></a></li>
+                                    <?php } ?>
+                                    <?php if (current_user_can('aam_manage_visitors')) { ?>
+                                        <li role="presentation" class="text-center"><a href="#visitor" aria-controls="visitor" role="tab" data-toggle="tab"><i class="icon-user-secret"></i><br/><?php echo __('Visitor', AAM_KEY); ?></a></li>
+                                    <?php } ?>
+                                    <?php if (current_user_can('aam_manage_default')) { ?>
+                                        <li role="presentation" class="text-center"><a href="#default" aria-controls="default" role="tab" data-toggle="tab" class="text-danger"><i class="icon-asterisk"></i><br/><?php echo __('Default', AAM_KEY); ?></a></li>
+                                    <?php } ?>
+                                </ul>
+                                <div class="tab-content">
+                                    <?php if (current_user_can('aam_list_roles')) { ?>
+                                    <div role="tabpanel" class="tab-pane active" id="roles">
+                                        <table id="role-list" class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Users</th>
+                                                    <th width="65%"><?php echo __('Role', AAM_KEY); ?></th>
+                                                    <th><?php echo __('Action', AAM_KEY); ?></th>
+                                                    <th>Level</th>
+                                                    <th>Expiration</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+
+                                        <div class="modal fade" id="add-role-modal" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-sm" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                                        <h4 class="modal-title"><?php echo __('Create Role', AAM_KEY); ?></h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label><?php echo __('Role Name', AAM_KEY); ?><span class="aam-asterix">*</span></label>
+                                                            <input type="text" class="form-control" name="name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
+                                                            <input type="text" class="form-control" name="expire" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
+                                                        </div>
+                                                        <?php do_action('aam-add-role-ui-action'); ?>
+                                                        <?php echo apply_filters('aam-add-role-ui-filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance.phtml')); ?>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-success" id="add-role-btn"><?php echo __('Create', AAM_KEY); ?></button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="edit-role-modal" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-sm" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                                        <h4 class="modal-title"><?php echo __('Update Role', AAM_KEY); ?></h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label for="new-role-name"><?php echo __('Role Name', AAM_KEY); ?></label>
+                                                            <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" name="name" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
+                                                            <input type="text" class="form-control" name="expire" id="edit-role-expiration" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
+                                                        </div>
+                                                        <?php do_action('aam-edit-role-ui-action'); ?>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-success" id="edit-role-btn"><?php echo __('Update', AAM_KEY); ?></button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="delete-role-modal" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-sm" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                                        <h4 class="modal-title"><?php echo __('Delete Role', AAM_KEY); ?></h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="text-center aam-confirm-message alert alert-danger" data-message="<?php echo __('Are you sure that you want to delete the %s role?', AAM_KEY); ?>"></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-danger" id="delete-role-btn"><?php echo __('Delete', AAM_KEY); ?></button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                    <?php if (current_user_can('list_users')) { ?>
+                                    <div role="tabpanel" class="tab-pane" id="users">
+                                        <table id="user-list" class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Roles</th>
+                                                    <th width="65%"><?php echo __('Username', AAM_KEY); ?></th>
+                                                    <th><?php echo __('Action', AAM_KEY); ?></th>
+                                                    <th>Level</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                    <?php } ?>
+                                    <?php if (current_user_can('aam_manage_visitors')) { ?>
+                                    <div role="tabpanel" class="tab-pane" id="visitor">
+                                        <div class="visitor-message">
+                                            <span class="aam-bordered"><?php echo __('Manage access to your website for visitors (any user that is not authenticated)', AAM_KEY); ?>.</span>
+                                            <button class="btn btn-primary btn-block" id="manage-visitor"><i class="icon-cog"></i> <?php echo __('Manage Visitors', AAM_KEY); ?></button>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                    <?php if (current_user_can('aam_manage_default')) { ?>
+                                    <div role="tabpanel" class="tab-pane" id="default">
+                                        <div class="visitor-message">
+                                            <span class="aam-bordered"><?php echo __('Manage default access to your website resources for all users, roles and visitor. This includes Administrator role and your user', AAM_KEY); ?>.</span>
+                                            <button class="btn btn-danger btn-block" id="manage-default"><i class="icon-cog"></i> <?php echo __('Manage Default Access', AAM_KEY); ?></button>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <div class="aam-help-context">
+                                <p class="aam-info aam-hint">
+                                    <?php echo AAM_Backend_View_Helper::preparePhrase('Manage access for your users, roles and visitors. Be careful with [Administrator] role as well as your admin user. [Database backup is strongly recommended].', 'b', 'b'); ?>
+                                </p>
+
+                                <p class="text-justify">
+                                    <strong><i class="icon-users"></i> <?php echo __('Roles', AAM_KEY); ?></strong><br/>
+                                    <?php echo __('With Roles tab you can manage access for any defined role, edit role\'s name, create new role or even delete existing (but only when there is no users assigned to it). You are not allowed to delete Administrator role.', AAM_KEY); ?>
+                                </p>
+
+                                <p class="text-justify">
+                                    <strong><i class="icon-user"></i> <?php echo __('Users', AAM_KEY); ?></strong><br/>
+                                    <?php echo __('Manage access for any user. As a bonus feature, you can block user. It means that user will be not able to login to your website anymore.', AAM_KEY); ?>
+                                </p>
+
+                                <p class="text-justify">
+                                    <strong><i class="icon-user-secret"></i> <?php echo __('Visitor', AAM_KEY); ?></strong><br/>
+                                    <?php echo __('Visitor can be considered any user that is not authenticated to your website.', AAM_KEY); ?>
+                                </p>
+                                
+                                <p class="text-justify">
+                                    <strong><i class="icon-asterisk"></i> <?php echo __('Default', AAM_KEY); ?></strong><br/>
+                                    <?php echo __('Manage default access settings to your website resources for all users, roles and visitors.', AAM_KEY); ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php do_action('aam-sidebar-ui-action', 'bottom'); ?>
+            </div>
+        </div>
+    </div>
+<?php }
