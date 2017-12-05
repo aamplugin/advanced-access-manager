@@ -934,6 +934,11 @@ input[type=radio]:checked + label:before {
     padding: 10px 15px;
 }
 
+.highlighted-italic i {
+    color: #a94442;
+    font-weight: 700;
+}
+
 .aam-error-list {
     padding: 15px;
     list-style: disc;

@@ -57,7 +57,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     public function __get($name) {
         $post = $this->getPost();
         
-        return (property_exists($post, $name) ? $post->$name : null);
+        return (is_object($post) && property_exists($post, $name) ? $post->$name : null);
     }
 
     /**

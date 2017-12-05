@@ -125,8 +125,10 @@ class AAM_Extension_Repository {
         } else { // TODO - Remove May 2018
             AAM_Core_Console::add(AAM_Backend_View_Helper::preparePhrase(
                 sprintf(
-                    __('The [%s] file is missing. Update all your extensions to the latest version.', AAM_KEY),
-                    str_replace(AAM_EXTENSION_BASE . '/', '', $config)
+                    __('The [%s] file is missing. Update extension to the latest version. %sRead more.%s', AAM_KEY),
+                    str_replace(AAM_EXTENSION_BASE . '/', '', $config),
+                   '<a href="https://aamplugin.com/help/how-to-fix-the-config-php-file-is-missing-notification" target="_blank">',
+                   '</a>'
                 ),
                 'b'    
             ));
@@ -260,7 +262,8 @@ class AAM_Extension_Repository {
         
         if (!defined($id)) {
             $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
-        } elseif (empty($stored[$id]['status'])) {
+        } elseif (empty($stored[$id]['status']) 
+                || $stored[$id]['status'] == AAM_Extension_Repository::STATUS_INSTALLED) {
             $status = AAM_Extension_Repository::STATUS_INSTALLED;
 
             if ($item['type'] == 'commercial') {

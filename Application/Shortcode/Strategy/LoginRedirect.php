@@ -32,7 +32,6 @@ class AAM_Shortcode_Strategy_LoginRedirect implements AAM_Shortcode_Strategy_Int
      * 
      * Expecting attributes in $args are:
      *   "class"    => CSS class for login button
-     *   "label"    => Login button label
      *   "callback" => callback function that returns the login button
      * 
      * @param type $args
@@ -50,7 +49,6 @@ class AAM_Shortcode_Strategy_LoginRedirect implements AAM_Shortcode_Strategy_Int
     public function run() {
         $redirect = AAM_Core_Request::server('REQUEST_URI');
         $class    = (isset($this->args['class']) ? $this->args['class'] : '');
-        $label    = (isset($this->args['label']) ? $this->args['label'] : 'Login');
         
         if (isset($this->args['callback'])) {
             $button = call_user_func($this->args['callback'], $this);
@@ -62,7 +60,7 @@ class AAM_Shortcode_Strategy_LoginRedirect implements AAM_Shortcode_Strategy_Int
             );
             
             $button  = '<a href="' . $url . '" ';
-            $button .= 'class="' . $class . '">' . $label . '</a>';
+            $button .= 'class="' . $class . '">' . $this->content . '</a>';
         }
         
         return $button;
