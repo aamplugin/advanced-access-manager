@@ -41,7 +41,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
     /**
      * Filter Menu List
      * 
-     * Keep in mind that this funciton only filter the menu items but do not
+     * Keep in mind that this function only filter the menu items but do not
      * restrict access to them. You have to explore roles and capabilities to
      * control the full access to menus.
      *
@@ -57,11 +57,11 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
 
         foreach ($menu as $id => $item) {
             if (!empty($submenu[$item[2]])) {
-                $subs = $this->filterSubmenu($item[2]);
+                $subs = $this->filterSubmenu($item);
             } else {
                 $subs = array();
             }
-
+            
             // cover scenario like with Visual Composer where landing page
             // is defined dynamically
             if ($this->has('menu-' . $item[2])) {
@@ -75,7 +75,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
                 }
             }
         }
-
+        
         // remove duplicated separators
         $count = 0;
         foreach ($menu as $id => $item) {
@@ -107,7 +107,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
     /**
      * Filter submenu
      * 
-     * @param string $parent
+     * @param array &$parent
      * 
      * @return void
      * 
@@ -115,17 +115,21 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
      * @global array $menu
      * @global array $submenu
      */
-    protected function filterSubmenu($parent) {
+    protected function filterSubmenu(&$parent) {
         global $submenu;
 
         $filtered = array();
 
-        foreach ($submenu[$parent] as $id => $item) {
+        foreach ($submenu[$parent[2]] as $id => $item) {
             if ($this->has($this->normalizeItem($item[2]))) {
-                unset($submenu[$parent][$id]);
+                unset($submenu[$parent[2]][$id]);
             } else {
-                $filtered[] = $submenu[$parent][$id];
+                $filtered[] = $submenu[$parent[2]][$id];
             }
+        }
+        
+        if (count($filtered)) { //make sure that the parent points to the first sub
+            $parent[2] = array_values($filtered)[0][2];
         }
 
         return $filtered;

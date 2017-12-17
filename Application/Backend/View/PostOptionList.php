@@ -66,7 +66,7 @@ class AAM_Backend_View_PostOptionList {
                 ),
                 'expire' => array(
                     'title' => __('Access Expiration', AAM_KEY),
-                    'sub' => __('Expires:', AAM_KEY),
+                    'sub' => __('Expires', AAM_KEY),
                     'option' => 'frontend.expire_datetime',
                     'preview' => 'frontend-expire_datetime-preview',
                     'descr' => __('Define when access expires for %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied and user will be redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/help/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>') . sprintf(__(' %ssee in action.%s', AAM_KEY), "<a href='https://youtu.be/IgtgVoWs35w' target='_blank'>", '</a>')

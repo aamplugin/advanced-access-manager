@@ -194,7 +194,7 @@ class AAM_Backend_View {
         $objectId = intval(AAM_Core_Request::post('objectId', 0));
         
         $param = AAM_Core_Request::post('param');
-        $value = AAM_Core_Request::post('value');
+        $value = filter_input(INPUT_POST, 'value');
         
         $result = AAM_Backend_Subject::getInstance()->save(
                 $param, $value, $object, $objectId

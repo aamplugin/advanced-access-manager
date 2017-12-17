@@ -71,9 +71,11 @@ class AAM_Backend_Filter {
         add_action('profile_update', array($this, 'profileUpdate'), 10, 2);
         
         //user/role filters
-        add_filter('editable_roles', array($this, 'filterRoles'));
-        add_action('pre_get_users', array($this, 'filterUserQuery'), 999);
-        add_filter('views_users', array($this, 'filterViews'));
+        if (!is_multisite() || !is_super_admin()) {
+            add_filter('editable_roles', array($this, 'filterRoles'));
+            add_action('pre_get_users', array($this, 'filterUserQuery'), 999);
+            add_filter('views_users', array($this, 'filterViews'));
+        }
         
         AAM_Backend_Authorization::bootstrap(); //bootstrap backend authorization
     }

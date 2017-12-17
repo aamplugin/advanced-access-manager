@@ -1774,8 +1774,8 @@
                     //load referenced post
                     if ($('#load-post-object').val()) {
                         $.aam.loadAccessForm(
-                                $('#load-post-object-type').val(), 
-                                $('#load-post-object').val()
+                            $('#load-post-object-type').val(), 
+                            $('#load-post-object').val()
                         );
                     }
                     

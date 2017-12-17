@@ -258,22 +258,16 @@ class AAM_Extension_Repository {
      * @return type
      */
     protected function checkStatus($item, $retrieved, $stored) {
-        $id = $item['id'];
+        $id     = $item['id'];
+        $status = !empty($stored[$id]['status']) ? $stored[$id]['status'] : null;
         
-        if (!defined($id)) {
+        if (is_null($status)) {
             $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
-        } elseif (empty($stored[$id]['status']) 
-                || $stored[$id]['status'] == AAM_Extension_Repository::STATUS_INSTALLED) {
-            $status = AAM_Extension_Repository::STATUS_INSTALLED;
-
-            if ($item['type'] == 'commercial') {
-                $valid = !empty($item['license']);
-            } else {
-                $valid = true;
-            }
-
-            if ($valid && isset($retrieved->$id) 
-                    && version_compare(constant($id), $retrieved->$id->version) == -1) {
+            
+            if (defined($id)) {
+                $status = AAM_Extension_Repository::STATUS_INSTALLED;
+                
+                if ($this->isOutdatedVersion($item, $retrieved, constant($id))) {
                     $status = AAM_Extension_Repository::STATUS_UPDATE;
                     AAM_Core_Console::add(
                         AAM_Backend_View_Helper::preparePhrase(sprintf(
@@ -281,12 +275,33 @@ class AAM_Extension_Repository {
                             $item['title']
                         ), 'b')
                     );
+                }
             }
-        } else {
-            $status = $stored[$id]['status'];
+        } elseif ($status == AAM_Extension_Repository::STATUS_INSTALLED && !defined($id)) {
+            $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
         }
         
         return $status;
+    }
+    
+    /**
+     * 
+     * @param type $item
+     * @param type $retrieved
+     * @param type $version
+     * @return type
+     */
+    protected function isOutdatedVersion($item, $retrieved, $version) {
+        $id = $item['id'];
+        
+        if ($item['type'] == 'commercial') {
+            $valid = !empty($item['license']);
+        } else {
+            $valid = true;
+        }
+
+        return $valid && isset($retrieved->$id) 
+                && version_compare($version, $retrieved->$id->version) == -1;
     }
     
     /**

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AAM\n"
-"POT-Creation-Date: 2017-12-03 15:15-0500\n"
+"POT-Creation-Date: 2017-12-12 06:08-0500\n"
 "PO-Revision-Date: \n"
 "Last-Translator: WPAAM <support@wpaam.com>\n"
 "Language-Team: WP AAM <vasyl@vasyltech.com>\n"
@@ -10,7 +10,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.4\n"
+"X-Generator: Poedit 2.0.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;preparePhrase\n"
@@ -499,6 +499,7 @@ msgstr ""
 
 #: Application/Backend/View/PostOptionList.php:62
 #: Application/Backend/phtml/partial/post-advanced-settings.phtml:32
+#: Application/Frontend/phtml/login.phtml:13
 msgid "Password"
 msgstr ""
 
@@ -591,6 +592,7 @@ msgid "AAM Secure Login Widget"
 msgstr ""
 
 #: Application/Backend/Widget/Login.php:80
+#: Application/Frontend/phtml/login.phtml:25
 msgid "Login"
 msgstr ""
 
@@ -1637,4 +1639,16 @@ msgstr ""
 #: Application/Backend/phtml/widget/login-frontend.phtml:55
 #: Application/Frontend/phtml/login.phtml:42
 msgid "Log Out"
+msgstr ""
+
+#: Application/Frontend/phtml/login.phtml:7
+msgid "Username or Email Address"
+msgstr ""
+
+#: Application/Frontend/phtml/login.phtml:20
+msgid "Remember Me"
+msgstr ""
+
+#: Application/Frontend/phtml/login.phtml:31
+msgid "Lost your password?"
 msgstr ""

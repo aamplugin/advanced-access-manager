@@ -134,9 +134,9 @@ class AAM_Backend_Manager {
      * @param type $id
      * @return type
      */
-    public function theTitle($title, $id) {
+    public function theTitle($title, $id = null) {
         if (empty($title)) {
-            $title = '[No Title]: ID ' . $id;
+            $title = '[No Title]: ID ' . ($id ? $id : '[No ID]');
         }
         
         return $title;

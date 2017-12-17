@@ -136,8 +136,6 @@ class AAM_Core_Config {
     protected static function readConfigPress($param, $default = null) {
         if (defined('AAM_CONFIGPRESS')) {
             $config = AAM_ConfigPress::get('aam.' . $param, $default);
-        } elseif (class_exists('ConfigPress')) {
-            $config = ConfigPress::get('aam.' . $param, $default);
         } else {
             $config = $default;
         }
