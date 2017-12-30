@@ -135,7 +135,7 @@ class AAM_Frontend_Filter {
     public function filterPostList($posts) {
         $current = AAM_Core_API::getCurrentPost();
         
-        if (is_array($posts) && !$this->isMainWP()) {
+        if (is_array($posts)) {
             foreach ($posts as $i => $post) {
                 if ($current && ($current->ID == $post->ID)) { continue; }
                 
@@ -188,7 +188,7 @@ class AAM_Frontend_Filter {
     public function preparePostQuery($query) {
         static $skip = false;
         
-        if (($skip === false) && $this->isMainWP()) { // avoid loop
+        if ($skip === false && !$this->isMainWP()) { // avoid loop
             $skip     = true;
             $filtered = AAM_Core_API::getFilteredPostList($query);
             $skip     = false;
@@ -328,7 +328,7 @@ class AAM_Frontend_Filter {
                 break;
             }
         }
-
+        
         return $result;
     }
     

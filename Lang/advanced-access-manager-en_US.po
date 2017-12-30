@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AAM\n"
-"POT-Creation-Date: 2017-12-12 06:08-0500\n"
+"POT-Creation-Date: 2017-12-17 18:56-0500\n"
 "PO-Revision-Date: \n"
 "Language-Team: WP AAM <vasyl@vasyltech.com>\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,12 @@ msgstr ""
 "Language: en_US\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: Application/Backend/Feature/Extension/Manager.php:106
+#: Application/Backend/Feature/Extension/Manager.php:60
+#, php-format
+msgid "To install extension manually, check %sthis article%s."
+msgstr ""
+
+#: Application/Backend/Feature/Extension/Manager.php:112
 msgid "Enter license key to update extension."
 msgstr ""
 
@@ -512,7 +517,7 @@ msgid "Access Expiration"
 msgstr ""
 
 #: Application/Backend/View/PostOptionList.php:69
-msgid "Expires:"
+msgid "Expires"
 msgstr ""
 
 #: Application/Backend/View/PostOptionList.php:72
@@ -626,12 +631,12 @@ msgid ""
 "more.%s"
 msgstr ""
 
-#: Application/Extension/Repository.php:307
+#: Application/Extension/Repository.php:322
 #, php-format
 msgid "Failed to create %s"
 msgstr ""
 
-#: Application/Extension/Repository.php:311
+#: Application/Extension/Repository.php:326
 #, php-format
 msgid "Directory %s is not writable"
 msgstr ""
@@ -790,9 +795,19 @@ msgstr ""
 msgid "Deactivate"
 msgstr ""
 
+#: Application/Backend/phtml/extensions.phtml:49
+#: Application/Backend/phtml/extensions.phtml:76
+msgid "extension is active"
+msgstr ""
+
 #: Application/Backend/phtml/extensions.phtml:53
 #: Application/Backend/phtml/extensions.phtml:80
 msgid "Activate"
+msgstr ""
+
+#: Application/Backend/phtml/extensions.phtml:53
+#: Application/Backend/phtml/extensions.phtml:80
+msgid "extension is inactive"
 msgstr ""
 
 #: Application/Backend/phtml/extensions.phtml:55

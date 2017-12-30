@@ -438,9 +438,11 @@ class AAM_Backend_Filter {
         
         //filter roles
         foreach($roles as $id => $role) {
-            $roleLevel = AAM_Core_API::maxLevel($role['capabilities']);
-            if ($userLevel < $roleLevel) {
-                unset($roles[$id]);
+            if (!empty($role['capabilities']) && is_array($role['capabilities'])) {
+                $roleLevel = AAM_Core_API::maxLevel($role['capabilities']);
+                if ($userLevel < $roleLevel) {
+                    unset($roles[$id]);
+                }
             }
         }
         

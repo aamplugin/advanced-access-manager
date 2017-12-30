@@ -129,7 +129,8 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         }
         
         if (count($filtered)) { //make sure that the parent points to the first sub
-            $parent[2] = array_values($filtered)[0][2];
+            $values    = array_values($filtered);
+            $parent[2] = $values[0][2];
         }
 
         return $filtered;

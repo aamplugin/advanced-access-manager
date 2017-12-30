@@ -356,6 +356,15 @@ final class AAM_Core_API {
             }
         }
         
+        if (is_single()) {
+            $post = self::getCurrentPost();
+            $in   = ($post ? array_search($post->ID, $filtered) : false);
+            
+            if ($in !== false) {
+                $filtered = array_splice($filtered, $in, 1);
+            }
+        }
+        
         return (is_array($filtered) ? $filtered : array());
     }
     
