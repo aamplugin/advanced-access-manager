@@ -36,8 +36,7 @@ final class AAM_Core_Server {
         $params = array(
             'domain'  => parse_url(site_url(), PHP_URL_HOST), 
             'version' => AAM_Core_API::version(),
-            'uid'     => AAM_Core_API::getOption('aam-uid', null, 'site'),
-            'email'   => AAM_Core_API::getOption('admin_email')
+            'uid'     => AAM_Core_API::getOption('aam-uid', null, 'site')
         );
         
         self::send('/register', $params);

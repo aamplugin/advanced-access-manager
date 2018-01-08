@@ -67,9 +67,6 @@ class AAM_Backend_Filter {
         
         add_action('pre_post_update', array($this, 'prePostUpdate'), 10, 2);
         
-        //user profile update action
-        add_action('profile_update', array($this, 'profileUpdate'), 10, 2);
-        
         //user/role filters
         if (!is_multisite() || !is_super_admin()) {
             add_filter('editable_roles', array($this, 'filterRoles'));
@@ -393,36 +390,6 @@ class AAM_Backend_Filter {
         
         if ($post->post_author != $data['post_author']) {
             AAM_Core_Cache::clear($id);
-        }
-    }
-    
-    /**
-     * Profile updated hook
-     * 
-     * Adjust expiration time and user cache if profile updated
-     * 
-     * @param int     $id
-     * @param WP_User $old
-     * 
-     * @return void
-     * 
-     * @access public
-     */
-    public function profileUpdate($id, $old) {
-        $user = get_user_by('ID', $id);
-        
-        //role changed?
-        if (implode('', $user->roles) != implode('', $old->roles)) {
-            AAM_Core_Cache::clear($id);
-            
-            //check if role has expiration data set
-            $role   = (is_array($user->roles) ? $user->roles[0] : '');
-            $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
-            
-            if ($expire) {
-                update_user_option($id, "aam-original-roles", $old->roles);
-                update_user_option($id, "aam-role-expires", strtotime($expire));
-            }
         }
     }
     

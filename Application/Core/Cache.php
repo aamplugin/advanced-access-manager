@@ -103,7 +103,7 @@ class AAM_Core_Cache {
             $wpdb->query($wpdb->prepare($query, $user, self::CACHE_OPTION));
         }
         
-        self::$cache = false;
+        self::$cache = array();
         
         //clear updated flag
         self::$updated = false;
@@ -135,7 +135,7 @@ class AAM_Core_Cache {
      */
     public static function bootstrap() {
         if (!AAM::isAAM()) {
-            $cache = get_user_meta(AAM::getUser(), self::CACHE_OPTION, true);
+            $cache = get_user_meta(AAM::getUser()->ID, self::CACHE_OPTION, true);
             self::$cache = (is_array($cache) ? $cache : array());
             
             add_action('shutdown', 'AAM_Core_Cache::save');

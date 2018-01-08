@@ -277,8 +277,12 @@ class AAM_Extension_Repository {
                     );
                 }
             }
-        } elseif ($status == AAM_Extension_Repository::STATUS_INSTALLED && !defined($id)) {
-            $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
+        } elseif ($status == AAM_Extension_Repository::STATUS_INSTALLED) {
+            if (!defined($id)) {
+                $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
+            } elseif ($this->isOutdatedVersion($item, $retrieved, constant($id))) {
+                $status = AAM_Extension_Repository::STATUS_UPDATE;
+            }
         }
         
         return $status;

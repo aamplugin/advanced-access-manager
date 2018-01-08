@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.0.3
+  Version: 5.0.4
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -174,9 +174,6 @@ class AAM {
         } elseif (version_compare($wp_version, '3.8') == -1) {
             exit(__('WP 3.8 or higher is required.', AAM_KEY));
         }
-
-        //register plugin
-        AAM_Core_Server::register();
     }
 
     /**
