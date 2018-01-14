@@ -144,11 +144,14 @@ abstract class AAM_Core_Subject {
     }
     
     /**
+     * Get subject name
      * 
-     * @return type
+     * @return string
+     * 
+     * @access public
      */
     public function getName() {
-        return null;
+        return '';
     }
     
     /**
@@ -220,9 +223,13 @@ abstract class AAM_Core_Subject {
     }
 
     /**
-     *
-     * @param type $capability
-     * @return type
+     * Check if subject has capability
+     * 
+     * @param string $capability
+     * 
+     * @return boolean
+     * 
+     * @access public
      */
     public function hasCapability($capability) {
         $subject = $this->getSubject();
@@ -231,32 +238,43 @@ abstract class AAM_Core_Subject {
     }
     
     /**
+     * Save option
      * 
-     * @param type $param
-     * @param type $value
-     * @param type $object
-     * @param type $objectId
-     * @return type
+     * @param string $param
+     * @param mixed  $value
+     * @param string $object
+     * @param mixed  $objectId
+     * 
+     * @return boolean
+     * 
+     * @access public
      */
     public function save($param, $value, $object, $objectId = 0) {
         return $this->getObject($object, $objectId)->save($param, $value);
     }
 
     /**
-     * Undocumented function
+     * Reset object
      *
      * @param string $object
-     * @return void
+     * 
+     * @return boolean
+     * 
+     * @access public
      */
     public function resetObject($object) {
         return $this->deleteOption($object);
     }
     
     /**
-     *
-     * @param type $object
-     * @param type $id
-     * @return type
+     * Delete option
+     * 
+     * @param string $object
+     * @param mixed  $id
+     * 
+     * @return boolean
+     * 
+     * @access public
      */
     public function deleteOption($object, $id = 0) {
         return AAM_Core_API::deleteOption($this->getOptionName($object, $id));

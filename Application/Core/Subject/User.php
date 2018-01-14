@@ -333,4 +333,12 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         return AAM_Core_API::maxLevel($this->allcaps);
     }
     
+    /**
+     * 
+     * @return boolean
+     */
+    public function isUser() {
+        return true;
+    }
+    
 }

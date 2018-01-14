@@ -202,4 +202,12 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
         return AAM_Core_API::maxLevel($this->capabilities);
     }
     
+    /**
+     * 
+     * @return boolean
+     */
+    public function isRole() {
+        return true;
+    }
+    
 }

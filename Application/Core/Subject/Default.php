@@ -80,6 +80,14 @@ class AAM_Core_Subject_Default extends AAM_Core_Subject {
     
     /**
      * 
+     * @return boolean
+     */
+    public function isDefault() {
+        return true;
+    }
+    
+    /**
+     * 
      * @return type
      */
     public static function getInstance() {

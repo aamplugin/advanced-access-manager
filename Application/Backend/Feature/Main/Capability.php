@@ -21,7 +21,6 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
      * @var array
      * 
      * @access private
-     * @todo Move this to the Object_Capability
      */
     public static $groups = array(
         'system' => array(
@@ -45,7 +44,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             'manage_options', 'manage_links', 'manage_categories', 'customize',
             'unfiltered_html', 'unfiltered_upload', 'update_themes',
             'update_core', 'upload_files', 'delete_plugins', 'remove_users',
-            'switch_themes', 'list_users', 'promote_users', 'create_users'
+            'switch_themes', 'list_users', 'promote_users', 'create_users', 'delete_site'
         ),
         'aam' => array(
             'aam_manage_admin_menu', 'aam_manage_metaboxes', 'aam_manage_capabilities',

@@ -116,7 +116,25 @@ abstract class AAM_Core_Object {
     public function getOption() {
         return $this->_option;
     }
-
+    
+    /**
+     * Update single option item
+     * 
+     * @param string $item
+     * @param mixed  $value
+     * 
+     * @return boolean Always true
+     * 
+     * @access public
+     */
+    public function updateOptionItem($item, $value) {
+        $option = $this->getOption();
+        $option[$item] = $value;
+        $this->setOption($option);
+        
+        return true;
+    }
+    
     /**
      * Set Inherited flag
      * 
@@ -161,6 +179,28 @@ abstract class AAM_Core_Object {
      */
     public function isOverwritten () {
         return $this->_overwritten;
+    }
+    
+    /**
+     * Check if access is allowed
+     * 
+     * @return bool
+     * 
+     * @access public
+     */
+    public function allowed() {
+        return !call_user_func_array(array($this, 'has'), func_get_args());
+    }
+    
+    /**
+     * Check if access is denied
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function denied() {
+        return call_user_func_array(array($this, 'has'), func_get_args());
     }
 
 }

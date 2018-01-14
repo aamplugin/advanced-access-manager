@@ -172,7 +172,7 @@ class AAM_Backend_Manager {
      * @access public
      */
     public function theTitle($title, $id = null) {
-        if (empty($title)) {
+        if (empty($title) && AAM::isAAM()) { //apply filter only for AAM page
             $title = '[No Title]: ID ' . ($id ? $id : '[No ID]');
         }
         

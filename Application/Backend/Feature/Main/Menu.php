@@ -27,8 +27,10 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
        $object = AAM_Backend_Subject::getInstance()->getObject('menu');
 
        foreach($items as $item) {
-           $object->save($item, $status);
+           $object->updateOptionItem($item, $status);
        }
+       
+       $object->save();
 
        return json_encode(array('status' => 'success'));
     }
