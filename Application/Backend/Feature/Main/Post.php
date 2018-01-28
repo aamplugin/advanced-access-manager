@@ -359,7 +359,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $id     = AAM_Core_Request::post('id');
         $access = $metadata = array();
         $object = AAM_Backend_Subject::getInstance()->getObject($type, $id);
-
+        
         //prepare the response object
         if (is_a($object, 'AAM_Core_Object')) {
             foreach($object->getOption() as $key => $value) {

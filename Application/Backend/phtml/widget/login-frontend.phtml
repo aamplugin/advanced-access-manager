@@ -50,8 +50,11 @@
                 <?php echo get_avatar(AAM::getUser()->ID, "50"); ?>
             </div>
             <div style="display:table-cell;">
-                <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard'); ?></a><br/>
-                <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile'); ?></a><br/>
+                <?php $allowAdmin = !AAM_Core_API::capabilityExists('access_dashboard') || AAM::getUser()->hasCapability('access_dashboard'); ?>
+                <?php if ($allowAdmin) { ?>
+                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard'); ?></a><br/>
+                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile'); ?></a><br/>
+                <?php } ?>
                 <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out'); ?></a>
             </div>
         </div>

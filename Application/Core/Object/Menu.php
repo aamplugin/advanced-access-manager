@@ -154,18 +154,20 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         
         $result = null;
         
-        foreach($submenu as $parent => $subs) {
-            foreach($subs as $sub) {
-                if ($sub[2] == $search) {
-                    $result = $parent;
+        //if (is_array($submenu)) {
+            foreach($submenu as $parent => $subs) {
+                foreach($subs as $sub) {
+                    if ($sub[2] == $search) {
+                        $result = $parent;
+                        break;
+                    }
+                }
+
+                if ($result !== null) {
                     break;
                 }
             }
-            
-            if ($result !== null) {
-                break;
-            }
-        }
+        //}
         
         return $result;
     }

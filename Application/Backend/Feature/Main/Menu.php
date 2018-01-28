@@ -114,7 +114,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
         $subject   = AAM_Backend_Subject::getInstance();
         $isDefault = ($subject->getUID() == AAM_Core_Subject_Default::UID);
         
-        if (isset($submenu[$menu])) {
+        if (array_key_exists($menu, $submenu) && is_array($submenu[$menu])) {
             foreach ($submenu[$menu] as $item) {
                 if ($subject->hasCapability($item[1]) || $isDefault) {
                     $response[] = array(

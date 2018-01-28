@@ -45,6 +45,8 @@ class AAM_Core_Config {
         } else {
             self::$config = AAM_Core_Compatibility::getConfig();
         }
+        
+        add_filter('aam-get-config-filter', 'AAM_Core_Config::get', 10, 2);
     }
     
     /**
@@ -59,21 +61,24 @@ class AAM_Core_Config {
      * @static
      */
     public static function get($option, $default = null) {
-        if (isset(self::$config[$option])) {
+        if (array_key_exists($option, self::$config)) {
             $response = self::$config[$option];
         } else {
             $response = self::readConfigPress($option, $default);
         }
         
-        return self::normalize(
-                apply_filters('aam-filter-config-get', $response, $option
-        ));
+        return self::normalize($response);
     }
     
     /**
+     * Normalize config option
      * 
-     * @param type $setting
-     * @return type
+     * @param string $setting
+     * 
+     * @return string
+     * 
+     * @access protected
+     * @static
      */
     protected static function normalize($setting) {
         return str_replace(
@@ -108,12 +113,17 @@ class AAM_Core_Config {
     }
     
     /**
+     * Delete config option
      * 
-     * @param type $option
+     * @param string $option
+     * 
+     * @access public
+     * @static
      */
     public static function delete($option) {
-        if (isset(self::$config[$option])) {
+        if (array_key_exists($option, self::$config)) {
             unset(self::$config[$option]);
+            
             if (is_multisite()) {
                 AAM_Core_API::updateOption(self::OPTION, self::$config, 'site');
             } else {

@@ -148,10 +148,15 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
     }
 
     /**
+     * Collect metaboxes
      * 
-     * @global type $wp_meta_boxes
      * @param type $post_type
      * @param type $cache
+     * 
+     * @return void
+     * 
+     * @access protected
+     * @global array $wp_meta_boxes
      */
     protected function collectMetaboxes($post_type, &$cache) {
         global $wp_meta_boxes;

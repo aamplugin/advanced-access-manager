@@ -216,10 +216,10 @@ class AAM_Core_Login {
      * @param type $increment
      */
     protected function updateLoginCounter($increment) {
-        $attempts = get_transient('aam-login-attemtps');
+        $attempts = get_transient('aam_login_attemtps');
 
         if ($attempts !== false) {
-            $timeout = get_option('_transient_timeout_aam-login-attemtps') - time();
+            $timeout = get_option('_transient_timeout_aam_login_attemtps') - time();
             $attempts = intval($attempts) + $increment;
         } else {
             $attempts = 1;
@@ -232,7 +232,7 @@ class AAM_Core_Login {
             wp_safe_redirect(site_url('index.php'));
             exit;
         } else {
-            set_transient('aam-login-attemtps', $attempts, $timeout);
+            set_transient('aam_login_attemtps', $attempts, $timeout);
         }
     }
 

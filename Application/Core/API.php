@@ -151,7 +151,7 @@ final class AAM_Core_API {
         } elseif(isset($wp_roles)) {
             $roles = $wp_roles;
         } else {
-            $roles = $wp_roles = new WP_Roles();
+            $roles = new WP_Roles();
         }
         
         return $roles;
@@ -215,7 +215,7 @@ final class AAM_Core_API {
     public static function capabilityExists($cap) {
         $caps = self::getAllCapabilities();
         
-        return (isset($caps[$cap]) ? true : false);
+        return (is_scalar($cap) && array_key_exists($cap, $caps) ? true : false);
     }
     
     /**
@@ -401,8 +401,8 @@ final class AAM_Core_API {
                         $cache[] = $post->ID;
                     }
                     
-                    AAM_Core_Cache::set(AAM::getUser(), $key . '_checked', $checked);
-                    AAM_Core_Cache::set(AAM::getUser(), $key, $cache);
+                    AAM_Core_Cache::set($key . '_checked', $checked);
+                    AAM_Core_Cache::set($key, $cache);
                     $counter++;
                 }
             } else {

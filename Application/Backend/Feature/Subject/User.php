@@ -74,7 +74,7 @@ class AAM_Backend_Feature_Subject_User {
         
         if (is_array($roles)) {
             foreach($roles as $role) {
-                if (isset($names[$role])) {
+                if (array_key_exists($role, $names)) {
                     $response[] = translate_user_role($names[$role]);
                 }
             }

@@ -85,7 +85,8 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
                 //check if capability is present for current role! Note, we
                 //can not use the native WP_Role::has_cap function because it will
                 //return false if capability exists but not checked
-                if (isset($role->capabilities[$capability])) {
+                if (is_array($role->capabilities) 
+                        && array_key_exists($capability, $role->capabilities)) {
                     $role->add_cap($updated, $role->capabilities[$capability]);
                     $role->remove_cap($capability);
                 }
@@ -176,7 +177,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         
         if (is_array($roles)) { 
             foreach($roles as $role) {
-                if (isset($names[$role])) {
+                if (is_array($names) && array_key_exists($role, $names)) {
                     $response[] = translate_user_role($names[$role]);
                 }
             }

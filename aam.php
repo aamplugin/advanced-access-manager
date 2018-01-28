@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.0.5
+  Version: 5.0.7
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -110,11 +110,11 @@ class AAM {
             );
             self::$_instance = new self;
             
-            //load AAM core config
-            AAM_Core_Config::bootstrap();
-            
             //load AAM cache
             AAM_Core_Cache::bootstrap();
+            
+            //load AAM core config
+            AAM_Core_Config::bootstrap();
             
             //load all installed extension
             AAM_Extension_Repository::getInstance()->load();
@@ -169,8 +169,8 @@ class AAM {
         global $wp_version;
         
         //check PHP Version
-        if (version_compare(PHP_VERSION, '5.2') == -1) {
-            exit(__('PHP 5.2 or higher is required.', AAM_KEY));
+        if (version_compare(PHP_VERSION, '5.2.3') == -1) {
+            exit(__('PHP 5.2.3 or higher is required.', AAM_KEY));
         } elseif (version_compare($wp_version, '3.8') == -1) {
             exit(__('WP 3.8 or higher is required.', AAM_KEY));
         }

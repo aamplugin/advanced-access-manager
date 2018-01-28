@@ -33,7 +33,7 @@ class AAM_Backend_Widget_Login extends WP_Widget {
         require(
             AAM_Core_Config::get(
                 'login.widget.template', 
-                dirname(__DIR__) . '/phtml/widget/login-frontend.phtml'
+                dirname(__FILE__) . '/../phtml/widget/login-frontend.phtml'
             )
         );
     }
@@ -45,22 +45,32 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     public function form($instance) {
         $instance = $this->normalize($instance);
         
-        require(dirname(__DIR__) . '/phtml/widget/login-backend.phtml');
+        require(dirname(__FILE__) . '/../phtml/widget/login-backend.phtml');
     }
     
     /**
+     * Update widget
      * 
-     * @param type $new
-     * @param type $old
-     * @return type
+     * @param array $new
+     * @param array $old
+     * 
+     * @return array
+     * 
+     * @access public
      */
     public function update($new, $old) {
-        if ($new['login-timeout'] != $old['login-timeout']) {
-            AAM_Core_Config::set('login-timeout', $new['login-timeout']);
+        $nlt = (isset($new['login-timeout']) ? $new['login-timeout'] : null);
+        $olt = (isset($old['login-timeout']) ? $old['login-timeout'] : null);
+        
+        if ($nlt != $olt) {
+            AAM_Core_Config::set('login-timeout', $nlt);
         }
         
-        if ($new['brute-force-lockout'] != $old['brute-force-lockout']) {
-            AAM_Core_Config::set('brute-force-lockout', $new['brute-force-lockout']);
+        $nbl = (isset($new['brute-force-lockout']) ? $new['brute-force-lockout'] : null);
+        $obl = (isset($old['brute-force-lockout']) ? $old['brute-force-lockout'] : null);
+        
+        if ($nbl != $obl) {
+            AAM_Core_Config::set('brute-force-lockout', $nbl);
         }
         
         return parent::update($new, $old);
@@ -72,8 +82,8 @@ class AAM_Backend_Widget_Login extends WP_Widget {
      * @return type
      */
     protected function normalize($instance) {
-        $instance['login-title'] = AAM_Core_Config::get('login-title');
-        $instance['login-ip-track'] = AAM_Core_Config::get('login-ip-track');
+        $instance['login-title']         = AAM_Core_Config::get('login-title');
+        $instance['login-ip-track']      = AAM_Core_Config::get('login-ip-track');
         $instance['brute-force-lockout'] = AAM_Core_Config::get('brute-force-lockout');
         
         if (empty($instance['login-title'])) {
