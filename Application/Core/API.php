@@ -215,7 +215,7 @@ final class AAM_Core_API {
     public static function capabilityExists($cap) {
         $caps = self::getAllCapabilities();
         
-        return (is_scalar($cap) && array_key_exists($cap, $caps) ? true : false);
+        return (is_string($cap) && array_key_exists($cap, $caps) ? true : false);
     }
     
     /**
