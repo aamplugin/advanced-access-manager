@@ -28,6 +28,8 @@
                     <input id="<?php echo $this->get_field_id('pwd'); ?>" class="input login-input" value="" size="20" type="password" />
                 </label>
             </p>
+            
+            <?php do_action('login_form'); ?>
 
             <p class="forgetmenot">
                 <label for="rememberme">

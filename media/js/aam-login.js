@@ -42,7 +42,6 @@ if (typeof jQuery !== 'undefined') {
                                 }).val('Wait...');
                             },
                             success: function(response) {
-                                console.log(response);
                                 if (response.status === "success") {
                                     if (response.redirect) {
                                         location.href = response.redirect;
