@@ -387,6 +387,10 @@ a.btn:focus, a.btn:active {
     background-color: #F7D3A1;
 }
 
+.badge.sup {
+    font-size: 8px;
+}
+
 /** DATATABLES **/
 .dataTables_info {
     float: left;

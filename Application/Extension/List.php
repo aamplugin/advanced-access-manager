@@ -69,7 +69,7 @@ class AAM_Extension_List {
                 'id'          => 'AAM_MULTISITE',
                 'type'        => 'GNU',
                 'license'     => 'AAMMULTISITE',
-                'description' => 'Convenient way to navigate between different sites in the Network Admin Panel.',
+                'description' => 'Convenient way to navigate between different sites in the Network Admin Panel. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/multisite-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_MULTISITE') ? constant('AAM_MULTISITE') : null)
             ),
             'AAM_CONFIGPRESS' => array(
@@ -77,7 +77,7 @@ class AAM_Extension_List {
                 'id'          => 'AAM_CONFIGPRESS',
                 'type'        => 'GNU',
                 'license'     => 'AAMCONFIGPRESS',
-                'description' => 'Extension to manage AAM core functionality with advanced configuration settings.',
+                'description' => 'Extension to manage AAM core functionality with advanced configuration settings. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/configpress-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_CONFIGPRESS') ? constant('AAM_CONFIGPRESS') : null)
             ),
             'AAM_USER_ACTIVITY' => array(
@@ -85,8 +85,17 @@ class AAM_Extension_List {
                 'id'          => 'AAM_USER_ACTIVITY',
                 'type'        => 'GNU',
                 'license'     => 'AAMUSERACTIVITY',
-                'description' => 'Track any kind of user or visitor activity on your website. <a href="https://aamplugin.com/help/how-to-track-any-wordpress-user-activity" target="_blank">Read more.</a>',
+                'description' => 'Track any kind of user or visitor activity on your website. <a href="https://aamplugin.com/help/how-to-track-any-wordpress-user-activity" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/user-activity-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_USER_ACTIVITY') ? constant('AAM_USER_ACTIVITY') : null)
+            ),
+            'AAM_SOCIAL_LOGIN' => array(
+                'title'       => 'Social Login',
+                'id'          => 'AAM_SOCIAL_LOGIN',
+                'type'        => 'GNU',
+                'tag'         => 'ALPHA', 
+                'license'     => 'AAMSOCIALLOGIN',
+                'description' => 'Login to your website with social networks like Facebook, Twitter, Instagram etc. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/social-login-extension" target="_blank">Github here</a>.',
+                'version'     => (defined('AAM_SOCIAL_LOGIN') ? constant('AAM_SOCIAL_LOGIN') : null)
             ),
         );
     }

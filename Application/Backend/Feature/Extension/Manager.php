@@ -56,11 +56,7 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
         $package = AAM_Core_Server::download($license);
         
         if (is_wp_error($package)) {
-            $manually = sprintf(
-                __('To install extension manually, check %sthis article%s.', AAM_KEY), 
-                '<a href="https://aamplugin.com/help/how-to-install-aam-extension-manually">', 
-                '</a>'
-            );
+            $manually = __('You may try to install extension manually.', AAM_KEY);
             $response = array(
                 'status' => 'failure', 
                 'error'  => strip_tags($package->get_error_message()) . ' ' . $manually

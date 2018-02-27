@@ -225,13 +225,44 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Roles</th>
-                                                    <th width="65%"><?php echo __('Username', AAM_KEY); ?></th>
+                                                    <th width="60%"><?php echo __('Username', AAM_KEY); ?></th>
                                                     <th><?php echo __('Action', AAM_KEY); ?></th>
                                                     <th>Level</th>
+                                                    <th>Expiration</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
                                         </table>
+                                        
+                                        <div class="modal fade" id="edit-user-expiration-modal" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog modal-sm" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                                        <h4 class="modal-title"><?php echo __('Manage User Expiration', AAM_KEY); ?></h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label for="user-expires"><?php echo __('Expires', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-create-temporary-wordpress-user-account" target="_blank" data-toggle="tooltip" title="For how long the user can stay active. Click to learn more."><i class="icon-help-circled"></i></a></label>
+                                                            <input type="text" class="form-control" id="user-expires" placeholder="<?php echo __('Enter Expiration', AAM_KEY); ?>" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label><?php echo __('Action After Expiration', AAM_KEY); ?> </label>
+                                                            <select class="form-control" id="action-after-expiration">
+                                                                <option value=""><?php echo __('Select Action', AAM_KEY); ?></option>
+                                                                <option value="delete"><?php echo __('Delete Account', AAM_KEY); ?></option>
+                                                                <option value="lock"><?php echo __('Lock Account', AAM_KEY); ?></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-warning hidden" id="reset-user-expiration-btn"><?php echo __('Reset', AAM_KEY); ?></button>
+                                                        <button type="button" class="btn btn-success" id="edit-user-expiration-btn"><?php echo __('Save', AAM_KEY); ?></button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <?php } ?>
                                     <?php if (current_user_can('aam_manage_visitors')) { ?>

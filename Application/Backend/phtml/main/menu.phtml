@@ -20,63 +20,75 @@
             <?php
             $first  = false;
             $object = AAM_Backend_Subject::getInstance()->getObject('menu');
-            foreach ($this->getMenu() as $i => $menu) {
-                ?>
-                <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="menu-<?php echo $i; ?>-heading">
-                        <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
-                                <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
-                            </a>
-                            <?php if ($object->has($menu['id'])) { ?>
-                                <i class="aam-panel-title-icon icon-eye-off text-danger"></i>
-                            <?php } elseif ($this->hasSubmenuChecked($object, $menu['submenu'])) { ?>
-                                <i class="aam-panel-title-icon icon-attention-circled text-warning"></i>
-                            <?php } ?>
-                        </h4>
-                    </div>
+            $menuList = $this->getMenu();
+            
+            if (!empty($menuList)) {
+                foreach ($menuList as $i => $menu) {
+                    ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="menu-<?php echo $i; ?>-heading">
+                            <h4 class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                    <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
+                                </a>
+                                <?php if ($object->has($menu['id'])) { ?>
+                                    <i class="aam-panel-title-icon icon-eye-off text-danger"></i>
+                                <?php } elseif ($this->hasSubmenuChecked($object, $menu['submenu'])) { ?>
+                                    <i class="aam-panel-title-icon icon-attention-circled text-warning"></i>
+                                <?php } ?>
+                            </h4>
+                        </div>
 
-                    <div id="menu-<?php echo $i; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
-                        <div class="panel-body">
-                            <?php if (!empty($menu['submenu'])) { ?>
-                                <div class="row">
-                                    <?php echo ($object->has($menu['id']) ? '<div class="aam-lock"></div>' : ''); ?>
-                                    <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
-                                        <?php if ($submenu['id'] == 'index.php') { ?>
-                                            <div class="col-xs-12 col-md-6 aam-submenu-item">
-                                                <label for="menu-item-<?php echo $i . $j; ?>"><?php echo $submenu['name']; ?> <small class="aam-menu-capability"><?php echo $submenu['capability']; ?></small></label>
-                                                <a href="#dashboard-lockout-modal" data-toggle="modal"><i class="icon-help-circled"></i></a>
-                                            </div>
-                                        <?php } else { ?>
-                                            <div class="col-xs-12 col-md-6 aam-submenu-item">
-                                                <label for="menu-item-<?php echo $i . $j; ?>"><?php echo $submenu['name']; ?> <small class="aam-menu-capability"><?php echo $submenu['capability']; ?></small></label>
-                                                <input type="checkbox" class="aam-checkbox-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"<?php echo ($object->has($submenu['id']) ? ' checked="checked"' : ''); ?> />
-                                                <label for="menu-item-<?php echo $i . $j; ?>" data-toggle="tooltip" title="<?php echo ($object->has($submenu['id']) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
-                                            </div>
+                        <div id="menu-<?php echo $i; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
+                            <div class="panel-body">
+                                <?php if (!empty($menu['submenu'])) { ?>
+                                    <div class="row">
+                                        <?php echo ($object->has($menu['id']) ? '<div class="aam-lock"></div>' : ''); ?>
+                                        <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
+                                            <?php if ($submenu['id'] == 'index.php') { ?>
+                                                <div class="col-xs-12 col-md-6 aam-submenu-item">
+                                                    <label for="menu-item-<?php echo $i . $j; ?>"><?php echo $submenu['name']; ?> <small class="aam-menu-capability"><?php echo $submenu['capability']; ?></small></label>
+                                                    <a href="#dashboard-lockout-modal" data-toggle="modal"><i class="icon-help-circled"></i></a>
+                                                </div>
+                                            <?php } else { ?>
+                                                <div class="col-xs-12 col-md-6 aam-submenu-item">
+                                                    <label for="menu-item-<?php echo $i . $j; ?>"><?php echo $submenu['name']; ?> <small class="aam-menu-capability"><?php echo $submenu['capability']; ?></small></label>
+                                                    <input type="checkbox" class="aam-checkbox-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"<?php echo ($object->has($submenu['id']) ? ' checked="checked"' : ''); ?> />
+                                                    <label for="menu-item-<?php echo $i . $j; ?>" data-toggle="tooltip" title="<?php echo ($object->has($submenu['id']) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
+                                                </div>
+                                            <?php } ?>
                                         <?php } ?>
-                                    <?php } ?>
-                                </div>
-                            
-                                <hr class="aam-divider" />
-                            <?php } ?>
+                                    </div>
 
-                            <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
-                                <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                    <?php if ($object->has($menu['id'])) { ?>
-                                        <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                            <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
-                                        </a>
-                                    <?php } else { ?>
-                                        <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                            <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
-                                        </a>
-                                    <?php } ?>
+                                    <hr class="aam-divider" />
+                                <?php } ?>
+
+                                <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
+                                    <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
+                                        <?php if ($object->has($menu['id'])) { ?>
+                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                                <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
+                                            </a>
+                                        <?php } else { ?>
+                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                                <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                            </a>
+                                        <?php } ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                <?php } 
+            } else { ?>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <p class="aam-notification">
+                            <?php echo __('Current user does not have enough capabilities to access any available dashboard page.', AAM_KEY); ?>
+                        </p>
+                    </div>
                 </div>
-            <?php } ?>
+            <?php }?>
         </div>
         
         <div class="modal fade" id="dashboard-lockout-modal" tabindex="-1" role="dialog">
