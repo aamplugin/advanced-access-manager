@@ -45,6 +45,7 @@ class AAM_Backend_View {
         AAM_Backend_Feature_Settings_Core::register();
         AAM_Backend_Feature_Settings_Content::register();
         AAM_Backend_Feature_Settings_Tools::register();
+        AAM_Backend_Feature_Settings_ConfigPress::register();
         
         //feature registration hook
         do_action('aam-feature-registration-action');

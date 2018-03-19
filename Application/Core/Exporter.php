@@ -99,6 +99,11 @@ class AAM_Core_Exporter {
                     AAM_Core_Config::OPTION, 
                     serialize(AAM_Core_API::getOption(AAM_Core_Config::OPTION)
                 ));
+            } elseif ($feature == 'configpress') {
+                $this->add(
+                    'aam-configpress', 
+                    AAM_Core_ConfigPress::getInstance()->read()
+                );
             } else {
                 do_action('aam-export', 'system', $feature, $this);
             }

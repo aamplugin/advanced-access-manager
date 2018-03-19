@@ -113,6 +113,12 @@ class AAM_Backend_Manager {
         }
         
         AAM_Extension_Repository::getInstance()->hasUpdates();
+        
+        if (version_compare(PHP_VERSION, '5.3.0') == -1) {
+            AAM_Core_Console::add(
+                __('AAM requires PHP version 5.3.0 or higher to function properly', AAM_KEY)
+            );
+        }
     }
     
     /**

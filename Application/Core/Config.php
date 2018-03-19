@@ -144,12 +144,8 @@ class AAM_Core_Config {
      * @static
      */
     protected static function readConfigPress($param, $default = null) {
-        if (defined('AAM_CONFIGPRESS')) {
-            $config = AAM_ConfigPress::get('aam.' . $param, $default);
-        } else {
-            $config = $default;
-        }
-
+        $config = AAM_Core_ConfigPress::get('aam.' . $param, $default);
+        
         if (is_array($config) && isset($config['userFunc'])) {
             if (is_callable($config['userFunc'])) {
                 $response = call_user_func($config['userFunc']);

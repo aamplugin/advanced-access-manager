@@ -12,54 +12,115 @@
  * 
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @todo Deprecated - Remove in May 2018
  */
 final class AAM_Core_ConfigPress {
+    
+    /**
+     * Instance of itself
+     * 
+     * @var AAM_Core_ConfigPress 
+     * 
+     * @access private
+     */
+    protected static $instance = null;
+    
+    /**
+     * Parsed config
+     * 
+     * @var array
+     * 
+     * @access protected 
+     */
+    protected $config = null;
+    
+    /**
+     * Raw config text
+     * 
+     * @var string
+     * 
+     * @access protected 
+     */
+    protected $rawConfig = null;
+    
+    /**
+     * Constructor
+     * 
+     * @return void
+     * 
+     * @access protected
+     */
+    protected function __construct() {
+        try {
+            $reader = new AAM_Core_ConfigPress_Reader;
+            $this->config = $reader->parseString($this->read());
+        } catch (Exception $e) {
+            AAM_Core_Console::add($e->getMessage());
+            $this->config = array();
+        }
+    }
+    
+    /**
+     * Read config from the database
+     * 
+     * @return string
+     * 
+     * @access protected
+     */
+    public function read() {
+        $blog   = (defined('BLOG_ID_CURRENT_SITE') ? BLOG_ID_CURRENT_SITE : 1);
+        $config = AAM_Core_API::getOption('aam-configpress', 'null', $blog);
+
+        return ($config === 'null' ? '' : $config);
+    }
 
     /**
-     * Get ConfigPress parameter
+     * Get configuration option/setting
      * 
-     * @param string $param
-     * @param mixed $default
+     * If $option is defined, return it, otherwise return the $default value
+     * 
+     * @param string $option
+     * @param mixed  $default
      * 
      * @return mixed
      * 
      * @access public
-     * @static
      */
-    public static function get($param, $default = null) {
-        if (class_exists('ConfigPress')) {
-            $response = ConfigPress::get($param, $default);
+    public static function get($option = null, $default = null) {
+        //init config only when requested and only one time
+        $instance = self::getInstance();
+        
+        if (is_null($option)) {
+            $value = $instance->config;
         } else {
-            $response = $default;
-        }
-
-        return self::parseParam($response, $default);
-    }
-
-    /**
-     * Parse found parameter
-     * 
-     * @param mixed $param
-     * @param mixed $default
-     * 
-     * @return mixed
-     * 
-     * @access protected
-     * @static
-     */
-    protected static function parseParam($param, $default) {
-        if (is_array($param) && isset($param['userFunc'])) {
-            if (is_callable($param['userFunc'])) {
-                $response = call_user_func($param['userFunc']);
-            } else {
-                $response = $default;
+            $chunks = explode('.', $option);
+            $value = $instance->config;
+            foreach ($chunks as $chunk) {
+                if (isset($value[$chunk])) {
+                    $value = $value[$chunk];
+                } else {
+                    $value = $default;
+                    break;
+                }
             }
-        } else {
-            $response = $param;
         }
-
-        return $response;
+        
+        return $value;
     }
-
+    
+    /**
+     * Get single instance of itself
+     * 
+     * @return AAM_Core_ConfigPress
+     * 
+     * @access public
+     * @static
+     */
+    public static function getInstance() {
+        if (is_null(self::$instance)) {
+            self::$instance = new self;
+        }
+        
+        return self::$instance;
+    }
+    
 }

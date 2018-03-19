@@ -2412,14 +2412,14 @@
 
 
         /**
-         * Utilities Interface
+         * Settings Interface
          * 
          * @param {type} $
          * 
          * @returns {undefined}
          */
         (function ($) {
-
+            
             /**
              * 
              * @param {type} param
@@ -2621,6 +2621,35 @@
             }
 
             aam.addHook('init', initialize);
+            
+            //ConfigPress hook
+            aam.addHook('menu-feature-click', function(feature) {
+                if (feature === 'configpress' 
+                        && !$('#configpress-editor').next().hasClass('CodeMirror')) {
+                    var editor = CodeMirror.fromTextArea(
+                        document.getElementById("configpress-editor"), {}
+                    );
+
+                    editor.on("blur", function(){
+                        $.ajax(aamLocal.ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Settings_ConfigPress.save',
+                                _ajax_nonce: aamLocal.nonce,
+                                config: editor.getValue()
+                            },
+                            error: function () {
+                                aam.notification(
+                                    'danger', 
+                                    aam.__('Application error')
+                                );
+                            }
+                        });
+                    });
+                } 
+            });
 
         })(jQuery);
         

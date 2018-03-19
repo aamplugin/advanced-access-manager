@@ -94,6 +94,31 @@ class AAM {
         
         return (is_admin() && count($intersect));
     }
+    
+    /**
+     * Bootstrap AAM
+     * 
+     * @return void
+     * 
+     * @access public
+     * @static
+     */
+    public static function bootstrap() {
+        if (is_null(self::$_instance)) {
+            //load AAM core config
+            AAM_Core_Config::bootstrap();
+            
+            //login control
+            if (AAM_Core_Config::get('secure-login', true)) {
+                AAM_Core_Login::bootstrap();
+            }
+            
+            //JWT Authentication
+            if (AAM_Core_Config::get('jwt-authentication', false)) {
+                AAM_Core_JWTAuth::bootstrap();
+            }
+        }
+    }
 
     /**
      * Initialize the AAM plugin
@@ -113,25 +138,17 @@ class AAM {
             //load AAM cache
             AAM_Core_Cache::bootstrap();
             
-            //load AAM core config
-            AAM_Core_Config::bootstrap();
-            
             //load all installed extension
             AAM_Extension_Repository::getInstance()->load();
+            
+            //load media control
+            AAM_Core_Media::bootstrap();
             
             //bootstrap the correct interface
             if (is_admin()) {
                 AAM_Backend_Manager::bootstrap();
             } else {
                 AAM_Frontend_Manager::bootstrap();
-            }
-            
-            //load media control
-            AAM_Core_Media::bootstrap();
-            
-            //login control
-            if (AAM_Core_Config::get('secure-login', true)) {
-                AAM_Core_Login::bootstrap();
             }
         }
 
@@ -169,8 +186,8 @@ class AAM {
         global $wp_version;
         
         //check PHP Version
-        if (version_compare(PHP_VERSION, '5.2.3') == -1) {
-            exit(__('PHP 5.2.3 or higher is required.', AAM_KEY));
+        if (version_compare(PHP_VERSION, '5.3.0') == -1) {
+            exit(__('PHP 5.3.0 or higher is required.', AAM_KEY));
         } elseif (version_compare($wp_version, '3.8') == -1) {
             exit(__('WP 3.8 or higher is required.', AAM_KEY));
         }
@@ -209,10 +226,13 @@ if (defined('ABSPATH')) {
     );
     define('AAM_KEY', 'advanced-access-manager');
     define('AAM_EXTENSION_BASE', WP_CONTENT_DIR . '/aam/extension');
+    define('AAM_BASEDIR', dirname(__FILE__));
     
     //register autoloader
     require (dirname(__FILE__) . '/autoloader.php');
     AAM_Autoloader::register();
+    
+    add_action('plugins_loaded', 'AAM::bootstrap', 1);
     
     //the highest priority (higher the core)
     //this is important to have to catch events like register core post types

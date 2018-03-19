@@ -57,6 +57,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'title' => __('Secure Login', AAM_KEY),
                 'descr' => __('AAM comes with its own user login handler. With this feature you can add AJAX login widget to your frontend page that significantly enhance your website security.', AAM_KEY),
                 'value' => AAM_Core_Config::get('secure-login', true)
+            ),
+            'jwt-authentication' => array(
+                'title' => __('JWT Authentication', AAM_KEY),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTfull API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
+                'value' => AAM_Core_Config::get('jwt-authentication', false)
             )
         );
         

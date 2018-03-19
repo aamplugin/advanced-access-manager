@@ -241,8 +241,12 @@ class AAM_Core_Login {
      * 
      * @access public
      */
-    public function execute($credentials = array()) {
+    public function execute($credentials = array(), $set_cookie = true) {
         $this->aamLogin = true;
+        
+        if ($set_cookie === false) {
+            add_filter('send_auth_cookies', function() { return false; });
+        }
         
         $response = array(
             'status'   => 'failure',
@@ -264,7 +268,9 @@ class AAM_Core_Login {
             }
             
             $response['status'] = 'success';
+            $response['user']   = $user;
         } catch (Exception $ex) {
+            $response['error']  = $user;
             $response['reason'] = $ex->getMessage();
         }
 

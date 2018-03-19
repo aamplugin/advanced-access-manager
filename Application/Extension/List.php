@@ -72,14 +72,6 @@ class AAM_Extension_List {
                 'description' => 'Convenient way to navigate between different sites in the Network Admin Panel. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/multisite-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_MULTISITE') ? constant('AAM_MULTISITE') : null)
             ),
-            'AAM_CONFIGPRESS' => array(
-                'title'       => 'ConfigPress',
-                'id'          => 'AAM_CONFIGPRESS',
-                'type'        => 'GNU',
-                'license'     => 'AAMCONFIGPRESS',
-                'description' => 'Extension to manage AAM core functionality with advanced configuration settings. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/configpress-extension" target="_blank">Github here</a>.',
-                'version'     => (defined('AAM_CONFIGPRESS') ? constant('AAM_CONFIGPRESS') : null)
-            ),
             'AAM_USER_ACTIVITY' => array(
                 'title'       => 'User Activities',
                 'id'          => 'AAM_USER_ACTIVITY',

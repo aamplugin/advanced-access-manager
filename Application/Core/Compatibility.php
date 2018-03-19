@@ -27,6 +27,7 @@ class AAM_Core_Compatibility {
         define('AAM_REDIRECT', '99');
         define('AAM_CONTENT_TEASER', '99');
         define('AAM_LOGIN_REDIRECT', '99');
+        define('AAM_CONFIGPRESS', '99');
         //TODO - Remove this in Jul 2018
         
         //caching filter & action

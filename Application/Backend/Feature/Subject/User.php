@@ -119,7 +119,7 @@ class AAM_Backend_Feature_Subject_User {
     public function block() {
         $result = false;
         
-        if (current_user_can('aam_toggle_users') && current_user_ca('edit_users')) {
+        if (current_user_can('aam_toggle_users') && current_user_can('edit_users')) {
             $subject = AAM_Backend_Subject::getInstance();
 
             if ($this->isAllowed($subject->get())) {
