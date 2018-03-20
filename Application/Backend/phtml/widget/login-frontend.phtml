@@ -44,7 +44,14 @@
         </div>
 
         <p id="<?php echo $this->get_field_id('nav'); ?>">
-            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>">Lost your password?</a>
+            <?php 
+            if ( get_option( 'users_can_register' ) ) { 
+		$registration_url = sprintf('<a href="%s">%s</a>', esc_url(wp_registration_url()), __('Register'));
+		echo apply_filters( 'register', $registration_url );
+		echo esc_html(apply_filters('login_link_separator', ' | '));
+            }
+            ?>
+            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php echo __('Lost your password?'); ?></a>
         </p>
     <?php } else { ?>
         <div style="display: table; width: 100%;">

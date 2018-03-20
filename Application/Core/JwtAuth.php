@@ -70,7 +70,17 @@ class AAM_Core_JWTAuth {
     public function registerAPI() {
         register_rest_route('aam/v1', '/authenticate', array(
             'methods'  => 'POST',
-            'callback' => array($this, 'authenticate')
+            'callback' => array($this, 'authenticate'),
+            'args' => array(
+                'username' => array(
+                    'description' => __('Valid username.', AAM_KEY),
+                    'type'        => 'string',
+                ),
+                'password' => array(
+                    'description' => __('Valid password.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
         ));
     }
     
