@@ -391,6 +391,28 @@ a.btn:focus, a.btn:active {
     font-size: 8px;
 }
 
+.aam-api-method {
+    font-size: 8px;
+    font-weight: bold;
+    color: #808080;
+}
+
+.aam-api-method.get {
+    color: #3c763d;
+}
+
+.aam-api-method.post {
+    color: #F5AA2E;
+}
+
+.aam-api-method.put {
+    color: #286090;
+}
+
+.aam-api-method.delete {
+    color: #a94442;
+}
+
 /** DATATABLES **/
 .dataTables_info {
     float: left;
@@ -411,6 +433,7 @@ div.dataTables_wrapper div.dataTables_filter {
 }
 
 #capability-list_wrapper div.dataTables_filter, 
+#route-list_wrapper div.dataTables_filter, 
 #post-list_wrapper div.dataTables_filter {
     text-align: right;
 }

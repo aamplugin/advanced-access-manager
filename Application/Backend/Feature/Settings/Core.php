@@ -58,6 +58,16 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'descr' => __('AAM comes with its own user login handler. With this feature you can add AJAX login widget to your frontend page that significantly enhance your website security.', AAM_KEY),
                 'value' => AAM_Core_Config::get('secure-login', true)
             ),
+            'core.xmlrpc' => array(
+                'title' => __('XML-RPC WordPress API', AAM_KEY),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Remote procedure call (RPC) interface is used to manage WordPress website content and features. For more information check %sXML-RPC Support%s article.', 'b'), '<a href="https://codex.wordpress.org/XML-RPC_Support">', '</a>'),
+                'value' => AAM_Core_Config::get('core.xmlrpc', true)
+            ),
+            'core.restful' => array(
+                'title' => __('WordPress RESTful API', AAM_KEY),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('RESTful interface that is used to manage WordPress website content and features. For more information check %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
+                'value' => AAM_Core_Config::get('core.restful', true)
+            ),
             'jwt-authentication' => array(
                 'title' => __('JWT Authentication', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTfull API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),

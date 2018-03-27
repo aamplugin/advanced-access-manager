@@ -13,12 +13,12 @@
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  */
-class AAM_Core_JWTAuth {
+class AAM_Core_JwtAuth {
 
     /**
      * Single instance of itself
      * 
-     * @var AAM_Core_JWTAuth 
+     * @var AAM_Core_JwtAuth 
      * 
      * @access protected
      * @static
@@ -37,7 +37,7 @@ class AAM_Core_JWTAuth {
         add_action('rest_api_init', array($this, 'registerAPI'));
 
         //register authentication hook
-        add_filter('determine_current_user', array($this, 'determineCurrentUser'), 1);
+        add_filter('determine_current_user', array($this, 'determineCurrentUser'), 999);
 
         //load firebase vendor
         require AAM_BASEDIR . '/vendor/autoload.php';
@@ -151,7 +151,7 @@ class AAM_Core_JWTAuth {
                 $claims = Firebase\JWT\JWT::decode(
                         $token, $key, array_keys(Firebase\JWT\JWT::$supported_algs)
                 );
-
+                
                 if (isset($claims->userId)) {
                     $result = $claims->userId;
                 }
@@ -167,7 +167,7 @@ class AAM_Core_JWTAuth {
     /**
      * Get single instance of itself
      * 
-     * @return AAM_Core_JWTAuth
+     * @return AAM_Core_JwtAuth
      * 
      * @access public
      * @static
@@ -183,7 +183,7 @@ class AAM_Core_JWTAuth {
     /**
      * Bootstrap AAM JWT Authentication feature
      * 
-     * @return AAM_Core_JWTAuth
+     * @return AAM_Core_JwtAuth
      * 
      * @access public
      * @static

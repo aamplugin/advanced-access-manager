@@ -2202,6 +2202,155 @@
             aam.addHook('init', initialize);
 
         })(jQuery);
+        
+        /**
+         * API Routes Interface
+         * 
+         * @param {jQuery} $
+         * 
+         * @returns {void}
+         */
+        (function ($) {
+
+            /**
+             * 
+             * @param {type} type
+             * @param {type} route
+             * @param {type} method
+             * @param {type} value
+             * @param {type} btn
+             * @returns {undefined}
+             */
+            function save(type, route, method, value, btn) {
+                //show indicator
+                $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
+                
+                $.ajax(aamLocal.ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Main_Route.save',
+                        _ajax_nonce: aamLocal.nonce,
+                        subject: aam.getSubject().type,
+                        subjectId: aam.getSubject().id,
+                        type: type,
+                        route: route,
+                        method: method,
+                        value: value
+                    },
+                    success: function (response) {
+                        if (response.status === 'failure') {
+                            aam.notification('danger', response.error);
+                            updateBtn(btn, value ? 0 : 1);
+                        } else {
+                            $('#aam-route-overwrite').removeClass('hidden');
+                            updateBtn(btn, value);
+                        }
+                    },
+                    error: function () {
+                        updateBtn(btn, value ? 0 : 1);
+                        aam.notification('danger', aam.__('Application error'));
+                    }
+                });
+            }
+            
+            /**
+             * 
+             * @param {type} btn
+             * @param {type} value
+             * @returns {undefined}
+             */
+            function updateBtn(btn, value) {
+                if (value) {
+                    $(btn).attr('class', 'aam-row-action text-danger icon-check');
+                } else {
+                    $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
+                }
+            }
+            
+            /**
+             * 
+             * @returns {undefined}
+             */
+            function initialize() {
+                if ($('#route-content').length) {
+                    //initialize the role list table
+                    $('#route-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        pagingType: 'simple',
+                        serverSide: false,
+                        ajax: {
+                            url: aamLocal.ajaxurl,
+                            type: 'POST',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Route.getTable',
+                                _ajax_nonce: aamLocal.nonce,
+                                subject: aam.getSubject().type,
+                                subjectId: aam.getSubject().id
+                            }
+                        },
+                        columnDefs: [
+                            {visible: false, targets: [0]},
+                            {className: 'text-center', targets: [1]}
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: aam.__('Search Route'),
+                            info: aam.__('_TOTAL_ route(s)'),
+                            infoFiltered: '',
+                            infoEmpty: aam.__('Nothing to show'),
+                            lengthMenu: '_MENU_'
+                        },
+                        createdRow: function (row, data) {
+                            // decorate the method
+                            var method = $('<span/>', {
+                                'class': 'aam-api-method ' + data[1].toLowerCase()
+                            }).text(data[1]);
+                            
+                            $('td:eq(0)', row).html(method);
+                            
+                            var actions = data[3].split(',');
+
+                            var container = $('<div/>', {'class': 'aam-row-actions'});
+                            $.each(actions, function (i, action) {
+                                switch (action) {
+                                    case 'unchecked':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-check-empty'
+                                        }).bind('click', function () {
+                                            save(data[0], data[2], data[1], 1, this);
+                                        }));
+                                        break;
+
+                                    case 'checked':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-danger icon-check'
+                                        }).bind('click', function () {
+                                            save(data[0], data[2], data[1], 0, this);
+                                        }));
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            });
+                            $('td:eq(2)', row).html(container);
+                        }
+                    });
+
+                    //reset button
+                    $('#route-reset').bind('click', function () {
+                        aam.reset('route');
+                    });
+                }
+            }
+
+            aam.addHook('init', initialize);
+
+        })(jQuery);
 
         /**
          * Extensions Interface
