@@ -33,7 +33,7 @@ class AAM_Backend_Widget_Login extends WP_Widget {
         require(
             AAM_Core_Config::get(
                 'login.widget.template', 
-                dirname(__FILE__) . '/../phtml/widget/login-frontend.phtml'
+                realpath(dirname(__FILE__) . '/../phtml/widget/login-frontend.phtml')
             )
         );
     }

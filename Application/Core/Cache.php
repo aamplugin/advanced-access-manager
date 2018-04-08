@@ -97,7 +97,7 @@ class AAM_Core_Cache {
     public static function clear($user = null) {
         global $wpdb;
         
-        if (is_null($user)) {
+        if (empty($user)) {
             //clear visitor cache
             $query = "DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s";
             $wpdb->query($wpdb->prepare($query, '_transient_aam_%' ));
@@ -132,7 +132,7 @@ class AAM_Core_Cache {
     protected static function getCacheOption($id = null) {
         $option = self::POST_CACHE . '_';
         
-        if (is_null($id)) {
+        if (empty($id)) {
             $option .= AAM::getUser()->isVisitor() ? 'visitor' : AAM::getUser()->ID;
         } else {
             $option .= $id;

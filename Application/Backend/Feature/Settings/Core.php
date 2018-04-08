@@ -64,7 +64,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'value' => AAM_Core_Config::get('core.xmlrpc', true)
             ),
             'core.restful' => array(
-                'title' => __('WordPress RESTful API', AAM_KEY),
+                'title' => __('RESTful WordPress API', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('RESTful interface that is used to manage WordPress website content and features. For more information check %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
                 'value' => AAM_Core_Config::get('core.restful', true)
             ),

@@ -1011,7 +1011,7 @@
 
                     //reset button
                     $('#menu-reset').bind('click', function () {
-                        aam.reset('menu');
+                        aam.reset('menu', $(this));
                     });
                 }
             }
@@ -1132,7 +1132,7 @@
 
                     //reset button
                     $('#metabox-reset').bind('click', function () {
-                        aam.reset('metabox');
+                        aam.reset('metabox', $(this));
                     });
 
                     $('input[type="checkbox"]', '#metabox-list').each(function () {
@@ -1444,7 +1444,7 @@
 
                     //reset button
                     $('#capability-reset').bind('click', function () {
-                        aam.reset('capability');
+                        aam.reset('capability', $(this));
                     });
                 }
             }
@@ -1848,11 +1848,21 @@
                                 subject: aam.getSubject().type,
                                 subjectId: aam.getSubject().id
                             },
+                            beforeSend: function() {
+                                var label = $('#post-reset').text();
+                                $('#post-reset').attr('data-original-label', label);
+                                $('#post-reset').text(aam.__('Resetting...'));
+                            },
                             success: function (response) {
                                 if (response.status === 'success') {
                                     $('#post-overwritten').addClass('hidden');
                                     $.aam.loadAccessForm(type, id);
                                 }
+                            },
+                            complete: function() {
+                                $('#post-reset').text(
+                                    $('#post-reset').attr('data-original-label')
+                                );
                             }
                         });
                     });
@@ -1986,7 +1996,7 @@
                     });
 
                     $('#redirect-reset').bind('click', function () {
-                        aam.reset('redirect');
+                        aam.reset('redirect', $(this));
                     });
                 }
             }
@@ -2059,7 +2069,7 @@
                     });
                     
                     $('#login-redirect-reset').bind('click', function () {
-                        aam.reset('loginRedirect');
+                        aam.reset('loginRedirect', $(this));
                     });
                 }
             }
@@ -2126,7 +2136,7 @@
                     });
                     
                     $('#logout-redirect-reset').bind('click', function () {
-                        aam.reset('logoutRedirect');
+                        aam.reset('logoutRedirect', $(this));
                     });
                 }
             }
@@ -2343,7 +2353,7 @@
 
                     //reset button
                     $('#route-reset').bind('click', function () {
-                        aam.reset('route');
+                        aam.reset('route', $(this));
                     });
                 }
             }
@@ -2627,7 +2637,10 @@
                             },
                             success: function(response) {
                                 if (response.status === 'success') {
-                                    aam.notification('success', aam.__('All settings were cleared successfully'));
+                                    aam.notification(
+                                        'success', 
+                                        aam.__('All settings has been cleared successfully')
+                                    );
                                 } else {
                                     aam.notification('danger', response.reason);
                                 }
@@ -2658,7 +2671,10 @@
                             },
                             success: function(response) {
                                 if (response.status === 'success') {
-                                    aam.notification('success', aam.__('The cache was cleared successfully'));
+                                    aam.notification(
+                                        'success', 
+                                        aam.__('The cache has been cleared successfully')
+                                    );
                                 } else {
                                     aam.notification('danger', response.reason);
                                 }
@@ -3146,7 +3162,7 @@
      * @param {type} object
      * @returns {undefined}
      */
-    AAM.prototype.reset = function(object) {
+    AAM.prototype.reset = function(object, btn) {
         $.ajax(aamLocal.ajaxurl, {
             type: 'POST',
             data: {
@@ -3157,11 +3173,19 @@
                 subjectId: this.getSubject().id,
                 object: object
             },
+            beforeSend: function() {
+                var label = btn.text();
+                btn.attr('data-original-label', label);
+                btn.text(aam.__('Resetting...'));
+            },
             success: function () {
                 aam.fetchContent('main');
             },
             error: function () {
                 aam.notification('danger', aam.__('Application error'));
+            },
+            complete: function() {
+                btn.text(btn.attr('data-original-label'));
             }
         });
     };

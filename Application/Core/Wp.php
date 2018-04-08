@@ -53,6 +53,13 @@ class AAM_Core_Wp {
         return $response;
     }
     
+    /**
+     * 
+     * @param WP_Error $response
+     * @param type $server
+     * @param type $request
+     * @return \WP_Error
+     */
     public static function restAuth($response, $server, $request) {
         $user    = AAM::getUser();
         $object  = $user->getObject('route');
