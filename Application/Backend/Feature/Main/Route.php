@@ -61,7 +61,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
                 $response[] = array(
                     'restful',
                     $method,
-                    $route,
+                    htmlspecialchars($route),
                     $object->has('restful', $route, $method) ? 'checked' : 'unchecked'
                 );
             }

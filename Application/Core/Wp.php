@@ -47,7 +47,11 @@ class AAM_Core_Wp {
      */
     public static function disableRestful($response) {
         if (!is_wp_error($response)) {
-            $response = new WP_Error(403, 'RESTfull API is disabled');
+            $response = new WP_Error(
+                'access_denied', 
+                __('RESTfull API is disabled', AAM_KEY),
+                array('status' => 403)
+            );
         }
         
         return $response;
@@ -67,9 +71,13 @@ class AAM_Core_Wp {
         $method  = $request->get_method();
         
         foreach(array_keys($server->get_routes()) as $route) {
-            if ($route == $matched || preg_match("#^{$route}$#", $matched)) {
+            if ($route == $matched || preg_match("#^{$route}$#i", $matched)) {
                 if ($object->has('restful', $route, $method)) {
-                    $response = new WP_Error(403, __('Access denied', AAM_KEY));
+                    $response = new WP_Error(
+                        'access_denied', 
+                        __('Access denied', AAM_KEY),
+                        array('status' => 401)
+                    );
                     break;
                 }
             }

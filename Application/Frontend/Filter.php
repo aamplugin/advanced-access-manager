@@ -63,6 +63,9 @@ class AAM_Frontend_Filter {
         
         //filter post content
         add_filter('the_content', array($this, 'filterPostContent'), 999);
+        
+        //REST API authorization
+        add_filter('rest_request_before_callbacks', array($this, 'authRest'), 10, 3);
     }
     
     /**
@@ -93,9 +96,37 @@ class AAM_Frontend_Filter {
             $post = AAM_Core_API::getCurrentPost();
             
             if ($post) {
-                AAM_Frontend_Authorization::getInstance()->post($post);
+                AAM_Frontend_Authorization::getInstance()->chechReadAuth($post);
             }
         }
+    }
+    
+    /**
+     * 
+     * @param type $response
+     * @param type $handler
+     * @param type $request
+     * @return type
+     */
+    public function authRest($response, $handler, $request) {
+        $auth = AAM_Frontend_Rest::bootstrap();
+        
+        foreach($auth->getRoutes() as $group => $routes) {
+            foreach($routes as $regex) {
+                // Route to work with single post
+                if(preg_match('#^' . $regex . '$#i', $request->get_route())) {
+                    $response = apply_filters(
+                        'aam-rest-auth-request-filter', 
+                        $response,
+                        $group,
+                        $request, 
+                        $handler
+                    );
+                }
+            }
+        }
+        
+        return $response;
     }
     
     /**
@@ -117,7 +148,7 @@ class AAM_Frontend_Filter {
         $post = AAM_Core_API::getCurrentPost();
         
         if ($post) {
-            AAM_Frontend_Authorization::getInstance()->post($post);
+            AAM_Frontend_Authorization::getInstance()->chechReadAuth($post);
         }
         
         return $template;

@@ -36,7 +36,7 @@ class AAM_Frontend_Authorization {
      * 
      * @access public
      */
-    public function post(AAM_Core_Object_Post $post) {
+    public function chechReadAuth(AAM_Core_Object_Post $post) {
         // pre post access hook
         do_action('aam-pre-post-authorization-action', $post);
         

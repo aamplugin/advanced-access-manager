@@ -45,7 +45,7 @@ class AAM_Core_ConfigPress_Reader {
             set_error_handler(array($this, 'parserError'));
             $ini = parse_ini_string($string, true);
             restore_error_handler();
-
+            
             $response = $this->process(is_array($ini) ? $ini : array());
         } else {
             $response = array();

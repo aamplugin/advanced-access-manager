@@ -19,7 +19,7 @@ class AAM_Extension_List {
                 'title'       => 'Complete Package',
                 'id'          => 'AAM_COMPLETE_PACKAGE',
                 'type'        => 'commercial',
-                'description' => 'Get the complete list of all available premium extensions in one package. Any new premium extensions in the future will be available with updates for no additional cost.',
+                'description' => 'Get the complete list of all available premium extensions in one package. Any new premium extensions in the future will be available for no additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
                 'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null)
             ),
@@ -27,7 +27,7 @@ class AAM_Extension_List {
                 'title'       => 'Plus Package',
                 'id'          => 'AAM_PLUS_PACKAGE',
                 'type'        => 'commercial',
-                'description' => 'The best selling extension that has the most advanced content management features for WordPress CMS. Manage accsss to any post, page, custom post type, category, custom hierarchical taxonomy or define the default access to all.',
+                'description' => 'The best selling extension with the most advanced content management features for the WordPress CMS. Manage granular access to any post, page, custom post type, category, custom hierarchical taxonomy or define the default access to all your content for all users, roles and visitors.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null)
             ),
@@ -35,7 +35,7 @@ class AAM_Extension_List {
                 'title'       => 'IP Check',
                 'id'          => 'AAM_IP_CHECK',
                 'type'        => 'commercial',
-                'description' => 'This extension was designed to manage access to your entire website based on visitor\'s geo-location, refered host or IP address.',
+                'description' => 'Manage access to your entire website based on visitor\'s geo-location, refered host or IP address.',
                 'url'         => 'https://aamplugin.com/extension/ip-check',
                 'version'     => (defined('AAM_IP_CHECK') ? constant('AAM_IP_CHECK') : null)
             ),
@@ -52,10 +52,11 @@ class AAM_Extension_List {
                 'id'          => 'AAM_ECOMMERCE',
                 'type'        => 'commercial',
                 'new'         => true,
-                'description' => 'Start selling access to your website content. This extension gives ability to define the list of E-Commerce products that you can bind with any content on your website. The properly configured AAM Payment widget allows any authenticated user to purchase access with credit/debig card or PayPal. Braintree and Stripe gateways are used to handle actual purchase.',
+                'description' => 'Start selling access to your website content. This extension gives you the ability to define list of E-Commerce products that you can bind with any content on your website. The properly configured AAM Payment widget allows any authenticated user to purchase access with credit/debig card or PayPal. Braintree and Stripe gateways are used to handle payment transactions.',
                 'url'         => 'https://aamplugin.com/extension/ecommerce',
                 'version'     => (defined('AAM_ECOMMERCE') ? constant('AAM_ECOMMERCE') : null)
             ),
+            // TODO: Remove in Dec 2018
             'AAM_PAYMENT' => array(
                 'title'       => 'Payment',
                 'id'          => 'AAM_PAYMENT',
