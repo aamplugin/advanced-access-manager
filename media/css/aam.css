@@ -361,6 +361,11 @@ a.btn:focus, a.btn:active {
     margin-bottom: 10px;
 }
 
+.aam-clear {
+    clear: both !important;
+    display:block;
+}
+
 .btn-right::after {
     display: block;
     content: " ";
@@ -434,6 +439,7 @@ div.dataTables_wrapper div.dataTables_filter {
 
 #capability-list_wrapper div.dataTables_filter, 
 #route-list_wrapper div.dataTables_filter, 
+#eproduct-list_wrapper div.dataTables_filter, 
 #post-list_wrapper div.dataTables_filter {
     text-align: right;
 }

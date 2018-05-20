@@ -29,18 +29,38 @@ final class AAM_Core_API {
      */
     public static function getOption($option, $default = FALSE, $blog_id = null) {
         if (is_multisite()) {
-            if (is_null($blog_id)) {
-                $blog = get_current_blog_id();
-            } elseif ($blog_id == 'site') {
-                $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
+            if (is_null($blog_id) || get_current_blog_id() == $blog_id) {
+                $response = self::getCachedOption($option, $default);
             } else {
-                $blog = $blog_id;
+                if ($blog_id == 'site') {
+                    $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
+                } else {
+                    $blog = $blog_id;
+                }
+                $response = get_blog_option($blog, $option, $default);
             }
-            $response = get_blog_option($blog, $option, $default);
         } else {
-            $response = get_option($option, $default);
+            $response = self::getCachedOption($option, $default);
         }
 
+        return $response;
+    }
+    
+    /**
+     * 
+     * @param type $option
+     * @param type $default
+     * @return type
+     */
+    protected static function getCachedOption($option, $default) {
+        $cache = wp_cache_get('alloptions', 'options');
+        
+        if (empty($cache)) {
+            $response = get_option($option, $default);
+        } else {
+            $response = isset($cache[$option]) ? maybe_unserialize($cache[$option]) : $default;
+        }
+        
         return $response;
     }
 
@@ -111,7 +131,7 @@ final class AAM_Core_API {
      * 
      * @access public
      */
-    public static function cURL($url, $send_cookies = TRUE, $params = array(), $timeout = 20) {
+    public static function cURL($url, $send_cookies = true, $params = array(), $timeout = 20) {
         $header = array('User-Agent' => AAM_Core_Request::server('HTTP_USER_AGENT'));
 
         $cookies = AAM_Core_Request::cookie(null, array());
@@ -219,6 +239,31 @@ final class AAM_Core_API {
     }
     
     /**
+     * 
+     * @param AAM_Core_Subject $subject
+     */
+    public static function clearCache($subject = null) {
+        global $wpdb;
+        
+        if (empty($subject)) { // clear all cache
+            // visitors, default and role cache
+            $query = "DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s";
+            $wpdb->query($wpdb->prepare($query, '%aam_cache%' ));
+            
+            // TODO: aam_visitor_cache does not follow the option naming pattern
+            $query = "DELETE FROM {$wpdb->options} WHERE `option_name` = %s";
+            $wpdb->query($wpdb->prepare($query, 'aam_visitor_cache' ));
+            
+            // user cache
+            $query = "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s";
+            $wpdb->query($wpdb->prepare($query, '%aam_cache%' ));
+        } else {
+            //clear visitor cache
+            $subject->getObject('cache')->reset();
+        }
+    }
+    
+    /**
      * Reject the request
      *
      * Redirect or die the execution based on ConfigPress settings
@@ -244,7 +289,7 @@ final class AAM_Core_API {
                 $redirect = $object->get("{$area}.redirect.{$type}");
             } else { //ConfigPress setup
                 $redirect = AAM_Core_Config::get(
-                       "{$area}.access.deny.redirect", __('Access Denied', AAM_KEY)
+                    "{$area}.access.deny.redirect", __('Access Denied', AAM_KEY)
                 );
             }
 
@@ -336,24 +381,20 @@ final class AAM_Core_API {
      * 
      * @access public
      */
-    public static function getFilteredPostList($query, $area = 'frontend') {
+    public static function getFilteredPostList($query) {
         $filtered = array();
-        $type     = self::getQueryPostType($query);
         
-        if ($type) { 
-            if (AAM_Core_Cache::has("{$type}__not_in_{$area}")) {
-                $filtered = AAM_Core_Cache::get("{$type}__not_in_{$area}");
-            } else { //first initial build
-                $posts = get_posts(array(
-                    'post_type'   => $type, 
-                    'numberposts' => AAM_Core_Config::get('get_post_limit', 500), 
-                    'post_status' => 'any'
-                ));
-
-                foreach ($posts as $post) {
-                    if (self::isHiddenPost($post, $type, $area)) {
-                        $filtered[] = $post->ID;
-                    }
+        $type = self::getQueryPostType($query);
+        $area = AAM_Core_Api_Area::get();
+        
+        if ($type) {
+            $cache = AAM::getUser()->getObject('cache')->getMergedOption();
+            $posts = (isset($cache['post']) ? $cache['post'] : array());
+            
+            foreach($posts as $id => $option) {
+                if (!empty($option["{$area}.list"]) 
+                                    || !empty($option["{$area}.hidden"])) {
+                    $filtered[] = $id;
                 }
             }
         }
@@ -368,51 +409,6 @@ final class AAM_Core_API {
         }
         
         return (is_array($filtered) ? $filtered : array());
-    }
-    
-    /**
-     * Check if post is hidden
-     * 
-     * @param mixed  $post
-     * @param string $area
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public static function isHiddenPost($post, $type, $area = 'frontend') {
-        static $counter = 0;
-        
-        $hidden = false;
-        
-        if ($counter <= AAM_Core_Config::get('get_post_limit', 500)) { //avoid server crash
-            $user    = get_current_user_id();
-            $key     = "{$type}__not_in_{$area}";
-            $cache   = AAM_Core_Cache::get($key, array());
-            $checked = AAM_Core_Cache::get($key . '_checked', array());
-            
-            if (!in_array($post->ID, $cache)) {
-                if (!in_array($post->ID, $checked)) {
-                    $object    = AAM::getUser()->getObject('post', $post->ID, $post);
-                    $list      = $object->has("{$area}.list");
-                    $others    = $object->has("{$area}.list_others");
-                    $checked[] = $post->ID;
-
-                    if ($list || ($others && ($post->post_author != $user))) {
-                        $hidden  = true;
-                        $cache[] = $post->ID;
-                    }
-                    
-                    AAM_Core_Cache::set($key . '_checked', $checked);
-                    AAM_Core_Cache::set($key, $cache);
-                    $counter++;
-                }
-            } else {
-                $hidden = true;
-            }
-        }
-        
-        return $hidden;
     }
     
     /**
@@ -449,7 +445,7 @@ final class AAM_Core_API {
     public static function getCurrentPost() {
         global $wp_query, $post;
         
-        $res = null;
+        $res = $post;
         
         if (!empty($wp_query->queried_object)) {
             $res = $wp_query->queried_object;

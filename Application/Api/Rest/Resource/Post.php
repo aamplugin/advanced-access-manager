@@ -8,130 +8,59 @@
  */
 
 /**
- * AAM frontend RESTful authorization
+ * AAM RESTful Posts Resource
  * 
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  * @todo Rethink about DRY approach to the post access control
  */
-class AAM_Frontend_Rest {
+class AAM_Api_Rest_Resource_Post {
     
     /**
      * Instance of itself
      * 
-     * @var AAM_Frontend_Rest
+     * @var AAM_Api_Rest_Resource_Post
      * 
      * @access private 
      */
     private static $_instance = null;
     
     /**
-     *
-     * @var type 
-     */
-    protected $defaultRoutes = array(
-        'posts' => array(
-            '/wp/v2/posts/(?P<id>[\d]+)', 
-            '/wp/v2/pages/(?P<id>[\d]+)', 
-            '/wp/v2/media/(?P<id>[\d]+)'
-        )
-    );
-    
-    /**
+     * Authorize Post actions
      * 
-     */
-    protected function __construct() {
-        add_filter('aam-rest-auth-request-filter', array($this, 'authorize'), 10, 4);
-        
-        add_filter('rest_user_query', array($this, 'userQuery'), 10, 2);
-    }
-    
-    /**
+     * @param WP_REST_Request $request
      * 
-     * @param type $response
-     * @param type $group
-     * @param type $request
-     * @return type
-     */
-    public function authorize($response, $group, $request) {
-       if ($group == 'posts') {
-            $response = $this->authorizePostAction(
-                $request['id'], $request->get_method()
-            );
-        }
-        
-        return $response;
-    }
-    
-    /**
+     * @return WP_Error|null
      * 
-     * @param array $args
-     * @param type $request
-     * @return type
+     * @access public
      */
-    public function userQuery($args, $request) {
-        //current user max level
-        $max     = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
-        $exclude = isset($args['role__not_in']) ? $args['role__not_in'] : array();
-        $roles   = AAM_Core_API::getRoles();
+    public function authorize($request) {
+        $result = null;
         
-        foreach($roles->role_objects as $id => $role) {
-            if (AAM_Core_API::maxLevel($role->capabilities) > $max) {
-                $exclude[] = $id;
+        if ($request['id']) {
+            $post = AAM::getUser()->getObject('post', $request['id']);
+
+            switch($request->get_method()) {
+                case 'GET':
+                    $result = $this->authorizeRead($post, $request);
+                    break;
+
+                case 'POST':
+                case 'PUT':
+                case 'PATCH':
+                    $result = $this->authorizeUpdate($post);
+                    break;
+
+                case 'DELETE':
+                    $result = $this->authorizeDelete($post);
+                    break;
+
+                default:
+                    break;
             }
         }
         
-        $args['role__not_in'] = $exclude;
-        
-        return $args;
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function getRoutes() {
-        $posts = AAM_Core_Config::get('restful.routes.posts', array());
-        
-        $routes = array(
-            'posts' => array_merge(
-                (is_array($posts) ? $posts : array()), $this->defaultRoutes['posts']
-            )
-        );
-        
-        return apply_filters('aam-rest-auth-routes-filter', $routes);
-    }
-    
-    /**
-     * 
-     * @param type $id
-     * @param type $method
-     * @return type
-     */
-    protected function authorizePostAction($id, $method) {
-        $post = AAM::getUser()->getObject('post', $id);
-        
-        switch($method) {
-            case 'GET':
-                $result = $this->chechReadAuth($post);
-                break;
-
-            case 'POST':
-            case 'PUT':
-            case 'PATCH':
-                $result = $this->chechUpdateAuth($post);
-                break;
-
-            case 'DELETE':
-                $result = $this->chechDeleteAuth($post);
-                break;
-
-            default:
-                $result = null;
-                break;
-        }
-        
-        return $result;
+        return apply_filters('aam-rest-post-authorization', $result, $request);
     }
     
     /**
@@ -141,14 +70,16 @@ class AAM_Frontend_Rest {
      * This method run multiple checks at-once
      * 
      * @param AAM_Core_Object_Post $post
+     * @param WP_REST_Request      $request
      * 
      * @return void
      * 
      * @access protected
      */
-    protected function chechReadAuth(AAM_Core_Object_Post $post) {
+    protected function authorizeRead(AAM_Core_Object_Post $post, $request) {
         $result = null;
         
+        //TODO: remove pipeline filter for all methods
         $steps = apply_filters('aam-post-read-auth-pipeline-filter', array(
             // Step #1. Check if access expired to the post
             array($this, 'checkExpiration'),
@@ -157,16 +88,16 @@ class AAM_Frontend_Rest {
             // Step #3. Check if counter exceeded max allowed views
             array($this, 'checkCounter'),
             // Step #4. Check if redirect is defined for the post
-            array($this, 'checkRedirect')
+            array($this, 'checkRedirect'),
+            // Step #5. Check if post is password protected
+            array($this, 'checkPassword')
         ));
         
         if (is_array($steps)) {
             foreach($steps as $callback) {
-                $result = call_user_func_array($callback, array($post));
+                $result = call_user_func_array($callback, array($post, $request));
                 
-                if (is_wp_error($result)) {
-                    break;
-                }
+                if (is_wp_error($result)) { break; }
             }
         } else {
             $result = new WP_Error(
@@ -183,10 +114,10 @@ class AAM_Frontend_Rest {
      * @param AAM_Core_Object_Post $post
      * @return type
      */
-    protected function chechUpdateAuth(AAM_Core_Object_Post $post) {
+    protected function authorizeUpdate(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $steps = apply_filters('aam-post-update-auth-steps-filter', array(
+        $steps = apply_filters('aam-post-update-auth-pipeline-filter', array(
             // Step #1. Check if edit action is alloed
             array($this, 'checkUpdate'),
         ));
@@ -195,9 +126,7 @@ class AAM_Frontend_Rest {
             foreach($steps as $callback) {
                 $result = call_user_func_array($callback, array($post));
                 
-                if (is_wp_error($result)) {
-                    break;
-                }
+                if (is_wp_error($result)) { break; }
             }
         } else {
             $result = new WP_Error(
@@ -214,7 +143,7 @@ class AAM_Frontend_Rest {
      * @param AAM_Core_Object_Post $post
      * @return type
      */
-    protected function chechDeleteAuth(AAM_Core_Object_Post $post) {
+    protected function authorizeDelete(AAM_Core_Object_Post $post) {
         $result = null;
         
         $steps = apply_filters('aam-post-delete-auth-steps-filter', array(
@@ -226,9 +155,7 @@ class AAM_Frontend_Rest {
             foreach($steps as $callback) {
                 $result = call_user_func_array($callback, array($post));
                 
-                if (is_wp_error($result)) {
-                    break;
-                }
+                if (is_wp_error($result)) { break; }
             }
         } else {
             $result = new WP_Error(
@@ -253,14 +180,12 @@ class AAM_Frontend_Rest {
      * @access protected
      */
     protected function checkExpiration($post) {
-        $expire = $post->has('frontend.expire');
+        $expire = $post->has('api.expire');
 
         if ($expire) {
-            $date = strtotime($post->get('frontend.expire_datetime'));
+            $date = strtotime($post->get('api.expire_datetime'));
             if ($date <= time()) {
-                $actions = AAM_Core_Config::get(
-                        'post.access.expired', 'frontend.read'
-                );
+                $actions = AAM_Core_Config::get('post.access.expired', 'api.read');
 
                 foreach(array_map('trim', explode(',', $actions)) as $action) {
                     $post->set($action, 1);
@@ -281,15 +206,15 @@ class AAM_Frontend_Rest {
     protected function checkReadAccess(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $read   = $post->has('frontend.read');
-        $others = $post->has('frontend.read_others');
+        $read   = $post->has('api.read');
+        $others = $post->has('api.read_others');
         
         if ($read || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'post_read_access_denied', 
+                'rest_cannot_read', 
                 "User is unauthorized to read the post. Access denied.", 
                 array(
-                    'action' => 'frontend.read',
+                    'action' => 'api.read',
                     'status' => 401
                 )
             );
@@ -312,16 +237,16 @@ class AAM_Frontend_Rest {
         $user   = get_current_user_id();
         
         //check counter only for authenticated users and if ACCESS COUNTER is set
-        if ($user && $post->has('frontend.access_counter')) {
-            $option  = 'aam-post-' . $post->ID . '-access-counter';
+        if ($user && $post->has('api.access_counter')) {
+            $option  = 'aam-post-api-' . $post->ID . '-access-counter';
             $counter = intval(get_user_meta($user, $option, true));
             
-            if ($counter >= $post->get('frontend.access_counter_limit')) {
+            if ($counter >= $post->get('api.access_counter_limit')) {
                 $result = new WP_Error(
-                    'post_read_access_denied', 
+                    'rest_cannot_read', 
                     "User exceeded allowed read number. Access denied.", 
                     array(
-                        'action' => 'frontend.access_counter',
+                        'action' => 'api.access_counter',
                         'status' => 401
                     )
                 );
@@ -345,16 +270,57 @@ class AAM_Frontend_Rest {
     protected function checkRedirect(AAM_Core_Object_Post $post) {
         $result = null;
         
-        if ($post->has('frontend.redirect')) {
+        if ($post->has('api.redirect')) {
             $result = new WP_Error(
-                'post_read_access_denied', 
-                "Direct access is not allowed. Access redirected", 
+                'rest_cannot_read', 
+                "Direct access is not allowed. Follow the redirect link.", 
                 array(
-                    'action'   => 'frontend.redirect',
-                    'redirect' => $post->get('frontend.location'),
+                    'action'   => 'api.redirect',
+                    'redirect' => $post->get('api.location'),
                     'status'   => 307
                 )
             );
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Check PASSWORD PROTECTED option
+     * 
+     * @param AAM_Core_Object_Post $post
+     * @param WP_REST_Request      $request
+     * 
+     * @return null|WP_Error
+     * 
+     * @access public
+     */
+    public function checkPassword(AAM_Core_Object_Post $post, $request) {
+        $result = null;
+        
+        if ($post->has('api.protected')) {
+            $pass = $post->get('api.password');
+            
+            // initialize hasher
+            require_once( ABSPATH . 'wp-includes/class-phpass.php' );
+            $hasher = new PasswordHash(8, true);
+
+            if ($pass != $request['password'] 
+                    && !$hasher->CheckPassword($pass, $request['password'])) {
+                $result = new WP_Error(
+                    'rest_cannot_read', 
+                    "The content is password protected. Provide valid password to read.", 
+                    array(
+                        'action'   => 'api.protected',
+                        'status'   => 401
+                    )
+                );
+            }
+            
+            // Very important! Unset password. Otherwise it will fall back to the
+            // default password verification and this will cause invalid password
+            // response
+            $request['password'] = null;
         }
         
         return $result;
@@ -372,15 +338,15 @@ class AAM_Frontend_Rest {
     protected function checkUpdate(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $edit   = $post->has('backend.edit');
-        $others = $post->has('backend.edit_others');
+        $edit   = $post->has('api.edit');
+        $others = $post->has('api.edit_others');
         
         if ($edit || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'post_update_access_denied', 
+                'rest_cannot_update', 
                 "User is unauthorized to update the post. Access denied.", 
                 array(
-                    'action' => 'backend.edit',
+                    'action' => 'api.edit',
                     'status' => 401
                 )
             );
@@ -401,15 +367,15 @@ class AAM_Frontend_Rest {
     protected function checkDelete(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $delete = $post->has('backend.delete');
-        $others = $post->has('backend.delete_others');
+        $delete = $post->has('api.delete');
+        $others = $post->has('api.delete_others');
         
         if ($delete || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'post_delete_access_denied', 
+                'rest_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 
                 array(
-                    'action' => 'backend.delete',
+                    'action' => 'api.delete',
                     'status' => 401
                 )
             );
@@ -421,7 +387,7 @@ class AAM_Frontend_Rest {
     /**
      * Alias for the bootstrap
      * 
-     * @return AAM_Frontend_Authorization
+     * @return AAM_Api_Rest_Resource_Post
      * 
      * @access public
      * @static
@@ -433,7 +399,7 @@ class AAM_Frontend_Rest {
     /**
      * Bootstrap authorization layer
      * 
-     * @return void
+     * @return AAM_Api_Rest_Resource_Post
      * 
      * @access public
      */
@@ -444,5 +410,4 @@ class AAM_Frontend_Rest {
         
         return self::$_instance;
     }
-    
 }

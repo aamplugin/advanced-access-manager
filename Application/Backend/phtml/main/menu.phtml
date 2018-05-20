@@ -63,19 +63,21 @@
                                     <hr class="aam-divider" />
                                 <?php } ?>
 
-                                <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
-                                    <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                        <?php if ($object->has($menu['id'])) { ?>
-                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                                <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
-                                            </a>
-                                        <?php } else { ?>
-                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                                <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
-                                            </a>
-                                        <?php } ?>
+                                <?php if ($menu['id'] != 'menu-index.php') { ?>
+                                    <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
+                                        <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
+                                            <?php if ($object->has($menu['id'])) { ?>
+                                                <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                                    <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
+                                                </a>
+                                            <?php } else { ?>
+                                                <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                                    <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                                </a>
+                                            <?php } ?>
+                                        </div>
                                     </div>
-                                </div>
+                                <?php } ?>
                             </div>
                         </div>
                     </div>

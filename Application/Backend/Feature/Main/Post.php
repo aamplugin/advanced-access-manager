@@ -433,18 +433,18 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $param = AAM_Core_Request::post('param');
         $value = AAM_Core_Request::post('value');
 
-        if (strpos($param, 'frontend.expire_datetime') !== false) {
+        if (strpos($param, '.expire_datetime') !== false) {
             $value = date('Y-m-d H:i:s', strtotime($value));
         }
 
         //clear cache
-        AAM_Core_Cache::clear();
+        AAM_Core_API::clearCache();
 
         $result = $subject->save($param, $value, $object, $id);
 
         return json_encode(array(
-            'status' => ($result ? 'success' : 'failure'),
-            'value'  => $value,
+            'status'  => ($result ? 'success' : 'failure'),
+            'value'   => $value,
             'preview' => $this->getPreviewValue($param, $value)
         ));
     }
@@ -464,7 +464,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         if ($object instanceof AAM_Core_Object) {
             $result = $object->reset();
             //clear cache
-            AAM_Core_Cache::clear();
+            AAM_Core_API::clearCache();
         } else {
             $result = false;
         }
@@ -515,6 +515,22 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     
     /**
      * 
+     * @param type $renderBackButton
+     * @param type $extraClass
+     */
+    public static function renderAccessForm() {
+        ob_start();
+        require_once(
+            AAM_BASEDIR . '/Application/Backend/phtml/partial/post-access-form.phtml'
+        );
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return $content;
+    }
+    
+    /**
+     * 
      * @return type
      */
     public static function getCurrentObject() {
@@ -546,7 +562,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'post',
             'position'   => 20,
-            'title'      => __('Posts & Pages', AAM_KEY),
+            'title'      => __('Posts & Terms', AAM_KEY),
             'capability' => 'aam_manage_posts',
             'type'       => 'main',
             'subjects'   => array(

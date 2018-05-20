@@ -28,25 +28,10 @@ class AAM_Core_Compatibility {
         define('AAM_CONTENT_TEASER', '99');
         define('AAM_LOGIN_REDIRECT', '99');
         define('AAM_CONFIGPRESS', '99');
-        //TODO - Remove this in Jul 2018
-        
-        //caching filter & action
-        add_filter(
-            'aam-read-cache-filter', 'AAM_Core_Compatibility::readCache', 10, 2
-        );
+        //TODO - Remove this in Jul 2019
         
         //utilities option
         add_filter('aam-utility-property', 'AAM_Core_Config::get', 10, 2);
-    }
-    
-    /**
-     * 
-     * @param type $value
-     * @param type $option
-     * @return type
-     */
-    public static function readCache($value, $option) {
-        return AAM_Core_Cache::get($option, $value);
     }
     
     /**

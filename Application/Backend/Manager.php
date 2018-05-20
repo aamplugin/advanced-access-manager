@@ -38,6 +38,9 @@ class AAM_Backend_Manager {
         //check if user switch is required
         $this->checkUserSwitch();
         
+        //cache clearing hook
+        add_action('aam-clear-cache-action', 'AAM_Core_API::clearCache');
+        
         //print required JS & CSS
         add_action('admin_print_scripts', array($this, 'printJavascript'));
         add_action('admin_print_styles', array($this, 'printStylesheet'));
@@ -154,7 +157,7 @@ class AAM_Backend_Manager {
         
         //role changed?
         if (implode('', $user->roles) != implode('', $old->roles)) {
-            AAM_Core_Cache::clear($id);
+            AAM_Core_API::clearCache(new AAM_Core_Subject_User($id));
             
             //check if role has expiration data set
             $role   = (is_array($user->roles) ? $user->roles[0] : '');

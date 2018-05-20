@@ -142,7 +142,7 @@ class AAM_Core_ConfigPress_Reader {
      * @return type
      */
     protected function parseValue($value) {
-        return trim($value);
+        return is_string($value) ? trim($value) : $value;
     }
 
 }

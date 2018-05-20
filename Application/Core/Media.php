@@ -48,7 +48,7 @@ class AAM_Core_Media {
             $this->initialize();
             
             if (AAM_Core_Config::get('media-access-control', false)) {
-                $area = (is_admin() ? 'backend' : 'frontend');
+                $area = AAM_Core_Api_Area::get();
                 if (AAM_Core_Config::get("{$area}-access-control", true)) {
                     $this->checkMediaAccess();
                 } else {

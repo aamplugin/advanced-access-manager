@@ -1,5 +1,26 @@
 <?php if (defined('AAM_KEY')) { ?>
-    <div class="modal fade" id="modal-frontend-access_counter_limit" tabindex="-1" role="dialog">
+    <div class="modal fade" id="modal-teaser" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"><?php echo __('Teaser Message', AAM_KEY); ?></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><?php echo __('Simple text or valid HTML', AAM_KEY); ?></label>
+                        <textarea class="form-control" placeholder="<?php echo __('Enter your teaser', AAM_KEY); ?>" rows="5" id="aam-teaser-message"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-teaser" data-field="#aam-teaser-message"><?php echo __('Save', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-access-counter" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -13,14 +34,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-access_counter_limit" data-field="#aam-read-counter"><?php echo __('Update', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-access-counter" data-field="#aam-read-counter"><?php echo __('Update', AAM_KEY); ?></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modal-frontend-password" tabindex="-1" role="dialog">
+    <div class="modal fade" id="modal-password" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -34,14 +55,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-password" data-field="#aam-access-password"><?php echo __('Update', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-password" data-field="#aam-access-password"><?php echo __('Update', AAM_KEY); ?></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modal-frontend-location" tabindex="-1" role="dialog">
+    <div class="modal fade" id="modal-redirect" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -56,14 +77,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-location" data-field="#aam-access-redirect"><?php echo __('Update', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-redirect" data-field="#aam-access-redirect"><?php echo __('Update', AAM_KEY); ?></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modal-frontend-expire_datetime" tabindex="-1" role="dialog">
+    <div class="modal fade" id="modal-access-expires" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -83,35 +104,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-expire_datetime" data-field="#aam-expire-datetime"><?php echo __('Update', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-access-expires" data-field="#aam-expire-datetime"><?php echo __('Update', AAM_KEY); ?></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modal-frontend-teaser" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title"><?php echo __('Teaser Message', AAM_KEY); ?></h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label><?php echo __('Simple text or valid HTML', AAM_KEY); ?></label>
-                        <textarea class="form-control" placeholder="<?php echo __('Enter your teaser', AAM_KEY); ?>" rows="5" id="aam-teaser-message"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-teaser" data-field="#aam-teaser-message"><?php echo __('Save', AAM_KEY); ?></button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modal-frontend-eproduct" tabindex="-1" role="dialog">
+    <div class="modal fade" id="modal-eproduct" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -122,12 +122,11 @@
                     <?php
                         echo apply_filters(
                             'aam-frontend-eproduct-setup', 
-                            '<p class="alert alert-warning text-center">' . AAM_Backend_View_Helper::preparePhrase('Monetization is the premium feature that is available with [Payment] extension.', 'b') . '</p>'
+                            '<p class="alert alert-warning text-center">' . sprintf(AAM_Backend_View_Helper::preparePhrase('Monetization is the premium feature that is available with %s[E-Commerce]%s extension.', 'b'), '<a href="https://aamplugin.com/extension/ecommerce" target="_blank">', '</a>') . '</p>'
                        );
                     ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success extended-post-access-btn" data-modal="#modal-frontend-eproduct" data-field="#aam-selected-eproduct"><?php echo __('Update', AAM_KEY); ?></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                 </div>
             </div>

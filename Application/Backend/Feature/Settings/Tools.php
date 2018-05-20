@@ -74,6 +74,8 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
 
         $mquery = "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s";
         $wpdb->query($wpdb->prepare($mquery, $wpdb->prefix . 'aam%'));
+        
+        $this->clearCache();
 
         return json_encode(array('status' => 'success'));
     }
@@ -83,7 +85,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
      * @return type
      */
     public function clearCache() {
-        AAM_Core_Cache::clear();
+        AAM_Core_API::clearCache();
 
         return json_encode(array('status' => 'success'));
     }

@@ -50,9 +50,13 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     }
     
     /**
+     * Get WP post property
      * 
-     * @param type $name
-     * @return type
+     * @param string $name
+     * 
+     * @return mixed
+     * 
+     * @access public
      */
     public function __get($name) {
         $post = $this->getPost();
@@ -72,37 +76,103 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     public function read() {
         $subject = $this->getSubject();
         $post    = $this->getPost();
-        $opname  = $this->getOptionName();
-        $chname  = $opname . '|' . $post->ID;
         
-        //read cache first
-        $option = AAM_Core_Cache::get($chname);
+        // Read cache first
+        $option = $subject->getObject('cache')->get('post', $post->ID);
         
         if ($option === false) { //if false, then the cache is empty but exist
             $option = array();
-        } else {
-            //Cache is empty. Get post access for current subject (user or role)
-            if (empty($option)) { //no cache for this element
-                $option = get_post_meta($post->ID, $opname, true);
-                $this->setOverwritten(!empty($option));
-            }
+        } elseif (empty($option)) {
+            $option = get_post_meta($post->ID, $this->getOptionName(), true);
+            $this->setOverwritten(!empty($option));
             
-            //try to inherit from terms or default settings - AAM Plus Package or any
-            //other extension that use this filter
+            // Inherit from terms or default settings - AAM Plus Package
             if (empty($option)) {
                 $option = apply_filters('aam-post-access-filter', $option, $this);
             }
             
-            //No settings for a post. Try to inherit from the parent
-            if (empty($option)) {
+            // Cache result but only if it is not empty
+            if (!empty($option)) {
+                $subject->getObject('cache')->add('post', $post->ID, $option);
+            } else { // No settings for a post. Try to inherit from the parent
                 $option = $subject->inheritFromParent('post', $post->ID, $post);
+            }
+            
+            // Do not perform finalization if this is user level subject unless it
+            // is overriten. This is critical to avoid overloading database with too 
+            // much cache
+            if ($this->allowCache($subject) || $this->isOverwritten()) {
+                $this->finalizeOption($post, $subject, $option);
             }
         }
         
         $this->setOption($option);
+    }
+    
+    /**
+     * 
+     * @param type $subject
+     * @return type
+     * @todo This does not belong here
+     */
+    protected function allowCache($subject) {
+        $config = AAM_Core_Config::get(
+                'core.cache.post.levels', array('role', 'visitor', 'user')
+        );
         
-        //if result is empty, simply cache the false to speed-up
-        AAM_Core_Cache::set($chname, (empty($option) ? false : $option));
+        return is_array($config) && in_array($subject::UID, $config);
+    }
+    
+    /**
+     * Finalize post options
+     * 
+     * @param WP_Post          $post
+     * @param AAM_Core_Subject $subject
+     * @param array            &$option
+     * 
+     * @return void
+     * 
+     * @access protected
+     */
+    protected function finalizeOption($post, $subject, &$option) {
+        // If result is empty, simply cache the false to speed-up but do not
+        // do it on the use level to avoid overloading database with too much cache
+        if (empty($option)) {
+            $subject->getObject('cache')->add('post', $post->ID, false);
+        } else {
+            $subject->getObject('cache')->add('post', $post->ID, $option);
+            
+            // Determine if post is hidden or not. This is more complex calculation
+            // as it is based on the combination of several options
+            // TODO: this check does not belong here
+            if (in_array($subject::UID, array('user'))) {
+                $this->determineVisibility($post, 'frontend', $option);
+                $this->determineVisibility($post, 'backend', $option);
+                $this->determineVisibility($post, 'api', $option);
+            }
+        }
+    }
+    
+    /**
+     * Determine if post is visible for current subject
+     * 
+     * @param WP_Post $post
+     * @param string  $area
+     * 
+     * @param boolean $option
+     * 
+     * @access protected
+     */
+    protected function determineVisibility($post, $area, &$option) {
+        $list   = !empty($option["{$area}.list"]);
+        $others = !empty($option["{$area}.list_others"]);
+        
+        if ($list || ($others && ($post->post_author != $this->getSubject()->ID))) {
+            $option["{$area}.hidden"] = true;
+            
+            // Cache result but only if visibility is true!
+            $this->getSubject()->getObject('cache')->add('post', $post->ID, $option);
+        }
     }
     
     /**
@@ -117,9 +187,17 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         
         $option[$property] = $checked;
         
-        $result = update_post_meta(
-                $this->getPost()->ID, $this->getOptionName(), $option
-        );
+        // Very specific WP case. According to the WP core, you are not allowed to
+        // set meta for revision, so let's bypass this constrain.
+        if ($this->getPost()->post_type == 'revision') {
+            $result =  update_metadata(
+                'post', $this->getPost()->ID, $this->getOptionName(), $option
+            );
+        } else {
+            $result = update_post_meta(
+                    $this->getPost()->ID, $this->getOptionName(), $option
+            );
+        }
         
         if ($result) {
             $this->setOption($option);
@@ -136,9 +214,19 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
      * @access public
      */
     public function reset() {
-        AAM_Core_Cache::clear();
+        AAM_Core_API::clearCache();
         
-        return delete_post_meta($this->getPost()->ID, $this->getOptionName());
+        // Very specific WP case. According to the WP core, you are not allowed to
+        // set meta for revision, so let's bypass this constrain.
+        if ($this->getPost()->post_type == 'revision') {
+            $result = delete_metadata(
+                    'post', $this->getPost()->ID, $this->getOptionName()
+            );
+        } else {
+            $result = delete_post_meta($this->getPost()->ID, $this->getOptionName());
+        }
+        
+        return $result;
     }
 
     /**

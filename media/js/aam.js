@@ -185,7 +185,14 @@
                                                 'class', 'aam-row-action icon-cog text-muted'
                                             );
                                         } else {
-                                            $.aam.loadAccessForm($('#load-post-object-type').val(), $('#load-post-object').val(), $(this));
+                                            aam.fetchPartial('postform', function(content) {
+                                                $('#metabox-post-access-form').html(content);
+                                                $.aam.loadAccessForm(
+                                                    $('#load-post-object-type').val(), 
+                                                    $('#load-post-object').val(), 
+                                                    $(this)
+                                                );
+                                            });
                                         }
                                     }
                                 }).attr({
@@ -485,6 +492,41 @@
 
                 return (subject.type === 'user' && parseInt(subject.id) === id);
             }
+            
+            /**
+             * 
+             * @param {type} selected
+             * @returns {undefined}
+             */
+            function loadRoleList(selected) {
+                console.log(selected);
+                $.ajax(aamLocal.ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Subject_Role.getList',
+                        _ajax_nonce: aamLocal.nonce
+                    },
+                    beforeSend: function () {
+                        $('#expiration-change-role').html(
+                            '<option value="">' + aam.__('Loading...') + '</option>'
+                        );
+                    },
+                    success: function (response) {
+                        $('#expiration-change-role').html(
+                            '<option value="">' + aam.__('Select Role') + '</option>'
+                        );
+                        for (var i in response) {
+                            $('#expiration-change-role').append(
+                                '<option value="' + i + '">' + response[i].name + '</option>'
+                            );
+                        }
+                        
+                        $('#expiration-change-role').val(selected);
+                    }
+                });
+            }
 
             /**
              * 
@@ -645,7 +687,14 @@
                                             aam.fetchContent('main');
                                             $('i.icon-spin4', container).attr('class', 'aam-row-action icon-cog text-muted');
                                         } else {
-                                            $.aam.loadAccessForm($('#load-post-object-type').val(), $('#load-post-object').val(), $(this));
+                                            aam.fetchPartial('postform', function(content) {
+                                                $('#metabox-post-access-form').html(content);
+                                                $.aam.loadAccessForm(
+                                                    $('#load-post-object-type').val(), 
+                                                    $('#load-post-object').val(), 
+                                                    $(this)
+                                                );
+                                            });
                                         }
                                     }
                                 }).attr({
@@ -667,9 +716,18 @@
                                             var settings = data[5].split('|');
                                             $('#user-expires').val(settings[0]);
                                             $('#action-after-expiration').val(settings[1]);
+                                            
+                                            if (settings[1] === 'change-role') {
+                                                $('#expiration-change-role-holder').removeClass('hidden');
+                                                loadRoleList(settings[2]);
+                                            } else {
+                                                loadRoleList();
+                                                $('#expiration-change-role-holder').addClass('hidden');
+                                            }
                                         } else {
                                             $('#reset-user-expiration-btn').addClass('hidden');
                                             $('#user-expires, #action-after-expiration').val('');
+                                            loadRoleList();
                                         }
                                         
                                         $('#edit-user-expiration-modal').modal('show');
@@ -747,6 +805,14 @@
                 }
             });
             
+            $('#action-after-expiration').bind('change', function() {
+               if ($(this).val() === 'change-role') {
+                   $('#expiration-change-role-holder').removeClass('hidden');
+               } else {
+                   $('#expiration-change-role-holder').addClass('hidden');
+               }
+            });
+            
             //edit role button
             $('#edit-user-expiration-btn').bind('click', function () {
                 var _this = this;
@@ -760,7 +826,8 @@
                         _ajax_nonce: aamLocal.nonce,
                         user: $(_this).attr('data-user-id'),
                         expires: $('#user-expires').val(),
-                        after: $('#action-after-expiration').val()
+                        after: $('#action-after-expiration').val(),
+                        role: $('#expiration-change-role').val()
                     },
                     beforeSend: function () {
                         $(_this).text(aam.__('Saving...')).attr('disabled', true);
@@ -858,8 +925,16 @@
                         aam.fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
                     } else {
-                        $.aam.loadAccessForm($('#load-post-object-type').val(), $('#load-post-object').val(), null, function () {
-                            $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
+                        aam.fetchPartial('postform', function(content) {
+                            $('#metabox-post-access-form').html(content);
+                            $.aam.loadAccessForm(
+                                $('#load-post-object-type').val(), 
+                                $('#load-post-object').val(), 
+                                null, 
+                                function () {
+                                    $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
+                                }
+                            );
                         });
                     }
                     //hide post & pages access control groups that belong to backend
@@ -888,8 +963,16 @@
                         aam.fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
                     } else {
-                        $.aam.loadAccessForm($('#load-post-object-type').val(), $('#load-post-object').val(), null, function () {
-                            $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
+                        aam.fetchPartial('postform', function(content) {
+                            $('#metabox-post-access-form').html(content);
+                            $.aam.loadAccessForm(
+                                $('#load-post-object-type').val(), 
+                                $('#load-post-object').val(), 
+                                null, 
+                                function () {
+                                    $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
+                                }
+                            );
                         });
                     }
                 });
@@ -1551,7 +1634,7 @@
 
                 //show overlay if present
                 $('.aam-overlay', container).show();
-
+                
                 //reset data preview elements
                 $('.option-preview', container).text('');
 
@@ -2870,7 +2953,7 @@
      * 
      * @returns {undefined}
      */
-    AAM.prototype.fetchContent = function (uiType) {
+    AAM.prototype.fetchContent = function (view, success) {
         var _this = this;
         
         //referred object ID like post, page or any custom post type
@@ -2883,7 +2966,7 @@
             data: {
                 action: 'aamc',
                 _ajax_nonce: aamLocal.nonce,
-                uiType: uiType,
+                uiType: view,
                 subject: this.getSubject().type,
                 subjectId: this.getSubject().id,
                 oid: object ? object[1] : null,
@@ -2917,13 +3000,47 @@
                 
                 $('.aam-sidebar .metabox-holder').hide();
                 $('.aam-sidebar .shared-metabox').show();
-                $('.aam-sidebar .' + uiType + '-metabox').show();
+                $('.aam-sidebar .' + view + '-metabox').show();
                 
-                if (uiType !== 'main') { //hide subject and user/role manager
+                if (view !== 'main') { //hide subject and user/role manager
                     $('#aam-subject-banner').hide();
                 } else {
                     $('#aam-subject-banner').show();
                 }
+                
+                if (typeof success === 'function') {
+                   // success.call();
+                }
+            }
+        });
+    };
+    
+    
+    /**
+     * 
+     * @returns {undefined}
+     */
+    AAM.prototype.fetchPartial = function (view, success) {
+        var _this = this;
+        
+        //referred object ID like post, page or any custom post type
+        var object   = window.location.search.match(/&oid\=([^&]*)/);
+        var type     = window.location.search.match(/&otype\=([^&]*)/);
+
+        $.ajax(aamLocal.url.site, {
+            type: 'POST',
+            dataType: 'html',
+            data: {
+                action: 'aamc',
+                _ajax_nonce: aamLocal.nonce,
+                uiType: view,
+                subject: this.getSubject().type,
+                subjectId: this.getSubject().id,
+                oid: object ? object[1] : null,
+                otype: type ? type[1] : null
+            },
+            success: function (response) {
+                success.call(_this, response);
             }
         });
     };

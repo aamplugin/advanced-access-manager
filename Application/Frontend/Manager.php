@@ -39,6 +39,9 @@ class AAM_Frontend_Manager {
         //manage AAM shortcode
         add_shortcode('aam', array($this, 'processShortcode'));
         
+        //cache clearing hook
+        add_action('aam-clear-cache-action', 'AAM_Core_API::clearCache');
+        
         //admin bar
         $this->checkAdminBar();
         
@@ -47,6 +50,11 @@ class AAM_Frontend_Manager {
             add_action('widgets_init', array($this, 'registerLoginWidget'));
             add_action('wp_enqueue_scripts', array($this, 'printJavascript'));
         }
+        
+        //password protected filter
+        add_filter('post_password_required', array($this, 'isPassProtected'), 10, 2);
+        //manage password check expiration
+        add_filter('post_password_expires', array($this, 'checkPassExpiration'));
     }
     
     /**
@@ -112,6 +120,54 @@ class AAM_Frontend_Manager {
 
             wp_localize_script('aam-login', 'aamLocal', $locals);
         }
+    }
+    
+    /**
+     * Check if post is password protected
+     * 
+     * @param boolean $res
+     * @param WP_Post $post
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function isPassProtected($res, $post) {
+        if (is_a($post, 'WP_Post')) {
+            $object = AAM::getUser()->getObject('post', $post->ID);
+
+            if ($object->has('frontend.protected')) {
+                require_once( ABSPATH . 'wp-includes/class-phpass.php' );
+                $hasher = new PasswordHash( 8, true );
+                $pass   = $object->get('frontend.password');
+                $hash   = wp_unslash(
+                        AAM_Core_Request::cookie('wp-postpass_' . COOKIEHASH)
+                );
+
+                $res = empty($hash) ? true : !$hasher->CheckPassword($pass, $hash);
+            }
+        }
+        
+        return $res;
+    }
+    
+    /**
+     * Get password expiration TTL
+     * 
+     * @param int $expire
+     * 
+     * @return int
+     * 
+     * @access public
+     */
+    public function checkPassExpiration($expire) {
+        $overwrite = AAM_Core_Config::get('post.password.expires', null);
+        
+        if ($overwrite !== null) {
+            $expire = ($overwrite ? time() + strtotime($overwrite) : 0);
+        }
+        
+        return $expire;
     }
     
     /**

@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.2.7
+  Version: 5.3
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -109,7 +109,7 @@ class AAM {
             AAM_Core_Config::bootstrap();
             
             //load WP Core hooks
-            AAM_Core_Wp::bootstrap();
+            AAM_Shared_Manager::bootstrap();
             
             //login control
             if (AAM_Core_Config::get('secure-login', true)) {
@@ -138,9 +138,6 @@ class AAM {
             );
             self::$_instance = new self;
             
-            //load AAM cache
-            AAM_Core_Cache::bootstrap();
-            
             //load all installed extension
             AAM_Extension_Repository::getInstance()->load();
             
@@ -148,9 +145,9 @@ class AAM {
             AAM_Core_Media::bootstrap();
             
             //bootstrap the correct interface
-            if (is_admin()) {
+            if (AAM_Core_Api_Area::isBackend()) {
                 AAM_Backend_Manager::bootstrap();
-            } else {
+            } elseif (AAM_Core_Api_Area::isFrontend()) {
                 AAM_Frontend_Manager::bootstrap();
             }
         }
@@ -240,6 +237,9 @@ if (defined('ABSPATH')) {
     //the highest priority (higher the core)
     //this is important to have to catch events like register core post types
     add_action('init', 'AAM::getInstance', -1);
+    
+    //register API manager is applicable
+    add_action('parse_request', 'AAM_Api_Manager::bootstrap', 1);
     
     //schedule cron
     if (!wp_next_scheduled('aam-cron')) {

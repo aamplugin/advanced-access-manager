@@ -205,7 +205,7 @@ msgstr ""
 #, php-format
 msgid ""
 "[Note!] PHP 5.4 or higher is required for this feature. Enable the ability "
-"to authenticate user with WordPress RESTfull API and JWT token. For more "
+"to authenticate user with WordPress RESTful API and JWT token. For more "
 "information, check %sHow to authenticate WordPress user with JWT token%s "
 "article"
 msgstr ""

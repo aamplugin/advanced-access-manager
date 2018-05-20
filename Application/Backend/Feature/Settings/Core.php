@@ -43,6 +43,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'descr' => __('Allow AAM to manage access to frontend resources. If there is no need to manage access to the website frontend then keep this option unchecked as it may increase your webiste performance.', AAM_KEY),
                 'value' => AAM_Core_Config::get('frontend-access-control', true)
             ),
+            'api-access-control' => array(
+                'title' => __('API Access Control', AAM_KEY),
+                'descr' => __('Allow AAM to manage access to the website resources that are invoked with WordPress core API (currently only for RESTful API). If there is no need to manage access to the website API then keep this option unchecked as it may increase your webiste performance.', AAM_KEY),
+                'value' => AAM_Core_Config::get('api-access-control', true)
+            ),
             'render-access-metabox' => array(
                 'title' => __('Render Access Manager Metabox', AAM_KEY),
                 'descr' => __('Render Access Manager metabox on all post and category edit pages. Access Manager metabox is the quick way to manage access to any post or category without leaving an edit page.', AAM_KEY),
@@ -70,7 +75,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
             ),
             'jwt-authentication' => array(
                 'title' => __('JWT Authentication', AAM_KEY),
-                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTfull API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTful API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
                 'value' => AAM_Core_Config::get('jwt-authentication', false)
             )
         );
