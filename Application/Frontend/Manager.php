@@ -32,7 +32,7 @@ class AAM_Frontend_Manager {
      * @access public
      */
     public function __construct() {
-        if (AAM_Core_Config::get('frontend-access-control', true)) {
+        if (AAM_Core_Config::get('core.settings.frontendAccessControl', true)) {
             AAM_Frontend_Filter::register();
         }
         
@@ -46,7 +46,7 @@ class AAM_Frontend_Manager {
         $this->checkAdminBar();
         
         //register login widget
-        if (AAM_Core_Config::get('secure-login', true)) {
+        if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
             add_action('widgets_init', array($this, 'registerLoginWidget'));
             add_action('wp_enqueue_scripts', array($this, 'printJavascript'));
         }
@@ -109,7 +109,7 @@ class AAM_Frontend_Manager {
      * @access public
      */
     public function printJavascript() {
-        if (AAM_Core_Config::get('secure-login', true)) {
+        if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
             wp_enqueue_script('aam-login', AAM_MEDIA . '/js/aam-login.js');
 
             //add plugin localization
@@ -161,7 +161,7 @@ class AAM_Frontend_Manager {
      * @access public
      */
     public function checkPassExpiration($expire) {
-        $overwrite = AAM_Core_Config::get('post.password.expires', null);
+        $overwrite = AAM_Core_Config::get('feature.post.password.expires', null);
         
         if ($overwrite !== null) {
             $expire = ($overwrite ? time() + strtotime($overwrite) : 0);

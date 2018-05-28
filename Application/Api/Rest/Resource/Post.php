@@ -60,7 +60,7 @@ class AAM_Api_Rest_Resource_Post {
             }
         }
         
-        return apply_filters('aam-rest-post-authorization', $result, $request);
+        return $result;
     }
     
     /**
@@ -77,10 +77,7 @@ class AAM_Api_Rest_Resource_Post {
      * @access protected
      */
     protected function authorizeRead(AAM_Core_Object_Post $post, $request) {
-        $result = null;
-        
-        //TODO: remove pipeline filter for all methods
-        $steps = apply_filters('aam-post-read-auth-pipeline-filter', array(
+        $steps = array(
             // Step #1. Check if access expired to the post
             array($this, 'checkExpiration'),
             // Step #2. Check if user has access to read the post
@@ -91,22 +88,9 @@ class AAM_Api_Rest_Resource_Post {
             array($this, 'checkRedirect'),
             // Step #5. Check if post is password protected
             array($this, 'checkPassword')
-        ));
+        );
         
-        if (is_array($steps)) {
-            foreach($steps as $callback) {
-                $result = call_user_func_array($callback, array($post, $request));
-                
-                if (is_wp_error($result)) { break; }
-            }
-        } else {
-            $result = new WP_Error(
-                'application_error', 
-                "aam-post-read-auth-steps-filter was not utilized properly"
-            );
-        }
-        
-        return $result;
+        return $this->processPipeline($steps, $post, $request);
     }
     
     /**
@@ -115,27 +99,12 @@ class AAM_Api_Rest_Resource_Post {
      * @return type
      */
     protected function authorizeUpdate(AAM_Core_Object_Post $post) {
-        $result = null;
-        
-        $steps = apply_filters('aam-post-update-auth-pipeline-filter', array(
+        $steps = array(
             // Step #1. Check if edit action is alloed
             array($this, 'checkUpdate'),
-        ));
+        );
         
-        if (is_array($steps)) {
-            foreach($steps as $callback) {
-                $result = call_user_func_array($callback, array($post));
-                
-                if (is_wp_error($result)) { break; }
-            }
-        } else {
-            $result = new WP_Error(
-                'application_error', 
-                "aam-post-update-auth-steps-filter was not utilized properly"
-            );
-        }
-        
-        return $result;
+        return $this->processPipeline($steps, $post);
     }
     
     /**
@@ -144,24 +113,26 @@ class AAM_Api_Rest_Resource_Post {
      * @return type
      */
     protected function authorizeDelete(AAM_Core_Object_Post $post) {
-        $result = null;
-        
-        $steps = apply_filters('aam-post-delete-auth-steps-filter', array(
+        $steps = array(
             // Step #1. Check if edit action is alloed
             array($this, 'checkDelete'),
-        ));
+        );
         
-        if (is_array($steps)) {
-            foreach($steps as $callback) {
-                $result = call_user_func_array($callback, array($post));
-                
-                if (is_wp_error($result)) { break; }
-            }
-        } else {
-            $result = new WP_Error(
-                'application_error', 
-                "aam-post-delete-auth-steps-filter was not utilized properly"
-            );
+        return $this->processPipeline($steps, $post);
+    }
+    
+    /**
+     * 
+     * @param array $pipeline
+     * @param type $post
+     * @param type $request
+     * @return type
+     */
+    protected function processPipeline(array $pipeline, $post, $request = null) {
+        foreach($pipeline as $callback) {
+            $result = call_user_func_array($callback, array($post, $request));
+
+            if (is_wp_error($result)) { break; }
         }
         
         return $result;
@@ -211,7 +182,7 @@ class AAM_Api_Rest_Resource_Post {
         
         if ($read || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'rest_cannot_read', 
+                'rest_post_cannot_read', 
                 "User is unauthorized to read the post. Access denied.", 
                 array(
                     'action' => 'api.read',
@@ -243,7 +214,7 @@ class AAM_Api_Rest_Resource_Post {
             
             if ($counter >= $post->get('api.access_counter_limit')) {
                 $result = new WP_Error(
-                    'rest_cannot_read', 
+                    'rest_post_cannot_read', 
                     "User exceeded allowed read number. Access denied.", 
                     array(
                         'action' => 'api.access_counter',
@@ -271,12 +242,26 @@ class AAM_Api_Rest_Resource_Post {
         $result = null;
         
         if ($post->has('api.redirect')) {
+            $rule = explode('|', $post->get('api.location'));
+            
+            if (count($rule) == 1) { // TODO: legacy. Remove in Jul 2020
+                $redirect = $rule[0];
+            } elseif ($rule[0] == 'page') {
+                $redirect = get_page_link($rule[1]);
+            } elseif ($rule[0] == 'url') {
+                $redirect = $rule[1];
+            } elseif (($rule[0] == 'callback') && is_callable($rule[1])) {
+                $redirect = call_user_func($rule[1], $post);
+            } else {
+                $redirect = null;
+            }
+            
             $result = new WP_Error(
-                'rest_cannot_read', 
+                'rest_post_cannot_read', 
                 "Direct access is not allowed. Follow the redirect link.", 
                 array(
                     'action'   => 'api.redirect',
-                    'redirect' => $post->get('api.location'),
+                    'redirect' => $redirect,
                     'status'   => 307
                 )
             );
@@ -308,7 +293,7 @@ class AAM_Api_Rest_Resource_Post {
             if ($pass != $request['password'] 
                     && !$hasher->CheckPassword($pass, $request['password'])) {
                 $result = new WP_Error(
-                    'rest_cannot_read', 
+                    'rest_post_cannot_read', 
                     "The content is password protected. Provide valid password to read.", 
                     array(
                         'action'   => 'api.protected',
@@ -343,7 +328,7 @@ class AAM_Api_Rest_Resource_Post {
         
         if ($edit || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'rest_cannot_update', 
+                'rest_post_cannot_update', 
                 "User is unauthorized to update the post. Access denied.", 
                 array(
                     'action' => 'api.edit',
@@ -372,7 +357,7 @@ class AAM_Api_Rest_Resource_Post {
         
         if ($delete || ($others && ($post->post_author != get_current_user_id()))) {
             $result = new WP_Error(
-                'rest_cannot_delete', 
+                'rest_post_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 
                 array(
                     'action' => 'api.delete',
@@ -410,4 +395,5 @@ class AAM_Api_Rest_Resource_Post {
         
         return self::$_instance;
     }
+    
 }

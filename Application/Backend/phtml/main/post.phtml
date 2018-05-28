@@ -58,14 +58,14 @@
                 <div class="aam-slide-form aam-access-form" data-type="type">
                     <a href="#" class="btn btn-xs btn-primary post-back btn-right">&Lt; <?php echo __('Go Back', AAM_KEY); ?></a>
                     <span class="aam-clear"></span>
-                    <?php echo apply_filters('aam-post-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('post-type.phtml')); ?>
+                    <?php /* TODO: Rethink this filter */ echo apply_filters('aam-post-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('post-type.phtml')); ?>
                     <a href="#" class="btn btn-xs btn-primary post-back">&Lt; <?php echo __('Go Back', AAM_KEY); ?></a>
                 </div>
 
                 <div class="aam-slide-form aam-access-form" data-type="term">
                     <a href="#" class="btn btn-xs btn-primary post-back btn-right">&Lt; <?php echo __('Go Back', AAM_KEY); ?></a>
                     <span class="aam-clear"></span>
-                    <?php echo apply_filters('aam-term-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('term-type.phtml')); ?>
+                    <?php /* TODO: Rethink this filter */ echo apply_filters('aam-term-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('term-type.phtml')); ?>
                     <a href="#" class="btn btn-xs btn-primary post-back">&Lt; <?php echo __('Go Back', AAM_KEY); ?></a>
                 </div>
                 

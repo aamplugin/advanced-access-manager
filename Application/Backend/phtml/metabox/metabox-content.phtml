@@ -112,7 +112,7 @@
                         <?php if ($object->type == 'post') { ?>
                             <?php echo AAM_Backend_Feature_Main_Post::renderAccessForm(); ?>
                         <?php } else {
-                            echo apply_filters('aam-term-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('term-type.phtml'));
+                             /* TODO: Rethink this filter */ echo apply_filters('aam-term-type-ui-filter', AAM_Backend_View::getInstance()->loadPartial('term-type.phtml'));
                         } ?>
                     </div>
                     <div class="aam-overlay"></div>

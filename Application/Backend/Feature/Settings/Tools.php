@@ -28,7 +28,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
      */
     public function export() {
         $exporter = new AAM_Core_Exporter(AAM_Core_Config::get(
-                        'export', array('system' => 'roles,utilities,configpress')
+            'feature.export', array('system' => 'roles,utilities,configpress')
         ));
 
         return json_encode(array(

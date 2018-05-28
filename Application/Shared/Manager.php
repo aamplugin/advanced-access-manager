@@ -45,12 +45,12 @@ class AAM_Shared_Manager {
             self::$_instance = new self;
             
             // Disable XML-RPC if needed
-            if (!AAM_Core_Config::get('core.xmlrpc', true)) {
+            if (!AAM_Core_Config::get('core.settings.xmlrpc', true)) {
                 add_filter('xmlrpc_enabled', '__return_false');
             }
 
             // Disable RESTful API if needed
-            if (!AAM_Core_Config::get('core.restful', true)) {
+            if (!AAM_Core_Config::get('core.settings.restful', true)) {
                 add_filter(
                     'rest_authentication_errors', 
                     array(self::$_instance, 'disableRest'), 
@@ -60,7 +60,7 @@ class AAM_Shared_Manager {
 
             // Control post visibility
             //important to keep this option optional for optimization reasons
-            if (AAM_Core_Config::get('check-post-visibility', true)) {
+            if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
                 // filter navigation pages & taxonomies
                 add_filter('get_pages', array(self::$_instance, 'filterPostList'), 999);
                 // add post filter for LIST restriction

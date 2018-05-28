@@ -13,7 +13,7 @@
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  */
-abstract class AAM_Core_Object {
+abstract class AAM_Core_Object implements AAM_Core_Contract_Object {
 
     /**
      * Subject

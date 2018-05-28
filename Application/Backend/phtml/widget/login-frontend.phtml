@@ -18,13 +18,13 @@
 
         <div id="<?php echo $this->get_field_id('loginform'); ?>">
             <p>
-                <label for="user_login">Username or Email Address<br>
+                <label for="user_login"><?php __('Username or Email Address', AAM_KEY); ?><br>
                     <input id="<?php echo $this->get_field_id('log'); ?>" class="input login-input" value="" size="20" type="text" />
                 </label>
             </p>
 
             <p>
-                <label for="user_pass">Password<br>
+                <label for="user_pass"><?php __('Password', AAM_KEY); ?><br>
                     <input id="<?php echo $this->get_field_id('pwd'); ?>" class="input login-input" value="" size="20" type="password" />
                 </label>
             </p>
@@ -33,12 +33,12 @@
 
             <p class="forgetmenot">
                 <label for="rememberme">
-                    <input id="<?php echo  $this->get_field_id('rememberme'); ?>" value="forever" type="checkbox"/> Remember Me
+                    <input id="<?php echo  $this->get_field_id('rememberme'); ?>" value="forever" type="checkbox"/> <?php __('Remember Me', AAM_KEY); ?>
                 </label>
             </p>
 
             <p class="submit">
-                <input class="button button-primary button-large aam-login-submit" data-prefix="<?php echo  $this->get_field_id(''); ?>" value="Log In" type="submit" />
+                <input class="button button-primary button-large aam-login-submit" data-prefix="<?php echo  $this->get_field_id(''); ?>" value="<?php __('Log In', AAM_KEY); ?>" type="submit" />
                 <input id="<?php echo  $this->get_field_id('redirect'); ?>" value="<?php echo $this->args['redirect']; ?>" type="hidden" />
             </p>
         </div>
@@ -51,7 +51,7 @@
 		echo esc_html(apply_filters('login_link_separator', ' | '));
             }
             ?>
-            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php echo __('Lost your password?'); ?></a>
+            <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php echo __('Lost your password?', AAM_KEY); ?></a>
         </p>
     <?php } else { ?>
         <div style="display: table; width: 100%;">
@@ -61,10 +61,10 @@
             <div style="display:table-cell;">
                 <?php $allowAdmin = !AAM_Core_API::capabilityExists('access_dashboard') || AAM::getUser()->hasCapability('access_dashboard'); ?>
                 <?php if ($allowAdmin) { ?>
-                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard'); ?></a><br/>
-                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile'); ?></a><br/>
+                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br/>
+                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br/>
                 <?php } ?>
-                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out'); ?></a>
+                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out', AAM_KEY); ?></a>
             </div>
         </div>
     <?php } ?>

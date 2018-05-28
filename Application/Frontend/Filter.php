@@ -40,7 +40,7 @@ class AAM_Frontend_Filter {
         add_action('404_template', array($this, 'themeRedirect'), 999);
         
         //important to keep this option optional for optimization reasons
-        if (AAM_Core_Config::get('check-post-visibility', true)) {
+        if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
             //filter navigation pages & taxonomies
             add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
         }
@@ -65,7 +65,7 @@ class AAM_Frontend_Filter {
         
         if ($wp_query->is_404) { // Handle 404 redirect
             $type = AAM_Core_Config::get('frontend.404redirect.type', 'default');
-            do_action('aam-rejected-action', 'frontend', array(
+            do_action('aam-access-rejected-action', 'frontend', array(
                 'hook' => 'aam_404', 
                 'uri'  => AAM_Core_Request::server('REQUEST_URI')
             ));

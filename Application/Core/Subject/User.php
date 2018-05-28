@@ -101,13 +101,12 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
             case 'delete':
                 require_once(ABSPATH . 'wp-admin/includes/user.php' );
                 wp_delete_user(
-                    $this->getId(), AAM_Core_Config::get('core.reasign.user')
+                    $this->getId(), AAM_Core_Config::get('core.reasign.ownership.user')
                 );
                 wp_logout();
                 break;
 
             default:
-                do_action('aam-expired-user-action', $this);
                 break;
         }
     }

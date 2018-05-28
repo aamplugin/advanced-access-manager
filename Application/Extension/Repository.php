@@ -92,6 +92,7 @@ class AAM_Extension_Repository {
                     $this->bootstrapExtension($basedir . '/' . $extension);
                 }
             }
+            // TODO: Rethink this hook
             //Very important hook for cases when there is extensions dependancy.
             //For example AAM Plus Package depends on AAM Utitlities properties
             do_action('aam-post-extensions-load');
@@ -303,9 +304,19 @@ class AAM_Extension_Repository {
         } else {
             $valid = true;
         }
+        
+        $outdated = false;
+        
+        if ($valid) {
+            // first check the retrieved version from the server
+            if (isset($retrieved->$id)) {
+                $outdated = version_compare($version, $retrieved->$id->version) == -1;
+            } else {
+                $outdated = version_compare($version, $item['latest']);
+            }
+        }
 
-        return $valid && isset($retrieved->$id) 
-                && version_compare($version, $retrieved->$id->version) == -1;
+        return $outdated;
     }
     
     /**
@@ -342,7 +353,7 @@ class AAM_Extension_Repository {
      * @access public
      */
     public function getBasedir() {
-        $dirname = AAM_Core_Config::get('extention.directory', AAM_EXTENSION_BASE);
+        $dirname = AAM_Core_Config::get('core.extention.directory', AAM_EXTENSION_BASE);
         
         if (file_exists($dirname) === false) {
             @mkdir($dirname, fileperms( ABSPATH ) & 0777 | 0755);

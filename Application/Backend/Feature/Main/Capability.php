@@ -150,15 +150,13 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         $actions[] = ($subject->hasCapability($cap) ? 'checked' : 'unchecked');
         
         //allow to delete or update capability only for roles!
-        if (AAM_Core_Config::get('manage-capability', false) 
+        if (AAM_Core_Config::get('core.settings.editCapabilities', false) 
                 && ($subject->getUID() == AAM_Core_Subject_Role::UID)) {
             $actions[] = 'edit';
             $actions[] = 'delete';
         }
         
-        return implode(
-            ',', apply_filters('aam-cap-row-actions-filter', $actions, $subject)
-        );
+        return implode(',', $actions);
     }
 
     /**

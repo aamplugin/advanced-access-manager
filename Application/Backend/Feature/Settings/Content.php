@@ -28,20 +28,20 @@ class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract 
      */
     protected function getList() {
         $settings = array(
-            'media-access-control' => array(
+            'core.settings.mediaAccessControl' => array(
                 'title' => __('Media Files Access Control', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Allow AAM to manage a physically access to all media files located in the defined by the system [uploads] folder. [Note!] This feature requires additional steps as described in %sthis article%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/help/how-to-manage-wordpress-media-access" target="_blank">', '</a>'),
-                'value' => AAM_Core_Config::get('media-access-control', false)
+                'value' => AAM_Core_Config::get('core.settings.mediaAccessControl', false)
             ),
-            'check-post-visibility' => array(
+            'core.settings.checkPostVisibility' => array(
                 'title' => __('Check Post Visibility', AAM_KEY),
-                'descr' => __('For performance reasons, keep this option uncheck if do not use LIST or LIST TO OTHERS access options on Posts & Pages tab. When it is checked, AAM will filter list of posts that are hidden for a user on both frontend and backend.', AAM_KEY),
-                'value' => AAM_Core_Config::get('check-post-visibility', true)
+                'descr' => __('For performance reasons, keep this option disabled if do not use LIST or LIST TO OTHERS access options on Posts & Terms tab. When it is checked, AAM will filter list of posts that are hidden for a user on frontend, backend and API calls.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.checkPostVisibility', true)
             ),
-            'manage-hidden-post-types' => array(
+            'core.settings.manageHiddenPostTypes' => array(
                 'title' => __('Manage Hidden Post Types', AAM_KEY),
-                'descr' => __('By default AAM allows you to manage access only to public post types on Posts & Pages tab. By enabling this feature, you also will be able to manage access to hidden post types like revisions, navigation menus or any other custom post types that are not registered as public.', AAM_KEY),
-                'value' => AAM_Core_Config::get('manage-hidden-post-types', false)
+                'descr' => __('By default AAM allows you to manage access only to public post types on Posts & Terms tab. By enabling this feature, you also will be able to manage access to hidden post types like revisions, navigation menus or any other custom post types that are not registered as public.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.manageHiddenPostTypes', false)
             )
         );
         

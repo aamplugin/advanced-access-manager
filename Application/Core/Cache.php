@@ -56,4 +56,10 @@ class AAM_Core_Cache {
         return null;
     }
     
+    /**
+     * 
+     */
+    public static function clear() {
+        AAM_Core_API::clearCache();
+    }
 }

@@ -52,7 +52,7 @@ class AAM_Core_Login {
         add_action('wp_logout', array($this, 'logout'));
         
         //user login control
-        add_filter('wp_authenticate_user', array($this, 'checkLockedUser'), 1, 2);
+        add_filter('wp_authenticate_user', array($this, 'authenticateUser'), 1, 2);
             
         //login process
         add_filter('login_message', array($this, 'loginMessage'));
@@ -116,17 +116,26 @@ class AAM_Core_Login {
      *
      * @access public
      */
-    public function checkLockedUser($user) {
-        if (is_a($user, 'WP_User') && $user->user_status == 1) {
-            $user = new WP_Error();
-            
-            $message  = '[ERROR]: User is locked. Please contact your website ';
-            $message .= 'administrator.';
-            
-            $user->add(
-                'authentication_failed', 
-                AAM_Backend_View_Helper::preparePhrase($message, 'strong')
-            );
+    public function authenticateUser($user) {
+        if (is_a($user, 'WP_User')) {
+            // First check if user is blocked
+            if ($user->user_status == 1) {
+                $user = new WP_Error();
+
+                $message  = '[ERROR]: User is locked. Please contact your website ';
+                $message .= 'administrator.';
+
+                $user->add(
+                    'authentication_failed', 
+                    AAM_Backend_View_Helper::preparePhrase($message, 'strong')
+                );
+            } elseif (AAM_Core_Config::get('single-session', false)) {
+                $sessions = WP_Session_Tokens::get_instance($user->ID);
+                
+                if (count($sessions->get_all()) > 1) {
+                    $sessions->destroy_all();
+                }
+            }
         }
 
         return $user;
@@ -147,13 +156,11 @@ class AAM_Core_Login {
         if (empty($message)) {
             if ($reason == 'restricted') {
                 $message = AAM_Core_Config::get(
-                    'login.redirect.message',
+                    'security.redirect.message',
                     '<p class="message">' . 
                         __('Access denied. Please login to get access.', AAM_KEY) . 
                     '</p>'
                 );
-            } else {
-                $message = apply_filters('aam-login-message-filter', $message);
             }
         }
         

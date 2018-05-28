@@ -73,13 +73,11 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
      * @return type
      */
     protected function addHttpPasswd($url) {
-        $htpasswd = AAM_Core_Config::get('htpasswd');
+        $htpasswd = AAM_Core_Config::get('feature.metabox.htpasswd');
         
         if (!empty($htpasswd['user']) && !empty($htpasswd['pass'])) {
             $url = preg_replace(
-                    '/^(http[s]?:\/\/)/', 
-                    "$1{$htpasswd['user']}:{$htpasswd['pass']}@", 
-                    $url
+                '/^(http[s]?:\/\/)/', "$1{$htpasswd['user']}:{$htpasswd['pass']}@", $url
             );
         }
         
@@ -247,7 +245,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'      => 'backend-access-control',
+            'option'      => 'core.settings.backendAccessControl',
             'view'        => __CLASS__
         ));
     }

@@ -47,9 +47,9 @@ class AAM_Core_Media {
         if (AAM_Core_Request::get('aam-media')) {
             $this->initialize();
             
-            if (AAM_Core_Config::get('media-access-control', false)) {
+            if (AAM_Core_Config::get('core.settings.mediaAccessControl', false)) {
                 $area = AAM_Core_Api_Area::get();
-                if (AAM_Core_Config::get("{$area}-access-control", true)) {
+                if (AAM_Core_Config::get("core.settings.{$area}AccessControl", true)) {
                     $this->checkMediaAccess();
                 } else {
                     $this->printMedia();
@@ -98,8 +98,8 @@ class AAM_Core_Media {
                         'post'   => $media->getPost()
                     );
 
-                    if ($default = AAM_Core_Config::get('media.restricted.default')) {
-                        do_action('aam-rejected-action', $area, $args);
+                    if ($default = AAM_Core_Config::get('media.default.placeholder')) {
+                        do_action('aam-access-rejected-action', $area, $args);
                         $this->printMedia(get_post($default));
                     } else {
                         AAM_Core_API::reject($area, $args);
@@ -165,7 +165,7 @@ class AAM_Core_Media {
         
         $s   = preg_replace('/(-[\d]+x[\d]+)(\.[\w]+)$/', '$2', $this->request_uri);
         $id  = apply_filters(
-                'aam-find-media',  
+                'aam-found-media-filter',  
                 $wpdb->get_var(
                     $wpdb->prepare(
                         "SELECT ID FROM {$wpdb->posts} WHERE guid LIKE %s", 

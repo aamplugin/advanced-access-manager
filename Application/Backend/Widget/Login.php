@@ -73,6 +73,13 @@ class AAM_Backend_Widget_Login extends WP_Widget {
             AAM_Core_Config::set('brute-force-lockout', $nbl);
         }
         
+        $nss = (isset($new['single-session']) ? $new['single-session'] : null);
+        $oss = (isset($old['single-session']) ? $old['single-session'] : null);
+        
+        if ($nss != $oss) {
+            AAM_Core_Config::set('single-session', $nss);
+        }
+        
         return parent::update($new, $old);
     }
     
@@ -85,6 +92,7 @@ class AAM_Backend_Widget_Login extends WP_Widget {
         $instance['login-title']         = AAM_Core_Config::get('login-title');
         $instance['login-ip-track']      = AAM_Core_Config::get('login-ip-track');
         $instance['brute-force-lockout'] = AAM_Core_Config::get('brute-force-lockout');
+        $instance['single-session'] = AAM_Core_Config::get('single-session');
         
         if (empty($instance['login-title'])) {
             $instance['login-title'] = __('Login', AAM_KEY);

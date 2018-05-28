@@ -289,11 +289,11 @@ final class AAM_Core_API {
                 $redirect = $object->get("{$area}.redirect.{$type}");
             } else { //ConfigPress setup
                 $redirect = AAM_Core_Config::get(
-                    "{$area}.access.deny.redirect", __('Access Denied', AAM_KEY)
+                    "{$area}.access.deny.redirectRule", __('Access Denied', AAM_KEY)
                 );
             }
 
-            do_action('aam-rejected-action', $area, $args);
+            do_action('aam-access-rejected-action', $area, $args);
 
             self::redirect($redirect, $args);
         } else {

@@ -89,7 +89,7 @@ class AAM_Backend_Feature_Main_Redirect extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'backend-access-control,frontend-access-control',
+            'option'     => 'core.settings.backendAccessControl,core.settings.frontendAccessControl',
             'view'       => __CLASS__
         ));
     }

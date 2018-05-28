@@ -67,7 +67,7 @@ class AAM_Api_Manager {
         
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
-        if (AAM_Core_Config::get('api-access-control', true)) {
+        if (AAM_Core_Config::get('core.settings.apiAccessControl', true)) {
             add_filter(
                 'user_has_cap', 
                 array(AAM_Shared_Manager::getInstance(), 'userHasCap'), 

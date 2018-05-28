@@ -127,7 +127,7 @@ class AAM_Core_JwtAuth {
             } else {
                 $response->status = 400;
                 $response->data = new WP_Error(
-                    'jwt_empty_secret_key',
+                    'rest_jwt_empty_secret_key',
                     __('JWT Authentication is enabled but secret key is not defined', AAM_KEY)
                 );
             }
@@ -151,7 +151,7 @@ class AAM_Core_JwtAuth {
             $token = preg_replace('/^Bearer /', '', $_SERVER['HTTP_AUTHENTICATION']);
         }
         
-        $token = apply_filters('aam-authentication-header-filter', $token);
+        $token = apply_filters('aam-jwt-authentication-header-filter', $token);
         $key   = AAM_Core_Config::get('authentication.jwt.secret');
         
         if ($token) {

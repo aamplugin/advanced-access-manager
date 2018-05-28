@@ -59,7 +59,7 @@ class AAM_Backend_Filter {
         add_filter('pre_option_default_category', array($this, 'filterDefaultCategory'));
         
         //add post filter for LIST restriction
-        if (!AAM::isAAM() && AAM_Core_Config::get('check-post-visibility', true)) {
+        if (!AAM::isAAM() && AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
             add_filter('found_posts', array($this, 'filterPostCount'), 999, 2);
         }
         
@@ -74,7 +74,7 @@ class AAM_Backend_Filter {
         
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
-        if (AAM_Core_Config::get('backend-access-control', true)) {
+        if (AAM_Core_Config::get('core.settings.backendAccessControl', true)) {
             add_filter(
                 'user_has_cap', 
                 array(AAM_Shared_Manager::getInstance(), 'userHasCap'), 
@@ -272,12 +272,12 @@ class AAM_Backend_Filter {
         if (is_null($default)) {
             //check if user category is defined
             $id      = get_current_user_id();
-            $default = AAM_Core_Config::get('default.category.user.' . $id , null);
+            $default = AAM_Core_Config::get('feature.post.defaultTerm.user.' . $id , null);
             $roles   = AAM::getUser()->roles;
             
             if (is_null($default) && count($roles)) {
                 $default = AAM_Core_Config::get(
-                    'default.category.role.' . array_shift($roles), false
+                    'feature.post.defaultTerm.role.' . array_shift($roles), false
                 );
             }
         }

@@ -161,8 +161,8 @@
                                                             <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
                                                             <input type="text" class="form-control" name="expire" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
-                                                        <?php do_action('aam-add-role-ui-action'); ?>
-                                                        <?php echo apply_filters('aam-add-role-ui-filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance.phtml')); ?>
+                                                        <?php /* TODO: Rethink this filter */ do_action('aam-add-role-ui-action'); ?>
+                                                        <?php /* TODO: Rethink this filter */ echo apply_filters('aam-add-role-ui-filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance.phtml')); ?>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-success" id="add-role-btn"><?php echo __('Create', AAM_KEY); ?></button>
@@ -188,7 +188,7 @@
                                                             <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
                                                             <input type="text" class="form-control" name="expire" id="edit-role-expiration" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
-                                                        <?php do_action('aam-edit-role-ui-action'); ?>
+                                                        <?php /* TODO: Rethink this filter */ do_action('aam-edit-role-ui-action'); ?>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-success" id="edit-role-btn"><?php echo __('Update', AAM_KEY); ?></button>

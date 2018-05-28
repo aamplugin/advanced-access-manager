@@ -63,8 +63,8 @@ class AAM_Shortcode_Strategy_Login implements AAM_Shortcode_Strategy_Interface {
         } else {
             ob_start();
             require AAM_Core_Config::get(
-                'login.shortcode.template', 
-                realpath(dirname(__FILE__) . '/../../Frontend/phtml/login.phtml')
+                'feature.secureLogin.shortcode.template', 
+                realpath(AAM_BASEDIR . '/Application/Frontend/phtml/login.phtml')
             );
             $content = ob_get_contents();
             ob_end_clean();

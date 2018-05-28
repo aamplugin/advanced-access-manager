@@ -15,12 +15,20 @@
  */
 class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
     
+    /**
+     * 
+     * @return type
+     */
     public function getTable() {
         $response = array('data' => $this->retrieveAllRoutes());
 
         return json_encode($response);
     }
 
+    /**
+     * 
+     * @return type
+     */
     public function save() {
        $type   = filter_input(INPUT_POST, 'type');
        $route  = filter_input(INPUT_POST, 'route');
@@ -50,7 +58,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
         $object   = AAM_Backend_Subject::getInstance()->getObject('route');
 	$routes   = rest_get_server()->get_routes();
         
-        //build all RESful routes
+        //build all RESTful routes
         foreach ($routes as $route => $handlers) {
             $methods = array();
             foreach($handlers as $handler) {
@@ -105,7 +113,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.restful',
+            'option'     => 'core.settings.restful',
             'view'       => __CLASS__
         ));
     }

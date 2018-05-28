@@ -192,7 +192,7 @@ class AAM_Backend_Feature_Subject_User {
         if ($this->isAllowed($user) || ($user->ID == get_current_user_id())) {
             $actions = array('manage');
             
-            if (AAM_Core_Config::get('secure-login', true) 
+            if (AAM_Core_Config::get('core.settings.secureLogin', true) 
                     && current_user_can('aam_toggle_users')) {
                 $actions[] = ($user->user_status ? 'unlock' : 'lock');
             }

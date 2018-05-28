@@ -28,55 +28,55 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
      */
     protected function getList() {
         $settings = array(
-            'manage-capability' => array(
+            'core.settings.editCapabilities' => array(
                 'title' => __('Edit/Delete Capabilities', AAM_KEY),
-                'descr' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or the entire website.', 'b'),
-                'value' => AAM_Core_Config::get('manage-capability', false)
+                'descr' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
+                'value' => AAM_Core_Config::get('core.settings.editCapabilities', false)
             ),
-            'backend-access-control' => array(
+            'core.settings.backendAccessControl' => array(
                 'title' => __('Backend Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to the backend. Keep this option disabled if there is no needs to restrict backend features for other users. This option may reduce your website backend performance.', AAM_KEY),
-                'value' => AAM_Core_Config::get('backend-access-control', true)
+                'descr' => __('Allow AAM to manage access to the backend. Note! Keep this option disabled if there is no needs to restrict backend features for other users.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.backendAccessControl', true)
             ),
-            'frontend-access-control' => array(
+            'core.settings.frontendAccessControl' => array(
                 'title' => __('Frontend Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to frontend resources. If there is no need to manage access to the website frontend then keep this option unchecked as it may increase your webiste performance.', AAM_KEY),
-                'value' => AAM_Core_Config::get('frontend-access-control', true)
+                'descr' => __('Allow AAM to manage access to the frontend. Note! Keep this option disabled if there is no needs to restrict frontend resources for users and visitors.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.frontendAccessControl', true)
             ),
-            'api-access-control' => array(
+            'core.settings.apiAccessControl' => array(
                 'title' => __('API Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to the website resources that are invoked with WordPress core API (currently only for RESTful API). If there is no need to manage access to the website API then keep this option unchecked as it may increase your webiste performance.', AAM_KEY),
-                'value' => AAM_Core_Config::get('api-access-control', true)
+                'descr' => __('Allow AAM to manage access to the website resources that are invoked with WordPress core APIs (currently only for RESTful API). Note! Keep this option disabled if there is no needs to restrict API access.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.apiAccessControl', true)
             ),
-            'render-access-metabox' => array(
+            'ui.settings.renderAccessMetabox' => array(
                 'title' => __('Render Access Manager Metabox', AAM_KEY),
-                'descr' => __('Render Access Manager metabox on all post and category edit pages. Access Manager metabox is the quick way to manage access to any post or category without leaving an edit page.', AAM_KEY),
-                'value' => AAM_Core_Config::get('render-access-metabox', true),
+                'descr' => __('Render Access Manager metabox on all post and term edit pages. Access Manager metabox is the quick way to manage access to any post or term without leaving an edit page.', AAM_KEY),
+                'value' => AAM_Core_Config::get('ui.settings.renderAccessMetabox', true),
             ),
-            'show-access-link' => array(
+            'ui.settings.renderAccessActionLink' => array(
                 'title' => __('Render Access Link', AAM_KEY),
                 'descr' => __('Render Access shortcut link under any post, page, custom post type, category, custom taxonomy title or user name.', AAM_KEY),
-                'value' => AAM_Core_Config::get('show-access-link', true),
+                'value' => AAM_Core_Config::get('ui.settings.renderAccessActionLink', true),
             ),
-            'secure-login' => array(
+            'core.settings.secureLogin' => array(
                 'title' => __('Secure Login', AAM_KEY),
                 'descr' => __('AAM comes with its own user login handler. With this feature you can add AJAX login widget to your frontend page that significantly enhance your website security.', AAM_KEY),
-                'value' => AAM_Core_Config::get('secure-login', true)
+                'value' => AAM_Core_Config::get('core.settings.secureLogin', true)
             ),
-            'core.xmlrpc' => array(
+            'core.settings.xmlrpc' => array(
                 'title' => __('XML-RPC WordPress API', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Remote procedure call (RPC) interface is used to manage WordPress website content and features. For more information check %sXML-RPC Support%s article.', 'b'), '<a href="https://codex.wordpress.org/XML-RPC_Support">', '</a>'),
-                'value' => AAM_Core_Config::get('core.xmlrpc', true)
+                'value' => AAM_Core_Config::get('core.settings.xmlrpc', true)
             ),
-            'core.restful' => array(
+            'core.settings.restful' => array(
                 'title' => __('RESTful WordPress API', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('RESTful interface that is used to manage WordPress website content and features. For more information check %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
-                'value' => AAM_Core_Config::get('core.restful', true)
+                'value' => AAM_Core_Config::get('core.settings.restful', true)
             ),
-            'jwt-authentication' => array(
+            'core.settings.jwtAuthentication' => array(
                 'title' => __('JWT Authentication', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTful API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
-                'value' => AAM_Core_Config::get('jwt-authentication', false)
+                'value' => AAM_Core_Config::get('core.settings.jwtAuthentication', false)
             )
         );
         

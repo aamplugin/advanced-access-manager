@@ -75,7 +75,7 @@ class AAM_Frontend_Authorization {
             $date = strtotime($post->get('frontend.expire_datetime'));
             if ($date <= time()) {
                 $actions = AAM_Core_Config::get(
-                        'post.access.expired', 'frontend.read'
+                        'feature.post.access.expired', 'frontend.read'
                 );
 
                 foreach(array_map('trim', explode(',', $actions)) as $action) {
@@ -141,8 +141,18 @@ class AAM_Frontend_Authorization {
      * @access protected
      */
     protected function checkRedirect(AAM_Core_Object_Post $post) {
-        if ($post->has('frontend.redirect')) {
-            AAM_Core_API::redirect($post->get('frontend.location'));
+        if ($post->has(AAM_Core_Api_Area::get() . '.redirect')) {
+            $rule = explode('|', $post->get(AAM_Core_Api_Area::get() . '.location'));
+            
+            if (count($rule) == 1) { // TODO: legacy. Remove in Jul 2020
+                AAM_Core_API::redirect($rule[0]);
+            } elseif ($rule[0] == 'page') {
+                wp_safe_redirect(get_page_link($rule[1]), 307);
+            } elseif ($rule[0] == 'url') {
+                wp_redirect($rule[1], 307);
+            } elseif (($rule[0] == 'callback') && is_callable($rule[1])) {
+                call_user_func($rule[1], $post);
+            }
         }
     }
     

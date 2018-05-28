@@ -2014,6 +2014,36 @@
                             );
                         });
                     });
+                    
+                    // post REDIRECT rules
+                    $('#modal-redirect').on('show.bs.modal', function() {
+                        $('.post-redirect-action').hide();
+                        $('.post-redirect-value').val('');
+                        $('.post-redirect-type').prop('checked', false);
+                        
+                        if ($('#post-redirect-rule').val()) {
+                            var rule = $('#post-redirect-rule').val().split('|');
+                            $('.post-redirect-type[value="' + rule[0] + '"]').prop('checked', true);
+                            $('#post-redirect-' + rule[0] + '-action').show();
+                            $('#post-redirect-' + rule[0] + '-value').val(rule[1]);
+                        }   
+                    });
+                    
+                    $('.post-redirect-type').each(function() {
+                       $(this).bind('click', function() {
+                           $('#post-redirect-rule').val($(this).val());
+                           $('.post-redirect-action').hide();
+                           $('#post-redirect-' + $(this).val() + '-action').show();
+                       });
+                    });
+                    
+                    $('.post-redirect-value').each(function() {
+                       $(this).bind('change', function() {
+                           var val = $('#post-redirect-rule').val().split('|');
+                           val[1] = $(this).val();
+                           $('#post-redirect-rule').val(val.join('|'));
+                       });
+                    });
                 }
             }
 
@@ -2959,7 +2989,7 @@
         //referred object ID like post, page or any custom post type
         var object   = window.location.search.match(/&oid\=([^&]*)/);
         var type     = window.location.search.match(/&otype\=([^&]*)/);
-
+        
         $.ajax(aamLocal.url.site, {
             type: 'POST',
             dataType: 'html',

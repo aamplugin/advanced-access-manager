@@ -202,7 +202,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'backend-access-control',
+            'option'     => 'core.settings.backendAccessControl',
             'view'       => __CLASS__
         ));
     }

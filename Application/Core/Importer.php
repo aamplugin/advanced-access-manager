@@ -50,7 +50,7 @@ class AAM_Core_Importer {
             } elseif ($table == '_usermeta') {
                 $this->insertUsermeta($data);
             } else {
-                do_action('aam-import', $table, $data);
+                do_action('aam-import-action', $table, $data);
             }
         }
         

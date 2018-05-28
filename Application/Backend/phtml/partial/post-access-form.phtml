@@ -5,7 +5,7 @@
 <?php $apiOptions = AAM_Backend_Feature_Main_Post::getAccessOptionList('api'); ?>
 
 <div class="panel-group" id="post-access-accordion" role="tablist" aria-multiselectable="true">
-    <?php if (count($frontendOptions) && AAM_Core_Config::get('frontend-access-control', true)) { ?>
+    <?php if (count($frontendOptions) && AAM_Core_Config::get('core.settings.frontendAccessControl', true)) { ?>
         <div class="panel panel-success">
             <div class="panel-heading" role="tab" id="heading-post-frontend-access-settings">
                 <h4 class="panel-title">
@@ -41,7 +41,7 @@
         </div>
     <?php } ?>
 
-    <?php if (count($backendOptions) && AAM_Core_Config::get('backend-access-control', true)) { ?>
+    <?php if (count($backendOptions) && AAM_Core_Config::get('core.settings.backendAccessControl', true)) { ?>
         <div class="panel panel-info">
             <div class="panel-heading" role="tab" id="heading-post-backend-access-settings">
                 <h4 class="panel-title">
@@ -77,7 +77,7 @@
         </div>
     <?php } ?>
 
-    <?php if (count($apiOptions) && AAM_Core_Config::get('api-access-control', true)) { ?>
+    <?php if (count($apiOptions) && AAM_Core_Config::get('core.settings.apiAccessControl', true)) { ?>
         <div class="panel panel-warning">
             <div class="panel-heading" role="tab" id="heading-post-api-access-settings">
                 <h4 class="panel-title">

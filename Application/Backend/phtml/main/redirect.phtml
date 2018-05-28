@@ -22,8 +22,8 @@
             <div class="col-xs-12">
                 <div>
                     <ul class="nav nav-tabs" role="tablist">
-                        <?php if (AAM_Core_Config::get('frontend-access-control', true)) { ?> <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend-redirect" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li><?php } ?>
-                        <?php if (AAM_Core_Config::get('backend-access-control', true) && !$this->isVisitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend-redirect" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
+                        <?php if (AAM_Core_Config::get('core.settings.frontendAccessControl', true)) { ?> <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend-redirect" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li><?php } ?>
+                        <?php if (AAM_Core_Config::get('core.settings.backendAccessControl', true) && !$this->isVisitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend-redirect" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
                     </ul>
 
                     <?php $frontendType = $this->getOption('frontend.redirect.type', 'default'); ?>

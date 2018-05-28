@@ -17,6 +17,92 @@
 class AAM_Core_Compatibility {
     
     /**
+     * Convert all-style AAM settings to standard ConfigPress style settings
+     * 
+     * @param array $config
+     * 
+     * @return array
+     * @since  AAM 5.3.1
+     * @todo   Remove June 1st 2019
+     */
+    public static function normalizeConfigOptions($config) {
+        if (is_array($config)) {
+            $changes = 0;
+            $changes += self::normalizeOption('manage-capability', 'core.settings.editCapabilities', $config);
+            $changes += self::normalizeOption('backend-access-control', 'core.settings.backendAccessControl', $config);
+            $changes += self::normalizeOption('frontend-access-control', 'core.settings.frontendAccessControl', $config);
+            $changes += self::normalizeOption('api-access-control', 'core.settings.apiAccessControl', $config);
+            $changes += self::normalizeOption('render-access-metabox', 'ui.settings.renderAccessMetabox', $config);
+            $changes += self::normalizeOption('show-access-link', 'ui.settings.renderAccessActionLink', $config);
+            $changes += self::normalizeOption('secure-login', 'core.settings.secureLogin', $config);
+            $changes += self::normalizeOption('core.xmlrpc', 'core.settings.xmlrpc', $config);
+            $changes += self::normalizeOption('core.restful', 'core.settings.restful', $config);
+            $changes += self::normalizeOption('jwt-authentication', 'core.settings.jwtAuthentication', $config);
+            $changes += self::normalizeOption('ms-member-access', 'core.settings.multisiteMemberAccessControl', $config);
+            $changes += self::normalizeOption('media-access-control', 'core.settings.mediaAccessControl', $config);
+            $changes += self::normalizeOption('check-post-visibility', 'core.settings.checkPostVisibility', $config);
+            $changes += self::normalizeOption('manage-hidden-post-types', 'core.settings.manageHiddenPostTypes', $config);
+            $changes += self::normalizeOption('page-category', 'core.settings.pageCategory', $config);
+            $changes += self::normalizeOption('media-category', 'core.settings.mediaCategory', $config);
+            $changes += self::normalizeOption('multi-category', 'core.settings.multiCategory', $config);
+            $changes += self::normalizeOption('inherit-parent-post', 'core.settings.inheritParentPost', $config);
+            //$changes += self::normalizeOption('', '', $config);
+            
+            if ($changes > 0) {
+                if (is_multisite()) {
+                    $result = AAM_Core_API::updateOption('aam-utilities', $config, 'site');
+                } else {
+                    $result = AAM_Core_API::updateOption('aam-utilities', $config);
+                }
+            }
+        }
+        
+        return $config;
+    }
+    
+    /**
+     * 
+     * @param type $option
+     * @param type $normalizedName
+     * @param type $config
+     * @return int
+     */
+    protected static function normalizeOption($option, $normalizedName, &$config) {
+        $changed = 0;
+        
+        if (array_key_exists($option, $config)) {
+            $value = $config[$option];
+            unset($config[$option]);
+            $config[$normalizedName] = $value;
+            $changed = 1;
+        }
+        
+        return $changed;
+    }
+    
+    /**
+     * Get config
+     * @return type
+     */
+    public static function getConfig() {
+        $config = AAM_Core_API::getOption('aam-utilities', array(), 'site');
+        
+        foreach(array_keys((is_array($config) ? $config : array())) as $option) {
+            if (strpos($option, 'frontend.redirect') !== false) {
+                self::convertConfigOption('redirect', $config, $option);
+            } elseif (strpos($option, 'backend.redirect') !== false) {
+                self::convertConfigOption('redirect', $config, $option);
+            } elseif (strpos($option, 'login.redirect') !== false) {
+                self::convertConfigOption('loginRedirect', $config, $option);
+            } elseif (strpos($option, 'frontend.teaser') !== false) {
+                self::convertConfigOption('teaser', $config, $option);
+            }
+        }
+        
+        return self::normalizeConfigOptions($config);
+    }
+    
+    /**
      * 
      */
     public static function initExtensions() {
@@ -57,28 +143,6 @@ class AAM_Core_Compatibility {
         }
         
         return $list;
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public static function getConfig() {
-        $config = AAM_Core_API::getOption('aam-utilities', array(), 'site');
-        
-        foreach(array_keys((is_array($config) ? $config : array())) as $option) {
-            if (strpos($option, 'frontend.redirect') !== false) {
-                self::convertConfigOption('redirect', $config, $option);
-            } elseif (strpos($option, 'backend.redirect') !== false) {
-                self::convertConfigOption('redirect', $config, $option);
-            } elseif (strpos($option, 'login.redirect') !== false) {
-                self::convertConfigOption('loginRedirect', $config, $option);
-            } elseif (strpos($option, 'frontend.teaser') !== false) {
-                self::convertConfigOption('teaser', $config, $option);
-            }
-        }
-        
-        return $config;
     }
     
     /**
