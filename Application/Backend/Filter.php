@@ -25,11 +25,6 @@ class AAM_Backend_Filter {
     private static $_instance = null;
     
     /**
-     * pre_get_posts flag
-     */
-    protected $skip = false;
-
-    /**
      * Initialize backend filters
      * 
      * @return void
@@ -57,11 +52,6 @@ class AAM_Backend_Filter {
 
         //default category filder
         add_filter('pre_option_default_category', array($this, 'filterDefaultCategory'));
-        
-        //add post filter for LIST restriction
-        if (!AAM::isAAM() && AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
-            add_filter('found_posts', array($this, 'filterPostCount'), 999, 2);
-        }
         
         add_action('pre_post_update', array($this, 'prePostUpdate'), 10, 2);
         
@@ -283,47 +273,6 @@ class AAM_Backend_Filter {
         }
         
         return ($default ? $default : $category);
-    }
-    
-    /**
-     * Filter post count for pagination
-     *  
-     * @param int      $counter
-     * @param WP_Query $query
-     * 
-     * @return array
-     * 
-     * @access public
-     */
-    public function filterPostCount($counter, $query) {
-        $filtered = array();
-        $subject  = AAM::getUser();
-        
-        foreach ($query->posts as $post) {
-            if (isset($post->post_type)) {
-                $type = $post->post_type;
-            } else {
-                $type = AAM_Core_API::getQueryPostType($query);
-            }
-            
-            $object = $subject->getObject(
-                    'post', (is_a($post, 'WP_Post') ? $post->ID : $post)
-            );
-            
-            $hidden = $object->get('backend.hidden');
-            $list   = $object->get('backend.list');
-            
-            if (empty($hidden) && empty($list)) {
-                $filtered[] = $post;
-            } else {
-                $counter--;
-                $query->post_count--;
-            }
-        }
-        
-        $query->posts = $filtered;
-
-        return $counter;
     }
     
     /**

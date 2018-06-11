@@ -22,7 +22,7 @@ class AAM_Extension_List {
                 'description' => 'Get the complete list of all available premium extensions in one package. Any new premium extensions in the future will be available for no additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
                 'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
-                'latest'      => '3.7.2'
+                'latest'      => '3.7.3' // TODO - Increase version after Plus Package feedback loop
             ),
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
@@ -31,7 +31,7 @@ class AAM_Extension_List {
                 'description' => 'The best selling extension with the most advanced content management features for the WordPress CMS. Manage granular access to any post, page, custom post type, category, custom hierarchical taxonomy or define the default access to all your content for all users, roles and visitors.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null),
-                'latest'      => '3.6.2'
+                'latest'      => '3.7'
             ),
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',
@@ -95,7 +95,7 @@ class AAM_Extension_List {
                 'type'        => 'GNU',
                 'tag'         => 'ALPHA', 
                 'license'     => 'AAMSOCIALLOGIN',
-                'description' => 'Login to your website with social networks like Facebook, Twitter, Instagram etc. This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/social-login-extension" target="_blank">Github here</a>.',
+                'description' => 'Login to your website with social networks like Facebook, Twitter, Instagram etc. <a href="https://aamplugin.com/help/how-does-aam-social-login-works" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/social-login-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_SOCIAL_LOGIN') ? constant('AAM_SOCIAL_LOGIN') : null),
                 'latest'      => '0.1'
             ),

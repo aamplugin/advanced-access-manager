@@ -369,49 +369,6 @@ final class AAM_Core_API {
     }
     
     /**
-     * Get filtered post list
-     * 
-     * Return only posts that are restricted to LIST or LIST TO OTHERS for the
-     * current user. This function is shared by both frontend and backend
-     * 
-     * @param WP_Query $query
-     * @param string   $area
-     * 
-     * @return array
-     * 
-     * @access public
-     */
-    public static function getFilteredPostList($query) {
-        $filtered = array();
-        
-        $type = self::getQueryPostType($query);
-        $area = AAM_Core_Api_Area::get();
-        
-        if ($type) {
-            $cache = AAM::getUser()->getObject('cache')->getMergedOption();
-            $posts = (isset($cache['post']) ? $cache['post'] : array());
-            
-            foreach($posts as $id => $option) {
-                if (!empty($option["{$area}.list"]) 
-                                    || !empty($option["{$area}.hidden"])) {
-                    $filtered[] = $id;
-                }
-            }
-        }
-        
-        if (is_single()) {
-            $post = self::getCurrentPost();
-            $in   = ($post ? array_search($post->ID, $filtered) : false);
-            
-            if ($in !== false) {
-                $filtered = array_splice($filtered, $in, 1);
-            }
-        }
-        
-        return (is_array($filtered) ? $filtered : array());
-    }
-    
-    /**
      * Get Query post type
      * 
      * @param WP_Query $query
@@ -459,6 +416,10 @@ final class AAM_Core_API {
                     break;
                 }
             }
+        } elseif (!empty($wp_query->query_vars['p'])) {
+            $res = get_post($wp_query->query_vars['p']);
+        } elseif (!empty($wp_query->query_vars['page_id'])) {
+            $res = get_post($wp_query->query_vars['page_id']);
         }
         
         $user = AAM::getUser();

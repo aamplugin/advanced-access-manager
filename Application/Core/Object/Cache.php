@@ -72,7 +72,7 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      * 
      * @access public
      */
-    public function get($type, $id, $default = array()) {
+    public function get($type, $id = 0, $default = array()) {
         $option = $this->getOption();
         
         return (isset($option[$type][$id]) ? $option[$type][$id] : $default);
@@ -99,31 +99,6 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      */
     public function reset() {
         return $this->getSubject()->deleteOption('cache');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function getMergedOption() {
-        $options = array($this->getOption());
-        $subject = $this->getSubject();
-        
-        while($subject = $subject->getParent()) {
-            $options[] = $subject->getObject('cache')->getOption();
-        }
-        
-        $merged = array();
-        
-        // Important to reverse as lower subject level overrides higher. For example,
-        // Role level overrides Default level.
-        foreach(array_reverse($options) as $option) {
-            if (is_array($option)) {
-                $merged = array_replace_recursive($merged, $option);
-            }
-        }
-        
-        return $merged;
     }
     
     /**

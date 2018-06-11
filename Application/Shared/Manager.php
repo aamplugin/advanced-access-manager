@@ -61,12 +61,12 @@ class AAM_Shared_Manager {
             // Control post visibility
             //important to keep this option optional for optimization reasons
             if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
-                // filter navigation pages & taxonomies
-                add_filter('get_pages', array(self::$_instance, 'filterPostList'), 999);
-                // add post filter for LIST restriction
-                add_filter('the_posts', array(self::$_instance, 'filterPostList'), 999);
-                // pre post query builder
-                add_action('pre_get_posts', array(self::$_instance, 'preparePostQuery'), 999);
+                add_filter(
+                    'posts_clauses_request', 
+                    array(self::$_instance, 'filterPostQuery'), 
+                    999, 
+                    2
+                );
             }
             
             //filter post content
@@ -74,6 +74,72 @@ class AAM_Shared_Manager {
         }
         
         return self::$_instance;
+    }
+    
+    /**
+     * 
+     * @global WPDB $wpdb
+     * @param type $clauses
+     * @param type $wpQuery
+     * @return type
+     */
+    public function filterPostQuery($clauses, $wpQuery) {
+        global $wpdb;
+        
+        $query  = '';
+        $option = AAM::getUser()->getObject('visibility')->getOption();
+        
+        //echo '<pre>'; print_r($option);
+        
+        if (!empty($option['post'])) {
+            if (!empty($wpQuery->query['post_type'])) {
+                $postType = $wpQuery->query['post_type'];
+            } elseif (!empty($wpQuery->query_vars['post_type'])) {
+                $postType = $wpQuery->query_vars['post_type'];
+            } elseif ($wpQuery->is_attachment) {
+                $postType = 'attachment';
+            } elseif ($wpQuery->is_page) {
+                $postType = 'page';
+            } else {
+                $postType = 'post';
+            }
+        
+            $not = array();
+            $area = AAM_Core_Api_Area::get();
+            
+            foreach($option['post'] as $id => $access) {
+                $chunks = explode('|', $id);
+                
+                if ($postType == $chunks[1]) {
+                    if (!empty($access["{$area}.list"])) {
+                        $not[] = $chunks[0];
+                    }
+                }
+            }
+            
+            $chunks = array();
+            if (!empty($not)) {
+                $query .= " AND {$wpdb->posts}.ID NOT IN (" . implode(',', $not) . ")";
+            }
+        }
+        
+        $clauses['where'] .= apply_filters(
+            'aam-post-where-clause-filter', $query, $wpQuery, $option
+        );
+        
+        if (strpos($clauses['where'], $wpdb->term_relationships) !== false) {
+            if (strpos($clauses['join'], $wpdb->term_relationships) === false) {
+                $clauses['join'] .= " LEFT JOIN {$wpdb->term_relationships} ON ({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)";
+            }
+            
+            if (empty($clauses['groupby'])) {
+                $clauses['groupby'] = "{$wpdb->posts}.ID";
+            }
+        }
+        
+        //echo '<pre>'; print_r($clauses); die();
+        
+        return $clauses;
     }
     
     /**
@@ -141,71 +207,6 @@ class AAM_Shared_Manager {
         }
         
         return $caps;
-    }
-    
-    /**
-     * Filter posts from the list
-     *  
-     * @param array $posts
-     * 
-     * @return array
-     * 
-     * @access public
-     */
-    public function filterPostList($posts) {
-        $current = AAM_Core_API::getCurrentPost();
-        
-        if (is_array($posts)) {
-            $area = AAM_Core_Api_Area::get();
-            
-            foreach ($posts as $i => $post) {
-                if ($current && ($current->ID == $post->ID)) { continue; }
-                
-                // TODO: refactor this to AAM API standalone
-                $object = AAM::getUser()->getObject('post', $post->ID);
-                $hidden = $object->get($area. '.hidden');
-                $list   = $object->get($area. '.list');
-                
-                if ($hidden || $list) {
-                    unset($posts[$i]);
-                }
-            }
-            
-            $posts = array_values($posts);
-        }
-        
-        return $posts;
-    }
-    
-    /**
-     * Build pre-post query request
-     * 
-     * This is used to solve the problem or pagination
-     * 
-     * @param stdClass $query
-     * 
-     * @return void
-     * 
-     * @access public
-     */
-    public function preparePostQuery($query) {
-        static $skip = false;
-        
-        if ($skip === false) { // avoid loop
-            $skip = true;
-            // TODO: refactor this to AAM API standalone
-            $filtered = AAM_Core_API::getFilteredPostList($query);
-            $skip = false;
-            
-            if (isset($query->query_vars['post__not_in']) 
-                    && is_array($query->query_vars['post__not_in'])) {
-                $query->query_vars['post__not_in'] = array_merge(
-                        $query->query_vars['post__not_in'], $filtered
-                );
-            } else {
-                $query->query_vars['post__not_in'] = $filtered;
-            }
-        }
     }
     
     /**

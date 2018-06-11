@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.3.1
+  Version: 5.3.2
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -141,10 +141,17 @@ class AAM {
      */
     public static function getInstance() {
         if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+            
+            // Logout user if he/she is blocked
+            $user = self::$_instance->getUser();
+            if ($user->getUID() == 'user' && $user->user_status == 1) {
+                wp_logout();
+            }
+            
             load_plugin_textdomain(
                     AAM_KEY, false, dirname(plugin_basename(__FILE__)) . '/Lang/'
             );
-            self::$_instance = new self;
             
             //load all installed extension
             AAM_Extension_Repository::getInstance()->load();

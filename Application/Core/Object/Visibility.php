@@ -1,0 +1,148 @@
+<?php
+
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'license.txt', which is part of this source code package.       *
+ * ======================================================================
+ */
+
+/**
+ * Post visibility object
+ * 
+ * @package AAM
+ * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ */
+class AAM_Core_Object_Visibility extends AAM_Core_Object {
+
+    /**
+     * Constructor
+     *
+     * @param AAM_Core_Subject $subject
+     *
+     * @return void
+     *
+     * @access public
+     */
+    public function __construct(AAM_Core_Subject $subject) {
+        parent::__construct($subject);
+
+        $this->initialize();
+    }
+    
+    /**
+     * 
+     * @global type $wpdb
+     */
+    public function initialize() {
+        global $wpdb;
+        
+        $subject = $this->getSubject();
+        
+        // Read cache first
+        $option = $subject->getObject('cache')->get('visibility');
+        if ($option === false) { //if false, then the cache is empty but exists
+            $option = array();
+        } elseif (empty($option)) {
+            $query  = "SELECT pm.`post_id`, pm.`meta_value`, p.`post_type` FROM {$wpdb->postmeta} AS pm ";
+            $query .= "LEFT JOIN {$wpdb->posts} AS p ON (pm.`post_id` = p.ID) ";
+            $query .= "WHERE pm.`meta_key` = %s";
+            
+            if ($wpdb->query($wpdb->prepare($query, $this->getOptionName('post')))) {
+                foreach($wpdb->last_result as $row) {
+                    $settings = maybe_unserialize($row->meta_value);
+                    $this->pushOptions('post', $row->post_id . '|' . $row->post_type, $settings);
+                }
+            }
+            
+            // Override the frontend.list for current post
+            $post = AAM_Core_API::getCurrentPost(); // current post
+            if ($post) {
+                $option = $this->getOption();
+                $option['post'][$post->ID . '|' . $post->post_type]['frontend.list'] = 0;
+                $this->setOption($option);
+            }
+            
+            do_action('aam-visibility-initialize-action', $this);
+            
+            // inherit settings from parent
+            $option = $subject->inheritFromParent('visibility', 0);
+            if (!empty($option)) {
+                $option = array_replace_recursive($option, $this->getOption());
+            } else {
+                $option = $this->getOption();
+            }
+            
+            if (in_array($subject::UID, array('user', 'visitor'))) {
+                $subject->getObject('cache')->add(
+                    'visibility', 0, empty($option) ? false : $option
+                );
+            }
+        }
+        
+        $this->setOption($option);
+    }
+    
+    /**
+     * 
+     * @param type $object
+     * @param type $id
+     * @param type $options
+     * @return type
+     */
+    public function pushOptions($object, $id, $options) {
+        $filtered    = array();
+        $listOptions = apply_filters(
+            'aam-post-list-options-filter', 
+            array('frontend.list', 'backend.list', 'api.list')
+        );
+        
+        foreach($options as $key => $value) {
+            if (in_array($key, $listOptions)) {
+                $filtered[$key] = $value;
+            }
+        }
+        
+        if (!empty($filtered)) {
+            $option = $this->getOption();
+            if (isset($option[$object][$id])) {
+                $option[$object][$id] = array_merge($option[$object][$id], $filtered);
+            } else {
+                $option[$object][$id] = $filtered;
+            }
+            $this->setOption($option);
+        }
+        
+        return $filtered;
+    }
+    
+    /**
+     * 
+     * @param type $object
+     * @param type $id
+     * @return type
+     */
+    public function has($object, $id = null) {
+        $option = $this->getOption();
+        
+        return (is_null($id) ? isset($option[$object]) : isset($option[$object][$id]));
+    }
+    
+    /**
+     * Generate option name
+     * 
+     * @return string
+     * 
+     * @access protected
+     */
+    protected function getOptionName($object) {
+        $subject = $this->getSubject();
+        
+        //prepare option name
+        $meta_key = 'aam-' . $object . '-access-' . $subject->getUID();
+        $meta_key .= ($subject->getId() ? $subject->getId() : '');
+
+        return $meta_key;
+    }
+
+}

@@ -36,7 +36,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
             'content' => base64_encode(json_encode($exporter->run()))
         ));
     }
-
+    
     /**
      * 
      * @return type

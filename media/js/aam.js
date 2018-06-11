@@ -2715,7 +2715,7 @@
                     }
                 });
             }
-
+            
             /**
              * 
              * @returns {undefined}
@@ -2768,7 +2768,7 @@
                             }
                         });
                     });
-
+                    
                     $('#clear-cache').bind('click', function () {
                         $.ajax(aamLocal.ajaxurl, {
                             type: 'POST',

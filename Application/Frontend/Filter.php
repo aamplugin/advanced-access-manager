@@ -41,8 +41,12 @@ class AAM_Frontend_Filter {
         
         //important to keep this option optional for optimization reasons
         if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
+            // TODO: figure out how to remove these two hooks and inject "visibility"
+            // object instead
             //filter navigation pages & taxonomies
             add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
+            // filter navigation pages & taxonomies
+            add_filter('get_pages', array($this, 'filterPages'), 999);
         }
         
         //widget filters
@@ -124,16 +128,50 @@ class AAM_Frontend_Filter {
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'))) {
                     $object = AAM::getUser()->getObject('post', $page->object_id);
-                    $hidden = $object->get('frontend.hidden');
+                    $others = $object->get('frontend.list_others');
                     $list   = $object->get('frontend.list');
                     
-                    if ($hidden || $list) {
+                    if (($others && ($object->post_author != get_current_user_id())) || $list) {
                         unset($pages[$i]);
                     }
                 }
             }
         }
 
+        return $pages;
+    }
+    
+    /**
+     * Filter posts from the list
+     *  
+     * @param array $pages
+     * 
+     * @return array
+     * 
+     * @access public
+     */
+    public function filterPages($pages) {
+        $current = AAM_Core_API::getCurrentPost();
+        
+        if (is_array($pages)) {
+            $area = AAM_Core_Api_Area::get();
+            
+            foreach ($pages as $i => $post) {
+                if ($current && ($current->ID == $post->ID)) { continue; }
+                
+                // TODO: refactor this to AAM API standalone
+                $object = AAM::getUser()->getObject('post', $post->ID);
+                $list   = $object->get($area. '.list');
+                $others = $object->get($area. '.list_others');
+                
+                if ($list || ($others && ($post->post_author != get_current_user_id()))) {
+                    unset($pages[$i]);
+                }
+            }
+            
+            $pages = array_values($pages);
+        }
+        
         return $pages;
     }
     

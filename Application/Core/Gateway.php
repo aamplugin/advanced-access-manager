@@ -218,6 +218,18 @@ final class AAM_Core_Gateway implements AAM_Core_Contract_Api {
     }
     
     /**
+     * Log any critical message
+     * 
+     * @param string $message
+     * @param string $markers...
+     * 
+     * @access public
+     */
+    public function log() {
+        call_user_func_array('AAM_Core_Console::add', func_get_args());
+    }
+    
+    /**
      * Get instance of the API gateway
      * 
      * @return AAM_Core_Gateway

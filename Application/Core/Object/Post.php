@@ -141,37 +141,6 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             $subject->getObject('cache')->add('post', $post->ID, false);
         } else {
             $subject->getObject('cache')->add('post', $post->ID, $option);
-            
-            // Determine if post is hidden or not. This is more complex calculation
-            // as it is based on the combination of several options
-            // TODO: this check does not belong here
-            if (in_array($subject::UID, array('user'))) {
-                $this->determineVisibility($post, 'frontend', $option);
-                $this->determineVisibility($post, 'backend', $option);
-                $this->determineVisibility($post, 'api', $option);
-            }
-        }
-    }
-    
-    /**
-     * Determine if post is visible for current subject
-     * 
-     * @param WP_Post $post
-     * @param string  $area
-     * 
-     * @param boolean $option
-     * 
-     * @access protected
-     */
-    protected function determineVisibility($post, $area, &$option) {
-        $list   = !empty($option["{$area}.list"]);
-        $others = !empty($option["{$area}.list_others"]);
-        
-        if ($list || ($others && ($post->post_author != $this->getSubject()->ID))) {
-            $option["{$area}.hidden"] = true;
-            
-            // Cache result but only if visibility is true!
-            $this->getSubject()->getObject('cache')->add('post', $post->ID, $option);
         }
     }
     

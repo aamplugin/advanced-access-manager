@@ -54,6 +54,9 @@ class AAM_Backend_Manager {
         //post title decorator
         add_filter('the_title', array($this, 'theTitle'), 999, 2);
         
+        //permalink manager
+        add_filter('get_sample_permalink_html', array($this, 'getPermalinkHtml'), 10, 5);
+        
         //screen options & contextual help hooks
         add_filter('screen_options_show_screen', array($this, 'screenOptions'));
         add_filter('contextual_help', array($this, 'helpOptions'), 10, 3);
@@ -151,6 +154,13 @@ class AAM_Backend_Manager {
                 'On ConfigPress tab, change [extention.directory] option to [core.extention.directory]', 'b', 'b'
             );
         }
+        
+        $tmpl = AAM_Core_Config::get('login.shortcode.template', null);
+        if (!empty($tmpl)) {
+            AAM_Core_Console::add(
+                'On ConfigPress tab, change [login.shortcode.template] option to [feature.secureLogin.shortcode.template]', 'b', 'b'
+            );
+        }
     }
     
     /**
@@ -167,6 +177,20 @@ class AAM_Backend_Manager {
         }
         
         return $caps;
+    }
+    
+    /**
+     * 
+     * @param string $html
+     * @return string
+     */
+    public function getPermalinkHtml($html) {
+        if (AAM_Core_API::capabilityExists('edit_permalink') 
+                && !AAM::getUser()->hasCapability('edit_permalink')) {
+            $html = '';
+        }
+        
+        return $html;
     }
     
     /**
