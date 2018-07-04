@@ -91,7 +91,8 @@
 .icon-twitter:before { content: '\e83b' !important; } /* 'î »' */
 .icon-user:before { content: '\e83d' !important; } /* 'î ½' */
 .icon-level-down:before { content: '\e83e' !important; } /* 'î ¾' */
-.icon-chat-empty:before { content: '\f0e6'; } /* 'ï¦' */
+.icon-chat-empty:before { content: '\f0e6' !important; } /* 'ï¦' */
+.icon-angle-circled-up:before { content: '\f139' !important; } /* '' */
 .icon-exchange:before { content: '\f0ec' !important; } /* 'ï¬' */
 .icon-circle:before { content: '\f111' !important; } /* 'ï' */
 .icon-circle-thin:before { content: '\f1db' !important; } /* 'ï' */
@@ -212,6 +213,16 @@ html, body {
 
 .inner-sm {
     padding: 20px;
+}
+
+.badge.danger {
+    color: #a94442;
+    background-color: #F1DBDA;
+}
+
+.badge.success {
+    color: #3c763d;
+    background-color: #DDEEDD;
 }
 
 .js .postbox .hndle, .js .widget .widget-top {
@@ -535,6 +546,12 @@ input[type=radio]:checked + label:before {
 
 .radio label {
     display: inline;
+}
+
+.aam-switch-user {
+    float:right; 
+    font-size:1em !important;
+    cursor: pointer;
 }
 
 .aam-redirect-action {

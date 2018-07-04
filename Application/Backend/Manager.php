@@ -23,7 +23,7 @@ class AAM_Backend_Manager {
      * @access private 
      */
     private static $_instance = null;
-
+    
     /**
      * Initialize the object
      * 
@@ -123,42 +123,6 @@ class AAM_Backend_Manager {
         if (version_compare(PHP_VERSION, '5.3.0') == -1) {
             AAM_Core_Console::add(
                 'AAM requires PHP version 5.3.0 or higher to function properly'
-            );
-        }
-        
-        // TODO: Remove Jun 2019
-        $htpasswd = AAM_Core_Config::get('htpasswd');
-        if (!empty($htpasswd)) {
-            AAM_Core_Console::add(
-                'On ConfigPress tab, change [htpasswd] option to [feature.metabox.htpasswd]', 'b', 'b'
-            );
-        }
-        
-        $export = AAM_Core_Config::get('export', null);
-        if (!empty($export)) {
-            AAM_Core_Console::add(
-                'On ConfigPress tab, change [export] option to [feature.export]', 'b', 'b'
-            );
-        }
-        
-        $defcat = AAM_Core_Config::get('default.category', null);
-        if (!empty($defcat)) {
-            AAM_Core_Console::add(
-                'On ConfigPress tab, change [default.category] option to [feature.post.defaultTerm]', 'b', 'b'
-            );
-        }
-        
-        $dir = AAM_Core_Config::get('extention.directory', null);
-        if (!empty($dir)) {
-            AAM_Core_Console::add(
-                'On ConfigPress tab, change [extention.directory] option to [core.extention.directory]', 'b', 'b'
-            );
-        }
-        
-        $tmpl = AAM_Core_Config::get('login.shortcode.template', null);
-        if (!empty($tmpl)) {
-            AAM_Core_Console::add(
-                'On ConfigPress tab, change [login.shortcode.template] option to [feature.secureLogin.shortcode.template]', 'b', 'b'
             );
         }
     }
@@ -723,7 +687,7 @@ class AAM_Backend_Manager {
     /**
      * Bootstrap the manager
      * 
-     * @return void
+     * @return AAM_Backend_View
      * 
      * @access public
      */
@@ -731,6 +695,8 @@ class AAM_Backend_Manager {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
         }
+        
+        return self::$_instance;
     }
     
     /**
@@ -741,9 +707,7 @@ class AAM_Backend_Manager {
      * @access public
      */
     public static function getInstance() {
-        self::bootstrap();
-
-        return self::$_instance;
+        return self::bootstrap();
     }
 
 }

@@ -63,7 +63,7 @@ final class AAM_Core_Gateway implements AAM_Core_Contract_Api {
     /**
      * Metabox & Widget object slug
      */
-    const OBJECT_METABOX_WIDGET = 'metabox';
+    const OBJECT_METABOX = 'metabox';
     
     /**
      * Post object slug
@@ -149,14 +149,14 @@ final class AAM_Core_Gateway implements AAM_Core_Contract_Api {
     /**
      * Get role
      * 
-     * @param string $id
+     * @param string $slug
      * 
      * @return AAM_Core_Subject_Role
      * 
      * @access public
      */
-    public function getRoleSubject($id) {
-        return new AAM_Core_Subject_Role($id);
+    public function getRoleSubject($slug) {
+        return new AAM_Core_Subject_Role($slug);
     }
     
     /**
@@ -227,6 +227,17 @@ final class AAM_Core_Gateway implements AAM_Core_Contract_Api {
      */
     public function log() {
         call_user_func_array('AAM_Core_Console::add', func_get_args());
+    }
+    
+    /**
+     * Deny access for current HTTP request
+     * 
+     * @return void
+     * 
+     * @access public
+     */
+    public function denyAccess() {
+        AAM_Core_API::reject();
     }
     
     /**

@@ -31,4 +31,19 @@ class AAM_Backend_Feature_Settings_Manager  extends AAM_Backend_Feature_Abstract
         return json_encode(array('status' => 'success'));
     }
     
+    /**
+     * Delete AAM utility options
+     * 
+     * @return string
+     *
+     * @access public
+     */
+    public function delete() {
+        $param = AAM_Core_Request::post('param');
+        
+        AAM_Core_Config::delete($param);
+        
+        return json_encode(array('status' => 'success'));
+    }
+    
 }

@@ -73,7 +73,7 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
         } elseif (is_string($widget['callback'][0])) {
             $callback = $widget['callback'][0];
         } else {
-            $callback = null;
+            $callback = isset($widget['classname']) ? $widget['classname'] : null;
         }
 
         return $callback;
@@ -85,13 +85,29 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @param type $screen
      */
     public function filterBackend($screen) {
-        global $wp_meta_boxes;
+        global $wp_meta_boxes, $wp_registered_widgets;
 
         if (is_array($wp_meta_boxes)) {
             foreach ($wp_meta_boxes as $screen_id => $zones) {
                 if ($screen == $screen_id) {
                     $this->filterZones($zones, $screen_id);
                 }
+            }
+        }
+    }
+    
+    /**
+     * 
+     * @global type $wp_registered_widgets
+     */
+    public function filterAppearanceWidgets() {
+        global $wp_registered_widgets;
+        
+        foreach($wp_registered_widgets as $id => $widget) {
+            $callback = $this->getWidgetCallback($widget);
+            if ($this->has('widgets', $callback)) {
+                unregister_widget($callback);
+                unset($wp_registered_widgets[$id]);
             }
         }
     }

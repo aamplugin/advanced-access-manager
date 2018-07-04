@@ -15,6 +15,48 @@
     
     /**
      * 
+     * @param {type} id
+     * @param {type} btn
+     * @param {type} rowAction
+     * @returns {undefined}
+     */
+    function switchToUser(id, btn, rowAction) {
+       $.ajax(aamLocal.ajaxurl, {
+           type: 'POST',
+           dataType: 'json',
+           data: {
+               action: 'aam',
+               sub_action: 'switchToUser',
+               _ajax_nonce: aamLocal.nonce,
+               user: id
+           },
+           beforeSend: function () {
+                $(btn).attr(
+                    'class', 
+                    'icon-spin4 animate-spin ' + (rowAction ? 'aam-row-action' : 'aam-switch-user')
+                );
+           },
+           success: function (response) {
+               if (response.status === 'success') {
+                   location.href = response.redirect;
+               } else {
+                   aam.notification('danger', response.reason);
+               }
+           },
+           error: function () {
+               aam.notification('danger', aam.__('Application error'));
+           },
+           complete: function () {
+                $(btn).attr(
+                    'class', 
+                    'icon-exchange ' + (rowAction ? 'aam-row-action text-success' : 'aam-switch-user')
+                );
+           }
+       });
+    }
+    
+    /**
+     * 
      * @returns {undefined}
      */
     function UI() {
@@ -468,6 +510,7 @@
             //in case interface needed to be reloaded
             aam.addHook('refresh', function () {
                 $('#role-list').DataTable().ajax.url(aamLocal.ajaxurl).load();
+                aam.fetchContent('main');
             });
 
         })(jQuery);
@@ -499,7 +542,6 @@
              * @returns {undefined}
              */
             function loadRoleList(selected) {
-                console.log(selected);
                 $.ajax(aamLocal.ajaxurl, {
                     type: 'POST',
                     dataType: 'json',
@@ -571,41 +613,6 @@
                     },
                     error: function () {
                         aam.notification('danger', aam.__('Application error'));
-                    }
-                });
-            }
-
-            /**
-             * 
-             * @param {type} id
-             * @param {type} btn
-             * @returns {undefined}
-             */
-            function switchToUser(id, btn) {
-                $.ajax(aamLocal.ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'switchToUser',
-                        _ajax_nonce: aamLocal.nonce,
-                        user: id
-                    },
-                    beforeSend: function () {
-                        $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            location.href = response.redirect;
-                        } else {
-                            aam.notification('danger', response.reason);
-                        }
-                    },
-                    error: function () {
-                        aam.notification('danger', aam.__('Application error'));
-                    },
-                    complete: function () {
-                        $(btn).attr('class', 'aam-row-action icon-exchange text-success');
                     }
                 });
             }
@@ -784,7 +791,7 @@
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-exchange text-success'
                                     }).bind('click', function () {
-                                        switchToUser(data[0], $(this));
+                                        switchToUser(data[0], $(this), true);
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': aam.__('Switch To User')
@@ -1782,7 +1789,7 @@
                             }
                         },
                         columnDefs: [
-                            {visible: false, targets: [0, 1]}
+                            {visible: false, targets: [0, 1, 5]}
                         ],
                         language: {
                             search: '_INPUT_',
@@ -1815,7 +1822,7 @@
                                     $('td:eq(0)', row).html('<i class="icon-doc-text-inv"></i>');
                                     break;
                             }
-
+                            
                             //update the title to a link
                             if (data[2] === 'type') {
                                 var link = $('<a/>', {
@@ -1836,8 +1843,31 @@
 
                                 }).html(data[3]);
                                 $('td:eq(1)', row).html(link);
-                            } else { //reset the post/term title
-                                $('td:eq(1)', row).html(data[3]);
+                            } else if (data[2] == 'term') {
+                                var name  = '<span>' + data[3] + '</span><i class="aam-row-subtitle">';
+                                
+                                if (data[5]) {
+                                    name += aam.__('Parent:') + ' <b>' + data[5] + '</b>; ';
+                                } else {
+                                    name += aam.__('Parent:') + ' none; ';
+                                }
+                                
+                                name += aam.__('ID:') + ' <b>' + data[0].split('|')[0] + '</b>';
+                                
+                                $('td:eq(1)', row).html(name);
+                                //$('td:eq(1)', row).html(data[3]);
+                            } else {
+                                var name  = '<span>' + data[3] + '</span><i class="aam-row-subtitle">';
+                                
+                                if (data[5]) {
+                                    name += aam.__('Parent:') + ' <b>' + data[5] + '</b>; ';
+                                } else {
+                                    name += aam.__('Parent:') + ' none; ';
+                                }
+                                
+                                name += aam.__('ID:') + ' <b>' + data[0] + '</b>';
+                                
+                                $('td:eq(1)', row).html(name);
                             }
 
                             //update the actions
@@ -2555,6 +2585,7 @@
              */
             function initialize() {
                 if ($('#extension-content').length) {
+                    $('[data-toggle="toggle"]', '.extensions-metabox').bootstrapToggle();
                     //check for updates
                     $('#aam-update-check').bind('click', function() {
                         $.ajax(aamLocal.ajaxurl, {
@@ -3181,10 +3212,14 @@
         $('body').delegate('[data-toggle="tooltip"]', 'hover', function (event) {
             event.preventDefault();
             $(this).tooltip({
-                'placement' : 'top',
+                'placement' : $(this).data('placement') || 'top',
                 'container' : 'body'
             });
             $(this).tooltip('show');
+        });
+        
+        $('body').delegate('.aam-switch-user', 'click', function (event) {
+            switchToUser(aam.getSubject().id, $(this), false);
         });
         
         $('.aam-area').each(function() {
@@ -3228,9 +3263,13 @@
         
         //update the header
         var subject = type.charAt(0).toUpperCase() + type.slice(1);
-        $('.aam-current-subject').html(
-                aam.__(subject) + ': <strong>' + name + '</strong>'
-        );
+        var title = aam.__(subject) + ': <strong>' + name + '</strong>';
+
+        if (type === 'user') {
+            title += '<i data-toggle="tooltip" title="Switch To User" data-placement="right" class="icon-exchange aam-switch-user"></i>';
+        }
+        
+        $('.aam-current-subject').html(title);
 
         //highlight screen if the same level
         if (parseInt(level) >= aamLocal.level || type === 'default') {

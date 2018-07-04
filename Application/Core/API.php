@@ -10,6 +10,8 @@
 /**
  * AAM core API
  * 
+ * NOTE! THIS IS LEGACY CLASS THAT SLOWLY WILL DIE! DO NOT RELY ON ITS METHODS
+ * 
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  */
@@ -139,7 +141,7 @@ final class AAM_Core_API {
         if (is_array($cookies) && $send_cookies) {
             foreach ($cookies as $key => $value) {
                 //SKIP PHPSESSID - some servers don't like it for security reason
-                if ($key !== session_name()) {
+                if ($key !== session_name() && is_scalar($value)) {
                     $requestCookies[] = new WP_Http_Cookie(array(
                         'name' => $key, 'value' => $value
                     ));
@@ -292,10 +294,20 @@ final class AAM_Core_API {
                     "{$area}.access.deny.redirectRule", __('Access Denied', AAM_KEY)
                 );
             }
-
-            do_action('aam-access-rejected-action', $area, $args);
-
-            self::redirect($redirect, $args);
+            
+            $doRedirect = true;
+            
+            if ($type == 'page') {
+                $page = self::getCurrentPost();
+                $doRedirect = (empty($page) || ($page->ID != $redirect));
+            } elseif ($type == 'url') {
+                $doRedirect = strpos($redirect, $_SERVER['REQUEST_URI']) === false;
+            }
+            
+            if ($doRedirect) {
+                do_action('aam-access-rejected-action', $area, $args);
+                self::redirect($redirect, $args);
+            }
         } else {
             wp_die(-1);
         }
@@ -408,18 +420,24 @@ final class AAM_Core_API {
             $res = $wp_query->queried_object;
         } elseif (!empty($wp_query->post)) {
             $res = $wp_query->post;
-        } elseif (!empty($wp_query->query['name']) && !empty($wp_query->posts)) {
-            //Important! Cover the scenario of NOT LIST but ALLOW READ
-            foreach($wp_query->posts as $post) {
-                if ($post->post_name == $wp_query->query['name']) {
-                    $res = $post;
-                    break;
-                }
-            }
         } elseif (!empty($wp_query->query_vars['p'])) {
             $res = get_post($wp_query->query_vars['p']);
         } elseif (!empty($wp_query->query_vars['page_id'])) {
             $res = get_post($wp_query->query_vars['page_id']);
+        } elseif (!empty($wp_query->query['name'])) {
+            //Important! Cover the scenario of NOT LIST but ALLOW READ
+            if (!empty($wp_query->posts)) {
+                foreach($wp_query->posts as $post) {
+                    if ($post->post_name == $wp_query->query['name']) {
+                        $res = $post;
+                        break;
+                    }
+                }
+            } elseif (!empty($wp_query->query['post_type'])) {
+                $res = get_page_by_path(
+                    $wp_query->query['name'], OBJECT, $wp_query->query['post_type']
+                );
+            }
         }
         
         $user = AAM::getUser();

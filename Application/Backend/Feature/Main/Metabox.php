@@ -41,9 +41,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
                 $url = add_query_arg('init', 'metabox', admin_url('index.php'));
             } else {
                 $url = add_query_arg(
-                        'init', 
-                        'metabox', 
-                        admin_url('post-new.php?post_type=' . $type)
+                    'init', 'metabox', admin_url('post-new.php?post_type=' . $type)
                 );
             }
             
@@ -95,7 +93,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
      */
     public function initialize($post_type) {
         $cache = $this->getMetaboxList();
-
+        
         if ($post_type === 'dashboard') {
             $this->collectWidgets($cache);
         } else {
@@ -129,13 +127,13 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
                 } elseif (is_string($data['callback'][0])) {
                     $callback = $data['callback'][0];
                 } else {
-                    $callback = null;
+                    $callback = isset($data['classname']) ? $data['classname'] : null;
                 }
 
                 if (!is_null($callback)) { //exclude any junk
                     $cache['widgets'][$callback] = array(
                         'title' => strip_tags($data['name']),
-                        'id' => $callback
+                        'id'    => $callback
                     );
                 }
             }
@@ -144,7 +142,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
         //now collect Admin Dashboard Widgets
         $this->collectMetaboxes('dashboard', $cache);
     }
-
+    
     /**
      * Collect metaboxes
      * 
@@ -171,7 +169,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
                             foreach ($boxes as $data) {
                                 if (trim($data['id'])) { //exclude any junk
                                     $cache[$post_type][$data['id']] = array(
-                                        'id' => $data['id'],
+                                        'id'    => $data['id'],
                                         'title' => strip_tags($data['title'])
                                     );
                                 }

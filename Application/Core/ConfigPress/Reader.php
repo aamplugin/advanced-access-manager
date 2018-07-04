@@ -126,7 +126,8 @@ class AAM_Core_ConfigPress_Reader {
     protected function buildNestedSection($data, &$config) {
         foreach ($data as $key => $value) {
             $root = &$config;
-            foreach (explode(self::SEPARATOR, $key) as $level) {
+            // TODO - Remove July 2019
+            foreach (explode(self::SEPARATOR, apply_filters('aam-configpress-compatibility-filter', $key)) as $level) {
                 if (!isset($root[$level])) {
                     $root[$level] = array();
                 }

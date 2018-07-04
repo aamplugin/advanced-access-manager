@@ -51,7 +51,12 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         
         foreach ($list->records as $type) {
             $response['data'][] = array(
-                $type->name, null, 'type', $type->labels->name, 'drilldown,manage'
+                $type->name, 
+                null, 
+                'type', 
+                $type->labels->name, 
+                'drilldown,manage',
+                null
             );
         }
         
@@ -108,12 +113,31 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         foreach($list->records as $record) {
             if (isset($record->ID)) { //this is post
                 $link = get_edit_post_link($record->ID, 'link');
+                
+                $parent = '';
+                
+                if (!empty($record->post_parent)) {
+                    $p = get_post($record->post_parent);
+                    $parent = (is_a($p, 'WP_Post') ? $p->post_title : '');
+                }
+                
+                if (empty($parent)) {
+                    $taxonomies = array_filter(
+                        get_object_taxonomies($record), 'is_taxonomy_hierarchical'
+                    );
+                    if (!empty($taxonomies)) {
+                        $terms = wp_get_object_terms($record->ID, $taxonomies, array('fields' => 'names'));
+                        $parent = implode(', ', $terms);
+                    }
+                }
+                
                 $response['data'][] = array(
                     $record->ID,
                     $link,
                     'post',
                     get_the_title($record),
-                    'manage' . ($link ? ',edit' : ''), 
+                    'manage' . ($link ? ',edit' : ''),
+                    $parent
                     //get_post_permalink($record)
                 );
             } else { //term
@@ -123,10 +147,19 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                     'term',
                     $record->name,
                     'manage,edit',
+                    rtrim(get_term_parents_list(
+                        $record->term_id, 
+                        $record->taxonomy, 
+                        array(
+                            'link' => false, 
+                            'format' => 'name', 
+                            'separator' => ' &raquo; ', 
+                            'inclusive' => false
+                        )
+                    ), ' &raquo; ')
                 );
             }
-        } 
-
+        }
 
         return $response;
     }

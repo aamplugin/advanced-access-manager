@@ -17,6 +17,25 @@
 class AAM_Core_Compatibility {
     
     /**
+     * 
+     */
+    public static function checkConfigPressCompatibility($key) {
+        if (strpos($key, 'htpasswd') === 0) {
+            $key = str_replace('htpasswd', 'feature.metabox.htpasswd', $key);
+        } elseif (strpos($key, 'export') === 0) {
+            $key = str_replace('export', 'feature.export', $key);
+        } elseif (strpos($key, 'default.category') === 0) {
+            $key = str_replace('default.category', 'feature.post.defaultTerm', $key);
+        } elseif (strpos($key, 'extention') === 0) {
+            $key = str_replace('extention', 'core.extention', $key);
+        } elseif (strpos($key, 'login') === 0) {
+            $key = str_replace('login', 'feature.secureLogin', $key);
+        }
+        
+        return $key;
+    }
+    
+    /**
      * Convert all-style AAM settings to standard ConfigPress style settings
      * 
      * @param array $config

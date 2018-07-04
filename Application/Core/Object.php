@@ -177,7 +177,7 @@ abstract class AAM_Core_Object implements AAM_Core_Contract_Object {
      * 
      * @access public
      */
-    public function isOverwritten () {
+    public function isOverwritten() {
         return $this->_overwritten;
     }
     

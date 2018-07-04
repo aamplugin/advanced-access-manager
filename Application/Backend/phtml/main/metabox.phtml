@@ -42,9 +42,9 @@
                                         case 'dashboard':
                                             echo __('Dashboard Widgets', AAM_KEY);
                                             break;
-
+                                        
                                         case 'widgets':
-                                            echo __('Frontend Widgets', AAM_KEY);
+                                            echo AAM_Backend_View_Helper::preparePhrase('Frontend Widgets [(including Appearance->Widgets)]', 'small');
                                             break;
 
                                         default:

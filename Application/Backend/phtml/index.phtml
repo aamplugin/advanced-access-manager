@@ -80,6 +80,65 @@
                     </div>
                 </div>
                 
+                <?php $licenses = AAM_Extension_Repository::getInstance()->getCommercialLicenses(); ?>
+                <?php if (count($licenses)) { ?>
+                    <div class="metabox-holder extensions-metabox" style="display:none;">
+                        <div class="postbox">
+                            <h3 class="hndle">
+                                <span><?php echo __('Premium Licenses', AAM_KEY); ?></span>
+                            </h3>
+                            <div class="inside">
+                                <div class="aam-postbox-inside">
+                                    <table class="table table-striped table-bordered">
+                                        <tbody>
+                                        <?php foreach($licenses as $license) { ?>
+                                            <tr>
+                                                <td width="70%">
+                                                    <b><?php echo $license['extension']; ?></b><br/>
+                                                    <small>License: <?php echo $license['license']; ?></small>
+                                                    <?php if (!empty($license['expires'])) { ?>
+                                                    <br/> <small>Expires: <?php echo $license['expires']; ?></small>
+                                                    <?php } ?>
+                                                </td>
+                                                <td>
+                                                    <div class="aam-row-actions">
+                                                        <a href="#transfer-license-modal" data-toggle="modal" class="aam-row-action"><i class="icon-exchange text-warning" data-toggle="tooltip" title="<?php echo __('Transfer License', AAM_KEY); ?>"></i></a>
+                                                        <?php if (!empty($license['expires'])) { ?>
+                                                        <a href="https://aamplugin.com/upgrade/<?php echo $license['license']; ?>" data-toggle="tooltip" title="<?php echo __('Upgrade License', AAM_KEY); ?>" class="aam-row-action" target="_blank"><i class="icon-angle-circled-up text-success"></i></a>
+                                                        <?php } ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="modal fade" id="transfer-license-modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><?php echo __('Transfer license', AAM_KEY); ?></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <p class="aam-info">
+                                            <?php echo AAM_Backend_View_Helper::preparePhrase('In order to transfer the license to a different domain, please contact us via email [support@aamplugin.com] with a reason for a transfer.', 'b'); ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                
                 <div class="metabox-holder extensions-metabox" style="display:none;">
                     <div class="postbox">
                         <div class="inside">

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg">
-<metadata>Copyright (C) 2017 by original authors @ fontello.com</metadata>
+<metadata>Copyright (C) 2018 by original authors @ fontello.com</metadata>
 <defs>
 <font id="fontello" horiz-adv-x="1000" >
 <font-face font-family="fontello" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
@@ -97,6 +97,8 @@
 <glyph glyph-name="exchange" unicode="&#xf0ec;" d="M1000 189v-107q0-7-5-12t-13-6h-768v-107q0-7-5-12t-13-6q-6 0-13 6l-178 178q-5 6-5 13 0 8 5 13l179 178q5 5 12 5 8 0 13-5t5-13v-107h768q7 0 13-5t5-13z m0 304q0-8-5-13l-179-178q-5-6-12-6-8 0-13 6t-5 12v107h-768q-7 0-13 6t-5 12v107q0 8 5 13t13 5h768v107q0 8 5 13t13 5q6 0 13-5l178-178q5-5 5-13z" horiz-adv-x="1000" />
 
 <glyph glyph-name="circle" unicode="&#xf111;" d="M857 350q0-117-57-215t-156-156-215-58-216 58-155 156-58 215 58 215 155 156 216 58 215-58 156-156 57-215z" horiz-adv-x="857.1" />
+
+<glyph glyph-name="angle-circled-up" unicode="&#xf139;" d="M650 214l57 57q11 11 11 25t-11 26l-253 253q-11 11-25 11t-25-11l-254-253q-10-11-10-26t10-25l57-57q11-10 25-10t25 10l172 172 171-172q11-10 25-10t25 10z m207 136q0-117-57-215t-156-156-215-58-216 58-155 156-58 215 58 215 155 156 216 58 215-58 156-156 57-215z" horiz-adv-x="857.1" />
 
 <glyph glyph-name="dollar" unicode="&#xf155;" d="M546 189q0-86-56-147t-144-77v-97q0-8-5-13t-13-5h-75q-7 0-13 5t-5 13v97q-37 5-71 18t-57 25-41 26-26 21-10 10q-9 12-1 23l58 76q3 5 12 6 9 1 14-5l1-1q63-55 135-70 21-4 42-4 45 0 79 24t35 68q0 16-9 30t-18 23-33 21-37 18-45 18q-21 9-34 14t-34 15-35 17-32 20-29 24-25 27-20 32-11 37-5 44q0 77 55 135t142 75v100q0 7 5 13t13 5h75q8 0 13-5t5-13v-98q32-3 62-13t48-19 36-20 21-17 9-7q9-11 3-22l-46-81q-4-9-12-9-8-2-15 4-2 2-9 7t-21 14-33 18-42 15-47 6q-53 0-87-24t-33-62q0-14 4-27t17-23 22-18 31-18 34-15 39-15q30-11 45-17t43-20 42-24 34-28 30-35 18-43 7-52z" horiz-adv-x="571.4" />
 

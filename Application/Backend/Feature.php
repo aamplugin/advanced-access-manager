@@ -94,7 +94,7 @@ class AAM_Backend_Feature {
      */
     public static function initView(stdClass $feature){
         if (is_string($feature->view)){
-            $feature->view = new $feature->view;
+            $feature->view = new $feature->view(AAM_Backend_Subject::getInstance());
         }
 
         return $feature;

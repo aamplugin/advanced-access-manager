@@ -13,7 +13,7 @@
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  */
-class AAM_Restful_Resource_User {
+class AAM_Api_Rest_Resource_User {
     
     /**
      * Instance of itself
