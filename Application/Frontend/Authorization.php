@@ -75,7 +75,7 @@ class AAM_Frontend_Authorization {
             $date = strtotime($post->get('frontend.expire_datetime'));
             if ($date <= time()) {
                 $actions = AAM_Core_Config::get(
-                        'feature.post.access.expired', 'frontend.read'
+                        'feature.frontend.postAccess.expired', 'frontend.read'
                 );
 
                 foreach(array_map('trim', explode(',', $actions)) as $action) {

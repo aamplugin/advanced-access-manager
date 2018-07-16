@@ -68,8 +68,11 @@ class AAM_Core_Object_LoginRedirect extends AAM_Core_Object {
     }
     
     /**
+     * Reset settings to default
      * 
-     * @return type
+     * @return boolean
+     * 
+     * @access public
      */
     public function reset() {
         return $this->getSubject()->deleteOption('loginredirect');

@@ -380,14 +380,20 @@ class AAM_Extension_Repository {
      * 
      * @access public
      */
-    public function getBasedir() {
-        $dirname = AAM_Core_Config::get('core.extention.directory', AAM_EXTENSION_BASE);
+    public function getBasedir($relative = false) {
+        $dir = AAM_Core_Config::get('core.extention.directory', AAM_EXTENSION_BASE);
         
-        if (file_exists($dirname) === false) {
-            @mkdir($dirname, fileperms( ABSPATH ) & 0777 | 0755);
-        }
+        return ($relative ? str_replace(ABSPATH, '', $dir) : $dir);
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    public function isWriteableDirectory() {
+        $directory = $this->getBasedir();
         
-        return $dirname;
+        return file_exists($directory) && is_writeable($directory);
     }
     
     /**

@@ -47,6 +47,11 @@ class AAM_Shared_Manager {
             // Disable XML-RPC if needed
             if (!AAM_Core_Config::get('core.settings.xmlrpc', true)) {
                 add_filter('xmlrpc_enabled', '__return_false');
+            } else {
+                add_action(
+                    'xmlrpc_call', 
+                    array(self::$_instance, 'authorizeXMLRPCRequest')
+                );
             }
 
             // Disable RESTful API if needed
@@ -57,7 +62,7 @@ class AAM_Shared_Manager {
                     1
                 );
             }
-
+            
             // Control post visibility
             //important to keep this option optional for optimization reasons
             if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
@@ -77,6 +82,21 @@ class AAM_Shared_Manager {
     }
     
     /**
+     * 
+     * @param type $method
+     */
+    public function authorizeXMLRPCRequest($method) {
+        $object = AAM::api()->getUser(get_current_user_id())->getObject('route');
+        
+        if ($object->has('xmlrpc', $method)) {
+            AAM_Core_API::getXMLRPCServer()->error(
+                401, 
+                'Authorization Error. You are not authorized to perform this action'
+            );
+        }
+    }
+    
+    /**
      * After post SELECT query 
      * 
      * @param array    $clauses
@@ -90,7 +110,7 @@ class AAM_Shared_Manager {
     public function filterPostQuery($clauses, $wpQuery) {
         if ($this->isPostFilterEnabled()) {
             $option = AAM::getUser()->getObject('visibility')->getOption();
-
+            
             if (!empty($option['post'])) {
                 $query = $this->preparePostQuery($option['post'], $wpQuery);
             } else {
@@ -149,7 +169,16 @@ class AAM_Shared_Manager {
             $postType = 'post';
         }
         
-        return $postType;
+        if ($postType == 'any') {
+            $postType = array_keys(
+                get_post_types(
+                    array('public' => true, 'exclude_from_search' => false), 
+                    'names'
+                )
+            );
+        }
+        
+        return (array) $postType;
     }
     
     /**
@@ -166,7 +195,7 @@ class AAM_Shared_Manager {
     protected function preparePostQuery($visibility, $wpQuery) {
         global $wpdb;
         
-        $postType = $this->getQueryingPostType($wpQuery);
+        $postTypes = $this->getQueryingPostType($wpQuery);
         
         $not = array();
         $area = AAM_Core_Api_Area::get();
@@ -174,7 +203,7 @@ class AAM_Shared_Manager {
         foreach($visibility as $id => $access) {
             $chunks = explode('|', $id);
 
-            if ($postType == $chunks[1]) {
+            if (in_array($chunks[1], $postTypes)) {
                 if (!empty($access["{$area}.list"])) {
                     $not[] = $chunks[0];
                 }

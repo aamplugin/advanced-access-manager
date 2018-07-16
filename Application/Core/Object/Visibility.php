@@ -74,9 +74,9 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
             }
             
             if (in_array($subject::UID, array('user', 'visitor'))) {
-                $subject->getObject('cache')->add(
-                    'visibility', 0, empty($option) ? false : $option
-                );
+               // $subject->getObject('cache')->add(
+               //     'visibility', 0, empty($option) ? false : $option
+               // );
             }
         }
         
@@ -103,15 +103,18 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
             }
         }
         
-        if (!empty($filtered)) {
-            $option = $this->getOption();
-            if (isset($option[$object][$id])) {
-                $option[$object][$id] = array_merge($option[$object][$id], $filtered);
-            } else {
-                $option[$object][$id] = $filtered;
-            }
-            $this->setOption($option);
+        if (empty($filtered)) {
+            $filtered = array_combine(
+                    $listOptions, 
+                    array_fill(0, count($listOptions), 0)
+            );
         }
+        
+        $option = $this->getOption();
+        if (!isset($option[$object][$id])) {
+            $option[$object][$id] = $filtered;
+        }
+        $this->setOption($option);
         
         return $filtered;
     }

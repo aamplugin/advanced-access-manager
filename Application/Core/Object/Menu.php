@@ -200,6 +200,32 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         
         return $direct || $branch || $indirect;
     }
+    
+    /**
+     * Allow access to a specific menu
+     * 
+     * @param string $menu
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function allow($menu) {
+        return $this->save($menu, 0);
+    }
+    
+    /**
+     * Deny access to a specific menu
+     * 
+     * @param string $menu
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function deny($menu) {
+        return $this->save($menu, 1);
+    }
 
     /**
      * Save menu option

@@ -141,6 +141,21 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
     
     /**
      * 
+     * @return type
+     */
+    public function fixDirectoryIssue() {
+        $dirname = AAM_Extension_Repository::getInstance()->getBasedir();
+        if (file_exists($dirname) === false) {
+            @mkdir($dirname, fileperms( ABSPATH ) & 0777 | 0755, true);
+        }
+        
+        return json_encode(array(
+            'status' => (AAM_Extension_Repository::getInstance()->isWriteableDirectory() ? 'success' : 'failed')
+        ));
+    }
+    
+    /**
+     * 
      * @param type $type
      * @return type
      */

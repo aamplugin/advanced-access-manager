@@ -147,14 +147,17 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     /**
      * Save options
      * 
+     * @param string $property
+     * @param mixed  $value
+     * 
      * @return boolean
      * 
      * @access public
      */
-    public function save($property, $checked) {
+    public function save($property, $value) {
         $option = $this->getOption();
         
-        $option[$property] = $checked;
+        $option[$property] = $value;
         
         // Very specific WP case. According to the WP core, you are not allowed to
         // set meta for revision, so let's bypass this constrain.
@@ -231,19 +234,67 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     /**
      * Check if option is set
      * 
-     * @param string $area
-     * @param string $action
+     * @param string $property
      * 
      * @return boolean
      * 
      * @access public
      */
-    public function has($action) {
+    public function has($property) {
         $option = $this->getOption();
 
-        return (isset($option[$action]) && $option[$action]);
+        return (array_key_exists($property, $option) && $option[$property]);
     }
-
+    
+    /**
+     * Update property
+     * 
+     * @param string $property
+     * @param mixed  $value
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function update($property, $value) {
+        return $this->save($property, $value);
+    }
+    
+    /**
+     * Remove property
+     * 
+     * @param string $property
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function remove($property) {
+        $option = $this->getOption();
+        
+        if (array_key_exists($option, $property)) {
+            unset($option[$property]);
+        }
+        
+        // Very specific WP case. According to the WP core, you are not allowed to
+        // set meta for revision, so let's bypass this constrain.
+        if ($this->getPost()->post_type == 'revision') {
+            $result =  update_metadata(
+                'post', $this->getPost()->ID, $this->getOptionName(), $option
+            );
+        } else {
+            $result = update_post_meta(
+                    $this->getPost()->ID, $this->getOptionName(), $option
+            );
+        }
+        
+        if ($result) {
+            $this->setOption($option);
+        }
+        
+        return $result;
+    }
+    
     /**
      * Get option
      * 

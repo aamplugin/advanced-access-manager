@@ -50,6 +50,24 @@ final class AAM_Core_API {
     
     /**
      * 
+     * @staticvar type $xmlrpc
+     * @return \classname
+     */
+    public static function getXMLRPCServer() {
+        static $xmlrpc = null;
+        
+        if (is_null($xmlrpc)) {
+            require_once(ABSPATH . WPINC . '/class-IXR.php');
+            require_once(ABSPATH . WPINC . '/class-wp-xmlrpc-server.php'); 
+            $classname = apply_filters('wp_xmlrpc_server_class', 'wp_xmlrpc_server');
+            $xmlrpc = new $classname;
+        }
+        
+        return $xmlrpc;
+    }
+    
+    /**
+     * 
      * @param type $option
      * @param type $default
      * @return type
@@ -378,30 +396,6 @@ final class AAM_Core_API {
         }
         
         return (!empty($version) ? $version : null);
-    }
-    
-    /**
-     * Get Query post type
-     * 
-     * @param WP_Query $query
-     * 
-     * @return string
-     * 
-     * @access public
-     */
-    public static function getQueryPostType($query) {
-        //get post type based on queired object
-        if (!empty($query->query['post_type'])) {
-            $type = $query->query['post_type'];
-        } elseif (!empty($query->query_vars['post_type'])) {
-            $type = $query->query_vars['post_type'];
-        }
-        
-        if (empty($type) || !is_scalar($type)){
-            $type = 'post';
-        }
-        
-        return $type;
     }
     
     /**

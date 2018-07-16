@@ -349,30 +349,6 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     }
     
     /**
-     * 
-     * @return type
-     */
-    public function autocomplete() {
-        $res  = array();
-        $list = get_posts(array(
-            'post_type'   => AAM_Core_Request::post('type'), 
-            'category'    => 0, 
-            's'           => AAM_Core_Request::post('s'),
-            'numberposts' => 10, 
-            'post_status' => 'any', 
-            'fields'      => 'all'
-        ));
-
-        if (count($list)) {
-            foreach($list as $post) {
-                $res[] = "{$post->ID}|{$post->post_title}";
-            }
-        }
-
-        return json_encode($res);
-    }
-
-    /**
      * Get Post or Term access
      *
      * @return string

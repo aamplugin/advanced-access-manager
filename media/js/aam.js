@@ -169,10 +169,15 @@
                         var create = $('<a/>', {
                             'href': '#',
                             'class': 'btn btn-primary'
-                        }).html('<i class="icon-plus"></i> ' + aam.__('Create'))
+                        })
+                        .html('<i class="icon-plus"></i>')
                         .bind('click', function () {
                             resetForm('#add-role-modal .modal-body');
                             $('#add-role-modal').modal('show');
+                        })
+                        .attr({
+                            'data-toggle': "tooltip",
+                            'title': aam.__('Create New Role')
                         });
 
                         $('.dataTables_filter', '#role-list_wrapper').append(create);
@@ -630,10 +635,13 @@
                     url: aamLocal.ajaxurl,
                     type: 'POST',
                     dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Subject_User.getTable',
-                        _ajax_nonce: aamLocal.nonce
+                    data: function(params) {
+                       params.action = 'aam';
+                       params.sub_action = 'Subject_User.getTable';
+                       params._ajax_nonce = aamLocal.nonce;
+                       params.role = $('#user-list-filter').val();
+                       
+                       return params;
                     }
                 },
                 columnDefs: [
@@ -650,11 +658,48 @@
                         var create = $('<a/>', {
                             'href': '#',
                             'class': 'btn btn-primary'
-                        }).html('<i class="icon-plus"></i> ' + aam.__('Create')).bind('click', function () {
+                        })
+                        .html('<i class="icon-plus"></i> ')
+                        .bind('click', function () {
                             window.open(aamLocal.url.addUser, '_blank');
+                        })
+                        .attr({
+                            'data-toggle': "tooltip",
+                            'title': aam.__('Create New User')
                         });
 
                         $('.dataTables_filter', '#user-list_wrapper').append(create);
+                        
+                        var filter = $('<select>').attr({
+                            'class': 'user-filter',
+                            'id': 'user-list-filter'
+                        })
+                        .html('<option value="">' + aam.__('Loading roles...') + '</option>')
+                        .bind('change', function() {
+                            $('#user-list').DataTable().ajax.reload();
+                        });
+                        
+                        $('.dataTables_filter', '#user-list_wrapper').append(filter);
+                        
+                        $.ajax(aamLocal.ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Subject_Role.getList',
+                                _ajax_nonce: aamLocal.nonce
+                            },
+                            success: function (response) {
+                                $('#user-list-filter').html(
+                                    '<option value="">' + aam.__('Select Role') + '</option>'
+                                );
+                                for (var i in response) {
+                                    $('#user-list-filter').append(
+                                        '<option value="' + i + '">' + response[i].name + '</option>'
+                                    );
+                                }
+                            }
+                        });
                     }
                 },
                 createdRow: function (row, data) {
@@ -2446,8 +2491,8 @@
                             }
                         },
                         columnDefs: [
-                            {visible: false, targets: [0]},
-                            {className: 'text-center', targets: [1]}
+                           // {visible: false, targets: [0]},
+                            {className: 'text-center', targets: [0, 1]}
                         ],
                         language: {
                             search: '_INPUT_',
@@ -2463,7 +2508,11 @@
                                 'class': 'aam-api-method ' + data[1].toLowerCase()
                             }).text(data[1]);
                             
-                            $('td:eq(0)', row).html(method);
+                            $('td:eq(0)', row).html(
+                                '<small>' + (data[0] === 'restful' ? 'JSON' : 'XML') + '</small>'
+                            );
+                            
+                            $('td:eq(1)', row).html(method);
                             
                             var actions = data[3].split(',');
 
@@ -2490,7 +2539,7 @@
                                         break;
                                 }
                             });
-                            $('td:eq(2)', row).html(container);
+                            $('td:eq(3)', row).html(container);
                         }
                     });
 
@@ -2690,6 +2739,39 @@
                             }, function() {
                                 $('i', _this).attr('class', 'icon-download-cloud');
                             });
+                        });
+                    });
+                    
+                    $('#fix-extension-dir-issue').bind('click', function(event) {
+                        event.preventDefault();
+                        
+                        $('i', this).attr('class', 'icon-spin4 animate-spin');
+                        
+                        $.ajax(aamLocal.ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Extension_Manager.fixDirectoryIssue',
+                                _ajax_nonce: aamLocal.nonce
+                            },
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    $('#extension-dir-warning').remove();
+                                    aam.notification(
+                                        'success', 
+                                        aam.__('The issue has been resolved')
+                                    );
+                                } else {
+                                    $('#extension-dir-issue-modal').modal('show');
+                                }
+                            },
+                            error: function() {
+                                aam.notification('danger', aam.__('Application error'));
+                            },
+                            complete: function () {
+                                $('i', '#fix-extension-dir-issue').attr('class', 'icon-wrench');
+                            }
                         });
                     });
 

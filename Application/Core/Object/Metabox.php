@@ -85,7 +85,7 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @param type $screen
      */
     public function filterBackend($screen) {
-        global $wp_meta_boxes, $wp_registered_widgets;
+        global $wp_meta_boxes;
 
         if (is_array($wp_meta_boxes)) {
             foreach ($wp_meta_boxes as $screen_id => $zones) {
@@ -168,6 +168,34 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
         $options = $this->getOption();
 
         return !empty($options[$screen][$metabox]);
+    }
+    
+    /**
+     * Allow access to a specific metabox
+     * 
+     * @param string $screen
+     * @param string $metabox
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function allow($screen, $metabox) {
+        $this->save("{$screen}|{$metabox}", 0);
+    }
+    
+    /**
+     * Deny access to a specific metabox
+     * 
+     * @param string $screen
+     * @param string $metabox
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function deny($screen, $metabox) {
+        return $this->save("{$screen}|{$metabox}", 1);
     }
 
 }

@@ -156,7 +156,9 @@ class AAM_Api_Rest_Resource_Post {
         if ($expire) {
             $date = strtotime($post->get('api.expire_datetime'));
             if ($date <= time()) {
-                $actions = AAM_Core_Config::get('post.access.expired', 'api.read');
+                $actions = AAM_Core_Config::get(
+                        'feature.api.postAccess.expired', 'api.read'
+                );
 
                 foreach(array_map('trim', explode(',', $actions)) as $action) {
                     $post->set($action, 1);

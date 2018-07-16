@@ -236,6 +236,11 @@ html, body {
     font-size: 1em;
 }
 
+.hndle.warning {
+    background-color: #f0ad4e !important;
+    color: #FFFFFF;
+}
+
 /** BOOTSTRAP **/
 .row {
     position: relative;
@@ -476,6 +481,10 @@ table.table-bordered.dataTable tbody th, table.table-bordered.dataTable tbody td
 #capability-groups {
     right: 0;
     left: auto;
+}
+
+.user-filter {
+    max-width: 40%;
 }
 
 input[type=checkbox] { /* to hide the checkbox itself */
@@ -754,7 +763,7 @@ input[type=radio]:checked + label:before {
     padding: 2px 15px 0px 15px;
 }
 
-.aam-submenu-item .aam-menu-capability {
+.aam-submenu-item .aam-menu-capability, .aam-metabox-details {
     display: block;
     margin-top: -4px;
 }
@@ -995,7 +1004,7 @@ input[type=radio]:checked + label:before {
     margin-bottom: 0;
 }
 
-.aam-menu-capability {
+.aam-menu-capability, .aam-metabox-details {
     color: #777777;
     font-weight: 400;
 }

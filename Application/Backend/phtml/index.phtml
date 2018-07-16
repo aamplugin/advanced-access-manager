@@ -80,6 +80,41 @@
                     </div>
                 </div>
                 
+                <?php if (AAM_Extension_Repository::getInstance()->isWriteableDirectory() === false) { ?>
+                    <?php $relativePath = AAM_Extension_Repository::getInstance()->getBasedir(true); ?>
+                    <div class="metabox-holder extensions-metabox" id='extension-dir-warning' style="display:none;">
+                        <div class="postbox">
+                            <h3 class="hndle warning">
+                                <span><?php echo __('Warning', AAM_KEY); ?></span>
+                            </h3>
+                            <div class="inside">
+                                <div class="aam-postbox-inside text-center">
+                                    <p class='alert alert-warning text-larger highlighted-italic'>
+                                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('All AAM extension should be located in [%s] directory however it either does not exist or is not writable.', 'b'), $relativePath); ?>
+                                    </p>
+                                    <a href="#" class="btn btn-sm btn-success btn-block" id='fix-extension-dir-issue'><i class="icon-wrench"></i> <?php echo __('Click To Fix The Issue', AAM_KEY); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="extension-dir-issue-modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <p class="alert alert-warning text-larger">
+                                            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Failed to create a [%s] directory for AAM extension. To create it manually, login to your website via FTP and create [%s] directory. [Please Note!] It is a relative directory path from your website root (where wp-config.php file is located).', 'b', 'b', 'b'), $relativePath, $relativePath); ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Ok', AAM_KEY); ?></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                
                 <?php $licenses = AAM_Extension_Repository::getInstance()->getCommercialLicenses(); ?>
                 <?php if (count($licenses)) { ?>
                     <div class="metabox-holder extensions-metabox" style="display:none;">

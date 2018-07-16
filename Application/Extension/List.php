@@ -22,7 +22,7 @@ class AAM_Extension_List {
                 'description' => 'Get the complete list of all available premium extensions in one package. Any new premium extensions in the future will be available for no additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
                 'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
-                'latest'      => '3.8' 
+                'latest'      => '3.8.2' 
             ),
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
@@ -31,7 +31,7 @@ class AAM_Extension_List {
                 'description' => 'The best selling extension with the most advanced content management features for the WordPress CMS. Manage granular access to any post, page, custom post type, category, custom hierarchical taxonomy or define the default access to all your content for all users, roles and visitors.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null),
-                'latest'      => '3.7.3'
+                'latest'      => '3.7.5'
             ),
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',

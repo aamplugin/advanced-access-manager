@@ -93,6 +93,7 @@ class AAM_Backend_Feature_Subject_User {
      */
     public function query() {
         $search = trim(AAM_Core_Request::request('search.value'));
+        $role   = trim(AAM_Core_Request::request('role'));
         
         $args = array(
             'blog_id' => get_current_blog_id(),
@@ -106,6 +107,10 @@ class AAM_Backend_Feature_Subject_User {
             'orderby' => 'user_nicename',
             'order'   => 'ASC'
         );
+        
+        if (!empty($role)) {
+            $args['role__in'] = $role;
+        }
 
         return new WP_User_Query($args);
     }

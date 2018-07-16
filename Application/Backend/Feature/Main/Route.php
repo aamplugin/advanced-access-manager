@@ -75,6 +75,16 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
             }
         }
         
+        // Build XML RPC routes
+        foreach(array_keys(AAM_Core_API::getXMLRPCServer()->methods) as $route) {
+            $response[] = array(
+                'xmlrpc',
+                'POST',
+                htmlspecialchars($route),
+                $object->has('xmlrpc', $route) ? 'checked' : 'unchecked'
+            );
+        }
+        
         return $response;
     }
 
