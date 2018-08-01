@@ -110,7 +110,11 @@ class AAM_Frontend_Manager {
      */
     public function printJavascript() {
         if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
-            wp_enqueue_script('aam-login', AAM_MEDIA . '/js/aam-login.js');
+            wp_enqueue_script(
+                'aam-login', 
+                AAM_MEDIA . '/js/aam-login.js', 
+                array('jquery')
+            );
 
             //add plugin localization
             $locals = array(

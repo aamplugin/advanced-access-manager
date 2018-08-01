@@ -129,7 +129,7 @@ class AAM_Core_Login {
                     'authentication_failed', 
                     AAM_Backend_View_Helper::preparePhrase($message, 'strong')
                 );
-            } elseif (AAM_Core_Config::get('single-session', false)) {
+            } elseif (AAM_Core_Config::get('core.settings.singleSession', false)) {
                 $sessions = WP_Session_Tokens::get_instance($user->ID);
                 
                 if (count($sessions->get_all()) > 1) {
@@ -174,12 +174,12 @@ class AAM_Core_Login {
      */
     public function authenticate($response) {
         // Login Timeout
-        if (AAM_Core_Config::get('login-timeout', false)) {
+        if (AAM_Core_Config::get('core.settings.loginTimeout', false)) {
             @sleep(intval(AAM_Core_Config::get('security.login.timeout', 1)));
         }
 
         // Brute Force Lockout
-        if (AAM_Core_Config::get('brute-force-lockout', false)) {
+        if (AAM_Core_Config::get('core.settings.bruteForceLockout', false)) {
             $this->updateLoginCounter(1);
         }
         

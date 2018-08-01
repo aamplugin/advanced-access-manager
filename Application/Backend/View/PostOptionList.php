@@ -25,7 +25,6 @@ class AAM_Backend_View_PostOptionList {
                 'list' => array(
                     'title'  => __('List', AAM_KEY),
                     'descr'  => __('Hide %s however still allow access with direct URL.', AAM_KEY) . sprintf(__(' %sSee in action.%s', AAM_KEY), "<a href='https://youtu.be/2jiu_CL6JJg' target='_blank'>", '</a>'),
-                    'config' => 'core.settings.checkPostVisibility'
                 ),
                 'read' => array(
                     'title' => __('Read', AAM_KEY),
@@ -91,7 +90,6 @@ class AAM_Backend_View_PostOptionList {
                     'title'   => __('List', AAM_KEY),
                     'exclude' => array(AAM_Core_Subject_Visitor::UID),
                     'descr'   => __('Hide %s however still allow access with direct URL.', AAM_KEY),
-                    'config'  => 'core.settings.checkPostVisibility'
                 ),
                 'edit' => array(
                     'title'   => __('Edit', AAM_KEY),
@@ -113,7 +111,6 @@ class AAM_Backend_View_PostOptionList {
                 'list' => array(
                     'title'  => __('List', AAM_KEY),
                     'descr'  => __('Hide %s however still allow access to retrieve %s.', AAM_KEY),
-                    'config' => 'core.settings.checkPostVisibility'
                 ),
                 'read' => array(
                     'title' => __('Read', AAM_KEY),

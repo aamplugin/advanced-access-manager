@@ -64,21 +64,58 @@ class AAM_Shared_Manager {
             }
             
             // Control post visibility
-            //important to keep this option optional for optimization reasons
-            if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
-                add_filter(
-                    'posts_clauses_request', 
-                    array(self::$_instance, 'filterPostQuery'), 
-                    999, 
-                    2
-                );
-            }
-            
+            add_filter(
+                'posts_clauses_request', 
+                array(self::$_instance, 'filterPostQuery'), 
+                999, 
+                2
+            );
+
             //filter post content
-            add_filter('the_content', array(self::$_instance, 'filterPostContent'), 999);
+            add_filter(
+                'the_content', array(self::$_instance, 'filterPostContent'), 999
+            );
+            
+            //filter admin toolbar
+            if (AAM_Core_Config::get('core.settings.backendAccessControl', true)) {
+                if (filter_input(INPUT_GET, 'init') !== 'toolbar') {
+                    add_action(
+                        'wp_before_admin_bar_render', 
+                        array(self::$_instance, 'filterToolbar'), 
+                        999
+                    );
+                }
+            }
         }
         
         return self::$_instance;
+    }
+    
+    /**
+     * 
+     * @global type $wp_admin_bar
+     */
+    public function filterToolbar() {
+        global $wp_admin_bar;
+        
+        $toolbar = AAM::api()->getUser()->getObject('toolbar');
+        
+        //echo '<pre>'; print_r($wp_admin_bar->get_nodes()); die();
+        
+        foreach($wp_admin_bar->get_nodes() as $id => $node) {
+            if ($toolbar->has($id, true)) {
+                if (!empty($node->parent)) { // update parent node with # link
+                    $parent = $wp_admin_bar->get_node($node->parent);
+                    if ($parent && ($parent->href == $node->href)) {
+                        $wp_admin_bar->add_node(array(
+                            'id'   => $parent->id,
+                            'href' => '#'
+                        ));
+                    }
+                }
+                $wp_admin_bar->remove_node($id);
+            }
+        }
     }
     
     /**
@@ -132,16 +169,12 @@ class AAM_Shared_Manager {
      * @return type
      */
     protected function isPostFilterEnabled() {
-        $visibility = AAM_Core_Config::get('core.settings.checkPostVisibility', true);
-        
-        if ($visibility) {
-            if (AAM_Core_Api_Area::isBackend()) {
-                $visibility = AAM_Core_Config::get('core.settings.backendAccessControl', true);
-            } elseif (AAM_Core_Api_Area::isAPI()) {
-                $visibility = AAM_Core_Config::get('core.settings.apiAccessControl', true);
-            } else {
-                $visibility = AAM_Core_Config::get('core.settings.frontendAccessControl', true);
-            }
+        if (AAM_Core_Api_Area::isBackend()) {
+            $visibility = AAM_Core_Config::get('core.settings.backendAccessControl', true);
+        } elseif (AAM_Core_Api_Area::isAPI()) {
+            $visibility = AAM_Core_Config::get('core.settings.apiAccessControl', true);
+        } else {
+            $visibility = AAM_Core_Config::get('core.settings.frontendAccessControl', true);
         }
         
         return $visibility;
@@ -166,7 +199,7 @@ class AAM_Shared_Manager {
         } elseif ($wpQuery->is_page) {
             $postType = 'page';
         } else {
-            $postType = 'post';
+            $postType = 'any';
         }
         
         if ($postType == 'any') {

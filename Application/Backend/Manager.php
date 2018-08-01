@@ -107,6 +107,11 @@ class AAM_Backend_Manager {
         //control admin area
         add_action('admin_init', array($this, 'adminInit'));
         
+        //admin toolbar
+        if (filter_input(INPUT_GET, 'init') == 'toolbar') {
+            add_action('wp_after_admin_bar_render', array($this, 'adminBar'));
+        }
+        
         //register login widget
         if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
             add_action('widgets_init', array($this, 'registerLoginWidget'));
@@ -381,6 +386,37 @@ class AAM_Backend_Manager {
                 'advanced',
                 'high'
             );
+        }
+    }
+    
+    /**
+     * 
+     * @global type $wp_admin_bar
+     */
+    public function adminBar() {
+        global $wp_admin_bar;
+        
+        $reflection = new ReflectionClass(get_class($wp_admin_bar));
+        
+        $prop = $reflection->getProperty('nodes');
+        $prop->setAccessible(true);
+        
+        $nodes = $prop->getValue($wp_admin_bar);
+        
+        if (isset($nodes['root'])) {
+            $cache = array();
+            foreach($nodes['root']->children as $node) {
+                $cache = array_merge($cache, $node->children);
+            }
+            
+            // do some cleanup
+            foreach($cache as $i => $node) {
+                if ($node->id == 'menu-toggle') {
+                    unset($cache[$i]);
+                }
+            }
+            
+            AAM_Core_API::updateOption('aam_toolbar_cache', array_values($cache));
         }
     }
     

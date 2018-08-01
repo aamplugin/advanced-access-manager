@@ -35,17 +35,17 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
             ),
             'core.settings.backendAccessControl' => array(
                 'title' => __('Backend Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to the backend. Note! Keep this option disabled if there is no needs to restrict backend features for other users.', AAM_KEY),
+                'descr' => __('Allow AAM to manage access to the backend. Keep this option disabled if there is no needs to restrict backend features for other users.', AAM_KEY),
                 'value' => AAM_Core_Config::get('core.settings.backendAccessControl', true)
             ),
             'core.settings.frontendAccessControl' => array(
                 'title' => __('Frontend Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to the frontend. Note! Keep this option disabled if there is no needs to restrict frontend resources for users and visitors.', AAM_KEY),
+                'descr' => __('Allow AAM to manage access to the frontend. Keep this option disabled if there is no needs to restrict frontend resources for users and visitors.', AAM_KEY),
                 'value' => AAM_Core_Config::get('core.settings.frontendAccessControl', true)
             ),
             'core.settings.apiAccessControl' => array(
                 'title' => __('API Access Control', AAM_KEY),
-                'descr' => __('Allow AAM to manage access to the website resources that are invoked with WordPress core APIs (currently only for RESTful API). Note! Keep this option disabled if there is no needs to restrict API access.', AAM_KEY),
+                'descr' => __('Allow AAM to manage access to the website resources that are invoked with WordPress core APIs. Keep this option disabled if there is no needs to restrict API access.', AAM_KEY),
                 'value' => AAM_Core_Config::get('core.settings.apiAccessControl', true)
             ),
             'ui.settings.renderAccessMetabox' => array(

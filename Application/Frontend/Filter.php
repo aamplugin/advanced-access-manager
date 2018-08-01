@@ -39,15 +39,12 @@ class AAM_Frontend_Filter {
         add_action('wp', array($this, 'wp'), 999);
         add_action('404_template', array($this, 'themeRedirect'), 999);
         
-        //important to keep this option optional for optimization reasons
-        if (AAM_Core_Config::get('core.settings.checkPostVisibility', true)) {
-            // TODO: figure out how to remove these two hooks and inject "visibility"
-            // object instead
-            //filter navigation pages & taxonomies
-            add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
-            // filter navigation pages & taxonomies
-            add_filter('get_pages', array($this, 'filterPages'), 999);
-        }
+        // TODO: figure out how to remove these two hooks and inject "visibility"
+        // object instead
+        //filter navigation pages & taxonomies
+        add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
+        // filter navigation pages & taxonomies
+        add_filter('get_pages', array($this, 'filterPages'), 999);
         
         //widget filters
         add_filter('sidebars_widgets', array($this, 'filterWidgets'), 999);

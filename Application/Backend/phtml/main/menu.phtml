@@ -42,7 +42,7 @@
                         <div id="menu-<?php echo $i; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
                             <div class="panel-body">
                                 <?php if (!empty($menu['submenu'])) { ?>
-                                    <div class="row">
+                                    <div class="row aam-inner-tab">
                                         <?php echo ($object->has($menu['id']) ? '<div class="aam-lock"></div>' : ''); ?>
                                         <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
                                             <?php if ($submenu['id'] == 'index.php') { ?>

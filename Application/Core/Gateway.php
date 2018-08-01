@@ -88,7 +88,7 @@ final class AAM_Core_Gateway {
      * @access public
      */
     public function denyAccess($params = null) {
-        AAM_Core_API::reject();
+        AAM_Core_API::reject(AAM_Core_Api_Area::get(), $params);
     }
     
     /**

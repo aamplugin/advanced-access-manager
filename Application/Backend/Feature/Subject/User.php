@@ -234,7 +234,7 @@ class AAM_Backend_Feature_Subject_User {
             update_user_meta(
                 $user, 
                 'aam_user_expiration',
-                date('Y-m-d H:i:s', strtotime($expires)) . "|" . ($action ? $action : 'delete') . '|' . $role
+                $expires . "|" . ($action ? $action : 'delete') . '|' . $role
             );
         } else {
             delete_user_meta($user, 'aam_user_expiration');

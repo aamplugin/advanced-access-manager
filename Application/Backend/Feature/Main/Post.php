@@ -451,10 +451,6 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $param = AAM_Core_Request::post('param');
         $value = AAM_Core_Request::post('value');
 
-        if (strpos($param, '.expire_datetime') !== false) {
-            $value = date('Y-m-d H:i:s', strtotime($value));
-        }
-
         //clear cache
         AAM_Core_API::clearCache();
 

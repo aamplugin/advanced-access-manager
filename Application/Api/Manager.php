@@ -57,30 +57,26 @@ class AAM_Api_Manager {
      * @access public
      */
     protected function __construct() {
-        // REST API action authorization. Triggered before call is dispatched
-        add_filter(
-            'rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3
-        );
-        
-        // Manage access to the RESTful endpoints
-        add_filter('rest_pre_dispatch', array($this, 'authorizeRest'), 1, 3);
-        
-        // Check if user has ability to perform certain task based on provided
-        // capability and meta data
         if (AAM_Core_Config::get('core.settings.apiAccessControl', true)) {
+            // REST API action authorization. Triggered before call is dispatched
             add_filter(
-                'user_has_cap', 
-                array(AAM_Shared_Manager::getInstance(), 'userHasCap'), 
-                999, 
-                3
+                'rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3
             );
-        }
-        
-        // Register any additional endpoints with ConfigPress
-        $additional = AAM_Core_Config::get('rest.manage.endpoint');
-        
-        if (!empty($additional) && is_array($additional)) {
-            $this->resources = array_merge_recursive($this->resources, $additional);
+
+            // Manage access to the RESTful endpoints
+            add_filter('rest_pre_dispatch', array($this, 'authorizeRest'), 1, 3);
+
+            // Check if user has ability to perform certain task based on provided
+            // capability and meta data
+            $shared = AAM_Shared_Manager::getInstance();
+            add_filter('user_has_cap', array($shared, 'userHasCap'), 999, 3);
+
+            // Register any additional endpoints with ConfigPress
+            $additional = AAM_Core_Config::get('rest.manage.endpoint');
+
+            if (!empty($additional) && is_array($additional)) {
+                $this->resources = array_merge_recursive($this->resources, $additional);
+            }
         }
     }
     

@@ -49,50 +49,12 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     }
     
     /**
-     * Update widget
-     * 
-     * @param array $new
-     * @param array $old
-     * 
-     * @return array
-     * 
-     * @access public
-     */
-    public function update($new, $old) {
-        $nlt = (isset($new['login-timeout']) ? $new['login-timeout'] : null);
-        $olt = (isset($old['login-timeout']) ? $old['login-timeout'] : null);
-        
-        if ($nlt != $olt) {
-            AAM_Core_Config::set('login-timeout', $nlt);
-        }
-        
-        $nbl = (isset($new['brute-force-lockout']) ? $new['brute-force-lockout'] : null);
-        $obl = (isset($old['brute-force-lockout']) ? $old['brute-force-lockout'] : null);
-        
-        if ($nbl != $obl) {
-            AAM_Core_Config::set('brute-force-lockout', $nbl);
-        }
-        
-        $nss = (isset($new['single-session']) ? $new['single-session'] : null);
-        $oss = (isset($old['single-session']) ? $old['single-session'] : null);
-        
-        if ($nss != $oss) {
-            AAM_Core_Config::set('single-session', $nss);
-        }
-        
-        return parent::update($new, $old);
-    }
-    
-    /**
      * 
      * @param type $instance
      * @return type
      */
     protected function normalize($instance) {
-        $instance['login-title']         = AAM_Core_Config::get('login-title');
-        $instance['login-ip-track']      = AAM_Core_Config::get('login-ip-track');
-        $instance['brute-force-lockout'] = AAM_Core_Config::get('brute-force-lockout');
-        $instance['single-session'] = AAM_Core_Config::get('single-session');
+        $instance['login-title'] = AAM_Core_Config::get('login-title');
         
         if (empty($instance['login-title'])) {
             $instance['login-title'] = __('Login', AAM_KEY);

@@ -56,33 +56,36 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
     protected function retrieveAllRoutes() {
         $response = array();
         $object   = AAM_Backend_Subject::getInstance()->getObject('route');
-	$routes   = rest_get_server()->get_routes();
         
         //build all RESTful routes
-        foreach ($routes as $route => $handlers) {
-            $methods = array();
-            foreach($handlers as $handler) {
-                $methods = array_merge($methods, array_keys($handler['methods']));
-            }
-        
-            foreach(array_unique($methods) as $method) {
-                $response[] = array(
-                    'restful',
-                    $method,
-                    htmlspecialchars($route),
-                    $object->has('restful', $route, $method) ? 'checked' : 'unchecked'
-                );
+        if (AAM::api()->getConfig('core.settings.restful', true)) {
+            foreach (rest_get_server()->get_routes() as $route => $handlers) {
+                $methods = array();
+                foreach($handlers as $handler) {
+                    $methods = array_merge($methods, array_keys($handler['methods']));
+                }
+
+                foreach(array_unique($methods) as $method) {
+                    $response[] = array(
+                        'restful',
+                        $method,
+                        htmlspecialchars($route),
+                        $object->has('restful', $route, $method) ? 'checked' : 'unchecked'
+                    );
+                }
             }
         }
         
         // Build XML RPC routes
-        foreach(array_keys(AAM_Core_API::getXMLRPCServer()->methods) as $route) {
-            $response[] = array(
-                'xmlrpc',
-                'POST',
-                htmlspecialchars($route),
-                $object->has('xmlrpc', $route) ? 'checked' : 'unchecked'
-            );
+        if (AAM::api()->getConfig('core.settings.xmlrpc', true)) {
+            foreach(array_keys(AAM_Core_API::getXMLRPCServer()->methods) as $route) {
+                $response[] = array(
+                    'xmlrpc',
+                    'POST',
+                    htmlspecialchars($route),
+                    $object->has('xmlrpc', $route) ? 'checked' : 'unchecked'
+                );
+            }
         }
         
         return $response;
@@ -114,7 +117,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'route',
             'position'   => 50,
-            'title'      => __('API Routes', AAM_KEY) . ' <span class="badge">NEW</span>',
+            'title'      => __('API Routes', AAM_KEY),
             'capability' => 'aam_manage_api_routes',
             'type'       => 'main',
             'subjects'   => array(
@@ -123,7 +126,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.settings.restful',
+            'option'     => 'core.settings.apiAccessControl',
             'view'       => __CLASS__
         ));
     }

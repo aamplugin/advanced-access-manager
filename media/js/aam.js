@@ -691,7 +691,7 @@
                             },
                             success: function (response) {
                                 $('#user-list-filter').html(
-                                    '<option value="">' + aam.__('Select Role') + '</option>'
+                                    '<option value="">' + aam.__('Filter By Role') + '</option>'
                                 );
                                 for (var i in response) {
                                     $('#user-list-filter').append(
@@ -863,6 +863,41 @@
                } else {
                    $('#expiration-change-role-holder').addClass('hidden');
                }
+            });
+            
+            $('#user-expiration-datapicker').datetimepicker({
+                icons: {
+                    time: "icon-clock",
+                    date: "icon-calendar",
+                    up: "icon-angle-up",
+                    down: "icon-angle-down",
+                    previous: "icon-angle-left",
+                    next: "icon-angle-right"
+                },
+                inline: true,
+                sideBySide: true
+            });
+
+            $('#edit-user-expiration-modal').on('show.bs.modal', function() {
+                try{
+                    if ($.trim($('#user-expires').val())) {
+                        $('#user-expiration-datapicker').data('DateTimePicker').defaultDate(
+                            $('#user-expires').val()
+                        );
+                    } else {
+                        $('#user-expiration-datapicker').data('DateTimePicker').defaultDate(
+                            new Date()
+                        );
+                    }
+                } catch(e) {
+                    // do nothing. Prevent from any kind of corrupted data
+                }
+            });
+
+            $('#user-expiration-datapicker').on('dp.change', function(res) {
+                $('#user-expires').val(
+                    res.date.format('MM/DD/YYYY, h:mm a')
+                );
             });
             
             //edit role button
@@ -1096,7 +1131,7 @@
                                     $('#aam-menu-overwrite').show();
 
                                     if (status) { //locked the menu
-                                        $('.aam-bordered', target).append(
+                                        $('.aam-inner-tab', target).append(
                                                 $('<div/>', {'class': 'aam-lock'})
                                         );
                                         _this.removeClass('btn-danger').addClass('btn-primary');
@@ -1147,6 +1182,193 @@
                     //reset button
                     $('#menu-reset').bind('click', function () {
                         aam.reset('menu', $(this));
+                    });
+                }
+            }
+
+            aam.addHook('init', initialize);
+
+        })(jQuery);
+        
+        /**
+         * Toolbar Interface
+         * 
+         * @param {jQuery} $
+         * 
+         * @returns {void}
+         */
+        (function ($) {
+            
+            /**
+             * 
+             * @param {type} param
+             * @param {type} value
+             * @returns {undefined}
+             */
+            function save(items, status, successCallback) {
+                $.ajax(aamLocal.ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Main_Toolbar.save',
+                        subject: aam.getSubject().type,
+                        subjectId: aam.getSubject().id,
+                        _ajax_nonce: aamLocal.nonce,
+                        items: items,
+                        status: status
+                    },
+                    success: function(response) {
+                        successCallback(response);
+                    },
+                    error: function () {
+                        aam.notification('danger', aam.__('Application Error'));
+                    }
+                });
+            }
+
+            /**
+             * 
+             * @returns {undefined}
+             */
+            function getContent() {
+                $.ajax(aamLocal.ajaxurl, {
+                    type: 'POST',
+                    dataType: 'html',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Main_Toolbar.getContent',
+                        _ajax_nonce: aamLocal.nonce,
+                        subject: aam.getSubject().type,
+                        subjectId: aam.getSubject().id
+                    },
+                    success: function (response) {
+                        $('#toolbar-content').replaceWith(response);
+                        $('#toolbar-content').addClass('active');
+                        initialize();
+                    },
+                    error: function () {
+                        aam.notification('danger', aam.__('Application error'));
+                    }
+                });
+            }
+
+            /**
+             * 
+             * @returns {undefined}
+             */
+            function initialize() {
+                if ($('#toolbar-content').length) {
+                    $('.aam-restrict-toolbar').each(function () {
+                        $(this).bind('click', function () {
+                            var _this  = $(this);
+                            var status = ($('i', $(this)).hasClass('icon-eye-off') ? 1 : 0);
+                            var target = _this.data('target');
+
+                            $('i', _this).attr('class', 'icon-spin4 animate-spin');
+
+                            var items = new Array(_this.data('toolbar'));
+
+                            $('input', target).each(function () {
+                                $(this).attr('checked', status ? true : false);
+                                items.push($(this).data('toolbar'));
+                            });
+
+                            save(items, status, function(result) {
+                                if (result.status === 'success') {
+                                    $('#aam-toolbar-overwrite').show();
+
+                                    if (status) { //locked the menu
+                                        $('.aam-inner-tab', target).append(
+                                                $('<div/>', {'class': 'aam-lock'})
+                                        );
+                                        _this.removeClass('btn-danger').addClass('btn-primary');
+                                        _this.html('<i class="icon-eye"></i>' + aam.__('Show Menu'));
+                                        //add menu restricted indicator
+                                        var ind = $('<i/>', {
+                                            'class': 'aam-panel-title-icon icon-eye-off text-danger'
+                                        });
+                                        $('.panel-title', target + '-heading').append(ind);
+                                    } else {
+                                        $('.aam-lock', target).remove();
+                                        _this.removeClass('btn-primary').addClass('btn-danger');
+                                        _this.html(
+                                                '<i class="icon-eye-off"></i>' + aam.__('Restrict Menu')
+                                        );
+                                        $('.panel-title .icon-eye-off', target + '-heading').remove();
+                                    }
+                                } else {
+                                    _this.attr('checked', !status);
+                                }
+                            });
+                        });
+                    });
+                    
+                    //init refresh list button
+                    $('#refresh-toolbar-list').bind('click', function () {
+                        $.ajax(aamLocal.ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Toolbar.refreshList',
+                                _ajax_nonce: aamLocal.nonce
+                            },
+                            beforeSend: function () {
+                                $('i', '#refresh-toolbar-list').attr(
+                                    'class', 'icon-spin4 animate-spin'
+                                );
+                            },
+                            success: function (response) {
+                                if (response.status === 'success') {
+                                    getContent();
+                                } else {
+                                    aam.notification(
+                                        'danger', 
+                                        aam.__('Failed to retrieve toolbar')
+                                    );
+                                }
+                            },
+                            error: function () {
+                                aam.notification(
+                                        'danger', 
+                                        aam.__('Application error')
+                                );
+                            },
+                            complete: function () {
+                                $('i', '#refresh-toolbar-list').attr(
+                                    'class', 'icon-arrows-cw'
+                                );
+                            }
+                        });
+                    });
+
+                    //reset button
+                    $('#toolbar-reset').bind('click', function () {
+                        aam.reset('toolbar', $(this));
+                    });
+
+                    $('input[type="checkbox"]', '#toolbar-list').each(function () {
+                        $(this).bind('click', function () {
+                            var _this = $(this);
+                            aam.save(
+                                $(this).data('toolbar'),
+                                $(this).attr('checked') ? 1 : 0,
+                                'toolbar',
+                                null,
+                                function(result) {
+                                    if (result.status === 'success') {
+                                        $('#aam-toolbar-overwrite').show();
+                                        
+                                        if (_this.attr('checked')) {
+                                            _this.next().attr('data-original-title', aam.__('Uncheck to show'));
+                                        } else {
+                                            _this.next().attr('data-original-title', aam.__('Check to hide'));
+                                        }
+                                    }
+                                }
+                            );
+                        });
                     });
                 }
             }
@@ -1590,7 +1812,7 @@
 
 
         /**
-         * Posts & Pages Interface
+         * Posts & Terms Interface
          * 
          * @param {jQuery} $
          * 
@@ -2119,6 +2341,37 @@
                            $('#post-redirect-rule').val(val.join('|'));
                        });
                     });
+                    
+                    $('#post-expiration-datapicker').datetimepicker({
+                        icons: {
+                            time: "icon-clock",
+                            date: "icon-calendar",
+                            up: "icon-angle-up",
+                            down: "icon-angle-down",
+                            previous: "icon-angle-left",
+                            next: "icon-angle-right"
+                        },
+                        inline: true,
+                        sideBySide: true
+                    });
+                    
+                    $('#modal-access-expires').on('show.bs.modal', function() {
+                        if ($.trim($('#aam-expire-datetime').val())) {
+                            $('#post-expiration-datapicker').data('DateTimePicker').defaultDate(
+                                    $('#aam-expire-datetime').val()
+                            );
+                        } else {
+                            $('#post-expiration-datapicker').data('DateTimePicker').defaultDate(
+                                    new Date()
+                            );
+                        }
+                    });
+                    
+                    $('#post-expiration-datapicker').on('dp.change', function(res) {
+                        $('#aam-expire-datetime').val(
+                                res.date.format('MM/DD/YYYY, h:mm a')
+                        );
+                    });
                 }
             }
 
@@ -2499,6 +2752,7 @@
                             searchPlaceholder: aam.__('Search Route'),
                             info: aam.__('_TOTAL_ route(s)'),
                             infoFiltered: '',
+                            emptyTable: aam.__('No API enpoints found. You might have APIs disabled.'),
                             infoEmpty: aam.__('Nothing to show'),
                             lengthMenu: '_MENU_'
                         },

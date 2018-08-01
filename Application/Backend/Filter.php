@@ -44,9 +44,6 @@ class AAM_Backend_Filter {
         add_action('network_admin_notices', array($this, 'adminNotices'), -1);
         add_action('user_admin_notices', array($this, 'adminNotices'), -1);
         
-        //admin bar
-        add_action('wp_before_admin_bar_render', array($this, 'filterAdminBar'), 999);
-        
         //post restrictions
         add_filter('page_row_actions', array($this, 'postRowActions'), 10, 2);
         add_filter('post_row_actions', array($this, 'postRowActions'), 10, 2);
@@ -135,60 +132,6 @@ class AAM_Backend_Filter {
                 remove_all_actions('user_admin_notices');
             }
         }
-    }
-    
-    /**
-     * Filter top admin bar
-     * 
-     * The filter will be performed based on the Backend Menu access settings
-     * 
-     * @return void
-     * 
-     * @access public
-     * @global WP_Admin_Bar $wp_admin_bar
-     */
-    public function filterAdminBar() {
-        global $wp_admin_bar;
-        
-        $menu = AAM::getUser()->getObject('menu');
-        foreach($wp_admin_bar->get_nodes() as $id => $node) {
-            if (!empty($node->href)) {
-                $suffix = str_replace(admin_url(), '', $node->href);
-                if ($menu->has($suffix, true)) {
-                    if (empty($node->parent) && $this->hasChildren($id)) { //root level
-                        $node->href = '#';
-                        $wp_admin_bar->add_node($node);
-                    } else {
-                        $wp_admin_bar->remove_menu($id);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Check if specified top bar item has children
-     * 
-     * @param string $id
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     * @global WP_Admin_Bar $wp_admin_bar
-     */
-    protected function hasChildren($id) {
-        global $wp_admin_bar;
-        
-        $has = false;
-        
-        foreach($wp_admin_bar->get_nodes() as $node) {
-            if ($node->parent == $id) {
-                $has = true;
-                break;
-            }
-        }
-        
-        return $has;
     }
     
     /**
