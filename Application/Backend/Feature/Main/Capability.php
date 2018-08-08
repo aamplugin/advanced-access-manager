@@ -51,7 +51,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             'aam_manage_posts', 'aam_manage_access_denied_redirect', 'aam_create_roles',
             'aam_manage_login_redirect', 'aam_manage_logout_redirect', 'aam_manager',
             'aam_manage_settings', 'aam_manage_extensions', 'aam_show_notifications', 
-            'aam_manage_404_redirect', 'aam_manage_ip_check', 'aam_manage_toolbar',
+            'aam_manage_404_redirect', 'aam_manage_ip_check', 'aam_manager_admin_toolbar',
             'aam_manage_default', 'aam_manage_visitors', 'aam_list_roles',
             'aam_edit_roles', 'aam_delete_roles', 'aam_toggle_users', 'aam_switch_users',
             'aam_manage_configpress', 'aam_manage_api_routes'

@@ -44,7 +44,8 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             $this->setPost(get_post($post));
         }
         
-        if ($this->getPost()) {
+        // Do not initialize settings for posts that are about to be created
+        if ($this->getPost() && ($this->getPost()->post_status != 'auto-draft')) {
             $this->read();
         }
     }

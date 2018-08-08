@@ -145,7 +145,7 @@ class AAM_Shared_Manager {
      * @global WPDB $wpdb
      */
     public function filterPostQuery($clauses, $wpQuery) {
-        if ($this->isPostFilterEnabled()) {
+        if (!$wpQuery->is_singular && $this->isPostFilterEnabled()) {
             $option = AAM::getUser()->getObject('visibility')->getOption();
             
             if (!empty($option['post'])) {
@@ -157,7 +157,7 @@ class AAM_Shared_Manager {
             $clauses['where'] .= apply_filters(
                 'aam-post-where-clause-filter', $query, $wpQuery, $option
             );
-
+            
             $this->finalizePostQuery($clauses);
         }
         

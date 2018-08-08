@@ -73,7 +73,7 @@ class AAM_Core_Config {
             $response = self::readConfigPress($option, $default);
         }
         
-        return self::normalize($response);
+        return ($response ? self::normalize($response) : $response);
     }
     
     /**
@@ -147,7 +147,6 @@ class AAM_Core_Config {
      */
     protected static function readConfigPress($param, $default = null) {
         $config = AAM_Core_ConfigPress::get('aam.' . $param, $default);
-        
         if (is_array($config) && isset($config['userFunc'])) {
             if (is_callable($config['userFunc'])) {
                 $response = call_user_func($config['userFunc']);

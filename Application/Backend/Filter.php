@@ -204,19 +204,15 @@ class AAM_Backend_Filter {
      * @staticvar type $default
      */
     public function filterDefaultCategory($category) {
-        static $default = null;
+        //check if user category is defined
+        $id      = get_current_user_id();
+        $default = AAM_Core_Config::get('feature.post.defaultTerm.user.' . $id , null);
+        $roles   = AAM::getUser()->roles;
         
-        if (is_null($default)) {
-            //check if user category is defined
-            $id      = get_current_user_id();
-            $default = AAM_Core_Config::get('feature.post.defaultTerm.user.' . $id , null);
-            $roles   = AAM::getUser()->roles;
-            
-            if (is_null($default) && count($roles)) {
-                $default = AAM_Core_Config::get(
-                    'feature.post.defaultTerm.role.' . array_shift($roles), false
-                );
-            }
+        if (is_null($default) && count($roles)) {
+            $default = AAM_Core_Config::get(
+                'feature.post.defaultTerm.role.' . array_shift($roles), false
+            );
         }
         
         return ($default ? $default : $category);
