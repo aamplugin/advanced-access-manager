@@ -92,6 +92,21 @@ final class AAM_Core_Gateway {
     }
     
     /**
+     * Check if capability exists
+     * 
+     * This method checks if provided capability exists (registered for any role).
+     * 
+     * @param string $capability
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function capabilityExists($capability) {
+        return AAM_Core_API::capabilityExists($capability);
+    }
+    
+    /**
      * Get instance of the API gateway
      * 
      * @return AAM_Core_Gateway

@@ -56,7 +56,8 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                 'type', 
                 $type->labels->name, 
                 'drilldown,manage',
-                null
+                null,
+                apply_filters('aam-type-override-status', false, $type->name, AAM_Backend_Subject::getInstance())
             );
         }
         
@@ -126,7 +127,9 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                         get_object_taxonomies($record), 'is_taxonomy_hierarchical'
                     );
                     if (!empty($taxonomies)) {
-                        $terms = wp_get_object_terms($record->ID, $taxonomies, array('fields' => 'names'));
+                        $terms  = wp_get_object_terms(
+                                $record->ID, $taxonomies, array('fields' => 'names')
+                        );
                         $parent = implode(', ', $terms);
                     }
                 }
@@ -137,8 +140,8 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                     'post',
                     get_the_title($record),
                     'manage' . ($link ? ',edit' : ''),
-                    $parent
-                    //get_post_permalink($record)
+                    $parent,
+                    AAM_Backend_Subject::getInstance()->getObject('post', $record->ID)->isOverwritten()
                 );
             } else { //term
                 $response['data'][] = array(
@@ -156,7 +159,13 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                             'separator' => ' &raquo; ', 
                             'inclusive' => false
                         )
-                    ), ' &raquo; ')
+                    ), ' &raquo; '),
+                    apply_filters(
+                        'aam-term-override-status', 
+                        false, 
+                        $record->term_id . '|' . $record->taxonomy, 
+                        AAM_Backend_Subject::getInstance()
+                    )
                 );
             }
         }

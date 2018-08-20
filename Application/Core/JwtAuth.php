@@ -86,29 +86,20 @@ class AAM_Core_JwtAuth {
         $response = new WP_REST_Response();
         
         if ($result['status'] == 'success') { // generate token
-            $key    = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
-            $expire = AAM_Core_Config::get('authentication.jwt.expires', 86400);
-            
-            if ($key) {
-                $claims = array(
-                    "iat"    => time(),
-                    'exp'    => time() + $expire, // by default expires in 1 day
-                    'userId' => $result['user']->ID,
-                );
-
-                $response->data = array(
-                    'token' => Firebase\JWT\JWT::encode(
-                            apply_filters('aam-jwt-claims-filter', $claims), $key
-                    ),
-                    'token_expires' => $claims['exp'],
-                    'user'  => $result['user']
-                );
+            try {
+                $token = $this->generateJWT($result['user']->ID);
+                
                 $response->status = 200;
-            } else {
+                $response->data = array(
+                    'token'         => $token->token,
+                    'token_expires' => $token->claims['exp'],
+                    'user'          => $result['user']
+                );
+            } catch (Exception $ex) {
                 $response->status = 400;
                 $response->data = new WP_Error(
                     'rest_jwt_empty_secret_key',
-                    __('JWT Authentication is enabled but secret key is not defined', AAM_KEY)
+                    $ex->getMessage()
                 );
             }
         } else {
@@ -117,6 +108,40 @@ class AAM_Core_JwtAuth {
         }
         
         return apply_filters('aam-jwt-response-filter', $response);
+    }
+    
+    /**
+     * Generate JWT token
+     * 
+     * @param int $userId
+     * 
+     * @return stdClass
+     * 
+     * @access public
+     * @throws Exception
+     */
+    public function generateJWT($userId) {
+        $key    = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
+        $expire = AAM_Core_Config::get('authentication.jwt.expires', 86400);
+
+        if ($key) {
+            $claims = apply_filters('aam-jwt-claims-filter', array(
+                "iat"    => time(),
+                'exp'    => time() + $expire, // by default expires in 1 day
+                'userId' => $userId,
+            ));
+            
+            $token = Firebase\JWT\JWT::encode($claims, $key);
+        } else {
+            Throw new Exception(
+                __('JWT Authentication is enabled but secret key is not defined', AAM_KEY)
+            );
+        }
+        
+        return (object) array(
+            'token'  => $token,
+            'claims' => $claims
+        );
     }
     
     /**

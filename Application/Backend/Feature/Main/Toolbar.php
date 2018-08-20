@@ -154,7 +154,7 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
             'uid'        => 'toolbar',
             'position'   => 6,
             'title'      => __('Admin Toolbar', AAM_KEY),
-            'capability' => 'aam_manager_admin_toolbar',
+            'capability' => 'aam_manage_admin_toolbar',
             'type'       => 'main',
             'subjects'   => array(
                 AAM_Core_Subject_Role::UID, 

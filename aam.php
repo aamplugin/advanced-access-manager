@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.4.1
+  Version: 5.4.2
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -237,6 +237,9 @@ class AAM {
         if (file_exists($dirname)) {
             AAM_Core_API::removeDirectory($dirname);
         }
+        
+        //clear all AAM settings
+        AAM_Core_API::clearSettings();
         
         //clear schedules
         wp_clear_scheduled_hook('aam-cron');

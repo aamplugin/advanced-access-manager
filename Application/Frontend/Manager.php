@@ -167,7 +167,7 @@ class AAM_Frontend_Manager {
     public function checkPassExpiration($expire) {
         $overwrite = AAM_Core_Config::get('feature.post.password.expires', null);
         
-        if ($overwrite !== null) {
+        if (!is_null($overwrite)) {
             $expire = ($overwrite ? time() + strtotime($overwrite) : 0);
         }
         

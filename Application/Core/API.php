@@ -259,6 +259,35 @@ final class AAM_Core_API {
     }
     
     /**
+     * Clear all AAM settings
+     * 
+     * @global wpdb $wpdb
+     * 
+     * @access public
+     */
+    public static function clearSettings() {
+        global $wpdb;
+
+        //clear wp_options
+        $oquery = "DELETE FROM {$wpdb->options} WHERE (`option_name` LIKE %s) AND ";
+        $oquery .= "(`option_name` NOT IN ('aam-extensions', 'aam-uid'))";
+        $wpdb->query($wpdb->prepare($oquery, 'aam%'));
+
+        //clear wp_postmeta
+        $pquery = "DELETE FROM {$wpdb->postmeta} WHERE `meta_key` LIKE %s";
+        $wpdb->query($wpdb->prepare($pquery, 'aam-post-access-%'));
+
+        //clear wp_usermeta
+        $uquery = "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s";
+        $wpdb->query($wpdb->prepare($uquery, 'aam%'));
+
+        $mquery = "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s";
+        $wpdb->query($wpdb->prepare($mquery, $wpdb->prefix . 'aam%'));
+        
+        self::clearCache();
+    }
+    
+    /**
      * 
      * @param AAM_Core_Subject $subject
      */

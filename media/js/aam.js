@@ -2056,7 +2056,7 @@
                             }
                         },
                         columnDefs: [
-                            {visible: false, targets: [0, 1, 5]}
+                            {visible: false, targets: [0, 1, 5, 6]}
                         ],
                         language: {
                             search: '_INPUT_',
@@ -2075,18 +2075,25 @@
                             });
                         },
                         rowCallback: function (row, data) {
+                            if (data[6]) {
+                                var extraClass = ' text-danger';
+                                var tooltip = ' data-toggle="tooltip" title="' + aam.__('Settings Customized') + '"';
+                            } else {
+                                extraClass = tooltip = '';
+                            }
+                            
                             //object type icon
                             switch (data[2]) {
                                 case 'type':
-                                    $('td:eq(0)', row).html('<i class="icon-box"></i>');
+                                    $('td:eq(0)', row).html('<i class="icon-box' + extraClass + '"' + tooltip + '></i>');
                                     break;
 
                                 case 'term':
-                                    $('td:eq(0)', row).html('<i class="icon-folder"></i>');
+                                    $('td:eq(0)', row).html('<i class="icon-folder' + extraClass + '"' + tooltip + '></i>');
                                     break;
 
                                 default:
-                                    $('td:eq(0)', row).html('<i class="icon-doc-text-inv"></i>');
+                                    $('td:eq(0)', row).html('<i class="icon-doc-text-inv' + extraClass + '"' + tooltip + '></i>');
                                     break;
                             }
                             

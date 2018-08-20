@@ -182,9 +182,13 @@ class AAM_Core_Compatibility {
             $subject = new AAM_Core_Subject_Default;
         }
         
-        $subject->getObject($oid)->save($option, $config[$option]);
-        unset($config[$option]);
-        AAM_Core_API::updateOption('aam-utilities', $config);
+        $object = $subject->getObject($oid);
+        
+        if (is_a($object, 'AAM_Core_Subject')) {
+            $object->save($option, $config[$option]);
+            unset($config[$option]);
+            AAM_Core_API::updateOption('aam-utilities', $config);
+        }
     }
 
 }
