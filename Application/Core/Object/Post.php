@@ -45,7 +45,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         }
         
         // Do not initialize settings for posts that are about to be created
-        if ($this->getPost() && ($this->getPost()->post_status != 'auto-draft')) {
+        if ($this->getPost() && ($this->getPost()->post_status !== 'auto-draft')) {
             $this->read();
         }
     }
@@ -121,7 +121,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
                 'core.cache.post.levels', array('role', 'visitor', 'user')
         );
         
-        return is_array($config) && in_array($subject::UID, $config);
+        return is_array($config) && in_array($subject::UID, $config, true);
     }
     
     /**
@@ -162,7 +162,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         
         // Very specific WP case. According to the WP core, you are not allowed to
         // set meta for revision, so let's bypass this constrain.
-        if ($this->getPost()->post_type == 'revision') {
+        if ($this->getPost()->post_type === 'revision') {
             $result =  update_metadata(
                 'post', $this->getPost()->ID, $this->getOptionName(), $option
             );
@@ -191,7 +191,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         
         // Very specific WP case. According to the WP core, you are not allowed to
         // set meta for revision, so let's bypass this constrain.
-        if ($this->getPost()->post_type == 'revision') {
+        if ($this->getPost()->post_type === 'revision') {
             $result = delete_metadata(
                     'post', $this->getPost()->ID, $this->getOptionName()
             );
@@ -201,7 +201,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         
         return $result;
     }
-
+    
     /**
      * Set Post
      *
@@ -244,7 +244,8 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     public function has($property) {
         $option = $this->getOption();
 
-        return (array_key_exists($property, $option) && $option[$property]);
+        return (array_key_exists($property, $option) 
+                && in_array($option[$property], array(1, '1', true, "true"), true));
     }
     
     /**
@@ -279,7 +280,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         
         // Very specific WP case. According to the WP core, you are not allowed to
         // set meta for revision, so let's bypass this constrain.
-        if ($this->getPost()->post_type == 'revision') {
+        if ($this->getPost()->post_type === 'revision') {
             $result =  update_metadata(
                 'post', $this->getPost()->ID, $this->getOptionName(), $option
             );

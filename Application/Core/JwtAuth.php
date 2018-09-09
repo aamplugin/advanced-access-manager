@@ -85,7 +85,7 @@ class AAM_Core_JwtAuth {
         
         $response = new WP_REST_Response();
         
-        if ($result['status'] == 'success') { // generate token
+        if ($result['status'] === 'success') { // generate token
             try {
                 $token = $this->generateJWT($result['user']->ID);
                 
@@ -121,9 +121,11 @@ class AAM_Core_JwtAuth {
      * @throws Exception
      */
     public function generateJWT($userId) {
-        $key    = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
-        $expire = AAM_Core_Config::get('authentication.jwt.expires', 86400);
-
+        $key       = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
+        $expire    = AAM_Core_Config::get('authentication.jwt.expires', 86400);
+        $container = AAM_Core_Config::get('authentication.jwt.container', 'header');
+        $alg       = AAM_Core_Config::get('authentication.jwt.algorithm', 'HS256');
+        
         if ($key) {
             $claims = apply_filters('aam-jwt-claims-filter', array(
                 "iat"    => time(),
@@ -131,7 +133,18 @@ class AAM_Core_JwtAuth {
                 'userId' => $userId,
             ));
             
-            $token = Firebase\JWT\JWT::encode($claims, $key);
+            $token = Firebase\JWT\JWT::encode($claims, $key, $alg);
+            
+            if ($container === 'cookie') {
+                setcookie(
+                    'aam-jwt', 
+                    $token, 
+                    time() + $expire, // 3 hours
+                    '/', 
+                    parse_url(get_bloginfo('url'), PHP_URL_HOST), 
+                    is_ssl()
+                );
+            }
         } else {
             Throw new Exception(
                 __('JWT Authentication is enabled but secret key is not defined', AAM_KEY)
@@ -149,14 +162,7 @@ class AAM_Core_JwtAuth {
      * @param type $result
      */
     public function determineCurrentUser($result) {
-        // get Authentication header
-        $token = null;
-        
-        if (isset($_SERVER['HTTP_AUTHENTICATION'])) {
-            $token = preg_replace('/^Bearer /', '', $_SERVER['HTTP_AUTHENTICATION']);
-        }
-        
-        $token = apply_filters('aam-jwt-authentication-header-filter', $token);
+        $token = $this->extractJwt();
         $key   = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
         
         if ($token) {
@@ -169,12 +175,41 @@ class AAM_Core_JwtAuth {
                     $result = $claims->userId;
                 }
             } catch (Exception $ex) {
-                echo $ex->getMessage();
                 // Do nothing
             }
         }
         
         return $result;
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    protected function extractJwt() {
+        $container = AAM_Core_Config::get('authentication.jwt.container', 'header');
+        
+        if ($container === 'header') {
+            $jwt = apply_filters(
+                'aam-jwt-authentication-header-filter', 
+                AAM_Core_Request::server('HTTP_AUTHENTICATION')
+            );
+        } elseif ($container === 'cookie') {
+            $jwt = apply_filters(
+                'aam-jwt-authentication-cookie-filter', 
+                AAM_Core_Request::cookie('aam-jwt')
+            );
+        } else {
+            AAM_Core_Console::add(
+                sprint_f(
+                    __('Invalid value %s for property %s', AAM_KEY), 
+                    $container, 
+                    'authentication.jwt.container'
+                )
+            );
+        }
+        
+        return (!empty($jwt) ? preg_replace('/^Bearer /', '', $jwt) : null);
     }
     
     /**

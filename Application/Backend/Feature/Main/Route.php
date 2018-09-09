@@ -22,7 +22,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
     public function getTable() {
         $response = array('data' => $this->retrieveAllRoutes());
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
 
     /**
@@ -39,7 +39,7 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract {
 
        $object->save($type, $route, $method, $value);
 
-       return json_encode(array('status' => 'success'));
+       return wp_json_encode(array('status' => 'success'));
     }
 
     /**

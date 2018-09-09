@@ -37,7 +37,7 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
         parent::__construct($subject);
         
         if (!AAM::isAAM() 
-                && (AAM_Core_Config::get('core.cache.status', 'enabled') == 'enabled')) {
+                && (AAM_Core_Config::get('core.cache.status', 'enabled') === 'enabled')) {
             // Register shutdown hook
             add_action('shutdown', array($this, 'save'));
 
@@ -109,7 +109,9 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      * @access public
      */
     public function inheritFromParent(){
-        if ($subject = $this->getParent()){
+        $subject = $this->getParent();
+                
+        if (is_a($subject, 'AAM_Core_Subject')){
             $option = $subject->getObject('cache')->getOption();
         } else {
             $option = array();

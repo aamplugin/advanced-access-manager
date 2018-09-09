@@ -31,9 +31,9 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
             'feature.export', array('system' => 'roles,utilities,configpress')
         ));
 
-        return json_encode(array(
+        return wp_json_encode(array(
             'status' => 'success',
-            'content' => base64_encode(json_encode($exporter->run()))
+            'content' => base64_encode(wp_json_encode($exporter->run()))
         ));
     }
     
@@ -44,7 +44,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
     public function import() {
         $importer = new AAM_Core_Importer(filter_input(INPUT_POST, 'json'));
 
-        return json_encode(array('status' => $importer->run()));
+        return wp_json_encode($importer->run());
     }
 
     /**
@@ -59,7 +59,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
     public function clear() {
         AAM_Core_API::clearSettings();
 
-        return json_encode(array('status' => 'success'));
+        return wp_json_encode(array('status' => 'success'));
     }
 
     /**
@@ -69,7 +69,7 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
     public function clearCache() {
         AAM_Core_API::clearCache();
 
-        return json_encode(array('status' => 'success'));
+        return wp_json_encode(array('status' => 'success'));
     }
 
     /**
@@ -81,12 +81,12 @@ class AAM_Backend_Feature_Settings_Tools extends AAM_Backend_Feature_Abstract {
      */
     public static function register() {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid' => 'settings-tools',
-            'position' => 10,
-            'title' => __('Tools', AAM_KEY),
+            'uid'        => 'settings-tools',
+            'position'   => 10,
+            'title'      => __('Tools', AAM_KEY),
             'capability' => 'aam_manage_settings',
-            'type' => 'settings',
-            'view' => __CLASS__
+            'type'       => 'settings',
+            'view'       => __CLASS__
         ));
     }
 

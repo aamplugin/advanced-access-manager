@@ -47,7 +47,7 @@ class AAM_Backend_Feature_Subject_User {
             }
         }
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -79,7 +79,7 @@ class AAM_Backend_Feature_Subject_User {
             }
         }
         
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -136,7 +136,7 @@ class AAM_Backend_Feature_Subject_User {
             }
         }
 
-        return json_encode(array('status' => ($result ? 'success' : 'failure')));
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
     
     /**

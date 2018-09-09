@@ -22,7 +22,7 @@ class AAM_Backend_Feature_Main_LogoutRedirect extends AAM_Backend_Feature_Abstra
     public function isDefault() {
         $subject = AAM_Backend_Subject::getInstance();
         
-        return ($subject->getUID() == 'default');
+        return ($subject->getUID() === 'default');
     }
     
     /**

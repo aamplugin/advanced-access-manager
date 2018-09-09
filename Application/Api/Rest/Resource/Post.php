@@ -182,7 +182,7 @@ class AAM_Api_Rest_Resource_Post {
         $read   = $post->has('api.read');
         $others = $post->has('api.read_others');
         
-        if ($read || ($others && ($post->post_author != get_current_user_id()))) {
+        if ($read || ($others && ($post->post_author !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_read', 
                 "User is unauthorized to read the post. Access denied.", 
@@ -246,13 +246,13 @@ class AAM_Api_Rest_Resource_Post {
         if ($post->has('api.redirect')) {
             $rule = explode('|', $post->get('api.location'));
             
-            if (count($rule) == 1) { // TODO: legacy. Remove in Jul 2020
+            if (count($rule) === 1) { // TODO: legacy. Remove in Jul 2020
                 $redirect = $rule[0];
-            } elseif ($rule[0] == 'page') {
+            } elseif ($rule[0] === 'page') {
                 $redirect = get_page_link($rule[1]);
-            } elseif ($rule[0] == 'url') {
+            } elseif ($rule[0] === 'url') {
                 $redirect = $rule[1];
-            } elseif (($rule[0] == 'callback') && is_callable($rule[1])) {
+            } elseif (($rule[0] === 'callback') && is_callable($rule[1])) {
                 $redirect = call_user_func($rule[1], $post);
             } else {
                 $redirect = null;
@@ -292,7 +292,7 @@ class AAM_Api_Rest_Resource_Post {
             require_once( ABSPATH . 'wp-includes/class-phpass.php' );
             $hasher = new PasswordHash(8, true);
 
-            if ($pass != $request['password'] 
+            if ($pass !== $request['password'] 
                     && !$hasher->CheckPassword($pass, $request['password'])) {
                 $result = new WP_Error(
                     'rest_post_cannot_read', 
@@ -328,7 +328,7 @@ class AAM_Api_Rest_Resource_Post {
         $edit   = $post->has('api.edit');
         $others = $post->has('api.edit_others');
         
-        if ($edit || ($others && ($post->post_author != get_current_user_id()))) {
+        if ($edit || ($others && ($post->post_author !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_update', 
                 "User is unauthorized to update the post. Access denied.", 
@@ -357,7 +357,7 @@ class AAM_Api_Rest_Resource_Post {
         $delete = $post->has('api.delete');
         $others = $post->has('api.delete_others');
         
-        if ($delete || ($others && ($post->post_author != get_current_user_id()))) {
+        if ($delete || ($others && ($post->post_author !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 

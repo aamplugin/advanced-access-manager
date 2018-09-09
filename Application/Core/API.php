@@ -31,10 +31,10 @@ final class AAM_Core_API {
      */
     public static function getOption($option, $default = FALSE, $blog_id = null) {
         if (is_multisite()) {
-            if (is_null($blog_id) || get_current_blog_id() == $blog_id) {
+            if (is_null($blog_id) || get_current_blog_id() === $blog_id) {
                 $response = self::getCachedOption($option, $default);
             } else {
-                if ($blog_id == 'site') {
+                if ($blog_id === 'site') {
                     $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
                 } else {
                     $blog = $blog_id;
@@ -100,7 +100,7 @@ final class AAM_Core_API {
         if (is_multisite()) {
             if (is_null($blog_id)) {
                 $blog = get_current_blog_id();
-            } elseif ($blog_id == 'site') {
+            } elseif ($blog_id === 'site') {
                 $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
             } else {
                 $blog = $blog_id;
@@ -145,33 +145,18 @@ final class AAM_Core_API {
      * Initiate HTTP request
      *
      * @param string $url Requested URL
-     * @param bool $send_cookies Wheather send cookies or not
      * 
      * @return WP_Error|array
      * 
      * @access public
      */
-    public static function cURL($url, $send_cookies = true, $params = array(), $timeout = 20) {
+    public static function cURL($url, $params = array(), $timeout = 20) {
         $header = array('User-Agent' => AAM_Core_Request::server('HTTP_USER_AGENT'));
-
-        $cookies = AAM_Core_Request::cookie(null, array());
-        $requestCookies = array();
-        if (is_array($cookies) && $send_cookies) {
-            foreach ($cookies as $key => $value) {
-                //SKIP PHPSESSID - some servers don't like it for security reason
-                if ($key !== session_name() && is_scalar($value)) {
-                    $requestCookies[] = new WP_Http_Cookie(array(
-                        'name' => $key, 'value' => $value
-                    ));
-                }
-            }
-        }
 
         return wp_remote_request($url, array(
             'headers' => $header,
             'method'  => 'POST',
             'body'    => $params,
-            'cookies' => $requestCookies,
             'timeout' => $timeout
         ));
     }
@@ -325,16 +310,16 @@ final class AAM_Core_API {
      * @access public
      */
     public static function reject($area = 'frontend', $args = array()) {
-        if (AAM_Core_Request::server('REQUEST_METHOD') != 'POST') {
+        if (AAM_Core_Request::server('REQUEST_METHOD') !== 'POST') {
             $object = AAM::getUser()->getObject('redirect');
             $type   = $object->get("{$area}.redirect.type");
 
-            if (!empty($type) && ($type == 'login')) {
+            if (!empty($type) && ($type === 'login')) {
                 $redirect = add_query_arg(
                         array('reason' => 'restricted'), 
                         wp_login_url(AAM_Core_Request::server('REQUEST_URI'))
                 );
-            } elseif (!empty($type) && ($type != 'default')) {
+            } elseif (!empty($type) && ($type !== 'default')) {
                 $redirect = $object->get("{$area}.redirect.{$type}");
             } else { //ConfigPress setup
                 $redirect = AAM_Core_Config::get(
@@ -344,11 +329,11 @@ final class AAM_Core_API {
             
             $doRedirect = true;
             
-            if ($type == 'page') {
+            if ($type === 'page') {
                 $page = self::getCurrentPost();
-                $doRedirect = (empty($page) || ($page->ID != $redirect));
-            } elseif ($type == 'url') {
-                $doRedirect = strpos($redirect, $_SERVER['REQUEST_URI']) === false;
+                $doRedirect = (empty($page) || ($page->ID !== intval($redirect)));
+            } elseif ($type === 'url') {
+                $doRedirect = strpos($redirect, AAM_Core_Request::server('REQUEST_URI')) === false;
             }
             
             if ($doRedirect) {
@@ -371,11 +356,11 @@ final class AAM_Core_API {
      * @access public
      */
     public static function redirect($rule, $args = null) {
-        $path = parse_url($rule);
+        $path = wp_parse_url($rule);
         if ($path && !empty($path['host'])) {
-            wp_redirect($rule, 307);
+            wp_redirect($rule, 307); exit;
         } elseif (preg_match('/^[\d]+$/', $rule)) {
-            wp_safe_redirect(get_page_link($rule), 307);
+            wp_safe_redirect(get_page_link($rule), 307); exit;
         } elseif (is_callable($rule)) {
             call_user_func($rule, $args);
         } elseif (!empty($args['callback']) && is_callable($args['callback'])) {
@@ -450,9 +435,9 @@ final class AAM_Core_API {
         } elseif (!empty($wp_query->query['name'])) {
             //Important! Cover the scenario of NOT LIST but ALLOW READ
             if (!empty($wp_query->posts)) {
-                foreach($wp_query->posts as $post) {
-                    if ($post->post_name == $wp_query->query['name']) {
-                        $res = $post;
+                foreach($wp_query->posts as $p) {
+                    if ($p->post_name === $wp_query->query['name']) {
+                        $res = $p;
                         break;
                     }
                 }

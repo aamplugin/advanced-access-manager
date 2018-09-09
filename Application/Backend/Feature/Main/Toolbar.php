@@ -32,7 +32,7 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
        
        $object->save();
 
-       return json_encode(array('status' => 'success'));
+       return wp_json_encode(array('status' => 'success'));
     }
 
     /**
@@ -59,7 +59,7 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
         $children = array();
         
         foreach($branch->children as $child) {
-            if (empty($child->type) || !in_array($child->type, array('container', 'group'))) {
+            if (empty($child->type) || !in_array($child->type, array('container', 'group'), true)) {
                 $children[] = $child;
             }
             if(!empty($child->children)) {
@@ -81,43 +81,10 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
                 preg_replace(
                     '/[\d]/', 
                     '', 
-                    strip_tags(!empty($node->title) ? $node->title : $node->id)
+                    wp_strip_all_tags(!empty($node->title) ? $node->title : $node->id)
                 )
             )
         );
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function refreshList() {
-        // reset cache
-        AAM_Core_API::deleteOption('aam_toolbar_cache');
-        
-        //grab toolbar itesm
-        AAM_Core_API::cURL($this->addHttpPasswd(
-                add_query_arg('init', 'toolbar', admin_url('index.php')))
-        );
-        
-        return json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @param type $url
-     * @return type
-     */
-    protected function addHttpPasswd($url) {
-        $htpasswd = AAM_Core_Config::get('feature.toolbar.htpasswd');
-        
-        if (!empty($htpasswd['user']) && !empty($htpasswd['pass'])) {
-            $url = preg_replace(
-                '/^(http[s]?:\/\/)/', "$1{$htpasswd['user']}:{$htpasswd['pass']}@", $url
-            );
-        }
-        
-        return $url;
     }
     
     /**

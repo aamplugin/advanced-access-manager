@@ -22,7 +22,7 @@ class AAM_Backend_Feature_Main_LoginRedirect extends AAM_Backend_Feature_Abstrac
     public function isDefault() {
         $subject = AAM_Backend_Subject::getInstance()->getUID();
         
-        return ($subject == AAM_Core_Subject_Default::UID);
+        return ($subject === AAM_Core_Subject_Default::UID);
     }
     
     /**

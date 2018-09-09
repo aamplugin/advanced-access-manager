@@ -60,7 +60,7 @@ class AAM_Backend_Authorization {
             
             if (!empty($taxonomy)) {
                 $menu .= '?taxonomy=' . $taxonomy;
-            } elseif (!empty($postType) && ($postType != 'post')) {
+            } elseif (!empty($postType) && ($postType !== 'post')) {
                 $menu .= '?post_type=' . $postType;
             } elseif (!empty($page)) {
                 $menu .= '?page=' . $page;

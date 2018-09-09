@@ -79,17 +79,34 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $all    = AAM_Core_Config::get('core.settings.manageHiddenPostTypes', false);
         
         foreach (get_post_types(array(), 'objects') as $type) {
-            if (($all || $type->public) 
+            if (($all || $type->show_ui) 
                     && (empty($s) || stripos($type->labels->name, $s) !== false)) {
-                $filtered[] = $type;
+                $filtered[$type->label] = $type;
             }
         }
+        
+        $this->getOrderDirection() === 'ASC' ? ksort($filtered) : krsort($filtered);
         
         return (object) array(
             'total'    => count($list),
             'filtered' => count($filtered),
             'records'  => array_slice($filtered, $start, $length)
         );
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    protected function getOrderDirection() {
+        $dir   = 'asc';
+        $order = AAM_Core_Request::post('order.0');
+        
+        if (!empty($order['column']) && ($order['column'] === '3')) {
+            $dir = !empty($order['dir']) ? $order['dir'] : 'asc';
+        }
+        
+        return strtoupper($dir);
     }
 
     /**
@@ -156,10 +173,10 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                         array(
                             'link' => false, 
                             'format' => 'name', 
-                            'separator' => ' &raquo; ', 
+                            'separator' => '/', 
                             'inclusive' => false
                         )
-                    ), ' &raquo; '),
+                    ), '/'),
                     apply_filters(
                         'aam-term-override-status', 
                         false, 
@@ -190,10 +207,10 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         //first retrieve all hierarchical terms that belong to Post Type
         if ($paging['terms']) {
             $list = $this->retrieveTermList(
-                    $this->getTypeTaxonomies($type), 
-                    $s, 
-                    $paging['term_offset'], 
-                    $paging['terms']
+                $this->getTypeTaxonomies($type), 
+                $s, 
+                $paging['term_offset'], 
+                $paging['terms']
             );
         }
         
@@ -202,7 +219,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
             $list = array_merge(
                 $list, 
                 $this->retrievePostList(
-                        $type, $s, $paging['post_offset'], $paging['posts']
+                    $type, $s, $paging['post_offset'], $paging['posts']
                 )
             );
         }
@@ -287,7 +304,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     protected function getPostCount($type, $search) {
         global $wpdb;
         
-        $query  = "SELECT COUNT( * ) AS total FROM {$wpdb->posts} ";
+        $query  = "SELECT COUNT(*) AS total FROM {$wpdb->posts} ";
         $query .= "WHERE (post_type = %s) AND (post_title LIKE %s)";
         
         $args   = array($type, "{$search}%");
@@ -316,7 +333,8 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
             'search'     => $search, 
             'taxonomy'   => $taxonomies,
             'offset'     => $offset,
-            'number'     => $limit
+            'number'     => $limit,
+            'order'      => $this->getOrderDirection()
         );
 
         return get_terms($args);
@@ -332,13 +350,16 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
      */
     protected function retrievePostList($type, $search, $offset, $limit) {
         return get_posts(array(
-            'post_type'   => $type, 
-            'category'    => 0, 
-            's'           => $search,
-            'offset'      => $offset,
-            'numberposts' => $limit, 
-            'post_status' => 'any', 
-            'fields'      => 'all'
+            'post_type'        => $type, 
+            'category'         => 0, 
+            's'                => $search,
+            'suppress_filters' => true,
+            'offset'           => $offset,
+            'numberposts'      => $limit,
+            'orderby'          => 'title',
+            'order'            => $this->getOrderDirection(),
+            'post_status'      => 'any', 
+            'fields'           => 'all'
         ));
     }
 
@@ -354,7 +375,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     protected function wrapTable($response) {
         $response['draw'] = AAM_Core_Request::request('draw');
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -373,16 +394,12 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         //prepare the response object
         if (is_a($object, 'AAM_Core_Object')) {
             foreach($object->getOption() as $key => $value) {
-                if (is_bool($value) || in_array($value, array('0', '1'))) {
-                    $access[$key] = ($value ? 1 : 0); //TODO - to support legacy
-                } else {
-                    $access[$key] = $value;
-                }
+                $access[$key] = in_array($value, array(1, '1', true, "true"), true);
             }
             $metadata = array('overwritten' => $object->isOverwritten());
         }
 
-        return json_encode(array(
+        return wp_json_encode(array(
             'access'  => $access, 
             'meta'    => $metadata,
             'preview' => $this->preparePreviewValues($access)
@@ -413,7 +430,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     protected function getPreviewValue($option, $val) {
         switch($option) {
             case 'frontend.teaser':
-                $str = strip_tags($val);
+                $str = wp_strip_all_tags($val);
                 if (function_exists('mb_strlen')) {
                     $preview = (mb_strlen($str) > 25 ? mb_substr($str, 0, 22) . '...' : $str);
                 } else {
@@ -424,11 +441,11 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
             case 'frontend.location':
                 if (!empty($val)) {
                     $chunks = explode('|', $val);
-                    if ($chunks[0] == 'page') {
+                    if ($chunks[0] === 'page') {
                         $preview = __('Existing Page', AAM_KEY);
-                    } elseif ($chunks[0] == 'url') {
+                    } elseif ($chunks[0] === 'url') {
                         $preview = __('Valid URL', AAM_KEY);
-                    } elseif ($chunks[0] == 'callback') {
+                    } elseif ($chunks[0] === 'callback') {
                         $preview = __('Custom Callback', AAM_KEY);
                     }
                 }
@@ -465,7 +482,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
 
         $result = $subject->save($param, $value, $object, $id);
 
-        return json_encode(array(
+        return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure'),
             'value'   => $value,
             'preview' => $this->getPreviewValue($param, $value)
@@ -492,7 +509,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
             $result = false;
         }
         
-        return json_encode(array('status' => ($result ? 'success' : 'failure')));
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
 
     /**
@@ -522,7 +539,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         
         $filtered = array();
         foreach($list as $option => $data) {
-            $add = empty($data['exclude']) || !in_array($subject, $data['exclude']);
+            $add = empty($data['exclude']) || !in_array($subject, $data['exclude'], true);
             
             if ($add) {
                $add = empty($data['config']) || AAM_Core_Config::get($data['config'], true); 
@@ -543,9 +560,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
      */
     public static function renderAccessForm() {
         ob_start();
-        require_once(
-            AAM_BASEDIR . '/Application/Backend/phtml/partial/post-access-form.phtml'
-        );
+        require_once AAM_BASEDIR . '/Application/Backend/phtml/partial/post-access-form.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -594,7 +609,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.settings.backendAccessControl,core.settings.frontendAccessControl',
+            'option'     => 'core.settings.backendAccessControl,core.settings.frontendAccessControl,core.settings.apiAccessControl',
             'view'       => __CLASS__
         ));
     }

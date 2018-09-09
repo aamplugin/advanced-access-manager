@@ -28,7 +28,7 @@ class AAM_Backend_Feature_Settings_Manager  extends AAM_Backend_Feature_Abstract
         
         AAM_Core_Config::set($param, $value);
         
-        return json_encode(array('status' => 'success'));
+        return wp_json_encode(array('status' => 'success'));
     }
     
     /**
@@ -43,7 +43,7 @@ class AAM_Backend_Feature_Settings_Manager  extends AAM_Backend_Feature_Abstract
         
         AAM_Core_Config::delete($param);
         
-        return json_encode(array('status' => 'success'));
+        return wp_json_encode(array('status' => 'success'));
     }
     
 }

@@ -95,10 +95,10 @@ class AAM_Core_ConfigPress_Evaluator {
 
             if (empty($chunk)) {
                 continue; //skip empty part
-            } elseif ($chunk == '(') {
+            } elseif ($chunk === '(') {
                 $this->index[] = ++$index;
                 $queue[] = $this->evaluate();
-            } elseif ($chunk == ')') {
+            } elseif ($chunk === ')') {
                 array_pop($this->index);
                 $this->index[count($this->index) - 1] = ++$index;
                 break;
@@ -193,7 +193,7 @@ class AAM_Core_ConfigPress_Evaluator {
         foreach ($this->_operators as $operators) {
             $i = 0;
             while ($i < count($queue)) {
-                if (!is_bool($queue[$i]) && in_array($queue[$i], $operators)) {
+                if (!is_bool($queue[$i]) && in_array($queue[$i], $operators, true)) {
                     $value = $this->processOperation(
                             $queue[$i], $queue[$i - 1], $queue[$i + 1]
                     );

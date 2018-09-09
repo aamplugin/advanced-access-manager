@@ -127,7 +127,7 @@ class AAM_Api_Manager {
         $method  = $request->get_method();
         
         foreach(array_keys($server->get_routes()) as $route) {
-            if ($route == $matched || preg_match("#^{$route}$#i", $matched)) {
+            if ($route === $matched || preg_match("#^{$route}$#i", $matched)) {
                 if ($object->has('restful', $route, $method)) {
                     $response = new WP_Error(
                         'rest_access_denied', 

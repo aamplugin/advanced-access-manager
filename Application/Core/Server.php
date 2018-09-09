@@ -34,7 +34,7 @@ final class AAM_Core_Server {
     public static function register() {
         //prepare check params
         $params = array(
-            'domain'  => parse_url(site_url(), PHP_URL_HOST), 
+            'domain'  => wp_parse_url(site_url(), PHP_URL_HOST), 
             'version' => AAM_Core_API::version(),
             'uid'     => AAM_Core_API::getOption('aam-uid', null, 'site')
         );
@@ -56,7 +56,7 @@ final class AAM_Core_Server {
         
         //prepare check params
         $params = array(
-            'domain'   => parse_url(site_url(), PHP_URL_HOST), 
+            'domain'   => wp_parse_url(site_url(), PHP_URL_HOST), 
             'version'  => AAM_Core_API::version(),
             'uid'      => AAM_Core_API::getOption('aam-uid', null, 'site'),
             'licenses' => $repository->getCommercialLicenses(false)
@@ -85,7 +85,7 @@ final class AAM_Core_Server {
      * @access public
      */
     public static function download($license) {
-        $domain = parse_url(site_url(), PHP_URL_HOST);
+        $domain = wp_parse_url(site_url(), PHP_URL_HOST);
 
         $response = self::send(
                 '/download', 
@@ -121,7 +121,7 @@ final class AAM_Core_Server {
     protected static function send($request, $params, $timeout = 10) {
         $response = self::parseResponse(
             AAM_Core_API::cURL(
-                self::SERVER_URL . $request, false, $params, $timeout
+                self::SERVER_URL . $request, $params, $timeout
             )
         );
         
@@ -134,9 +134,9 @@ final class AAM_Core_Server {
      */
     protected static function parseResponse($response) {
         if (!is_wp_error($response)) {
-            if ($response['response']['code'] == 200) {
+            if (intval($response['response']['code']) === 200) {
                 $response = json_decode($response['body']);
-                if (empty($params['uid']) && isset($response->uid)) {
+                if (isset($response->uid)) {
                     AAM_Core_API::updateOption('aam-uid', $response->uid, 'site');
                 }
             } else {

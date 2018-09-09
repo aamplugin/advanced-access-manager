@@ -22,7 +22,7 @@ class AAM_Backend_Feature_Main_Redirect extends AAM_Backend_Feature_Abstract {
     public function isDefault() {
         $subject = AAM_Backend_Subject::getInstance();
         
-        return $subject->getUID() == AAM_Core_Subject_Default::UID;
+        return $subject->getUID() === AAM_Core_Subject_Default::UID;
     }
     
     /**
@@ -32,7 +32,7 @@ class AAM_Backend_Feature_Main_Redirect extends AAM_Backend_Feature_Abstract {
     public function isVisitor() {
         $subject = AAM_Backend_Subject::getInstance();
         
-        return $subject->getUID() == AAM_Core_Subject_Visitor::UID;
+        return $subject->getUID() === AAM_Core_Subject_Visitor::UID;
     }
     
     /**

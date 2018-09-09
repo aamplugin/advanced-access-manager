@@ -86,9 +86,67 @@ class AAM_Shared_Manager {
                     );
                 }
             }
+            
+            // Security. Make sure that we escaping all translation strings
+            add_filter(
+                    'gettext', array(self::$_instance, 'escapeTranslation'), 999, 3
+            );
+            
+            // Role Manager. Tracking user role changes and if there is expiration
+            // set, then trigger hooks
+            add_action('add_user_role', array(self::$_instance, 'userRoleAdded'), 10, 2);
+            add_action('remove_user_role', array(self::$_instance, 'userRoleRemoved'), 10, 2);
         }
         
         return self::$_instance;
+    }
+    
+    /**
+     * 
+     * @param type $userId
+     * @param type $role
+     */
+    public function userRoleAdded($userId, $role) {
+        $user = new AAM_Core_Subject_User($userId);
+        AAM_Core_API::clearCache($user);
+        
+        $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
+            
+        if ($expire) {
+            update_user_option($userId, "aam-original-roles", $user->roles);
+            update_user_option($userId, "aam-role-expires", strtotime($expire));
+        }
+    }
+    
+    /**
+     * 
+     * @param type $userId
+     * @param type $role
+     */
+    public function userRoleRemoved($userId, $role) {
+        $user = new AAM_Core_Subject_User($userId);
+        AAM_Core_API::clearCache($user);
+        
+        $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
+            
+        if ($expire) {
+            delete_user_option($userId, "aam-role-expires");
+        }
+    }
+    
+    /**
+     * 
+     * @param type $translation
+     * @param type $text
+     * @param type $domain
+     * @return type
+     */
+    public function escapeTranslation($translation, $text, $domain) {
+        if ($domain === AAM_KEY) {
+            $translation = esc_js($translation);
+        }
+        
+        return $translation;
     }
     
     /**
@@ -100,13 +158,11 @@ class AAM_Shared_Manager {
         
         $toolbar = AAM::api()->getUser()->getObject('toolbar');
         
-        //echo '<pre>'; print_r($wp_admin_bar->get_nodes()); die();
-        
         foreach($wp_admin_bar->get_nodes() as $id => $node) {
             if ($toolbar->has($id, true)) {
                 if (!empty($node->parent)) { // update parent node with # link
                     $parent = $wp_admin_bar->get_node($node->parent);
-                    if ($parent && ($parent->href == $node->href)) {
+                    if ($parent && ($parent->href === $node->href)) {
                         $wp_admin_bar->add_node(array(
                             'id'   => $parent->id,
                             'href' => '#'
@@ -202,7 +258,7 @@ class AAM_Shared_Manager {
             $postType = 'any';
         }
         
-        if ($postType == 'any') {
+        if ($postType === 'any') {
             $postType = array_keys(
                 get_post_types(
                     array('public' => true, 'exclude_from_search' => false), 
@@ -236,7 +292,7 @@ class AAM_Shared_Manager {
         foreach($visibility as $id => $access) {
             $chunks = explode('|', $id);
 
-            if (in_array($chunks[1], $postTypes)) {
+            if (in_array($chunks[1], $postTypes, true)) {
                 if (!empty($access["{$area}.list"])) {
                     $not[] = $chunks[0];
                 }
@@ -360,7 +416,7 @@ class AAM_Shared_Manager {
         
         $qfields = (isset($query->query['fields']) ? $query->query['fields'] : '');
         
-        if ($qfields == 'id=>parent') {
+        if ($qfields === 'id=>parent') {
             $author = "{$wpdb->posts}.post_author";
             if (strpos($fields, $author) === false) {
                 $fields .= ", $author"; 
@@ -446,7 +502,7 @@ class AAM_Shared_Manager {
      */
     protected function authorizePostEdit($id, $allcaps, $metacaps) {
         $object = AAM::getUser()->getObject('post', $id);
-        $draft  = $object->post_status == 'auto-draft';
+        $draft  = $object->post_status === 'auto-draft';
         $area   = AAM_Core_Api_Area::get();
 
         if (!$draft && !$this->isActionAllowed($area . '.edit', $object)) {
@@ -519,7 +575,7 @@ class AAM_Shared_Manager {
     protected function isActionAllowed($action, $object) {
         $edit   = $object->has($action);
         $others = $object->has("{$action}_others");
-        $author = ($object->post_author == get_current_user_id());
+        $author = ($object->post_author === get_current_user_id());
         
         return ($edit || ($others && !$author)) ? false : true;
     }

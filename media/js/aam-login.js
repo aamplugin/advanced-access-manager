@@ -63,7 +63,6 @@ if (typeof jQuery !== 'undefined') {
                                 }).val(button.attr('data-original-label'));
                             }
                         });
-                        
                     } else {
                         $('#' + prefix + 'error').html(
                             '<strong>ERROR:</strong> Username and password are required.'

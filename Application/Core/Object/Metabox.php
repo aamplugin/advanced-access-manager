@@ -89,7 +89,7 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
 
         if (is_array($wp_meta_boxes)) {
             foreach ($wp_meta_boxes as $screen_id => $zones) {
-                if ($screen == $screen_id) {
+                if ($screen === $screen_id) {
                     $this->filterZones($zones, $screen_id);
                 }
             }

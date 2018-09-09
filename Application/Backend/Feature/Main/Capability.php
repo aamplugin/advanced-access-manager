@@ -65,7 +65,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
     public function getTable() {
         $response = array('data' => $this->retrieveAllCaps());
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -99,7 +99,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             );
         }
         
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -116,7 +116,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         $roles      = AAM_Core_API::getRoles();
         $subject    = AAM_Backend_Subject::getInstance();
         
-        if ($subject->getUID() == AAM_Core_Subject_Role::UID) {
+        if ($subject->getUID() === AAM_Core_Subject_Role::UID) {
             foreach($roles->role_objects as $role) {
                 $role->remove_cap($capability);
             }
@@ -128,7 +128,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             );
         }
         
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -151,7 +151,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         
         //allow to delete or update capability only for roles!
         if (AAM_Core_Config::get('core.settings.editCapabilities', false) 
-                && ($subject->getUID() == AAM_Core_Subject_Role::UID)) {
+                && ($subject->getUID() === AAM_Core_Subject_Role::UID)) {
             $actions[] = 'edit';
             $actions[] = 'delete';
         }
@@ -240,7 +240,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             $response = array('status' => 'failure');
         }
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
 
     /**
@@ -253,13 +253,13 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
      * @access protected
      */
     protected function getGroup($capability) {
-        if (in_array($capability, self::$groups['system'])) {
+        if (in_array($capability, self::$groups['system'], true)) {
             $response = __('System', AAM_KEY);
-        } elseif (in_array($capability, self::$groups['post'])) {
+        } elseif (in_array($capability, self::$groups['post'], true)) {
             $response = __('Posts & Pages', AAM_KEY);
-        } elseif (in_array($capability, self::$groups['backend'])) {
+        } elseif (in_array($capability, self::$groups['backend'], true)) {
             $response = __('Backend', AAM_KEY);
-        } elseif (in_array($capability, self::$groups['aam'])) {
+        } elseif (in_array($capability, self::$groups['aam'], true)) {
             $response = __('AAM Interface', AAM_KEY);
         } else {
             $response = __('Miscellaneous', AAM_KEY);

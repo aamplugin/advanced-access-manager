@@ -58,7 +58,7 @@ final class AAM_Core_Api_Area {
      * @return type
      */
     public static function isBackend() {
-        return self::get() == self::BACKEND;
+        return self::get() === self::BACKEND;
     }
     
     /**
@@ -66,7 +66,7 @@ final class AAM_Core_Api_Area {
      * @return type
      */
     public static function isFrontend() {
-        return self::get() == self::FRONTEND;
+        return self::get() === self::FRONTEND;
     }
     
     /**
@@ -74,6 +74,6 @@ final class AAM_Core_Api_Area {
      * @return type
      */
     public static function isAPI() {
-        return self::get() == self::API;
+        return self::get() === self::API;
     }
 }

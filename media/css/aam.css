@@ -28,7 +28,6 @@
     width: 1em;
     margin-right: .2em;
     text-align: center;
-    /* opacity: .8; */
 
     /* For safety - reset parent styles, that can break glyph codes*/
     font-variant: normal;
@@ -42,14 +41,10 @@
     margin-left: .2em;
 
     /* you can be more comfortable with increased icons size */
-    /* font-size: 120%; */
 
     /* Font smoothing. That was taken from TWBS */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    /* Uncomment for 3D effect */
-    /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
 
 .icon-clock:before { content: '\e800' !important; } /* 'î ' */
@@ -566,6 +561,10 @@ input[type=radio]:checked + label:before {
     float:right; 
     font-size:1em !important;
     cursor: pointer;
+}
+
+.aam-access-overwritten {
+    color: #f0ad4e;
 }
 
 .aam-redirect-action {

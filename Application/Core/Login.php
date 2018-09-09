@@ -80,6 +80,17 @@ class AAM_Core_Login {
             // Delete User Switch flag in case admin is inpersonating user
             AAM_Core_API::deleteOption('aam-user-switch-' . $user->ID);
             
+            // Experimental feature. Track user session
+            if (AAM::api()->getConfig('core.session.tracking', false)) {
+                $ttl = AAM::api()->getConfig(
+                    "core.session.user.{$this->ID}.ttl",
+                    AAM::api()->getConfig("core.session.user.ttl", null)
+                );
+                if (!empty($ttl)) {
+                    add_user_meta($user->ID, 'aam-authenticated-timestamp', time());
+                }
+            }
+            
             if ($this->aamLogin === false) {
                 $redirect = $this->getLoginRedirect($user);
                 
@@ -105,6 +116,9 @@ class AAM_Core_Login {
             $redirect = $object->get("logout.redirect.{$type}");
             AAM_Core_API::redirect($redirect);
         }
+        
+        // get user login timestamp
+        delete_user_meta(AAM::getUser()->ID, 'aam-authenticated-timestamp');
     }
     
     /**
@@ -119,7 +133,7 @@ class AAM_Core_Login {
     public function authenticateUser($user) {
         if (is_a($user, 'WP_User')) {
             // First check if user is blocked
-            if ($user->user_status == 1) {
+            if ($user->user_status === 1) {
                 $user = new WP_Error();
 
                 $message  = '[ERROR]: User is locked. Please contact your website ';
@@ -154,7 +168,7 @@ class AAM_Core_Login {
         $reason = AAM_Core_Request::get('reason');
         
         if (empty($message)) {
-            if ($reason == 'restricted') {
+            if ($reason === 'restricted') {
                 $message = AAM_Core_Config::get(
                     'security.redirect.message',
                     '<p class="message">' . 

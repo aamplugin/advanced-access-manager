@@ -88,7 +88,7 @@ class AAM_Extension_Repository {
         if (file_exists($basedir)) {
             //iterate through each active extension and load it
             foreach (scandir($basedir) as $extension) {
-                if (!in_array($extension, array('.', '..'))) {
+                if (!in_array($extension, array('.', '..'), true)) {
                     $this->bootstrapExtension($basedir . '/' . $extension);
                 }
             }
@@ -122,7 +122,7 @@ class AAM_Extension_Repository {
         
         if (file_exists($config)) {
             $conf = require $config;
-            $load = empty($cache[$conf['id']]['status']) || ($cache[$conf['id']]['status'] != self::STATUS_INACTIVE);
+            $load = empty($cache[$conf['id']]['status']) || ($cache[$conf['id']]['status'] !== self::STATUS_INACTIVE);
         } else { // TODO - Remove May 2019
             AAM_Core_Console::add(AAM_Backend_View_Helper::preparePhrase(
                 sprintf(
@@ -176,7 +176,7 @@ class AAM_Extension_Repository {
         foreach((array) $licenses as $key => $data) {
             if (isset($extensions[$key]) 
                     && !empty($data['license']) 
-                    && $extensions[$key]['type'] == 'commercial') {
+                    && $extensions[$key]['type'] === 'commercial') {
                 
                 if ($details) {
                     $response[] = array(
@@ -306,7 +306,7 @@ class AAM_Extension_Repository {
                     );
                 }
             }
-        } elseif ($status == AAM_Extension_Repository::STATUS_INSTALLED) {
+        } elseif ($status === AAM_Extension_Repository::STATUS_INSTALLED) {
             if (!defined($id)) {
                 $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
             } elseif ($this->isOutdatedVersion($item, $retrieved, constant($id))) {
@@ -327,7 +327,7 @@ class AAM_Extension_Repository {
     protected function isOutdatedVersion($item, $retrieved, $version) {
         $id = $item['id'];
         
-        if ($item['type'] == 'commercial') {
+        if ($item['type'] === 'commercial') {
             $valid = !empty($item['license']);
         } else {
             $valid = true;
@@ -338,9 +338,9 @@ class AAM_Extension_Repository {
         if ($valid) {
             // first check the retrieved version from the server
             if (isset($retrieved->$id)) {
-                $outdated = version_compare($version, $retrieved->$id->version) == -1;
+                $outdated = version_compare($version, $retrieved->$id->version) === -1;
             } else {
-                $outdated = version_compare($version, $item['latest']) == -1;
+                $outdated = version_compare($version, $item['latest']) === -1;
             }
         }
 
@@ -405,7 +405,7 @@ class AAM_Extension_Repository {
         $updates = 0;
         
         foreach($this->getList() as $item) {
-            $updates += ($item['status'] == self::STATUS_UPDATE);
+            $updates += ($item['status'] === self::STATUS_UPDATE);
         }
         
         return $updates ? true : false;

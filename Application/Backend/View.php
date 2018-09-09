@@ -33,6 +33,7 @@ class AAM_Backend_View {
      */
     protected function __construct() {
         //register default features
+        AAM_Backend_Feature_Main_GetStarted::register();
         AAM_Backend_Feature_Main_Menu::register();
         AAM_Backend_Feature_Main_Toolbar::register();
         AAM_Backend_Feature_Main_Metabox::register();
@@ -63,7 +64,7 @@ class AAM_Backend_View {
      */
     public function renderPage() {
         ob_start();
-        require_once(dirname(__FILE__) . '/phtml/index.phtml');
+        require_once dirname(__FILE__) . '/phtml/index.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -79,7 +80,7 @@ class AAM_Backend_View {
      */
     public function renderAccessFrame() {
         ob_start();
-        require_once(dirname(__FILE__) . '/phtml/metabox/metabox-content.phtml');
+        require_once dirname(__FILE__) . '/phtml/metabox/metabox-content.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -93,7 +94,7 @@ class AAM_Backend_View {
      */
     public function renderPostMetabox($post) {
         ob_start();
-        require_once(dirname(__FILE__) . '/phtml/metabox/post-metabox.phtml');
+        require_once dirname(__FILE__) . '/phtml/metabox/post-metabox.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -107,7 +108,7 @@ class AAM_Backend_View {
      */
     public function renderTermMetabox($term) {
         ob_start();
-        require_once(dirname(__FILE__) . '/phtml/metabox/term-metabox.phtml');
+        require_once dirname(__FILE__) . '/phtml/metabox/term-metabox.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -129,7 +130,7 @@ class AAM_Backend_View {
         
         if (method_exists($this, $parts[0])) {
             $response = call_user_func(array($this, $parts[0]));
-        } elseif (count($parts) == 2) { //cover the Model.method pattern
+        } elseif (count($parts) === 2) { //cover the Model.method pattern
             try {
                 $classname = 'AAM_Backend_Feature_' . $parts[0];
                 if (class_exists($classname)) {
@@ -162,12 +163,12 @@ class AAM_Backend_View {
         
         if (is_null($content)) {
             ob_start();
-            if ($type == 'extensions') {
+            if ($type === 'extensions') {
                 AAM_Backend_Feature_Extension_Manager::getInstance()->render();
-            } elseif ($type == 'postform') {
+            } elseif ($type === 'postform') {
                 echo AAM_Backend_Feature_Main_Post::renderAccessForm();
             } else {
-                require_once(dirname(__FILE__) . '/phtml/main-panel.phtml');
+                require_once dirname(__FILE__) . '/phtml/main-panel.phtml';
             }
             $content = ob_get_contents();
             ob_end_clean();
@@ -183,7 +184,7 @@ class AAM_Backend_View {
      */
     public function loadPartial($partial) {
         ob_start();
-        require_once(dirname(__FILE__) . '/phtml/partial/' . $partial);
+        require_once dirname(__FILE__) . '/phtml/partial/' . $partial;
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -210,7 +211,7 @@ class AAM_Backend_View {
                 $param, $value, $object, $objectId
         );
 
-        return json_encode(array('status' => ($result ? 'success' : 'failure')));
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
 
     /**
@@ -250,7 +251,7 @@ class AAM_Backend_View {
             }
         }
         
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**

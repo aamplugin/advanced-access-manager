@@ -108,7 +108,7 @@ class AAM_Backend_Manager {
         add_action('admin_init', array($this, 'adminInit'));
         
         //admin toolbar
-        if (filter_input(INPUT_GET, 'init') == 'toolbar') {
+        if (filter_input(INPUT_GET, 'init') === 'toolbar') {
             add_action('wp_after_admin_bar_render', array($this, 'adminBar'));
         }
         
@@ -125,7 +125,7 @@ class AAM_Backend_Manager {
         
         AAM_Extension_Repository::getInstance()->hasUpdates();
         
-        if (version_compare(PHP_VERSION, '5.3.0') == -1) {
+        if (version_compare(PHP_VERSION, '5.3.0') === -1) {
             AAM_Core_Console::add(
                 'AAM requires PHP version 5.3.0 or higher to function properly'
             );
@@ -139,7 +139,7 @@ class AAM_Backend_Manager {
      * @return type
      */
     public function mapMetaCap($caps, $cap) {
-        if (in_array($cap, AAM_Backend_Feature_Main_Capability::$groups['aam'])) {
+        if (in_array($cap, AAM_Backend_Feature_Main_Capability::$groups['aam'], true)) {
             if (!AAM_Core_API::capabilityExists($cap)) {
                 $caps = array(AAM_Core_Config::get('page.capability', 'administrator'));
             }
@@ -178,7 +178,7 @@ class AAM_Backend_Manager {
         $user = get_user_by('ID', $id);
         
         //role changed?
-        if (implode('', $user->roles) != implode('', $old->roles)) {
+        if (implode('', $user->roles) !== implode('', $old->roles)) {
             AAM_Core_API::clearCache(new AAM_Core_Subject_User($id));
             
             //check if role has expiration data set
@@ -256,7 +256,7 @@ class AAM_Backend_Manager {
     public function handleLogin() {
         $login = AAM_Core_Login::getInstance();
 
-        echo json_encode($login->execute());
+        echo wp_json_encode($login->execute());
         exit;
     }
     
@@ -326,7 +326,7 @@ class AAM_Backend_Manager {
      * 
      */
     protected function checkUserSwitch() {
-        if (AAM_Core_Request::get('action') == 'aam-switch-back') {
+        if (AAM_Core_Request::get('action') === 'aam-switch-back') {
             $current  = get_current_user_id();
             $uid      = AAM_Core_API::getOption('aam-user-switch-' . $current);
             $redirect = admin_url('admin.php?page=aam&user=' . $current);
@@ -360,11 +360,9 @@ class AAM_Backend_Manager {
                     'index.php?action=aam-switch-back', 'aam-switch-' . $uid
             );
             
-            $style = 'padding: 10px; font-weight: 700; letter-spacing:0.5px;';
-            
             echo '<div class="updated notice">';
-            echo '<p style="' . $style . '">';
-            echo sprintf('Switch back to <a href="%s">%s</a>.', $url, $name);
+            echo '<p style="padding: 10px; font-weight: 700; letter-spacing:0.5px;">';
+            echo sprintf('Switch back to <a href="%s">%s</a>.', $url, esc_js($name));
             echo '</p></div>';
         }
     }
@@ -411,7 +409,7 @@ class AAM_Backend_Manager {
             
             // do some cleanup
             foreach($cache as $i => $node) {
-                if ($node->id == 'menu-toggle') {
+                if ($node->id === 'menu-toggle') {
                     unset($cache[$i]);
                 }
             }
@@ -458,14 +456,13 @@ class AAM_Backend_Manager {
     public function initMetaboxes() {
         global $post;
 
-        if (AAM_Core_Request::get('init') == 'metabox') {
+        if (AAM_Core_Request::get('init') === 'metabox') {
             //make sure that nobody is playing with screen options
             if (is_a($post, 'WP_Post')) {
                 $screen = $post->post_type;
-            } elseif ($screen_object = get_current_screen()) {
-                $screen = $screen_object->id;
             } else {
-                $screen = '';
+                $screen_object = get_current_screen();
+                $screen        = ($screen_object ? $screen_object->id : '');
             }
         
             $model = new AAM_Backend_Feature_Main_Metabox;
@@ -591,8 +588,8 @@ class AAM_Backend_Manager {
         $subject = AAM_Backend_Subject::getInstance();
         
         $locals = array(
-            'nonce'   => wp_create_nonce('aam_ajax'),
-            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('aam_ajax'),
+            'ajaxurl'  => admin_url('admin-ajax.php'),
             'url' => array(
                 'site'     => admin_url('index.php'),
                 'editUser' => admin_url('user-edit.php'),

@@ -98,7 +98,7 @@ class AAM_Frontend_Authorization {
         $read   = $post->has('frontend.read');
         $others = $post->has('frontend.read_others');
         
-        if ($read || ($others && ($post->post_author != get_current_user_id()))) {
+        if ($read || ($others && ($post->post_author !== get_current_user_id()))) {
             $this->deny('post_read', 'frontend.read', $post->getPost());
         }
     }
@@ -145,13 +145,13 @@ class AAM_Frontend_Authorization {
             $rule = explode('|', $post->get(AAM_Core_Api_Area::get() . '.location'));
             $code = apply_filters('aam-post-redirect-http-code-filter', 307);
             
-            if (count($rule) == 1) { // TODO: legacy. Remove in Jul 2020
+            if (count($rule) === 1) { // TODO: legacy. Remove in Jul 2020
                 AAM_Core_API::redirect($rule[0]);
-            } elseif ($rule[0] == 'page') {
-                wp_safe_redirect(get_page_link($rule[1]), $code);
-            } elseif ($rule[0] == 'url') {
-                wp_redirect($rule[1], $code);
-            } elseif (($rule[0] == 'callback') && is_callable($rule[1])) {
+            } elseif ($rule[0] === 'page') {
+                wp_safe_redirect(get_page_link($rule[1]), $code); exit;
+            } elseif ($rule[0] === 'url') {
+                wp_redirect($rule[1], $code); exit;
+            } elseif (($rule[0] === 'callback') && is_callable($rule[1])) {
                 call_user_func($rule[1], $post);
             }
         }

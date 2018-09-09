@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.4.2
+  Version: 5.4.3
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -142,7 +142,9 @@ class AAM {
         AAM::getInstance();
         
         //load all installed extension
-        AAM_Extension_Repository::getInstance()->load();
+        if (AAM_Core_Config::get('core.settings.extensionSupport', true)) {
+            AAM_Extension_Repository::getInstance()->load();
+        }
 
         //load media control
         AAM_Core_Media::bootstrap();
@@ -168,14 +170,9 @@ class AAM {
             self::$_instance = new self;
             
             // Logout user if he/she is blocked
-            $user = self::$_instance->getUser();
-            if ($user->getUID() == 'user' && $user->user_status == 1) {
-                wp_logout();
-            }
+            self::$_instance->getUser()->validateUserStatus();
             
-            load_plugin_textdomain(
-                    AAM_KEY, false, dirname(plugin_basename(__FILE__)) . '/Lang/'
-            );
+            load_plugin_textdomain(AAM_KEY);
         }
 
         return self::$_instance;
@@ -193,7 +190,7 @@ class AAM {
     public static function cron() {
         $extensions = AAM_Core_API::getOption('aam-extensions', null, 'site');
         
-        if (!empty($extensions)) {
+        if (!empty($extensions) && AAM_Core_Config::get('core.settings.cron', true)) {
             //grab the server extension list
             AAM_Core_API::updateOption(
                     'aam-check', AAM_Core_Server::check(), 'site'
@@ -212,9 +209,9 @@ class AAM {
         global $wp_version;
         
         //check PHP Version
-        if (version_compare(PHP_VERSION, '5.3.0') == -1) {
+        if (version_compare(PHP_VERSION, '5.3.0') === -1) {
             exit(__('PHP 5.3.0 or higher is required.', AAM_KEY));
-        } elseif (version_compare($wp_version, '4.0') == -1) {
+        } elseif (version_compare($wp_version, '4.0') === -1) {
             exit(__('WP 4.0 or higher is required.', AAM_KEY));
         }
     }

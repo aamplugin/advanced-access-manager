@@ -42,19 +42,28 @@ class AAM_Core_Importer {
      * @return type
      */
     public function run() {
-        foreach($this->input->dataset as $table => $data) {
-            if ($table == '_options') {
-                $this->insertOptions($data);
-            } elseif ($table == '_postmeta') {
-                $this->insertPostmeta($data);
-            } elseif ($table == '_usermeta') {
-                $this->insertUsermeta($data);
-            } else {
-                do_action('aam-import-action', $table, $data);
+        $response = array('status' => 'success');
+        
+        if (version_compare($this->input->version, AAM_Core_API::version()) === 0) {
+            foreach($this->input->dataset as $table => $data) {
+                if ($table === '_options') {
+                    $this->insertOptions($data);
+                } elseif ($table === '_postmeta') {
+                    $this->insertPostmeta($data);
+                } elseif ($table === '_usermeta') {
+                    $this->insertUsermeta($data);
+                } else {
+                    do_action('aam-import-action', $table, $data);
+                }
             }
+        } else {
+            $response = array(
+                'status' => 'failure',
+                'reason' => __('Version of exported settings do not match current AAM version', AAM_KEY) 
+            );
         }
         
-        return 'success';
+        return $response;
     }
     
     /**
@@ -122,8 +131,19 @@ class AAM_Core_Importer {
      * @return void
      */
     protected function prepareValue($value) {
-        if (is_serialized($value)) {
-            $value = unserialize($value);
+        if (is_string($value)) {
+            // #1. Check is string base64 encoded
+            $decoded = base64_decode($value);
+            
+            if ($decoded !== false) {
+                $value = $decoded;
+            }
+            
+            // #2. Check if string is json
+            $json = json_decode($value, true);
+            if (json_last_error() == JSON_ERROR_NONE) {
+                $value = $json;
+            }
         }
         
         return $value;

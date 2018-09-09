@@ -67,13 +67,12 @@ class AAM_Core_Compatibility {
             $changes += self::normalizeOption('single-session', 'core.settings.singleSession', $config);
             $changes += self::normalizeOption('brute-force-lockout', 'core.settings.bruteForceLockout', $config);
             $changes += self::normalizeOption('inherit-parent-post', 'core.settings.inheritParentPost', $config);
-            //$changes += self::normalizeOption('', '', $config);
             
             if ($changes > 0) {
                 if (is_multisite()) {
-                    $result = AAM_Core_API::updateOption('aam-utilities', $config, 'site');
+                    AAM_Core_API::updateOption('aam-utilities', $config, 'site');
                 } else {
-                    $result = AAM_Core_API::updateOption('aam-utilities', $config);
+                    AAM_Core_API::updateOption('aam-utilities', $config);
                 }
             }
         }

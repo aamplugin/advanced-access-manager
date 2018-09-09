@@ -62,7 +62,7 @@ class AAM_Shortcode_Strategy_Login implements AAM_Shortcode_Strategy_Interface {
             $content = call_user_func($this->args['callback'], $this);
         } else {
             ob_start();
-            require AAM_Core_Config::get(
+            require AAM::api()->getConfig(
                 'feature.secureLogin.shortcode.template', 
                 realpath(AAM_BASEDIR . '/Application/Frontend/phtml/login.phtml')
             );

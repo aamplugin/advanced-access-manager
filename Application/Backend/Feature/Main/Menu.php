@@ -32,7 +32,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
        
        $object->save();
 
-       return json_encode(array('status' => 'success'));
+       return wp_json_encode(array('status' => 'success'));
     }
 
     /**
@@ -112,7 +112,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
         
         $response  = array();
         $subject   = AAM_Backend_Subject::getInstance();
-        $isDefault = ($subject->getUID() == AAM_Core_Subject_Default::UID);
+        $isDefault = ($subject->getUID() === AAM_Core_Subject_Default::UID);
         
         if (array_key_exists($menu, $submenu) && is_array($submenu[$menu])) {
             foreach ($submenu[$menu] as $item) {
@@ -142,7 +142,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
      * @access protected
      */
     protected function filterMenuName($name) {
-        $filtered = trim(strip_tags($name));
+        $filtered = trim(wp_strip_all_tags($name));
         
         return preg_replace('/([\d]+)$/', '', $filtered);
     }

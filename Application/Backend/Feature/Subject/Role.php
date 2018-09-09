@@ -64,7 +64,7 @@ class AAM_Backend_Feature_Subject_Role {
             );
         }
         
-        return json_encode(apply_filters('aam-get-role-list-filter', $response));
+        return wp_json_encode(apply_filters('aam-get-role-list-filter', $response));
     }
     
     /**
@@ -94,7 +94,7 @@ class AAM_Backend_Feature_Subject_Role {
      * @return string
      */
     public function getList(){
-        return json_encode(
+        return wp_json_encode(
                 apply_filters('aam-get-role-list-filter', $this->fetchRoleList())
         );
     }
@@ -116,7 +116,7 @@ class AAM_Backend_Feature_Subject_Role {
         
         foreach ($roles as $id => $role) {
             $match = preg_match('/^' . $search . '/i', $role['name']);
-            if (($exclude != $id) && (!$search || $match)) {
+            if (($exclude !== $id) && (!$search || $match)) {
                 $response[$id] = $role;
             }
         }
@@ -169,7 +169,7 @@ class AAM_Backend_Feature_Subject_Role {
             }
         }
 
-        return json_encode($response);
+        return wp_json_encode($response);
     }
     
     /**
@@ -234,7 +234,7 @@ class AAM_Backend_Feature_Subject_Role {
             $response = array('status' => 'failure');
         }
         
-        return json_encode($response);
+        return wp_json_encode($response);
     }
 
     /**
@@ -253,7 +253,7 @@ class AAM_Backend_Feature_Subject_Role {
             }
         }
 
-        return json_encode(array('status' => $status));
+        return wp_json_encode(array('status' => $status));
     }
 
 }

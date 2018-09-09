@@ -118,8 +118,8 @@ class AAM_Backend_Feature {
         $subject = AAM_Backend_Subject::getInstance()->getUID();
         foreach (self::$_features as $feature) {
             $ftype = (!empty($feature->type) ? $feature->type : 'main'); //TODO - legacy Nov 2018
-            if ($ftype == $type 
-                    && (empty($feature->subjects) || in_array($subject, $feature->subjects))) {
+            if ($ftype === $type 
+                    && (empty($feature->subjects) || in_array($subject, $feature->subjects, true))) {
                 $response[] = self::initView($feature);
             }
         }
@@ -144,7 +144,7 @@ class AAM_Backend_Feature {
         $pos_a = (empty($feature_a->position) ? 9999 : $feature_a->position);
         $pos_b = (empty($feature_b->position) ? 9999 : $feature_b->position);
 
-        if ($pos_a == $pos_b){
+        if ($pos_a === $pos_b){
             $response = 0;
         } else {
             $response = ($pos_a < $pos_b ? -1 : 1);

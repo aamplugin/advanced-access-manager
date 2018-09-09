@@ -65,7 +65,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
                 $option = $this->getOption();
             }
             
-            if (in_array($subject::UID, array('user', 'visitor'))) {
+            if (in_array($subject::UID, array('user', 'visitor'), true)) {
                 $subject->getObject('cache')->add(
                     'visibility', 0, empty($option) ? false : $option
                 );
@@ -90,7 +90,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
         );
         
         foreach($options as $key => $value) {
-            if (in_array($key, $listOptions)) {
+            if (in_array($key, $listOptions, true)) {
                 $filtered[$key] = $value;
             }
         }

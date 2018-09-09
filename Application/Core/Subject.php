@@ -212,7 +212,7 @@ abstract class AAM_Core_Subject {
             
             $object = apply_filters('aam-object-filter', $object, $type, $id, $this);
             
-            if (is_a($object, 'AAM_Core_Object')) {
+            if (is_a($object, 'AAM_Core_Object') && !AAM::isAAM()) {
                 $this->_objects[$type][$id] = $object;
             }
         } else {
@@ -318,7 +318,9 @@ abstract class AAM_Core_Subject {
      * @access public
      */
     public function inheritFromParent($object, $id = '', $param = null){
-        if ($subject = $this->getParent()){
+        $subject = $this->getParent();
+        
+        if (is_a($subject, 'AAM_Core_Subject')){
             $option = $subject->getObject($object, $id, $param)->getOption();
         } else {
             $option = null;

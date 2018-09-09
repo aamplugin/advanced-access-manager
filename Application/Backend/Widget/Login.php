@@ -30,11 +30,9 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     public function widget($args, $instance) {
         $this->args = array_merge($args, $this->normalize($instance));
         
-        require(
-            AAM_Core_Config::get(
-                'feature.secureLogin.widget.template',
-                realpath(dirname(__FILE__) . '/../phtml/widget/login-frontend.phtml')
-            )
+        require AAM_Core_Config::get(
+            'feature.secureLogin.widget.template',
+            realpath(dirname(__FILE__) . '/../phtml/widget/login-frontend.phtml')
         );
     }
     
@@ -45,7 +43,7 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     public function form($instance) {
         $instance = $this->normalize($instance);
         
-        require(dirname(__FILE__) . '/../phtml/widget/login-backend.phtml');
+        require dirname(__FILE__) . '/../phtml/widget/login-backend.phtml';
     }
     
     /**

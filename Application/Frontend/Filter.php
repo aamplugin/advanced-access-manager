@@ -71,7 +71,7 @@ class AAM_Frontend_Filter {
                 'uri'  => AAM_Core_Request::server('REQUEST_URI')
             ));
             
-            if ($type != 'default') {
+            if ($type !== 'default') {
                 AAM_Core_API::redirect(
                     AAM_Core_Config::get("frontend.404redirect.{$type}")
                 );
@@ -123,12 +123,12 @@ class AAM_Frontend_Filter {
     public function getNavigationMenu($pages) {
         if (is_array($pages)) {
             foreach ($pages as $i => $page) {
-                if (in_array($page->type, array('post_type', 'custom'))) {
+                if (in_array($page->type, array('post_type', 'custom'), true)) {
                     $object = AAM::getUser()->getObject('post', $page->object_id);
                     $others = $object->get('frontend.list_others');
                     $list   = $object->get('frontend.list');
                     
-                    if (($others && ($object->post_author != get_current_user_id())) || $list) {
+                    if (($others && ($object->post_author !== get_current_user_id())) || $list) {
                         unset($pages[$i]);
                     }
                 }
@@ -154,14 +154,14 @@ class AAM_Frontend_Filter {
             $area = AAM_Core_Api_Area::get();
             
             foreach ($pages as $i => $post) {
-                if ($current && ($current->ID == $post->ID)) { continue; }
+                if ($current && ($current->ID === $post->ID)) { continue; }
                 
                 // TODO: refactor this to AAM API standalone
                 $object = AAM::getUser()->getObject('post', $post->ID);
                 $list   = $object->get($area. '.list');
                 $others = $object->get($area. '.list_others');
                 
-                if ($list || ($others && ($post->post_author != get_current_user_id()))) {
+                if ($list || ($others && ($post->post_author !== get_current_user_id()))) {
                     unset($pages[$i]);
                 }
             }

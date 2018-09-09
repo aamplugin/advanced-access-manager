@@ -57,7 +57,7 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
     public function run() {
         //prepare user
         if (get_current_user_id()) {
-            $user = array(AAM::getUser()->ID, AAM::getUser()->roles[0]);
+            $user = array((string)AAM::getUser()->ID, AAM::getUser()->roles[0]);
         } else {
             $user = array('visitor');
         }
@@ -73,16 +73,16 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
             $content = $this->content;
             
             //#1. Check if content is restricted for current user
-            if (in_array('all', $hide) || $this->check($user, $hide)) {
+            if (in_array('all', $hide, true) || $this->check($user, $hide)) {
                 $content = '';
             }
 
             //#2. Check if content is limited for current user
-            if (in_array('all', $limit) || $this->check($user, $limit)) {
+            if (in_array('all', $limit, true) || $this->check($user, $limit)) {
                 $content = do_shortcode($msg);
             }
 
-            //#3. Check if content is allosed for current user
+            //#3. Check if content is allowed for current user
             if ($this->check($user, $show)) {
                 $content = $this->content;
             }
@@ -102,14 +102,14 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
         $auth  = get_current_user_id();
         
         foreach($conditions as $condition) {
-            if (($condition == 'authenticated') && $auth) {
+            if (($condition === 'authenticated') && $auth) {
                 $match = true;
-            } else if (preg_match('/^[\d\.*\-]+$/', $condition)) {
+            } else if (preg_match('/^[\d*-]+\.[\d*-]+[\d\.*-]*[\d\.*-]*$/', $condition)) {
                 $match = $this->checkIP(
                         $condition, AAM_Core_Request::server('REMOTE_ADDR')
                 );
             } else {
-                $match = in_array($condition, $user);
+                $match = in_array($condition, $user, true);
             }
             
             if ($match) {
@@ -140,7 +140,7 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
                     break;
                 }
             } elseif ($group !== '*') {
-                if ($group != $uipSplit[$i]) {
+                if ($group !== $uipSplit[$i]) {
                     $match = false;
                     break;
                 }

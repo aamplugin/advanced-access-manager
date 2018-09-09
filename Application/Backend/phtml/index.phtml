@@ -12,19 +12,10 @@
                     <div class="postbox">
                         <h3 class="hndle">
                             <span><?php echo __('Main Panel', AAM_KEY); ?></span>
-                            <span class="aam-help-menu" data-target="#access-manager-inside"><i class="icon-help-circled"></i></span>
                         </h3>
                         <div class="inside" id="access-manager-inside">
                             <div class="aam-postbox-inside" id="aam-content">
                                 <p class="alert alert-info text-larger text-center" id="aam-initial-load"><?php echo AAM_Backend_View_Helper::preparePhrase('[Loading AAM UI]. Please wait. If content will not load within next 30 seconds, clear your browser cache and reload the page. If still nothing, it is most likely some sort of JavaScript or CSS conflict with one your active plugins or theme. Try to deactivate all plugins and switch to any default WordPress theme to find out what causes the issue.', 'strong'); ?></p>
-                            </div>
-                            <div class="aam-help-context" >
-                                <div class="text-justify aam-large-padding">
-                                    <p class="text-larger"><?php echo __('Appreciate your interest in Advanced Access Manager (AAM). With strong knowledge and experience in WordPress, AAM becomes a very powerful tool to manage access to your frontend and backend.', AAM_KEY); ?></p>
-                                    <p class="text-larger"><span class="aam-highlight"><?php echo __('Please Note!', AAM_KEY); ?></span> <?php echo AAM_Backend_View_Helper::preparePhrase('Power comes with responsibility. Make sure you have enough knowledge in WordPress Roles & Capabilities because AAM is very closely intergrated with WordPress core. It is also very important [to have backup of your database before you start working with AAM] (there is no need to backup your files, AAM does not modify any physical files on your server and never did).', 'b'); ?></p>
-                                    <p class="text-larger"><?php echo __('AAM was thoroughly tested on the fresh installation of WordPress and in the latest versions of Chrome, Safari, IE and Firefox. If you have any issues, the most typical case is the conflict with other plugins or themes.', AAM_KEY); ?></p>
-                                    <p class="text-larger"><?php echo sprintf(__('Check our %sHelp%s section to find some useful articles about AAM functionality or %scontact us%s directly.', AAM_KEY), '<a href="https://aamplugin.com/help" target="_blank">', '</a>', '<a href="mailto:support@aamplugin.com">', '</a>'); ?></p>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -65,7 +56,7 @@
                                         <span>Settings</span>
                                     </a>
                                 <?php } ?>
-                                <?php if (current_user_can('aam_manage_extensions')) { ?>
+                                <?php if (AAM_Core_Config::get('core.settings.extensionSupport', true) && current_user_can('aam_manage_extensions')) { ?>
                                     <a href="#" title="Extensions" data-type="extensions" class="aam-area">
                                         <i class="icon-cubes"></i>
                                         <span>Extensions</span>

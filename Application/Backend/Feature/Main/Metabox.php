@@ -23,65 +23,35 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
     }
     
     /**
-     *
+     * 
      * @global type $wp_post_types
      * @return type
      */
-    public function refreshList() {
+    public function prepareInitialization() {
         global $wp_post_types;
 
         AAM_Core_API::deleteOption('aam_metabox_cache');
-        $type_list = array_keys($wp_post_types);
-
-        //used to retrieve the list of all wigets on the frontend
-        array_unshift($type_list, 'widgets');
-
-        foreach ($type_list as $type) {
-            if ($type == 'widgets') {
-                $url = add_query_arg('init', 'metabox', admin_url('index.php'));
-            } else {
-                $url = add_query_arg(
+        
+        $endpoints = array();
+        
+        foreach (array_merge(array('widgets'), array_keys($wp_post_types)) as $type) {
+            if ($type === 'widgets') {
+                $endpoints[] = add_query_arg('init', 'metabox', admin_url('index.php'));
+            } elseif ($wp_post_types[$type]->show_ui) {
+                $endpoints[] = add_query_arg(
                     'init', 'metabox', admin_url('post-new.php?post_type=' . $type)
                 );
             }
-            
-            //grab metaboxes
-            AAM_Core_API::cURL($this->addHttpPasswd($url));
         }
         
-        return json_encode(array('status' => 'success'));
+        return wp_json_encode(
+            array(
+                'status'    => 'success',
+                'endpoints' => $endpoints
+            )
+        );
     }
     
-    /**
-     *
-     * @global type $wp_post_types
-     * @return type
-     */
-    public function initURL() {
-        //grab metaboxes
-        $url = $this->addHttpPasswd(AAM_Core_Request::post('url'));
-        AAM_Core_API::cURL(add_query_arg('init', 'metabox', $url));
-        
-        return json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @param type $url
-     * @return type
-     */
-    protected function addHttpPasswd($url) {
-        $htpasswd = AAM_Core_Config::get('feature.metabox.htpasswd');
-        
-        if (!empty($htpasswd['user']) && !empty($htpasswd['pass'])) {
-            $url = preg_replace(
-                '/^(http[s]?:\/\/)/', "$1{$htpasswd['user']}:{$htpasswd['pass']}@", $url
-            );
-        }
-        
-        return $url;
-    }
-
     /**
      * Initialize metabox list
      * 
@@ -132,7 +102,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
 
                 if (!is_null($callback)) { //exclude any junk
                     $cache['widgets'][$callback] = array(
-                        'title' => strip_tags($data['name']),
+                        'title' => wp_strip_all_tags($data['name']),
                         'id'    => $callback
                     );
                 }
@@ -170,7 +140,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
                                 if (trim($data['id'])) { //exclude any junk
                                     $cache[$post_type][$data['id']] = array(
                                         'id'    => $data['id'],
-                                        'title' => strip_tags($data['title'])
+                                        'title' => wp_strip_all_tags($data['title'])
                                     );
                                 }
                             }
@@ -192,7 +162,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
         $subject = AAM_Backend_Subject::getInstance();
         
         //if visitor, return only frontend widgets
-        if ($subject->getUID() == AAM_Core_Subject_Visitor::UID) {
+        if ($subject->getUID() === AAM_Core_Subject_Visitor::UID) {
             if (!empty($cache['widgets'])) {
                 $response = array('widgets' => $cache['widgets']);
             } else {
@@ -204,7 +174,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
         
         //filter non-existing metaboxes
         foreach(array_keys($response) as $id) {
-            if (!in_array($id, array('dashboard', 'widgets')) 
+            if (!in_array($id, array('dashboard', 'widgets'), true) 
                     && empty($wp_post_types[$id])) {
                 unset($response[$id]);
             }

@@ -157,7 +157,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         if (is_array($submenu)) {
             foreach($submenu as $parent => $subs) {
                 foreach($subs as $sub) {
-                    if ($sub[2] == $search) {
+                    if ($sub[2] === $search) {
                         $result = $parent;
                         break;
                     }

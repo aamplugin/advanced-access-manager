@@ -28,6 +28,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
      */
     protected function getList() {
         $settings = array(
+            'core.settings.getStarted' => array(
+                'title' => __('Get Started Tab', AAM_KEY),
+                'descr' => __('Display the "Get Started" feature on the Main panel. You can disable this feature to remove the extra tab when you get familiar with core access control concepts.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.getStarted', true)
+            ),
             'core.settings.editCapabilities' => array(
                 'title' => __('Edit/Delete Capabilities', AAM_KEY),
                 'descr' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
@@ -77,6 +82,16 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'title' => __('JWT Authentication', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTful API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
                 'value' => AAM_Core_Config::get('core.settings.jwtAuthentication', false)
+            ),
+            'core.settings.extensionSupport' => array(
+                'title' => __('Support AAM Extensions', AAM_KEY),
+                'descr' => __('AAM comes with the limited list of premium and free extensions that significantly enhance AAM behavior. You can disable support for AAM extension and any already installed extension will no longer be loaded during the website execution as well as website administrator will not be able to install new extensions.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.extensionSupport', true)
+            ),
+            'core.settings.cron' => array(
+                'title' => __('AAM Cron Job', AAM_KEY),
+                'descr' => __('AAM cron job executes periodically (typically once a day) to check for available updates for already installed extensions. Cron job is not executed if there are no installed extensions.', AAM_KEY),
+                'value' => AAM_Core_Config::get('core.settings.cron', true)
             )
         );
         
