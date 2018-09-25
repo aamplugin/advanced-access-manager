@@ -32,7 +32,8 @@ class AAM_Backend_Feature_Subject_User {
             'data'            => array(),
         );
         
-        if (current_user_can('list_users')) { 
+        // TODO: The list_users is legacy and can be removed in Oct 2021
+        if (current_user_can('aam_manage_users') || current_user_can('list_users')) { 
             //get total number of users
             $total  = count_users();
             $result = $this->query();
@@ -104,8 +105,8 @@ class AAM_Backend_Feature_Subject_User {
             'search_columns' => array(
                 'user_login', 'user_email', 'display_name'
             ),
-            'orderby' => 'user_nicename',
-            'order'   => 'ASC'
+            'orderby' => 'display_name',
+            'order'   => $this->getOrderDirection()
         );
         
         if (!empty($role)) {
@@ -113,6 +114,21 @@ class AAM_Backend_Feature_Subject_User {
         }
 
         return new WP_User_Query($args);
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    protected function getOrderDirection() {
+        $dir   = 'asc';
+        $order = AAM_Core_Request::post('order.0');
+        
+        if (!empty($order['column']) && ($order['column'] === '2')) {
+            $dir = !empty($order['dir']) ? $order['dir'] : 'asc';
+        }
+        
+        return strtoupper($dir);
     }
 
     /**
@@ -205,10 +221,15 @@ class AAM_Backend_Feature_Subject_User {
             if (current_user_can('edit_users')) {
                 $actions[] = 'edit';
                 $actions[] = 'ttl';
+            } else {
+                $actions[] = 'no-edit';
+                $actions[] = 'no-ttl';
             }
             
             if (current_user_can('aam_switch_users')) {
                 $actions[] = 'switch';
+            } else {
+                $actions[] = 'no-switch';
             }
         } else {
             $actions = array();

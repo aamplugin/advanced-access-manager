@@ -15,6 +15,15 @@ class AAM_Extension_List {
      */
     public static function get() {
         return array(
+            'AAM_COMPLETE_PACKAGE' => array(
+                'title'       => 'Complete Package',
+                'id'          => 'AAM_COMPLETE_PACKAGE',
+                'type'        => 'commercial',
+                'description' => 'Get the complete list of all premium AAM extensions in one package and all future premium extensions already included for now additional cost.',
+                'url'         => 'https://aamplugin.com/complete-package',
+                'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
+                'latest'      => '3.8.6' 
+            ),
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
                 'id'          => 'AAM_PLUS_PACKAGE',
@@ -22,7 +31,7 @@ class AAM_Extension_List {
                 'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories and hierarchical taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels. As the bonus, define more granular access to how comments can be managed on the backend by other users.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null),
-                'latest'      => '3.7.8'
+                'latest'      => '3.8'
             ),
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',
@@ -51,15 +60,6 @@ class AAM_Extension_List {
                 'url'         => 'https://aamplugin.com/extension/ecommerce',
                 'version'     => (defined('AAM_ECOMMERCE') ? constant('AAM_ECOMMERCE') : null),
                 'latest'      => '1.2.1'
-            ),
-            'AAM_COMPLETE_PACKAGE' => array(
-                'title'       => 'Complete Package',
-                'id'          => 'AAM_COMPLETE_PACKAGE',
-                'type'        => 'commercial',
-                'description' => 'Get the complete list of all premium AAM extensions in one package and all future premium extensions already included for now additional cost.',
-                'url'         => 'https://aamplugin.com/complete-package',
-                'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
-                'latest'      => '3.8.5' 
             ),
             'AAM_MULTISITE' => array(
                 'title'       => 'Multisite',

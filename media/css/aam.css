@@ -557,6 +557,14 @@ input[type=radio]:checked + label:before {
     display: inline;
 }
 
+.aam-small-highlighted {
+    font-size: 85%;
+    border-bottom: 1px solid #999999;
+    padding: 0px 20px 2px 0;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
 .aam-switch-user {
     float:right; 
     font-size:1em !important;

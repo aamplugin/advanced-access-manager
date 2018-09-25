@@ -394,7 +394,11 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         //prepare the response object
         if (is_a($object, 'AAM_Core_Object')) {
             foreach($object->getOption() as $key => $value) {
-                $access[$key] = in_array($value, array(1, '1', true, "true"), true);
+                if (in_array($value, array(1, '1', 0, '0', false, "false", true, "true"), true)) {
+                    $access[$key] = !empty($value);
+                } else {
+                    $access[$key] = $value;
+                }
             }
             $metadata = array('overwritten' => $object->isOverwritten());
         }

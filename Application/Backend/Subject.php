@@ -87,9 +87,11 @@ class AAM_Backend_Subject {
     protected function initDefaultSubject() {
         $user = intval(AAM_Core_Request::get('user'));
         
-        if ($user && current_user_can('list_users')) {
+        // TODO: The list_users is legacy and can be removed in Oct 2021
+        if ($user && (current_user_can('aam_manage_users') || current_user_can('list_users'))) {
             $this->initRequestedSubject(AAM_Core_Subject_User::UID, $user);
-        } elseif (current_user_can('aam_list_roles')) {
+        // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
+        } elseif (current_user_can('aam_manage_roles') || current_user_can('aam_list_roles')) {
             $roles = array_keys(get_editable_roles());
             $this->initRequestedSubject(AAM_Core_Subject_Role::UID, array_shift($roles));
         } elseif (current_user_can('aam_manage_visitors')) {

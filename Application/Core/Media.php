@@ -89,7 +89,7 @@ class AAM_Core_Media {
             } else {
                 $read   = $media->has('frontend.read');
                 $others = $media->has('frontend.read_others');
-                $author = ($media->post_author === get_current_user_id());
+                $author = (intval($media->post_author) === get_current_user_id());
                 
                 if ($read || ($others && !$author)) {
                     $args = array(

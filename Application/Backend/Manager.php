@@ -533,7 +533,8 @@ class AAM_Backend_Manager {
      * @access public
      */
     public function userActions($actions, $user) {
-        if ($this->renderExternalUIFeature('list_users')) {
+        if ($this->renderExternalUIFeature('aam_manage_users') 
+                    || $this->renderExternalUIFeature('list_users')) {
             $url = admin_url('admin.php?page=aam&user=' . $user->ID);
 
             $actions['aam']  = '<a href="' . $url . '" target="_blank">';

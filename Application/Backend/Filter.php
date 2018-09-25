@@ -187,7 +187,7 @@ class AAM_Backend_Filter {
     protected function isAllowed($action, $object) {
         $edit   = $object->has($action);
         $others = $object->has("{$action}_others");
-        $author = ($object->post_author === get_current_user_id());
+        $author = (intval($object->post_author) === get_current_user_id());
         
         return ($edit || ($others && !$author)) ? false : true;
     }
@@ -232,7 +232,7 @@ class AAM_Backend_Filter {
     public function prePostUpdate($id, $data) {
         $post = get_post($id);
         
-        if ($post->post_author !== intval($data['post_author'])) {
+        if (intval($post->post_author) !== intval($data['post_author'])) {
             AAM_Core_API::clearCache();
         }
     }

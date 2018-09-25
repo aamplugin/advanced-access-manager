@@ -138,7 +138,7 @@
             //initialize the role list table
             $('#role-list').DataTable({
                 autoWidth: false,
-                ordering: false,
+                ordering: true,
                 dom: 'ftrip',
                 pagingType: 'simple',
                 processing: true,
@@ -155,7 +155,8 @@
                     }
                 },
                 columnDefs: [
-                    {visible: false, targets: [0, 1, 4, 5]}
+                    {visible: false, targets: [0, 1, 4, 5]},
+                    {orderable: false, targets: [0, 1, 3, 4, 5]}
                 ],
                 language: {
                     search: '_INPUT_',
@@ -269,6 +270,14 @@
                                     }));
                                 }
                                 break;
+                                
+                            case 'no-edit':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-pencil text-muted'
+                                    }));
+                                }
+                                break;
 
                             case 'clone':
                                 if (!getAAM().isUI()) {
@@ -282,6 +291,14 @@
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Clone Role')
+                                    }));
+                                }
+                                break;
+                                
+                            case 'no-clone':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-clone text-muted'
                                     }));
                                 }
                                 break;
@@ -303,6 +320,14 @@
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Delete Role')
+                                    }));
+                                }
+                                break;
+                                
+                            case 'no-delete':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-trash-empty text-muted'
                                     }));
                                 }
                                 break;
@@ -333,8 +358,8 @@
                         $('td:eq(0) strong', this).replaceWith(
                             '<span>' + $('td:eq(0) strong', this).text() + '</span>'
                         );
-                        $('.text-muted', this).attr('disabled', false);
-                        $('.text-muted', this).toggleClass('text-muted text-info');
+                        $('.icon-cog.text-muted', this).attr('disabled', false);
+                        $('.icon-cog.text-muted', this).toggleClass('text-muted text-info');
                     }
                 });
             } );
@@ -507,8 +532,6 @@
                         highlight.replaceWith($('<span/>').text(highlight.text()));
                     }
                 });
-                //show post & pages access control groups that belong to backend
-                $('.aam-backend-post-access').show();
             });
 
             //in case interface needed to be reloaded
@@ -624,7 +647,7 @@
             //initialize the user list table
             $('#user-list').DataTable({
                 autoWidth: false,
-                ordering: false,
+                ordering: true,
                 dom: 'ftrip',
                 stateSave: true,
                 pagingType: 'simple',
@@ -644,7 +667,8 @@
                     }
                 },
                 columnDefs: [
-                    {visible: false, targets: [0, 1, 4, 5]}
+                    {visible: false, targets: [0, 1, 4, 5]},
+                    {orderable: false, targets: [0, 1, 3, 4, 5]}
                 ],
                 language: {
                     search: '_INPUT_',
@@ -789,6 +813,14 @@
                                 }
                                 break;
                                 
+                            case 'no-ttl':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-clock text-muted'
+                                    }));
+                                }
+                                break;
+                                
                             case 'edit':
                                 if (!getAAM().isUI()) {
                                     $(container).append($('<i/>', {
@@ -800,6 +832,14 @@
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Edit User')
+                                    }));
+                                }
+                                break;
+                                
+                            case 'no-edit':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-pencil text-muted'
                                     }));
                                 }
                                 break;
@@ -839,6 +879,14 @@
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Switch To User')
+                                    }));
+                                }
+                                break;
+                                
+                            case 'no-switch':
+                                if (!getAAM().isUI()) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-switch text-muted'
                                     }));
                                 }
                                 break;
@@ -979,8 +1027,6 @@
                         highlight.replaceWith('<span>' + highlight.text() + '</span>');
                     }
                 });
-                //show post & pages access control groups that belong to backend
-                $('.aam-backend-post-access').show();
             });
 
             //in case interface needed to be reloaded
@@ -1023,8 +1069,6 @@
                             );
                         });
                     }
-                    //hide post & pages access control groups that belong to backend
-                    $('.aam-backend-post-access').hide();
                 });
             });
 
@@ -1849,7 +1893,7 @@
                         subject: getAAM().getSubject().type,
                         subjectId: getAAM().getSubject().id,
                         param: param,
-                        value: (value ? 1 : 0),
+                        value: value,
                         object: object,
                         objectId: object_id
                     },
@@ -1918,11 +1962,12 @@
                     $(this).unbind('click').bind('click', function () {
                         var _this   = $(this);
                         var checked = !_this.hasClass('icon-check');
+                        var value   = (checked ? 1 : 0);
 
                         _this.attr('class', 'aam-row-action icon-spin4 animate-spin');
                         save(
                             _this.data('property'),
-                            (checked ? true : false),
+                            value,
                             object,
                             id,
                             function(response) {
@@ -1939,8 +1984,29 @@
                                 }
                             }
                         );
+                
+                        if ($(this).data('trigger') && value) {
+                            $('#' + $(this).data('trigger')).trigger('click');
+                        }
                     });
                 });
+                
+                $('.advanced-post-option').each(function() {
+                    $(this).bind('click', function() {
+                        var container = $(this).attr('href');
+                        var option = objectAccess.access[$(this).data('ref')];
+                        var field  = $($('.extended-post-access-btn', container).data('field'));
+
+                        //add attributes to the .extended-post-access-btn
+                        $('.extended-post-access-btn', container).attr({
+                            'data-ref': $(this).attr('data-ref'),
+                            'data-preview': $(this).attr('data-preview')
+                        });
+
+                        //set field value
+                        field.val(option);
+                    });
+                 });
 
                 $.ajax(getLocal().ajaxurl, {
                     type: 'POST',
@@ -2280,23 +2346,6 @@
                             $('#load-post-object').val()
                         );
                     }
-                    
-                    $('.advanced-post-option').each(function() {
-                       $(this).bind('click', function() {
-                           var container = $(this).attr('href');
-                           var option = objectAccess.access[$(this).data('ref')];
-                           var field  = $($('.extended-post-access-btn', container).data('field'));
-                           
-                           //add attributes to the .extended-post-access-btn
-                           $('.extended-post-access-btn', container).attr({
-                               'data-ref': $(this).data('ref'),
-                               'data-preview': $(this).data('preview')
-                           });
-                           
-                           //set field value
-                           field.val(option);
-                       });
-                    });
                     
                     $('.extended-post-access-btn').each(function() {
                         $(this).bind('click', function() {

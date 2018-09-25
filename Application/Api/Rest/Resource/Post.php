@@ -182,7 +182,7 @@ class AAM_Api_Rest_Resource_Post {
         $read   = $post->has('api.read');
         $others = $post->has('api.read_others');
         
-        if ($read || ($others && ($post->post_author !== get_current_user_id()))) {
+        if ($read || ($others && (intval($post->post_author) !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_read', 
                 "User is unauthorized to read the post. Access denied.", 
@@ -328,7 +328,7 @@ class AAM_Api_Rest_Resource_Post {
         $edit   = $post->has('api.edit');
         $others = $post->has('api.edit_others');
         
-        if ($edit || ($others && ($post->post_author !== get_current_user_id()))) {
+        if ($edit || ($others && (intval($post->post_author) !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_update', 
                 "User is unauthorized to update the post. Access denied.", 
@@ -357,7 +357,7 @@ class AAM_Api_Rest_Resource_Post {
         $delete = $post->has('api.delete');
         $others = $post->has('api.delete_others');
         
-        if ($delete || ($others && ($post->post_author !== get_current_user_id()))) {
+        if ($delete || ($others && (intval($post->post_author) !== get_current_user_id()))) {
             $result = new WP_Error(
                 'rest_post_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 

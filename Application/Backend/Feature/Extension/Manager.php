@@ -116,7 +116,7 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
             } else {
                 $response = wp_json_encode(array(
                     'status' => 'failure', 
-                    'error'  => __('Enter license key to update extension.', AAM_KEY)
+                    'error'  => __('No valid license key was found.', AAM_KEY)
                 ));
             }
         }

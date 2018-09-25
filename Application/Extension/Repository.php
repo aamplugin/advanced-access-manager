@@ -327,21 +327,11 @@ class AAM_Extension_Repository {
     protected function isOutdatedVersion($item, $retrieved, $version) {
         $id = $item['id'];
         
-        if ($item['type'] === 'commercial') {
-            $valid = !empty($item['license']);
+        // first check the retrieved version from the server
+        if (isset($retrieved->$id)) {
+            $outdated = version_compare($version, $retrieved->$id->version) === -1;
         } else {
-            $valid = true;
-        }
-        
-        $outdated = false;
-        
-        if ($valid) {
-            // first check the retrieved version from the server
-            if (isset($retrieved->$id)) {
-                $outdated = version_compare($version, $retrieved->$id->version) === -1;
-            } else {
-                $outdated = version_compare($version, $item['latest']) === -1;
-            }
+            $outdated = version_compare($version, $item['latest']) === -1;
         }
 
         return $outdated;

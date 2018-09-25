@@ -575,7 +575,7 @@ class AAM_Shared_Manager {
     protected function isActionAllowed($action, $object) {
         $edit   = $object->has($action);
         $others = $object->has("{$action}_others");
-        $author = ($object->post_author === get_current_user_id());
+        $author = (intval($object->post_author) === get_current_user_id());
         
         return ($edit || ($others && !$author)) ? false : true;
     }

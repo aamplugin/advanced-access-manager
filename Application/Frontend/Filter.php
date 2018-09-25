@@ -128,7 +128,7 @@ class AAM_Frontend_Filter {
                     $others = $object->get('frontend.list_others');
                     $list   = $object->get('frontend.list');
                     
-                    if (($others && ($object->post_author !== get_current_user_id())) || $list) {
+                    if (($others && (intval($object->post_author) !== get_current_user_id())) || $list) {
                         unset($pages[$i]);
                     }
                 }
@@ -161,7 +161,7 @@ class AAM_Frontend_Filter {
                 $list   = $object->get($area. '.list');
                 $others = $object->get($area. '.list_others');
                 
-                if ($list || ($others && ($post->post_author !== get_current_user_id()))) {
+                if ($list || ($others && (intval($post->post_author) !== get_current_user_id()))) {
                     unset($pages[$i]);
                 }
             }

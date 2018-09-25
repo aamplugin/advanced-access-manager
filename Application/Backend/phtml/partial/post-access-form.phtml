@@ -20,16 +20,20 @@
                         <tbody>
                             <?php foreach ($frontendOptions as $option => $data) { ?>
                                 <tr>
+                                    <?php $id = uniqid('aam'); ?>
                                     <td width="90%">
                                         <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
                                         <?php if (!empty($data['sub'])) { ?>
-                                            <small><?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> <a href="#<?php echo $data['modal']; ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>"><?php echo __('change', AAM_KEY); ?></a></small>
+                                            <small class="aam-small-highlighted">
+                                                <?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> 
+                                                <a href="#<?php echo $data['modal']; ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>" id="<?php echo $id; ?>"><?php echo __('change', AAM_KEY); ?></a>
+                                            </small>
                                         <?php } ?>
                                         <p class="aam-hint" data-dynamic-post-label="<?php echo $data['descr']; ?>"></p>
                                     </td>
                                     <td>
                                         <div class="aam-row-actions">
-                                            <i class="aam-row-action text-muted icon-check-empty" data-property="frontend.<?php echo $option; ?>"></i>
+                                            <i class="aam-row-action text-muted icon-check-empty" data-property="frontend.<?php echo $option; ?>" <?php echo (!empty($data['sub']) ? 'data-trigger="' . $id . '"' : ''); ?>></i>
                                         </div>
                                     </td>
                                 </tr>
@@ -56,16 +60,20 @@
                         <tbody>
                             <?php foreach ($backendOptions as $option => $data) { ?>
                                 <tr>
+                                    <?php $id = uniqid('aam'); ?>
                                     <td width="90%">
                                         <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
                                         <?php if (!empty($data['sub'])) { ?>
-                                            <small><?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> <a href="#modal-<?php echo str_replace('.', '-', $data['option']); ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>"><?php echo __('change', AAM_KEY); ?></a></small>
+                                            <small class="aam-small-highlighted">
+                                                <?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> 
+                                                <a href="#modal-<?php echo str_replace('.', '-', $data['option']); ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>" id="<?php echo $id; ?>"><?php echo __('change', AAM_KEY); ?></a>
+                                            </small>
                                         <?php } ?>
                                         <p class="aam-hint" data-dynamic-post-label="<?php echo $data['descr']; ?>"></p>
                                     </td>
                                     <td>
                                         <div class="aam-row-actions">
-                                            <i class="aam-row-action text-muted icon-check-empty" data-property="backend.<?php echo $option; ?>"></i>
+                                            <i class="aam-row-action text-muted icon-check-empty" data-property="backend.<?php echo $option; ?>" <?php echo (!empty($data['sub']) ? 'data-trigger="' . $id . '"' : ''); ?>></i>
                                         </div>
                                     </td>
                                 </tr>
@@ -92,19 +100,20 @@
                         <tbody>
                             <?php foreach ($apiOptions as $option => $data) { ?>
                                 <tr>
+                                    <?php $id = uniqid('aam'); ?>
                                     <td width="90%">
                                         <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
                                         <?php if (!empty($data['sub'])) { ?>
-                                            <small>
+                                            <small class="aam-small-highlighted">
                                                 <?php echo $data['sub']; ?>: <b id="<?php echo $data['preview']; ?>" data-ref="<?php echo $data['option']; ?>" class="option-preview">...</b> 
-                                                <a href="#<?php echo $data['modal']; ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>"><?php echo __('change', AAM_KEY); ?></a>
+                                                <a href="#<?php echo $data['modal']; ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $data['option']; ?>" data-preview="#<?php echo $data['preview']; ?>" id="<?php echo $id; ?>"><?php echo __('change', AAM_KEY); ?></a>
                                             </small>
                                         <?php } ?>
                                         <p class="aam-hint" data-dynamic-post-label="<?php echo $data['descr']; ?>"></p>
                                     </td>
                                     <td>
                                         <div class="aam-row-actions">
-                                            <i class="aam-row-action text-muted icon-check-empty" data-property="api.<?php echo $option; ?>"></i>
+                                            <i class="aam-row-action text-muted icon-check-empty" data-property="api.<?php echo $option; ?>" <?php echo (!empty($data['sub']) ? 'data-trigger="' . $id . '"' : ''); ?>></i>
                                         </div>
                                     </td>
                                 </tr>

@@ -244,8 +244,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     public function has($property) {
         $option = $this->getOption();
 
-        return (array_key_exists($property, $option) 
-                && in_array($option[$property], array(1, '1', true, "true"), true));
+        return (array_key_exists($property, $option) && !empty($option[$property]));
     }
     
     /**
