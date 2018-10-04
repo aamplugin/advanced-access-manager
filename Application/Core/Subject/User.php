@@ -39,11 +39,17 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * 
      */
     public function validateUserStatus() {
+        //check user_status for int
+        $userstatus = $this->user_status;
+        if (!is_int($userstatus)) {
+            $userstatus = (int)$userstatus;
+        }
+        
         //check if user is blocked
-        if ($this->user_status === 1) {
+        if ($userstatus === 1) {
             wp_logout();
         }
-            
+
         //check if user is expired
         $expired = get_user_option('aam_user_expiration', $this->ID);
         if (!empty($expired)) {
