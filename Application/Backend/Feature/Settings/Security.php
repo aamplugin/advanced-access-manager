@@ -48,6 +48,11 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically reject login attempts if number of unsuccessful login attempts is more than 20 over the period of 2 minutes (both values are configurable). For more information about this option please refer to %sHow does AAM Secure Login works%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/help/how-does-aam-secure-login-works" target="_blank">', '</a>'),
                 'value' => AAM_Core_Config::get('core.settings.bruteForceLockout', false)
             ),
+            'core.settings.hideSwitchbackNotification' => array(
+                'title' => __('Hide Switchback Notification', AAM_KEY),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Remove the "Switch back to" notification that appears when currently switched to another user')),
+                'value' => AAM_Core_Config::get('core.settings.hideSwitchbackNotification', false)
+            ),
         );
         
         return apply_filters('aam-settings-filter', $settings, 'security');

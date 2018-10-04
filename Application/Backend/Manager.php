@@ -348,22 +348,25 @@ class AAM_Backend_Manager {
      * 
      */
     public function notification() {
-        $uid = AAM_Core_API::getOption('aam-user-switch-' . get_current_user_id());
+        if (!AAM_Core_Config::get('core.settings.hideSwitchbackNotification', false)) {
         
-        if ($uid) {
-            //get user's name
-            $user  = new WP_User($uid);
-            $name = $user->display_name ? $user->display_name : $user->user_nicename;
-            
-            //generate switch back URL
-            $url = wp_nonce_url(
-                    'index.php?action=aam-switch-back', 'aam-switch-' . $uid
-            );
-            
-            echo '<div class="updated notice">';
-            echo '<p style="padding: 10px; font-weight: 700; letter-spacing:0.5px;">';
-            echo sprintf('Switch back to <a href="%s">%s</a>.', $url, esc_js($name));
-            echo '</p></div>';
+            $uid = AAM_Core_API::getOption('aam-user-switch-' . get_current_user_id());
+        
+            if ($uid) {
+                //get user's name
+                $user  = new WP_User($uid);
+                $name = $user->display_name ? $user->display_name : $user->user_nicename;
+
+                //generate switch back URL
+                $url = wp_nonce_url(
+                        'index.php?action=aam-switch-back', 'aam-switch-' . $uid
+                );
+                
+                echo '<div class="updated notice">';
+                echo '<p style="padding: 10px; font-weight: 700; letter-spacing:0.5px;">';
+                echo sprintf('Switch back to <a href="%s">%s</a>.', $url, esc_js($name));
+                echo '</p></div>';
+            }
         }
     }
     
