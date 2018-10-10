@@ -154,6 +154,9 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
                 && ($subject->getUID() === AAM_Core_Subject_Role::UID)) {
             $actions[] = 'edit';
             $actions[] = 'delete';
+        } else {
+            $actions[] = 'no-edit';
+            $actions[] = 'no-delete';
         }
         
         return implode(',', $actions);

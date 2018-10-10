@@ -118,6 +118,15 @@ abstract class AAM_Core_Object {
     }
     
     /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return $external;
+    }
+    
+    /**
      * Update single option item
      * 
      * @param string $item

@@ -156,7 +156,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                     $link,
                     'post',
                     get_the_title($record),
-                    'manage' . ($link ? ',edit' : ''),
+                    'manage' . ($link ? ',edit' : ',no-edit'),
                     $parent,
                     AAM_Backend_Subject::getInstance()->getObject('post', $record->ID)->isOverwritten()
                 );
@@ -392,17 +392,19 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $object = AAM_Backend_Subject::getInstance()->getObject($type, $id);
         
         //prepare the response object
+        $bValues = array(1, '1', 0, '0', false, "false", true, "true");
         if (is_a($object, 'AAM_Core_Object')) {
             foreach($object->getOption() as $key => $value) {
-                if (in_array($value, array(1, '1', 0, '0', false, "false", true, "true"), true)) {
+                if (in_array($value, $bValues, true)) {
                     $access[$key] = !empty($value);
                 } else {
                     $access[$key] = $value;
                 }
             }
             $metadata = array('overwritten' => $object->isOverwritten());
+            $access   = apply_filters('aam-get-post-access-filter', $access, $object);
         }
-
+        
         return wp_json_encode(array(
             'access'  => $access, 
             'meta'    => $metadata,

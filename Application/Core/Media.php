@@ -87,11 +87,7 @@ class AAM_Core_Media {
             if (empty($media)) {
                 $this->printMedia();
             } else {
-                $read   = $media->has('frontend.read');
-                $others = $media->has('frontend.read_others');
-                $author = (intval($media->post_author) === get_current_user_id());
-                
-                if ($read || ($others && !$author)) {
+                if (!$media->allowed('frontend.read')) {
                     $args = array(
                         'hook'   => 'media_read', 
                         'action' => "{$area}.read", 

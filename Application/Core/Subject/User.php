@@ -332,12 +332,20 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         if (is_null($this->parent)) {
             //try to get this option from the User's Role
             $roles  = $this->getSubject()->roles;
-            //first user role is counted only. AAM does not support multi-roles
-            $parent = array_shift($roles);
-
-            //in case of multisite & current user does not belong to the site
-            if ($parent) {
-                $this->parent = new AAM_Core_Subject_Role($parent);
+            $base   = array_shift($roles);
+            
+            if ($base) {
+                $this->parent = new AAM_Core_Subject_Role($base);
+                
+                // if user has more than one role that set subject as multi
+                if (AAM::api()->getConfig('core.settings.multiSubject', false) 
+                        && count($roles)) {
+                    $siblings = array();
+                    foreach($roles as $role) {
+                        $siblings[] = new AAM_Core_Subject_Role($role);
+                    }
+                    $this->parent->setSiblings($siblings);
+                }
             } else {
                 $this->parent = null;
             }

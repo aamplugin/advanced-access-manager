@@ -505,7 +505,7 @@ class AAM_Shared_Manager {
         $draft  = $object->post_status === 'auto-draft';
         $area   = AAM_Core_Api_Area::get();
 
-        if (!$draft && !$this->isActionAllowed($area . '.edit', $object)) {
+        if (!$draft && !$object->allowed($area . '.edit')) {
             $allcaps = $this->restrictCapabilities($allcaps, $metacaps);
         }
         
@@ -527,7 +527,7 @@ class AAM_Shared_Manager {
         $object = AAM::getUser()->getObject('post', $id);
         $area   = AAM_Core_Api_Area::get();
         
-        if (!$this->isActionAllowed($area . '.delete', $object)) {
+        if (!$object->allowed($area . '.delete')) {
             $allcaps = $this->restrictCapabilities($allcaps, $metacaps);
         }
         
@@ -552,32 +552,12 @@ class AAM_Shared_Manager {
             $object = AAM::getUser()->getObject('post', $post->ID);
             $area   = AAM_Core_Api_Area::get();
 
-            if (!$this->isActionAllowed($area . '.publish', $object)) {
+            if (!$object->allowed($area . '.publish')) {
                  $allcaps = $this->restrictCapabilities($allcaps, $metacaps);
             }
         }
         
         return $allcaps;
-    }
-    
-    /**
-     * Check if action is allowed
-     * 
-     * This method will take in consideration also *_others action
-     * 
-     * @param string               $action
-     * @param AAM_Core_Object_Post $object
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isActionAllowed($action, $object) {
-        $edit   = $object->has($action);
-        $others = $object->has("{$action}_others");
-        $author = (intval($object->post_author) === get_current_user_id());
-        
-        return ($edit || ($others && !$author)) ? false : true;
     }
     
     /**

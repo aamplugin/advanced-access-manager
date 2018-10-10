@@ -185,7 +185,9 @@
                 },
                 createdRow: function (row, data) {
                     if (isCurrent(data[0])) {
-                        $('td:eq(0)', row).html('<strong class="aam-highlight">' + data[2] + '</strong>');
+                        $('td:eq(0)', row).html(
+                            '<strong class="aam-highlight">' + data[2] + '</strong>'
+                        );
                     } else {
                         $('td:eq(0)', row).html('<span>' + data[2] + '</span>');
                     }
@@ -886,7 +888,7 @@
                             case 'no-switch':
                                 if (!getAAM().isUI()) {
                                     $(container).append($('<i/>', {
-                                        'class': 'aam-row-action icon-switch text-muted'
+                                        'class': 'aam-row-action icon-exchange text-muted'
                                     }));
                                 }
                                 break;
@@ -1128,24 +1130,28 @@
              * @returns {undefined}
              */
             function save(items, status, successCallback) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Menu.save',
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id,
-                        _ajax_nonce: getLocal().nonce,
-                        items: items,
-                        status: status
-                    },
-                    success: function(response) {
-                        successCallback(response);
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application Error'));
-                    }
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Main_Menu.save',
+                            subject: getAAM().getSubject().type,
+                            subjectId: getAAM().getSubject().id,
+                            _ajax_nonce: getLocal().nonce,
+                            items: items,
+                            status: status
+                        },
+                        success: function(response) {
+                            successCallback(response);
+                        },
+                        error: function () {
+                            getAAM().notification(
+                                'danger', getAAM().__('Application Error')
+                            );
+                        }
+                    });
                 });
             }
 
@@ -1251,24 +1257,28 @@
              * @returns {undefined}
              */
             function save(items, status, successCallback) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Toolbar.save',
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id,
-                        _ajax_nonce: getLocal().nonce,
-                        items: items,
-                        status: status
-                    },
-                    success: function(response) {
-                        successCallback(response);
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application Error'));
-                    }
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Main_Toolbar.save',
+                            subject: getAAM().getSubject().type,
+                            subjectId: getAAM().getSubject().id,
+                            _ajax_nonce: getLocal().nonce,
+                            items: items,
+                            status: status
+                        },
+                        success: function(response) {
+                            successCallback(response);
+                        },
+                        error: function () {
+                            getAAM().notification(
+                                'danger', getAAM().__('Application Error')
+                            );
+                        }
+                    });
                 });
             }
 
@@ -1592,7 +1602,8 @@
                     } else {
                         if (granted) {
                             getAAM().notification(
-                                'danger', getAAM().__('WordPress core does not allow to grant this capability')
+                                'danger', 
+                                getAAM().__('WordPress core does not allow to grant this capability')
                             );
                             $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
                         } else {
@@ -1666,6 +1677,12 @@
                                             $('#edit-capability-modal').modal('show');
                                         }));
                                         break;
+                                        
+                                    case 'no-edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-muted'
+                                        }));
+                                        break;
 
                                     case 'delete':
                                         $(container).append($('<i/>', {
@@ -1678,6 +1695,12 @@
                                             $('#capability-id').val(data[0]);
                                             $('#delete-capability-btn').attr('data-cap', data[0]);
                                             $('#delete-capability-modal').modal('show');
+                                        }));
+                                        break;
+                                        
+                                    case 'no-delete':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-trash-empty text-muted'
                                         }));
                                         break;
 
@@ -1883,36 +1906,40 @@
              * @param {*} successCallback 
              */
             function save(param, value, object, object_id, successCallback) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Post.save',
-                        _ajax_nonce: getLocal().nonce,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id,
-                        param: param,
-                        value: value,
-                        object: object,
-                        objectId: object_id
-                    },
-                    success: function (response) {
-                        if (response.status === 'failure') {
-                            getAAM().notification('danger', response.error);
-                        } else {
-                            $('#post-overwritten').removeClass('hidden');
-                            //add some specific attributes to reset button
-                            $('#post-reset').attr({
-                                'data-type': object,
-                                'data-id': object_id
-                            });
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Main_Post.save',
+                            _ajax_nonce: getLocal().nonce,
+                            subject: getAAM().getSubject().type,
+                            subjectId: getAAM().getSubject().id,
+                            param: param,
+                            value: value,
+                            object: object,
+                            objectId: object_id
+                        },
+                        success: function (response) {
+                            if (response.status === 'failure') {
+                                getAAM().notification('danger', response.error);
+                            } else {
+                                $('#post-overwritten').removeClass('hidden');
+                                //add some specific attributes to reset button
+                                $('#post-reset').attr({
+                                    'data-type': object,
+                                    'data-id': object_id
+                                });
+                            }
+                            successCallback(response);
+                        },
+                        error: function () {
+                            getAAM().notification(
+                                'danger', getAAM().__('Application error')
+                            );
                         }
-                        successCallback(response);
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
-                    }
+                    });
                 });
             }
 
@@ -2267,6 +2294,12 @@
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Edit')
+                                        }));
+                                        break;
+                                        
+                                    case 'no-edit' :
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-pencil'
                                         }));
                                         break;
 
@@ -2667,21 +2700,25 @@
              * @returns {undefined}
              */
             function save(param, value) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_404Redirect.save',
-                        _ajax_nonce: getLocal().nonce,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id,
-                        param: param,
-                        value: value
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
-                    }
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Main_404Redirect.save',
+                            _ajax_nonce: getLocal().nonce,
+                            subject: getAAM().getSubject().type,
+                            subjectId: getAAM().getSubject().id,
+                            param: param,
+                            value: value
+                        },
+                        error: function () {
+                            getAAM().notification(
+                                'danger', getAAM().__('Application error')
+                            );
+                        }
+                    });
                 });
             }
 
@@ -2738,36 +2775,40 @@
              * @returns {undefined}
              */
             function save(type, route, method, value, btn) {
-                //show indicator
-                $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
-                
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Route.save',
-                        _ajax_nonce: getLocal().nonce,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id,
-                        type: type,
-                        route: route,
-                        method: method,
-                        value: value
-                    },
-                    success: function (response) {
-                        if (response.status === 'failure') {
-                            getAAM().notification('danger', response.error);
+                getAAM().queueRequest(function() {
+                    //show indicator
+                    $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
+
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Main_Route.save',
+                            _ajax_nonce: getLocal().nonce,
+                            subject: getAAM().getSubject().type,
+                            subjectId: getAAM().getSubject().id,
+                            type: type,
+                            route: route,
+                            method: method,
+                            value: value
+                        },
+                        success: function (response) {
+                            if (response.status === 'failure') {
+                                getAAM().notification('danger', response.error);
+                                updateBtn(btn, value ? 0 : 1);
+                            } else {
+                                $('#aam-route-overwrite').removeClass('hidden');
+                                updateBtn(btn, value);
+                            }
+                        },
+                        error: function () {
                             updateBtn(btn, value ? 0 : 1);
-                        } else {
-                            $('#aam-route-overwrite').removeClass('hidden');
-                            updateBtn(btn, value);
+                            getAAM().notification(
+                                'danger', getAAM().__('Application error')
+                            );
                         }
-                    },
-                    error: function () {
-                        updateBtn(btn, value ? 0 : 1);
-                        getAAM().notification('danger', getAAM().__('Application error'));
-                    }
+                    });
                 });
             }
             
@@ -2924,26 +2965,32 @@
              * @returns {undefined}
              */
             function updateStatus(data) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: data,
-                    success: function (response) {
-                        if (response.status === 'success') {
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: data,
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                getAAM().notification(
+                                    'success', 
+                                    getAAM().__('Extension status was updated successfully')
+                                );
+                            } else {
+                                getAAM().notification(
+                                    'danger', getAAM().__(response.error)
+                                );
+                            }
+                        },
+                        error: function () {
                             getAAM().notification(
-                                'success', 
-                                getAAM().__('Extension status was updated successfully')
+                                'danger', getAAM().__('Application error')
                             );
-                        } else {
-                            getAAM().notification('danger', getAAM().__(response.error));
+                        },
+                        complete: function () {
+                            getAAM().fetchContent('extensions');
                         }
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
-                    },
-                    complete: function () {
-                        getAAM().fetchContent('extensions');
-                    }
+                    });
                 });
             }
 
@@ -3128,23 +3175,26 @@
              * 
              * @param {type} param
              * @param {type} value
-             * @param {type} reload
              * @returns {undefined}
              */
             function save(param, value) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Settings_Manager.save',
-                        _ajax_nonce: getLocal().nonce,
-                        param: param,
-                        value: value
-                    },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application Error'));
-                    }
+                getAAM().queueRequest(function() {
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Settings_Manager.save',
+                            _ajax_nonce: getLocal().nonce,
+                            param: param,
+                            value: value
+                        },
+                        error: function () {
+                            getAAM().notification(
+                                'danger', getAAM().__('Application Error')
+                            );
+                        }
+                    });
                 });
             }
             
@@ -3389,7 +3439,44 @@
          * Content filters
          */
         this.filters = {};
+        
+        /**
+         * Request queue
+         */
+        this.queue = {
+            requests: [],
+            processing: false
+        };
+        
+        /**
+         * 
+         * @type AAM
+         */
+        var _this = this;
+        
+        $(document).ajaxComplete(function() {
+            _this.queue.processing = false;
+            
+            if (_this.queue.requests.length > 0) {
+                _this.queue.processing = true;
+                _this.queue.requests.shift().call(_this);
+            }
+        });
     }
+    
+    /**
+     * 
+     * @param {type} request
+     * @returns {undefined}
+     */
+    AAM.prototype.queueRequest = function(request) {
+        this.queue.requests.push(request);
+        
+        if (this.queue.processing === false) {
+            this.queue.processing = true;
+            this.queue.requests.shift().call(this);
+        }
+    };
     
     /**
      * 
@@ -3655,14 +3742,14 @@
         return (getLocal().translation[label] ? getLocal().translation[label] : label);
     };
 
-/**
- * 
- * @param {type} type
- * @param {type} id
- * @param {type} name
- * @param {type} level
- * @returns {undefined}
- */
+    /**
+     * 
+     * @param {type} type
+     * @param {type} id
+     * @param {type} name
+     * @param {type} level
+     * @returns {undefined}
+     */
     AAM.prototype.setSubject = function (type, id, name, level) {
         this.subject = {
             type: type,
@@ -3729,65 +3816,74 @@
      * @param {type} value
      * @param {type} object
      * @param {type} object_id
-     * @param {type} successCallback
+     * @param {type} callback
      * @returns {undefined}
      */
-    AAM.prototype.save = function(param, value, object, object_id, successCallback) {
-        $.ajax(getLocal().ajaxurl, {
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'aam',
-                sub_action: 'save',
-                _ajax_nonce: getLocal().nonce,
-                subject: this.getSubject().type,
-                subjectId: this.getSubject().id,
-                param: param,
-                value: value,
-                object: object,
-                objectId: object_id
-            },
-            success: function (response) {
-                if (typeof successCallback === 'function') {
-                    successCallback(response);
+    AAM.prototype.save = function(param, value, object, object_id, callback) {
+        getAAM().queueRequest(function() {
+            $.ajax(getLocal().ajaxurl, {
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'aam',
+                    sub_action: 'save',
+                    _ajax_nonce: getLocal().nonce,
+                    subject: this.getSubject().type,
+                    subjectId: this.getSubject().id,
+                    param: param,
+                    value: value,
+                    object: object,
+                    objectId: object_id
+                },
+                success: function (response) {
+                    if (typeof callback === 'function') {
+                        callback(response);
+                    }
+                },
+                error: function () {
+                    getAAM().notification(
+                        'danger', getAAM().__('Application error')
+                    );
                 }
-            },
-            error: function () {
-                getAAM().notification('danger', getAAM().__('Application error'));
-            }
+            });
         });
     };
 
     /**
      * 
      * @param {type} object
+     * @param {type} btn
      * @returns {undefined}
      */
     AAM.prototype.reset = function(object, btn) {
-        $.ajax(getLocal().ajaxurl, {
-            type: 'POST',
-            data: {
-                action: 'aam',
-                sub_action: 'reset',
-                _ajax_nonce: getLocal().nonce,
-                subject: this.getSubject().type,
-                subjectId: this.getSubject().id,
-                object: object
-            },
-            beforeSend: function() {
-                var label = btn.text();
-                btn.attr('data-original-label', label);
-                btn.text(getAAM().__('Resetting...'));
-            },
-            success: function () {
-                getAAM().fetchContent('main');
-            },
-            error: function () {
-                getAAM().notification('danger', getAAM().__('Application error'));
-            },
-            complete: function() {
-                btn.text(btn.attr('data-original-label'));
-            }
+        getAAM().queueRequest(function() {
+            $.ajax(getLocal().ajaxurl, {
+                type: 'POST',
+                data: {
+                    action: 'aam',
+                    sub_action: 'reset',
+                    _ajax_nonce: getLocal().nonce,
+                    subject: this.getSubject().type,
+                    subjectId: this.getSubject().id,
+                    object: object
+                },
+                beforeSend: function() {
+                    var label = btn.text();
+                    btn.attr('data-original-label', label);
+                    btn.text(getAAM().__('Resetting...'));
+                },
+                success: function () {
+                    getAAM().fetchContent('main');
+                },
+                error: function () {
+                    getAAM().notification(
+                        'danger', getAAM().__('Application error')
+                    );
+                },
+                complete: function() {
+                    btn.text(btn.attr('data-original-label'));
+                }
+            });
         });
     };
     

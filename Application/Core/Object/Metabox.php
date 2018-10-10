@@ -197,5 +197,14 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
     public function deny($screen, $metabox) {
         return $this->save("{$screen}|{$metabox}", 1);
     }
+    
+    /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'metabox');
+    }
 
 }
