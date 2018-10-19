@@ -40,7 +40,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      */
     public function validateUserStatus() {
         //check if user is blocked
-        if ($this->user_status === 1) {
+        if (intval($this->user_status) === 1) {
             wp_logout();
         }
             
