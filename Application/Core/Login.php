@@ -91,6 +91,10 @@ class AAM_Core_Login {
                 }
             }
             
+            if (AAM::api()->getConfig('core.settings.setJwtCookieAfterLogin', false)) {
+                AAM_Core_JwtAuth::getInstance()->generateJWT($user->ID, 'cookie');
+            }
+            
             if ($this->aamLogin === false) {
                 $redirect = $this->getLoginRedirect($user);
                 
@@ -133,7 +137,7 @@ class AAM_Core_Login {
     public function authenticateUser($user) {
         if (is_a($user, 'WP_User')) {
             // First check if user is blocked
-            if ($user->user_status === 1) {
+            if (intval($user->user_status) === 1) {
                 $user = new WP_Error();
 
                 $message  = '[ERROR]: User is locked. Please contact your website ';

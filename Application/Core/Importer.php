@@ -141,7 +141,7 @@ class AAM_Core_Importer {
             
             // #2. Check if string is json
             $json = json_decode($value, true);
-            if (json_last_error() == JSON_ERROR_NONE) {
+            if (json_last_error() === JSON_ERROR_NONE) {
                 $value = $json;
             }
         }

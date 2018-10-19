@@ -147,7 +147,7 @@ class AAM_Backend_Filter {
         $object = AAM::getUser()->getObject('post', $post->ID, $post);
         
         //filter edit menu
-        if (!$this->isAllowed('backend.edit', $object)) {
+        if (!$object->allowed('backend.edit')) {
             if (isset($actions['edit'])) { 
                 unset($actions['edit']); 
             }
@@ -157,39 +157,19 @@ class AAM_Backend_Filter {
         }
         
         //filter delete menu
-        if (!$this->isAllowed('backend.delete', $object)) {
+        if (!$object->allowed('backend.delete')) {
             if (isset($actions['trash'])) { unset($actions['trash']); }
             if (isset($actions['delete'])) { unset($actions['delete']); }
         }
         
         //filter edit menu
-        if (!$this->isAllowed('backend.publish', $object)) {
+        if (!$object->allowed('backend.publish')) {
             if (isset($actions['inline hide-if-no-js'])) {
                 unset($actions['inline hide-if-no-js']);
             }
         }
 
         return $actions;
-    }
-    
-    /**
-     * Check if action is allowed
-     * 
-     * This method will take in consideration also *_others action
-     * 
-     * @param string               $action
-     * @param AAM_Core_Object_Post $object
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isAllowed($action, $object) {
-        $edit   = $object->has($action);
-        $others = $object->has("{$action}_others");
-        $author = (intval($object->post_author) === get_current_user_id());
-        
-        return ($edit || ($others && !$author)) ? false : true;
     }
     
     /**

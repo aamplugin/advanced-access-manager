@@ -112,5 +112,14 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object {
     public function reset() {
         return $this->getSubject()->deleteOption('toolbar');
     }
+    
+    /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'toolbar');
+    }
 
 }

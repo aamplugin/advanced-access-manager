@@ -70,6 +70,9 @@ class AAM_Backend_Manager {
             add_action('all_admin_notices', array($this, 'notification'));
         }
         
+        // Import/Export feature
+        add_action('export_filters', array($this, 'renderExportFields'));
+        
         if (AAM_Core_Config::get('ui.settings.renderAccessMetabox', true)) {
             add_action('edit_category_form_fields', array($this, 'renderTermMetabox'), 1);
             add_action('edit_link_category_form_fields', array($this, 'renderTermMetabox'), 1);
@@ -130,6 +133,15 @@ class AAM_Backend_Manager {
                 'AAM requires PHP version 5.3.0 or higher to function properly'
             );
         }
+    }
+    
+    public function renderExportFields() {
+        ob_start();
+        require_once dirname(__FILE__) . '/phtml/system/export.phtml';
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        echo $content;
     }
     
     /**
@@ -644,7 +656,7 @@ class AAM_Backend_Manager {
      * @access public
      */
     public function adminMenu() {
-        if (AAM_Core_Console::count()) {
+        if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) {
             $counter = '&nbsp;<span class="update-plugins">'
                      . '<span class="plugin-count">' . AAM_Core_Console::count()
                      . '</span></span>';

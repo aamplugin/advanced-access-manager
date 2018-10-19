@@ -252,5 +252,14 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
     public function reset() {
         return $this->getSubject()->deleteOption('menu');
     }
+    
+    /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'menu');
+    }
 
 }

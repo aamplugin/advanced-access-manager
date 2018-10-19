@@ -179,10 +179,7 @@ class AAM_Api_Rest_Resource_Post {
     protected function checkReadAccess(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $read   = $post->has('api.read');
-        $others = $post->has('api.read_others');
-        
-        if ($read || ($others && (intval($post->post_author) !== get_current_user_id()))) {
+        if (!$post->allowed('api.read')) {
             $result = new WP_Error(
                 'rest_post_cannot_read', 
                 "User is unauthorized to read the post. Access denied.", 
@@ -325,10 +322,7 @@ class AAM_Api_Rest_Resource_Post {
     protected function checkUpdate(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $edit   = $post->has('api.edit');
-        $others = $post->has('api.edit_others');
-        
-        if ($edit || ($others && (intval($post->post_author) !== get_current_user_id()))) {
+        if (!$post->allowed('api.edit')) {
             $result = new WP_Error(
                 'rest_post_cannot_update', 
                 "User is unauthorized to update the post. Access denied.", 
@@ -354,10 +348,7 @@ class AAM_Api_Rest_Resource_Post {
     protected function checkDelete(AAM_Core_Object_Post $post) {
         $result = null;
         
-        $delete = $post->has('api.delete');
-        $others = $post->has('api.delete_others');
-        
-        if ($delete || ($others && (intval($post->post_author) !== get_current_user_id()))) {
+        if (!$this->allowed('api.delete')) {
             $result = new WP_Error(
                 'rest_post_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 

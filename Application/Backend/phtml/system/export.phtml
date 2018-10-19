@@ -1,0 +1,25 @@
+<fieldset>
+    <p><label><input type="radio" name="content" value="aam" /> <?php _e('AAM Settings'); ?></label></p>
+    <ul id="aam-filters" class="export-filters">
+        <li>
+            <label><span class="label-responsive"><?php _e('Authors:'); ?></span>
+            </label>
+        </li>
+        <li>
+        </li>
+        <li>
+            <label for="page-status" class="label-responsive"><?php _e('Status:'); ?></label>
+        </li>
+    </ul>
+</fieldset>
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+        var form = $('#export-filters');
+        
+        form.find('input:radio').change(function() {
+            if ($(this).val() === 'aam') {
+                $('#aam-filters').slideDown();
+            }
+        });
+    });
+</script>

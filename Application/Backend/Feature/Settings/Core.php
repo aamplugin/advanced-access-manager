@@ -83,6 +83,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTful API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/help/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
                 'value' => AAM_Core_Config::get('core.settings.jwtAuthentication', false)
             ),
+            'core.settings.multiSubject' => array(
+                'title' => __('Multiple Roles Support', AAM_KEY),
+                'descr' => sprintf(__('Enable support for multiple roles per use. The final access settings or general settings will be computed based on the mergin preferences. For more information check %sWordPress access control for users with multiple roles%s article.', AAM_KEY), '<a href="https://aamplugin.com/help/wordpress-access-control-for-users-with-multiple-roles">', '</a>'),
+                'value' => AAM_Core_Config::get('core.settings.multiSubject', false)
+            ),
             'core.settings.extensionSupport' => array(
                 'title' => __('Support AAM Extensions', AAM_KEY),
                 'descr' => __('AAM comes with the limited list of premium and free extensions that significantly enhance AAM behavior. You can disable support for AAM extension and any already installed extension will no longer be loaded during the website execution as well as website administrator will not be able to install new extensions.', AAM_KEY),

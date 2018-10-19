@@ -85,15 +85,16 @@ class AAM_Backend_Subject {
      * @access protected
      */
     protected function initDefaultSubject() {
-        $user = intval(AAM_Core_Request::get('user'));
-        
-        // TODO: The list_users is legacy and can be removed in Oct 2021
-        if ($user && (current_user_can('aam_manage_users') || current_user_can('list_users'))) {
-            $this->initRequestedSubject(AAM_Core_Subject_User::UID, $user);
-        // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
-        } elseif (current_user_can('aam_manage_roles') || current_user_can('aam_list_roles')) {
+        if (current_user_can('aam_manage_roles') || current_user_can('aam_list_roles')) {
             $roles = array_keys(get_editable_roles());
             $this->initRequestedSubject(AAM_Core_Subject_Role::UID, array_shift($roles));
+        // TODO: The list_users is legacy and can be removed in Oct 2021
+        } elseif (current_user_can('aam_manage_users') || current_user_can('list_users')) {
+            $this->initRequestedSubject(
+                AAM_Core_Subject_User::UID, 
+                intval(AAM_Core_Request::get('user', get_current_user_id()))
+            );
+        // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
         } elseif (current_user_can('aam_manage_visitors')) {
             $this->initRequestedSubject(AAM_Core_Subject_Visitor::UID, null);
         } elseif (current_user_can('aam_manage_default')) {

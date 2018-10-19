@@ -193,7 +193,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         // set meta for revision, so let's bypass this constrain.
         if ($this->getPost()->post_type === 'revision') {
             $result = delete_metadata(
-                    'post', $this->getPost()->ID, $this->getOptionName()
+                'post', $this->getPost()->ID, $this->getOptionName()
             );
         } else {
             $result = delete_post_meta($this->getPost()->ID, $this->getOptionName());
@@ -245,6 +245,25 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         $option = $this->getOption();
 
         return (array_key_exists($property, $option) && !empty($option[$property]));
+    }
+    
+    /**
+     * Check if subject can do certain action
+     * 
+     * The difference between `can` and `allowed` is that can is more in-depth way 
+     * to take in consideration relationships between properties.
+     *  
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function allowed() {
+        return apply_filters(
+            'aam-post-action-allowed-filter', 
+            !call_user_func_array(array($this, 'has'), func_get_args()), 
+            func_get_arg(0), 
+            $this
+        );
     }
     
     /**
@@ -332,6 +351,15 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         $this->setOption($option);
         
         return true;
+    }
+    
+    /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'post');
     }
     
     /**

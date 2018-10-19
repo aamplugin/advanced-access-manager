@@ -125,10 +125,7 @@ class AAM_Frontend_Filter {
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'), true)) {
                     $object = AAM::getUser()->getObject('post', $page->object_id);
-                    $others = $object->get('frontend.list_others');
-                    $list   = $object->get('frontend.list');
-                    
-                    if (($others && (intval($object->post_author) !== get_current_user_id())) || $list) {
+                    if (!$object->allowed('frontend.list')) {
                         unset($pages[$i]);
                     }
                 }
@@ -158,10 +155,7 @@ class AAM_Frontend_Filter {
                 
                 // TODO: refactor this to AAM API standalone
                 $object = AAM::getUser()->getObject('post', $post->ID);
-                $list   = $object->get($area. '.list');
-                $others = $object->get($area. '.list_others');
-                
-                if ($list || ($others && (intval($post->post_author) !== get_current_user_id()))) {
+                if (!$object->allowed($area. '.list')) {
                     unset($pages[$i]);
                 }
             }

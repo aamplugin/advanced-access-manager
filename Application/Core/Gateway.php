@@ -107,6 +107,46 @@ final class AAM_Core_Gateway {
     }
     
     /**
+     * Merge 
+     * @param type $set1
+     * @param type $set2
+     * @param type $objectType
+     * @return type
+     */
+    public function mergeSettings($set1, $set2, $objectType, $preference = null) {
+        $combined = array($set1, $set2);
+        $merged   = array();
+        
+        if (is_null($preference)) {
+            $preference = $this->getConfig(
+                "core.settings.{$objectType}.merge.preference", 'deny'
+            );
+        }
+        
+        // first get the complete list of unique keys
+        $keys = array_keys(call_user_func_array('array_merge', $combined));
+        
+        foreach($keys as $key) {
+            foreach($combined as $options) {
+                // If merging preference is "deny" and at least one of the access
+                // settings is checked, then final merged array will have it set
+                // to checked
+                if ($preference === 'deny' && !empty($options[$key])) {
+                    $merged[$key] = $options[$key];
+                    break;
+                } elseif ($preference === 'allow' && empty($options[$key])) {
+                    $merged[$key] = 0;
+                    break;
+                } elseif (isset($options[$key])) {
+                    $merged[$key] = $options[$key];
+                }
+            }
+        }
+        
+        return $merged;
+    } 
+    
+    /**
      * Get instance of the API gateway
      * 
      * @return AAM_Core_Gateway
