@@ -47,30 +47,32 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
      * @global array  $menu
      */
     public function getMenu() {
-        global $menu;
+        $menu = json_decode(base64_decode(AAM_Core_Request::post('menu')), 1);
         
         $response = array();
         
         //let's create menu list with submenus
-        foreach ($menu as $item) {
-            if (preg_match('/^separator/', $item[2])) {
-                continue; //skip separator
-            }
-            
-            $submenu = $this->getSubmenu($item[2]);
-            
-            $allowed = AAM_Backend_Subject::getInstance()->hasCapability($item[1]);
-            
-            if ($allowed || count($submenu) > 0) {
-                $response[] = array(
-                    //add menu- prefix to define that this is the top level menu
-                    //WordPress by default gives the same menu id to the first
-                    //submenu
-                    'id'         => 'menu-' . $item[2],
-                    'name'       => $this->filterMenuName($item[0]),
-                    'submenu'    => $submenu,
-                    'capability' => $item[1]
-                );
+        if (!empty($menu)) {
+            foreach ($menu as $item) {
+                if (preg_match('/^separator/', $item[2])) {
+                    continue; //skip separator
+                }
+
+                $submenu = $this->getSubmenu($item[2]);
+
+                $allowed = AAM_Backend_Subject::getInstance()->hasCapability($item[1]);
+
+                if ($allowed || count($submenu) > 0) {
+                    $response[] = array(
+                        //add menu- prefix to define that this is the top level menu
+                        //WordPress by default gives the same menu id to the first
+                        //submenu
+                        'id'         => 'menu-' . $item[2],
+                        'name'       => $this->filterMenuName($item[0]),
+                        'submenu'    => $submenu,
+                        'capability' => $item[1]
+                    );
+                }
             }
         }
 
@@ -108,7 +110,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
      * @global array  $submenu
      */
     protected function getSubmenu($menu) {
-        global $submenu;
+        $submenu = json_decode(base64_decode(AAM_Core_Request::post('submenu')), 1);
         
         $response  = array();
         $subject   = AAM_Backend_Subject::getInstance();

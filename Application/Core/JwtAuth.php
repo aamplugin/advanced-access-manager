@@ -139,10 +139,11 @@ class AAM_Core_JwtAuth {
                 setcookie(
                     'aam-jwt', 
                     $token, 
-                    time() + $expire, // 3 hours
+                    time() + $expire,
                     '/', 
                     parse_url(get_bloginfo('url'), PHP_URL_HOST), 
-                    is_ssl()
+                    is_ssl(),
+                    AAM_Core_Config::get('authentication.jwt.cookie.httpOnly', false)
                 );
             }
         } else {

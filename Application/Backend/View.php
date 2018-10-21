@@ -48,11 +48,35 @@ class AAM_Backend_View {
         AAM_Backend_Feature_Settings_Core::register();
         AAM_Backend_Feature_Settings_Content::register();
         AAM_Backend_Feature_Settings_Security::register();
-        AAM_Backend_Feature_Settings_Tools::register();
         AAM_Backend_Feature_Settings_ConfigPress::register();
         
         //feature registration hook
         do_action('aam-feature-registration-action');
+    }
+    
+    /**
+     * Clear all AAM settings
+     * 
+     * @global wpdb $wpdb
+     * 
+     * @return string
+     * 
+     * @access public
+     */
+    public function clearSettings() {
+        AAM_Core_API::clearSettings();
+
+        return wp_json_encode(array('status' => 'success'));
+    }
+
+    /**
+     * 
+     * @return type
+     */
+    public function clearCache() {
+        AAM_Core_API::clearCache();
+
+        return wp_json_encode(array('status' => 'success'));
     }
 
     /**
@@ -242,6 +266,26 @@ class AAM_Backend_View {
                 AAM_Core_API::updateOption(
                         'aam-user-switch-' . $user->ID, get_current_user_id()
                 );
+                
+                // Making sure that user that we are switching too is not logged in
+                // already. Kinding by https://github.com/KenAer
+                $sessions = WP_Session_Tokens::get_instance($user->ID);
+                if (count($sessions->get_all()) > 1) {
+                    $sessions->destroy_all();
+                }
+                
+                // If there is jwt token in cookie, make sure it is deleted otherwise
+                // user technically will never be switched
+                if (AAM_Core_Request::cookie('aam-jwt')) {
+                    setcookie(
+                        'aam-jwt', 
+                        '', 
+                        time() - YEAR_IN_SECONDS,
+                        '/', 
+                        parse_url(get_bloginfo('url'), PHP_URL_HOST), 
+                        is_ssl()
+                    );
+                }
 
                 wp_clear_auth_cookie();
                 wp_set_auth_cookie( $user->ID, true );

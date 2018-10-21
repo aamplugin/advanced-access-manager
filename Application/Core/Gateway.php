@@ -107,11 +107,15 @@ final class AAM_Core_Gateway {
     }
     
     /**
-     * Merge 
-     * @param type $set1
-     * @param type $set2
-     * @param type $objectType
-     * @return type
+     * Merge AAM settings
+     * 
+     * @param array $set1
+     * @param array $set2
+     * @param string $objectType
+     * 
+     * @return array
+     * 
+     * @access public
      */
     public function mergeSettings($set1, $set2, $objectType, $preference = null) {
         $combined = array($set1, $set2);

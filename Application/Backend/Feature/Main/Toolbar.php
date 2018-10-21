@@ -47,7 +47,7 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
      * @global array  $menu
      */
     public function getToolbar() {
-        return AAM_Core_API::getOption('aam_toolbar_cache', array());
+        return json_decode(base64_decode(AAM_Core_Request::post('toolbar')));
     }
     
     /**

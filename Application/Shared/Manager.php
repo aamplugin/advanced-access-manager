@@ -551,9 +551,9 @@ class AAM_Shared_Manager {
         if (is_a($post, 'WP_Post')) {
             $object = AAM::getUser()->getObject('post', $post->ID);
             $area   = AAM_Core_Api_Area::get();
-
+            
             if (!$object->allowed($area . '.publish')) {
-                 $allcaps = $this->restrictCapabilities($allcaps, $metacaps);
+                $allcaps = $this->restrictCapabilities($allcaps, $metacaps);
             }
         }
         

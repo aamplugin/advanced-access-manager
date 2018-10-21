@@ -348,7 +348,7 @@ class AAM_Api_Rest_Resource_Post {
     protected function checkDelete(AAM_Core_Object_Post $post) {
         $result = null;
         
-        if (!$this->allowed('api.delete')) {
+        if (!$post->allowed('api.delete')) {
             $result = new WP_Error(
                 'rest_post_cannot_delete', 
                 "User is unauthorized to delete the post. Access denied.", 

@@ -67,10 +67,9 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
         $package = AAM_Core_Server::download($license);
         
         if (is_wp_error($package)) {
-            $manually = __('You may try to install extension manually.', AAM_KEY);
             $response = array(
                 'status' => 'failure', 
-                'error'  => wp_strip_all_tags($package->get_error_message()) . ' ' . $manually
+                'error'  => wp_strip_all_tags($package->get_error_message())
             );
         }elseif ($error = $repo->checkDirectory()) {
             $response = $this->installFailureResponse($error, $package);
@@ -78,7 +77,7 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
         } elseif (empty($package->content)) { //any unpredictable scenario
             $response = array(
                 'status' => 'failure', 
-                'error'  => __('Download failure. Please try again or contact us.', AAM_KEY)
+                'error'  => __('Download failure. Try again or contact us.', AAM_KEY)
             );
         } else { //otherwise install the extension
             $result = $repo->add(base64_decode($package->content));

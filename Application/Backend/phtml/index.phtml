@@ -71,6 +71,39 @@
                     </div>
                 </div>
                 
+                <div class="metabox-holder settings-metabox" style="display:none;">
+                    <div class="postbox">
+                        <div class="inside">
+                            <div class="row">
+                                <div class="col-xs-12 col-md-6">
+                                    <a href="#" class="btn btn-primary btn-block" id="clear-cache"><?php echo __('Clear AAM Cache', AAM_KEY); ?></a>
+                                </div>
+                                <div class="col-xs-12 col-md-6">
+                                    <a href="#clear-settings-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Reset AAM Settings', AAM_KEY); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal fade" id="clear-settings-modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><?php echo __('Clear all settings', AAM_KEY); ?></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-center alert alert-danger text-larger"><?php echo __('All AAM settings will be removed.', AAM_KEY); ?></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" id="clear-settings"><?php echo __('Clear', AAM_KEY); ?></button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <?php if (AAM_Extension_Repository::getInstance()->isWriteableDirectory() === false) { ?>
                     <?php $relativePath = AAM_Extension_Repository::getInstance()->getBasedir(true); ?>
                     <div class="metabox-holder extensions-metabox" id='extension-dir-warning' style="display:none;">
@@ -88,6 +121,7 @@
                             </div>
                         </div>
                     </div>
+                
                     <div class="modal fade" id="extension-dir-issue-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">

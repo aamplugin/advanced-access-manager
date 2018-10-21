@@ -23,6 +23,15 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      * @access protected 
      */
     protected $updated = false;
+    
+    /**
+     * Is cache enabled?
+     * 
+     * @var boolean
+     * 
+     * @access protected 
+     */
+    protected $enabled = true;
 
     /**
      * Constructor
@@ -36,8 +45,16 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
         
-        if (!AAM::isAAM() 
-                && (AAM_Core_Config::get('core.cache.status', 'enabled') === 'enabled')) {
+        // Determine if cache is enabled
+        $action   = AAM_Core_Request::request('action');
+        $triggers = array('edit', 'editpost');
+        $status   = AAM_Core_Config::get('core.cache.status', 'enabled');
+        
+        if (!AAM::isAAM() || ($status !== 'enabled') || in_array($action, $triggers)) {
+            $this->enabled = false;
+        }
+        
+        if ($this->enabled) {
             // Register shutdown hook
             add_action('shutdown', array($this, 'save'));
 
@@ -86,7 +103,7 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      * @access public
      */
     public function save() {
-        if ($this->updated) {
+        if ($this->enabled && $this->updated) {
             $this->getSubject()->updateOption($this->getOption(), 'cache');
         }
         
