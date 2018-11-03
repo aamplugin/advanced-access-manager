@@ -158,10 +158,11 @@ class AAM_Backend_Manager {
                 $export[$group] = implode(',', $settings);
             }
             
-            $args['export'] = array_merge(
-                array('system' => 'roles,utilities,configpress'),
-                $export
-            );
+            if (empty($export)) {
+                $export = array('system' => 'roles,utilities,configpress');
+            }
+            
+            $args['export'] = $export;
         }
         
         return $args;
@@ -787,9 +788,32 @@ class AAM_Backend_Manager {
         ob_clean();
         
         if (AAM::getUser()->hasCapability('aam_manager')) {
-            echo AAM_Backend_View::getInstance()->renderContent(
+            $response = AAM_Backend_View::getInstance()->renderContent(
                     AAM_Core_Request::post('uiType', 'main')
             );
+            
+            $accept = explode(',', AAM_Core_Request::server('HTTP_ACCEPT_ENCODING'));
+            header('Content-Type: text/html; charset=UTF-8');
+            
+            $zlib       = strtolower(ini_get('zlib.output_compression'));
+            $compressed = count(array_intersect(
+                array('zlib output compression', 'ob_gzhandler'),
+                ob_list_handlers()
+            )) > 0;
+            
+            if (in_array($zlib, array('1', 'on'), true) && !empty($accept)) {
+                header('Vary: Accept-Encoding'); // Handle proxies
+                
+                if ( false !== stripos($accept[0], 'deflate') && function_exists('gzdeflate')) {
+                    header('Content-Encoding: deflate');
+                    $response = ($compressed ? $response : gzdeflate($response, 3));
+                } elseif ( false !== stripos($accept[0], 'gzip') && function_exists('gzencode') ) {
+                    header('Content-Encoding: gzip');
+                    $response = ($compressed ? $response : gzencode($response, 3));
+                }
+            }
+            
+            echo $response;
         } else {
             echo __('Access Denied', AAM_KEY);
         }
@@ -819,7 +843,7 @@ class AAM_Backend_Manager {
         
         exit();
     }
-
+    
     /**
      * Bootstrap the manager
      * 

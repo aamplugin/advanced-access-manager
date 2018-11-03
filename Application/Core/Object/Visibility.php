@@ -40,7 +40,8 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
         $subject = $this->getSubject();
         
         // Read cache first
-        $option = $subject->getObject('cache')->get('visibility');
+        $option = $subject->getObject('cache')->get('visibility', 0);
+        
         if ($option === false) { //if false, then the cache is empty but exists
             $option = array();
         } elseif (empty($option)) {

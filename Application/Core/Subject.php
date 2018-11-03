@@ -232,29 +232,18 @@ abstract class AAM_Core_Subject {
      * @access public
      */
     public function getObject($type, $id = 0, $param = null) {
-        $object = null;
-        
         //performance optimization
         $id = (is_scalar($id) ? $id : 0); //prevent from any surprises
         
-        //check if there is an object with specified ID
-        if (!isset($this->_objects[$type][$id])) {
-            $classname = 'AAM_Core_Object_' . ucfirst($type);
-            
-            if (class_exists($classname)) {
-                $object = new $classname($this, (is_null($param) ? $id : $param));
-            }
-            
-            $object = apply_filters('aam-object-filter', $object, $type, $id, $this);
-            
-            if (is_a($object, 'AAM_Core_Object') && !AAM::isAAM()) {
-                $this->_objects[$type][$id] = $object;
-            }
-        } else {
-            $object = $this->_objects[$type][$id];
-        }
+        $classname = 'AAM_Core_Object_' . ucfirst($type);
 
-        return $object;
+        if (class_exists($classname)) {
+            $object = new $classname($this, (is_null($param) ? $id : $param));
+        } else {
+            $object = null;
+        }
+            
+        return apply_filters('aam-object-filter', $object, $type, $id, $this);
     }
 
     /**

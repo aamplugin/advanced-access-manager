@@ -157,8 +157,9 @@ class AAM_Shared_Manager {
         global $wp_admin_bar;
         
         $toolbar = AAM::api()->getUser()->getObject('toolbar');
+        $nodes   = $wp_admin_bar->get_nodes();
         
-        foreach($wp_admin_bar->get_nodes() as $id => $node) {
+        foreach((is_array($nodes) ? $nodes : array()) as $id => $node) {
             if ($toolbar->has($id, true)) {
                 if (!empty($node->parent)) { // update parent node with # link
                     $parent = $wp_admin_bar->get_node($node->parent);
@@ -202,7 +203,7 @@ class AAM_Shared_Manager {
      */
     public function filterPostQuery($clauses, $wpQuery) {
         if (!$wpQuery->is_singular && $this->isPostFilterEnabled()) {
-            $option = AAM::getUser()->getObject('visibility')->getOption();
+            $option = AAM::getUser()->getObject('visibility', 0)->getOption();
             
             if (!empty($option['post'])) {
                 $query = $this->preparePostQuery($option['post'], $wpQuery);

@@ -50,13 +50,13 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
         $triggers = array('edit', 'editpost');
         $status   = AAM_Core_Config::get('core.cache.status', 'enabled');
         
-        if (!AAM::isAAM() || ($status !== 'enabled') || in_array($action, $triggers)) {
+        if (AAM::isAAM() || ($status !== 'enabled') || in_array($action, $triggers)) {
             $this->enabled = false;
         }
         
         if ($this->enabled) {
             // Register shutdown hook
-            add_action('shutdown', array($this, 'save'));
+            register_shutdown_function(array($this, 'save'));
 
             // Just get the cache from current subject level. Do not trigger
             // inheritance chain!

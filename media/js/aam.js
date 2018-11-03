@@ -3362,10 +3362,9 @@
     /**
      * 
      * @param {type} view
-     * @param {type} success
      * @returns {undefined}
      */
-    AAM.prototype.fetchContent = function (view, success) {
+    AAM.prototype.fetchContent = function (view) {
         var _this = this;
         
         //referred object ID like post, page or any custom post type
@@ -3428,10 +3427,6 @@
                     $('#aam-subject-banner').hide();
                 } else {
                     $('#aam-subject-banner').show();
-                }
-                
-                if (typeof success === 'function') {
-                   // success.call();
                 }
             }
         });
