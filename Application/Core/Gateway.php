@@ -92,6 +92,60 @@ final class AAM_Core_Gateway {
     }
     
     /**
+     * Redirect request
+     * 
+     * @param string $type
+     * @param mixed  $arg
+     * 
+     * @return void
+     * 
+     * @access public
+     */
+    public function redirect($type, $arg = null) {
+        $area = AAM_Core_Api_Area::get();
+        
+        switch($type) {
+            case 'login':
+                wp_redirect(add_query_arg(
+                    array('reason' => 'restricted'), 
+                    wp_login_url(AAM_Core_Request::server('REQUEST_URI'))
+                ), 307);
+                break;
+            
+            case 'page':
+                $page = AAM_Core_API::getCurrentPost();
+                if(empty($page) || ($page->ID !== intval($arg))) {
+                    wp_safe_redirect(get_page_link($arg), 307);
+                }
+                break;
+                
+            case 'message':
+                wp_die($arg);
+                break;
+            
+            case 'url':
+                if (stripos($arg, AAM_Core_Request::server('REQUEST_URI')) === false) {
+                    wp_redirect($arg, 307);
+                }
+                break;
+                
+            case 'callback':
+                if (is_callable($arg)) {
+                    call_user_func($arg);
+                }
+                break;
+                
+            default:
+                wp_die(AAM_Core_Config::get(
+                    "{$area}.access.deny.redirectRule", __('Access Denied', AAM_KEY)
+                ));
+                break;
+        }
+        
+        exit; // Halt the execution
+    }
+    
+    /**
      * Check if capability exists
      * 
      * This method checks if provided capability exists (registered for any role).

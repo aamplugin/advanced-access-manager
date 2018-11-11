@@ -66,6 +66,17 @@ abstract class AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         $this->setSubject($subject);
     }
+    
+    /**
+     * Read object option
+     * 
+     * @return void
+     * 
+     * @access public
+     */
+    public function initialize() {
+        
+    }
 
     /**
      * Set current subject

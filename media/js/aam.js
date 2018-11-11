@@ -2868,6 +2868,206 @@
             getAAM().addHook('init', initialize);
 
         })(jQuery);
+        
+        /**
+         * URI Interface
+         * 
+         * @param {jQuery} $
+         * 
+         * @returns {void}
+         */
+        (function ($) {
+            function initialize() {
+                var container = '#uri-content';
+
+                if ($(container).length) {
+                    $('input[type="radio"]', container).each(function () {
+                        $(this).bind('click', function () {
+                            $('.aam-uri-access-action').hide();
+                            if ($(this).data('action')) {
+                                $($(this).data('action')).show();
+                            }
+                        });
+                    });
+                    
+                    //reset button
+                    $('#uri-reset').bind('click', function () {
+                        aam.reset('uri', $(this));
+                    });
+
+                    $('#uri-save-btn').bind('click', function(event) {
+                        event.preventDefault();
+
+                        var uri = $('#uri-rule').val();
+                        var type = $('input[name="uri.access.type"]:checked').val();
+                        var val  = $('#uri-access-deny-' + type + '-value').val();
+                        
+                        if (uri && type) {
+                            $.ajax(aamLocal.ajaxurl, {
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    action: 'aam',
+                                    sub_action: 'Main_Uri.save',
+                                    _ajax_nonce: aamLocal.nonce,
+                                    subject: aam.getSubject().type,
+                                    subjectId: aam.getSubject().id,
+                                    uri: uri,
+                                    type: type,
+                                    value: val,
+                                    id: $('#uri-save-btn').attr('data-id')
+                                },
+                                beforeSend: function () {
+                                    $('#uri-save-btn').text(aam.__('Saving...')).attr('disabled', true);
+                                },
+                                success: function (response) {
+                                    if (response.status === 'success') {
+                                        $('#uri-list').DataTable().ajax.reload();
+                                    } else {
+                                        aam.notification(
+                                            'danger', aam.__('Failed to save URI rule')
+                                        );
+                                    }
+                                },
+                                error: function () {
+                                    aam.notification('danger', aam.__('Application error'));
+                                },
+                                complete: function () {
+                                    $('#uri-model').modal('hide');
+                                    $('#uri-save-btn').text(aam.__('Save')).attr('disabled', false);
+                                }
+                            });
+                        }
+                     });
+
+                    $('#uri-delete-btn').bind('click', function (event) {
+                        event.preventDefault();
+
+                        $.ajax(aamLocal.ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Uri.delete',
+                                _ajax_nonce: aamLocal.nonce,
+                                subject: aam.getSubject().type,
+                                subjectId: aam.getSubject().id,
+                                id: $('#uri-delete-btn').data('id')
+                            },
+                            beforeSend: function () {
+                                $('#uri-delete-btn').text(aam.__('Deleting...')).attr('disabled', true);
+                            },
+                            success: function (response) {
+                                if (response.status === 'success') {
+                                    $('#uri-list').DataTable().ajax.reload();
+                                } else {
+                                    aam.notification('danger', aam.__('Failed to delete URI rule'));
+                                }
+                            },
+                            error: function () {
+                                aam.notification('danger', aam.__('Application error'));
+                            },
+                            complete: function () {
+                                $('#uri-delete-model').modal('hide');
+                                $('#uri-delete-btn').text(aam.__('Delete')).attr('disabled', false);
+                            }
+                        });
+                    });
+
+                    $('#uri-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        dom: 'ftrip',
+                        pagingType: 'simple',
+                        processing: true,
+                        stateSave: true,
+                        serverSide: false,
+                        ajax: {
+                            url: aamLocal.ajaxurl,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Uri.getTable',
+                                _ajax_nonce: aamLocal.nonce,
+                                subject: aam.getSubject().type,
+                                subjectId: aam.getSubject().id
+                            }
+                        },
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: aam.__('Search URI'),
+                            info: aam.__('_TOTAL_ URI(s)'),
+                            infoFiltered: ''
+                        },
+                        columnDefs: [
+                            {visible: false, targets: [0,2,3]}
+                        ],
+                        initComplete: function () {
+                            var create = $('<a/>', {
+                                'href': '#',
+                                'class': 'btn btn-primary'
+                            }).html('<i class="icon-plus"></i> ' + aam.__('Create'))
+                            .bind('click', function () {
+                                $('.form-clearable', '#uri-model').val('');
+                                $('.aam-uri-access-action').hide();
+                                $('input[type="radio"]', '#uri-model').prop('checked', false);
+                                $('#uri-save-btn').removeAttr('data-id');
+                                $('#uri-model').modal('show');
+                            });
+
+                            $('.dataTables_filter', '#uri-list_wrapper').append(create);
+                        },
+                        createdRow: function (row, data) {
+                            var actions = data[4].split(',');
+
+                            var container = $('<div/>', {'class': 'aam-row-actions'});
+                            $.each(actions, function (i, action) {
+                                switch (action) {
+                                    case 'edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-warning'
+                                        }).bind('click', function () {
+                                            $('.form-clearable', '#uri-model').val('');
+                                            $('.aam-uri-access-action').hide();
+                                            $('#uri-rule').val(data[1]);
+                                            $('input[value="' + data[2] + '"]', '#uri-model').prop('checked', true).trigger('click');
+                                            $('#uri-access-deny-' + data[2] + '-value').val(data[3]);
+                                            $('#uri-save-btn').attr('data-id', data[0]);
+                                            $('#uri-model').modal('show');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': aam.__('Edit Rule')
+                                        }));
+                                        break;
+
+                                    case 'delete':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-trash-empty text-danger'
+                                        }).bind('click', function () {
+                                            $('#uri-delete-btn').attr('data-id', data[0]);
+                                            $('#uri-delete-model').modal('show');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': aam.__('Delete Rule')
+                                        }));
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            });
+                            $('td:eq(1)', row).html(container);
+
+                            $('td:eq(0)', row).html(data[1]);
+                        }
+                    });
+                }
+            }
+            
+            getAAM().addHook('init', initialize);
+            
+        })(jQuery);
 
         /**
          * Extensions Interface
@@ -2943,7 +3143,7 @@
                             );
                         },
                         complete: function () {
-                            getAAM().fetchContent('extensions');
+                            location.reload();
                         }
                     });
                 });
@@ -3110,6 +3310,57 @@
                         $('#safari-download-notification').removeClass('hidden');
                     }
                 }
+            }
+
+            getAAM().addHook('init', initialize);
+
+        })(jQuery);
+        
+        /**
+         * Get Started Interface
+         * 
+         * @param {type} $
+         * 
+         * @returns {undefined}
+         */
+        (function ($) {
+            
+            /**
+             * 
+             * @returns {undefined}
+             */
+            function initialize() {
+                $('#ack-get-started').bind('click', function () {
+                    getAAM().queueRequest(function() {
+                        $.ajax(getLocal().ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Settings_Manager.save',
+                                _ajax_nonce: getLocal().nonce,
+                                param: 'core.settings.getStarted',
+                                value: 0
+                            },
+                            beforeSend: function() {
+                                $('#ack-get-started').text(
+                                        getAAM().__('Saving...')
+                                );
+                            },
+                            success: function() {
+                                location.reload();
+                            },
+                            error: function () {
+                                getAAM().notification(
+                                    'danger', getAAM().__('Application Error')
+                                );
+                                $('#ack-get-started').text(
+                                        getAAM().__('OK, got it')
+                                );
+                            }
+                        });
+                    });
+                });
             }
 
             getAAM().addHook('init', initialize);

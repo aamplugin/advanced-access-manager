@@ -27,6 +27,13 @@ class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
 
+        $this->initialize();
+    }
+    
+    /**
+     * 
+     */
+    public function initialize() {
         $this->read();
     }
     

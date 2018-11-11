@@ -71,6 +71,28 @@ class AAM_Backend_Filter {
         );
         
         AAM_Backend_Authorization::bootstrap(); //bootstrap backend authorization
+        
+        //check URI
+        $this->checkURIAccess();
+    }
+    
+    /**
+     * 
+     */
+    protected function checkURIAccess() {
+        $uri    = wp_parse_url(AAM_Core_Request::server('REQUEST_URI'));
+        $object = AAM::api()->getUser()->getObject('uri');
+        $params = array();
+        
+        if (isset($uri['query'])) {
+            parse_str($uri['query'], $params);
+        }
+        
+        if ($match = $object->findMatch($uri['path'], $params)) {
+            if ($match['type'] !== 'allow') {
+                AAM::api()->redirect($match['type'], $match['action']);
+            }
+        }
     }
     
     /**

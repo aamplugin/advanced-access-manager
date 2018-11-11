@@ -792,7 +792,7 @@ class AAM_Backend_Manager {
                     AAM_Core_Request::post('uiType', 'main')
             );
             
-            $accept = explode(',', AAM_Core_Request::server('HTTP_ACCEPT_ENCODING'));
+            $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
             header('Content-Type: text/html; charset=UTF-8');
             
             $zlib       = strtolower(ini_get('zlib.output_compression'));
@@ -804,10 +804,7 @@ class AAM_Backend_Manager {
             if (in_array($zlib, array('1', 'on'), true) && !empty($accept)) {
                 header('Vary: Accept-Encoding'); // Handle proxies
                 
-                if ( false !== stripos($accept[0], 'deflate') && function_exists('gzdeflate')) {
-                    header('Content-Encoding: deflate');
-                    $response = ($compressed ? $response : gzdeflate($response, 3));
-                } elseif ( false !== stripos($accept[0], 'gzip') && function_exists('gzencode') ) {
+                if ( false !== stripos($accept, 'gzip') && function_exists('gzencode') ) {
                     header('Content-Encoding: gzip');
                     $response = ($compressed ? $response : gzencode($response, 3));
                 }

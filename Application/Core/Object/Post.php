@@ -44,9 +44,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             $this->setPost(get_post($post));
         }
         
-        if ($this->getPost()) {
-            $this->read();
-        }
+        $this->initialize();
     }
     
     /**
@@ -62,6 +60,15 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         $post = $this->getPost();
         
         return (is_object($post) && property_exists($post, $name) ? $post->$name : null);
+    }
+    
+    /**
+     * 
+     */
+    public function initialize() {
+        if ($this->getPost()) {
+            $this->read();
+        }
     }
 
     /**

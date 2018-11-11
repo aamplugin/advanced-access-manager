@@ -54,7 +54,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             'aam_manage_404_redirect', 'aam_manage_ip_check', 'aam_manage_admin_toolbar',
             'aam_manage_default', 'aam_manage_visitors', 'aam_manage_roles', 'aam_manage_users',
             'aam_edit_roles', 'aam_delete_roles', 'aam_toggle_users', 'aam_switch_users',
-            'aam_manage_configpress', 'aam_manage_api_routes'
+            'aam_manage_configpress', 'aam_manage_api_routes', 'aam_manage_uri'
         )
     );
 
