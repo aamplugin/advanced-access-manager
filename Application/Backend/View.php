@@ -34,6 +34,7 @@ class AAM_Backend_View {
     protected function __construct() {
         //register default features
         AAM_Backend_Feature_Main_GetStarted::register();
+        AAM_Backend_Feature_Main_Policy::register();
         AAM_Backend_Feature_Main_Menu::register();
         AAM_Backend_Feature_Main_Toolbar::register();
         AAM_Backend_Feature_Main_Metabox::register();
@@ -120,6 +121,34 @@ class AAM_Backend_View {
     public function renderPostMetabox($post) {
         ob_start();
         require_once dirname(__FILE__) . '/phtml/metabox/post-metabox.phtml';
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return $content;
+    }
+    
+    /**
+     * 
+     * @param type $post
+     * @return type
+     */
+    public function renderPolicyMetabox($post) {
+        ob_start();
+        require_once dirname(__FILE__) . '/phtml/metabox/policy-metabox.phtml';
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return $content;
+    }
+    
+    /**
+     * 
+     * @param type $post
+     * @return type
+     */
+    public function renderPolicyPrincipalMetabox($post) {
+        ob_start();
+        require_once dirname(__FILE__) . '/phtml/metabox/policy-principal-metabox.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 
@@ -269,7 +298,7 @@ class AAM_Backend_View {
                 );
                 
                 // Making sure that user that we are switching too is not logged in
-                // already. Kinding by https://github.com/KenAer
+                // already. Reported by https://github.com/KenAer
                 $sessions = WP_Session_Tokens::get_instance($user->ID);
                 if (count($sessions->get_all()) > 1) {
                     $sessions->destroy_all();

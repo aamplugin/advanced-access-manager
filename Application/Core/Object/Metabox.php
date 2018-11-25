@@ -166,8 +166,12 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      */
     public function has($screen, $metabox) {
         $options = $this->getOption();
+        
+        $area      = ($screen === 'widgets' ? 'Widget' : 'Metabox');
+        $uid       = crc32($screen . $metabox);
+        $isAllowed = AAM::api()->isAllowed("{$area}:{$uid}");
 
-        return !empty($options[$screen][$metabox]);
+        return !empty($options[$screen][$metabox]) || ($isAllowed === false);
     }
     
     /**

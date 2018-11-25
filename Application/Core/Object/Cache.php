@@ -57,11 +57,18 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
         if ($this->enabled) {
             // Register shutdown hook
             register_shutdown_function(array($this, 'save'));
-
-            // Just get the cache from current subject level. Do not trigger
-            // inheritance chain!
-            $this->setOption($this->getSubject()->readOption('cache'));
+            
+            $this->reload();
         }
+    }
+    
+    /**
+     * 
+     */
+    public function reload() {
+        // Just get the cache from current subject level. Do not trigger
+        // inheritance chain!
+        $this->setOption($this->getSubject()->readOption('cache'));
     }
     
     /**

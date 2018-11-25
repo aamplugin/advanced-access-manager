@@ -66,11 +66,6 @@ class AAM_Api_Manager {
             // Manage access to the RESTful endpoints
             add_filter('rest_pre_dispatch', array($this, 'authorizeRest'), 1, 3);
 
-            // Check if user has ability to perform certain task based on provided
-            // capability and meta data
-            $shared = AAM_Shared_Manager::getInstance();
-            add_filter('user_has_cap', array($shared, 'userHasCap'), 999, 3);
-
             // Register any additional endpoints with ConfigPress
             $additional = AAM_Core_Config::get('rest.manage.endpoint');
 

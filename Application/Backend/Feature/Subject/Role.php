@@ -42,15 +42,15 @@ class AAM_Backend_Feature_Subject_Role {
 
             foreach ($filtered as $id => $data) {
                 $uc = (isset($stats[$id]) ? $stats[$id] : 0);
-
+                
                 $response['data'][] = array(
                     $id,
                     $uc,
                     translate_user_role($data['name']),
                     apply_filters(
-                            'aam-role-row-actions-filter', 
-                            implode(',', $this->prepareRowActions($uc)),
-                            $data
+                        'aam-role-row-actions-filter', 
+                        implode(',', $this->prepareRowActions($uc, $id)),
+                        $data
                     ),
                     AAM_Core_API::maxLevel($data['capabilities']),
                     AAM_Core_API::getOption("aam-role-{$id}-expiration", '')
@@ -73,23 +73,33 @@ class AAM_Backend_Feature_Subject_Role {
      * @param type $count
      * @return string
      */
-    protected function prepareRowActions($count) {
-        $actions = array('manage');
+    protected function prepareRowActions($count, $roleId) {
+        $ui = AAM_Core_Request::post('ui', 'main');
+        $id = AAM_Core_Request::post('id');
         
-        if (current_user_can('aam_edit_roles')) {
-            $actions[] = 'edit';
+        if ($ui === 'principal') {
+            $subject = new AAM_Core_Subject_Role($roleId);
+            $object  = $subject->getObject('policy');
+            
+            $actions = array(($object->has($id) ? 'detach' : 'attach'));
         } else {
-            $actions[] = 'no-edit';
-        }
-        if (current_user_can('aam_create_roles')) {
-            $actions[] = 'clone';
-        } else {
-            $actions[] = 'no-clone';
-        }
-        if (current_user_can('aam_delete_roles') && !$count) {
-            $actions[] = 'delete';
-        } else {
-            $actions[] = 'no-delete';
+            $actions = array('manage');
+
+            if (current_user_can('aam_edit_roles')) {
+                $actions[] = 'edit';
+            } else {
+                $actions[] = 'no-edit';
+            }
+            if (current_user_can('aam_create_roles')) {
+                $actions[] = 'clone';
+            } else {
+                $actions[] = 'no-clone';
+            }
+            if (current_user_can('aam_delete_roles') && !$count) {
+                $actions[] = 'delete';
+            } else {
+                $actions[] = 'no-delete';
+            }
         }
         
         return $actions;

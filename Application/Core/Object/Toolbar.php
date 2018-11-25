@@ -52,11 +52,14 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object {
     public function has($item, $both = false) {
         $options = $this->getOption();
         
+        // Policy API
+        $api = AAM::api();
+        
         // Step #1. Check if toolbar item is directly restricted
-        $direct = !empty($options[$item]);
+        $direct = !empty($options[$item]) || ($api->isAllowed("Toolbar:{$item}") === false);
         
         // Step #2. Check if whole branch is restricted
-        $branch = ($both && !empty($options['toolbar-' . $item]));
+        $branch = ($both && (!empty($options['toolbar-' . $item]) || ($api->isAllowed("Toolbar:toolbar-{$item}") === false)));
         
         return $direct || $branch;
     }

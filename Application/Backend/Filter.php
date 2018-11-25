@@ -61,38 +61,7 @@ class AAM_Backend_Filter {
             add_filter('views_users', array($this, 'filterViews'));
         }
         
-        // Check if user has ability to perform certain task based on provided
-        // capability and meta data
-        add_filter(
-            'user_has_cap', 
-            array(AAM_Shared_Manager::getInstance(), 'userHasCap'), 
-            999, 
-            3
-        );
-        
         AAM_Backend_Authorization::bootstrap(); //bootstrap backend authorization
-        
-        //check URI
-        $this->checkURIAccess();
-    }
-    
-    /**
-     * 
-     */
-    protected function checkURIAccess() {
-        $uri    = wp_parse_url(AAM_Core_Request::server('REQUEST_URI'));
-        $object = AAM::api()->getUser()->getObject('uri');
-        $params = array();
-        
-        if (isset($uri['query'])) {
-            parse_str($uri['query'], $params);
-        }
-        
-        if ($match = $object->findMatch($uri['path'], $params)) {
-            if ($match['type'] !== 'allow') {
-                AAM::api()->redirect($match['type'], $match['action']);
-            }
-        }
     }
     
     /**

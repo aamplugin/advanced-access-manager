@@ -58,6 +58,9 @@ class AAM_Backend_Manager {
         //permalink manager
         add_filter('get_sample_permalink_html', array($this, 'getPermalinkHtml'), 10, 5);
         
+        //access policy save
+        add_filter('wp_insert_post_data', array($this, 'filterPostData'), 10, 2);
+        
         //screen options & contextual help hooks
         add_filter('screen_options_show_screen', array($this, 'screenOptions'));
         add_filter('contextual_help', array($this, 'helpOptions'), 10, 3);
@@ -79,6 +82,9 @@ class AAM_Backend_Manager {
             //register custom access control metabox
             add_action('add_meta_boxes', array($this, 'metabox'));
         }
+        
+        //register custom access control metabox
+        add_action('add_meta_boxes', array($this, 'registerPolicyDocMetabox'));
         
         //manager AAM Ajax Requests
         add_action('wp_ajax_aam', array($this, 'ajax'));
@@ -131,6 +137,36 @@ class AAM_Backend_Manager {
                 'AAM requires PHP version 5.3.0 or higher to function properly'
             );
         }
+    }
+    
+    /**
+     * 
+     * @param type $data
+     * @return type
+     */
+    public function filterPostData($data) {
+        if (isset($data['post_type']) && ($data['post_type'] === 'aam_policy')) {
+            $data['post_content'] = trim(filter_input(INPUT_POST, 'aam-policy'));
+            
+            if (empty($data['post_content'])) {
+                $data['post_content'] = <<<EOT
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [],
+            "Action": []
+        }
+    ]
+}
+EOT;
+            }
+            
+            AAM_Core_API::clearCache();
+        }
+        
+        return $data;
     }
     
     /**
@@ -449,11 +485,17 @@ class AAM_Backend_Manager {
      * 
      */
     public function metabox() {
+        global $post;
+        
         $frontend = AAM_Core_Config::get('core.settings.frontendAccessControl', true);
         $backend  = AAM_Core_Config::get('core.settings.backendAccessControl', true);
         $api      = AAM_Core_Config::get('core.settings.apiAccessControl', true);
         
-        if (($frontend || $backend || $api) && AAM::getUser()->hasCapability('aam_manage_posts')) {
+        $needAC  = ($frontend || $backend || $api);
+        $allowed = AAM::getUser()->hasCapability('aam_manage_posts');
+        $notASP  = (!is_a($post, 'WP_Post') || ($post->post_type !== 'aam_policy'));
+        
+        if ($needAC && $allowed && $notASP) {
             add_meta_box(
                 'aam-acceess-manager', 
                 __('Access Manager', AAM_KEY) . ' <small style="color:#999999;">by AAM plugin</small>', 
@@ -462,6 +504,52 @@ class AAM_Backend_Manager {
                 'advanced',
                 'high'
             );
+        }
+    }
+    
+    /**
+     * 
+     * @global WP_Post $post
+     */
+    public function registerPolicyDocMetabox() {
+         global $post;
+         
+        if (is_a($post, 'WP_Post') && ($post->post_type === 'aam_policy')) {
+            add_meta_box(
+                'aam-policy', 
+                __('Policy Document', AAM_KEY), 
+                array($this, 'renderPolicyMetabox'),
+                null,
+                'normal',
+                'high'
+            );
+            add_meta_box(
+                'aam-policy-attached', 
+                __('Policy Principals', AAM_KEY), 
+                array($this, 'renderPolicyPrincipalMetabox'),
+                null,
+                'side'
+            );
+        }
+    }
+    
+    /**
+     * 
+     * @global WP_Post $post
+     */
+    public function renderPolicyMetabox() {
+        global $post;
+        
+        if (is_a($post, 'WP_Post')) {
+            echo AAM_Backend_View::getInstance()->renderPolicyMetabox($post);
+        }
+    }
+    
+    public function renderPolicyPrincipalMetabox() {
+        global $post;
+        
+        if (is_a($post, 'WP_Post')) {
+            echo AAM_Backend_View::getInstance()->renderPolicyPrincipalMetabox($post);
         }
     }
     
@@ -648,7 +736,7 @@ class AAM_Backend_Manager {
     public function printJavascript() {
         if (AAM::isAAM()) {
             wp_enqueue_script('aam-vendor', AAM_MEDIA . '/js/vendor.js');
-            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam.js');
+            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.7.js');
             
             //add plugin localization
             $this->printLocalization('aam-main');
@@ -691,6 +779,7 @@ class AAM_Backend_Manager {
         $locals = array(
             'nonce'    => wp_create_nonce('aam_ajax'),
             'ajaxurl'  => admin_url('admin-ajax.php'),
+            'ui'       => AAM_Core_Request::get('aamframe', 'main'),
             'url' => array(
                 'site'     => admin_url('index.php'),
                 'editUser' => admin_url('user-edit.php'),
@@ -710,10 +799,6 @@ class AAM_Backend_Manager {
                 'create_users' => current_user_can('create_users')
             )
         );
-        
-        if (AAM_Core_Request::get('aamframe')) {
-            $locals['ui'] = 'post';
-        }
         
         wp_localize_script($localKey, 'aamLocal', $locals);
     }
@@ -757,6 +842,15 @@ class AAM_Backend_Manager {
             'aam', 
             array($this, 'renderPage'), 
             AAM_MEDIA . '/active-menu.svg'
+        );
+        
+        // Access policy page
+        add_submenu_page(
+            'aam', 
+            'Access Policies', 
+            'Access Policies', 
+            AAM_Core_Config::get('policy.capability', 'aam_manage_policy'), 
+            'edit.php?post_type=aam_policy'
         );
     }
     

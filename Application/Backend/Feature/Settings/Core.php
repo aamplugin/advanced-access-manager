@@ -36,7 +36,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
             'core.settings.editCapabilities' => array(
                 'title' => __('Edit/Delete Capabilities', AAM_KEY),
                 'descr' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
-                'value' => AAM_Core_Config::get('core.settings.editCapabilities', false)
+                'value' => AAM_Core_Config::get('core.settings.editCapabilities', true)
             ),
             'core.settings.backendAccessControl' => array(
                 'title' => __('Backend Access Control', AAM_KEY),

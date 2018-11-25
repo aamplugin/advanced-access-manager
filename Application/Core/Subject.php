@@ -74,7 +74,7 @@ abstract class AAM_Core_Subject {
         //retrieve and set subject itself
         $this->setSubject($this->retrieveSubject());
     }
-
+    
     /**
      * Trigger Subject native methods
      *
@@ -238,7 +238,7 @@ abstract class AAM_Core_Subject {
         $id = (is_scalar($id) ? $id : 'none'); //prevent from any surprises
         
         //check if there is an object with specified ID
-        if (!isset($this->_objects[$type][$id]) || ($type === 'cache')) {
+        if (!isset($this->_objects[$type][$id])) {
             $classname = 'AAM_Core_Object_' . ucfirst($type);
             
             if (class_exists($classname)) {

@@ -945,6 +945,10 @@ input[type=radio]:checked + label:before {
     margin-bottom: 20px !important;
 }
 
+.aam-outer-top-xxs {
+    margin-top: 10px;
+}
+
 .aam-info-modal, .aam-info-modal p, .aam-info-modal ul {
     font-size: 1.1em;
     -moz-hyphens: auto;
@@ -1057,6 +1061,15 @@ input[type=radio]:checked + label:before {
     color: rgba(220, 220, 220, 0.8);
 }
 
+.json-editor-blackbord {
+    background: #333333 !important;
+    border-radius: 0;
+    padding: 10px 25px;
+    border: 0;
+    max-height: 60vh;
+    overflow-y: scroll;
+}
+
 .aam-current-subject {
     background-color: #337ab7;
     padding: 5px 15px 4px 10px;
@@ -1164,14 +1177,12 @@ input[type=radio]:checked + label:before {
 /* GUTTER */
 
 .CodeMirror-gutters {
-  border-right: 1px solid #ddd;
-  background-color: #f7f7f7;
   white-space: nowrap;
 }
 .CodeMirror-linenumbers {}
 .CodeMirror-linenumber {
-  padding: 0 3px 0 5px;
-  min-width: 20px;
+  padding: 0 3px 0 0px;
+  min-width: 15px;
   text-align: right;
   color: #999;
   white-space: nowrap;
@@ -1394,6 +1405,9 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #a22;}
   -webkit-tap-highlight-color: transparent;
   -webkit-font-variant-ligatures: contextual;
   font-variant-ligatures: contextual;
+}
+#policy-model .CodeMirror pre {
+    padding-left: 20px;
 }
 .CodeMirror-wrap pre {
   word-wrap: break-word;

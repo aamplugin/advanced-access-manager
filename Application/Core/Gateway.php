@@ -92,6 +92,22 @@ final class AAM_Core_Gateway {
     }
     
     /**
+     * Check if current user has access to specified resource
+     * 
+     * Apply all access/security policies and identify if user has access to specified
+     * resource.
+     * 
+     * @param string $resource
+     * @param string $action
+     * 
+     * @return mixed Boolean true|false if explicit access is defined or null if no
+     *               exact match found
+     */
+    public function isAllowed($resource, $action = null) {
+        return AAM::api()->getUser()->getObject('policy')->isAllowed($resource, $action);
+    }
+    
+    /**
      * Redirect request
      * 
      * @param string $type

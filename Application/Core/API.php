@@ -357,6 +357,7 @@ final class AAM_Core_API {
      */
     public static function redirect($rule, $args = null) {
         $path = wp_parse_url($rule);
+        
         if ($path && !empty($path['host'])) {
             wp_redirect($rule, 307); exit;
         } elseif (preg_match('/^[\d]+$/', $rule)) {

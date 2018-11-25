@@ -73,21 +73,50 @@
                             <?php if (current_user_can('aam_manage_visitors')) { ?>
                             <div role="tabpanel" class="tab-pane<?php echo (!$active++ ? ' active' : ''); ?>" id="visitor">
                                 <div class="visitor-message">
-                                    <span class="aam-bordered"><?php echo sprintf(__('Manage access to %s for visitors (any user that is not authenticated)', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
-                                    <button class="btn btn-primary btn-block" id="manage-visitor"><i class="icon-cog"></i> <?php echo __('Manage Visitors', AAM_KEY); ?></button>
+                                    <?php if (AAM_Core_Request::get('aamframe') !== 'principal') { ?>
+                                        <span class="aam-bordered"><?php echo sprintf(__('Manage access to %s for visitors (any user that is not authenticated)', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
+                                        <button class="btn btn-primary btn-block" id="manage-visitor"><i class="icon-cog"></i> <?php echo __('Manage Visitors', AAM_KEY); ?></button>
+                                    <?php } else { ?>
+                                        <span class="aam-bordered"><?php echo __('Attach current access &amp; security policy to visitors (any user that is not authenticated)', AAM_KEY); ?>.</span>
+                                        <?php 
+                                            $visitor = new AAM_Core_Subject_Visitor();
+                                            $hasPolicy = $visitor->getObject('policy')->has($object->id);
+                                        ?>
+                                        <?php if ($hasPolicy) { ?>
+                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="1"><?php echo __('Detach Policy From Visitors', AAM_KEY); ?></button>
+                                        <?php } else { ?>
+                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="0"><?php echo __('Attach Policy To Visitors', AAM_KEY); ?></button>
+                                        <?php } ?>
+                                    <?php } ?>
                                 </div>
                             </div>
                             <?php } ?>
                             <?php if (current_user_can('aam_manage_default')) { ?>
                             <div role="tabpanel" class="tab-pane<?php echo (!$active++ ? ' active' : ''); ?>" id="default">
                                 <div class="visitor-message">
-                                    <span class="aam-bordered"><?php echo sprintf(__('Manage default access to %s for all users, roles and visitor. This includes Administrator role and yourself', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
-                                    <?php if (defined('AAM_PLUS_PACKAGE')) { ?>
-                                    <button class="btn btn-danger btn-block" id="manage-default"><i class="icon-cog"></i> <?php echo __('Manage Default Access', AAM_KEY); ?></button>
+                                    <?php if (AAM_Core_Request::get('aamframe') !== 'principal') { ?>
+                                        <span class="aam-bordered"><?php echo sprintf(__('Manage default access to %s for all users, roles and visitor. This includes Administrator role and yourself', AAM_KEY), '<b>' . ($object->type == 'post' ? $object->post->post_title : $object->term->name) . '</b>'); ?>.</span>
                                     <?php } else { ?>
-                                    <p class="aam-notification">
-                                        <?php echo AAM_Backend_View_Helper::preparePhrase('This feature is allowed only with [AAM Plus Package] extension.', 'b'); ?>
-                                    </p>
+                                        <span class="aam-bordered"><?php echo __('Attach current access &amp; security policy to all users, roles and visitors. This includes Administrator role and yourself', AAM_KEY); ?>.</span>
+                                    <?php } ?>
+                                    <?php if (defined('AAM_PLUS_PACKAGE')) { ?>
+                                        <?php if (AAM_Core_Request::get('aamframe') !== 'principal') { ?>
+                                            <button class="btn btn-danger btn-block" id="manage-default"><i class="icon-cog"></i> <?php echo __('Manage Default Access', AAM_KEY); ?></button>
+                                        <?php } else { ?>
+                                            <?php 
+                                                $default = new AAM_Core_Subject_Default();
+                                                $hasPolicy = $default->getObject('policy')->has($object->id);
+                                            ?>
+                                            <?php if ($hasPolicy) { ?>
+                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="1"><?php echo __('Detach Policy From Everybody', AAM_KEY); ?></button>
+                                            <?php } else { ?>
+                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="0"><?php echo __('Attach Policy To Everybody', AAM_KEY); ?></button>
+                                            <?php } ?>
+                                        <?php } ?>
+                                    <?php } else { ?>
+                                        <p class="aam-notification">
+                                            <?php echo AAM_Backend_View_Helper::preparePhrase('This feature is allowed only with [AAM Plus Package] extension.', 'b'); ?>
+                                        </p>
                                     <?php } ?>
                                 </div>
                             </div>
@@ -97,6 +126,7 @@
                 </div>
             </div>
             
+            <?php if (AAM_Core_Request::get('aamframe') !== 'principal') { ?>
             <div class="col-sm-8" id="post-content">
                 <div class="aam-overwrite hidden" id="post-overwritten">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
@@ -122,10 +152,16 @@
                 
                 <?php require AAM_BASEDIR . '/Application/Backend/phtml/partial/post-advanced-settings.phtml'; ?>
             </div>
+            <?php } ?>
         </div>
         
+        <?php if (AAM_Core_Request::get('aamframe') !== 'principal') { ?>
         <p style="margin: 5px; text-align: left; font-size: 0.9em;">
            <b>Please help us</b> and submit your review <a href="https://wordpress.org/support/plugin/advanced-access-manager/reviews/" target="_blank"><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i><i class="icon-star"></i></a>
         </p>
+        <?php } ?>
+        
+        <input type="hidden" id="object-id" value="<?php echo $object->id; ?>" />
+        
     </body>
 </html>

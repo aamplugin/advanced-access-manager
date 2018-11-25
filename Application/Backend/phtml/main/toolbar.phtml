@@ -39,12 +39,22 @@
 
                             <div id="toolbar-<?php echo $branch->id; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="toolbar-<?php echo $branch->id; ?>-heading">
                                 <div class="panel-body">
+                                    <div class="row aam-inner-tab">
+                                        <div class="col-xs-12 text-center">
+                                            <small class="aam-menu-capability"><?php echo __('Menu ID:', AAM_KEY); ?> <b><?php echo $branch->id; ?></b></small>
+                                        </div>
+                                    </div>
+                                    <hr class="aam-divider" />
                                     <?php if (!empty($branch->children)) { ?>
                                         <div class="row aam-inner-tab">
                                             <?php echo ($object->has('toolbar-' . $branch->id) ? '<div class="aam-lock"></div>' : ''); ?>
                                             <?php foreach($this->getAllChildren($branch) as $child) { ?>
                                                 <div class="col-xs-12 aam-submenu-item">
-                                                    <label for="toolbar-<?php echo $child->id; ?>"><u><?php echo $this->normalizeTitle($child); ?></u><small class="aam-menu-capability"><?php echo str_replace(site_url(), '', $child->href); ?></b></small></label>
+                                                    <label for="toolbar-<?php echo $child->id; ?>">
+                                                        <u><?php echo $this->normalizeTitle($child); ?></u>
+                                                        <small class="aam-menu-capability"><?php echo __('URI:', AAM_KEY); ?> <b><?php echo str_replace(site_url(), '', $child->href); ?></b></small>
+                                                        <small class="aam-menu-capability"><?php echo __('ID:', AAM_KEY); ?> <b><?php echo esc_js($child->id); ?></b></small>
+                                                    </label>
                                                     <input type="checkbox" class="aam-checkbox-danger" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>"<?php echo ($object->has($child->id) ? ' checked="checked"' : ''); ?> />
                                                     <label for="toolbar-<?php echo $child->id; ?>" data-toggle="tooltip" title="<?php echo ($object->has($child->id) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                                 </div>

@@ -211,25 +211,33 @@ class AAM_Backend_Feature_Subject_User {
      */
     protected function prepareRowActions(AAM_Core_Subject_User $user) {
         if ($this->isAllowed($user) || ($user->ID == get_current_user_id())) {
-            $actions = array('manage');
-            
-            if (AAM_Core_Config::get('core.settings.secureLogin', true) 
-                    && current_user_can('aam_toggle_users')) {
-                $actions[] = ($user->user_status ? 'unlock' : 'lock');
-            }
-            
-            if (current_user_can('edit_users')) {
-                $actions[] = 'edit';
-                $actions[] = 'ttl';
+            $ui = AAM_Core_Request::post('ui', 'main');
+            $id = AAM_Core_Request::post('id');
+        
+            if ($ui === 'principal') {
+                $object = $user->getObject('policy');
+                $actions = array(($object->has($id) ? 'detach' : 'attach'));
             } else {
-                $actions[] = 'no-edit';
-                $actions[] = 'no-ttl';
-            }
-            
-            if (current_user_can('aam_switch_users')) {
-                $actions[] = 'switch';
-            } else {
-                $actions[] = 'no-switch';
+                $actions = array('manage');
+
+                if (AAM_Core_Config::get('core.settings.secureLogin', true) 
+                        && current_user_can('aam_toggle_users')) {
+                    $actions[] = ($user->user_status ? 'unlock' : 'lock');
+                }
+
+                if (current_user_can('edit_users')) {
+                    $actions[] = 'edit';
+                    $actions[] = 'ttl';
+                } else {
+                    $actions[] = 'no-edit';
+                    $actions[] = 'no-ttl';
+                }
+
+                if (current_user_can('aam_switch_users')) {
+                    $actions[] = 'switch';
+                } else {
+                    $actions[] = 'no-switch';
+                }
             }
         } else {
             $actions = array();

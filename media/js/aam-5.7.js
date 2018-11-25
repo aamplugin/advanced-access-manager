@@ -56,6 +56,63 @@
     
     /**
      * 
+     * @param {type} id
+     * @param {type} btn
+     * @returns {undefined}
+     */
+    function applyPolicy(subject, policyId, effect, btn) {
+        //show indicator
+        if (typeof btn !== 'function') {
+            $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
+        }
+
+        getAAM().queueRequest(function () {
+            $.ajax(getLocal().ajaxurl, {
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'aam',
+                    sub_action: 'Main_Policy.save',
+                    subject: subject.type,
+                    subjectId: subject.id,
+                    _ajax_nonce: getLocal().nonce,
+                    id: policyId,
+                    effect: effect
+                },
+                success: function (response) {
+                    if (typeof btn === 'function') {
+                        btn(response);
+                    } else {
+                        if (response.status === 'success') {
+                            if (effect) {
+                                $(btn).attr('class', 'aam-row-action text-success icon-check');
+                            } else {
+                                $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
+                            }
+                        } else {
+                            if (effect) {
+                                getAAM().notification(
+                                    'danger',
+                                    getAAM().__('Failed to apply policy changes')
+                                );
+                                $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
+                            } else {
+                                $(btn).attr('class', 'aam-row-action text-success icon-check');
+                            }
+                        }
+                    }
+                },
+                error: function () {
+                    getAAM().notification(
+                        'danger', getAAM().__('Application Error')
+                    );
+                }
+            });
+        });
+    }
+    
+    /**
+     * 
      * @returns {undefined}
      */
     function UI() {
@@ -151,7 +208,11 @@
                     data: {
                         action: 'aam',
                         sub_action: 'Subject_Role.getTable',
-                        _ajax_nonce: getLocal().nonce
+                        _ajax_nonce: getLocal().nonce,
+                        subject: getAAM().getSubject().type,
+                        subjectId: getAAM().getSubject().id,
+                        ui: getLocal().ui,
+                        id: $('#object-id').val()
                     }
                 },
                 columnDefs: [
@@ -165,7 +226,7 @@
                     infoFiltered: ''
                 },
                 initComplete: function () {
-                    if (!getAAM().isUI() && getLocal().caps.create_roles) {
+                    if (getAAM().isUI('main') && getLocal().caps.create_roles) {
                         var create = $('<a/>', {
                             'href': '#',
                             'class': 'btn btn-primary'
@@ -225,7 +286,7 @@
                                         $('i.icon-cog', container).attr(
                                             'class', 'aam-row-action icon-cog text-muted'
                                         );
-                                        if (!getAAM().isUI()) {
+                                        if (getAAM().isUI('main')) {
                                             $('i.icon-cog', container).attr(
                                                 'class', 'aam-row-action icon-spin4 animate-spin'
                                             );
@@ -251,7 +312,7 @@
                                 break;
 
                             case 'edit':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-pencil text-warning'
                                     }).bind('click', function () {
@@ -274,7 +335,7 @@
                                 break;
                                 
                             case 'no-edit':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-pencil text-muted'
                                     }));
@@ -282,7 +343,7 @@
                                 break;
 
                             case 'clone':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-clone text-success'
                                     }).bind('click', function () {
@@ -298,7 +359,7 @@
                                 break;
                                 
                             case 'no-clone':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-clone text-muted'
                                     }));
@@ -306,7 +367,7 @@
                                 break;
 
                             case 'delete':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-trash-empty text-danger'
                                     }).bind('click', {role: data}, function (event) {
@@ -327,15 +388,51 @@
                                 break;
                                 
                             case 'no-delete':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-trash-empty text-muted'
                                     }));
                                 }
                                 break;
+                                
+                            case 'attach':
+                                if (getAAM().isUI('principal')) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-check-empty'
+                                    }).bind('click', function() {
+                                        applyPolicy(
+                                            {
+                                                type: 'role',
+                                                id: data[0]
+                                            },
+                                            $('#object-id').val(),
+                                            1,
+                                            this
+                                        );
+                                    }));
+                                }
+                                break;
+                                
+                            case 'detach':
+                                if (getAAM().isUI('principal')) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-check text-success'
+                                    }).bind('click', function() {
+                                        applyPolicy(
+                                            {
+                                                type: 'role',
+                                                id: data[0]
+                                            },
+                                            $('#object-id').val(),
+                                            0,
+                                            this
+                                        );
+                                    }));
+                                }
+                                break;
 
                             default:
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     getAAM().triggerHook('role-action', {
                                         container: container,
                                         action   : action,
@@ -664,6 +761,10 @@
                        params.sub_action = 'Subject_User.getTable';
                        params._ajax_nonce = getLocal().nonce;
                        params.role = $('#user-list-filter').val();
+                       params.subject = getAAM().getSubject().type;
+                       params.subjectId = getAAM().getSubject().id;
+                       params.ui = getLocal().ui;
+                       params.id = $('#object-id').val();
                        
                        return params;
                     }
@@ -679,7 +780,7 @@
                     infoFiltered: ''
                 },
                 initComplete: function () {
-                    if (!getAAM().isUI() && getLocal().caps.create_users) {
+                    if (getAAM().isUI('main') && getLocal().caps.create_users) {
                         var create = $('<a/>', {
                             'href': '#',
                             'class': 'btn btn-primary'
@@ -759,7 +860,7 @@
                                         );
                                         $('i.icon-cog', container).attr('class', 'aam-row-action icon-cog text-muted');
 
-                                        if (!getAAM().isUI()) {
+                                        if (getAAM().isUI('main')) {
                                             $('i.icon-cog', container).attr('class', 'aam-row-action icon-spin4 animate-spin');
                                             getAAM().fetchContent('main');
                                             $('i.icon-spin4', container).attr('class', 'aam-row-action icon-cog text-muted');
@@ -781,7 +882,7 @@
                                 break;
                                 
                             case 'ttl':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-clock text-' + (data[5] ? 'danger' : 'warning')
                                     }).bind('click', function () {
@@ -816,7 +917,7 @@
                                 break;
                                 
                             case 'no-ttl':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-clock text-muted'
                                     }));
@@ -824,13 +925,13 @@
                                 break;
                                 
                             case 'edit':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-pencil text-info'
                                     }).bind('click', function () {
                                         window.open(
-                                                getLocal().url.editUser + '?user_id=' + data[0], '_blank'
-                                                );
+                                            getLocal().url.editUser + '?user_id=' + data[0], '_blank'
+                                        );
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Edit User')
@@ -839,7 +940,7 @@
                                 break;
                                 
                             case 'no-edit':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-pencil text-muted'
                                     }));
@@ -847,7 +948,7 @@
                                 break;
 
                             case 'lock':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-lock-open-alt text-warning'
                                     }).bind('click', function () {
@@ -860,7 +961,7 @@
                                 break;
 
                             case 'unlock':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-lock text-danger'
                                     }).bind('click', function () {
@@ -873,7 +974,7 @@
                                 break;
 
                             case 'switch':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-exchange text-success'
                                     }).bind('click', function () {
@@ -886,9 +987,45 @@
                                 break;
                                 
                             case 'no-switch':
-                                if (!getAAM().isUI()) {
+                                if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
                                         'class': 'aam-row-action icon-exchange text-muted'
+                                    }));
+                                }
+                                break;
+                                
+                            case 'attach':
+                                if (getAAM().isUI('principal')) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-check-empty'
+                                    }).bind('click', function() {
+                                        applyPolicy(
+                                            {
+                                                type: 'user',
+                                                id: data[0]
+                                            },
+                                            $('#object-id').val(),
+                                            1,
+                                            this
+                                        );
+                                    }));
+                                }
+                                break;
+                                
+                            case 'detach':
+                                if (getAAM().isUI('principal')) {
+                                    $(container).append($('<i/>', {
+                                        'class': 'aam-row-action icon-check text-success'
+                                    }).bind('click', function() {
+                                        applyPolicy(
+                                            {
+                                                type: 'user',
+                                                id: data[0]
+                                            },
+                                            $('#object-id').val(),
+                                            0,
+                                            this
+                                        );
                                     }));
                                 }
                                 break;
@@ -1055,7 +1192,7 @@
                     getAAM().setSubject('visitor', null, getAAM().__('Anonymous'), 0);
                     $('i.icon-cog', $(this)).attr('class', 'icon-spin4 animate-spin');
 
-                    if (!getAAM().isUI()) {
+                    if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
                     } else {
@@ -1071,6 +1208,42 @@
                             );
                         });
                     }
+                });
+                
+                $('#attach-policy-visitor').bind('click', function() {
+                    var has = parseInt($(this).attr('data-has')) ? true : false;
+                    var effect = (has ? 0 : 1);
+                    var btn = $(this);
+                    
+                    btn.text(getAAM().__('Processing...'));
+                    
+                    applyPolicy(
+                        {
+                            type: 'visitor'
+                        },
+                        $('#object-id').val(),
+                        effect,
+                        function(response) {
+                            if (response.status === 'success') {
+                                if (effect) {
+                                    btn.text(getAAM().__('Detach Policy From Visitors'));
+                                } else {
+                                    btn.text(getAAM().__('Attach Policy To Visitors'));
+                                }
+                                btn.attr('data-has', effect);
+                            } else {
+                                getAAM().notification(
+                                    'danger',
+                                    getAAM().__('Failed to apply policy changes')
+                                );
+                                if (effect) {
+                                    btn.text(getAAM().__('Attach Policy To Visitors'));
+                                } else {
+                                    btn.text(getAAM().__('Detach Policy From Visitors'));
+                                }
+                            }
+                        }
+                    );
                 });
             });
 
@@ -1091,7 +1264,7 @@
 
                     getAAM().setSubject('default', null, getAAM().__('All Users, Roles and Visitor'), 0);
                     $('i.icon-cog', $(this)).attr('class', 'icon-spin4 animate-spin');
-                    if (!getAAM().isUI()) {
+                    if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
                     } else {
@@ -1108,8 +1281,151 @@
                         });
                     }
                 });
+                
+                $('#attach-policy-default').bind('click', function() {
+                    var has = parseInt($(this).attr('data-has')) ? true : false;
+                    var effect = (has ? 0 : 1);
+                    var btn = $(this);
+                    
+                    btn.text(getAAM().__('Processing...'));
+                    
+                    applyPolicy(
+                        {
+                            type: 'default'
+                        },
+                        $('#object-id').val(),
+                        effect,
+                        function(response) {
+                            if (response.status === 'success') {
+                                if (effect) {
+                                    btn.text(getAAM().__('Detach Policy From Everybody'));
+                                } else {
+                                    btn.text(getAAM().__('Attach Policy To Everybody'));
+                                }
+                                btn.attr('data-has', effect);
+                            } else {
+                                getAAM().notification(
+                                    'danger',
+                                    getAAM().__('Failed to apply policy changes')
+                                );
+                                if (effect) {
+                                    btn.text(getAAM().__('Attach Policy To Everybody'));
+                                } else {
+                                    btn.text(getAAM().__('Detach Policy From Everybody'));
+                                }
+                            }
+                        }
+                    );
+                });
             });
 
+        })(jQuery);
+        
+        /**
+         * Policy Interface
+         * 
+         * @param {jQuery} $
+         * 
+         * @returns {void}
+         */
+        (function ($) {
+            function initialize() {
+                var container = '#policy-content';
+
+                if ($(container).length) {
+                    //reset button
+                    $('#policy-reset').bind('click', function () {
+                        getAAM().reset('policy', $(this));
+                    });
+                    
+                    $('#policy-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        dom: 'ftrip',
+                        pagingType: 'simple',
+                        processing: true,
+                        stateSave: true,
+                        serverSide: false,
+                        ajax: {
+                            url: getLocal().ajaxurl,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Policy.getTable',
+                                _ajax_nonce: getLocal().nonce,
+                                subject: getAAM().getSubject().type,
+                                subjectId: getAAM().getSubject().id
+                            }
+                        },
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search Policy'),
+                            info: getAAM().__('_TOTAL_ Policies'),
+                            infoFiltered: ''
+                        },
+                        columnDefs: [
+                            {visible: false, targets: [0,3]}
+                        ],
+                        createdRow: function (row, data) {
+                            var actions = data[2].split(',');
+
+                            var container = $('<div/>', {'class': 'aam-row-actions'});
+                            $.each(actions, function (i, action) {
+                                switch (action) {
+                                    case 'assign':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-check-empty'
+                                        }).bind('click', function () {
+                                            applyPolicy({
+                                                type: getAAM().getSubject().type,
+                                                id: getAAM().getSubject().id
+                                            }, data[0], 1, this);
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Apply Policy')
+                                        }));
+                                        break;
+
+                                    case 'unassign':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-success icon-check'
+                                        }).bind('click', function () {
+                                            applyPolicy({
+                                                type: getAAM().getSubject().type,
+                                                id: getAAM().getSubject().id
+                                            }, data[0], 0, this);
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Revoke Policy')
+                                        }));
+                                        break;
+                                        
+                                    case 'edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-warning'
+                                        }).bind('click', function () {
+                                            window.open(data[3], '_blank');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Edit Policy')
+                                        }));
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            });
+                            $('td:eq(1)', row).html(container);
+
+                            $('td:eq(0)', row).html(data[1]);
+                        }
+                    });
+                }
+            }
+            
+            getAAM().addHook('init', initialize);
+            
         })(jQuery);
 
 
@@ -1565,6 +1881,7 @@
                     }
                 });
             }
+            
             /**
              * 
              * @returns {undefined}
@@ -1618,6 +1935,18 @@
                                             'class': 'aam-row-action text-success icon-check'
                                         }).bind('click', function () {
                                             save(data[0], this);
+                                        }));
+                                        break;
+                                        
+                                    case 'no-unchecked':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-check-empty'
+                                        }));
+                                        break;
+
+                                    case 'no-checked':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-check'
                                         }));
                                         break;
 
@@ -1756,11 +2085,10 @@
                                 },
                                 success: function (response) {
                                     if (response.status === 'success') {
-                                        $('#edit-capability-modal').modal('hide');
                                         $('#capability-list').DataTable().ajax.reload();
                                     } else {
                                         getAAM().notification(
-                                            'danger', getAAM().__('Failed to update capability')
+                                            'danger', response.message
                                         );
                                     }
                                 },
@@ -1768,6 +2096,7 @@
                                     getAAM().notification('danger', getAAM().__('Application error'));
                                 },
                                 complete: function () {
+                                    $('#edit-capability-modal').modal('hide');
                                     $(btn).text(getAAM().__('Update Capability')).attr(
                                             'disabled', false
                                     );
@@ -1795,11 +2124,10 @@
                             },
                             success: function (response) {
                                 if (response.status === 'success') {
-                                    $('#delete-capability-modal').modal('hide');
                                     $('#capability-list').DataTable().ajax.reload();
                                 } else {
                                     getAAM().notification(
-                                        'danger', getAAM().__('Failed to delete capability')
+                                        'danger', response.message
                                     );
                                 }
                             },
@@ -1807,6 +2135,7 @@
                                 getAAM().notification('danger', getAAM().__('Application error'));
                             },
                             complete: function () {
+                                $('#delete-capability-modal').modal('hide');
                                 $(btn).text(getAAM().__('Delete Capability')).attr(
                                         'disabled', false
                                 );
@@ -2723,7 +3052,6 @@
              * @param {type} type
              * @param {type} route
              * @param {type} method
-             * @param {type} value
              * @param {type} btn
              * @returns {undefined}
              */
@@ -2892,7 +3220,7 @@
                     
                     //reset button
                     $('#uri-reset').bind('click', function () {
-                        aam.reset('uri', $(this));
+                        getAAM().reset('uri', $(this));
                     });
 
                     $('#uri-save-btn').bind('click', function(event) {
@@ -2903,38 +3231,40 @@
                         var val  = $('#uri-access-deny-' + type + '-value').val();
                         
                         if (uri && type) {
-                            $.ajax(aamLocal.ajaxurl, {
+                            $.ajax(getLocal().ajaxurl, {
                                 type: 'POST',
                                 dataType: 'json',
                                 data: {
                                     action: 'aam',
                                     sub_action: 'Main_Uri.save',
-                                    _ajax_nonce: aamLocal.nonce,
-                                    subject: aam.getSubject().type,
-                                    subjectId: aam.getSubject().id,
+                                    _ajax_nonce: getLocal().nonce,
+                                    subject: getAAM().getSubject().type,
+                                    subjectId: getAAM().getSubject().id,
                                     uri: uri,
                                     type: type,
                                     value: val,
                                     id: $('#uri-save-btn').attr('data-id')
                                 },
                                 beforeSend: function () {
-                                    $('#uri-save-btn').text(aam.__('Saving...')).attr('disabled', true);
+                                    $('#uri-save-btn').text(getAAM().__('Saving...')).attr('disabled', true);
                                 },
                                 success: function (response) {
                                     if (response.status === 'success') {
                                         $('#uri-list').DataTable().ajax.reload();
                                     } else {
-                                        aam.notification(
-                                            'danger', aam.__('Failed to save URI rule')
+                                        getAAM().notification(
+                                            'danger', getAAM().__('Failed to save URI rule')
                                         );
                                     }
                                 },
                                 error: function () {
-                                    aam.notification('danger', aam.__('Application error'));
+                                    getAAM().notification(
+                                        'danger', getAAM().__('Application error')
+                                    );
                                 },
                                 complete: function () {
                                     $('#uri-model').modal('hide');
-                                    $('#uri-save-btn').text(aam.__('Save')).attr('disabled', false);
+                                    $('#uri-save-btn').text(getAAM().__('Save')).attr('disabled', false);
                                 }
                             });
                         }
@@ -2943,33 +3273,33 @@
                     $('#uri-delete-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        $.ajax(aamLocal.ajaxurl, {
+                        $.ajax(getLocal().ajaxurl, {
                             type: 'POST',
                             dataType: 'json',
                             data: {
                                 action: 'aam',
                                 sub_action: 'Main_Uri.delete',
-                                _ajax_nonce: aamLocal.nonce,
-                                subject: aam.getSubject().type,
-                                subjectId: aam.getSubject().id,
+                                _ajax_nonce: getLocal().nonce,
+                                subject: getAAM().getSubject().type,
+                                subjectId: getAAM().getSubject().id,
                                 id: $('#uri-delete-btn').data('id')
                             },
                             beforeSend: function () {
-                                $('#uri-delete-btn').text(aam.__('Deleting...')).attr('disabled', true);
+                                $('#uri-delete-btn').text(getAAM().__('Deleting...')).attr('disabled', true);
                             },
                             success: function (response) {
                                 if (response.status === 'success') {
                                     $('#uri-list').DataTable().ajax.reload();
                                 } else {
-                                    aam.notification('danger', aam.__('Failed to delete URI rule'));
+                                    getAAM().notification('danger', getAAM().__('Failed to delete URI rule'));
                                 }
                             },
                             error: function () {
-                                aam.notification('danger', aam.__('Application error'));
+                                getAAM().notification('danger', getAAM().__('Application error'));
                             },
                             complete: function () {
                                 $('#uri-delete-model').modal('hide');
-                                $('#uri-delete-btn').text(aam.__('Delete')).attr('disabled', false);
+                                $('#uri-delete-btn').text(getAAM().__('Delete')).attr('disabled', false);
                             }
                         });
                     });
@@ -2983,21 +3313,21 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: aamLocal.ajaxurl,
+                            url: getLocal().ajaxurl,
                             type: 'POST',
                             dataType: 'json',
                             data: {
                                 action: 'aam',
                                 sub_action: 'Main_Uri.getTable',
-                                _ajax_nonce: aamLocal.nonce,
-                                subject: aam.getSubject().type,
-                                subjectId: aam.getSubject().id
+                                _ajax_nonce: getLocal().nonce,
+                                subject: getAAM().getSubject().type,
+                                subjectId: getAAM().getSubject().id
                             }
                         },
                         language: {
                             search: '_INPUT_',
-                            searchPlaceholder: aam.__('Search URI'),
-                            info: aam.__('_TOTAL_ URI(s)'),
+                            searchPlaceholder: getAAM().__('Search URI'),
+                            info: getAAM().__('_TOTAL_ URI(s)'),
                             infoFiltered: ''
                         },
                         columnDefs: [
@@ -3007,7 +3337,7 @@
                             var create = $('<a/>', {
                                 'href': '#',
                                 'class': 'btn btn-primary'
-                            }).html('<i class="icon-plus"></i> ' + aam.__('Create'))
+                            }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
                             .bind('click', function () {
                                 $('.form-clearable', '#uri-model').val('');
                                 $('.aam-uri-access-action').hide();
@@ -3037,7 +3367,7 @@
                                             $('#uri-model').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
-                                            'title': aam.__('Edit Rule')
+                                            'title': getAAM().__('Edit Rule')
                                         }));
                                         break;
 
@@ -3049,7 +3379,7 @@
                                             $('#uri-delete-model').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
-                                            'title': aam.__('Delete Rule')
+                                            'title': getAAM().__('Delete Rule')
                                         }));
                                         break;
 
@@ -3632,7 +3962,7 @@
             otype: type ? type[1] : null
         };
         
-        if (!getAAM().isUI() && (typeof aamEnvData !== 'undefined')) {
+    if (getAAM().isUI('main') && (typeof aamEnvData !== 'undefined')) {
             data.menu = aamEnvData.menu;
             data.submenu = aamEnvData.submenu;
             data.toolbar = aamEnvData.toolbar;
@@ -4001,10 +4331,11 @@
     
     /**
      * 
+     * @param {type} type
      * @returns {Boolean}
      */
-    AAM.prototype.isUI = function() {
-        return (typeof getLocal().ui !== 'undefined');
+    AAM.prototype.isUI = function(type) {
+        return (getLocal().ui === type);
     };
 
     /**

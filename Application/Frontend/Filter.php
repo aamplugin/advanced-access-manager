@@ -51,28 +51,6 @@ class AAM_Frontend_Filter {
         
         //get control over commenting stuff
         add_filter('comments_open', array($this, 'commentOpen'), 10, 2);
-        
-        //check URI
-        $this->checkURIAccess();
-    }
-    
-    /**
-     * 
-     */
-    protected function checkURIAccess() {
-        $uri    = wp_parse_url(AAM_Core_Request::server('REQUEST_URI'));
-        $object = AAM::api()->getUser()->getObject('uri');
-        $params = array();
-        
-        if (isset($uri['query'])) {
-            parse_str($uri['query'], $params);
-        }
-        
-        if ($match = $object->findMatch($uri['path'], $params)) {
-            if ($match['type'] !== 'allow') {
-                AAM::api()->redirect($match['type'], $match['action']);
-            }
-        }
     }
     
     /**
