@@ -240,7 +240,10 @@ final class AAM_Core_API {
     public static function capabilityExists($cap) {
         $caps = self::getAllCapabilities();
         
-        return (is_string($cap) && array_key_exists($cap, $caps) ? true : false);
+        $exists = array_key_exists($cap, $caps) ? true : false;
+        $policy = (AAM::api()->isAllowed("Capability:{$cap}") !== null);
+        
+        return (is_string($cap) && ($exists || $policy));
     }
     
     /**

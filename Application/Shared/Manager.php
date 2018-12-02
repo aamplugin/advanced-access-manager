@@ -439,8 +439,10 @@ class AAM_Shared_Manager {
         $uid        = (isset($args[2]) && is_numeric($args[2]) ? $args[2] : 0);
         
         // Apply policy first
-        if (AAM::api()->isAllowed("Capability:{$capability}") === true) {
-            $caps = $this->updateCapabilities($caps, $meta, true);
+        $effect = AAM::api()->isAllowed("Capability:{$capability}");
+        
+        if ($effect !== null) {
+            $caps = $this->updateCapabilities($caps, $meta, $effect);
         }
         
         switch($capability) {

@@ -270,7 +270,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         if ($object === 'capability') {
             $result = delete_user_option($this->getId(), self::AAM_CAPKEY);
         } else {
-            $result = $this->deleteOption($object);
+            $result = parent::resetObject($object);
         }
 
         return $result;

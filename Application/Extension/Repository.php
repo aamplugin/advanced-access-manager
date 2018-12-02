@@ -143,13 +143,15 @@ class AAM_Extension_Repository {
             $load    = $status && $version;
             
             if (!$version) {
-                AAM_Core_Console::add(AAM_Backend_View_Helper::preparePhrase(
-                    sprintf(
-                        __('[%s] was not loaded. Update extension to the latest version.', AAM_KEY),
-                        $list[$conf['id']]['title']
-                    ),
-                    'b'
-                ));
+                if (!empty($list[$conf['id']]['title'])) { // Any custom extensions
+                    AAM_Core_Console::add(AAM_Backend_View_Helper::preparePhrase(
+                        sprintf(
+                            __('[%s] was not loaded. Update extension to the latest version.', AAM_KEY),
+                            $list[$conf['id']]['title']
+                        ),
+                        'b'
+                    ));
+                }
             }
         } else { // TODO - Remove May 2019
             AAM_Core_Console::add(AAM_Backend_View_Helper::preparePhrase(

@@ -545,6 +545,10 @@ EOT;
         }
     }
     
+    /**
+     * 
+     * @global WP_Post $post
+     */
     public function renderPolicyPrincipalMetabox() {
         global $post;
         

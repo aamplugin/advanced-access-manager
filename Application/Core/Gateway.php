@@ -205,10 +205,10 @@ final class AAM_Core_Gateway {
                 // If merging preference is "deny" and at least one of the access
                 // settings is checked, then final merged array will have it set
                 // to checked
-                if ($preference === 'deny' && !empty($options[$key])) {
+                if (in_array($preference, array('deny', 'apply'), true) && !empty($options[$key])) {
                     $merged[$key] = $options[$key];
                     break;
-                } elseif ($preference === 'allow' && empty($options[$key])) {
+                } elseif (in_array($preference, array('allow', 'deprive'), true) && empty($options[$key])) {
                     $merged[$key] = 0;
                     break;
                 } elseif (isset($options[$key])) {

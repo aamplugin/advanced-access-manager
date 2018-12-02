@@ -253,12 +253,14 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         $caps     = AAM_Core_API::getAllCapabilities();
         
         foreach (array_keys($caps) as $cap) {
-            $response[] = array(
-                $cap,
-                $this->getGroup($cap),
-                $cap,
-                $this->prepareActionList($cap)
-            );
+            if (AAM::api()->isAllowed("Capability:{$cap}", 'AAM:list') !== false) {
+                $response[] = array(
+                    $cap,
+                    $this->getGroup($cap),
+                    $cap,
+                    $this->prepareActionList($cap)
+                );
+            }
         }
         
         return $response;

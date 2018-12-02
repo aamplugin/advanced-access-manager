@@ -299,6 +299,8 @@ abstract class AAM_Core_Subject {
      * @access public
      */
     public function resetObject($object) {
+        AAM_Core_API::clearCache();
+        
         return $this->deleteOption($object);
     }
     

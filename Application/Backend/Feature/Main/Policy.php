@@ -24,26 +24,6 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
     }
 
     /**
-     * 
-     * @return type
-     */
-    public function deletePolicy() {
-       $id = filter_input(INPUT_POST, 'id');
-       
-       $policies = AAM_Core_API::getOption('aam-policy-list', array(), 'site');
-       
-       if (isset($policies[$id])) {
-           unset($policies[$id]);
-       }
-
-       AAM_Core_API::updateOption('aam-policy-list', $policies, 'site');
-       
-       AAM_Core_API::clearCache();
-
-       return wp_json_encode(array('status' => 'success'));
-    }
-    
-    /**
      * Save post properties
      * 
      * @return string
@@ -51,16 +31,18 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
      * @access public
      */
     public function save() {
-        $subject = AAM_Backend_Subject::getInstance();
+        if (defined('AAM_PLUS_PACKAGE')) {
+            $subject = AAM_Backend_Subject::getInstance();
+            $id      = AAM_Core_Request::post('id');
+            $effect  = AAM_Core_Request::post('effect');
 
+            //clear cache
+            AAM_Core_API::clearCache();
 
-        $id     = AAM_Core_Request::post('id');
-        $effect = AAM_Core_Request::post('effect');
-
-        //clear cache
-        AAM_Core_API::clearCache();
-
-        $result = $subject->save($id, $effect, 'policy');
+            $result = $subject->save($id, $effect, 'policy');
+        } else {
+            $result = false;
+        }
 
         return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure')

@@ -1329,6 +1329,25 @@
          * @returns {void}
          */
         (function ($) {
+            
+            /**
+             * 
+             * @param {type} subject
+             * @param {type} id
+             * @param {type} effect
+             * @param {type} btn
+             * @returns {undefined}
+             */
+            function save(subject, id, effect, btn) {
+                $('#aam-policy-overwrite').show();
+                
+                applyPolicy(subject, id, effect, btn);
+            }
+            
+            /**
+             * 
+             * @returns {undefined}
+             */
             function initialize() {
                 var container = '#policy-content';
 
@@ -1377,7 +1396,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-muted icon-check-empty'
                                         }).bind('click', function () {
-                                            applyPolicy({
+                                            save({
                                                 type: getAAM().getSubject().type,
                                                 id: getAAM().getSubject().id
                                             }, data[0], 1, this);
@@ -1391,7 +1410,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-success icon-check'
                                         }).bind('click', function () {
-                                            applyPolicy({
+                                            save({
                                                 type: getAAM().getSubject().type,
                                                 id: getAAM().getSubject().id
                                             }, data[0], 0, this);
