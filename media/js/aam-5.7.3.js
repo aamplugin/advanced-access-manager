@@ -406,7 +406,7 @@
                                                 id: data[0]
                                             },
                                             $('#object-id').val(),
-                                            1,
+                                            ($(this).hasClass('icon-check-empty') ? 1 : 0),
                                             this
                                         );
                                     }));
@@ -424,7 +424,7 @@
                                                 id: data[0]
                                             },
                                             $('#object-id').val(),
-                                            0,
+                                            ($(this).hasClass('icon-check') ? 0 : 1),
                                             this
                                         );
                                     }));
@@ -513,10 +513,9 @@
                                     response.role.level
                                 );
                                 getAAM().fetchContent('main');
-                                $('#add-role-modal').modal('hide');
                             } else {
                                 getAAM().notification(
-                                        'danger', getAAM().__('Failed to add new role')
+                                    'danger', response.reason
                                 );
                             }
                         },
@@ -524,6 +523,7 @@
                             getAAM().notification('danger', getAAM().__('Application error'));
                         },
                         complete: function () {
+                            $('#add-role-modal').modal('hide');
                             $(_this).text(getAAM().__('Add Role')).attr('disabled', false);
                         }
                     });
@@ -742,6 +742,41 @@
                     }
                 });
             }
+            
+            /**
+             * 
+             * @param {type} id
+             * @param {type} expires
+             * @returns {undefined}
+             */
+            function generateJWT(id, expires) {
+                $.ajax(getLocal().ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Subject_User.generateJWT',
+                        _ajax_nonce: getLocal().nonce,
+                        user: id,
+                        expires: expires
+                    },
+                    beforeSend: function () {
+                        $('#user-auth-jwt').val(getAAM().__('Generating token...'));
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            $('#user-auth-jwt').val(response.jwt);
+                        } else {
+                            getAAM().notification(
+                                'danger', getAAM().__('Failed to generate JWT token')
+                            );
+                        }
+                    },
+                    error: function () {
+                        getAAM().notification('danger', getAAM().__('Application error'));
+                    }
+                });
+            }
 
             //initialize the user list table
             $('#user-list').DataTable({
@@ -881,20 +916,26 @@
                                 })).prop('disabled', (isCurrent(data[0]) ? true: false));
                                 break;
                                 
-                            case 'ttl':
+                            case 'edit':
                                 if (getAAM().isUI('main')) {
                                     $(container).append($('<i/>', {
-                                        'class': 'aam-row-action icon-clock text-' + (data[5] ? 'danger' : 'warning')
+                                        'class': 'aam-row-action icon-pencil text-info'
                                     }).bind('click', function () {
+                                        // Update user's edit profile
+                                        $('#edit-user-link').attr(
+                                            'href', 
+                                            getLocal().url.editUser + '?user_id=' + data[0]
+                                        );
+                                        
                                         $('#edit-user-expiration-btn').attr('data-user-id', data[0]);
                                         $('#reset-user-expiration-btn').attr('data-user-id', data[0]);
-                                        
+
                                         if (data[5]) {
                                             $('#reset-user-expiration-btn').removeClass('hidden');
                                             var settings = data[5].split('|');
                                             $('#user-expires').val(settings[0]);
                                             $('#action-after-expiration').val(settings[1]);
-                                            
+
                                             if (settings[1] === 'change-role') {
                                                 $('#expiration-change-role-holder').removeClass('hidden');
                                                 loadRoleList(settings[2]);
@@ -907,31 +948,9 @@
                                             $('#user-expires, #action-after-expiration').val('');
                                             loadRoleList();
                                         }
+
+                                        $('#edit-user-modal').modal('show');
                                         
-                                        $('#edit-user-expiration-modal').modal('show');
-                                    }).attr({
-                                        'data-toggle': "tooltip",
-                                        'title': getAAM().__('User Expiration')
-                                    }));
-                                }
-                                break;
-                                
-                            case 'no-ttl':
-                                if (getAAM().isUI('main')) {
-                                    $(container).append($('<i/>', {
-                                        'class': 'aam-row-action icon-clock text-muted'
-                                    }));
-                                }
-                                break;
-                                
-                            case 'edit':
-                                if (getAAM().isUI('main')) {
-                                    $(container).append($('<i/>', {
-                                        'class': 'aam-row-action icon-pencil text-info'
-                                    }).bind('click', function () {
-                                        window.open(
-                                            getLocal().url.editUser + '?user_id=' + data[0], '_blank'
-                                        );
                                     }).attr({
                                         'data-toggle': "tooltip",
                                         'title': getAAM().__('Edit User')
@@ -1064,15 +1083,17 @@
                 sideBySide: true
             });
 
-            $('#edit-user-expiration-modal').on('show.bs.modal', function() {
+            $('#edit-user-modal').on('show.bs.modal', function() {
                 try{
                     if ($.trim($('#user-expires').val())) {
                         $('#user-expiration-datapicker').data('DateTimePicker').defaultDate(
                             $('#user-expires').val()
                         );
                     } else {
+                        var tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
                         $('#user-expiration-datapicker').data('DateTimePicker').defaultDate(
-                            new Date()
+                            tomorrow
                         );
                     }
                 } catch(e) {
@@ -1083,6 +1104,10 @@
             $('#user-expiration-datapicker').on('dp.change', function(res) {
                 $('#user-expires').val(
                     res.date.format('MM/DD/YYYY, h:mm a')
+                );
+                generateJWT(
+                    $('#edit-user-expiration-btn').attr('data-user-id'),
+                    $('#user-expires').val()
                 );
             });
             
@@ -1116,7 +1141,7 @@
                         getAAM().notification('danger', getAAM().__('Application error'));
                     },
                     complete: function () {
-                        $('#edit-user-expiration-modal').modal('hide');
+                        $('#edit-user-modal').modal('hide');
                         $(_this).text(getAAM().__('Save')).attr('disabled', false);
                     }
                 });
@@ -1149,7 +1174,7 @@
                         getAAM().notification('danger', getAAM().__('Application error'));
                     },
                     complete: function () {
-                        $('#edit-user-expiration-modal').modal('hide');
+                        $('#edit-user-modal').modal('hide');
                         $(_this).text(getAAM().__('Reset')).attr('disabled', false);
                     }
                 });
@@ -1332,6 +1357,56 @@
             
             /**
              * 
+             * @param {type} data
+             * @param {type} cb
+             * @returns {undefined}
+             */
+            function downloadLicense(data, cb) {
+                $.ajax(getLocal().system.apiEndpoint + '/download', {
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        license: data.license,
+                        domain: getLocal().system.domain,
+                        uid: getLocal().system.uid
+                    },
+                    success: function (package) {
+                        $.ajax(getLocal().ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Main_Policy.install',
+                                _ajax_nonce: getLocal().nonce,
+                                license: data.license,
+                                package: package
+                            },
+                            success: function (response) {
+                                if (response.status !== 'success') {
+                                    getAAM().notification('danger', getAAM().__(response.error));
+                                }
+                            },
+                            error: function () {
+                                getAAM().notification(
+                                    'danger', 
+                                    getAAM().__('Application error')
+                                );
+                            },
+                            complete: function() {
+                                cb();
+                            }
+                        });
+                    },
+                    error: function (response) {
+                        getAAM().notification(
+                            'danger', response.responseJSON.message
+                        );
+                    }
+                });
+            }
+            
+            /**
+             * 
              * @param {type} subject
              * @param {type} id
              * @param {type} effect
@@ -1355,6 +1430,23 @@
                     //reset button
                     $('#policy-reset').bind('click', function () {
                         getAAM().reset('policy', $(this));
+                    });
+                    
+                    $('#download-policy').bind('click', function() {
+                        var license = $.trim($('#policy-license-key').val());
+                        
+                        if (license) {
+                            $(this).text(getAAM().__('Downloading'));
+                            downloadLicense({
+                                license: license
+                            }, function() {
+                                $('#download-policy').text(getAAM().__('Download'));
+                                $('#policy-list').DataTable().ajax.reload();
+                                $('#download-policy-modal').modal('hide');
+                            });
+                        } else {
+                            $('#policy-license-key').focus();
+                        }
                     });
                     
                     $('#policy-list').DataTable({
@@ -1386,6 +1478,26 @@
                         columnDefs: [
                             {visible: false, targets: [0,3]}
                         ],
+                        initComplete: function () {
+                            var create = $('<a/>', {
+                                'href': '#',
+                                'class': 'btn btn-primary'
+                            }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
+                            .bind('click', function () {
+                                window.open(getLocal().url.addPolicy, '_blank');
+                            });
+                            
+                            /*var download = $('<a/>', {
+                                'href': '#',
+                                'class': 'btn btn-success'
+                            }).html('<i class="icon-download-cloud"></i> ' + getAAM().__('Download'))
+                            .bind('click', function () {
+                               $('#download-policy-modal').modal('show');
+                            });
+
+                            $('.dataTables_filter', '#policy-list_wrapper').append(download);*/
+                            $('.dataTables_filter', '#policy-list_wrapper').append(create);
+                        },
                         createdRow: function (row, data) {
                             var actions = data[2].split(',');
 
@@ -3436,29 +3548,58 @@
              * @returns {undefined}
              */
             function downloadExtension(data, cb) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
+                $.ajax(getLocal().system.apiEndpoint + '/download', {
+                    type: 'GET',
                     dataType: 'json',
-                    data: data,
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            setTimeout(function () {
-                                getAAM().fetchContent('extensions');
-                            }, 500);
+                    data: {
+                        license: data.license,
+                        domain: getLocal().system.domain,
+                        uid: getLocal().system.uid
+                    },
+                    success: function (package) {
+                        if (package.error === true) {
+                            getAAM().notification('danger', package.message);
                         } else {
-                            getAAM().notification('danger', getAAM().__(response.error));
-                            if (typeof response.content !== 'undefined') {
-                                dump = response;
-                                $('#installation-error').text(response.error);
-                                $('#extension-notification-modal').modal('show');
-                            }
+                            $.ajax(getLocal().ajaxurl, {
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    action: 'aam',
+                                    sub_action: 'Extension_Manager.install',
+                                    _ajax_nonce: getLocal().nonce,
+                                    license: data.license,
+                                    package: package
+                                },
+                                success: function (response) {
+                                    if (response.status === 'success') {
+                                        setTimeout(function () {
+                                            getAAM().fetchContent('extensions');
+                                        }, 500);
+                                    } else {
+                                        getAAM().notification('danger', response.error);
+                                        if (typeof package.content !== 'undefined') {
+                                            dump = package;
+                                            $('#installation-error').text(response.error);
+                                            $('#extension-notification-modal').modal('show');
+                                        }
+                                    }
+                                },
+                                error: function () {
+                                    getAAM().notification(
+                                        'danger', 
+                                        getAAM().__('Application error')
+                                    );
+                                },
+                                complete: function() {
+                                    cb();
+                                }
+                            });
                         }
                     },
-                    error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
-                    },
-                    complete: function() {
-                        cb();
+                    error: function (response) {
+                        getAAM().notification(
+                            'danger', response.responseJSON.message
+                        );
                     }
                 });
             }
@@ -3505,6 +3646,7 @@
             function initialize() {
                 if ($('#extension-content').length) {
                     $('[data-toggle="toggle"]', '.extensions-metabox').bootstrapToggle();
+                    
                     //check for updates
                     $('#aam-update-check').bind('click', function() {
                         $.ajax(getLocal().ajaxurl, {
@@ -3558,7 +3700,7 @@
                                 action: 'aam',
                                 sub_action: 'Extension_Manager.update',
                                 _ajax_nonce: getLocal().nonce,
-                                extension: _this.data('product')
+                                license: _this.data('license')
                             }, function() {
                                 $('i', _this).attr('class', 'icon-arrows-cw');
                             });
@@ -3648,9 +3790,9 @@
                     //bind the download handler
                     $('#download-extension').bind('click', function () {
                         download(
-                                'data:application/zip;base64,' + dump.content,
-                                dump.title + '.zip',
-                                'application/zip'
+                            'data:application/zip;base64,' + dump.content,
+                            dump.title + '.zip',
+                            'application/zip'
                         );
                         $('#extension-notification-modal').modal('hide');
                     });

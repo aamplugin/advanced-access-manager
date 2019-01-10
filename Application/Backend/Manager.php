@@ -64,7 +64,7 @@ class AAM_Backend_Manager {
         //screen options & contextual help hooks
         add_filter('screen_options_show_screen', array($this, 'screenOptions'));
         add_filter('contextual_help', array($this, 'helpOptions'), 10, 3);
-
+        
         //manager Admin Menu
         if (is_multisite() && is_network_admin()) {
             //register AAM in the network admin panel
@@ -144,23 +144,16 @@ class AAM_Backend_Manager {
      * @param type $data
      * @return type
      */
-    public function filterPostData($data) {
+    public function filterPostData($data, $postarr) {
         if (isset($data['post_type']) && ($data['post_type'] === 'aam_policy')) {
-            $data['post_content'] = trim(filter_input(INPUT_POST, 'aam-policy'));
+            $content = trim(filter_input(INPUT_POST, 'aam-policy'));
+            
+            if (!empty($content)) { // Edit form was submitted
+                $data['post_content'] = $content;
+            }
             
             if (empty($data['post_content'])) {
-                $data['post_content'] = <<<EOT
-{
-    "Version": "1.0.0",
-    "Statement": [
-        {
-            "Effect": "deny",
-            "Resource": [],
-            "Action": []
-        }
-    ]
-}
-EOT;
+                $data['post_content'] = AAM_Backend_View_Helper::getDefaultPolicy();
             }
             
             AAM_Core_API::clearCache();
@@ -290,12 +283,16 @@ EOT;
             AAM_Core_API::clearCache(new AAM_Core_Subject_User($id));
             
             //check if role has expiration data set
-            $role   = (is_array($user->roles) ? $user->roles[0] : '');
-            $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
-            
-            if ($expire) {
-                update_user_option($id, "aam-original-roles", $old->roles);
-                update_user_option($id, "aam-role-expires", strtotime($expire));
+            // TODO: This supports only the first role and NOT the multi-roles
+            if (is_array($user->roles)) {
+                $roles  = array_values($user->roles);
+                $role   = array_shift($roles);
+                $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
+
+                if ($expire) {
+                    update_user_option($id, "aam-original-roles", $old->roles);
+                    update_user_option($id, "aam-role-expires", strtotime($expire));
+                }
             }
         }
     }
@@ -740,7 +737,7 @@ EOT;
     public function printJavascript() {
         if (AAM::isAAM()) {
             wp_enqueue_script('aam-vendor', AAM_MEDIA . '/js/vendor.js');
-            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.7.js');
+            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.7.3.js');
             
             //add plugin localization
             $this->printLocalization('aam-main');
@@ -778,16 +775,18 @@ EOT;
      * @access protected
      */
     protected function printLocalization($localKey) {
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject  = AAM_Backend_Subject::getInstance();
+        $endpoint = getenv('AAM_ENDPOINT');
         
         $locals = array(
             'nonce'    => wp_create_nonce('aam_ajax'),
-            'ajaxurl'  => admin_url('admin-ajax.php'),
+            'ajaxurl'  => esc_url(admin_url('admin-ajax.php')),
             'ui'       => AAM_Core_Request::get('aamframe', 'main'),
             'url' => array(
-                'site'     => admin_url('index.php'),
-                'editUser' => admin_url('user-edit.php'),
-                'addUser'  => admin_url('user-new.php')
+                'site'      => esc_url(admin_url('index.php')),
+                'editUser'  => esc_url(admin_url('user-edit.php')),
+                'addUser'   => esc_url(admin_url('user-new.php')),
+                'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
             ),
             'level'     => AAM_Core_API::maxLevel(wp_get_current_user()->allcaps),
             'subject'   => array(
@@ -796,6 +795,11 @@ EOT;
                 'name'  => $subject->getName(),
                 'level' => $subject->getMaxLevel(),
                 'blog'  => get_current_blog_id()
+            ),
+            'system' => array(
+                'domain'      => wp_parse_url(site_url(), PHP_URL_HOST),
+                'uid'         => AAM_Core_API::getOption('aam-uid', null, 'site'),
+                'apiEndpoint' => ($endpoint ? $endpoint : AAM_Core_Server::SERVER_URL)
             ),
             'translation' => AAM_Backend_View_Localization::get(),
             'caps'        => array(
@@ -883,7 +887,7 @@ EOT;
         check_ajax_referer('aam_ajax');
         
         // flush any output buffer
-        ob_clean();
+        @ob_clean();
         
         if (AAM::getUser()->hasCapability('aam_manager')) {
             $response = AAM_Backend_View::getInstance()->renderContent(

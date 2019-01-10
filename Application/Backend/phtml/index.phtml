@@ -62,10 +62,12 @@
                                         <span>Extensions</span>
                                     </a>
                                 <?php } ?>
-                                <a href="https://aamplugin.com/help" title="Help" target="_blank">
-                                    <i class="icon-help-circled"></i>
-                                    <span>Help</span>
-                                </a>
+                                <?php if (current_user_can('aam_view_help_btn')) { ?>
+                                    <a href="https://aamplugin.com/help" title="Help" target="_blank">
+                                        <i class="icon-help-circled"></i>
+                                        <span>Help</span>
+                                    </a>
+                                <?php } ?>
                             </div>
                         </div>
                     </div>
@@ -333,33 +335,55 @@
                                             <tbody></tbody>
                                         </table>
                                         
-                                        <div class="modal fade" id="edit-user-expiration-modal" tabindex="-1" role="dialog">
+                                        <div class="modal fade" id="edit-user-modal" tabindex="-1" role="dialog">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                                        <h4 class="modal-title"><?php echo __('Manage User Expiration', AAM_KEY); ?></h4>
+                                                        <h4 class="modal-title"><?php echo __('Manage User', AAM_KEY); ?></h4>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <p class="aam-info">To learn more about setting up temporary user accounts, please refer to <a href="https://aamplugin.com/help/how-to-create-temporary-wordpress-user-account" target="_blank">How to create temporary WordPress user account</a> article.</p>
-                                                        <div class="form-group">
-                                                            <div id="user-expiration-datapicker"></div>
-                                                            <input type="hidden" id="user-expires" />
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label><?php echo __('Action After Expiration', AAM_KEY); ?> </label>
-                                                            <select class="form-control" id="action-after-expiration">
-                                                                <option value=""><?php echo __('Select Action', AAM_KEY); ?></option>
-                                                                <option value="delete"><?php echo __('Delete Account', AAM_KEY); ?></option>
-                                                                <option value="lock"><?php echo __('Lock Account', AAM_KEY); ?></option>
-                                                                <option value="change-role"><?php echo __('Change User Role', AAM_KEY); ?></option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group hidden" id="expiration-change-role-holder">
-                                                            <label><?php echo __('Change To Role', AAM_KEY); ?></label>
-                                                            <select class="form-control" id="expiration-change-role">
-                                                                <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
-                                                            </select>
+                                                        <ul class="nav nav-tabs" role="tablist">
+                                                          <li role="presentation" class="active"><a href="#edit-user-expiration" aria-controls="edit-user-expiration" role="tab" data-toggle="tab">Temporary Access</a></li>
+                                                          <li role="presentation"><a href="#edit-user-jwt" aria-controls="edit-user-jwt" role="tab" data-toggle="tab">JWT Auth Token</a></li>
+                                                          <li role="presentation"><a href="#edit-user-profile" aria-controls="edit-user-profile" role="tab" data-toggle="tab">Edit User</a></li>
+                                                        </ul>
+
+                                                        <div class="tab-content">
+                                                            <div role="tabpanel" class="tab-pane active" id="edit-user-expiration">
+                                                                <p class="aam-info">To learn more about setting up temporary user accounts, please refer to <a href="https://aamplugin.com/help/how-to-create-temporary-wordpress-user-account" target="_blank">How to create temporary WordPress user account</a> article.</p>
+                                                                <div class="form-group">
+                                                                    <div id="user-expiration-datapicker"></div>
+                                                                    <input type="hidden" id="user-expires" />
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label><?php echo __('Action After Expiration', AAM_KEY); ?> </label>
+                                                                    <select class="form-control" id="action-after-expiration">
+                                                                        <option value=""><?php echo __('Select Action', AAM_KEY); ?></option>
+                                                                        <option value="delete"><?php echo __('Delete Account', AAM_KEY); ?></option>
+                                                                        <option value="lock"><?php echo __('Lock Account', AAM_KEY); ?></option>
+                                                                        <option value="change-role"><?php echo __('Change User Role', AAM_KEY); ?></option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group hidden" id="expiration-change-role-holder">
+                                                                    <label><?php echo __('Change To Role', AAM_KEY); ?></label>
+                                                                    <select class="form-control" id="expiration-change-role">
+                                                                        <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div role="tabpanel" class="tab-pane" id="edit-user-jwt">
+                                                                <div class="form-group">
+                                                                    <p class="aam-info">To learn more JWT authentication, please refer to <a href="https://aamplugin.com/article/how-to-authenticate-wordpress-user-with-jwt-token" target="_blank">How to authenticate WordPress user with JWT token</a> article.</p>
+                                                                    <textarea class="form-control" id="user-auth-jwt" readonly rows="5"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div role="tabpanel" class="tab-pane" id="edit-user-profile">
+                                                                <p class="aam-info"><?php echo __("To manage user profile, click on the button below.", AAM_KEY); ?></p>
+                                                                <p class="text-center">
+                                                                    <a href="#" id="edit-user-link" class="btn btn-primary" target="_blank"><?php echo __('Edit User Profile', AAM_KEY); ?></a>
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">

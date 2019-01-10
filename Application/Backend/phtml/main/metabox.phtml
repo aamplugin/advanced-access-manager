@@ -62,7 +62,7 @@
                                         <div class="col-xs-12 col-md-6 aam-submenu-item">
                                             <label for="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>">
                                                 <u><?php echo $metabox['title']; ?></u>
-                                                <small class="aam-metabox-details"><?php echo __('ID:', AAM_KEY); ?> <b><?php echo crc32($screen . $metabox['id']); ?></b></small>
+                                                <small class="aam-metabox-details"><?php echo __('ID:', AAM_KEY); ?> <b><?php echo crc32($screen . '|' . $metabox['id']); ?></b></small>
                                             </label>
                                             <input type="checkbox" class="aam-checkbox-danger" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo $screen; ?>|<?php echo $metabox['id']; ?>"<?php echo ($object->has($screen, $metabox['id']) ? ' checked="checked"' : ''); ?> />
                                             <label for="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-toggle="tooltip" title="<?php echo ($object->has($screen, $metabox['id']) ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>

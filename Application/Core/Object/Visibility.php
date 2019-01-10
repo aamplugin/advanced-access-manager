@@ -45,7 +45,8 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
         if ($option === false) { //if false, then the cache is empty but exists
             $option = array();
         } elseif (empty($option)) {
-            $query  = "SELECT pm.`post_id`, pm.`meta_value`, p.`post_type` FROM {$wpdb->postmeta} AS pm ";
+            $query  = "SELECT pm.`post_id`, pm.`meta_value`, p.`post_type` ";
+            $query .= "FROM {$wpdb->postmeta} AS pm ";
             $query .= "LEFT JOIN {$wpdb->posts} AS p ON (pm.`post_id` = p.ID) ";
             $query .= "WHERE pm.`meta_key` = %s";
             
@@ -54,6 +55,36 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
                     $settings = maybe_unserialize($row->meta_value);
                     $this->pushOptions('post', $row->post_id . '|' . $row->post_type, $settings);
                 }
+            }
+            
+            // Read all the settings from the Access & Security Policies
+            $area = AAM_Core_Api_Area::get();
+            $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                "/^post:(.*):(list|listtoothers)$/", 
+                $subject
+            );
+            
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+
+                $action = ($chunks[3] === 'listtoothers' ? 'list_others' : 'list');
+
+                if (is_numeric($chunks[2])) {
+                    $postId = $chunks[2];
+                } else {
+                    $post = get_page_by_path(
+                        $chunks[2], OBJECT, $chunks[1]
+                    );
+                    $postId = (is_a($post, 'WP_Post') ? $post->ID : 0);
+                }
+
+                $this->pushOptions(
+                    'post', 
+                    "{$postId}|{$chunks[1]}", 
+                    array(
+                        "{$area}.{$action}" => ($stm['Effect'] === 'deny' ? 1 : 0)
+                    )
+                );
             }
             
             do_action('aam-visibility-initialize-action', $this);

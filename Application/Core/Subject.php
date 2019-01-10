@@ -252,7 +252,6 @@ abstract class AAM_Core_Subject {
             }
         } else {
             $object = $this->_objects[$type][$id];
-            $object->initialize();
         }
 
         return $object;

@@ -39,7 +39,7 @@
                                 <tr>
                                     <td width="80%">
                                         <span class='aam-setting-title'><?php echo $product['title'], (!empty($product['tag']) ? '<sup><span class="badge sup">' . $product['tag'] . '</span></sup>' : ''), (!empty($product['version']) ? ' <small class="text-muted">v' . $product['version'] . '</small>' : ''); ?></span>
-                                        <?php if (!empty($product['license']) && $this->canShowLicense()) { ?><small class="aam-license-key"><b>License:</b> <?php echo $product['license'] . (!empty($product['expire']) ? " (updates expire on {$product['expire']})" : ''); ?></small><?php } ?>
+                                        <?php if (!empty($product['license'])) { ?><small class="aam-license-key"><b>License:</b> <?php echo $product['license'] . (!empty($product['expire']) ? " (updates expire on {$product['expire']})" : ''); ?></small><?php } ?>
                                         <p class="aam-extension-description">
                                             <?php echo $product['description']; ?>
                                         </p>
@@ -52,7 +52,7 @@
                                                 <a href="#" class="btn btn-sm btn-danger btn-block aam-deactivate-extension" data-product="<?php echo $product['id']; ?>"><i class="icon-attention-circled"></i> <?php echo __('Deactivate', AAM_KEY); ?></a><small><?php echo __('extension is active', AAM_KEY); ?></small>
                                             <?php } ?>
                                         <?php } elseif ($product['status'] == AAM_Extension_Repository::STATUS_UPDATE) { ?>
-                                            <a href="#" class="btn btn-sm btn-warning btn-block aam-update-extension<?php echo (empty($product['license']) ? ' disabled' : ''); ?>" data-product="<?php echo $product['id']; ?>"><i class="icon-arrows-cw"></i> <?php echo __('Update', AAM_KEY); ?></a><?php echo (empty($product['license']) ? '<small>' . __('license is missing', AAM_KEY) . '</small>' : ''); ?>
+                                            <a href="#" class="btn btn-sm btn-warning btn-block aam-update-extension<?php echo (empty($product['license']) ? ' disabled' : ''); ?>" data-license="<?php echo (!empty($product['license']) ? $product['license'] : ''); ?>"><i class="icon-arrows-cw"></i> <?php echo __('Update', AAM_KEY); ?></a><?php echo (empty($product['license']) ? '<small>' . __('license is missing', AAM_KEY) . '</small>' : ''); ?>
                                         <?php } elseif ($product['status'] == AAM_Extension_Repository::STATUS_INACTIVE) { ?>
                                             <a href="#" class="btn btn-sm btn-success btn-block aam-activate-extension" data-product="<?php echo $product['id']; ?>"><i class="icon-check"></i> <?php echo __('Activate', AAM_KEY); ?></a><small><?php echo __('extension is inactive', AAM_KEY); ?></small>
                                         <?php } else { ?>

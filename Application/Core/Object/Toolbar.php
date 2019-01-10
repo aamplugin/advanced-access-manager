@@ -29,10 +29,24 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object {
         
         $option = $this->getSubject()->readOption('toolbar');
         
+        if (!empty($option)) {
+            $this->setOverwritten(true);
+        }
+        
+        // Load settings from Access & Security Policy
+        if (empty($option)) {
+            $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                "/^Toolbar:/i", $subject
+            );
+            
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+                $option[$chunks[1]] = ($stm['Effect'] === 'deny' ? 1 : 0);
+            }
+        }
+        
         if (empty($option)) {
             $option = $this->getSubject()->inheritFromParent('toolbar');
-        } else {
-            $this->setOverwritten(true);
         }
         
         $this->setOption($option);
@@ -52,14 +66,11 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object {
     public function has($item, $both = false) {
         $options = $this->getOption();
         
-        // Policy API
-        $api = AAM::api();
-        
         // Step #1. Check if toolbar item is directly restricted
-        $direct = !empty($options[$item]) || ($api->isAllowed("Toolbar:{$item}") === false);
+        $direct = !empty($options[$item]);
         
         // Step #2. Check if whole branch is restricted
-        $branch = ($both && (!empty($options['toolbar-' . $item]) || ($api->isAllowed("Toolbar:toolbar-{$item}") === false)));
+        $branch = ($both && !empty($options['toolbar-' . $item]));
         
         return $direct || $branch;
     }

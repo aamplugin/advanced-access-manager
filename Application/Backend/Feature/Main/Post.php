@@ -167,16 +167,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                     'term',
                     $record->name,
                     'manage,edit',
-                    rtrim(get_term_parents_list(
-                        $record->term_id, 
-                        $record->taxonomy, 
-                        array(
-                            'link' => false, 
-                            'format' => 'name', 
-                            'separator' => '/', 
-                            'inclusive' => false
-                        )
-                    ), '/'),
+                    rtrim($this->getParentTermList($record), '/'),
                     apply_filters(
                         'aam-term-override-status', 
                         false, 
@@ -190,6 +181,51 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         return $response;
     }
     
+    /**
+     * 
+     * @global type $wp_version
+     * @param type $term
+     * @return type
+     * @todo Remove when min WP version will be 4.8
+     */
+    protected function getParentTermList($term) {
+        global $wp_version;
+
+        $list = '';
+        $args = array(
+            'link'      => false,
+            'format'    => 'name',
+            'separator' => '/',
+            'inclusive' => false
+        );
+
+        if (version_compare($wp_version, '4.8.0') === -1) {
+            $term = get_term($term->term_id, $term->taxonomy);
+
+            foreach (array('link', 'inclusive') as $bool) {
+                $args[$bool] = wp_validate_boolean($args[$bool]);
+            }
+
+            $parents = get_ancestors($term->term_id, $term->taxonomy, 'taxonomy');
+
+            foreach (array_reverse($parents) as $term_id) {
+                $parent = get_term($term_id, $term->taxonomy);
+
+                if ($args['link']) {
+                    $url = esc_url(get_term_link($parent->term_id, $term->taxonomy));
+                    $list .= sprintf('<a href="%s">%s</a>', $url, $parent->name);
+                } else {
+                    $list .= $parent->name;
+                }
+                $list .= $args['separator'];
+            }
+        } else {
+            $list = get_term_parents_list($term->term_id, $term->taxonomy, $args);
+        }
+
+        return $list;
+    }
+
     /**
      * 
      * @return type

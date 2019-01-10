@@ -183,6 +183,8 @@ class AAM_Backend_Feature_Subject_Role {
                 }
                 
                 do_action('aam-post-add-role-action', $role, $parent);
+            } else {
+                $response['reason'] = __("Role with slug [{$role_id}] already exists", AAM_KEY);
             }
         }
 

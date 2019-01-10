@@ -27,12 +27,28 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
         
-        $option = $this->getSubject()->readOption('metabox');
+        $option = AAM_Core_Compatibility::convertMetaboxes(
+                $this->getSubject()->readOption('metabox')
+        );
+        
+        if (!empty($option)) {
+            $this->setOverwritten(true);
+        }
+        
+        // Load settings from Access & Security Policy
+        if (empty($option)) {
+            $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                "/^(Metabox|Widget):/i", $subject
+            );
+            
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+                $option[$chunks[1]] = ($stm['Effect'] === 'deny' ? 1 : 0);
+            }
+        }
         
         if (empty($option)) {
             $option = $this->getSubject()->inheritFromParent('metabox');
-        } else {
-            $this->setOverwritten(true);
         }
 
         $this->setOption($option);
@@ -143,10 +159,10 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @inheritdoc
      */
     public function save($metabox, $granted) {
-        $param = explode('|', $metabox);
         $option = $this->getOption();
 
-        $option[$param[0]][$param[1]] = $granted;
+        $option[$metabox]        = $granted;
+        $option[crc32($metabox)] = $granted;
 
         return $this->getSubject()->updateOption($option, 'metabox');
     }
@@ -166,12 +182,9 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      */
     public function has($screen, $metabox) {
         $options = $this->getOption();
+        $mid     = "{$screen}|{$metabox}";
         
-        $area      = ($screen === 'widgets' ? 'Widget' : 'Metabox');
-        $uid       = crc32($screen . $metabox);
-        $isAllowed = AAM::api()->isAllowed("{$area}:{$uid}");
-
-        return !empty($options[$screen][$metabox]) || ($isAllowed === false);
+        return !empty($options[$mid]) || !empty($options[crc32($mid)]);
     }
     
     /**

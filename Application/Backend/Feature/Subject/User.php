@@ -84,6 +84,25 @@ class AAM_Backend_Feature_Subject_User {
     }
     
     /**
+     * 
+     * @return type
+     */
+    public function generateJWT() {
+        $userId  = filter_input(INPUT_POST, 'user');
+        $expires = filter_input(INPUT_POST, 'expires');
+        
+        $jwt = AAM_Core_JwtAuth::generateJWT(
+                $userId,
+                !empty($expires) ? strtotime($expires) - time() : 86400
+        );
+        
+        return wp_json_encode(array(
+            'status' => 'success',
+            'jwt'    => $jwt->token
+        ));
+    }
+    
+    /**
      * Query database for list of users
      * 
      * Based on filters and settings get the list of users from database
@@ -227,10 +246,8 @@ class AAM_Backend_Feature_Subject_User {
 
                 if (current_user_can('edit_users')) {
                     $actions[] = 'edit';
-                    $actions[] = 'ttl';
                 } else {
                     $actions[] = 'no-edit';
-                    $actions[] = 'no-ttl';
                 }
 
                 if (current_user_can('aam_switch_users')) {

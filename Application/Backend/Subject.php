@@ -70,7 +70,12 @@ class AAM_Backend_Subject {
         $classname = 'AAM_Core_Subject_' . ucfirst($type);
         
         if (class_exists($classname)) {
-            $this->setSubject(new $classname(stripslashes($id)));
+            $subject = new $classname(stripslashes($id));
+            
+            // Load access policy
+            $subject->getObject('policy');
+            
+            $this->setSubject($subject);
         }
     }
     

@@ -33,7 +33,28 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      *
      * @var type 
      */
+    protected $aamCaps = array();
+    
+    /**
+     *
+     * @var type 
+     */
     protected $parent = null;
+    
+    /**
+     * 
+     * @param type $id
+     */
+    public function __construct($id = '') {
+        parent::__construct($id);
+        
+        // Retrieve user capabilities set with AAM
+        $aamCaps = get_user_option(self::AAM_CAPKEY, $id);
+        
+        if (is_array($aamCaps)) {
+            $this->aamCaps = $aamCaps;
+        }
+    }
     
     /**
      * 
@@ -170,25 +191,37 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @access protected
      */
     protected function retrieveSubject() {
-        $subject = new WP_User($this->getId());
-
-        //retrieve aam capabilities if are not retrieved yet
-        $caps = get_user_option(self::AAM_CAPKEY, $this->getId());
-        if (is_array($caps)) {
-            $caps    = array_merge($subject->caps, $caps);
-            $allcaps = array_merge($subject->allcaps, $caps);
-            
-            //reset the user capabilities
-            $subject->allcaps = $allcaps;
-            $subject->caps    = $caps;
-            
-            if (wp_get_current_user()->ID === $subject->ID) {
-                wp_get_current_user()->allcaps = $allcaps;
-                wp_get_current_user()->caps    = $caps;
-            }
+        if ($this->getId() === get_current_user_id()) {
+            $subject = wp_get_current_user();
+        } else {
+            $subject = new WP_User($this->getId());
         }
         
         return $subject;
+    }
+    
+    /**
+     * 
+     */
+    public function loadCapabilities() {
+        $subject = $this->getSubject();
+        
+        // Retrieve all capabilities set in Access Policy
+        // Load Capabilities from the policy
+        $stms = AAM_Core_Policy_Manager::getInstance()->find("/^Capability:/i");
+        
+        $policyCaps = array();
+        
+        foreach($stms as $key => $stm) {
+            $chunks = explode(':', $key);
+            if (count($chunks) === 2) {
+                $policyCaps[$chunks[1]] = ($stm['Effect'] === 'allow' ? 1 : 0);
+            }
+        }
+        
+        //reset the user capabilities
+        $subject->allcaps = array_merge($subject->allcaps, $policyCaps,  $this->aamCaps);
+        $subject->caps    = array_merge($subject->caps, $policyCaps,  $this->aamCaps);
     }
 
     /**
@@ -212,7 +245,24 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @access public
      */
     public function hasCapability($capability) {
-        return user_can($this->getSubject(), $capability);
+        // Priority #1: capability that has been explicitely set
+        if (isset($this->aamCaps[$capability])) {
+            $result = !empty($this->aamCaps[$capability]);
+        } else {
+            // Priority #2: capability that has been defined in policy
+            // Override by policy if is set
+            $stm = AAM::api()->getPolicyManager()->find(
+                    "/^Capability:{$capability}$/i", $this
+            );
+            if (!empty($stm)) {
+                $val = end($stm);
+                $result = ($val['Effect'] === 'allow' ? 1 : 0);
+            } else {
+                $result = user_can($this->getSubject(), $capability);
+            }
+        }
+        
+        return $result;
     }
 
     /**

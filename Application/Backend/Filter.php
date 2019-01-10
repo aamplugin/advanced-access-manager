@@ -33,7 +33,9 @@ class AAM_Backend_Filter {
      */
     protected function __construct() {
         //menu filter
-        add_filter('parent_file', array($this, 'filterMenu'), 999, 1);
+        if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
+            add_filter('parent_file', array($this, 'filterMenu'), 999, 1);
+        }
         
         //manager WordPress metaboxes
         add_action("in_admin_header", array($this, 'metaboxes'), 999);

@@ -54,7 +54,8 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             'aam_manage_404_redirect', 'aam_manage_ip_check', 'aam_manage_admin_toolbar',
             'aam_manage_default', 'aam_manage_visitors', 'aam_manage_roles', 'aam_manage_users',
             'aam_edit_roles', 'aam_delete_roles', 'aam_toggle_users', 'aam_switch_users',
-            'aam_manage_configpress', 'aam_manage_api_routes', 'aam_manage_uri', 'aam_manage_policy'
+            'aam_manage_configpress', 'aam_manage_api_routes', 'aam_manage_uri', 'aam_manage_policy',
+            'aam_view_help_btn'
         )
     );
 
@@ -153,7 +154,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         
         $toggle = ($subject->hasCapability($cap) ? 'checked' : 'unchecked');
         
-        if (AAM::api()->isAllowed("Capability:{$cap}", 'AAM:toggle') === false) {
+        if (AAM::api()->isAllowed("Capability:{$cap}:AAM:toggle") === false) {
             $toggle = 'no-' . $toggle;
         }
         
@@ -191,7 +192,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         }
 
         // Access & Security policy has higher priority
-        if (AAM::api()->isAllowed("Capability:{$cap}", 'AAM:update') === false) {
+        if (AAM::api()->isAllowed("Capability:{$cap}:AAM:update") === false) {
             $allowed = false;
         }
         
@@ -212,7 +213,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
         }
 
         // Access & Security policy has higher priority
-        if (AAM::api()->isAllowed("Capability:{$cap}", 'AAM:delete') === false) {
+        if (AAM::api()->isAllowed("Capability:{$cap}:AAM:delete") === false) {
             $allowed = false;
         }
         
@@ -250,10 +251,25 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
      */
     protected function retrieveAllCaps() {
         $response = array();
-        $caps     = AAM_Core_API::getAllCapabilities();
+        
+        // Load also capabilities defined in policy
+        $stms = AAM_Core_Policy_Manager::getInstance()->find(
+            "/^Capability:/i", AAM_Backend_Subject::getInstance()->get()
+        );
+        
+        $policyCaps = array();
+        
+        foreach($stms as $key => $stm) {
+            $chunks = explode(':', $key);
+            if (count($chunks) === 2) {
+                $policyCaps[$chunks[1]] = ($stm['Effect'] === 'allow' ? 1 : 0);
+            }
+        }
+        
+        $caps = array_merge(AAM_Core_API::getAllCapabilities(), $policyCaps);
         
         foreach (array_keys($caps) as $cap) {
-            if (AAM::api()->isAllowed("Capability:{$cap}", 'AAM:list') !== false) {
+            if (AAM::api()->isAllowed("Capability:{$cap}:AAM:list") !== false) {
                 $response[] = array(
                     $cap,
                     $this->getGroup($cap),

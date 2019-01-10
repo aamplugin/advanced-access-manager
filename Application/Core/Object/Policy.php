@@ -16,10 +16,28 @@
 class AAM_Core_Object_Policy extends AAM_Core_Object {
 
     /**
-     *
-     * @var type 
+     * Resource tree
+     * 
+     * Shared resource tree across all the policy instances
+     * 
+     * @var array
+     * 
+     * @access protected
+     * @static 
      */
-    protected $resources = array();
+    protected static $resources = array();
+    
+    /**
+     * Feature tree
+     * 
+     * Shared features tree across all the policy instances
+     * 
+     * @var array
+     * 
+     * @access protected
+     * @static 
+     */
+    protected static $features = array();
     
     /**
      * Constructor
@@ -33,12 +51,21 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
         
-        $parent = $this->getSubject()->inheritFromParent('policy');
+        $this->initialize();
+    }
+    
+    /**
+     * 
+     */
+    public function initialize() {
+        $subject = $this->getSubject();
+        $parent  = $subject->inheritFromParent('policy');
+        
         if(empty($parent)) {
             $parent = array();
         }
         
-        $option = $this->getSubject()->readOption('policy');
+        $option = $subject->readOption('policy');
         if (empty($option)) {
             $option = array();
         } else {
@@ -50,53 +77,129 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
         }
         
         $this->setOption($parent);
+        
+        // Load statements for policies
+        $subjectId  = $subject->getUID();
+        $subjectId .= ($subject->getId() ? ".{$subject->getId()}" : '');
+        $this->load($subjectId, $option);
     }
     
     /**
      * 
      */
-    public function load() {
+    public function load($subjectId, $policies) {
         $resources = array();
-
-        foreach($this->loadStatements() as $statement) {
+        $features  = array();
+        
+        $list = $this->parsePolicy($subjectId, $policies);
+        
+        // Evaluate all Statements first
+        foreach($list['Statements'] as $statement) {
             if (isset($statement['Resource']) && $this->applicable($statement)) {
                 $this->evaluateStatement($statement, $resources);
             }
         }
+        self::$resources[$subjectId] = $resources;
         
-        $this->resources = $resources;
+        // Evaluate all Features then
+        foreach($list['Features'] as $feature) {
+            if ($this->applicable($feature)) {
+                $this->evaluateFeature($feature, $features);
+            }
+        }
+        
+        self::$features[$subjectId] = $features;
     }
     
     /**
      * 
      * @return type
      */
-    protected function loadStatements() {
-        $cache      = AAM::api()->getUser()->getObject('cache');
-        $statements = $cache->get('policyStatements', 0, null);
-       
-        // Step #1. Extract all statements
-        if (is_null($statements)) {
-            $statements = array();
+    protected function parsePolicy($subjectId, $policies) {
+        $cache = AAM::api()->getUser()->getObject('cache');
+        $list  = AAM_Core_Compatibility::preparePolicyList(
+                $cache->get('policy', $subjectId, null)
+        );
+        
+        if (is_null($list)) {
+            $list = array(
+                'Statements' => array(),
+                'Features'   => array()
+            );
             
-            foreach($this->getOption() as $id => $effect) {
+            foreach($policies as $id => $effect) {
                 if ($effect) {
                     $policy = get_post($id);
 
                     if (is_a($policy, 'WP_Post')) {
                         $obj = json_decode($policy->post_content, true);
                         if (json_last_error() === JSON_ERROR_NONE) {
-                            $statements = array_merge(
-                                $statements, $this->extractStatements($obj)
+                            $list['Statements'] = array_merge(
+                                $list['Statements'], $this->extractStatements($obj)
+                            );
+                            $list['Features'] = array_merge(
+                                $list['Features'], $this->extractFeatures($obj)
                             );
                         }
                     }
                 }
             }
-            $cache->add('policyStatements', 0, $statements);
+            $cache->add('policy', $subjectId, $list);
+        }
+        
+        return $list;
+    }
+    
+    /**
+     * 
+     * @param type $policy
+     * @return type
+     */
+    protected function extractStatements($policy) {
+        $statements = array();
+        
+        if (isset($policy['Statement'])) {
+            if (is_array($policy['Statement'])) {
+                $statements = $policy['Statement'];
+            } else {
+                $statements = array($policy['Statement']);
+            }
+        }
+        
+        // normalize each statement
+        foreach(array('Action', 'Condition') as $prop) {
+            foreach($statements as $i => $statement) {
+                if (isset($statement[$prop])) {
+                    $statements[$i][$prop] = (array) $statement[$prop];
+                }
+            }
         }
         
         return $statements;
+    }
+    
+    /**
+     * Extract list of policy features
+     * 
+     * @param array $policy
+     * 
+     * @return array
+     * 
+     * @access protected
+     * @since  v5.7.3
+     */
+    protected function extractFeatures($policy) {
+        $features = array();
+        
+        if (isset($policy['Feature'])) {
+            if (is_array($policy['Feature'])) {
+                $features = $policy['Feature'];
+            } else {
+                $features = array($policy['Feature']);
+            }
+        }
+        
+        return $features;
     }
     
     /**
@@ -123,6 +226,23 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
                 
                 $this->normalizeResource($resources, $id);
             }
+        }
+    }
+    
+    /**
+     * 
+     * @param type $feature
+     * @param type $features
+     */
+    protected function evaluateFeature($feature, &$features) {
+        $id = strtolower("{$feature['Plugin']}:{$feature['Feature']}");
+
+        // Add new statement
+        if (!isset($features[$id])) {
+            $features[$id] = $feature;
+        // Override feature unless the first one is marked as Enforced
+        } elseif (empty($features[$id]['Enforce'])) { 
+            $features[$id] = $feature;
         }
     }
     
@@ -517,34 +637,6 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
     
     /**
      * 
-     * @param type $policy
-     * @return type
-     */
-    protected function extractStatements($policy) {
-        $statements = array();
-        
-        if (isset($policy['Statement'])) {
-            if (is_array($policy['Statement'])) {
-                $statements = $policy['Statement'];
-            } else {
-                $statements = array($policy['Statement']);
-            }
-        }
-        
-        // normalize each statement
-        foreach(array('Action', 'Condition') as $prop) {
-            foreach($statements as $i => $statement) {
-                if (isset($statement[$prop])) {
-                    $statements[$i][$prop] = (array) $statement[$prop];
-                }
-            }
-        }
-        
-        return $statements;
-    }
-    
-    /**
-     * 
      * @param type $left
      * @param type $right
      * @return type
@@ -597,13 +689,33 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
     public function isAllowed($resource, $action = null) {
         $allowed = null;
         
-        $id = strtolower($resource . (!empty($action) ? ":{$action}" : ''));
+        $id  = strtolower($resource . (!empty($action) ? ":{$action}" : ''));
+        $res = $this->getResources();
         
-        if (isset($this->resources[$id])) {
-            $allowed = ($this->resources[$id]['Effect'] === 'allow');
+        if (isset($res[$id])) {
+            $allowed = ($res[$id]['Effect'] === 'allow');
         }
         
         return $allowed;
+    }
+    
+    /**
+     * 
+     * @param type $feature
+     * @param type $plugin
+     * @return type
+     */
+    public function isEnabled($feature, $plugin) {
+        $enabled = null;
+        
+        $id  = strtolower("{$plugin}:{$feature}");
+        $res = $this->getFeatures();
+        
+        if (isset($res[$id])) {
+            $enabled = in_array($res[$id]['Effect'], array('allow', 'enable'), true);
+        }
+        
+        return $enabled;
     }
     
     /**
@@ -629,6 +741,62 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
      */
     public function mergeOption($external) {
         return AAM::api()->mergeSettings($external, $this->getOption(), 'policy');
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    public function getResources(AAM_Core_Subject $subject = null) {
+        $response = array();
+        
+        if (is_null($subject)) {
+            if (!isset(self::$resources['__combined'])) {
+                foreach(self::$resources as $resources) {
+                    $response = array_merge($resources, $response);
+                }
+                self::$resources['__combined'] = $response;
+            } else {
+                $response = self::$resources['__combined'];
+            }
+        } else {
+            $subjectId  = $subject->getUID();
+            $subjectId .= ($subject->getId() ? ".{$subject->getId()}" : '');
+            
+            if (isset(self::$resources[$subjectId])) {
+                $response = self::$resources[$subjectId];
+            }
+        }
+        
+        return $response;
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    public function getFeatures(AAM_Core_Subject $subject = null) {
+        $response = array();
+        
+        if (is_null($subject)) {
+            if (!isset(self::$features['__combined'])) {
+                foreach(self::$features as $features) {
+                    $response = array_merge($features, $response);
+                }
+                self::$features['__combined'] = $response;
+            } else {
+                $response = self::$features['__combined'];
+            }
+        } else {
+            $subjectId  = $subject->getUID();
+            $subjectId .= ($subject->getId() ? ".{$subject->getId()}" : '');
+            
+            if (isset(self::$features[$subjectId])) {
+                $response = self::$features[$subjectId];
+            }
+        }
+        
+        return $response;
     }
     
 }

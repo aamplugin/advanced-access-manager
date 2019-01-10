@@ -27,17 +27,32 @@ class AAM_Core_Object_Capability extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
         
-        $this->setOption($this->getSubject()->getCapabilities());
+        $caps = $this->getSubject()->getCapabilities();
+        
+        // Load Capabilities from the policy
+        $stms = AAM_Core_Policy_Manager::getInstance()->find(
+            "/^Capability:/i", $subject
+        );
+        
+        foreach($stms as $key => $stm) {
+            $chunks = explode(':', $key);
+            if (count($chunks) === 2) {
+                $caps[$chunks[1]] = ($stm['Effect'] === 'allow' ? 1 : 0);
+            }
+        }
         
         //check if capabilities are overwritten but only for user subject
         if (is_a($this->getSubject(), 'AAM_Core_Subject_User')) {
-            $caps = get_user_option(
+            $userCaps = get_user_option(
                     AAM_Core_Subject_User::AAM_CAPKEY, $this->getSubject()->getId()
             );
-            if (!empty($caps)) {
+            if (!empty($userCaps)) {
+                $caps = array_merge($caps, $userCaps);
                 $this->setOverwritten(true);
             }
         }
+        
+        $this->setOption($caps);
     }
 
     /**

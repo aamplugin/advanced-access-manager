@@ -29,10 +29,25 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         
         $option = $this->getSubject()->readOption('menu');
         
+        if (!empty($option)) {
+            $this->setOverwritten(true);
+        }
+        
+        // Load settings from Access & Security Policy
+        if (empty($option)) {
+            $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                "/^BackendMenu:/i", $subject
+            );
+            
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+                $option[$chunks[1]] = ($stm['Effect'] === 'deny' ? 1 : 0);
+            }
+        }
+        
+        // Finally try to load from parent
         if (empty($option)) {
             $option = $this->getSubject()->inheritFromParent('menu');
-        } else {
-            $this->setOverwritten(true);
         }
         
         $this->setOption($option);
@@ -103,6 +118,27 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         }
         
         return $menu;
+    }
+    
+    /**
+     * Update single option item
+     * 
+     * @param string $item
+     * @param mixed  $value
+     * 
+     * @return boolean Always true
+     * 
+     * @access public
+     */
+    public function updateOptionItem($item, $value) {
+        $option = $this->getOption();
+        
+        $option[$item]        = $value;
+        $option[crc32($item)] = $value;
+        
+        $this->setOption($option);
+        
+        return true;
     }
 
     /**
@@ -190,20 +226,14 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         $options = $this->getOption();
         $parent  = $this->getParentMenu($decoded);
         
-        // Policy API
-        $api  = AAM::api();
-        $crc  = crc32($decoded);
-        $bcrc = crc32('menu-' . $decoded);
-        $pcrc = crc32('menu-' . $parent);
-        
         // Step #1. Check if menu is directly restricted
-        $direct = !empty($options[$decoded]) || ($api->isAllowed("BackendMenu:{$crc}") === false);
+        $direct = !empty($options[$decoded]) || !empty($options[crc32($decoded)]);
         
         // Step #2. Check if whole branch is restricted
-        $branch = ($both && (!empty($options['menu-' . $decoded]) || ($api->isAllowed("BackendMenu:{$bcrc}") === false)));
+        $branch = ($both && (!empty($options['menu-' . $decoded]) || !empty($options[crc32('menu-' . $decoded)])));
         
         // Step #3. Check if dynamic submenu is restricted because of whole branch
-        $indirect = ($parent && (!empty($options['menu-' . $parent]) || ($api->isAllowed("BackendMenu:{$pcrc}") === false)));
+        $indirect = ($parent && (!empty($options['menu-' . $parent]) || !empty($options[crc32('menu-' . $parent)])));
         
         return $direct || $branch || $indirect;
     }

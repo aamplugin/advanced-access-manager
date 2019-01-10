@@ -62,16 +62,11 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
     public function install($storedLicense = null) {
         $repo    = AAM_Extension_Repository::getInstance();
         $license = AAM_Core_Request::post('license', $storedLicense);
+        $package = (object) AAM_Core_Request::post('package');
         
-        //download the extension from the server first
-        $package = AAM_Core_Server::download($license);
+        $error   = $repo->checkDirectory();
         
-        if (is_wp_error($package)) {
-            $response = array(
-                'status' => 'failure', 
-                'error'  => wp_strip_all_tags($package->get_error_message())
-            );
-        }elseif ($error = $repo->checkDirectory()) {
+        if ($error) {
             $response = $this->installFailureResponse($error, $package);
             $repo->storeLicense($package, $license);
         } elseif (empty($package->content)) { //any unpredictable scenario
@@ -179,20 +174,6 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
         }
         
         return $response;
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function canShowLicense() {
-        $result = true;
-        
-        if (AAM_Core_API::capabilityExists('aam_display_license')) {
-            $result = !empty(AAM::getUser()->allcaps['aam_display_license']);
-        }
-        
-        return $result;
     }
     
     /**

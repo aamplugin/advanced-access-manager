@@ -50,4 +50,38 @@ class AAM_Backend_View_Helper {
         $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
     }
     
+    /**
+     * Get default Access Policy
+     * 
+     * @global string $wp_version
+     * 
+     * @return string
+     * 
+     * @access public
+     * @static
+     * @since  v5.7.3
+     */
+    public static function getDefaultPolicy() {
+        global $wp_version;
+        
+        $aamVersion = AAM_Core_API::version();
+        
+        return <<<EOT
+{
+    "Version": "1.0.0",
+    "Dependency": {
+        "wordpress": ">=$wp_version",
+        "advanced-access-manager": ">=$aamVersion"
+    },
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [],
+            "Action": []
+        }
+    ]
+}
+EOT;
+    }
+    
 }

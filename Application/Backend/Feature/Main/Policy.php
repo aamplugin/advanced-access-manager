@@ -22,6 +22,46 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
     public function getTable() {
         return wp_json_encode($this->retrievePolicies());
     }
+    
+    /**
+     * Install policy
+     * 
+     * @return string
+     * 
+     * @access public
+     * @since  v5.7.3
+     */
+    public function install() {
+        $package = (object) AAM_Core_Request::post('package');
+        
+        if (!empty($package->content)) {
+            $json = base64_decode($package->content);
+            
+            $result = wp_insert_post(array(
+                'post_author'  => get_current_user_id(),
+		'post_content' => $json,
+		'post_title'   => $package->title,
+		'post_excerpt' => $package->description,
+		'post_status'  => 'publish',
+		'post_type'    => 'aam_policy'
+            ));
+            
+            if (!is_wp_error($result)) {
+                $response = array('status' => 'success');
+            } else {
+                $response = array(
+                    'status' => 'failure', 'reason' => $result->get_error_message()
+                );
+            }
+        } else {
+            $response = array(
+                'status' => 'failure', 
+                'reason' => __('Failed to fetch policy. Please try again.', AAM_KEY)
+            );
+        }
+        
+        return wp_json_encode($response);
+    }
 
     /**
      * Save post properties
@@ -31,18 +71,14 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
      * @access public
      */
     public function save() {
-        if (defined('AAM_PLUS_PACKAGE')) {
-            $subject = AAM_Backend_Subject::getInstance();
-            $id      = AAM_Core_Request::post('id');
-            $effect  = AAM_Core_Request::post('effect');
+        $subject = AAM_Backend_Subject::getInstance();
+        $id      = AAM_Core_Request::post('id');
+        $effect  = AAM_Core_Request::post('effect');
 
-            //clear cache
-            AAM_Core_API::clearCache();
+        //clear cache
+        AAM_Core_API::clearCache();
 
-            $result = $subject->save($id, $effect, 'policy');
-        } else {
-            $result = false;
-        }
+        $result = $subject->save($id, $effect, 'policy');
 
         return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure')

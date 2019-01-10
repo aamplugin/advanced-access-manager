@@ -370,32 +370,17 @@
     
     <?php 
         if (!empty($post->post_content)) {
-            $decoded = json_decode(htmlspecialchars_decode($post->post_content));
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $error = AAM_Backend_View_Helper::preparePhrase(
-                    esc_js('[' . json_last_error_msg() . ']: ' . __('Access &amp; Security Policy is invalid and is ignored by AAM.', AAM_KEY)),
-                    'b'
-                );
-            }
+            // Validate the policy
+            $validator = new AAM_Core_Policy_Validator(htmlspecialchars_decode($post->post_content));
+            $errors    = $validator->validate();
         } else {
-           $post->post_content = <<<EOT
-{
-    "Version": "1.0.0",
-    "Statement": [
-        {
-            "Effect": "deny",
-            "Resource": [],
-            "Action": []
-        }
-    ]
-}
-EOT;
+           $post->post_content = AAM_Backend_View_Helper::getDefaultPolicy();
+           $errors = array();
         }
    ?>
 
-    <div class="aam-alert-danger<?php echo (empty($error) ? ' hidden' : ''); ?>" id="policy-parsing-error">
-        <?php echo (!empty($error) ? $error : ''); ?>
+    <div class="aam-alert-danger<?php echo (empty($errors) ? ' hidden' : ''); ?>" id="policy-parsing-error">
+        <?php echo implode('<br/>', $errors); ?>
     </div>
     
     <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo $post->post_content; ?></textarea>

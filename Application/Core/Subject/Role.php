@@ -127,6 +127,28 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
     public function getCapabilities() {
         return $this->getSubject()->capabilities;
     }
+    
+    /**
+     * Check if subject has capability
+     * 
+     * @param string $cap
+     * 
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function hasCapability($cap) {
+        $has = $this->getSubject()->has_cap($cap);
+        
+        // Override by policy if is set
+        $stm = AAM::api()->getPolicyManager()->find("/^Capability:{$cap}$/i", $this);
+        if (!empty($stm)) {
+            $val = end($stm);
+            $has = ($val['Effect'] === 'allow' ? 1 : 0);
+        }
+        
+        return $has;
+    }
 
     /**
      *

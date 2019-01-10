@@ -92,7 +92,7 @@ class AAM_Core_Login {
             }
             
             if (AAM::api()->getConfig('core.settings.setJwtCookieAfterLogin', false)) {
-                AAM_Core_JwtAuth::getInstance()->generateJWT($user->ID, 'cookie');
+                AAM_Core_JwtAuth::getInstance()->issueJWT($user->ID, 'cookie');
             }
             
             if ($this->aamLogin === false) {

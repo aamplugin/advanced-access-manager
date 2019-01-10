@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.7.1
+  Version: 5.7.3
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -115,20 +115,6 @@ class AAM {
         //load AAM core config
         AAM_Core_Config::bootstrap();
         
-        // Load AAM
-        AAM::getInstance();
-        
-         //load all installed extension
-        if (AAM_Core_Config::get('core.settings.extensionSupport', true)) {
-            AAM_Extension_Repository::getInstance()->load();
-        }
-        
-        // Load Access/Security Policies
-        self::getUser()->getObject('policy')->load();
-        
-        //load WP Core hooks
-        AAM_Shared_Manager::bootstrap();
-
         //login control
         if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
             AAM_Core_Login::bootstrap();
@@ -138,6 +124,20 @@ class AAM {
         if (AAM_Core_Config::get('core.settings.jwtAuthentication', false)) {
             AAM_Core_JwtAuth::bootstrap();
         }
+        
+        // Load AAM
+        AAM::getInstance();
+        
+         //load all installed extension
+        if (AAM_Core_Config::get('core.settings.extensionSupport', true)) {
+            AAM_Extension_Repository::getInstance()->load();
+        }
+        
+        // Load Access/Security Policies
+        AAM_Core_Policy_Manager::bootstrap();
+        
+        //load WP Core hooks
+        AAM_Shared_Manager::bootstrap();
     }
     
     /**
@@ -171,6 +171,9 @@ class AAM {
     public static function getInstance() {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
+            
+            // Load user capabilities
+            self::$_instance->getUser()->loadCapabilities();
             
             // Logout user if he/she is blocked
             self::$_instance->getUser()->validateUserStatus();

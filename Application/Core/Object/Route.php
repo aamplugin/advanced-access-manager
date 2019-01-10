@@ -27,12 +27,30 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
         
-        $option = $this->getSubject()->readOption('route');
+        $option = AAM_Core_Compatibility::convertRoute(
+                $this->getSubject()->readOption('route')
+        );
+        
+        if (!empty($option)) {
+            $this->setOverwritten(true);
+        }
+        
+        // Load settings from Access & Security Policy
+        if (empty($option)) {
+            $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                "/^Route:/i", $subject
+            );
+            
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+                $id     = "{$chunks[1]}|{$chunks[2]}|{$chunks[3]}";
+                
+                $option[$id] = ($stm['Effect'] === 'deny' ? 1 : 0);
+            }
+        }
         
         if (empty($option)) {
             $option = $this->getSubject()->inheritFromParent('route');
-        } else {
-            $this->setOverwritten(true);
         }
         
         $this->setOption($option);
@@ -51,8 +69,9 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
      */
     public function has($type, $route, $method = 'POST') {
         $options = $this->getOption();
+        $id      = strtolower("{$type}|{$route}|{$method}");
 
-        return !empty($options[$type][$route][$method]);
+        return !empty($options[$id]);
     }
 
     /**
@@ -64,7 +83,10 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
      */
     public function save($type, $route, $method, $value) {
         $option = $this->getOption();
-        $option[$type][$route][$method] = $value;
+        
+        $id     = strtolower("{$type}|{$route}|{$method}");
+        $option[$id] = $value;
+        
         $this->setOption($option);
         
         return $this->getSubject()->updateOption($this->getOption(), 'route');

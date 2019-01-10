@@ -48,7 +48,11 @@ class AAM_Api_Rest_Resource_Post {
                 case 'POST':
                 case 'PUT':
                 case 'PATCH':
-                    $result = $this->authorizeUpdate($post);
+                    if ($request['status'] === 'publish') {
+                        $result = $this->authorizePublish($post);
+                    } else {
+                        $result = $this->authorizeUpdate($post);
+                    }
                     break;
 
                 case 'DELETE':
@@ -91,6 +95,20 @@ class AAM_Api_Rest_Resource_Post {
         );
         
         return $this->processPipeline($steps, $post, $request);
+    }
+    
+    /**
+     * 
+     * @param AAM_Core_Object_Post $post
+     * @return type
+     */
+    protected function authorizePUblish(AAM_Core_Object_Post $post) {
+        $steps = array(
+            // Step #1. Check if publish action is alloed
+            array($this, 'checkPublish'),
+        );
+        
+        return $this->processPipeline($steps, $post);
     }
     
     /**
@@ -305,6 +323,33 @@ class AAM_Api_Rest_Resource_Post {
             // default password verification and this will cause invalid password
             // response
             $request['password'] = null;
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Check PUBLISH & PUBLISH_BY_OTHERS options
+     * 
+     * @param AAM_Core_Object_Post $post
+     * 
+     * @return void
+     * 
+     * @access protected
+     */
+    protected function checkPublish(AAM_Core_Object_Post $post) {
+        $result = null;
+        
+        // Keep this compatible with older version of Publish (without Gutenberg)
+        if (!$post->allowed('api.publish') || !$post->allowed('backend.publish')) {
+            $result = new WP_Error(
+                'rest_post_cannot_publish', 
+                "User is unauthorized to publish the post. Access denied.", 
+                array(
+                    'action' => 'api.publish',
+                    'status' => 401
+                )
+            );
         }
         
         return $result;

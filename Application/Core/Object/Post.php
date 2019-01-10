@@ -40,7 +40,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         //make sure that we are dealing with WP_Post object
         if (is_object($post)) {
             $this->setPost($post);
-        } elseif (intval($post)) {
+        } elseif (is_numeric($post)) {
             $this->setPost(get_post($post));
         }
         
@@ -92,6 +92,24 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         } elseif (empty($option)) {
             $option = get_post_meta($post->ID, $this->getOptionName(), true);
             $this->setOverwritten(!empty($option));
+            
+            // Read settings from access policy
+            if (empty($option)) {
+                $stms = AAM_Core_Policy_Manager::getInstance()->find(
+                    "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):/", 
+                    $subject
+                );
+                $option = array();
+                    
+                foreach($stms as $key => $stm) {
+                    // TODO: Prepare better conversion from policy Action to AAM
+                    // post & term action. For example listToOthers -> list_others
+                    $chunks = explode(':', $key);
+                    $option["frontend.{$chunks[3]}"] = $stm['Effect'] === 'deny';
+                    $option["backend.{$chunks[3]}"]  = $stm['Effect'] === 'deny';
+                    $option["api.{$chunks[3]}"]      = $stm['Effect'] === 'deny';
+                }
+            }
             
             // Inherit from terms or default settings - AAM Plus Package
             if (empty($option)) {

@@ -104,7 +104,37 @@ final class AAM_Core_Gateway {
      *               exact match found
      */
     public function isAllowed($resource, $action = null) {
-        return AAM::api()->getUser()->getObject('policy')->isAllowed($resource, $action);
+        $policy = AAM::api()->getUser()->getObject('policy');
+        
+        return $policy->isAllowed($resource, $action);
+    }
+    
+    /**
+     * Check if feature is enabled
+     * 
+     * @param string $feature
+     * @param string $plugin
+     * 
+     * @return boolean|null
+     * 
+     * @access public
+     * @since  v5.7.3
+     */
+    public function isEnabled($feature, $plugin = 'advanced-access-manager') {
+        $policy = AAM::api()->getUser()->getObject('policy');
+        
+        return $policy->isEnabled($feature, $plugin);
+    }
+    
+    /**
+     * Get policy manager
+     * 
+     * @return AAM_Core_Policy_Manager
+     * 
+     * @access public
+     */
+    public function getPolicyManager() {
+        return AAM_Core_Policy_Manager::getInstance();
     }
     
     /**

@@ -120,6 +120,8 @@ class AAM_Core_Exporter {
                 $this->pushData('options', '/^aam_menu_role/');
             } elseif ($feature === 'toolbar') {
                 $this->pushData('options', '/^aam_toolbar_role/');
+            } elseif ($feature === 'uri') {
+                $this->pushData('options', '/^aam_uri_role/');
             } elseif ($feature === 'route') {
                 $this->pushData('options', '/^aam_route_role/');
             } elseif ($feature === 'metabox') {
@@ -148,6 +150,8 @@ class AAM_Core_Exporter {
                 $this->pushData('usermeta', '/^' . $wpdb->prefix . 'aam_menu/');
             } elseif ($feature === 'toolbar') {
                 $this->pushData('usermeta', '/^' . $wpdb->prefix . 'aam_toolbar/');
+            } elseif ($feature === 'uri') {
+                $this->pushData('usermeta', '/^' . $wpdb->prefix . 'aam_uri/');
             } elseif ($feature === 'route') {
                 $this->pushData('usermeta', '/^' . $wpdb->prefix . 'aam_route/');
             } elseif ($feature === 'metabox') {
@@ -182,6 +186,8 @@ class AAM_Core_Exporter {
                 $this->pushData('options', '/^aam_visitor_redirect/');
             } elseif ($feature === 'route') {
                 $this->pushData('options', '/^aam_visitor_route/');
+            } elseif ($feature === 'uri') {
+                $this->pushData('options', '/^aam_visitor_uri/');
             }
         }
     }
@@ -200,6 +206,8 @@ class AAM_Core_Exporter {
                 $this->pushData('options', '/^aam_route_default/');
             } elseif ($feature === 'toolbar') {
                 $this->pushData('options', '/^aam_toolbar_default/');
+            } elseif ($feature === 'uri') {
+                $this->pushData('options', '/^aam_uri_default/');
             } elseif ($feature === 'post') {
                 $this->pushData('options', '/^aam_type_[\w_\-]_default/');
                 $this->pushData('options', '/^aam_term_[\d]+\|.+_default/');

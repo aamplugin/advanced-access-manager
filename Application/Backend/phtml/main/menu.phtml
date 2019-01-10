@@ -31,9 +31,9 @@
                                 <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
                                     <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
                                 </a>
-                                <?php if ($object->has($menu['id'])) { ?>
+                                <?php if ($menu['checked']) { ?>
                                     <i class="aam-panel-title-icon icon-eye-off text-danger"></i>
-                                <?php } elseif ($this->hasSubmenuChecked($object, $menu['submenu'])) { ?>
+                                <?php } elseif ($this->hasSubmenuChecked($menu['submenu'])) { ?>
                                     <i class="aam-panel-title-icon icon-attention-circled text-warning"></i>
                                 <?php } ?>
                             </h4>
@@ -44,14 +44,14 @@
                                 <?php if ($menu['id'] != 'menu-index.php') { ?>
                                     <div class="row aam-inner-tab">
                                         <div class="col-xs-12 text-center">
-                                            <small class="aam-menu-capability"><?php echo __('Menu ID:', AAM_KEY); ?> <b><?php echo crc32($menu['id']); ?></b></small>
+                                            <small class="aam-menu-capability"><?php echo __('Menu ID:', AAM_KEY); ?> <b><?php echo $menu['crc32']; ?></b></small>
                                         </div>
                                     </div>
                                     <hr class="aam-divider" />
                                 <?php } ?>
                                 <?php if (!empty($menu['submenu'])) { ?>
                                     <div class="row aam-inner-tab">
-                                        <?php echo ($object->has($menu['id']) ? '<div class="aam-lock"></div>' : ''); ?>
+                                        <?php echo ($menu['checked'] ? '<div class="aam-lock"></div>' : ''); ?>
                                         <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
                                             <?php if ($submenu['id'] == 'index.php') { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
@@ -64,9 +64,9 @@
                                                     <label for="menu-item-<?php echo $i . $j; ?>">
                                                         <u><?php echo $submenu['name']; ?></u>
                                                         <small class="aam-menu-capability"><?php echo __('Cap:', AAM_KEY), ' <b>', $submenu['capability']; ?></b></small>
-                                                        <small class="aam-menu-capability"><?php echo __('ID:', AAM_KEY), ' <b>', crc32($submenu['id']); ?></b></small>
+                                                        <small class="aam-menu-capability"><?php echo __('ID:', AAM_KEY), ' <b>', $submenu['crc32']; ?></b></small>
                                                     </label>
-                                                    <input type="checkbox" class="aam-checkbox-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"<?php echo ($object->has($submenu['id']) ? ' checked="checked"' : ''); ?> />
+                                                    <input type="checkbox" class="aam-checkbox-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"<?php echo ($submenu['checked'] ? ' checked="checked"' : ''); ?> />
                                                     <label for="menu-item-<?php echo $i . $j; ?>" data-toggle="tooltip" title="<?php echo ($object->has($submenu['id']) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                                 </div>
                                             <?php } ?>
@@ -79,7 +79,7 @@
                                 <?php if ($menu['id'] != 'menu-index.php') { ?>
                                     <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
                                         <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                            <?php if ($object->has($menu['id'])) { ?>
+                                            <?php if ($menu['checked']) { ?>
                                                 <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
                                                     <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                                 </a>
