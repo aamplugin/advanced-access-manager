@@ -141,14 +141,13 @@ class AAM_Core_JwtAuth {
                     $jwt, $key, array_keys(Firebase\JWT\JWT::$supported_algs)
                 );
                 
-                if (isset($claims->userId)) {
-                    $response->status = 200;
-                    $response->data = array (
-                        'status' => 'valid'
-                    );
-                }
+                $response->status = 200;
+                $response->data   = array(
+                    'status'        => 'valid',
+                    'token_expires' => date('m/d/Y H:i:s O', $claims->exp)
+                );
             } catch (Exception $ex) {
-                // Do nothing
+                $response->data['reason'] = $ex->getMessage();
             }
         }
         
@@ -198,16 +197,22 @@ class AAM_Core_JwtAuth {
      * @access public
      * @throws Exception
      */
-    public static function generateJWT($userId, $expires = 86400) {
+    public static function generateJWT($userId, $expires = null) {
         $key     = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
         $expire  = AAM_Core_Config::get('authentication.jwt.expires', $expires);
         $alg     = AAM_Core_Config::get('authentication.jwt.algorithm', 'HS256');
         
+        if (!empty($expire)) {
+            $time = DateTime::createFromFormat('m/d/Y, H:i O', $expires);
+        } else {
+            $time = new DateTime('+24 hours');
+        }
+        
         if ($key) {
             $claims = apply_filters('aam-jwt-claims-filter', array(
-                "iat"    => time(),
-                'exp'    => time() + $expire, // by default expires in 1 day
-                'userId' => $userId,
+                "iat"       => time(),
+                'exp'       => $time->format('U'),
+                'userId'    => $userId
             ));
             
             $token = Firebase\JWT\JWT::encode($claims, $key, $alg);
@@ -231,14 +236,32 @@ class AAM_Core_JwtAuth {
         $token = $this->extractJwt();
         $key   = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
         
-        if ($token) {
+        if (!empty($token['jwt'])) {
             try {
                 $claims = Firebase\JWT\JWT::decode(
-                        $token, $key, array_keys(Firebase\JWT\JWT::$supported_algs)
+                        $token['jwt'], $key, array_keys(Firebase\JWT\JWT::$supported_algs)
                 );
                 
                 if (isset($claims->userId)) {
                     $result = $claims->userId;
+                    
+                    // Also login user if REQUEST_METHOD is GET
+                    if ($token['method'] === 'query' 
+                            && AAM_Core_Request::server('REQUEST_METHOD') === 'GET') {
+                        wp_set_current_user($claims->userId);
+                        wp_set_auth_cookie($claims->userId);
+                        
+                        $exp = get_user_meta($claims->userId, 'aam_user_expiration', true);
+                        if (empty($exp)) {
+                            update_user_meta(
+                                $claims->userId, 
+                                'aam_user_expiration',
+                                date('m/d/Y, H:i O', $claims->exp) . '|logout|'
+                            );
+                        }
+                        
+                        do_action('wp_login', '', wp_get_current_user());
+                    }
                 }
             } catch (Exception $ex) {
                 // Do nothing
@@ -254,7 +277,7 @@ class AAM_Core_JwtAuth {
      */
     protected function extractJwt() {
         $container = explode(',', AAM_Core_Config::get(
-            'authentication.jwt.container', 'header'
+            'authentication.jwt.container', 'header,post,query,cookie'
         ));
         
         $jwt = null;
@@ -287,7 +310,10 @@ class AAM_Core_JwtAuth {
             }
         }
         
-        return (!empty($jwt) ? preg_replace('/^Bearer /', '', $jwt) : null);
+        return array(
+            'jwt'    => preg_replace('/^Bearer /', '', $jwt),
+            'method' => $method
+        );
     }
     
     /**

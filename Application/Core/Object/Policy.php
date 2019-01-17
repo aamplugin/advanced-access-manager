@@ -128,19 +128,17 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
             );
             
             foreach($policies as $id => $effect) {
-                if ($effect) {
-                    $policy = get_post($id);
-
-                    if (is_a($policy, 'WP_Post')) {
-                        $obj = json_decode($policy->post_content, true);
-                        if (json_last_error() === JSON_ERROR_NONE) {
-                            $list['Statements'] = array_merge(
-                                $list['Statements'], $this->extractStatements($obj)
-                            );
-                            $list['Features'] = array_merge(
-                                $list['Features'], $this->extractFeatures($obj)
-                            );
-                        }
+                $policy = get_post($id);
+                
+                if (is_a($policy, 'WP_Post')) {
+                    $obj = json_decode($policy->post_content, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $list['Statements'] = array_merge(
+                            $list['Statements'], $this->extractStatements($obj, empty($effect))
+                        );
+                        $list['Features'] = array_merge(
+                            $list['Features'], $this->extractFeatures($obj, empty($effect))
+                        );
                     }
                 }
             }
@@ -155,7 +153,7 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
      * @param type $policy
      * @return type
      */
-    protected function extractStatements($policy) {
+    protected function extractStatements($policy, $unset = false) {
         $statements = array();
         
         if (isset($policy['Statement'])) {
@@ -175,6 +173,12 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
             }
         }
         
+        if ($unset === true) {
+            foreach($statements as &$statement) {
+                $statement['Unset'] = true;
+            }
+        }
+        
         return $statements;
     }
     
@@ -188,7 +192,7 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
      * @access protected
      * @since  v5.7.3
      */
-    protected function extractFeatures($policy) {
+    protected function extractFeatures($policy, $unset = false) {
         $features = array();
         
         if (isset($policy['Feature'])) {
@@ -196,6 +200,12 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
                 $features = $policy['Feature'];
             } else {
                 $features = array($policy['Feature']);
+            }
+        }
+        
+        if ($unset === true) {
+            foreach($features as &$feature) {
+                $feature['Unset'] = true;
             }
         }
         
@@ -753,7 +763,15 @@ class AAM_Core_Object_Policy extends AAM_Core_Object {
         if (is_null($subject)) {
             if (!isset(self::$resources['__combined'])) {
                 foreach(self::$resources as $resources) {
-                    $response = array_merge($resources, $response);
+                    foreach ($resources as $id => $props) {
+                        if (!empty($props['Unset'])) {
+                            if (isset($response[$id])) { // Clear the entire chain
+                                unset($response[$id]);
+                            }
+                        } else {
+                            $response[$id] = $props;
+                        }
+                    }
                 }
                 self::$resources['__combined'] = $response;
             } else {

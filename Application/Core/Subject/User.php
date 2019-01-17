@@ -42,6 +42,12 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
     protected $parent = null;
     
     /**
+     *
+     * @var type 
+     */
+    protected $maxLevel = null;
+    
+    /**
      * 
      * @param type $id
      */
@@ -66,10 +72,23 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         }
             
         //check if user is expired
-        $expired = get_user_option('aam_user_expiration', $this->ID);
+        $expired = get_user_meta($this->ID, 'aam_user_expiration', true);
         if (!empty($expired)) {
-            $parts = explode('|', $expired);
-            if ($parts[0] <= date('Y-m-d H:i:s')) {
+            $parts   = explode('|', $expired);
+            
+            // Set time
+            // TODO: Remove in Jan 2020
+            if (preg_match('/^[\d]{4}-/', $parts[0])) {
+                $expires = DateTime::createFromFormat('Y-m-d H:i:s', $parts[0]);
+            } else {
+                $expires = DateTime::createFromFormat('m/d/Y, H:i O', $parts[0]);
+            }
+            
+            $compare = new DateTime();
+            //TODO - PHP Warning:  DateTime::setTimezone(): Can only do this for zones with ID for now in
+            @$compare->setTimezone($expires->getTimezone());
+            
+            if ($expires <= $compare) {
                 $this->triggerExpiredUserAction($parts);
             }
         }
@@ -114,6 +133,10 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         switch($config[1]) {
             case 'lock':
                 $this->block();
+                break;
+            
+            case 'logout':
+                wp_logout();
                 break;
             
             case 'change-role':
@@ -209,7 +232,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         // Retrieve all capabilities set in Access Policy
         // Load Capabilities from the policy
         $stms = AAM_Core_Policy_Manager::getInstance()->find("/^Capability:/i");
-        
+
         $policyCaps = array();
         
         foreach($stms as $key => $stm) {
@@ -444,7 +467,11 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @return type
      */
     public function getMaxLevel() {
-        return AAM_Core_API::maxLevel($this->allcaps);
+        if (is_null($this->maxLevel)) {
+            $this->maxLevel = AAM_Core_API::maxLevel($this->allcaps);
+        }
+        
+        return $this->maxLevel;
     }
     
 }

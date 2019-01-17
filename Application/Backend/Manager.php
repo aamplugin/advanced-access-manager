@@ -737,7 +737,7 @@ class AAM_Backend_Manager {
     public function printJavascript() {
         if (AAM::isAAM()) {
             wp_enqueue_script('aam-vendor', AAM_MEDIA . '/js/vendor.js');
-            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.7.3.js');
+            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.8.js');
             
             //add plugin localization
             $this->printLocalization('aam-main');
@@ -788,7 +788,7 @@ class AAM_Backend_Manager {
                 'addUser'   => esc_url(admin_url('user-new.php')),
                 'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
             ),
-            'level'     => AAM_Core_API::maxLevel(wp_get_current_user()->allcaps),
+            'level'     => AAM::getUser()->getMaxLevel(),
             'subject'   => array(
                 'type'  => $subject->getUID(),
                 'id'    => $subject->getId(),

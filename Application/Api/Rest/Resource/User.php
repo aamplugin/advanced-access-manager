@@ -55,7 +55,7 @@ class AAM_Api_Rest_Resource_User {
      */
     public function userQuery($args) {
         //current user max level
-        $max     = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
+        $max     = AAM::getUser()->getMaxLevel();
         $exclude = isset($args['role__not_in']) ? $args['role__not_in'] : array();
         $roles   = AAM_Core_API::getRoles();
         

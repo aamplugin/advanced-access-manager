@@ -513,7 +513,7 @@ class AAM_Shared_Manager {
      * @return type
      */
     protected function checkPluginsAction($action, $caps, $cap) {
-        $allow = AAM::api()->isAllowed("Plugin", "WP:{$action}");
+        $allow = AAM::api()->isAllowed("Plugin:WP:{$action}");
         
         if ($allow !== null) {
             $caps[] = $allow ? $cap : 'do_not_allow';
@@ -534,7 +534,7 @@ class AAM_Shared_Manager {
         $parts = explode('/', $plugin);
         $slug  = (!empty($parts[0]) ? $parts[0] : null);
 
-        $allow = AAM::api()->isAllowed("Plugin:{$slug}", "WP:{$action}");
+        $allow = AAM::api()->isAllowed("Plugin:{$slug}:WP:{$action}");
         if ($allow !== null) {
             $caps[] = $allow ? $cap : 'do_not_allow';
         }
@@ -620,7 +620,7 @@ class AAM_Shared_Manager {
         $user = new WP_User($userId);
         
         //current user max level
-        $maxLevel  = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
+        $maxLevel  = AAM::getUser()->getMaxLevel();
         //userLevel
         $userLevel = AAM_Core_API::maxLevel($user->allcaps);
 

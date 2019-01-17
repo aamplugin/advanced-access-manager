@@ -766,6 +766,9 @@
                     success: function (response) {
                         if (response.status === 'success') {
                             $('#user-auth-jwt').val(response.jwt);
+                            $('#user-auth-url').val(
+                                $('#user-auth-url').data('url').replace('%s', response.jwt)
+                            );
                         } else {
                             getAAM().notification(
                                 'danger', getAAM().__('Failed to generate JWT token')
@@ -871,9 +874,10 @@
                     }
 
                     //add subtitle
+                    var expire = (data[5] ? '; <i class="icon-clock"></i>' : '');
                     $('td:eq(0)', row).append(
                         $('<i/>', {'class': 'aam-row-subtitle'}).html(
-                            getAAM().__('Role') + ': ' + data[1] + '; ID: <b>' + data[0] + '</b>'
+                            getAAM().__('Role') + ': ' + data[1] + '; ID: <b>' + data[0] + '</b>' + expire
                         )
                     );
 
@@ -1103,7 +1107,7 @@
 
             $('#user-expiration-datapicker').on('dp.change', function(res) {
                 $('#user-expires').val(
-                    res.date.format('MM/DD/YYYY, h:mm a')
+                    res.date.format('MM/DD/YYYY, H:mm Z')
                 );
                 generateJWT(
                     $('#edit-user-expiration-btn').attr('data-user-id'),
@@ -1511,7 +1515,7 @@
                                             save({
                                                 type: getAAM().getSubject().type,
                                                 id: getAAM().getSubject().id
-                                            }, data[0], 1, this);
+                                            }, data[0], ($(this).hasClass('icon-check-empty') ? 1 : 0), this);
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Apply Policy')
@@ -1525,7 +1529,7 @@
                                             save({
                                                 type: getAAM().getSubject().type,
                                                 id: getAAM().getSubject().id
-                                            }, data[0], 0, this);
+                                            }, data[0], ($(this).hasClass('icon-check') ? 0 : 1), this);
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Revoke Policy')

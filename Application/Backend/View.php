@@ -290,7 +290,7 @@ class AAM_Backend_View {
         
         if (current_user_can('aam_switch_users')) { 
             $user  = new WP_User(AAM_Core_Request::post('user'));
-            $max   = AAM_Core_API::maxLevel(wp_get_current_user()->allcaps);
+            $max   = AAM::getUser()->getMaxLevel();
 
             if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
                 AAM_Core_API::updateOption(

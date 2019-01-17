@@ -218,7 +218,7 @@ class AAM_Backend_Filter {
      * @return array
      */
     public function filterRoles($roles) {
-        $userLevel = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
+        $userLevel = AAM::getUser()->getMaxLevel();
         
         //filter roles
         foreach($roles as $id => $role) {
@@ -262,7 +262,7 @@ class AAM_Backend_Filter {
      */
     public function filterUserQuery($query) {
         //current user max level
-        $max     = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
+        $max     = AAM::getUser()->getMaxLevel();
         $exclude = array();
         $roles   = AAM_Core_API::getRoles();
         
@@ -288,7 +288,7 @@ class AAM_Backend_Filter {
      * @access public
      */
     public function filterViews($views) {
-        $max   = AAM_Core_API::maxLevel(AAM::getUser()->allcaps);
+        $max   = AAM::getUser()->getMaxLevel();
         $roles = AAM_Core_API::getRoles();
         
         foreach($roles->role_objects as $id => $role) {
