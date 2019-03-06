@@ -28,7 +28,7 @@ if (!class_exists('Composer\Semver')) {
         if (strpos($classname, 'Composer\Semver') === 0) {
             $normalized = str_replace(
                 array('Composer\Semver', '\\'), 
-                array('Composer', '/'), 
+                array('composer', '/'), 
                 $classname
             );
             $filename = __DIR__ . '/' . $normalized . '.php';

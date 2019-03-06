@@ -150,7 +150,7 @@ class AAM_Core_Login {
             } elseif (AAM_Core_Config::get('core.settings.singleSession', false)) {
                 $sessions = WP_Session_Tokens::get_instance($user->ID);
                 
-                if (count($sessions->get_all()) > 1) {
+                if (count($sessions->get_all()) >= 1) {
                     $sessions->destroy_all();
                 }
             }
@@ -238,10 +238,10 @@ class AAM_Core_Login {
      * @access protected
      */
     protected function updateLoginCounter($increment) {
-        $attempts = get_transient('aam_login_attemtps');
+        $attempts = get_transient('aam_login_attempts');
 
         if ($attempts !== false) {
-            $timeout  = get_option('_transient_timeout_aam_login_attemtps') - time();
+            $timeout  = get_option('_transient_timeout_aam_login_attempts') - time();
             $attempts = intval($attempts) + $increment;
         } else {
             $attempts = 1;
@@ -255,7 +255,7 @@ class AAM_Core_Login {
             wp_safe_redirect(site_url('index.php'));
             exit;
         } else {
-            set_transient('aam_login_attemtps', $attempts, $timeout);
+            set_transient('aam_login_attempts', $attempts, $timeout);
         }
     }
     

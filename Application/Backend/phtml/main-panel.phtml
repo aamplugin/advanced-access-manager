@@ -1,5 +1,5 @@
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $features = AAM_Backend_Feature::retriveList($type); ?>
+    <?php $features = AAM_Backend_Feature::retrieveList($type); ?>
     <div class="row">
         <?php if (count($features)) { ?>
             <div class="col-xs-12 col-md-4">
@@ -23,7 +23,7 @@
             </div>
         <?php } else { ?>
             <div class="col-xs-12">
-                <p class="aam-notification text-center"><?php echo __('You are not allowed to manage any of the existing features.', 'AAM_KEY'); ?></p>
+                <p class="aam-notification text-larger text-center"><?php echo __('You are not allowed to manage any of the existing features.', 'AAM_KEY'); ?></p>
             </div>
         <?php } ?>
     </div>

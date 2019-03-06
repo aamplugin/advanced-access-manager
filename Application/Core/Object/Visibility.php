@@ -59,9 +59,8 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
             
             // Read all the settings from the Access & Security Policies
             $area = AAM_Core_Api_Area::get();
-            $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                "/^post:(.*):(list|listtoothers)$/", 
-                $subject
+            $stms = AAM_Core_Policy_Factory::get($subject)->find(
+                "/^post:(.*):(list|listtoothers)$/"
             );
             
             foreach($stms as $key => $stm) {

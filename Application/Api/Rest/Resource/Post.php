@@ -102,9 +102,9 @@ class AAM_Api_Rest_Resource_Post {
      * @param AAM_Core_Object_Post $post
      * @return type
      */
-    protected function authorizePUblish(AAM_Core_Object_Post $post) {
+    protected function authorizePublish(AAM_Core_Object_Post $post) {
         $steps = array(
-            // Step #1. Check if publish action is alloed
+            // Step #1. Check if publish action is allowed
             array($this, 'checkPublish'),
         );
         
@@ -118,7 +118,7 @@ class AAM_Api_Rest_Resource_Post {
      */
     protected function authorizeUpdate(AAM_Core_Object_Post $post) {
         $steps = array(
-            // Step #1. Check if edit action is alloed
+            // Step #1. Check if edit action is allowed
             array($this, 'checkUpdate'),
         );
         
@@ -132,7 +132,7 @@ class AAM_Api_Rest_Resource_Post {
      */
     protected function authorizeDelete(AAM_Core_Object_Post $post) {
         $steps = array(
-            // Step #1. Check if edit action is alloed
+            // Step #1. Check if edit action is allowed
             array($this, 'checkDelete'),
         );
         

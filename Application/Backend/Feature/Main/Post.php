@@ -16,6 +16,17 @@
 class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     
     /**
+     * Construct
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        if (!current_user_can('aam_manage_posts')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_posts'));
+        }
+    }
+    
+    /**
      * Get list for the table
      * 
      * @return string
@@ -57,7 +68,12 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                 $type->labels->name, 
                 'drilldown,manage',
                 null,
-                apply_filters('aam-type-override-status', false, $type->name, AAM_Backend_Subject::getInstance())
+                apply_filters(
+                    'aam-type-override-status', 
+                    false, 
+                    $type->name, 
+                    AAM_Backend_Subject::getInstance()
+                )
             );
         }
         
@@ -122,6 +138,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
      */
     protected function retrieveTypeContent($type) {
         $list     = $this->prepareContentList($type);
+        $subject  = AAM_Backend_Subject::getInstance();
         $response = array(
             'data'            => array(), 
             'recordsTotal'    => $list->total, 
@@ -158,21 +175,21 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                     get_the_title($record),
                     'manage' . ($link ? ',edit' : ',no-edit'),
                     $parent,
-                    AAM_Backend_Subject::getInstance()->getObject('post', $record->ID)->isOverwritten()
+                    $subject->getObject('post', $record->ID)->isOverwritten()
                 );
             } else { //term
                 $response['data'][] = array(
-                    $record->term_id . '|' . $record->taxonomy,
+                    $record->term_id . '|' . $record->taxonomy . '|' . $type,
                     get_edit_term_link($record->term_id, $record->taxonomy),
                     'term',
                     $record->name,
-                    'manage,edit',
+                    implode(',', apply_filters('aam-term-row-actions', array('manage', 'edit'), $subject, $record, $type)),
                     rtrim($this->getParentTermList($record), '/'),
                     apply_filters(
                         'aam-term-override-status', 
                         false, 
                         $record->term_id . '|' . $record->taxonomy, 
-                        AAM_Backend_Subject::getInstance()
+                        $subject
                     )
                 );
             }
@@ -489,6 +506,8 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
                         $preview = __('Valid URL', AAM_KEY);
                     } elseif ($chunks[0] === 'callback') {
                         $preview = __('Custom Callback', AAM_KEY);
+                    } elseif ($chunks[0] === 'login') {
+                        $preview = __('Redirect To Login Page', AAM_KEY);
                     }
                 }
                 break;
@@ -517,7 +536,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
         $id     = AAM_Core_Request::post('objectId', null);
 
         $param = AAM_Core_Request::post('param');
-        $value = AAM_Core_Request::post('value');
+        $value = filter_input(INPUT_POST, 'value');
 
         //clear cache
         AAM_Core_API::clearCache();
@@ -563,7 +582,6 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
     
     /**
      * 
-     * @staticvar type $list
      * @param type $area
      * @return type
      */

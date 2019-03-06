@@ -17,6 +17,35 @@
 class AAM_Core_Compatibility {
     
     /**
+     * Convert config to the Policy Config
+     * 
+     * @param string $option
+     * @param mixed  $value
+     * 
+     * @return mixed
+     * 
+     * @access public
+     * @static
+     * @since v5.9
+     */
+    public static function convertConfig($option, $value) {
+        if (strpos($option, '.defaultTerm.') !== false && empty($value)) {
+            $param = AAM_Core_Policy_Factory::get()->getParam(
+                    'post:default:category'
+            );
+            if (!empty($param)) {
+                if (!is_numeric($param)) {
+                    $term  = get_term_by('slug', $param, 'category');
+                    $param = (is_wp_error($term) || empty($term) ? null : $term->term_id);
+                }
+            }
+            $value = (is_null($param) ? $value : $param);
+        }
+        
+        return $value;
+    }
+    
+    /**
      * 
      */
     public static function checkConfigPressCompatibility($key) {
@@ -33,27 +62,6 @@ class AAM_Core_Compatibility {
         }
         
         return $key;
-    }
-    
-    /**
-     * 
-     * @param  type $list
-     * @return type
-     * @since  v5.7.3
-     * 
-     * @todo   Remove Jan 2020
-     */
-    public static function preparePolicyList($list) {
-        if (!is_null($list)) {
-            if (empty($list['Statements'])) {
-                $list = array(
-                    'Statements' => $list,
-                    'Features'   => array()
-                );
-            }
-        }
-        
-        return $list;
     }
     
     /**

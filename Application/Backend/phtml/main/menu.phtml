@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Protect your backend area. The list of menus and submenus is based on capabilities [%s] has. For more information please check %sHow to manage WordPress backend menu%s.', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/help/how-to-manage-wordpress-backend-menu" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Protect your backend area. The list of menus and submenus is based on capabilities [%s] has. For more information please check %sHow to manage WordPress backend menu%s.', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-manage-wordpress-backend-menu" target="_blank">', '</a>'); ?>
                 </p>
             </div>
         </div>
@@ -90,6 +90,8 @@
                                             <?php } ?>
                                         </div>
                                     </div>
+                                <?php } else { ?>
+                                    <p class="aam-info"><?php echo __('Dashboard menu cannot be restricted because it is the default page users are redirected after login. You can restrict only Dashboard submenus if any.', AAM_KEY); ?></p>
                                 <?php } ?>
                             </div>
                         </div>
@@ -116,7 +118,7 @@
                     <div class="modal-body">
                         <p class="text-center alert alert-warning text-larger">
                             <strong><?php echo __('You cannot restrict access to Dashboard home page.', AAM_KEY); ?></strong><br/>
-                            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('The [Home] is the default page every user is redirected after login. To restrict access to the entire backend, please check %sHow to lockdown WordPress backend%s article.', 'b'), '<a href="https://aamplugin.com/help/how-to-lockdown-wordpress-backend" target="_blank">', '</a>'); ?>
+                            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('The [Home] is the default page every user is redirected after login. To restrict access to the entire backend, please check %sHow to lockdown WordPress backend%s article.', 'b'), '<a href="https://aamplugin.com/article/how-to-lockdown-wordpress-backend" target="_blank">', '</a>'); ?>
                         </p>
                     </div>
                     <div class="modal-footer">

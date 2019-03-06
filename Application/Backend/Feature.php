@@ -51,8 +51,8 @@ class AAM_Backend_Feature {
         } else {
             $show = true;
         }
-
-        if ($show && AAM::getUser()->hasCapability($cap)) {
+        
+        if ($show && current_user_can($cap)) {
             self::$_features[] = $feature;
             $response = true;
         }
@@ -112,7 +112,7 @@ class AAM_Backend_Feature {
      * @access public
      * @static
      */
-    public static function retriveList($type) {
+    public static function retrieveList($type) {
         $response = array();
         
         $subject = AAM_Backend_Subject::getInstance()->getUID();

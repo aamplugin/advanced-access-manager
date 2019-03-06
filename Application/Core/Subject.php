@@ -76,6 +76,11 @@ abstract class AAM_Core_Subject {
     }
     
     /**
+     * 
+     */
+    public function initialize() { }
+    
+    /**
      * Trigger Subject native methods
      *
      * @param string $name

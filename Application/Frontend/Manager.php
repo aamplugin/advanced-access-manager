@@ -84,7 +84,7 @@ class AAM_Frontend_Manager {
      */
     public function checkAdminBar() {
         if (AAM_Core_API::capabilityExists('show_admin_bar')) {
-            if (!AAM::getUser()->hasCapability('show_admin_bar')) {
+            if (!current_user_can('show_admin_bar')) {
                 add_filter('show_admin_bar', '__return_false', PHP_INT_MAX );
             }
         }

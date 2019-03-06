@@ -61,7 +61,7 @@ class AAM_Extension_Repository {
      * 
      * @access protected 
      */
-    protected $depectedExtensions = array();
+    protected $detectedExtensions = array();
     
     /**
      * Extension list
@@ -91,7 +91,7 @@ class AAM_Extension_Repository {
     public function load($dir = null) {
         $basedir = (is_null($dir) ? $this->getBasedir() : $dir);
         
-        //since release 3.4 some extensions get intergreated into core
+        //since release 3.4 some extensions get integrated into core
         AAM_Core_Compatibility::initExtensions();
 
         if (file_exists($basedir)) {
@@ -102,8 +102,8 @@ class AAM_Extension_Repository {
                 }
             }
             // TODO: Rethink this hook
-            //Very important hook for cases when there is extensions dependancy.
-            //For example AAM Plus Package depends on AAM Utitlities properties
+            //Very important hook for cases when there is extensions dependency.
+            //For example AAM Plus Package depends on AAM Utilities properties
             do_action('aam-post-extensions-load');
         }
     }
@@ -132,12 +132,12 @@ class AAM_Extension_Repository {
         if (file_exists($config)) {
             $conf = require $config;
             
-            $this->depectedExtensions[$conf['id']] = $conf['version'];
+            $this->detectedExtensions[$conf['id']] = $conf['version'];
             
-            // determin if extension needs to be loaded based on the status
+            // determine if extension needs to be loaded based on the status
             $status = empty($cache[$conf['id']]['status']) || ($cache[$conf['id']]['status'] !== self::STATUS_INACTIVE);
             
-            // determin if extension meets minimum required AAM version
+            // determine if extension meets minimum required AAM version
             $list    = AAM_Extension_List::get();
             $issue   = !empty($conf['requires']['aam']) && (version_compare(AAM_Core_API::version(), $conf['requires']['aam']) === -1);
             $load    = $status && !$issue;
@@ -158,7 +158,7 @@ class AAM_Extension_Repository {
                 sprintf(
                     __('The [%s] does not appear to be a valid AAM extension. %sRead more.%s', AAM_KEY),
                     str_replace(AAM_EXTENSION_BASE . '/', '', $config),
-                   '<a href="https://aamplugin.com/help/how-to-fix-the-config-php-file-is-missing-notification" target="_blank">',
+                   '<a href="https://aamplugin.com/article/how-to-fix-the-config-php-file-is-missing-notification" target="_blank">',
                    '</a>'
                 ),
                 'b'    
@@ -273,7 +273,7 @@ class AAM_Extension_Repository {
      * @access public
      */
     public function getVersion($id) {
-        return (isset($this->depectedExtensions[$id]) ? $this->depectedExtensions[$id] : null);
+        return (isset($this->detectedExtensions[$id]) ? $this->detectedExtensions[$id] : null);
     }
     
     /**
@@ -323,10 +323,10 @@ class AAM_Extension_Repository {
         if (is_null($status)) {
             $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
             
-            if (isset($this->depectedExtensions[$id])) {
+            if (isset($this->detectedExtensions[$id])) {
                 $status = AAM_Extension_Repository::STATUS_INSTALLED;
                 
-                if ($this->isOutdatedVersion($item, $retrieved, $this->depectedExtensions[$id])) {
+                if ($this->isOutdatedVersion($item, $retrieved, $this->detectedExtensions[$id])) {
                     $status = AAM_Extension_Repository::STATUS_UPDATE;
                     AAM_Core_Console::add(
                         AAM_Backend_View_Helper::preparePhrase(sprintf(
@@ -337,9 +337,9 @@ class AAM_Extension_Repository {
                 }
             }
         } elseif ($status === AAM_Extension_Repository::STATUS_INSTALLED) {
-            if (!isset($this->depectedExtensions[$id])) {
+            if (!isset($this->detectedExtensions[$id])) {
                 $status = AAM_Extension_Repository::STATUS_DOWNLOAD;
-            } elseif ($this->isOutdatedVersion($item, $retrieved, $this->depectedExtensions[$id])) {
+            } elseif ($this->isOutdatedVersion($item, $retrieved, $this->detectedExtensions[$id])) {
                 $status = AAM_Extension_Repository::STATUS_UPDATE;
             }
         }
@@ -370,7 +370,7 @@ class AAM_Extension_Repository {
     /**
      * Check extension directory
      * 
-     * @return boolean|sstring
+     * @return boolean|string
      * 
      * @access public
      * 
@@ -401,7 +401,7 @@ class AAM_Extension_Repository {
      * @access public
      */
     public function getBasedir($relative = false) {
-        $dir = AAM_Core_Config::get('core.extention.directory', AAM_EXTENSION_BASE);
+        $dir = AAM_Core_Config::get('core.extension.directory', AAM_EXTENSION_BASE);
         
         return ($relative ? str_replace(ABSPATH, '', $dir) : $dir);
     }

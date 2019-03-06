@@ -39,7 +39,7 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
 
         return $role;
     }
-
+    
     /**
      * Delete User Role 
      *
@@ -141,10 +141,10 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
         $has = $this->getSubject()->has_cap($cap);
         
         // Override by policy if is set
-        $stm = AAM::api()->getPolicyManager()->find("/^Capability:{$cap}$/i", $this);
-        if (!empty($stm)) {
-            $val = end($stm);
-            $has = ($val['Effect'] === 'allow' ? 1 : 0);
+        $manager = AAM::api()->getPolicyManager($this);
+        
+        if ($manager->isAllowed("Capability:{$cap}") === false) {
+            $has = false;
         }
         
         return $has;

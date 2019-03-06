@@ -37,9 +37,7 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
         
         // Load settings from Access & Security Policy
         if (empty($option)) {
-            $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                "/^(Metabox|Widget):/i", $subject
-            );
+            $stms = AAM_Core_Policy_Factory::get($subject)->find("/^(Metabox|Widget):/i");
             
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);

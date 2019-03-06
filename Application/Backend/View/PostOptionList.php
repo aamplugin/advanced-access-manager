@@ -73,7 +73,7 @@ class AAM_Backend_View_PostOptionList {
                     'option'  => 'frontend.expire_datetime',
                     'preview' => 'frontend-expire_datetime-preview',
                     'modal'   => 'modal-access-expires',
-                    'descr'   => __('Define when access will expire for %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied and redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/help/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>') . sprintf(__(' %ssee in action.%s', AAM_KEY), "<a href='https://youtu.be/IgtgVoWs35w' target='_blank'>", '</a>')
+                    'descr'   => __('Define when access will expire for %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied and redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>') . sprintf(__(' %ssee in action.%s', AAM_KEY), "<a href='https://youtu.be/IgtgVoWs35w' target='_blank'>", '</a>')
                 ),
                 'monetize' => array(
                     'title'   => __('Monetized Access', AAM_KEY),
@@ -82,7 +82,7 @@ class AAM_Backend_View_PostOptionList {
                     'preview' => 'frontend-eproduct-preview',
                     'modal'   => 'modal-eproduct',
                     'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => sprintf(AAM_Backend_View_Helper::preparePhrase('[Premium feature!] Start selling access to %s. Access will be granted to open %s only if selected E-Product had been purchased. For more information %scheck this article%s.', 'b'), '%s', '%s', "<a href='https://aamplugin.com/help/how-to-monetize-access-to-the-wordpress-content' target='_blank'>", '</a>')
+                    'descr'   => sprintf(AAM_Backend_View_Helper::preparePhrase('[Premium feature!] Start selling access to %s. Access will be granted to open %s only if selected E-Product had been purchased. For more information %scheck this article%s.', 'b'), '%s', '%s', "<a href='https://aamplugin.com/article/how-to-monetize-access-to-the-wordpress-content' target='_blank'>", '</a>')
                 )
             ),
             'backend' => array(
@@ -151,7 +151,7 @@ class AAM_Backend_View_PostOptionList {
                     'option'  => 'api.expire_datetime',
                     'preview' => 'api-expire_datetime-preview',
                     'modal'   => 'modal-access-expires',
-                    'descr'   => __('Define when access expires to %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/help/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>')
+                    'descr'   => __('Define when access expires to %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>')
                 ),
                 'edit' => array(
                     'title'   => __('Update', AAM_KEY),

@@ -34,9 +34,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
         }
         
         if (empty($option)) {
-            $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                "/^URI:/i", $subject
-            );
+            $stms = AAM_Core_Policy_Factory::get($subject)->find("/^URI:/i");
             
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);

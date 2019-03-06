@@ -8,7 +8,7 @@
                     </p>
                 <?php } else { ?>
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for %s when access is denied to restricted resources like posts, categories, menus, etc. For more information about this feature, please check %sHow to redirect WordPress user when access is denied%s.'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/help/how-to-redirect-wordpress-user-when-access-is-denied" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for %s when access is denied to restricted resources like posts, categories, menus, etc. For more information about this feature, please check %sHow to redirect WordPress user when access is denied%s.'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-redirect-wordpress-user-when-access-is-denied" target="_blank">', '</a>'); ?>
                     </p>
                 <?php } ?>
                 <div class="aam-overwrite" id="aam-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">

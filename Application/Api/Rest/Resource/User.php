@@ -73,7 +73,7 @@ class AAM_Api_Rest_Resource_User {
     /**
      * Alias for the bootstrap
      * 
-     * @return AAM_Api_Restf_Resource_User
+     * @return AAM_Api_Rest_Resource_User
      * 
      * @access public
      * @static

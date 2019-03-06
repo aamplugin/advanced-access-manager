@@ -48,9 +48,6 @@ class AAM_Frontend_Filter {
         
         //widget filters
         add_filter('sidebars_widgets', array($this, 'filterWidgets'), 999);
-        
-        //get control over commenting stuff
-        add_filter('comments_open', array($this, 'commentOpen'), 10, 2);
     }
     
     /**
@@ -76,12 +73,11 @@ class AAM_Frontend_Filter {
                     AAM_Core_Config::get("frontend.404redirect.{$type}")
                 );
             }
-        } elseif ($wp_query->is_single || $wp_query->is_page 
-                                || $wp_query->is_posts_page || $wp_query->is_home) {
+        } elseif ($wp_query->is_single || $wp_query->is_page) {
             $post = AAM_Core_API::getCurrentPost();
             
             if ($post) {
-                AAM_Frontend_Authorization::getInstance()->chechReadAuth($post);
+                AAM_Frontend_Authorization::getInstance()->checkReadAuth($post);
             }
         }
     }
@@ -105,7 +101,7 @@ class AAM_Frontend_Filter {
         $post = AAM_Core_API::getCurrentPost();
         
         if ($post) {
-            AAM_Frontend_Authorization::getInstance()->chechReadAuth($post);
+            AAM_Frontend_Authorization::getInstance()->checkReadAuth($post);
         }
         
         return $template;
@@ -177,22 +173,6 @@ class AAM_Frontend_Filter {
      */
     public function filterWidgets($widgets) {
         return AAM::getUser()->getObject('metabox')->filterFrontend($widgets);
-    }
-    
-    /**
-     * Control frontend commenting feature
-     *
-     * @param boolean $open
-     * @param int     $post_id
-     *
-     * @return boolean
-     *
-     * @access public
-     */
-    public function commentOpen($open, $post_id) {
-        $object = AAM::getUser()->getObject('post', $post_id);
-        
-        return ($object->has('frontend.comment') ? false : $open);
     }
     
     /**

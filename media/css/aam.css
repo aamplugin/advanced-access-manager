@@ -52,6 +52,7 @@
 .icon-angle-left:before { content: '\f104' !important; } /* 'ï' */
 .icon-angle-right:before { content: '\f105' !important; } /* 'ï' */
 .icon-angle-up:before { content: '\f106' !important; } /* 'ï' */
+.icon-pin:before { content: '\e81a' !important; } /* 'î ' */
 .icon-angle-down:before { content: '\f107' !important; } /* 'ï' */
 .icon-asterisk:before { content: '\e801' !important; } /* 'î ' */
 .icon-spin4:before { content: '\e802' !important; } /* 'î ' */

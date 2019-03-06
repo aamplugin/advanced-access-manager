@@ -74,15 +74,30 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
         $subject = AAM_Backend_Subject::getInstance();
         $id      = AAM_Core_Request::post('id');
         $effect  = AAM_Core_Request::post('effect');
+        
+        $action = (!empty($effect) ? 'attach' : 'detach');
+        
+        // Verify that current user can perform following action
+        if (AAM_Core_Policy_Factory::get()->canTogglePolicy($id, $action)) {
+            //clear cache
+            AAM_Core_API::clearCache();
 
-        //clear cache
-        AAM_Core_API::clearCache();
-
-        $result = $subject->save($id, $effect, 'policy');
+            $result = $subject->save($id, $effect, 'policy');
+        } else {
+            $result = false;
+        }
 
         return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure')
         ));
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    public function reset() {
+        return AAM_Backend_Subject::getInstance()->resetObject('policy');
     }
     
     /**
@@ -186,12 +201,16 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
     protected function buildActionList($record) {
         //'assign,edit,clone,delete'
         $subject = AAM_Backend_Subject::getInstance();
-        $object  = $subject->getObject('policy');
-        $actions = array();
+        $policy  = $subject->getObject('policy');
+        $post    = $subject->getObject('post', $record->ID);
         
-        $actions[] = $object->has($record->ID) ? 'unassign' : 'assign';
-        $actions[] = 'edit';
-        $actions[] = 'delete';
+        $action  = $policy->has($record->ID) ? 'detach' : 'attach';
+        $prefix  = AAM_Core_Policy_Factory::get()->canTogglePolicy($record->ID, $action) ? '' : 'no-';
+        
+        $actions = array(
+            $policy->has($record->ID) ? "{$prefix}detach" : "{$prefix}attach",
+            $post->has('backend.edit') ? 'no-edit' : 'edit'
+        );
         
         return implode(',', $actions);
     }

@@ -3,7 +3,7 @@
 /**
   Plugin Name: Advanced Access Manager
   Description: All you need to manage access to your WordPress website
-  Version: 5.8
+  Version: 5.9.1
   Author: Vasyl Martyniuk <vasyl@vasyltech.com>
   Author URI: https://vasyltech.com
 
@@ -128,13 +128,10 @@ class AAM {
         // Load AAM
         AAM::getInstance();
         
-         //load all installed extension
+        //load all installed extension
         if (AAM_Core_Config::get('core.settings.extensionSupport', true)) {
             AAM_Extension_Repository::getInstance()->load();
         }
-        
-        // Load Access/Security Policies
-        AAM_Core_Policy_Manager::bootstrap();
         
         //load WP Core hooks
         AAM_Shared_Manager::bootstrap();
@@ -149,9 +146,6 @@ class AAM {
      * @static
      */
     public static function onInit() {
-        //load media control
-        AAM_Core_Media::bootstrap();
-
         //bootstrap the correct interface
         if (AAM_Core_Api_Area::isBackend()) {
             AAM_Backend_Manager::bootstrap();
@@ -173,12 +167,12 @@ class AAM {
             self::$_instance = new self;
             
             // Load user capabilities
-            self::$_instance->getUser()->loadCapabilities();
+            self::$_instance->getUser()->initialize();
             
             // Logout user if he/she is blocked
             self::$_instance->getUser()->validateUserStatus();
             
-            load_plugin_textdomain(AAM_KEY);
+            load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/Lang');
         }
 
         return self::$_instance;
@@ -281,7 +275,7 @@ if (defined('ABSPATH')) {
         wp_schedule_event(time(), 'daily', 'aam-cron');
     }
     add_action('aam-cron', 'AAM::cron');
-    
+
     //activation & deactivation hooks
     register_activation_hook(__FILE__, array('AAM', 'activate'));
     register_uninstall_hook(__FILE__, array('AAM', 'uninstall'));

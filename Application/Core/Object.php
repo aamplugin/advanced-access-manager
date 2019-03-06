@@ -74,9 +74,7 @@ abstract class AAM_Core_Object {
      * 
      * @access public
      */
-    public function initialize() {
-        
-    }
+    public function initialize() {}
 
     /**
      * Set current subject

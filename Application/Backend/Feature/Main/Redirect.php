@@ -16,6 +16,41 @@
 class AAM_Backend_Feature_Main_Redirect extends AAM_Backend_Feature_Abstract {
     
     /**
+     * Construct
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        if (!current_user_can('aam_manage_access_denied_redirect')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_access_denied_redirect'));
+        }
+    }
+    
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function save() {
+       $param = AAM_Core_Request::post('param');
+       $value = AAM_Core_Request::post('value');
+
+       $object = AAM_Backend_Subject::getInstance()->getObject('redirect');
+
+       $object->save($param, $value);
+
+       return wp_json_encode(array('status' => 'success'));
+    }
+    
+    /**
+     * 
+     * @return type
+     */
+    public function reset() {
+        return AAM_Backend_Subject::getInstance()->resetObject('redirect');
+    }
+    
+    /**
      * 
      * @return type
      */

@@ -21,6 +21,8 @@
                     </div>
                 </div>
             </div>
+            
+            <?php $manageExtensions = AAM_Core_Config::get('core.settings.extensionSupport', true) && current_user_can('aam_manage_extensions'); ?>
 
             <div class="col-xs-12 col-md-4 aam-sidebar">
                 <?php if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) { ?>
@@ -56,14 +58,14 @@
                                         <span>Settings</span>
                                     </a>
                                 <?php } ?>
-                                <?php if (AAM_Core_Config::get('core.settings.extensionSupport', true) && current_user_can('aam_manage_extensions')) { ?>
+                                <?php if ($manageExtensions) { ?>
                                     <a href="#" title="Extensions" data-type="extensions" class="aam-area">
                                         <i class="icon-cubes"></i>
                                         <span>Extensions</span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamplugin.com/help" title="Help" target="_blank">
+                                    <a href="https://aamplugin.com/support" title="Help" target="_blank">
                                         <i class="icon-help-circled"></i>
                                         <span>Help</span>
                                     </a>
@@ -73,40 +75,42 @@
                     </div>
                 </div>
                 
-                <div class="metabox-holder settings-metabox" style="display:none;">
-                    <div class="postbox">
-                        <div class="inside">
-                            <div class="row">
-                                <div class="col-xs-12 col-md-6">
-                                    <a href="#" class="btn btn-primary btn-block" id="clear-cache"><?php echo __('Clear AAM Cache', AAM_KEY); ?></a>
+                <?php if (current_user_can('aam_manage_settings')) { ?>
+                    <div class="metabox-holder settings-metabox" style="display:none;">
+                        <div class="postbox">
+                            <div class="inside">
+                                <div class="row">
+                                    <div class="col-xs-12 col-md-6">
+                                        <a href="#" class="btn btn-primary btn-block" id="clear-cache"><?php echo __('Clear AAM Cache', AAM_KEY); ?></a>
+                                    </div>
+                                    <div class="col-xs-12 col-md-6">
+                                        <a href="#clear-settings-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Reset AAM Settings', AAM_KEY); ?></a>
+                                    </div>
                                 </div>
-                                <div class="col-xs-12 col-md-6">
-                                    <a href="#clear-settings-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Reset AAM Settings', AAM_KEY); ?></a>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="clear-settings-modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title"><?php echo __('Clear all settings', AAM_KEY); ?></h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-center alert alert-danger text-larger"><?php echo __('All AAM settings will be removed.', AAM_KEY); ?></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" id="clear-settings"><?php echo __('Clear', AAM_KEY); ?></button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="modal fade" id="clear-settings-modal" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-sm" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title"><?php echo __('Clear all settings', AAM_KEY); ?></h4>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="text-center alert alert-danger text-larger"><?php echo __('All AAM settings will be removed.', AAM_KEY); ?></p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-danger" id="clear-settings"><?php echo __('Clear', AAM_KEY); ?></button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php } ?>
                 
-                <?php if (AAM_Extension_Repository::getInstance()->isWriteableDirectory() === false) { ?>
+                <?php if (AAM_Extension_Repository::getInstance()->isWriteableDirectory() === false && $manageExtensions) { ?>
                     <?php $relativePath = AAM_Extension_Repository::getInstance()->getBasedir(true); ?>
                     <div class="metabox-holder extensions-metabox" id='extension-dir-warning' style="display:none;">
                         <div class="postbox">
@@ -143,7 +147,7 @@
                 <?php } ?>
                 
                 <?php $licenses = AAM_Extension_Repository::getInstance()->getCommercialLicenses(); ?>
-                <?php if (count($licenses)) { ?>
+                <?php if (count($licenses) && $manageExtensions) { ?>
                     <div class="metabox-holder extensions-metabox" style="display:none;">
                         <div class="postbox">
                             <h3 class="hndle">
@@ -228,6 +232,9 @@
                                     <?php if (current_user_can('aam_manage_default')) { ?>
                                         <li role="presentation" class="<?php echo (!$active++ ? 'active ' : ''); ?>text-center"><a href="#default" aria-controls="default" role="tab" data-toggle="tab" class="text-danger"><i class="icon-asterisk"></i><br/><?php echo __('Default', AAM_KEY); ?></a></li>
                                     <?php } ?>
+                                    <?php if ($active === 0) { ?>
+                                        <li role="presentation" class="active text-center"><a href="#none" aria-controls="none" role="tab" data-toggle="tab" class="text-muted"><i class="icon-asterisk"></i><br/><?php echo __('None', AAM_KEY); ?></a></li>
+                                    <?php } ?>
                                 </ul>
                                 <div class="tab-content">
                                     <?php $active = 0; ?>
@@ -260,7 +267,7 @@
                                                             <input type="text" class="form-control" name="name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" />
                                                         </div>
                                                         <div class="form-group">
-                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
+                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/article/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
                                                             <input type="text" class="form-control" name="expire" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
                                                         <?php /* TODO: Rethink this filter */ do_action('aam-add-role-ui-action'); ?>
@@ -287,7 +294,7 @@
                                                             <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" name="name" />
                                                         </div>
                                                         <div class="form-group">
-                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/help/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
+                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/article/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
                                                             <input type="text" class="form-control" name="expire" id="edit-role-expiration" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
                                                         <?php /* TODO: Rethink this filter */ do_action('aam-edit-role-ui-action'); ?>
@@ -422,6 +429,11 @@
                                             <span class="aam-bordered"><?php echo __('Manage default access to your website resources for all users, roles and visitor. This includes Administrator role and your user', AAM_KEY); ?>.</span>
                                             <button class="btn btn-danger btn-block" id="manage-default"><i class="icon-cog"></i> <?php echo __('Manage Default Access', AAM_KEY); ?></button>
                                         </div>
+                                    </div>
+                                    <?php } ?>
+                                    <?php if ($active === 0) { ?>
+                                    <div role="tabpanel" class="tab-pane active" id="none">
+                                        <p class="alert alert-warning"><?php echo __('You are not allowed to manage any of the existing users, roles, visitors or default access settings for all.', AAM_KEY); ?></p>
                                     </div>
                                     <?php } ?>
                                 </div>

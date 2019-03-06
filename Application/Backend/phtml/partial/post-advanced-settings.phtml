@@ -80,6 +80,10 @@
                             <input type="radio" id="post-redirect-url" name="post-redirect-type" class="post-redirect-type" data-action="#post-redirect-url-action" value="url" />
                             <label for="post-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to the URL [(enter full URL starting from http or https)]', 'small'); ?></label>
                         </div>
+                        <div class="radio hidden" id="post-login-redirect-visitor">
+                            <input type="radio" id="post-redirect-login" name="post-redirect-type" class="post-redirect-type" value="login" data-action="none" />
+                            <label for="post-redirect-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
+                        </div>
                         <div class="radio">
                             <input type="radio" id="post-redirect-callback" name="post-redirect-type" class="post-redirect-type" data-action="#post-redirect-callback-action" value="callback" />
                             <label for="post-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="http://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>

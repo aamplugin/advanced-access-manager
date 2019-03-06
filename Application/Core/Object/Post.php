@@ -95,9 +95,9 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             
             // Read settings from access policy
             if (empty($option)) {
-                $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                    "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):/", 
-                    $subject
+                $stms = AAM_Core_Policy_Factory::get($subject)->find(
+                    "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):/",
+                    array('post' => $post)
                 );
                 $option = array();
                     
@@ -124,7 +124,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             }
             
             // Do not perform finalization if this is user level subject unless it
-            // is overriten. This is critical to avoid overloading database with too 
+            // is overwritten. This is critical to avoid overloading database with too 
             // much cache
             if ($this->allowCache($subject) || $this->isOverwritten()) {
                 $this->finalizeOption($post, $subject, $option);

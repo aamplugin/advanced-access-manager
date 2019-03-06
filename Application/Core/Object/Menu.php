@@ -26,7 +26,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
      */
     public function __construct(AAM_Core_Subject $subject) {
         parent::__construct($subject);
-        
+    
         $option = $this->getSubject()->readOption('menu');
         
         if (!empty($option)) {
@@ -35,9 +35,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
         
         // Load settings from Access & Security Policy
         if (empty($option)) {
-            $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                "/^BackendMenu:/i", $subject
-            );
+            $stms = AAM_Core_Policy_Factory::get($subject)->find("/^BackendMenu:/i");
             
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);
@@ -91,7 +89,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object {
                 }
             }
         }
-        
+
         // remove duplicated separators
         $count = 0;
         foreach ($menu as $id => $item) {

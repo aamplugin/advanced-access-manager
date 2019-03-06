@@ -30,9 +30,7 @@ class AAM_Core_Object_Capability extends AAM_Core_Object {
         $caps = $this->getSubject()->getCapabilities();
         
         // Load Capabilities from the policy
-        $stms = AAM_Core_Policy_Manager::getInstance()->find(
-            "/^Capability:/i", $subject
-        );
+        $stms = AAM_Core_Policy_Factory::get($subject)->find("/^Capability:/i");
         
         foreach($stms as $key => $stm) {
             $chunks = explode(':', $key);

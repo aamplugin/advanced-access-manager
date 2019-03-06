@@ -16,6 +16,17 @@
 class AAM_Backend_Feature_Main_404Redirect  extends AAM_Backend_Feature_Abstract {
     
     /**
+     * Construct
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        if (!current_user_can('aam_manage_404_redirect')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_404_redirect'));
+        }
+    }
+    
+    /**
      * @inheritdoc
      */
     public static function getTemplate() {

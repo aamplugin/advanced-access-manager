@@ -22,7 +22,7 @@ class AAM_Extension_List {
                 'description' => 'Get the complete list of all premium AAM extensions in one package and all future premium extensions already included for now additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
                 'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
-                'latest'      => '3.8.12'
+                'latest'      => '3.8.16'
             ),
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
@@ -31,7 +31,7 @@ class AAM_Extension_List {
                 'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories and hierarchical taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels. As the bonus, define more granular access to how comments can be managed on the backend by other users.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null),
-                'latest'      => '3.9'
+                'latest'      => '3.9.4'
             ),
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',
@@ -75,7 +75,7 @@ class AAM_Extension_List {
                 'id'          => 'AAM_USER_ACTIVITY',
                 'type'        => 'GNU',
                 'license'     => 'AAMUSERACTIVITY',
-                'description' => 'Track any kind of user or visitor activity on your website. <a href="https://aamplugin.com/help/how-to-track-any-wordpress-user-activity" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/user-activity-extension" target="_blank">Github here</a>.',
+                'description' => 'Track any kind of user or visitor activity on your website. <a href="https://aamplugin.com/article/how-to-track-any-wordpress-user-activity" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/user-activity-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_USER_ACTIVITY') ? constant('AAM_USER_ACTIVITY') : null),
                 'latest'      => '1.4.2'
             ),
@@ -85,7 +85,7 @@ class AAM_Extension_List {
                 'type'        => 'GNU',
                 'tag'         => 'ALPHA', 
                 'license'     => 'AAMSOCIALLOGIN',
-                'description' => 'Login to your website with social networks like Facebook, Twitter, Instagram etc. <a href="https://aamplugin.com/help/how-does-aam-social-login-works" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/social-login-extension" target="_blank">Github here</a>.',
+                'description' => 'Login to your website with social networks like Facebook, Twitter, Instagram etc. <a href="https://aamplugin.com/article/how-does-aam-social-login-works" target="_blank">Read more.</a> This is the open source solution and you can find it on the <a href="https://github.com/aamplugin/social-login-extension" target="_blank">Github here</a>.',
                 'version'     => (defined('AAM_SOCIAL_LOGIN') ? constant('AAM_SOCIAL_LOGIN') : null),
                 'latest'      => '0.2.1'
             ),

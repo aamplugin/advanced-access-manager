@@ -66,9 +66,9 @@ class AAM_Core_Policy_Validator {
      */
     public function validate() {
         $steps = array(
-            'isJSON',           // #1. Check if policy is valid JSON
-            'isNotEmpty',       // #2. Check if policy is not empty
-            'isValidDepenency', // #3. Check if all dependencies are defined properly
+            'isJSON',            // #1. Check if policy is valid JSON
+            'isNotEmpty',        // #2. Check if policy is not empty
+            'isValidDependency', // #3. Check if all dependencies are defined properly
         );
         
         foreach($steps as $step) {
@@ -114,14 +114,14 @@ class AAM_Core_Policy_Validator {
         return $result;
     }
     
-    public function isValidDepenency() {
+    public function isValidDependency() {
         if (!empty($this->json['Dependency'])) {
             foreach($this->json['Dependency'] as $app => $constraints) {
                 try {
-                    $satifies = Semver::satisfies(
+                    $satisfies = Semver::satisfies(
                             $this->getAppVersion(strtolower($app)), $constraints
                     );
-                    if ($satifies === false) {
+                    if ($satisfies === false) {
                         throw new Exception(
                             AAM_Backend_View_Helper::preparePhrase(
                                 "The dependency [{$app}] does not satisfy version requirement by the policy",

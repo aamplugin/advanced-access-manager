@@ -61,7 +61,7 @@
                 <?php echo get_avatar(AAM::getUser()->ID, "50"); ?>
             </div>
             <div style="display:table-cell;">
-                <?php $allowAdmin = !AAM_Core_API::capabilityExists('access_dashboard') || AAM::getUser()->hasCapability('access_dashboard'); ?>
+                <?php $allowAdmin = !AAM_Core_API::capabilityExists('access_dashboard') || current_user_can('access_dashboard'); ?>
                 <?php if ($allowAdmin) { ?>
                     <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br/>
                     <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br/>

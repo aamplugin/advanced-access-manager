@@ -48,9 +48,15 @@ class AAM_Backend_Subject {
         $subject = AAM_Core_Request::request('subject');
         
         if ($subject) {
-            $this->initRequestedSubject(
-                    $subject, AAM_Core_Request::request('subjectId')
+            $instance = $this->initRequestedSubject(
+                $subject, AAM_Core_Request::request('subjectId')
             );
+            
+            $max = AAM::getUser()->getMaxLevel();
+        
+            if ($max < AAM_Core_API::maxLevel($instance->getMaxLevel())) {
+                AAM::api()->denyAccess(array('reason' => 'User Level is too low'));
+            }
         } else {
             $this->initDefaultSubject();
         }
@@ -71,12 +77,14 @@ class AAM_Backend_Subject {
         
         if (class_exists($classname)) {
             $subject = new $classname(stripslashes($id));
-            
-            // Load access policy
-            $subject->getObject('policy');
+            $subject->initialize();
             
             $this->setSubject($subject);
+        } else {
+            wp_die('Invalid subject type'); exit;
         }
+        
+        return $subject;
     }
     
     /**
@@ -139,7 +147,7 @@ class AAM_Backend_Subject {
      * @param string $name
      * @param array  $args
      * 
-     * @return mized
+     * @return mixed
      * 
      * @access public
      */

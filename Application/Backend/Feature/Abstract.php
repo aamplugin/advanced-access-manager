@@ -24,7 +24,7 @@ abstract class AAM_Backend_Feature_Abstract {
      * @throws Exception
      */
     public function __construct() {
-        if (!AAM::getUser()->hasCapability('aam_manager')) {
+        if (!current_user_can('aam_manager')) {
             AAM_Core_API::reject(
                 'backend', array('hook' => 'aam_manager')
             );

@@ -16,6 +16,17 @@
 class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstract {
     
     /**
+     * Construct
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        if (!current_user_can('aam_manage_settings')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_settings'));
+        }
+    }
+    
+    /**
      * @inheritdoc
      */
     public static function getTemplate() {
@@ -51,7 +62,7 @@ class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstr
             'uid'        => 'configpress',
             'position'   => 90,
             'title'      => __('ConfigPress', AAM_KEY),
-            'capability' => 'aam_manage_configpress',
+            'capability' => 'aam_manage_settings',
             'type'       => 'settings',
             'subjects'   => array(
                 AAM_Core_Subject_Role::UID, 

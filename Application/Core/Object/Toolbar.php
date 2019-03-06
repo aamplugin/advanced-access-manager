@@ -35,9 +35,7 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object {
         
         // Load settings from Access & Security Policy
         if (empty($option)) {
-            $stms = AAM_Core_Policy_Manager::getInstance()->find(
-                "/^Toolbar:/i", $subject
-            );
+            $stms = AAM_Core_Policy_Factory::get($subject)->find("/^Toolbar:/i");
             
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);

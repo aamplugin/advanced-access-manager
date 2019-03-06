@@ -2,7 +2,7 @@
 
 /**
  * Make sure that path to the PHPUnit is included in the PHP.ini include_path as well
- * as phpunit is installed on your machine
+ * as PHPUnit is installed on your machine
  */
 
 // Autoloader for the PHPUnit Framework
@@ -15,6 +15,9 @@ spl_autoload_register(function($classname) {
         }
     }
 });
+
+// Load test subject
+require_once __DIR__ . '/subject.php';
 
 // Load the WordPress library.
 require_once dirname(__DIR__) . '/../../../wp-load.php';

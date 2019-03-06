@@ -188,7 +188,7 @@ class AAM_Core_ConfigPress_Evaluator {
      * @access protected
      */
     protected function computeQueue($queue) {
-        $value = $queue[0]; //defaule value
+        $value = $queue[0]; //default value
         
         foreach ($this->_operators as $operators) {
             $i = 0;

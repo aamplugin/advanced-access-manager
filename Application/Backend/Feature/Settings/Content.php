@@ -16,6 +16,17 @@
 class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract {
     
     /**
+     * Construct
+     */
+    public function __construct() {
+        parent::__construct();
+        
+        if (!current_user_can('aam_manage_settings')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_settings'));
+        }
+    }
+    
+    /**
      * @inheritdoc
      */
     public static function getTemplate() {
@@ -30,7 +41,7 @@ class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract 
         $settings = array(
             'core.settings.mediaAccessControl' => array(
                 'title' => __('Media Files Access Control', AAM_KEY),
-                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Allow AAM to manage a physically access to all media files located in the defined by the system [uploads] folder. [Note!] This feature requires additional steps as described in %sthis article%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/help/how-to-manage-wordpress-media-access" target="_blank">', '</a>'),
+                'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('Allow AAM to manage a physically access to all media files located in the defined by the system [uploads] folder. [Note!] This feature requires additional steps as described in %sthis article%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/article/how-to-manage-wordpress-media-access" target="_blank">', '</a>'),
                 'value' => AAM_Core_Config::get('core.settings.mediaAccessControl', false)
             ),
             'core.settings.manageHiddenPostTypes' => array(

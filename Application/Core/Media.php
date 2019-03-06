@@ -44,32 +44,28 @@ class AAM_Core_Media {
      * @access protected
      */
     protected function __construct() {
-        if (AAM_Core_Request::get('aam-media')) {
-            $this->initialize();
-            
-            if (AAM_Core_Config::get('core.settings.mediaAccessControl', false)) {
-                $area = AAM_Core_Api_Area::get();
-                if (AAM_Core_Config::get("core.settings.{$area}AccessControl", true)) {
-                    $this->checkMediaAccess();
-                } else {
-                    $this->printMedia();
-                }
-            } else {
-                $this->printMedia();
-            }
-        }
-    }
-    
-    /**
-     * 
-     */
-    protected function initialize() {
         $media   = filter_input(INPUT_GET, 'aam-media', FILTER_VALIDATE_INT);
         $request = ($media !== 1 ? $media : urldecode(AAM_Core_Request::server('REQUEST_URI')));
         $root    = AAM_Core_Request::server('DOCUMENT_ROOT');
         
         $this->request     = str_replace('\\', '/', $root . $request);
         $this->request_uri = preg_replace('/\?.*$/', '', $request);
+    }
+    
+    /**
+     * 
+     */
+    public function authorize() {
+        if (AAM_Core_Config::get('core.settings.mediaAccessControl', false)) {
+            $area = AAM_Core_Api_Area::get();
+            if (AAM_Core_Config::get("core.settings.{$area}AccessControl", true)) {
+                $this->checkMediaAccess();
+            } else {
+                $this->printMedia();
+            }
+        } else {
+            $this->printMedia();
+        }
     }
     
     /**
@@ -161,8 +157,27 @@ class AAM_Core_Media {
     protected function findMedia() {
         global $wpdb;
         
-        $s   = preg_replace('/(-[\d]+x[\d]+)(\.[\w]+)$/', '$2', $this->request_uri);
+        // 1. replace the cropped extension for images
+        $s = preg_replace('/(-[\d]+x[\d]+)(\.[\w]+)$/', '$2', $this->request);
+        
+        // 2. Replace the path to the media
+        $basedir = wp_upload_dir();
+        $s       = ltrim(str_replace($basedir['basedir'], '', $s), '/');
+        
         $id  = apply_filters(
+            'aam-found-media-filter',  
+            $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s", 
+                    array('_wp_attached_file', $s)
+                )
+            ), 
+            $this->request_uri,
+            $this->request
+        );
+                    
+        if (empty($id)) { // Try to find the image by GUID
+            $id  = apply_filters(
                 'aam-found-media-filter',  
                 $wpdb->get_var(
                     $wpdb->prepare(
@@ -170,9 +185,11 @@ class AAM_Core_Media {
                         array('%' . $s)
                     )
                 ), 
-                $this->request_uri
-        );
-                        
+                $this->request_uri,
+                $this->request
+            );
+        }
+        
         return ($id ? AAM::getUser()->getObject('post', $id) : null);
     }
     

@@ -369,12 +369,12 @@
     </style>
     
     <?php 
-        if (!empty($post->post_content)) {
+        if (!empty($args->post->post_content)) {
             // Validate the policy
-            $validator = new AAM_Core_Policy_Validator(htmlspecialchars_decode($post->post_content));
+            $validator = new AAM_Core_Policy_Validator(htmlspecialchars_decode($args->post->post_content));
             $errors    = $validator->validate();
         } else {
-           $post->post_content = AAM_Backend_View_Helper::getDefaultPolicy();
+           $args->post->post_content = AAM_Backend_View_Helper::getDefaultPolicy();
            $errors = array();
         }
    ?>
@@ -383,10 +383,10 @@
         <?php echo implode('<br/>', $errors); ?>
     </div>
     
-    <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo $post->post_content; ?></textarea>
+    <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo $args->post->post_content; ?></textarea>
 
     <p class="aam-infobox">
-        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamplugin.com/access-and-security-policy" target="_blank">', '</a>'); ?>
+        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamplugin.com/reference/policy" target="_blank">', '</a>'); ?>
     </p>
     
     <script type='text/javascript' src="<?php echo AAM_MEDIA . '/js/vendor.js'; ?>"></script>

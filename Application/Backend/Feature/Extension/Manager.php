@@ -28,7 +28,9 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
         parent::__construct();
         
         if (AAM_Core_Config::get('core.settings.extensionSupport', true) === false) {
-            AAM_Core_API::reject('backend');
+            AAM::api()->denyAccess(array('reason' => 'core.settings.extensionSupport'));
+        } elseif (!current_user_can('aam_manage_extensions')) {
+            AAM::api()->denyAccess(array('reason' => 'aam_manage_extensions'));
         }
     }
     
@@ -149,13 +151,15 @@ class AAM_Backend_Feature_Extension_Manager extends AAM_Backend_Feature_Abstract
      * @return type
      */
     public function fixDirectoryIssue() {
-        $dirname = AAM_Extension_Repository::getInstance()->getBasedir();
+        $repo    = AAM_Extension_Repository::getInstance();
+        $dirname = $repo->getBasedir();
+        
         if (file_exists($dirname) === false) {
-            @mkdir($dirname, fileperms( ABSPATH ) & 0777 | 0755, true);
+            @mkdir($dirname, fileperms(ABSPATH) & 0777 | 0755, true);
         }
         
         return wp_json_encode(array(
-            'status' => (AAM_Extension_Repository::getInstance()->isWriteableDirectory() ? 'success' : 'failed')
+            'status' => ($repo->isWriteableDirectory() ? 'success' : 'failed')
         ));
     }
     

@@ -81,11 +81,12 @@
                                         <?php 
                                             $visitor = new AAM_Core_Subject_Visitor();
                                             $hasPolicy = $visitor->getObject('policy')->has($object->id);
+                                            $btnStatus = AAM_Core_Policy_Factory::get()->canTogglePolicy($object->id, ($hasPolicy ? 'detach' : 'attach'));
                                         ?>
                                         <?php if ($hasPolicy) { ?>
-                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="1"><?php echo __('Detach Policy From Visitors', AAM_KEY); ?></button>
+                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="1"<?php echo ($btnStatus ? '' : ' disabled'); ?>><?php echo __('Detach Policy From Visitors', AAM_KEY); ?></button>
                                         <?php } else { ?>
-                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="0"><?php echo __('Attach Policy To Visitors', AAM_KEY); ?></button>
+                                            <button class="btn btn-primary btn-block" id="attach-policy-visitor" data-has="0"<?php echo ($btnStatus ? '' : ' disabled'); ?>><?php echo __('Attach Policy To Visitors', AAM_KEY); ?></button>
                                         <?php } ?>
                                     <?php } ?>
                                 </div>
@@ -106,11 +107,12 @@
                                             <?php 
                                                 $default = new AAM_Core_Subject_Default();
                                                 $hasPolicy = $default->getObject('policy')->has($object->id);
+                                                $btnStatus = AAM_Core_Policy_Factory::get()->canTogglePolicy($object->id, ($hasPolicy ? 'detach' : 'attach'));
                                             ?>
                                             <?php if ($hasPolicy) { ?>
-                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="1"><?php echo __('Detach Policy From Everybody', AAM_KEY); ?></button>
+                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="1"<?php echo ($btnStatus ? '' : ' disabled'); ?>><?php echo __('Detach Policy From Everybody', AAM_KEY); ?></button>
                                             <?php } else { ?>
-                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="0"><?php echo __('Attach Policy To Everybody', AAM_KEY); ?></button>
+                                                <button class="btn btn-danger btn-block" id="attach-policy-default" data-has="0"<?php echo ($btnStatus ? '' : ' disabled'); ?>><?php echo __('Attach Policy To Everybody', AAM_KEY); ?></button>
                                             <?php } ?>
                                         <?php } ?>
                                     <?php } else { ?>

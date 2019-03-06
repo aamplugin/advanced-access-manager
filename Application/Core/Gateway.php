@@ -30,6 +30,22 @@ final class AAM_Core_Gateway {
     protected function __construct() {}
     
     /**
+     * Prevent from fatal errors
+     * 
+     * @param string $name
+     * @param array  $arguments
+     * 
+     * @return void
+     * 
+     * @access public
+     */
+    public function __call($name, $arguments) {
+        trigger_error(
+            esc_js(__("The method {$name} is not defined in the AAM API", AAM_KEY))
+        );
+    }
+    
+    /**
      * Get AAM configuration option
      * 
      * @param string $option
@@ -40,7 +56,9 @@ final class AAM_Core_Gateway {
      * @access public
      */
     public function getConfig($option, $default = null) {
-        return AAM_Core_Config::get($option, $default);
+        $value = AAM_Core_Config::get($option, $default);
+        
+        return AAM_Core_Compatibility::convertConfig($option, $value);
     }
     
     /**
@@ -57,6 +75,7 @@ final class AAM_Core_Gateway {
     public function getUser($id = null) {
         if (!empty($id)) {
             $user = new AAM_Core_Subject_User($id);
+            $user->initialize();
         } elseif (get_current_user_id()) {
             $user = AAM::getUser();
         } else {
@@ -92,49 +111,16 @@ final class AAM_Core_Gateway {
     }
     
     /**
-     * Check if current user has access to specified resource
-     * 
-     * Apply all access/security policies and identify if user has access to specified
-     * resource.
-     * 
-     * @param string $resource
-     * @param string $action
-     * 
-     * @return mixed Boolean true|false if explicit access is defined or null if no
-     *               exact match found
-     */
-    public function isAllowed($resource, $action = null) {
-        $policy = AAM::api()->getUser()->getObject('policy');
-        
-        return $policy->isAllowed($resource, $action);
-    }
-    
-    /**
-     * Check if feature is enabled
-     * 
-     * @param string $feature
-     * @param string $plugin
-     * 
-     * @return boolean|null
-     * 
-     * @access public
-     * @since  v5.7.3
-     */
-    public function isEnabled($feature, $plugin = 'advanced-access-manager') {
-        $policy = AAM::api()->getUser()->getObject('policy');
-        
-        return $policy->isEnabled($feature, $plugin);
-    }
-    
-    /**
      * Get policy manager
      * 
      * @return AAM_Core_Policy_Manager
      * 
      * @access public
      */
-    public function getPolicyManager() {
-        return AAM_Core_Policy_Manager::getInstance();
+    public function getPolicyManager(AAM_Core_Subject $subject = null) {
+        return AAM_Core_Policy_Factory::get(
+            (is_null($subject) ? $this->getUser() : $subject)
+        );
     }
     
     /**
@@ -189,6 +175,17 @@ final class AAM_Core_Gateway {
         }
         
         exit; // Halt the execution
+    }
+    
+    /**
+     * Get current post
+     * 
+     * @return WP_Post
+     * 
+     * @access public
+     */
+    public function getCurrentPost() {
+        return AAM_Core_API::getCurrentPost();
     }
     
     /**

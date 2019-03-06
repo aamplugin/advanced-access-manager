@@ -197,7 +197,7 @@ final class AAM_Core_API {
         
         if (is_array($caps)) { //WP Error Fix bug report
             foreach($caps as $cap => $granted) {
-                if ($granted && preg_match('/^level_([0-9]+)$/', $cap, $match)) {
+                if (!empty($granted) && preg_match('/^level_([0-9]+)$/', $cap, $match)) {
                     $max = ($max < $match[1] ? $match[1] : $max);
                 }
             }
@@ -216,11 +216,13 @@ final class AAM_Core_API {
      * @access public
      */
     public static function getAllCapabilities() {
-        $caps = array();
+        static $caps = array();
         
-        foreach (self::getRoles()->role_objects as $role) {
-            if (is_array($role->capabilities)) {
-                $caps = array_merge($caps, $role->capabilities);
+        if (empty($caps)) {
+            foreach (self::getRoles()->role_objects as $role) {
+                if (is_array($role->capabilities)) {
+                    $caps = array_merge($caps, $role->capabilities);
+                }
             }
         }
         
@@ -238,12 +240,10 @@ final class AAM_Core_API {
      * @static
      */
     public static function capabilityExists($cap) {
-        $caps = self::getAllCapabilities();
-        
+        $caps   = self::getAllCapabilities();
         $exists = array_key_exists($cap, $caps) ? true : false;
-        $policy = (AAM::api()->isAllowed("Capability:{$cap}") !== null);
         
-        return (is_string($cap) && ($exists || $policy));
+        return (is_string($cap) && $exists);
     }
     
     /**
@@ -428,7 +428,9 @@ final class AAM_Core_API {
         
         $res = $post;
         
-        if (!empty($wp_query->queried_object)) {
+        if (get_the_ID()) {
+            $res = get_post(get_the_ID());
+        } elseif (!empty($wp_query->queried_object)) {
             $res = $wp_query->queried_object;
         } elseif (!empty($wp_query->post)) {
             $res = $wp_query->post;

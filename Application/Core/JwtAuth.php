@@ -116,7 +116,7 @@ class AAM_Core_JwtAuth {
                 );
             }
         } else {
-            $response->data = $result['error'];
+            $response->data = $result['reason'];
             $response->status = 403;
         }
         
@@ -144,7 +144,7 @@ class AAM_Core_JwtAuth {
                 $response->status = 200;
                 $response->data   = array(
                     'status'        => 'valid',
-                    'token_expires' => date('m/d/Y H:i:s O', $claims->exp)
+                    'token_expires' => $claims->exp
                 );
             } catch (Exception $ex) {
                 $response->data['reason'] = $ex->getMessage();
