@@ -22,7 +22,7 @@ class AAM_Extension_List {
                 'description' => 'Get the complete list of all premium AAM extensions in one package and all future premium extensions already included for now additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
                 'version'     => (defined('AAM_COMPLETE_PACKAGE') ? constant('AAM_COMPLETE_PACKAGE') : null),
-                'latest'      => '3.8.16'
+                'latest'      => '3.8.17'
             ),
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
@@ -31,7 +31,7 @@ class AAM_Extension_List {
                 'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories and hierarchical taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels. As the bonus, define more granular access to how comments can be managed on the backend by other users.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
                 'version'     => (defined('AAM_PLUS_PACKAGE') ? constant('AAM_PLUS_PACKAGE') : null),
-                'latest'      => '3.9.4'
+                'latest'      => '3.9.5'
             ),
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',

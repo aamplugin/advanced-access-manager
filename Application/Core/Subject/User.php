@@ -118,15 +118,39 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
             }
         }
         
-        $subject->roles = $roles;
-        
         //reset the user capabilities
         $subject->allcaps = array_merge($subject->allcaps, $roleCaps, $policyCaps,  $this->aamCaps);
-        $subject->caps    = array_merge($subject->caps, $roleCaps, $policyCaps,  $this->aamCaps);
+        $subject->caps    = array_merge($subject->caps,  $this->aamCaps);
 
         //make sure that no capabilities are going outside of define boundary
         $subject->allcaps = $this->applyCapabilityBoundaries($manager, $subject->allcaps);
         $subject->caps = $this->applyCapabilityBoundaries($manager, $subject->caps);
+
+        // also delete all capabilities that are assigned to denied role ONLY
+        // $diff contains the list of roles that were denied for user
+        $diff = array_diff_key( $subject->roles, $roles);
+
+        // prepare the list of capabilities that potentially should be removed from
+        // user
+        $removeCaps = array();
+        foreach($diff as $role) {
+            $removeCaps = array_merge($removeCaps, $allRoles->get_role($role)->capabilities);
+        }
+
+        // prepare the list of capabilities that should still be assigned to user
+        $keepCaps = array();
+        foreach($roles as $role) {
+            $keepCaps = array_merge($keepCaps, $allRoles->get_role($role)->capabilities);
+        }
+
+        foreach(array_keys($removeCaps) as $key) {
+            if (!array_key_exists($key, $keepCaps)) {
+                unset($subject->allcaps[$key]);
+                if (isset($subject->caps[$key])) { unset($subject->caps[$key]); }
+            }
+        }
+
+        $subject->roles = $roles;
     }
 
     /**

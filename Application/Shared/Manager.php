@@ -448,7 +448,9 @@ class AAM_Shared_Manager {
         switch($cap) {
             case 'edit_user':
             case 'delete_user':
-                $caps = $this->authorizeUserUpdate($caps, $args[0]);
+                if (isset($args[0])) {
+                    $caps = $this->authorizeUserUpdate($caps, $args[0]);
+                }
                 break;
             
             case 'install_plugins':

@@ -39,11 +39,11 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
             
             $result = wp_insert_post(array(
                 'post_author'  => get_current_user_id(),
-		'post_content' => $json,
-		'post_title'   => $package->title,
-		'post_excerpt' => $package->description,
-		'post_status'  => 'publish',
-		'post_type'    => 'aam_policy'
+                'post_content' => $json,
+                'post_title'   => $package->title,
+                'post_excerpt' => $package->description,
+                'post_status'  => 'publish',
+                'post_type'    => 'aam_policy'
             ));
             
             if (!is_wp_error($result)) {

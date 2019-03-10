@@ -169,10 +169,9 @@ final class AAM_Core_Policy_Manager {
      * 
      * @access public
      */
-    public function getParam($name, $args = array()) {
+    public function getParam($id, $args = array()) {
         $value = null;
-        $id    = strtolower($name);
-        
+
         if (isset($this->tree['Param'][$id])) {
             $param = $this->tree['Param'][$id];
             
@@ -310,10 +309,10 @@ final class AAM_Core_Policy_Manager {
         // Step #1. If there are any statements, let's index them by resource:action
         // and insert into the list of statements
         foreach($addition['Statement'] as $stm) {
-            $ress = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
+            $list = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
             $acts = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
             
-            foreach($ress as $res) {
+            foreach($list as $res) {
                 foreach($acts as $act) {
                     $id = strtolower($res . (!empty($act) ? ":{$act}" : ''));
                     

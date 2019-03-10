@@ -38,11 +38,9 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract {
        $object = AAM_Backend_Subject::getInstance()->getObject('metabox');
 
        foreach($items as $item) {
-           $object->updateOptionItem($item, $status);
+           $object->save($item, $status);
        }
        
-       $object->save();
-
        return wp_json_encode(array('status' => 'success'));
     }
     

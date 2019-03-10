@@ -230,7 +230,7 @@ class AAM_Backend_Manager {
             $content = trim(filter_input(INPUT_POST, 'aam-policy'));
             
             if (!empty($content)) { // Edit form was submitted
-                $data['post_content'] = $content;
+                $data['post_content'] = addslashes($content);
             }
             
             if (empty($data['post_content'])) {
