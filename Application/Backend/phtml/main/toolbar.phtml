@@ -51,7 +51,7 @@
                                             <?php foreach($this->getAllChildren($branch) as $child) { ?>
                                                 <div class="col-xs-12 aam-submenu-item">
                                                     <label for="toolbar-<?php echo $child->id; ?>">
-                                                        <u><?php echo $this->normalizeTitle($child); ?></u>
+                                                        <?php echo $this->normalizeTitle($child); ?>
                                                         <small class="aam-menu-capability"><?php echo __('URI:', AAM_KEY); ?> <b><?php echo str_replace(site_url(), '', $child->href); ?></b></small>
                                                         <small class="aam-menu-capability"><?php echo __('ID:', AAM_KEY); ?> <b><?php echo esc_js($child->id); ?></b></small>
                                                     </label>

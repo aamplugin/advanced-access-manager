@@ -21,7 +21,8 @@ class AAM_Backend_Feature_Main_LoginRedirect extends AAM_Backend_Feature_Abstrac
     public function __construct() {
         parent::__construct();
         
-        if (!current_user_can('aam_manage_login_redirect')) {
+        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
+        if (!$allowed || !current_user_can('aam_manage_login_redirect')) {
             AAM::api()->denyAccess(array('reason' => 'aam_manage_login_redirect'));
         }
     }

@@ -56,7 +56,8 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
             'aam_edit_roles', 'aam_delete_roles', 'aam_toggle_users', 'aam_switch_users',
             'aam_manage_configpress', 'aam_manage_api_routes', 'aam_manage_uri', 'aam_manage_policy',
             'aam_view_help_btn', 'aam_edit_policy', 'aam_read_policy', 'aam_delete_policy',
-            'aam_delete_policies', 'aam_edit_policies', 'aam_edit_others_policies', 'aam_publish_policies'
+            'aam_delete_policies', 'aam_edit_policies', 'aam_edit_others_policies', 'aam_publish_policies',
+            'aam_manage_jwt'
         )
     );
     
@@ -66,7 +67,8 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
     public function __construct() {
         parent::__construct();
         
-        if (!current_user_can('aam_manage_capabilities')) {
+        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
+        if (!$allowed || !current_user_can('aam_manage_capabilities')) {
             AAM::api()->denyAccess(array('reason' => 'aam_manage_capabilities'));
         }
     }

@@ -34,17 +34,27 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
      *
      * @access public
      */
-    public function __construct(AAM_Core_Subject $subject, $post) {
+    public function __construct(AAM_Core_Subject $subject, $post, $param = null) {
         parent::__construct($subject);
 
-        //make sure that we are dealing with WP_Post object
-        if (is_object($post)) {
-            $this->setPost($post);
+        // Make sure that we are dealing with WP_Post object
+        // This is done to remove redundant calls to the database on the backend view
+        if (is_object($param) && is_a($param, 'WP_Post')) {
+            $this->setPost($param);
         } elseif (is_numeric($post)) {
             $this->setPost(get_post($post));
         }
+
+        //var_dump($settings);
+        // Determine if we need to skip inheritance change from the parent subject
+        // This is done to eliminate constrains related to Inherit From Parent Post
+        if (is_array($param)) {
+            $void = !empty($param['voidInheritance']);
+        } else {
+            $void = false;
+        }
         
-        $this->initialize();
+        $this->initialize($void);
     }
     
     /**
@@ -65,9 +75,9 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     /**
      * 
      */
-    public function initialize() {
+    public function initialize($voidInheritance = false) {
         if ($this->getPost()) {
-            $this->read();
+            $this->read($voidInheritance);
         }
     }
 
@@ -80,7 +90,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
      *
      * @access public
      */
-    public function read() {
+    public function read($voidInheritance = false) {
         $subject = $this->getSubject();
         $post    = $this->getPost();
         
@@ -105,12 +115,17 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
                     // TODO: Prepare better conversion from policy Action to AAM
                     // post & term action. For example listToOthers -> list_others
                     $chunks = explode(':', $key);
-                    $option["frontend.{$chunks[3]}"] = $stm['Effect'] === 'deny';
-                    $option["backend.{$chunks[3]}"]  = $stm['Effect'] === 'deny';
-                    $option["api.{$chunks[3]}"]      = $stm['Effect'] === 'deny';
+
+                    $option = array_merge(
+                        $option,
+                        AAM_Core_Compatibility::convertPolicyAction(
+                            (isset($chunks[3]) ? $chunks[3] : 'read'),
+                            $stm['Effect'] === 'deny'
+                        )
+                    );
                 }
             }
-            
+
             // Inherit from terms or default settings - AAM Plus Package
             if (empty($option)) {
                 $option = apply_filters('aam-post-access-filter', $option, $this);
@@ -119,7 +134,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             // Cache result but only if it is not empty
             if (!empty($option)) {
                 $subject->getObject('cache')->add('post', $post->ID, $option);
-            } else { // No settings for a post. Try to inherit from the parent
+            } elseif ($voidInheritance === false) { // No settings for a post. Try to inherit from the parent
                 $option = $subject->inheritFromParent('post', $post->ID, $post);
             }
             

@@ -46,9 +46,6 @@ class AAM_Backend_Manager {
         add_action('admin_print_footer_scripts', array($this, 'printFooterJavascript'));
         add_action('admin_print_styles', array($this, 'printStylesheet'));
         
-        //map AAM UI specific capabilities
-        add_filter('map_meta_cap', array($this, 'mapMetaCap'), 10, 4);
-        
         //user profile update action
         add_action('profile_update', array($this, 'profileUpdate'), 10, 2);
 
@@ -74,9 +71,10 @@ class AAM_Backend_Manager {
         //manager Admin Menu
         if (is_multisite() && is_network_admin()) {
             //register AAM in the network admin panel
-            add_action('network_admin_menu', array($this, 'adminMenu'));
+            add_action('_network_admin_menu', array($this, 'adminMenu'));
         } else {
-            add_action('admin_menu', array($this, 'adminMenu'));
+            add_action('_user_admin_menu', array($this, 'adminMenu'));
+            add_action('_admin_menu', array($this, 'adminMenu'));
             add_action('all_admin_notices', array($this, 'notification'));
         }
         
@@ -316,22 +314,6 @@ class AAM_Backend_Manager {
     
     /**
      * 
-     * @param type $caps
-     * @param type $cap
-     * @return type
-     */
-    public function mapMetaCap($caps, $cap) {
-        if (in_array($cap, AAM_Backend_Feature_Main_Capability::$groups['aam'], true)) {
-            if (!AAM_Core_API::capabilityExists($cap)) {
-                $caps = array(AAM_Core_Config::get('page.capability', 'administrator'));
-            }
-        }
-        
-        return $caps;
-    }
-    
-    /**
-     * 
      * @param string $html
      * @return string
      */
@@ -368,7 +350,8 @@ class AAM_Backend_Manager {
 
             if (!empty($newRoles)) {
                 //remove all current roles and then set new
-                $user->set_role($role);
+                $user->set_role('');
+                // TODO: Fix the bug where multiple roles are not removed 
                 foreach($newRoles as $role) {
                     $user->add_role($role);
                 }
@@ -378,19 +361,6 @@ class AAM_Backend_Manager {
         //role changed?
         if (implode('', $user->roles) !== implode('', $old->roles)) {
             AAM_Core_API::clearCache(new AAM_Core_Subject_User($id));
-            
-            // check if role has expiration data set
-            // TODO: This supports only the first role and NOT the multi-roles
-            if (is_array($user->roles)) {
-                $roles  = array_values($user->roles);
-                $role   = array_shift($roles);
-                $expire = AAM_Core_API::getOption("aam-role-{$role}-expiration", '');
-
-                if ($expire) {
-                    update_user_option($id, "aam-original-roles", $old->roles);
-                    update_user_option($id, "aam-role-expires", strtotime($expire));
-                }
-            }
         }
     }
     
@@ -514,17 +484,12 @@ class AAM_Backend_Manager {
         
         if ($uid && AAM_Core_API::capabilityExists('access_dashboard')) {
             $caps = AAM::getUser()->allcaps;
-            if (empty($caps['access_dashboard'])) {
-                //also additionally check for AJAX calls
-                if (defined('DOING_AJAX') && empty($caps['allow_ajax_calls'])) {
-                    AAM_Core_API::reject(
-                            'backend', array('hook' => 'access_dashboard')
-                    );
-                } elseif (!defined('DOING_AJAX')) {
-                    AAM_Core_API::reject(
-                            'backend', array('hook' => 'access_dashboard')
-                    );
-                }
+            // If this is the AJAX call, still allow it because it will break a lot
+            // of frontend stuff that depends on it
+            if (empty($caps['access_dashboard']) && !defined('DOING_AJAX')) {
+                AAM_Core_API::reject(
+                    'backend', array('hook' => 'access_dashboard')
+                );
             }
         }
     }
@@ -591,7 +556,7 @@ class AAM_Backend_Manager {
         if ($needAC && $allowed && $notASP) {
             add_meta_box(
                 'aam-access-manager', 
-                __('Access Manager', AAM_KEY) . ' <small style="color:#999999;">by AAM plugin</small>', 
+                __('Access Manager', AAM_KEY), 
                 array($this, 'renderPostMetabox'),
                 null,
                 'advanced',
@@ -833,7 +798,7 @@ class AAM_Backend_Manager {
     public function printJavascript() {
         if (AAM::isAAM()) {
             wp_enqueue_script('aam-vendor', AAM_MEDIA . '/js/vendor.js');
-            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.9.1.js');
+            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.9.2.js');
             
             //add plugin localization
             $this->printLocalization('aam-main');
@@ -956,6 +921,18 @@ class AAM_Backend_Manager {
             AAM_Core_Config::get('policy.capability', 'aam_manage_policy'), 
             'edit.php?post_type=aam_policy'
         );
+
+        $type = get_post_type_object('aam_policy');
+        if (current_user_can($type->cap->create_posts)) {
+            add_submenu_page(
+                'aam', 
+                'Add New Policies', 
+                'Add New Policies', 
+                $type->cap->create_posts, 
+                'post-new.php?post_type=aam_policy'
+            );
+        }
+
     }
     
     /**

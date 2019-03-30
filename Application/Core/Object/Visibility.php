@@ -171,4 +171,13 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
         return $meta_key;
     }
 
+    /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'post');
+    }
+
 }

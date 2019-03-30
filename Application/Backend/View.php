@@ -46,6 +46,7 @@ class AAM_Backend_View {
         AAM_Backend_Feature_Main_LogoutRedirect::register();
         AAM_Backend_Feature_Main_404Redirect::register();
         AAM_Backend_Feature_Main_Uri::register();
+        AAM_Backend_Feature_Main_Jwt::register();
         
         AAM_Backend_Feature_Settings_Core::register();
         AAM_Backend_Feature_Settings_Content::register();

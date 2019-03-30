@@ -129,8 +129,11 @@ class JWT
             );
         }
 
+        // The timestamp simply does not take in consideration the timezone
+        $exp = !is_numeric($payload->exp) ? strtotime($payload->exp) : $payload->exp;
+
         // Check if this token has expired.
-        if (isset($payload->exp) && ($timestamp - static::$leeway) >= $payload->exp) {
+        if (isset($exp) && ($timestamp - static::$leeway) >= $exp) {
             throw new ExpiredException('Expired token');
         }
 

@@ -247,7 +247,7 @@ abstract class AAM_Core_Subject {
             $classname = 'AAM_Core_Object_' . ucfirst($type);
             
             if (class_exists($classname)) {
-                $object = new $classname($this, (is_null($param) ? $id : $param));
+                $object = new $classname($this, $id, $param);
             }
             
             $object = apply_filters('aam-object-filter', $object, $type, $id, $this);

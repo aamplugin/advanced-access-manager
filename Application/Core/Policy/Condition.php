@@ -70,18 +70,27 @@ final class AAM_Core_Policy_Condition {
      */
     public function evaluate($conditions, $args = array()) {
         $result = true;
-        
+
         foreach($conditions as $type => $conditions) {
             $type = strtolower($type);
             
             if (isset($this->map[$type])) {
                 $callback = array($this, $this->map[$type]);
-                $result   = $result && call_user_func($callback, $conditions, $args);
+                
+                // Since v5.9.2 - if specific condition type is array, then combine
+                // them with AND operation
+                if (isset($conditions[0]) && is_array($conditions[0])) {
+                    foreach($conditions as $set) {
+                        $result = $result && call_user_func($callback, $set, $args);
+                    }
+                } else {
+                    $result = $result && call_user_func($callback, $conditions, $args);
+                }
             } else {
                 $result = false;
             }
         }
-        
+
         return $result;
     }
     
@@ -99,10 +108,17 @@ final class AAM_Core_Policy_Condition {
         $result = false;
         
         foreach($this->prepareConditions($conditions, $args) as $condition) {
-            foreach((array)$condition['right'] as $subset) {
+            // Convert the right condition into the array of array to cover more
+            // complex between conditions like [[0,8],[13,15]]
+            if (is_array($condition['right'][0])) {
+                $right = $condition['right'];
+            } else {
+                $right = array($condition['right']);
+            }
+            foreach($right as $subset) {
                 $min = (is_array($subset) ? array_shift($subset) : $subset);
                 $max = (is_array($subset) ? end($subset) : $subset);
-
+                
                 $result = $result || ($condition['left'] >= $min && $condition['left'] <= $max);
             }
         }

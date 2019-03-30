@@ -12,10 +12,33 @@
  * 
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @todo   Remove Feb 2018
  */
 class AAM_Core_Compatibility {
     
+    /**
+     * Undocumented variable
+     *
+     * @var [type]
+     */
+    protected static $instance = null;
+
+    /**
+     * Compatibility between post actions and policy actions
+     *
+     * @param [type] $action
+     * @param [type] $effect
+     * @return void
+     */
+    public static function convertPolicyAction($action, $effect, $prefix = '') {
+        $action = apply_filters('aam-policy-post-resource-action-filter', $action);
+
+        return array(
+            "{$prefix}frontend.{$action}" => $effect,
+            "{$prefix}backend.{$action}"  => $effect,
+            "{$prefix}api.{$action}"      => $effect
+        );
+    }
+
     /**
      * Convert config to the Policy Config
      * 
@@ -271,4 +294,16 @@ class AAM_Core_Compatibility {
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public static function getInstance() {
+        if (is_null(self::$instance)) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
+    }
 }

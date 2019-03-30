@@ -59,8 +59,7 @@ class AAM_Backend_Feature_Subject_Role {
                     implode(',', $this->prepareRowActions($uc, $id)),
                     $data
                 ),
-                AAM_Core_API::maxLevel($data['capabilities']),
-                AAM_Core_API::getOption("aam-role-{$id}-expiration", '')
+                AAM_Core_API::maxLevel($data['capabilities'])
             );
         }
         
@@ -163,7 +162,6 @@ class AAM_Backend_Feature_Subject_Role {
         
         if (current_user_can('aam_create_roles')) {
             $name    = sanitize_text_field(filter_input(INPUT_POST, 'name'));
-            $expire  = filter_input(INPUT_POST, 'expire');
             $roles   = AAM_Core_API::getRoles();
             $role_id = sanitize_key(strtolower($name));
 
@@ -183,13 +181,6 @@ class AAM_Backend_Feature_Subject_Role {
                 //clone settings if needed
                 if (AAM_Core_Request::post('clone')) {
                     $this->cloneSettings($role, $parent);
-                }
-                
-                //save expiration rule if set
-                if ($expire) {
-                    AAM_Core_API::updateOption("aam-role-{$role_id}-expiration", $expire);
-                } else {
-                    AAM_Core_API::deleteOption("aam-role-{$role_id}-expiration");
                 }
                 
                 do_action('aam-post-add-role-action', $role, $parent);
@@ -246,16 +237,6 @@ class AAM_Backend_Feature_Subject_Role {
             $role    = AAM_Backend_Subject::getInstance();
             $role->update(trim(filter_input(INPUT_POST, 'name')));
             
-            $expire  = filter_input(INPUT_POST, 'expire');
-            //save expiration rule if set
-            if ($expire) {
-                AAM_Core_API::updateOption(
-                        'aam-role-' . $role->getId() .'-expiration', $expire
-                );
-            } else { 
-                AAM_Core_API::deleteOption('aam-role-' . $role->getId() .'-expiration');
-            }
-
             do_action('aam-post-update-role-action', $role->get());
             
             $response = array('status' => 'success');

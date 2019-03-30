@@ -56,13 +56,13 @@
                                             <?php if ($submenu['id'] == 'index.php') { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                     <label for="menu-item-<?php echo $i . $j; ?>">
-                                                        <u><?php echo $submenu['name']; ?></u><small class="aam-menu-capability"><?php echo __('Cap:', AAM_KEY), ' <b>', $submenu['capability']; ?></b></small></label>
+                                                        <?php echo $submenu['name']; ?><small class="aam-menu-capability"><?php echo __('Cap:', AAM_KEY), ' <b>', $submenu['capability']; ?></b></small></label>
                                                     <a href="#dashboard-lockout-modal" data-toggle="modal"><i class="icon-help-circled"></i></a>
                                                 </div>
                                             <?php } else { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                     <label for="menu-item-<?php echo $i . $j; ?>">
-                                                        <u><?php echo $submenu['name']; ?></u>
+                                                        <?php echo $submenu['name']; ?>
                                                         <small class="aam-menu-capability"><?php echo __('Cap:', AAM_KEY), ' <b>', $submenu['capability']; ?></b></small>
                                                         <small class="aam-menu-capability"><?php echo __('ID:', AAM_KEY), ' <b>', $submenu['crc32']; ?></b></small>
                                                     </label>

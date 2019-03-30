@@ -37,7 +37,9 @@ class AAM_Frontend_Manager {
         }
         
         //manage AAM shortcode
-        add_shortcode('aam', array($this, 'processShortcode'));
+        if (AAM_Core_Config::get('core.processShortcodes', true)) {
+            add_shortcode('aam', array($this, 'processShortcode'));
+        }
         
         //cache clearing hook
         add_action('aam-clear-cache-action', 'AAM_Core_API::clearCache');

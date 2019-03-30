@@ -248,7 +248,6 @@
                                                     <th width="65%"><?php echo __('Role', AAM_KEY); ?></th>
                                                     <th><?php echo __('Action', AAM_KEY); ?></th>
                                                     <th>Level</th>
-                                                    <th>Expiration</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -265,10 +264,6 @@
                                                         <div class="form-group">
                                                             <label><?php echo __('Role Name', AAM_KEY); ?><span class="aam-asterix">*</span></label>
                                                             <input type="text" class="form-control" name="name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" />
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/article/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
-                                                            <input type="text" class="form-control" name="expire" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
                                                         <?php /* TODO: Rethink this filter */ do_action('aam-add-role-ui-action'); ?>
                                                         <?php /* TODO: Rethink this filter */ echo apply_filters('aam-add-role-ui-filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance.phtml')); ?>
@@ -292,10 +287,6 @@
                                                         <div class="form-group">
                                                             <label for="new-role-name"><?php echo __('Role Name', AAM_KEY); ?></label>
                                                             <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" name="name" />
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label><?php echo __('Role Expiration', AAM_KEY); ?> <a href="https://aamplugin.com/article/how-to-manage-wordpress-roles" target="_blank" data-toggle="tooltip" title="For how long user can have this role. Click to learn more."><i class="icon-help-circled"></i></a></label>
-                                                            <input type="text" class="form-control" name="expire" id="edit-role-expiration" placeholder="<?php echo __('Enter Expiration Rule', AAM_KEY); ?>" />
                                                         </div>
                                                         <?php /* TODO: Rethink this filter */ do_action('aam-edit-role-ui-action'); ?>
                                                     </div>
@@ -352,7 +343,6 @@
                                                     <div class="modal-body">
                                                         <ul class="nav nav-tabs" role="tablist">
                                                           <li role="presentation" class="active"><a href="#edit-user-expiration" aria-controls="edit-user-expiration" role="tab" data-toggle="tab">Temporary Access</a></li>
-                                                          <li role="presentation"><a href="#edit-user-jwt" aria-controls="edit-user-jwt" role="tab" data-toggle="tab">JWT Auth Token</a></li>
                                                           <li role="presentation"><a href="#edit-user-profile" aria-controls="edit-user-profile" role="tab" data-toggle="tab">Edit User</a></li>
                                                         </ul>
 
@@ -378,23 +368,6 @@
                                                                     <select class="form-control" id="expiration-change-role">
                                                                         <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
                                                                     </select>
-                                                                </div>
-                                                            </div>
-                                                            <div role="tabpanel" class="tab-pane" id="edit-user-jwt">
-                                                                <div class="form-group">
-                                                                    <p class="aam-info"><?php echo sprintf(__('User JWT token to authentication user without a need for entering username/password. To learn more about JWT authentication, please refer to %sHow to authenticate WordPress user with JWT token%s article.', AAM_KEY), '<a href="https://aamplugin.com/article/how-to-authenticate-wordpress-user-with-jwt-token" target="_blank">', '</a>'); ?></p>
-                                                                    <div class="form-group">
-                                                                        <label for="user-auth-url"><?php echo __('JWT Token (for any API calls)', AAM_KEY); ?></label>
-                                                                        <textarea class="form-control" id="user-auth-jwt" readonly rows="5"></textarea>
-                                                                    </div>
-                                                                    
-                                                                    <hr/>
-                                                                    
-                                                                    <div class="form-group">
-                                                                        <label for="user-auth-url"><?php echo __('User Login URL (with JWT token)', AAM_KEY); ?></label>
-                                                                        <textarea class="form-control" id="user-auth-url" data-url="<?php echo add_query_arg('aam-jwt', '%s', site_url()); ?>" readonly rows="5"></textarea>
-                                                                        <small><?php echo __('With this URL user will be automatically logged in until the time defined on the "Temporary Access" tab.', AAM_KEY); ?></small>
-                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <div role="tabpanel" class="tab-pane" id="edit-user-profile">

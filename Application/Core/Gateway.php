@@ -124,6 +124,15 @@ final class AAM_Core_Gateway {
     }
     
     /**
+     * Compatibility manager
+     *
+     * @return AAM_Core_Compatibility
+     */
+    public function getCompatibilityManager() {
+        return AAM_Core_Compatibility::getInstance();
+    }
+
+    /**
      * Redirect request
      * 
      * @param string $type
@@ -246,6 +255,17 @@ final class AAM_Core_Gateway {
         
         return $merged;
     } 
+
+    /**
+     * Get current AAM version
+     *
+     * @return string
+     * 
+     * @access public
+     */
+    public function getAAMVersion() {
+        return AAM_Core_API::version();
+    }
     
     /**
      * Get instance of the API gateway

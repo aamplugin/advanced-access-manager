@@ -21,7 +21,8 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
     public function __construct() {
         parent::__construct();
         
-        if (!current_user_can('aam_manage_uri')) {
+        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
+        if (!$allowed || !current_user_can('aam_manage_uri')) {
             AAM::api()->denyAccess(array('reason' => 'aam_manage_uri'));
         }
     }
@@ -146,7 +147,7 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'uri',
             'position'   => 55,
-            'title'      => __('URI Access', AAM_KEY) . '<span class="badge">NEW</span>',
+            'title'      => __('URI Access', AAM_KEY),
             'capability' => 'aam_manage_uri',
             'type'       => 'main',
             'subjects'   => array(

@@ -34,14 +34,15 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
         if (!empty($option)) {
             $this->setOverwritten(true);
         }
-        
+       
         // Load settings from Access & Security Policy
         if (empty($option)) {
             $stms = AAM_Core_Policy_Factory::get($subject)->find("/^Route:/i");
-            
+           
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);
-                $id     = "{$chunks[1]}|{$chunks[2]}|{$chunks[3]}";
+                $method = (isset($chunks[3]) ? $chunks[3] : 'post');
+                $id     = "{$chunks[1]}|{$chunks[2]}|{$method}";
                 
                 $option[$id] = ($stm['Effect'] === 'deny' ? 1 : 0);
             }
@@ -68,7 +69,7 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
     public function has($type, $route, $method = 'POST') {
         $options = $this->getOption();
         $id      = strtolower("{$type}|{$route}|{$method}");
-
+        
         return !empty($options[$id]);
     }
 

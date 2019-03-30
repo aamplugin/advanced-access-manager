@@ -92,7 +92,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract {
             'core.settings.jwtAuthentication' => array(
                 'title' => __('JWT Authentication', AAM_KEY),
                 'descr' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] PHP 5.4 or higher is required for this feature. Enable the ability to authenticate user with WordPress RESTful API and JWT token. For more information, check %sHow to authenticate WordPress user with JWT token%s article', 'b'), '<a href="https://aamplugin.com/article/how-to-authenticate-wordpress-user-with-jwt-token">', '</a>'),
-                'value' => AAM_Core_Config::get('core.settings.jwtAuthentication', false)
+                'value' => AAM_Core_Config::get('core.settings.jwtAuthentication', true)
             ),
             'core.settings.multiSubject' => array(
                 'title' => __('Multiple Roles Support', AAM_KEY),

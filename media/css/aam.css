@@ -103,6 +103,8 @@
 .icon-cubes:before { content: '\f1b3' !important; } /* 'ï³' */
 .icon-cog-alt:before { content: '\e80d' !important; } /* 'î ' */
 .icon-wrench:before { content: '\e80e' !important; } /* 'î ' */
+.icon-ok-circled:before { content: '\e81c' !important; } /* 'î ' */
+.icon-cancel-circled:before { content: '\e81d' !important; } /* 'î ' */
 
 .animate-spin {
     -moz-animation: spin 2s infinite linear;
@@ -308,6 +310,18 @@ div.error {
     background-color: #337ab7; 
     color: #FFFFFF; 
     font-weight: bold; 
+}
+
+.aam-block {
+  display: block;
+}
+
+.aam-block .aam-copy-clipboard{
+  float: right;
+}
+
+.aam-block .aam-copy-clipboard:after {
+  clear:both;
 }
 
 .panel-title {
@@ -594,11 +608,6 @@ input[type=radio]:checked + label:before {
     margin-top: 30px;
 }
 
-.aam-block {
-    display: block;
-    letter-spacing: 1.5px;
-}
-
 .aam-highligh-row { 
     border:3px solid #337ab7;
 }
@@ -754,7 +763,7 @@ input[type=radio]:checked + label:before {
     font-weight: 500;
     padding: 15px;
     text-align: center;
-    z-index: 999;
+    z-index: 9999;
     color: #FFFFFF;
     letter-spacing: 1px;
 }

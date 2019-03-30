@@ -21,7 +21,8 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
     public function __construct() {
         parent::__construct();
         
-        if (!current_user_can('aam_manage_admin_menu')) {
+        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
+        if (!$allowed || !current_user_can('aam_manage_admin_menu')) {
             AAM::api()->denyAccess(array('reason' => 'aam_manage_admin_menu'));
         }
     }

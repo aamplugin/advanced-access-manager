@@ -51,12 +51,6 @@ class AAM_Backend_Subject {
             $instance = $this->initRequestedSubject(
                 $subject, AAM_Core_Request::request('subjectId')
             );
-            
-            $max = AAM::getUser()->getMaxLevel();
-        
-            if ($max < AAM_Core_API::maxLevel($instance->getMaxLevel())) {
-                AAM::api()->denyAccess(array('reason' => 'User Level is too low'));
-            }
         } else {
             $this->initDefaultSubject();
         }
@@ -99,7 +93,8 @@ class AAM_Backend_Subject {
      */
     protected function initDefaultSubject() {
         // This cover the scenario when we directly go to user e.g. ?page=aam&user=38
-        $forceUser = AAM_Core_Request::get('user');
+        // or through AJAX post request with user ID
+        $forceUser = AAM_Core_Request::request('user');
         
         // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
         if (!$forceUser && (current_user_can('aam_manage_roles') || current_user_can('aam_list_roles'))) {
@@ -128,6 +123,34 @@ class AAM_Backend_Subject {
      */
     protected function setSubject(AAM_Core_Subject $subject) {
         $this->subject = $subject;
+    }
+
+    /**
+     * Check if current subject is allowed to be managed
+     *
+     * @return boolean
+     * 
+     * @access public
+     */
+    public function isAllowedToManage() {
+        // Determine that current user has enough level to manage requested subject
+        $sameLevel = false;
+        if (AAM_Core_API::capabilityExists('manage_same_user_level')) {
+            $sameLevel = current_user_can('manage_same_user_level');
+        } else {
+            $sameLevel = current_user_can('administrator');
+        }
+
+        $userMaxLevel    = AAM::api()->getUser()->getMaxLevel();
+        $subjectMaxLevel = $this->subject->getMaxLevel();
+
+        if ($sameLevel) {
+            $allowed = $userMaxLevel >= $subjectMaxLevel;
+        } else {
+            $allowed = $userMaxLevel > $subjectMaxLevel;
+        }
+
+        return $allowed;
     }
     
     /**

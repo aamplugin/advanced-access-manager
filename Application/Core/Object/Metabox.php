@@ -146,9 +146,9 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @param type $screen_id
      */
     protected function filterMetaboxes($zone, $metaboxes, $screen_id) {
-        foreach (array_keys($metaboxes) as $metabox) {
-            if ($this->has($screen_id, $metabox)) {
-                remove_meta_box($metabox, $screen_id, $zone);
+        foreach ($metaboxes as $id => $metabox) {
+            if ($this->has($screen_id, $id, $metabox['title'])) {
+                remove_meta_box($id, $screen_id, $zone);
             }
         }
     }
@@ -178,11 +178,20 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @param type $metabox
      * @return type
      */
-    public function has($screen, $metabox) {
+    public function has($screen, $metaboxId, $metaboxTitle = null) {
         $options = $this->getOption();
-        $mid     = "{$screen}|{$metabox}";
-        
-        return !empty($options[$mid]) || !empty($options[crc32($mid)]);
+        $mid     = "{$screen}|{$metaboxId}";
+
+        if(function_exists('mb_strtolower')) {
+            $mtl = mb_strtolower("{$screen}|{$metaboxTitle}");
+        } else {
+            $mtl = strtolower("{$screen}|{$metaboxTitle}");
+        }
+
+        // Also remove any HTML tags
+        $mtl = wp_strip_all_tags($mtl);
+
+        return !empty($options[$mid]) || !empty($options[crc32($mid)]) || !empty($options[$mtl]);
     }
     
     /**

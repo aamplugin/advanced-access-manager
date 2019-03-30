@@ -105,10 +105,12 @@ final class AAM_Core_Policy_Token {
                 break;
             
             case 'authenticated':
+            case 'isauthenticated':
                 $value = $user->isVisitor() ? false : true;
                 break;
 
             case 'capabilities':
+            case 'caps':
                 $value = array();
                 foreach($user->allcaps as $cap => $effect) {
                     if (!empty($effect)) {

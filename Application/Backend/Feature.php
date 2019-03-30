@@ -40,19 +40,24 @@ class AAM_Backend_Feature {
     public static function registerFeature(stdClass $feature) {
         $response = false;
 
+        // Determine correct AAM UI capability
         if (empty($feature->capability)){
             $cap = 'aam_manager';
         } else {
             $cap = $feature->capability;
         }
         
+        // Determine if minimum required options are enabled
         if (isset($feature->option)) {
             $show = self::isVisible($feature->option);
         } else {
             $show = true;
         }
+
+        // Determine that current user has enough level to manage requested subject
+        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
         
-        if ($show && current_user_can($cap)) {
+        if ($show && $allowed && current_user_can($cap)) {
             self::$_features[] = $feature;
             $response = true;
         }

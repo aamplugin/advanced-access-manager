@@ -92,7 +92,7 @@ final class AAM_Core_Policy_Manager {
         
         foreach($tree['Statement'] as $key => $stm) {
             if (preg_match($s, $key) && $this->isApplicable($stm, $args)) {
-                $statements[strtolower($key)] = $stm;
+                $statements[$this->strToLower($key)] = $stm;
             }
         }
         
@@ -114,7 +114,7 @@ final class AAM_Core_Policy_Manager {
     public function isAllowed($resource, $args = array()) {
         $allowed = null;
         $tree    = $this->preparePolicyTree();
-        $id      = strtolower($resource);
+        $id      = $this->strToLower($resource);
         
         if (isset($tree['Statement'][$id])) {
             $stm = $tree['Statement'][$id];
@@ -126,6 +126,25 @@ final class AAM_Core_Policy_Manager {
         }
         
         return $allowed;
+    }
+
+    /**
+     * Convert string to lowercase
+     *
+     * @param string $str
+     * 
+     * @return string
+     * 
+     * @access protected
+     */
+    protected function strToLower($str) {
+        if (function_exists('mb_strtolower')) {
+            $result = mb_strtolower($str);
+        } else {
+            $result = strtolower($str);
+        }
+
+        return $result;
     }
 
     /**
@@ -145,7 +164,7 @@ final class AAM_Core_Policy_Manager {
     public function isBoundary($resource, $args = array()) {
         $denied = false;
         $tree   = $this->preparePolicyTree();
-        $id     = strtolower($resource);
+        $id     = $this->strToLower($resource);
         
         if (isset($tree['Statement'][$id])) {
             $stm = $tree['Statement'][$id];
@@ -314,7 +333,7 @@ final class AAM_Core_Policy_Manager {
             
             foreach($list as $res) {
                 foreach($acts as $act) {
-                    $id = strtolower($res . (!empty($act) ? ":{$act}" : ''));
+                    $id = $this->strToLower($res . (!empty($act) ? ":{$act}" : ''));
                     
                     if (!isset($tree['Statement'][$id]) || empty($tree['Statement'][$id]['Enforce'])) {
                         $tree['Statement'][$id] = $this->removeKeys($stm, array('Resource', 'Action'));
