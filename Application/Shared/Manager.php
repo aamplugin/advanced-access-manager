@@ -27,15 +27,6 @@ class AAM_Shared_Manager {
     /**
      * Undocumented variable
      *
-     * @var array
-     */
-    protected $primitiveCaps = array(
-        'edit_post', 'delete_post', 'read_post', 'publish_posts'
-    );
-
-    /**
-     * Undocumented variable
-     *
      * @var boolean
      */
     protected $skipMetaCheck = false;
@@ -142,8 +133,13 @@ class AAM_Shared_Manager {
      */
     public function registerPostType($type, $object) {
         if (is_a($object, 'WP_Post_Type')) { // Work only with WP 4.6.0 or higher
+            // The list of capabilities to override
+            $override = array(
+                'edit_post', 'delete_post', 'read_post', 'publish_posts'
+            );
+
             foreach($object->cap as $type => $capability) {
-                if (in_array($type, $this->primitiveCaps, true)) {
+                if (in_array($type, $override, true)) {
                     $object->cap->{$type} = "aam|{$type}|{$capability}";
                 }
             }
@@ -203,8 +199,8 @@ class AAM_Shared_Manager {
         if (isset($uri['query'])) {
             parse_str($uri['query'], $params);
         }
-        
-        if ($match = $object->findMatch($uri['path'], $params)) {
+
+        if ($match = $object->findMatch(rtrim($uri['path'], '/'), $params)) {
             if ($match['type'] !== 'allow') {
                 AAM::api()->redirect($match['type'], $match['action']);
             }
@@ -299,7 +295,7 @@ class AAM_Shared_Manager {
     public function filterPostQuery($clauses, $wpQuery) {
         if (!$wpQuery->is_singular && $this->isPostFilterEnabled()) {
             $option = AAM::getUser()->getObject('visibility', 0)->getOption();
-
+            
             if (!empty($option['post'])) {
                 $query = $this->preparePostQuery($option['post'], $wpQuery);
             } else {
@@ -400,7 +396,7 @@ class AAM_Shared_Manager {
         } else {
             $query = '';
         }
-        
+
         return $query;
     }
     
@@ -468,18 +464,20 @@ class AAM_Shared_Manager {
      * @access public
      */
     public function mapMetaCaps($caps, $cap, $user_id, $args) {
-        global $post, $screen;
+        global $post;
 
         $objectId = (isset($args[0]) ? $args[0] : null);
 
         // First of all delete all artificial capability from the $caps
         foreach($caps as $i => $capability) {
             if (strpos($capability, 'aam|') === 0) {
-                $parts    = explode('|', $capability);
-                $capability = $parts[2];
-                $primitive  = $parts[1];
-            } else {
-                $primitive  = null;
+                $parts = explode('|', $capability);
+
+                if (in_array($parts[1], array('edit_post', 'delete_post', 'read_post'), true)) {
+                    $capability = null; //remove primitive from the meta array
+                } else {
+                    $capability = $parts[2];
+                }
             }
 
             if (in_array($capability, AAM_Backend_Feature_Main_Capability::$groups['aam'], true)) {
@@ -490,8 +488,7 @@ class AAM_Shared_Manager {
                 }
             }
 
-            // If capability is primitive - then do not include it in the list of meta caps
-            if (in_array($primitive, $this->primitiveCaps, true)) {
+            if ($capability === null) {
                 unset($caps[$i]);
             } else {
                 $caps[$i] = $capability;

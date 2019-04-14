@@ -349,26 +349,48 @@
                                                         <div class="tab-content">
                                                             <div role="tabpanel" class="tab-pane active" id="edit-user-expiration">
                                                                 <p class="aam-info"><?php echo __('Define for how long user can access the website and what action needs to be taken after access expires.', AAM_KEY); ?>
-                                                                <div class="form-group">
+                                                                
+                                                                <div class="form-group aam-bordered">
                                                                     <div id="user-expiration-datapicker"></div>
                                                                     <input type="hidden" id="user-expires" />
                                                                 </div>
-                                                                <div class="form-group">
-                                                                    <label><?php echo __('Action After Expiration', AAM_KEY); ?> </label>
-                                                                    <select class="form-control" id="action-after-expiration">
-                                                                        <option value=""><?php echo __('Select Action', AAM_KEY); ?></option>
-                                                                        <option value="logout"><?php echo __('Logout User', AAM_KEY); ?></option>
-                                                                        <option value="delete"><?php echo __('Delete Account', AAM_KEY); ?></option>
-                                                                        <option value="lock"><?php echo __('Lock Account', AAM_KEY); ?></option>
-                                                                        <option value="change-role"><?php echo __('Change User Role', AAM_KEY); ?></option>
-                                                                    </select>
+
+                                                                <div class="aam-bordered">
+                                                                    <div class="form-group">
+                                                                        <label><?php echo __('Action After Expiration', AAM_KEY); ?> </label>
+                                                                        <select class="form-control" id="action-after-expiration">
+                                                                            <option value=""><?php echo __('Select Action', AAM_KEY); ?></option>
+                                                                            <option value="logout"><?php echo __('Logout User', AAM_KEY); ?></option>
+                                                                            <option value="delete"><?php echo __('Delete Account', AAM_KEY); ?></option>
+                                                                            <option value="lock"><?php echo __('Lock Account', AAM_KEY); ?></option>
+                                                                            <option value="change-role"><?php echo __('Change User Role', AAM_KEY); ?></option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="form-group hidden" id="expiration-change-role-holder">
+                                                                        <label><?php echo __('Change To Role', AAM_KEY); ?></label>
+                                                                        <select class="form-control" id="expiration-change-role">
+                                                                            <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="form-group hidden" id="expiration-change-role-holder">
-                                                                    <label><?php echo __('Change To Role', AAM_KEY); ?></label>
-                                                                    <select class="form-control" id="expiration-change-role">
-                                                                        <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
-                                                                    </select>
-                                                                </div>
+
+                                                                <?php if (AAM::api()->getConfig('core.settings.jwtAuthentication', true) && current_user_can('aam_manage_jwt')) { ?>
+                                                                    <div class="form-group aam-bordered aam-outer-top-xs">
+                                                                        <label for="login-url-preview" class="aam-block">
+                                                                            <?php echo __('Login with URL', AAM_KEY); ?>
+                                                                            <a href="#" class="aam-copy-clipboard" data-clipboard-target="#login-url-preview"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <input type="text" class="form-control" id="login-url-preview" data-url="<?php echo add_query_arg('aam-jwt', '%s', site_url()); ?>" value="<?php echo __('Login URL has not been requested', AAM_KEY); ?>" readonly />
+                                                                            <span class="input-group-btn">
+                                                                                <a href="#" class="btn btn-primary" id="request-login-url"><?php echo __('Request URL', AAM_KEY); ?></a>
+                                                                            </span>
+                                                                            <input type="hidden" id="login-jwt" />
+                                                                        </div>
+                                                                        <small><?php echo AAM_Backend_View_Helper::preparePhrase('With this URL user will be automatically logged in until defined date and time. The JWT token associated with URL is [revokable] however not [refreshable].', 'i', 'i'); ?></small>
+                                                                    </div>
+                                                                <?php } ?>
                                                             </div>
                                                             <div role="tabpanel" class="tab-pane" id="edit-user-profile">
                                                                 <p class="aam-info"><?php echo __("To manage user profile, click on the button below.", AAM_KEY); ?></p>

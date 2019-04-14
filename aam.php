@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: All you need to manage access to your WordPress website
- * Version: 5.9.3
+ * Version: 5.9.4
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  *
@@ -114,7 +114,7 @@ class AAM {
     public static function onPluginsLoaded() {
         //load AAM core config
         AAM_Core_Config::bootstrap();
-        
+
         //login control
         if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
             AAM_Core_Login::bootstrap();
@@ -171,12 +171,12 @@ class AAM {
             
             // Load user capabilities
             $user->initialize();
-            
+
             // Logout user if he/she is blocked
             $status = $user->getUserStatus();
-            
+
             // If user is not active, then perform rollback on user
-            if ($status['status'] !== 'active') {
+            if (!empty($status) && $status->status !== 'active') {
                 $user->restrainUserAccount($status);
             }
             

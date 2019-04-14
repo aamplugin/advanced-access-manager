@@ -72,15 +72,55 @@ class AAM_Backend_Feature_Subject_User {
         $expires = filter_input(INPUT_POST, 'expires');
         $action  = filter_input(INPUT_POST, 'after');
         $role    = filter_input(INPUT_POST, 'role');
+        $jwt     = filter_input(INPUT_POST, 'jwt');
         
         if (current_user_can('edit_users')) {
             if ($userId != get_current_user_id()) {
                 if ($this->isAllowed(new AAM_Core_Subject_User($userId))) {
-                    $this->updateUserExpiration($userId, $expires, $action, $role);
+                    $this->updateUserExpiration($userId, $expires, $action, $role, $jwt);
                     $response = array('status' => 'success');
                 }
             } else {
                 $response['reason'] = __('You cannot set expiration to yourself', AAM_KEY);
+            }
+        }
+        
+        return wp_json_encode($response);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function resetExpiration() {
+        $response = array(
+            'status' => 'failure',
+            'reason' => __('Operation is not permitted', AAM_KEY)
+        );
+        
+        $userId  = filter_input(INPUT_POST, 'user');
+        
+        if (current_user_can('edit_users')) {
+            if ($userId != get_current_user_id()) {
+                if ($this->isAllowed(new AAM_Core_Subject_User($userId))) {
+                    $meta = get_user_meta($userId, 'aam_user_expiration', true);
+                    
+                    if (!empty($meta)) {
+                        $parts = explode('|', $meta);
+                        if (!empty($parts[3])) {
+                            AAM_Core_Jwt_Manager::getInstance()->revokeToken(
+                                $userId, $parts[3]
+                            );
+                        }
+                    }
+                    $result   = delete_user_meta($userId, 'aam_user_expiration');
+                    $response = array(
+                        'status' => $result ? 'success' : 'failure'
+                    );
+                }
+            } else {
+                $response['reason'] = __('You cannot manager expiration to yourself', AAM_KEY);
             }
         }
         
@@ -207,6 +247,48 @@ class AAM_Backend_Feature_Subject_User {
 
         return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function generateJwt() {
+        if (current_user_can('aam_manage_jwt')) {
+            $user    = AAM_Backend_Subject::getInstance()->get();
+            $expires = filter_input(INPUT_POST, 'expires');
+            $trigger = filter_input(INPUT_POST, 'trigger', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+
+            try {
+                $max = AAM::getUser()->getMaxLevel();
+                if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
+                    $issuer = new AAM_Core_Jwt_Issuer();
+                    $jwt =  $issuer->issueToken(
+                        array(
+                            'userId'      => $user->ID, 
+                            'revocable'   => true, 
+                            'refreshable' => false,
+                            'trigger'     => $trigger
+                        ), 
+                        $expires
+                    );
+                    AAM_Core_Jwt_Manager::getInstance()->registerToken($user->ID, $jwt->token);
+                    $result = array(
+                        'status' => 'success',
+                        'jwt'    => $jwt->token
+                    );
+                } else {
+                    $result = array('status' => 'failure', 'reason' => 'User ID has higher level than current user');
+                }
+            } catch (Exception $ex) {
+                $result = array('status' => 'failure', 'reason' => $ex->getMessage());
+            }
+        } else {
+            $result = array('status' => 'failure', 'reason' => 'You are not allowed to manage JWT tokens');
+        }
+        
+        return wp_json_encode($result);
+    }
     
     /**
      * Prepare row
@@ -309,16 +391,12 @@ class AAM_Backend_Feature_Subject_User {
      * 
      * @access protected
      */
-    protected function updateUserExpiration($user, $expires, $action, $role = '') {
-        if (trim($expires)) {
-            update_user_meta(
-                $user, 
-                'aam_user_expiration',
-                $expires . "|" . ($action ? $action : 'delete') . '|' . $role
-            );
-        } else {
-            delete_user_meta($user, 'aam_user_expiration');
-        }
+    protected function updateUserExpiration($user, $expires, $action, $role = '', $jwt = '') {
+        update_user_meta(
+            $user, 
+            'aam_user_expiration',
+            $expires . "|" . ($action ? $action : 'delete') . '|' . $role . '|' . $jwt
+        );
     }
     
     /**

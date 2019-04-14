@@ -31,6 +31,8 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * It is very important to have all user capability changes be stored in
      * separate options from the wp_capabilities usermeta cause if AAM is not
      * active as a plugin, it reverts back to the default WordPress settings
+     * 
+     * @todo Remove in June 2020
      */
     const AAM_CAPKEY = 'aam_capability';
     
@@ -198,7 +200,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      */
     public function getUserStatus() {
         if (is_null($this->status)) {
-            $this->status = array('status' => 'active');
+            $this->status = (object) array('status' => 'active');
             $steps  = array(
                 'UserRecordStatus', // Check if user's record states that it is blocked
                 'UserExpiration', // Check if user's account is expired
@@ -209,7 +211,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
             foreach($steps as $step) {
                 $result = call_user_func(array($this, "check{$step}"));
                 if ($result !== true) {
-                    $this->status = $result;
+                    $this->status = (object) $result;
                     break;
                 }
             }
@@ -221,23 +223,23 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
     /**
      * Restrain user account based on status
      *
-     * @param array $status
+     * @param object $status
      * 
      * @return void
      * @see    AAM_Core_Subject_User::getUserStatus
      * 
      * @access public
      */
-    public function restrainUserAccount(array $status) {
-        switch($status['action']) {
+    public function restrainUserAccount($status) {
+        switch($status->action) {
             case 'lock':
                 $this->block();
                 break;
             
             case 'change-role':
-                $this->getSubject()->set_role(''); // First reset all roles
-                foreach((array)$status['meta'] as $role) {
-                    $this->getSubject()->add_role($role);
+                $this->set_role(''); // First reset all roles
+                foreach((array)$status->meta as $role) {
+                    $this->add_role($role);
                 }
                 break;
 
@@ -251,7 +253,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
                 wp_logout();
                 break;
         }
-
+        
         // Delete `aam_user_expiration`
         delete_user_meta($this->getId(), 'aam_user_expiration');
     }
@@ -385,9 +387,9 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
 
         $status = ($this->getSubject()->user_status ? 0 : 1);
         $result = $wpdb->update(
-                $wpdb->users, 
-                array('user_status' => $status), 
-                array('ID' => $this->getId())
+            $wpdb->users, 
+            array('user_status' => $status), 
+            array('ID' => $this->getId())
         );
         
         if ($result) {
@@ -423,7 +425,16 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @access public
      */
     public function getCapabilities() {
-        return $this->getSubject()->allcaps;
+        $caps  = $this->getSubject()->caps;
+        $roles = AAM_Core_API::getRoles();
+
+        foreach($caps as $cap => $effect) {
+            if ($roles->is_role($cap)) {
+                unset($caps[$cap]);
+            }
+        }
+
+        return $caps;
     }
 
     /**
@@ -449,7 +460,9 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @access public
      */
     public function addCapability($capability) {
-        return $this->updateCapability($capability, true);
+        $this->getSubject()->add_cap($capability);
+
+        return true;
     }
 
     /**
@@ -462,26 +475,9 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * @access public
      */
     public function removeCapability($capability) {
-        return $this->updateCapability($capability, false);
-    }
+        $this->getSubject()->remove_cap($capability);
 
-    /**
-     * Update User's Capability Set
-     *
-     * @param string  $capability
-     * @param boolean $grand
-     *
-     * @return boolean
-     *
-     * @access public
-     */
-    public function updateCapability($capability, $grand) {
-        //update capability
-        $caps = $this->getSubject()->caps;
-        $caps[$capability] = $grand;
-        
-        //save and return the result of operation
-        return update_user_option($this->getId(), self::AAM_CAPKEY, $caps);
+        return true;
     }
 
     /**

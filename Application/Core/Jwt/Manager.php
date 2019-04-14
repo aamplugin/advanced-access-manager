@@ -39,6 +39,9 @@ class AAM_Core_Jwt_Manager {
 
         //register authentication hook
         add_filter('determine_current_user', array($this, 'determineUser'), 999);
+
+        //login user if JWT is in the URL
+        add_action('init', array($this, 'loginAccount'), 1);
     }
     
     /**
@@ -174,21 +177,29 @@ class AAM_Core_Jwt_Manager {
         $result = $issuer->validateToken($jwt);
 
         if ($result->status === 'valid') {
-            // calculate the new expiration
-            $issuedAt = new DateTime();
-            $issuedAt->setTimestamp($result->iat);
-            $expires = DateTime::createFromFormat('m/d/Y, H:i O', $result->exp);
+            if (!empty($result->refreshable)) {
+                // calculate the new expiration
+                $issuedAt = new DateTime();
+                $issuedAt->setTimestamp($result->iat);
+                $expires = DateTime::createFromFormat('m/d/Y, H:i O', $result->exp);
 
-            $exp = new DateTime();
-            $exp->add($issuedAt->diff($expires));
+                $exp = new DateTime();
+                $exp->add($issuedAt->diff($expires));
 
-            $new = $this->issueToken($result->userId, $jwt, $exp);
+                $new = $this->issueToken($result->userId, $jwt, $exp);
 
-            $response->status = 200;
-            $response->data = array(
-                'token'         => $new->token,
-                'token_expires' => $new->claims['exp'],
-            );
+                $response->status = 200;
+                $response->data = array(
+                    'token'         => $new->token,
+                    'token_expires' => $new->claims['exp'],
+                );
+            } else {
+                $response->status = 400;
+                $response->data   = new WP_Error(
+                    'rest_jwt_validation_failure',
+                    __('Provided JWT token is not refreshable', AAM_KEY)
+                );
+            }
         } else {
             $response->status = 400;
             $response->data   = new WP_Error(
@@ -219,12 +230,56 @@ class AAM_Core_Jwt_Manager {
 
                 if ($result->status === 'valid') {
                     $userId = $result->userId;
-                    $this->possiblyLoginUser($token->method, $result);
                 }
             }
         }
         
         return $userId;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function loginAccount() {
+        $jwt    = AAM_Core_Request::get('aam-jwt');
+        $method = AAM_Core_Request::server('REQUEST_METHOD');
+
+        if (!empty($jwt) && ($method === 'GET')) {
+            $issuer = new AAM_Core_Jwt_Issuer();
+            $token  = $issuer->validateToken($jwt);
+
+           
+
+            // Check that JWT token is valid
+            if ($token->status === 'valid') {
+                // Check if Account is active
+                $user = AAM::api()->getUser($token->userId);
+
+                if ($user->getUserStatus()->status === 'active') {
+                    wp_set_current_user($token->userId);
+                    wp_set_auth_cookie($token->userId);
+
+                    // TODO: Remove June 2020
+                    $exp = (is_numeric($token->exp) ? date('m/d/Y, H:i O', $token->exp) : $token->exp);
+
+                    // determine correct trigger
+                    if (!empty($token->trigger)) {
+                        update_user_meta(
+                            $token->userId, 
+                            'aam_user_expiration',
+                            $exp . "|{$token->trigger->action}|" . (!empty($token->trigger->role) ? $token->trigger->role : '')
+                        );
+                    }
+
+                    do_action('wp_login', $user->user_login, $user->getSubject());
+
+                    // finally just redirect user to the homepage
+                    wp_safe_redirect(get_home_url()); exit;
+                }
+            }
+        }
     }
 
     /**
@@ -308,7 +363,14 @@ class AAM_Core_Jwt_Manager {
     protected function issueToken($userId, $replace = null, $expires = null) {
         $issuer = new AAM_Core_Jwt_Issuer();
         $result = $issuer->issueToken(
-            array('userId' => $userId, 'revocable' => true), $expires
+            array(
+                'userId' => $userId, 
+                'revocable' => true,
+                'refreshable' => AAM::api()->getConfig(
+                    'authentication.jwt.refreshable', false
+                )
+            ), 
+            $expires
         );
 
         // Finally register token so it can be revoked
@@ -329,7 +391,7 @@ class AAM_Core_Jwt_Manager {
      */
     protected function extractJwt() {
         $container = explode(',', AAM_Core_Config::get(
-            'authentication.jwt.container', 'header,post,query,cookie'
+            'authentication.jwt.container', 'header,post,cookie'
         ));
         
         $jwt = null;
@@ -342,10 +404,6 @@ class AAM_Core_Jwt_Manager {
                 
                 case 'cookie':
                     $jwt = AAM_Core_Request::cookie('aam-jwt');
-                    break;
-                
-                case 'query':
-                    $jwt = AAM_Core_Request::get('aam-jwt');
                     break;
                 
                 case 'post':
@@ -372,41 +430,6 @@ class AAM_Core_Jwt_Manager {
         }
         
         return $response;
-    }
-
-    /**
-     * Also login user if HTTP request is get and JWT was extracted from query params
-     *
-     * @param string $container
-     * @param object $claims
-     * 
-     * @return void
-     * 
-     * @access protected
-     */
-    protected function possiblyLoginUser($container, $claims) {
-        // Also login user if REQUEST_METHOD is GET
-        $method = AAM_Core_Request::server('REQUEST_METHOD');
-
-        if ($container === 'query' && ($method === 'GET')) {
-            $exp = get_user_meta($claims->userId, 'aam_user_expiration', true);
-
-            // Do it only once
-            if (empty($exp)) {
-                wp_set_current_user($claims->userId);
-                wp_set_auth_cookie($claims->userId);
-
-                // TODO: Remove June 2020
-                $exp = (is_numeric($claims->exp) ? date('m/d/Y, H:i O', $claims->exp) : $claims->exp);
-
-                update_user_meta(
-                    $claims->userId, 
-                    'aam_user_expiration',
-                    $exp . '|logout|'
-                );
-                do_action('wp_login', '', wp_get_current_user());
-            }
-        }
     }
 
     /**

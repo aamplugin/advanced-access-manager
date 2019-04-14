@@ -234,8 +234,9 @@ class AAM_Backend_Feature_Subject_Role {
      */
     public function edit() {
         if (current_user_can('aam_edit_roles')) {
-            $role    = AAM_Backend_Subject::getInstance();
-            $role->update(trim(filter_input(INPUT_POST, 'name')));
+            $role = AAM_Backend_Subject::getInstance();
+
+            $role->update(esc_js(trim(filter_input(INPUT_POST, 'name'))));
             
             do_action('aam-post-update-role-action', $role->get());
             

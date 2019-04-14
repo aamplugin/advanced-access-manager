@@ -79,6 +79,12 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
      */
     public function add($type, $id, $value) {
         $option = $this->getOption();
+        
+        $limit  = AAM_Core_Config::get('core.cache.limit', 1000);
+        if (isset($option[$type][$id]) && (count($option[$type][$id]) >= $limit)) {
+            array_shift($option[$type][$id]);
+        }
+
         $option[$type][$id] = $value;
         $this->setOption($option);
         
@@ -124,5 +130,5 @@ class AAM_Core_Object_Cache extends AAM_Core_Object {
     public function reset() {
         return $this->getSubject()->deleteOption('cache');
     }
-    
+
 }

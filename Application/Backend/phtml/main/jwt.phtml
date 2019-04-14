@@ -43,12 +43,28 @@
                             <input type="hidden" id="jwt-expires" />
                         </div>
 
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span class='aam-setting-title'><?php echo __('Is token refreshable?', AAM_KEY); ?></span>
+                                        <p class="aam-setting-description">
+                                            <?php echo __('Whether this token, before expires, can be used to obtain a new token for the same time duration or not.', AAM_KEY); ?>
+                                        </p>
+                                    </td>
+                                    <td class="text-center">
+                                    <input data-toggle="toggle" id="jwt-refreshable" type="checkbox" data-on="Yes" data-off="No" data-size="small" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
                         <div class="form-group aam-outer-top-xs">
                             <label for="jwt-token-preview" class="aam-block">
                                 <?php echo __('JWT Token (for any API calls)', AAM_KEY); ?>
                                 <a href="#" class="aam-copy-clipboard" data-clipboard-target="#jwt-token-preview"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>
                             </label>
-                            <textarea class="form-control" id="jwt-token-preview" readonly rows="5"></textarea>
+                            <input type="text" class="form-control" id="jwt-token-preview" readonly />
                         </div>
                         
                         <hr/>
@@ -58,8 +74,8 @@
                                 <?php echo __('Account Login URL (with JWT token)', AAM_KEY); ?>
                                 <a href="#" class="aam-copy-clipboard" data-clipboard-target="#jwt-url-preview"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>
                             </label>
-                            <textarea class="form-control" id="jwt-url-preview" data-url="<?php echo add_query_arg('aam-jwt', '%s', site_url()); ?>" readonly rows="5"></textarea>
-                            <small><?php echo __('With this URL account will be automatically logged in until the time defined on the "Temporary Access" tab.', AAM_KEY); ?></small>
+                            <input type="text" class="form-control" id="jwt-url-preview" data-url="<?php echo add_query_arg('aam-jwt', '%s', site_url()); ?>" readonly />
+                            <small><?php echo __('With this URL account will be automatically logged in as long as JWT token is valid.', AAM_KEY); ?></small>
                         </div>
                     </div>
                     <div class="modal-footer">

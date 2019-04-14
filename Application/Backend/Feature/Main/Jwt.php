@@ -40,15 +40,20 @@ class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract {
      * @return type
      */
     public function generate() {
-        $user    = AAM_Backend_Subject::getInstance()->get();
-        $expires = filter_input(INPUT_POST, 'expires');
+        $user        = AAM_Backend_Subject::getInstance()->get();
+        $expires     = filter_input(INPUT_POST, 'expires');
+        $refreshable = filter_input(INPUT_POST, 'refreshable', FILTER_VALIDATE_BOOLEAN);
 
         try {
             $max = AAM::getUser()->getMaxLevel();
             if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
                 $issuer = new AAM_Core_Jwt_Issuer();
                 $jwt =  $issuer->issueToken(
-                    array('userId'  => $user->ID, 'revocable' => true), 
+                    array(
+                        'userId'      => $user->ID, 
+                        'revocable'   => true, 
+                        'refreshable' => $refreshable
+                    ), 
                     $expires
                 );
                 $result = array(

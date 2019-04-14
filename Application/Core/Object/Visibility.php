@@ -56,17 +56,13 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
                     $this->pushOptions('post', $row->post_id . '|' . $row->post_type, $settings);
                 }
             }
-            
+
             // Read all the settings from the Access & Security Policies
             $area = AAM_Core_Api_Area::get();
-            $stms = AAM_Core_Policy_Factory::get($subject)->find(
-                "/^post:(.*):(list|listtoothers)$/"
-            );
-            
+            $stms = AAM_Core_Policy_Factory::get($subject)->find("/^post:(.*):list$/");
+
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);
-
-                $action = ($chunks[3] === 'listtoothers' ? 'list_others' : 'list');
 
                 if (is_numeric($chunks[2])) {
                     $postId = $chunks[2];
@@ -77,15 +73,18 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
                     $postId = (is_a($post, 'WP_Post') ? $post->ID : 0);
                 }
 
-                $this->pushOptions(
-                    'post', 
-                    "{$postId}|{$chunks[1]}", 
-                    array(
-                        "{$area}.{$action}" => ($stm['Effect'] === 'deny' ? 1 : 0)
-                    )
-                );
+                // Cover the case when unknown slug is used
+                if (!empty($postId)) { 
+                    $this->pushOptions(
+                        'post', 
+                        "{$postId}|{$chunks[1]}", 
+                        array(
+                            "{$area}.list" => ($stm['Effect'] === 'deny' ? 1 : 0)
+                        )
+                    );
+                }
             }
-            
+
             do_action('aam-visibility-initialize-action', $this);
             
             // inherit settings from parent
@@ -128,8 +127,8 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object {
         
         if (empty($filtered)) {
             $filtered = array_combine(
-                    $listOptions, 
-                    array_fill(0, count($listOptions), 0)
+                $listOptions, 
+                array_fill(0, count($listOptions), 0)
             );
         }
         

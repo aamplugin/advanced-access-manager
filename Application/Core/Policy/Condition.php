@@ -144,7 +144,7 @@ final class AAM_Core_Policy_Condition {
         foreach($this->prepareConditions($conditions, $args) as $condition) {
             $result = $result || ($condition['left'] === $condition['right']);
         }
-        
+
         return $result;
     }
     

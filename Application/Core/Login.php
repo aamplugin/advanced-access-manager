@@ -77,7 +77,7 @@ class AAM_Core_Login {
                 $this->updateLoginCounter(-1);
             }
             
-            // Delete User Switch flag in case admin is inpersonating user
+            // Delete User Switch flag in case admin is impersonating user
             AAM_Core_API::deleteOption('aam-user-switch-' . $user->ID);
             
             // Experimental feature. Track user session
@@ -89,20 +89,6 @@ class AAM_Core_Login {
                 if (!empty($ttl)) {
                     add_user_meta($user->ID, 'aam-authenticated-timestamp', time());
                 }
-            }
-            
-            if (AAM::api()->getConfig('core.settings.setJwtCookieAfterLogin', false)) {
-                $issuer = new AAM_Core_Jwt_Issuer();
-                $token  = $issuer->issueToken(array('userId' => $user->ID));
-                setcookie(
-                    'aam-jwt', 
-                    $token->token, 
-                    $token->claims['exp'],
-                    '/', 
-                    parse_url(get_bloginfo('url'), PHP_URL_HOST), 
-                    is_ssl(),
-                    AAM_Core_Config::get('authentication.jwt.cookie.httpOnly', false)
-                );
             }
             
             if ($this->aamLogin === false) {

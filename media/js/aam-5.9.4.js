@@ -43,7 +43,7 @@
                }
            },
            error: function () {
-               getAAM().notification('danger', getAAM().__('Application error'));
+               getAAM().notification('danger');
            },
            complete: function () {
                 $(btn).attr(
@@ -103,9 +103,7 @@
                     }
                 },
                 error: function () {
-                    getAAM().notification(
-                        'danger', getAAM().__('Application Error')
-                    );
+                    getAAM().notification('danger');
                 }
             });
         });
@@ -569,7 +567,7 @@
                             }
                         },
                         error: function () {
-                            getAAM().notification('danger', getAAM().__('Application error'));
+                            getAAM().notification('danger');
                         },
                         complete: function () {
                             $('#add-role-modal').modal('hide');
@@ -623,7 +621,7 @@
                             }
                         },
                         error: function () {
-                            getAAM().notification('danger', getAAM().__('Application error'));
+                            getAAM().notification('danger');
                         },
                         complete: function () {
                             $('#edit-role-modal').modal('hide');
@@ -660,7 +658,7 @@
                         }
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     },
                     complete: function () {
                         $('#delete-role-modal').modal('hide');
@@ -753,9 +751,59 @@
                         }
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     }
                 });
+            }
+
+            /**
+             * 
+             * @param {*} expires 
+             * @param {*} action 
+             */
+            function generateJWT() {
+                if ($('#login-url-preview').length === 1) {
+                    // Build the trigger
+                    var trigger = {
+                        action: $('#action-after-expiration').val()
+                    }
+
+                    if (trigger.action === 'change-role') {
+                        trigger.role = $('#expiration-change-role').val();
+                    }
+
+                    $.ajax(getLocal().ajaxurl, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'aam',
+                            sub_action: 'Subject_User.generateJwt',
+                            _ajax_nonce: getLocal().nonce,
+                            subject: 'user',
+                            subjectId: $('#reset-user-expiration-btn').attr('data-user-id'),
+                            expires:  $('#user-expires').val(),
+                            trigger: trigger
+                        },
+                        beforeSend: function () {
+                            $('#login-url-preview').val(getAAM().__('Generating URL...'));
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                $('#login-url-preview').val(
+                                    $('#login-url-preview').data('url').replace('%s', response.jwt)
+                                );
+                                $('#login-jwt').val(response.jwt);
+                            } else {
+                                getAAM().notification(
+                                    'danger', getAAM().__('Failed to generate JWT token')
+                                );
+                            }
+                        },
+                        error: function () {
+                            getAAM().notification('danger');
+                        }
+                    });
+                }
             }
             
             //initialize the user list table
@@ -924,9 +972,17 @@
                                                 loadRoleList();
                                                 $('#expiration-change-role-holder').addClass('hidden');
                                             }
+
+                                            // set JWT if defined
+                                            if (settings.length === 4) {
+                                                $('#login-url-preview').val(
+                                                    $('#login-url-preview').data('url').replace('%s', settings[3])
+                                                );
+                                                $('#login-jwt').val( settings[3]);
+                                            }
                                         } else {
-                                            $('#reset-user-expiration-btn').addClass('hidden');
-                                            $('#user-expires, #action-after-expiration').val('');
+                                            $('#reset-user-expiration-btn, #expiration-change-role-holder').addClass('hidden');
+                                            $('#user-expires, #action-after-expiration, #login-url-preview, #login-url').val('');
                                             loadRoleList();
                                         }
 
@@ -1050,7 +1106,11 @@
                    $('#expiration-change-role-holder').addClass('hidden');
                }
             });
-            
+
+            $('#request-login-url').bind('click', function() {
+                generateJWT();
+            });
+
             $('#user-expiration-datapicker').datetimepicker({
                 icons: {
                     time: "icon-clock",
@@ -1061,6 +1121,7 @@
                     next: "icon-angle-right"
                 },
                 inline: true,
+                minDate: new Date(),
                 sideBySide: true
             });
 
@@ -1083,9 +1144,7 @@
             });
 
             $('#user-expiration-datapicker').on('dp.change', function(res) {
-                $('#user-expires').val(
-                    res.date.format('MM/DD/YYYY, H:mm Z')
-                );
+                $('#user-expires').val(res.date.format('MM/DD/YYYY, H:mm Z'));
             });
             
             //edit role button
@@ -1102,7 +1161,8 @@
                         user: $(_this).attr('data-user-id'),
                         expires: $('#user-expires').val(),
                         after: $('#action-after-expiration').val(),
-                        role: $('#expiration-change-role').val()
+                        role: $('#expiration-change-role').val(),
+                        jwt: $('#login-jwt').val()
                     },
                     beforeSend: function () {
                         $(_this).text(getAAM().__('Saving...')).attr('disabled', true);
@@ -1115,7 +1175,7 @@
                         }
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     },
                     complete: function () {
                         $('#edit-user-modal').modal('hide');
@@ -1133,7 +1193,7 @@
                     dataType: 'json',
                     data: {
                         action: 'aam',
-                        sub_action: 'Subject_User.saveExpiration',
+                        sub_action: 'Subject_User.resetExpiration',
                         _ajax_nonce: getLocal().nonce,
                         user: $(_this).attr('data-user-id')
                     },
@@ -1148,7 +1208,7 @@
                         }
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     },
                     complete: function () {
                         $('#edit-user-modal').modal('hide');
@@ -1264,7 +1324,10 @@
                 $('#manage-default').bind('click', function () {
                     var _this = this;
 
-                    getAAM().setSubject('default', null, getAAM().__('All Users, Roles and Visitor'), 0);
+                    getAAM().setSubject(
+                        'default', null, getAAM().__('All Users, Roles and Visitor'), 0
+                    );
+
                     $('i.icon-cog', $(this)).attr('class', 'icon-spin4 animate-spin');
                     if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
@@ -1364,10 +1427,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', 
-                                    getAAM().__('Application error')
-                                );
+                                getAAM().notification('danger');
                             },
                             complete: function() {
                                 cb();
@@ -1589,9 +1649,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -1713,9 +1771,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -1839,9 +1895,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -1868,9 +1922,7 @@
                         initialize();
                     },
                     error: function () {
-                        getAAM().notification(
-                            'danger', getAAM().__('Application error')
-                        );
+                        getAAM().notification('danger');
                     }
                 });
             }
@@ -1932,9 +1984,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', getAAM().__('Application error')
-                                );
+                                getAAM().notification('danger');
                                 $('i', '#refresh-metabox-list').attr(
                                     'class', 'icon-arrows-cw'
                                 );
@@ -2046,9 +2096,7 @@
                             }
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -2142,10 +2190,13 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-trash-empty text-danger'
                                         }).bind('click', function () {
-                                            var message = $('.aam-confirm-message', '#delete-capability-modal');
-                                            $(message).html(message.data('message').replace(
-                                                    '%s', '"' + data[0] + '"')
-                                            );
+                                            var message = $('.aam-confirm-message', '#delete-capability-modal').data('message');
+
+                                            // replace some dynamic parts
+                                            message = message.replace('%s', '<b>' + data[0] + '</b>');
+                                            message = message.replace('%n', '<b>' +  getAAM().getSubject().name + '</b>')
+                                            $('.aam-confirm-message', '#delete-capability-modal').html(message);
+
                                             $('#capability-id').val(data[0]);
                                             $('#delete-capability-btn').attr('data-cap', data[0]);
                                             $('#delete-capability-modal').modal('show');
@@ -2222,7 +2273,7 @@
                                     }
                                 },
                                 error: function () {
-                                    getAAM().notification('danger', getAAM().__('Application error'));
+                                    getAAM().notification('danger');
                                 },
                                 complete: function () {
                                     $(_this).text(getAAM().__('Add Capability')).attr('disabled', false);
@@ -2248,6 +2299,8 @@
                                 data: {
                                     action: 'aam',
                                     sub_action: 'Main_Capability.update',
+                                    subject: getAAM().getSubject().type,
+                                    subjectId: getAAM().getSubject().id,
                                     _ajax_nonce: getLocal().nonce,
                                     capability: $(this).attr('data-cap'),
                                     updated: cap
@@ -2265,7 +2318,7 @@
                                     }
                                 },
                                 error: function () {
-                                    getAAM().notification('danger', getAAM().__('Application error'));
+                                    getAAM().notification('danger');
                                 },
                                 complete: function () {
                                     $('#edit-capability-modal').modal('hide');
@@ -2304,7 +2357,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification('danger', getAAM().__('Application error'));
+                                getAAM().notification('danger');
                             },
                             complete: function () {
                                 $('#delete-capability-modal').modal('hide');
@@ -2389,9 +2442,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -2559,7 +2610,7 @@
                         });
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     },
                     complete: function () {
                         $(btn).attr('class', $(btn).attr('data-class')).removeAttr('data-class');
@@ -2777,7 +2828,7 @@
                                                     $(_btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
                                                 },
                                                 error: function () {
-                                                    getAAM().notification('danger', getAAM().__('Application error'));
+                                                    getAAM().notification('danger');
                                                 },
                                                 complete: function () {
                                                     $('#post-list').DataTable().ajax.reload();
@@ -2951,6 +3002,7 @@
                             previous: "icon-angle-left",
                             next: "icon-angle-right"
                         },
+                        minDate: new Date(),
                         inline: true,
                         sideBySide: true
                     });
@@ -3013,9 +3065,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -3109,9 +3159,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -3211,9 +3259,7 @@
                             successCallback(response);
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -3303,9 +3349,7 @@
                             value: value
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -3394,9 +3438,7 @@
                         },
                         error: function () {
                             updateBtn(btn, value ? 0 : 1);
-                            getAAM().notification(
-                                'danger', getAAM().__('Application error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -3565,9 +3607,7 @@
                                     }
                                 },
                                 error: function () {
-                                    getAAM().notification(
-                                        'danger', getAAM().__('Application error')
-                                    );
+                                    getAAM().notification('danger');
                                 },
                                 complete: function () {
                                     $('#uri-model').modal('hide');
@@ -3602,7 +3642,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification('danger', getAAM().__('Application error'));
+                                getAAM().notification('danger');
                             },
                             complete: function () {
                                 $('#uri-delete-model').modal('hide');
@@ -3720,7 +3760,7 @@
              * @param {type} expires
              * @returns {undefined}
              */
-            function generateJWT(expires) {
+            function generateJWT(expires, refreshable) {
                 $.ajax(getLocal().ajaxurl, {
                     type: 'POST',
                     dataType: 'json',
@@ -3730,7 +3770,8 @@
                         _ajax_nonce: getLocal().nonce,
                         subject: getAAM().getSubject().type,
                         subjectId: getAAM().getSubject().id,
-                        expires: expires
+                        expires: expires,
+                        refreshable: refreshable
                     },
                     beforeSend: function () {
                         $('#jwt-token-preview').val(getAAM().__('Generating token...'));
@@ -3749,7 +3790,7 @@
                         }
                     },
                     error: function () {
-                        getAAM().notification('danger', getAAM().__('Application error'));
+                        getAAM().notification('danger');
                     }
                 });
             }
@@ -3793,7 +3834,15 @@
                             res.date.format('MM/DD/YYYY, H:mm Z')
                         );
                         generateJWT(
-                            $('#jwt-expires').val()
+                            $('#jwt-expires').val(),
+                            $('#jwt-refreshable').is(':checked')
+                        );
+                    });
+
+                    $('#jwt-refreshable').on('change', function() {
+                        generateJWT(
+                            $('#jwt-expires').val(),
+                            $('#jwt-refreshable').is(':checked')
                         );
                     });
 
@@ -3915,9 +3964,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', getAAM().__('Application error')
-                                );
+                                getAAM().notification('danger');
                             },
                             complete: function() {
                                 $('#create-jwt-btn').html(getAAM().__('Create'));
@@ -3949,15 +3996,15 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', getAAM().__('Application error')
-                                );
+                                getAAM().notification('danger');
                             },
                             complete: function() {
                                 $('#jwt-delete-btn').html(getAAM().__('Delete'));
                             }
                         });
                     });
+
+                    $('[data-toggle="toggle"]', container).bootstrapToggle();
                 }
             }
             
@@ -4020,10 +4067,7 @@
                                     }
                                 },
                                 error: function () {
-                                    getAAM().notification(
-                                        'danger', 
-                                        getAAM().__('Application error')
-                                    );
+                                    getAAM().notification('danger');
                                 },
                                 complete: function() {
                                     cb();
@@ -4063,9 +4107,7 @@
                             }
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application error')
-                            );
+                            getAAM().notification('danger');
                         },
                         complete: function () {
                             location.reload();
@@ -4214,7 +4256,7 @@
                                 }
                             },
                             error: function() {
-                                getAAM().notification('danger', getAAM().__('Application error'));
+                                getAAM().notification('danger');
                             },
                             complete: function () {
                                 $('i', '#fix-extension-dir-issue').attr('class', 'icon-wrench');
@@ -4277,9 +4319,7 @@
                                 location.reload();
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', getAAM().__('Application Error')
-                                );
+                                getAAM().notification('danger');
                                 $('#ack-get-started').text(
                                         getAAM().__('OK, got it')
                                 );
@@ -4322,9 +4362,7 @@
                             value: value
                         },
                         error: function () {
-                            getAAM().notification(
-                                'danger', getAAM().__('Application Error')
-                            );
+                            getAAM().notification('danger');
                         }
                     });
                 });
@@ -4373,7 +4411,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification('danger', getAAM().__('Application Error'));
+                                getAAM().notification('danger');
                             },
                             complete: function() {
                                 $('#clear-settings').prop('disabled', false);
@@ -4407,7 +4445,7 @@
                                 }
                             },
                             error: function () {
-                                getAAM().notification('danger', getAAM().__('Application Error'));
+                                getAAM().notification('danger');
                             },
                             complete: function() {
                                 $('#clear-cache').prop('disabled', false);
@@ -4439,10 +4477,7 @@
                                 config: editor.getValue()
                             },
                             error: function () {
-                                getAAM().notification(
-                                    'danger', 
-                                    getAAM().__('Application error')
-                                );
+                                getAAM().notification('danger');
                             }
                         });
                     });
@@ -4853,6 +4888,21 @@
      */
     AAM.prototype.notification = function (status, message) {
         var notification = $('<div/>', {'class': 'aam-sticky-note ' + status});
+
+        if (!message) {
+            switch(status) {
+                case 'success':
+                    message = getAAM().__('Operation Completed Successfully');
+                    break;
+
+                case 'danger':
+                    message = getAAM().__('Unexpected Application Error');
+                    break;
+
+                default:
+                    break;
+            }
+        }
         
         notification.append($('<span/>').text(message));
         $('.wrap').append(notification);
@@ -4888,9 +4938,7 @@
                     getAAM().fetchContent('main');
                 },
                 error: function () {
-                    getAAM().notification(
-                        'danger', getAAM().__('Application error')
-                    );
+                    getAAM().notification('danger');
                 },
                 complete: function() {
                     btn.text(btn.attr('data-original-label'));

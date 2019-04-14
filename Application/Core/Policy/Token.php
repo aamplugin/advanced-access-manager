@@ -75,7 +75,7 @@ final class AAM_Core_Policy_Token {
      */
     protected static function getValue($token, $args) {
         $parts = explode('.', $token);
-        
+
         if (isset(self::$map[$parts[0]])) {
             $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
         } elseif ($parts[0] === 'CALLBACK' && is_callable($parts[1])) {
@@ -112,7 +112,7 @@ final class AAM_Core_Policy_Token {
             case 'capabilities':
             case 'caps':
                 $value = array();
-                foreach($user->allcaps as $cap => $effect) {
+                foreach((array) $user->allcaps as $cap => $effect) {
                     if (!empty($effect)) {
                         $value[] = $cap;
                     }

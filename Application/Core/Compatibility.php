@@ -27,7 +27,8 @@ class AAM_Core_Compatibility {
      *
      * @param [type] $action
      * @param [type] $effect
-     * @return void
+     * 
+     * @return array
      */
     public static function convertPolicyAction($action, $effect, $prefix = '') {
         $action = apply_filters('aam-policy-post-resource-action-filter', $action);
@@ -186,9 +187,9 @@ class AAM_Core_Compatibility {
     
     /**
      * 
-     * @param type $option
-     * @param type $normalizedName
-     * @param type $config
+     * @param type  $option
+     * @param type  $normalizedName
+     * @param array &$config
      * @return int
      */
     protected static function normalizeOption($option, $normalizedName, &$config) {

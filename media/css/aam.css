@@ -105,6 +105,17 @@
 .icon-wrench:before { content: '\e80e' !important; } /* 'î ' */
 .icon-ok-circled:before { content: '\e81c' !important; } /* 'î ' */
 .icon-cancel-circled:before { content: '\e81d' !important; } /* 'î ' */
+.icon-info-circled:before { content: '\e81f' !important; } /* 'î ' */
+.icon-attention:before { content: '\e81e' !important; } /* 'î ' */
+
+.icon-image-40 {
+  font-size: 40px;
+}
+
+.icon-image-40:before {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
 
 .animate-spin {
     -moz-animation: spin 2s infinite linear;

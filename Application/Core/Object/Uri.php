@@ -35,7 +35,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
         
         if (empty($option)) {
             $stms = AAM_Core_Policy_Factory::get($subject)->find("/^URI:/i");
-            
+
             foreach($stms as $key => $stm) {
                 $chunks = explode(':', $key);
                 $effect = ($stm['Effect'] === 'deny' ? 1 : 0);
@@ -85,7 +85,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
                 );
             }
         }
-        
+
         if (empty($option)) {
             $option = $this->getSubject()->inheritFromParent('uri');
         }
@@ -117,11 +117,10 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
                 if (apply_filters('aam-uri-match-filter', preg_match($regex, $s), $uri, $s)
                         && (empty($out) || count(array_intersect_assoc($params, $out)) === count($out))) {
                     $match = $rule;
-                    break;
                 }
             }
         }
-        
+
         return $match;
     }
 
