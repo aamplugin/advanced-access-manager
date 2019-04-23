@@ -107,6 +107,7 @@
 .icon-cancel-circled:before { content: '\e81d' !important; } /* 'î ' */
 .icon-info-circled:before { content: '\e81f' !important; } /* 'î ' */
 .icon-attention:before { content: '\e81e' !important; } /* 'î ' */
+.icon-tag:before { content: '\e821' !important; } /* 'î ¡' */
 
 .icon-image-40 {
   font-size: 40px;
@@ -1130,7 +1131,7 @@ input[type=radio]:checked + label:before {
 
 /*! ========================================================================
  * Bootstrap Toggle: bootstrap-toggle.css v2.2.0
- * http://www.bootstraptoggle.com
+ * https://www.bootstraptoggle.com
  * ========================================================================
  * Copyright 2014 Min Hur, The New York Times Company
  * Licensed under MIT

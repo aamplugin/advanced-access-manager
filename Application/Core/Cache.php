@@ -12,7 +12,7 @@
  * 
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @todo - Remove May 2019
+ * @todo - Remove with v6.0
  */
 class AAM_Core_Cache {
     

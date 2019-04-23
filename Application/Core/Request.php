@@ -92,7 +92,7 @@ class AAM_Core_Request {
      * Check array for specified parameter and return the it's value or
      * default one
      *
-     * @param array  &$array  Global array _GET, _POST etc
+     * @param array  $array   Global array _GET, _POST etc
      * @param string $param   Array Parameter
      * @param mixed  $default Default value
      *
@@ -101,7 +101,7 @@ class AAM_Core_Request {
      * @access protected
      * @static
      */
-    protected static function readArray(&$array, $param, $default) {
+    protected static function readArray($array, $param, $default) {
         $value = $default;
         if (is_null($param)) {
             $value = $array;

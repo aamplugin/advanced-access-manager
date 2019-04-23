@@ -2,8 +2,8 @@
 
 /**
  * Plugin Name: Advanced Access Manager
- * Description: All you need to manage access to your WordPress website
- * Version: 5.9.4
+ * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
+ * Version: 5.9.6.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  *
@@ -69,8 +69,12 @@ class AAM {
     }
     
     /**
+     * Get AAM API manager
      * 
-     * @return type
+     * @return AAM_Core_Gateway
+     * 
+     * @access public
+     * @static
      */
     public static function api() {
         return AAM_Core_Gateway::getInstance();
@@ -269,7 +273,8 @@ if (defined('ABSPATH')) {
     require (dirname(__FILE__) . '/autoloader.php');
     AAM_Autoloader::register();
     
-    add_action('plugins_loaded', 'AAM::onPluginsLoaded', 1);
+    // Keep this as the lowest priority
+    add_action('plugins_loaded', 'AAM::onPluginsLoaded', -1);
     
     //the highest priority (higher the core)
     //this is important to have to catch events like register core post types

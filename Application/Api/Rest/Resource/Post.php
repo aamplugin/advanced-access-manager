@@ -301,14 +301,9 @@ class AAM_Api_Rest_Resource_Post {
         $result = null;
         
         if ($post->has('api.protected')) {
-            $pass = $post->get('api.password');
+            $pass   = $post->get('api.password');
             
-            // initialize hasher
-            require_once( ABSPATH . 'wp-includes/class-phpass.php' );
-            $hasher = new PasswordHash(8, true);
-
-            if ($pass !== $request['password'] 
-                    && !$hasher->CheckPassword($pass, $request['password'])) {
+            if ($request['password'] !== $pass) {
                 $result = new WP_Error(
                     'rest_post_cannot_read', 
                     "The content is password protected. Provide valid password to read.", 

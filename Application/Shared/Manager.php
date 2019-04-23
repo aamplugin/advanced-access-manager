@@ -111,11 +111,6 @@ class AAM_Shared_Manager {
 
             //get control over commenting stuff
             add_filter('comments_open', array(self::$_instance, 'commentOpen'), 10, 2);
-            
-            // Role Manager. Tracking user role changes and if there is expiration
-            // set, then trigger hooks
-            add_action('add_user_role', array(self::$_instance, 'userRoleAdded'), 10, 2);
-            add_action('remove_user_role', array(self::$_instance, 'userRoleRemoved'), 10, 2);
         }
         
         return self::$_instance;
@@ -200,31 +195,15 @@ class AAM_Shared_Manager {
             parse_str($uri['query'], $params);
         }
 
-        if ($match = $object->findMatch(rtrim($uri['path'], '/'), $params)) {
+        if ($match = $object->findMatch($uri['path'], $params)) {
             if ($match['type'] !== 'allow') {
-                AAM::api()->redirect($match['type'], $match['action']);
+                AAM::api()->redirect(
+                    $match['type'], 
+                    $match['action'],
+                    (!empty($match['code']) ? $match['code'] : 307)
+                );
             }
         }
-    }
-    
-    /**
-     * 
-     * @param type $userId
-     * @param type $role
-     */
-    public function userRoleAdded($userId, $role) {
-        $user = new AAM_Core_Subject_User($userId);
-        AAM_Core_API::clearCache($user);
-    }
-    
-    /**
-     * 
-     * @param type $userId
-     * @param type $role
-     */
-    public function userRoleRemoved($userId, $role) {
-        $user = new AAM_Core_Subject_User($userId);
-        AAM_Core_API::clearCache($user);
     }
     
     /**
@@ -333,7 +312,7 @@ class AAM_Shared_Manager {
      * 
      * @param WP_Query $wpQuery
      * 
-     * @return string
+     * @return array
      * 
      * @access protected
      */
@@ -471,13 +450,9 @@ class AAM_Shared_Manager {
         // First of all delete all artificial capability from the $caps
         foreach($caps as $i => $capability) {
             if (strpos($capability, 'aam|') === 0) {
-                $parts = explode('|', $capability);
-
-                if (in_array($parts[1], array('edit_post', 'delete_post', 'read_post'), true)) {
-                    $capability = null; //remove primitive from the meta array
-                } else {
-                    $capability = $parts[2];
-                }
+                // Remove this capability from the mapped array and let WP Core
+                // handle the correct mapping
+                $capability = null; 
             }
 
             if (in_array($capability, AAM_Backend_Feature_Main_Capability::$groups['aam'], true)) {
@@ -708,7 +683,7 @@ class AAM_Shared_Manager {
     public function filterPostContent($content) {
         $post = AAM_Core_API::getCurrentPost();
         $area = AAM_Core_Api_Area::get();
-        
+
         if ($post && $post->has($area . '.limit')) {
             if ($post->has($area . '.teaser')) {
                 $message = $post->get($area . '.teaser');

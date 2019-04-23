@@ -43,6 +43,7 @@ class AAM_Frontend_Filter {
         // object instead
         //filter navigation pages & taxonomies
         add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
+        
         // filter navigation pages & taxonomies
         add_filter('get_pages', array($this, 'filterPages'), 999);
         

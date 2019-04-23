@@ -102,4 +102,13 @@ class AAM_Core_Object_Route extends AAM_Core_Object {
         return $this->getSubject()->deleteOption('route');
     }
 
+     /**
+     * 
+     * @param type $external
+     * @return type
+     */
+    public function mergeOption($external) {
+        return AAM::api()->mergeSettings($external, $this->getOption(), 'route');
+    }
+    
 }

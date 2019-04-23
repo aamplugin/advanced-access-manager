@@ -43,7 +43,7 @@ final class AAM_Core_Policy_Factory {
         
         $id  = $subject->getId(); 
         $sid = $subject->getUID() . (empty($id) ? '' : '_' . $id);
-        
+
         if (!isset(self::$_instances[$sid])) {
             self::$_instances[$sid] = new AAM_Core_Policy_Manager($subject);
         }

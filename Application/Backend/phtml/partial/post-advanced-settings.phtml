@@ -86,7 +86,7 @@
                         </div>
                         <div class="radio">
                             <input type="radio" id="post-redirect-callback" name="post-redirect-type" class="post-redirect-type" data-action="#post-redirect-callback-action" value="callback" />
-                            <label for="post-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="http://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                            <label for="post-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
 
                         <div class="form-group post-redirect-action" id="post-redirect-page-action" style="display: none;">
@@ -104,7 +104,21 @@
 
                         <div class="form-group post-redirect-action" id="post-redirect-url-action" style="display: none;">
                             <label><?php echo __('The URL', AAM_KEY); ?></label>
-                            <input type="text" class="form-control post-redirect-value" id="post-redirect-url-value" placeholder="http://" value="" />
+                            <input type="text" class="form-control post-redirect-value" id="post-redirect-url-value" placeholder="https://" value="" />
+                        </div>
+
+                        <div class="form-group post-redirect-action" id="post-redirect-code" style="display: none;">
+                            <label><?php echo __('HTTP Redirect Code', AAM_KEY); ?></label>
+                            <select class="form-control post-redirect-value" id="post-redirect-code-value">
+                                <option value=""><?php echo __('HTTP Code (Default 307)', AAM_KEY); ?></option>
+                                <option value="301"><?php echo __('301 - Moved Permanently', AAM_KEY); ?></option>
+                                <option value="302"><?php echo __('302 - Found', AAM_KEY); ?></option>
+                                <option value="303"><?php echo __('303 - See Other', AAM_KEY); ?></option>
+                                <option value="307"><?php echo __('307 - Temporary Redirect', AAM_KEY); ?></option>
+                                <option value="401"><?php echo __('401 - Unauthorized', AAM_KEY); ?></option>
+                                <option value="403"><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                <option value="410"><?php echo __('410 - Gone', AAM_KEY); ?></option>
+                            </select>
                         </div>
 
                         <div class="form-group post-redirect-action" id="post-redirect-callback-action" style="display: none;">

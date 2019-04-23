@@ -44,6 +44,7 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
        $id    = filter_input(INPUT_POST, 'id');
        $type  = filter_input(INPUT_POST, 'type');
        $value = filter_input(INPUT_POST, 'value');
+       $code  = filter_input(INPUT_POST, 'code');
 
        $object = AAM_Backend_Subject::getInstance()->getObject('uri');
        
@@ -51,7 +52,7 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
            $id = uniqid();
        }
        
-       $object->save($id, str_replace(site_url(), '', $uri), $type, $value);
+       $object->save($id, str_replace(site_url(), '', $uri), $type, $value, $code);
 
        return wp_json_encode(array('status' => 'success'));
     }
@@ -114,6 +115,7 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
                 $rule['uri'],
                 $rule['type'],
                 $rule['action'],
+                isset($rule['code']) ? $rule['code'] : 307,
                 'edit,delete'
             );
         }

@@ -156,7 +156,9 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         // prepare the list of capabilities that should still be assigned to user
         $keepCaps = array();
         foreach($roles as $role) {
-            $keepCaps = array_merge($keepCaps, $allRoles->get_role($role)->capabilities);
+            if ($allRoles->is_role($role)) {
+                $keepCaps = array_merge($keepCaps, $allRoles->get_role($role)->capabilities);
+            }
         }
 
         foreach(array_keys($removeCaps) as $key) {

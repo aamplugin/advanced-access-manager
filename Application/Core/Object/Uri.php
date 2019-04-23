@@ -41,39 +41,40 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
                 $effect = ($stm['Effect'] === 'deny' ? 1 : 0);
                 $type   = $stm['Effect'];
                 $destination = null;
+                $code   = null;
                 
                 if ($effect === 1 && !empty($stm['Metadata']['Redirect'])) {
-                    $type = strtolower($stm['Metadata']['Redirect']['Type']);
+                    $redirect = $stm['Metadata']['Redirect'];
+                    $type     = strtolower($redirect['Type']);
+                    $code     = isset($redirect['Code']) ? $redirect['Code'] : 307;
                     
                     switch($type) {
                         case 'message':
-                            $destination = $stm['Metadata']['Redirect']['Message'];
+                            $destination = $redirect['Message'];
                             break;
-                        
+                            
                         case 'page':
-                            if (isset($stm['Metadata']['Redirect']['Id'])) {
-                                $destination = intval($stm['Metadata']['Redirect']['Id']);
-                            } elseif (isset($stm['Metadata']['Redirect']['Slug'])) {
-                                $page = $post = get_page_by_path(
-                                   $stm['Metadata']['Redirect']['Slug'], OBJECT
-                                );
+                            if (isset($redirect['Id'])) {
+                                $destination = intval($redirect['Id']);
+                            } elseif (isset($redirect['Slug'])) {
+                                $page = get_page_by_path($redirect['Slug'], OBJECT);
                                 $destination = (is_a($page, 'WP_Post') ? $page->ID : 0);
                             }
                             break;
-                            
+
                         case 'url':
                             $destination = filter_var(
-                                    $stm['Metadata']['Redirect']['URL'], 
-                                    FILTER_VALIDATE_URL
+                                $redirect['URL'], 
+                                FILTER_VALIDATE_URL
                             );
                             if (empty($destination)) {
                                 $type = 'message';
-                                $destination = "Invalid URL: [{$stm['Metadata']['Redirect']['URL']}]";
+                                $destination = "Invalid URL: [{$redirect['URL']}]";
                             }
                             break;
                         
                         case 'callback':
-                            $destination = $stm['Metadata']['Redirect']['Callback'];
+                            $destination = $redirect['Callback'];
                             break;
                     }
                 }
@@ -81,7 +82,8 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
                 $option[crc32($chunks[1] . $type. $destination)] = array(
                     'uri'    => $chunks[1],
                     'type'   => $type,
-                    'action' => $destination
+                    'action' => $destination,
+                    'code'   => $code
                 );
             }
         }
@@ -111,6 +113,10 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
                 if (!empty($uri['query'])) {
                     parse_str($uri['query'], $out);
                 }
+
+                // normalize the search and target URIs
+                $s           = rtrim($s,  '/');
+                $uri['path'] = rtrim((isset($uri['path']) ? $uri['path'] : ''), '/');
                 
                 $regex = '@^' . preg_quote($uri['path']) . '$@';
                 
@@ -131,12 +137,13 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
      * 
      * @access public
      */
-    public function save($id, $uri, $type, $action = null) {
+    public function save($id, $uri, $type, $action = null, $code = 307) {
         $option = $this->getOption();
         $option[$id] = array(
             'uri'    => $uri,
             'type'   => $type,
-            'action' => $action
+            'action' => $action,
+            'code'   => $code
         );
         $this->setOption($option);
         
@@ -172,11 +179,39 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
     
     /**
      * 
-     * @param type $external
+     * @param array $external
+     * 
      * @return type
      */
     public function mergeOption($external) {
-        return array_merge($external, $this->getOption());
+        $combined = array_merge($external, $this->getOption());
+        $merged   = array();
+        
+        $preference = AAM::api()->getConfig(
+            "core.settings.uri.merge.preference", 'deny'
+        );
+        
+        // first get the complete list of unique keys
+        $keys = array_keys(call_user_func_array('array_merge', $combined));
+        
+        foreach($combined as $key => $options) {
+            // If merging preference is "deny" and at least one of the access
+            // settings is checked, then final merged array will have it set
+            // to checked
+            if (!isset($merged[$options['uri']])) {
+                $merged[$key] = $options;
+            } else {
+                if (($preference === 'deny') && ($options['type'] !== 'allow')) {
+                    $merged[$key] = $options;
+                    break;
+                } elseif ($preference === 'allow' && ($options['type'] === 'allow')) {
+                    $merged[$key] = $options;
+                    break;
+                }
+            }
+        }
+
+        return $merged;
     }
 
 }

@@ -36,7 +36,7 @@
                     </div>
                     <div class="radio">
                         <input type="radio" name="logout.redirect.type" id="logout-redirect-callback" data-action="#callback-logout-redirect-action" value="callback"<?php echo ($type == 'callback' ? ' checked' : ''); ?> />
-                        <label for="logout-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="http://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                        <label for="logout-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                     </div>
 
                     <div class="form-group logout-redirect-action" id="page-logout-redirect-action" style="display: <?php echo ($type == 'page' ? 'block' : 'none'); ?>;">
@@ -56,7 +56,7 @@
 
                     <div class="form-group logout-redirect-action" id="url-logout-redirect-action" style="display: <?php echo ($type == 'url' ? 'block' : 'none'); ?>;">
                         <label><?php echo __('The URL', AAM_KEY); ?></label>
-                        <input type="text" class="form-control" name="logout.redirect.url" placeholder="http://" value="<?php echo $this->getOption('logout.redirect.url'); ?>" />
+                        <input type="text" class="form-control" name="logout.redirect.url" placeholder="https://" value="<?php echo $this->getOption('logout.redirect.url'); ?>" />
                     </div>
 
                     <div class="form-group logout-redirect-action" id="callback-logout-redirect-action" style="display: <?php echo ($type == 'callback' ? 'block' : 'none'); ?>;">

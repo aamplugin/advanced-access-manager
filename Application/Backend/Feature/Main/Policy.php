@@ -91,9 +91,6 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
         
         // Verify that current user can perform following action
         if (AAM_Core_Policy_Factory::get()->canTogglePolicy($id, $action)) {
-            //clear cache
-            AAM_Core_API::clearCache();
-
             $result = $subject->save($id, $effect, 'policy');
         } else {
             $result = false;
@@ -139,8 +136,6 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
      * @return type
      */
     protected function retrievePolicies() {
-        $search = trim(AAM_Core_Request::request('search.value'));
-        
         $list = get_posts(array(
             'post_type'   => 'aam_policy',
             'numberposts' => -1,

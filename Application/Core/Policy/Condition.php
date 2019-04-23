@@ -106,7 +106,7 @@ final class AAM_Core_Policy_Condition {
      */
     protected function evaluateBetweenConditions($conditions, $args) {
         $result = false;
-        
+
         foreach($this->prepareConditions($conditions, $args) as $condition) {
             // Convert the right condition into the array of array to cover more
             // complex between conditions like [[0,8],[13,15]]
@@ -122,7 +122,7 @@ final class AAM_Core_Policy_Condition {
                 $result = $result || ($condition['left'] >= $min && $condition['left'] <= $max);
             }
         }
-        
+
         return $result;
     }
     
@@ -140,7 +140,7 @@ final class AAM_Core_Policy_Condition {
      */
     protected function evaluateEqualsConditions($conditions, $args) {
         $result = false;
-        
+
         foreach($this->prepareConditions($conditions, $args) as $condition) {
             $result = $result || ($condition['left'] === $condition['right']);
         }
@@ -373,15 +373,16 @@ final class AAM_Core_Policy_Condition {
             if (preg_match_all('/(\$\{[^}]+\})/', $exp, $match)) {
                 $exp = AAM_Core_Policy_Token::evaluate($exp, $match[1], $args);
             }
+
             // If there is type scaling, perform it too
-            if (preg_match('/^\(\*(string|ip|int|boolean|bool|array)\)(.*)/i', $exp, $scale)) {
+            if (preg_match('/^\(\*(string|ip|int|boolean|bool|array|null)\)(.*)/i', $exp, $scale)) {
                 $exp = $this->scaleValue($scale[2], $scale[1]);
             }
         } elseif (is_array($exp) || is_object($exp)) {
             foreach($exp as &$value) {
                 $value = $this->parseExpression($value, $args);
             }
-        } else {
+        } elseif (is_null($exp) === false) {
             $exp = false;
         }
         
@@ -419,6 +420,10 @@ final class AAM_Core_Policy_Condition {
 
             case 'array':
                 $value = json_decode($value, true);
+                break;
+
+            case 'null':
+                $value = ($value === '' ? null : $value);
                 break;
         }
         

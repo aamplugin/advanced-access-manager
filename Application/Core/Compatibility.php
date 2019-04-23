@@ -25,19 +25,107 @@ class AAM_Core_Compatibility {
     /**
      * Compatibility between post actions and policy actions
      *
-     * @param [type] $action
-     * @param [type] $effect
+     * @param string   $action
+     * @param bool|int $effect
+     * @param string   $prefix
+     * @param array    $meta
+     * @param array    $args
      * 
      * @return array
      */
-    public static function convertPolicyAction($action, $effect, $prefix = '') {
-        $action = apply_filters('aam-policy-post-resource-action-filter', $action);
+    public static function convertPolicyAction($action, $effect, $prefix = '', $meta = array(), $args = array()) {
+        $result = array();
 
-        return array(
-            "{$prefix}frontend.{$action}" => $effect,
-            "{$prefix}backend.{$action}"  => $effect,
-            "{$prefix}api.{$action}"      => $effect
-        );
+        if (!empty($meta['Password']['Value'])) {
+            $result = array(
+                "{$prefix}frontend.password"  => $meta['Password']['Value'],
+                "{$prefix}api.password"       => $meta['Password']['Value'],
+                "{$prefix}frontend.protected" => true,
+                "{$prefix}api.protected"      => true
+            );
+        }
+        
+        if (!empty($meta['Teaser']['Value'])) {
+            if (preg_match_all('/(\$\{[^}]+\})/', $meta['Teaser']['Value'], $match)) {
+                $res = AAM_Core_Policy_Token::evaluate($meta['Teaser']['Value'], $match[1], $args);
+            } else {
+                $res = $meta['Teaser']['Value'];
+            }
+
+            $result = array_merge($result, array(
+                "{$prefix}frontend.teaser"  => $res,
+                "{$prefix}api.teaser"       => $res,
+                "{$prefix}frontend.limit"   => true,
+                "{$prefix}api.limit"        => true
+            ));
+        }  
+        
+        if (!empty($meta['Redirect'])) {
+            // Build the redirect location
+            $type = (isset($meta['Redirect']['Type']) ? $meta['Redirect']['Type'] : 'message');
+            switch($type) {
+                case 'page':
+                    if (isset($meta['Redirect']['Id'])) {
+                        $destination = intval($meta['Redirect']['Id']);
+                    } elseif (isset($meta['Redirect']['Slug'])) {
+                        $page = get_page_by_path(
+                            $meta['Redirect']['Slug'], OBJECT
+                        );
+                        $destination = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                    }
+                    if (isset($meta['Redirect']['Code'])) {
+                        $destination .= "|{$meta['Redirect']['Code']}";
+                    } else {
+                        $destination .= "|307";
+                    }
+                    break;
+
+                case 'url':
+                    $destination = filter_var(
+                        $meta['Redirect']['URL'], 
+                        FILTER_VALIDATE_URL
+                    );
+                    if (empty($destination)) {
+                        $type = 'message';
+                        $destination = "Invalid URL: [{$meta['Redirect']['URL']}]";
+                    }
+                    if (isset($meta['Redirect']['Code'])) {
+                        $destination .= "|{$meta['Redirect']['Code']}";
+                    } else {
+                        $destination .= "|307";
+                    }
+                    break;
+
+                case 'callback':
+                    $destination = $meta['Redirect']['Callback'];
+                    break;
+
+                case 'login':
+                    $destination = null;
+                    break;
+
+                default:
+                    $destination = $meta['Redirect']['Message'];
+                    break;
+            }
+            
+            $result = array_merge($result, array(
+                "{$prefix}frontend.redirect"  => true,
+                "{$prefix}frontend.location"  => $type . (!empty($destination) ? "|{$destination}" : '')
+            ));
+        } 
+        
+        if (empty($meta)){
+            $action = apply_filters('aam-policy-post-resource-action-filter', $action);
+
+            $result = array_merge($result, array(
+                "{$prefix}frontend.{$action}" => $effect,
+                "{$prefix}backend.{$action}"  => $effect,
+                "{$prefix}api.{$action}"      => $effect
+            ));
+        }
+
+        return $result;
     }
 
     /**

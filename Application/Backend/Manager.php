@@ -38,9 +38,6 @@ class AAM_Backend_Manager {
         //check if user switch is required
         $this->checkUserSwitch();
         
-        //cache clearing hook
-        add_action('aam-clear-cache-action', 'AAM_Core_API::clearCache');
-        
         //print required JS & CSS
         add_action('admin_print_scripts', array($this, 'printJavascript'));
         add_action('admin_print_footer_scripts', array($this, 'printFooterJavascript'));
@@ -226,19 +223,37 @@ class AAM_Backend_Manager {
     public function filterPostData($data) {
         if (isset($data['post_type']) && ($data['post_type'] === 'aam_policy')) {
             $content = trim(filter_input(INPUT_POST, 'aam-policy'));
-            
-            if (!empty($content)) { // Edit form was submitted
-                $data['post_content'] = addslashes($content);
-            }
-            
+
             if (empty($data['post_content'])) {
-                $data['post_content'] = AAM_Backend_View_Helper::getDefaultPolicy();
+                $content = AAM_Backend_View_Helper::getDefaultPolicy();
             }
-            
-            AAM_Core_API::clearCache();
+
+            $content = $this->formatPolicy($content);
+
+            if (!empty($content)) { // Edit form was submitted
+                $content = addslashes($content);
+            }
+
+            $data['post_content'] = $content;
         }
         
         return $data;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $content
+     * @return void
+     */
+    protected function formatPolicy($content) {
+        $json = json_decode($content);
+       
+        if (!empty($json)) {
+            $content = wp_json_encode($json, JSON_PRETTY_PRINT);
+        }
+
+        return $content;
     }
     
     /**
@@ -356,11 +371,6 @@ class AAM_Backend_Manager {
                     $user->add_role($role);
                 }
             }
-        }
-        
-        //role changed?
-        if (implode('', $user->roles) !== implode('', $old->roles)) {
-            AAM_Core_API::clearCache(new AAM_Core_Subject_User($id));
         }
     }
     
@@ -664,7 +674,7 @@ class AAM_Backend_Manager {
      * @param type $term
      */
     public function renderTermMetabox($term) {
-        if (is_a($term, 'WP_Term') && is_taxonomy_hierarchical($term->taxonomy)) {
+        if (is_a($term, 'WP_Term')) {
             $frontend = AAM_Core_Config::get('core.settings.frontendAccessControl', true);
             $backend  = AAM_Core_Config::get('core.settings.backendAccessControl', true);
             $api      = AAM_Core_Config::get('core.settings.apiAccessControl', true);
@@ -798,7 +808,7 @@ class AAM_Backend_Manager {
     public function printJavascript() {
         if (AAM::isAAM()) {
             wp_enqueue_script('aam-vendor', AAM_MEDIA . '/js/vendor.js');
-            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.9.4.js');
+            wp_enqueue_script('aam-main', AAM_MEDIA . '/js/aam-5.9.6.js');
             
             //add plugin localization
             $this->printLocalization('aam-main');

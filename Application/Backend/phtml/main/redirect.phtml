@@ -55,7 +55,7 @@
                             </div>
                             <div class="radio">
                                 <input type="radio" name="frontend.redirect.type" id="frontend-redirect-callback" data-action="#frontend-callback-action" value="callback" data-group="frontend-redirect"<?php echo ($frontendType == 'callback' ? ' checked' : ''); ?> />
-                                <label for="frontend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="http://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                                <label for="frontend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-message-action" style="display: <?php echo ($frontendType == 'message' ? 'block' : 'none'); ?>;">
@@ -80,7 +80,7 @@
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-url-action" style="display: <?php echo ($frontendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" name="frontend.redirect.url" placeholder="http://" value="<?php echo $this->getOption('frontend.redirect.url'); ?>" />
+                                <input type="text" class="form-control" name="frontend.redirect.url" placeholder="https://" value="<?php echo $this->getOption('frontend.redirect.url'); ?>" />
                             </div>
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-callback-action" style="display: <?php echo ($frontendType == 'callback' ? 'block' : 'none'); ?>;">
@@ -107,7 +107,7 @@
                             </div>
                             <div class="radio">
                                 <input type="radio" name="backend.redirect.type" id="backend-redirect-callback" data-action="#backend-callback-action" value="callback" data-group="backend-redirect"<?php echo ($backendType == 'callback' ? ' checked' : ''); ?> />
-                                <label for="backend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="http://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                                <label for="backend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
                             <div class="form-group aam-redirect-action backend-redirect" id="backend-message" style="display: <?php echo ($backendType == 'message' ? 'block' : 'none'); ?>;">
@@ -132,9 +132,9 @@
 
                             <div class="form-group aam-redirect-action backend-redirect" id="backend-url" style="display: <?php echo ($backendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="backend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="http://" name="backend.redirect.url" value="<?php echo $this->getOption('backend.redirect.url'); ?>" />
+                                <input type="text" class="form-control" placeholder="https://" name="backend.redirect.url" value="<?php echo $this->getOption('backend.redirect.url'); ?>" />
                             </div>
-                            
+
                             <div class="form-group aam-redirect-action backend-redirect" id="backend-callback-action" style="display: <?php echo ($backendType == 'callback' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                                 <input type="text" class="form-control" placeholder="Enter valid callback" name="backend.redirect.callback" value="<?php echo $this->getOption('backend.redirect.callback'); ?>" />

@@ -279,8 +279,14 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
      */
     public function add() {
         $capability = sanitize_text_field(AAM_Core_Request::post('capability'));
+        $assign     = filter_input(INPUT_POST, 'assign', FILTER_VALIDATE_INT); 
 
         if ($capability) {
+            // Add capability to current user if checkbox checked
+            if ($assign === 1) {
+                AAM::api()->getUser()->addCapability($capability);
+            }
+
             $result = AAM_Backend_Subject::getInstance()->addCapability($capability);
             
             $response = array('status' => ($result ? 'success' : 'failure'));

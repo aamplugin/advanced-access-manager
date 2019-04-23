@@ -421,7 +421,7 @@ final class AAM_Core_API {
      * 
      * @global type $wp_query
      * 
-     * @return WP_Post|null
+     * @return AAM_Core_Object_Post|null
      */
     public static function getCurrentPost() {
         global $wp_query, $post;
@@ -458,5 +458,16 @@ final class AAM_Core_API {
         
         return (is_a($res, 'WP_Post') ? $user->getObject('post', $res->ID) : null);
     }
-    
+
+    /**
+     * Undocumented function
+     *
+     * @return PasswordHash
+     */
+    public static function prepareHasher() {
+        require_once ABSPATH . WPINC . '/class-phpass.php';
+        
+        return new PasswordHash( 8, true );
+    }
+
 }

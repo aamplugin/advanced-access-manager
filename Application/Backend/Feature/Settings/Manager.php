@@ -52,8 +52,6 @@ class AAM_Backend_Feature_Settings_Manager  extends AAM_Backend_Feature_Abstract
      * @access public
      */
     public function clearCache() {
-        AAM_Core_API::clearCache();
-
         return wp_json_encode(array('status' => 'success'));
     }
     

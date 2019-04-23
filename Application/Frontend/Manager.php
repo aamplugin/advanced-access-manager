@@ -41,9 +41,6 @@ class AAM_Frontend_Manager {
             add_shortcode('aam', array($this, 'processShortcode'));
         }
         
-        //cache clearing hook
-        add_action('aam-clear-cache-action', 'AAM_Core_API::clearCache');
-        
         //admin bar
         $this->checkAdminBar();
         
@@ -143,14 +140,12 @@ class AAM_Frontend_Manager {
             $object = AAM::getUser()->getObject('post', $post->ID);
 
             if ($object->has('frontend.protected')) {
-                require_once( ABSPATH . 'wp-includes/class-phpass.php' );
-                $hasher = new PasswordHash( 8, true );
-                $pass   = $object->get('frontend.password');
-                $hash   = wp_unslash(
+                $pass = $object->get('frontend.password');
+                $hash = wp_unslash(
                         AAM_Core_Request::cookie('wp-postpass_' . COOKIEHASH)
                 );
 
-                $res = empty($hash) ? true : !$hasher->CheckPassword($pass, $hash);
+                $res = empty($hash) ? true : !AAM_Core_API::prepareHasher()->CheckPassword($pass, $hash);
             }
         }
         

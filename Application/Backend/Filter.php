@@ -50,8 +50,6 @@ class AAM_Backend_Filter {
         add_filter('page_row_actions', array($this, 'postRowActions'), 10, 2);
         add_filter('post_row_actions', array($this, 'postRowActions'), 10, 2);
 
-        add_action('pre_post_update', array($this, 'prePostUpdate'), 10, 2);
-        
         //user/role filters
         if (!is_multisite() || !is_super_admin()) {
             add_filter('editable_roles', array($this, 'filterRoles'));
@@ -159,26 +157,6 @@ class AAM_Backend_Filter {
         }
 
         return $actions;
-    }
-    
-    /**
-     * Post update hook
-     * 
-     * Clear cache if post owner changed
-     * 
-     * @param int   $id
-     * @param array $data
-     * 
-     * @return void
-     * 
-     * @access public
-     */
-    public function prePostUpdate($id, $data) {
-        $post = get_post($id);
-        
-        if (intval($post->post_author) !== intval($data['post_author'])) {
-            AAM_Core_API::clearCache();
-        }
     }
     
     /**

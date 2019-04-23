@@ -2235,6 +2235,8 @@
 
                     $('#add-capability-modal').on('shown.bs.modal', function (e) {
                         $('#new-capability-name').val('');
+                        $('#assign-new-capability').attr('checked', true);
+                        $('#new-capability-name').focus();
                     });
 
                     $('#add-capability').bind('click', function () {
@@ -2246,7 +2248,7 @@
 
                         var capability = $.trim($('#new-capability-name').val());
                         $('#new-capability-name').parent().removeClass('has-error');
-
+                        var assign  = $('#assign-new-capability').is(':checked') ? 1 : 0
                         if (capability) {
                             $.ajax(getLocal().ajaxurl, {
                                 type: 'POST',
@@ -2256,6 +2258,7 @@
                                     sub_action: 'Main_Capability.add',
                                     _ajax_nonce: getLocal().nonce,
                                     capability: capability,
+                                    assign: assign,
                                     subject: getAAM().getSubject().type,
                                     subjectId: getAAM().getSubject().id
                                 },
@@ -2284,14 +2287,10 @@
                         }
                     });
 
-                    $('#add-capability-modal').on('shown.bs.modal', function (e) {
-                        $('#new-capability-name').focus();
-                    });
-
                     $('#update-capability-btn').bind('click', function () {
                         var btn = this;
                         var cap = $.trim($('#capability-id').val());
-
+                        
                         if (cap) {
                             $.ajax(getLocal().ajaxurl, {
                                 type: 'POST',
@@ -2473,6 +2472,11 @@
              * @returns {undefined}
              */
             getAAM().loadAccessForm = function(object, id, btn, callback) {
+                // TODO: Rethink this shortcut
+                if (object === 'cat' || object === 'tag') {
+                    object = 'term';
+                }
+
                 //reset the form first
                 var container = $('.aam-access-form[data-type="' + object + '"]');
                 $('#post-overwritten').addClass('hidden');
@@ -2671,14 +2675,22 @@
                         rowCallback: function (row, data) {
                             //object type icon
                             var icon = 'icon-doc-text-inv';
+                            var tooltip = getAAM().__('Post');
                             
                             switch (data[2]) {
                                 case 'type':
                                     icon = 'icon-box';
+                                    tooltip = getAAM().__('Post Type');
                                     break;
 
-                                case 'term':
+                                case 'cat':
                                     icon = 'icon-folder';
+                                    tooltip = getAAM().__('Hierarchical Term');
+                                    break;
+
+                                case 'tag':
+                                    icon = 'icon-tag';
+                                    tooltip = getAAM().__('Tag');
                                     break;
 
                                 default:
@@ -2693,7 +2705,9 @@
                                 }));
                             } else {
                                 $('td:eq(0)', row).html($('<i/>', {
-                                    'class': icon
+                                    'class': icon,
+                                    'data-toggle': "tooltip",
+                                    'title': tooltip
                                 }));
                             }
                             
@@ -2717,7 +2731,7 @@
 
                                 }).html(data[3]);
                                 $('td:eq(1)', row).html(link);
-                            } else if (data[2] === 'term') {
+                            } else if (data[2] === 'cat') {
                                 $('td:eq(1)', row).html($('<span/>').text(data[3]));
                                 
                                 var sub = $('<i class="aam-row-subtitle"></i>');
@@ -2728,6 +2742,15 @@
                                 } else {
                                     sub.append($('<span/>').text(getAAM().__('Parent:') + ' none; '));
                                 }
+                                
+                                sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
+                                sub.append($('<strong/>').text(data[0].split('|')[0]));
+                                
+                                $('td:eq(1)', row).append(sub);
+                            } else if (data[2] === 'tag') {
+                                $('td:eq(1)', row).html($('<span/>').text(data[3]));
+                                
+                                var sub = $('<i class="aam-row-subtitle"></i>');
                                 
                                 sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
                                 sub.append($('<strong/>').text(data[0].split('|')[0]));
@@ -2807,10 +2830,16 @@
                                             'class': 'aam-row-action text-muted icon-pencil'
                                         }));
                                         break;
+
+                                    case 'no-pin':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-pin'
+                                        }));
+                                        break;
                                         
                                     case 'pin' :
                                         $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-pin'
+                                            'class': 'aam-row-action icon-pin'
                                         }).bind('click', function () {
                                             var _btn = $(this);
                                             $.ajax(getLocal().ajaxurl, {
@@ -2974,6 +3003,14 @@
                             $('.post-redirect-type[value="' + rule[0] + '"]').prop('checked', true);
                             $('#post-redirect-' + rule[0] + '-action').show();
                             $('#post-redirect-' + rule[0] + '-value').val(rule[1]);
+
+                            // If Page or URL, also show the HTTP Redirect Code
+                            if (rule[0] === 'page' || rule[0] === 'url') {
+                                $('#post-redirect-code').show();
+                                if (rule.length === 3) {
+                                    $('#post-redirect-code-value').val(rule[2]);
+                                }
+                            }
                         }   
                     });
                     
@@ -2982,6 +3019,11 @@
                            $('#post-redirect-rule').val($(this).val());
                            $('.post-redirect-action').hide();
                            $('#post-redirect-' + $(this).val() + '-action').show();
+
+                            // If Page or URL, also show the HTTP Redirect Code
+                            if ($(this).val() === 'page' || $(this).val() === 'url') {
+                                $('#post-redirect-code').show();
+                            }
                        });
                     });
                     
@@ -2989,6 +3031,12 @@
                        $(this).bind('change', function() {
                            var val = $('#post-redirect-rule').val().split('|');
                            val[1] = $(this).val();
+
+                            // If Page or URL, also add the HTTP Redirect Code
+                            if (val[0] === 'page' || val[0] === 'url') {
+                                val[2] = $('#post-redirect-code-value').val();
+                            }   
+
                            $('#post-redirect-rule').val(val.join('|'));
                        });
                     });
@@ -3560,9 +3608,16 @@
                 if ($(container).length) {
                     $('input[type="radio"]', container).each(function () {
                         $(this).bind('click', function () {
+                            var action = $(this).data('action');
+
                             $('.aam-uri-access-action').hide();
-                            if ($(this).data('action')) {
-                                $($(this).data('action')).show();
+
+                            if (action) {
+                                $(action).show();
+                            }
+
+                            if ($(this).val() === 'page' || $(this).val() === 'url') {
+                                $('#uri-access-deny-redirect-code').show();
                             }
                         });
                     });
@@ -3578,6 +3633,7 @@
                         var uri = $('#uri-rule').val();
                         var type = $('input[name="uri.access.type"]:checked').val();
                         var val  = $('#uri-access-deny-' + type + '-value').val();
+                        var code = $('#uri-access-deny-redirect-code-value').val();
                         
                         if (uri && type) {
                             $.ajax(getLocal().ajaxurl, {
@@ -3592,6 +3648,7 @@
                                     uri: uri,
                                     type: type,
                                     value: val,
+                                    code: code,
                                     id: $('#uri-save-btn').attr('data-id')
                                 },
                                 beforeSend: function () {
@@ -3678,7 +3735,7 @@
                             infoFiltered: ''
                         },
                         columnDefs: [
-                            {visible: false, targets: [0,2,3]}
+                            {visible: false, targets: [0, 2, 3, 4]}
                         ],
                         initComplete: function () {
                             var create = $('<a/>', {
@@ -3696,7 +3753,7 @@
                             $('.dataTables_filter', '#uri-list_wrapper').append(create);
                         },
                         createdRow: function (row, data) {
-                            var actions = data[4].split(',');
+                            var actions = data[5].split(',');
 
                             var container = $('<div/>', {'class': 'aam-row-actions'});
                             $.each(actions, function (i, action) {
@@ -3710,6 +3767,7 @@
                                             $('#uri-rule').val(data[1]);
                                             $('input[value="' + data[2] + '"]', '#uri-model').prop('checked', true).trigger('click');
                                             $('#uri-access-deny-' + data[2] + '-value').val(data[3]);
+                                            $('#uri-access-deny-redirect-code-value').val(data[4]);
                                             $('#uri-save-btn').attr('data-id', data[0]);
                                             $('#uri-model').modal('show');
                                         }).attr({
@@ -4417,39 +4475,6 @@
                                 $('#clear-settings').prop('disabled', false);
                                 $('#clear-settings').text(getAAM().__('Clear'));
                                 $('#clear-settings-modal').modal('hide');
-                            }
-                        });
-                    });
-                    
-                    $('#clear-cache').bind('click', function () {
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Settings_Manager.clearCache',
-                                _ajax_nonce: getLocal().nonce
-                            },
-                            beforeSend: function() {
-                                $('#clear-cache').prop('disabled', true);
-                                $('#clear-cache').text(getAAM().__('Wait...'));
-                            },
-                            success: function(response) {
-                                if (response.status === 'success') {
-                                    getAAM().notification(
-                                        'success', 
-                                        getAAM().__('The cache has been cleared successfully')
-                                    );
-                                } else {
-                                    getAAM().notification('danger', response.reason);
-                                }
-                            },
-                            error: function () {
-                                getAAM().notification('danger');
-                            },
-                            complete: function() {
-                                $('#clear-cache').prop('disabled', false);
-                                $('#clear-cache').text(getAAM().__('Clear'));
                             }
                         });
                     });

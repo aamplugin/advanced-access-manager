@@ -45,8 +45,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
             $this->setPost(get_post($post));
         }
 
-        //var_dump($settings);
-        // Determine if we need to skip inheritance change from the parent subject
+        // Determine if we need to skip inheritance chain from the parent subject
         // This is done to eliminate constrains related to Inherit From Parent Post
         if (is_array($param)) {
             $void = !empty($param['voidInheritance']);
@@ -94,94 +93,47 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
         $subject = $this->getSubject();
         $post    = $this->getPost();
         
-        // Read cache first
-        $option = $subject->getObject('cache')->get('post', $post->ID);
+        $option = get_post_meta($post->ID, $this->getOptionName(), true);
+        $this->setOverwritten(!empty($option));
         
-        if ($option === false) { //if false, then the cache is empty but exist
-            $option = array();
-        } elseif (empty($option)) {
-            $option = get_post_meta($post->ID, $this->getOptionName(), true);
-            $this->setOverwritten(!empty($option));
-            
-            // Read settings from access policy
-            if (empty($option)) {
-                $stms = AAM_Core_Policy_Factory::get($subject)->find(
-                    "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):/",
-                    array('post' => $post)
-                );
-                $option = array();
-                    
-                foreach($stms as $key => $stm) {
-                    // TODO: Prepare better conversion from policy Action to AAM
-                    // post & term action. For example listToOthers -> list_others
-                    $chunks = explode(':', $key);
-
-                    $option = array_merge(
-                        $option,
-                        AAM_Core_Compatibility::convertPolicyAction(
-                            (isset($chunks[3]) ? $chunks[3] : 'read'),
-                            $stm['Effect'] === 'deny'
-                        )
-                    );
-                }
-            }
-
-            // Inherit from terms or default settings - AAM Plus Package
-            if (empty($option)) {
-                $option = apply_filters('aam-post-access-filter', $option, $this);
-            }
-            
-            // Cache result but only if it is not empty
-            if (!empty($option)) {
-                $subject->getObject('cache')->add('post', $post->ID, $option);
-            } elseif ($voidInheritance === false) { // No settings for a post. Try to inherit from the parent
-                $option = $subject->inheritFromParent('post', $post->ID, $post);
-            }
-            
-            // Do not perform finalization if this is user level subject unless it
-            // is overwritten. This is critical to avoid overloading database with too 
-            // much cache
-            if ($this->allowCache($subject) || $this->isOverwritten()) {
-                $this->finalizeOption($post, $subject, $option);
-            }
-        }
-        
-        $this->setOption($option);
-    }
-    
-    /**
-     * 
-     * @param type $subject
-     * @return type
-     * @todo This does not belong here
-     */
-    protected function allowCache($subject) {
-        $config = AAM_Core_Config::get(
-                'core.cache.post.levels', array('role', 'visitor', 'user')
-        );
-        
-        return is_array($config) && in_array($subject::UID, $config, true);
-    }
-    
-    /**
-     * Finalize post options
-     * 
-     * @param WP_Post          $post
-     * @param AAM_Core_Subject $subject
-     * @param array            &$option
-     * 
-     * @return void
-     * 
-     * @access protected
-     */
-    protected function finalizeOption($post, $subject, &$option) {
-        // If result is empty, simply cache the false to speed-up but do not
-        // do it on the use level to avoid overloading database with too much cache
+        // Read settings from access policy
         if (empty($option)) {
-            $subject->getObject('cache')->add('post', $post->ID, false);
-        } else {
-            $subject->getObject('cache')->add('post', $post->ID, $option);
+            $stms = AAM_Core_Policy_Factory::get($subject)->find(
+                "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):/",
+                array('post' => $post)
+            );
+
+            $option = array();
+
+            foreach($stms as $key => $stm) {
+                $chunks = explode(':', $key);
+                $action = (isset($chunks[3]) ? $chunks[3] : 'read');
+                $meta   = (isset($stm['Metadata']) ? $stm['Metadata'] : array());
+
+                $option = array_merge(
+                    $option,
+                    AAM_Core_Compatibility::convertPolicyAction(
+                        $action,
+                        $stm['Effect'] === 'deny',
+                        '',
+                        ($action === 'read' ? $meta : array()),
+                        array($post)
+                    )
+                );
+            }
         }
+
+        // Inherit from terms or default settings - AAM Plus Package
+        if (empty($option)) {
+            $option = apply_filters('aam-post-access-filter', $option, $this);
+        }
+        
+        // No settings for a post. Try to inherit from the parent
+        if (empty($option) && ($voidInheritance === false)) { 
+            $option = $subject->inheritFromParent('post', $post->ID, $post);
+        }
+
+        $this->setOption($option);
     }
     
     /**
@@ -226,8 +178,6 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
      * @access public
      */
     public function reset() {
-        AAM_Core_API::clearCache();
-        
         // Very specific WP case. According to the WP core, you are not allowed to
         // set meta for revision, so let's bypass this constrain.
         if ($this->getPost()->post_type === 'revision') {
@@ -331,7 +281,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object {
     public function remove($property) {
         $option = $this->getOption();
         
-        if (array_key_exists($option, $property)) {
+        if (array_key_exists($property, $option)) {
             unset($option[$property]);
         }
         

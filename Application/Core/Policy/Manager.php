@@ -195,7 +195,11 @@ final class AAM_Core_Policy_Manager {
             $param = $this->tree['Param'][$id];
             
             if ($this->isApplicable($param, $args)) {
-                $value = $param['Value'];
+                if (preg_match_all('/(\$\{[^}]+\})/', $param['Value'], $match)) {
+                    $value = AAM_Core_Policy_Token::evaluate($param['Value'], $match[1]);
+                } else {
+                    $value = $param['Value'];
+                }
             }
         }
         
@@ -238,7 +242,7 @@ final class AAM_Core_Policy_Manager {
      * 
      * @access protected
      */
-    protected function isApplicable($block, $args) {
+    protected function isApplicable($block, $args = array()) {
         $result = true;
         
         if (!empty($block['Condition']) && !is_scalar($block['Condition'])) {
@@ -262,25 +266,30 @@ final class AAM_Core_Policy_Manager {
      */
     protected function preparePolicyTree() {
         if (is_null($this->tree)) {
-            $cache = $this->subject->getObject('cache')->get('policyTree');
-            
-            if (empty($cache)) {
-                $this->tree = array(
-                    'Statement' => array(),
-                    'Param'     => array()
-                );
+            $this->tree = array(
+                'Statement' => array(),
+                'Param'     => array()
+            );
 
-                foreach($this->policyObject->getOption() as $id => $effect) {
-                    if (!empty($effect)) { // Load policy only if it is attached
-                        $this->extendTree(
-                            $this->tree, $this->parsePolicy(get_post($id))
-                        );
-                    }
+            $ids = array_filter(
+                $this->policyObject->getOption(),
+                function($state) {
+                    return !empty($state);
                 }
-                
-                $this->subject->getObject('cache')->add('policyTree', 0, $this->tree);
-            } else {
-                $this->tree = $cache;
+            );
+
+            if (count($ids)) {
+                $policies = get_posts(array(
+                    'include'     => array_keys($ids),
+                    'post_status' => 'publish',
+                    'post_type'   => 'aam_policy'
+                ));
+
+                foreach($policies as $policy) {
+                    $this->extendTree(
+                        $this->tree, $this->parsePolicy($policy->post_content)
+                    );
+                }
             }
         }
         
@@ -290,25 +299,23 @@ final class AAM_Core_Policy_Manager {
     /**
      * Parse policy post and extract Statements and Params
      * 
-     * @param WP_Post $policy
+     * @param string $policy
      * 
      * @return array
      * 
      * @access protected
      */
     protected function parsePolicy($policy) {
-        $tree = array('Statement' => array(), 'Param' => array());
-        // Only parse if policy is valid WP post and is published (active)
-        if (is_a($policy, 'WP_Post') && ($policy->post_status === 'publish')) {
-            $val = json_decode($policy->post_content, true);
-            
-            // Do not load the policy if any errors
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $tree = array(
-                    'Statement' => isset($val['Statement']) ? (array) $val['Statement'] : array(),
-                    'Param'     => isset($val['Param']) ? (array) $val['Param'] : array(),
-                );
-            }
+        $val = json_decode($policy, true);
+        
+        // Do not load the policy if any errors
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $tree = array(
+                'Statement' => isset($val['Statement']) ? (array) $val['Statement'] : array(),
+                'Param'     => isset($val['Param']) ? (array) $val['Param'] : array(),
+            );
+        } else {
+            $tree = array('Statement' => array(), 'Param' => array());
         }
         
         return $tree;
@@ -332,6 +339,11 @@ final class AAM_Core_Policy_Manager {
             $acts = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
             
             foreach($list as $res) {
+                // Allow to build resource name dynamically. 
+                // e.g. "Term:category:${USERMETA.region}:posts"
+                if (preg_match_all('/(\$\{[^}]+\})/', $res, $match)) {
+                    $res = AAM_Core_Policy_Token::evaluate($res, $match[1]);
+                }
                 foreach($acts as $act) {
                     $id = $this->strToLower($res . (!empty($act) ? ":{$act}" : ''));
                     
@@ -344,10 +356,24 @@ final class AAM_Core_Policy_Manager {
         
         // Step #2. If there are any params, let's index them and insert into the list
         foreach($addition['Param'] as $param) {
-            $id = (isset($param['Key']) ? $param['Key'] : '__none');
-            
-            if (!isset($tree['Param'][$id]) || empty($tree['Param'][$id]['Enforce'])) {
-                $tree['Param'][$id] = $this->removeKeys($param, array('Key'));
+            if (!empty($param['Key'])) {
+                $id = $param['Key'];
+
+                if (!isset($tree['Param'][$id]) || empty($tree['Param'][$id]['Enforce'])) {
+                    $tree['Param'][$id] = $this->removeKeys($param, array('Key'));
+
+                    if (strpos($id, 'option:') === 0) {
+                        add_filter("pre_option_" . substr($id, 7), function($res, $option) {
+                            $param = $this->tree['Param']["option:{$option}"];
+                            
+                            if ($this->isApplicable($param)) {
+                                $res = $param['Value'];
+                            }
+                            
+                            return $res;
+                        }, 1, 2);
+                    }
+                }
             }
         }
     }
