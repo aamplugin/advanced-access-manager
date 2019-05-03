@@ -191,9 +191,6 @@ class AAM_Core_Object_Uri extends AAM_Core_Object {
             "core.settings.uri.merge.preference", 'deny'
         );
         
-        // first get the complete list of unique keys
-        $keys = array_keys(call_user_func_array('array_merge', $combined));
-        
         foreach($combined as $key => $options) {
             // If merging preference is "deny" and at least one of the access
             // settings is checked, then final merged array will have it set

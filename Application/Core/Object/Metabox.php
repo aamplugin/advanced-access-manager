@@ -82,11 +82,15 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object {
      * @return type
      */
     protected function getWidgetCallback($widget) {
-        if (is_object($widget['callback'][0])) {
-            $callback = get_class($widget['callback'][0]);
-        } elseif (is_string($widget['callback'][0])) {
-            $callback = $widget['callback'][0];
-        } else {
+        if (is_array($widget['callback'])) {
+            if (is_object($widget['callback'][0])) {
+                $callback = get_class($widget['callback'][0]);
+            } elseif (is_string($widget['callback'][0])) {
+                $callback = $widget['callback'][0];
+            }
+        }
+
+        if (empty($callback)) {
             $callback = isset($widget['classname']) ? $widget['classname'] : null;
         }
 

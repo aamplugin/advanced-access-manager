@@ -24,8 +24,9 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     
     /**
      * 
-     * @param type $args
-     * @param type $instance
+     * @param array $args
+     * 
+     * @param string $instance
      */
     public function widget($args, $instance) {
         $this->args = array_merge($args, $this->normalize($instance));
@@ -48,8 +49,9 @@ class AAM_Backend_Widget_Login extends WP_Widget {
     
     /**
      * 
-     * @param type $instance
-     * @return type
+     * @param array $instance
+     * 
+     * @return array
      */
     protected function normalize($instance) {
         $instance['login-title'] = AAM_Core_Config::get('login-title');

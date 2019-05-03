@@ -383,7 +383,7 @@
         <?php echo implode('<br/>', $errors); ?>
     </div>
     
-    <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo $args->post->post_content; ?></textarea>
+    <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo stripslashes($args->post->post_content); ?></textarea>
 
     <p class="aam-infobox">
         <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamplugin.com/reference/policy" target="_blank">', '</a>'); ?>

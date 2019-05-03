@@ -54,6 +54,15 @@ final class AAM_Core_Policy_Manager {
         $this->policyObject = $subject->getObject('policy');
         $this->subject      = $subject;
     }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function initializePolicyTree() {
+        $this->preparePolicyTree();
+    }
     
     /**
      * Call policy object public methods
@@ -353,7 +362,7 @@ final class AAM_Core_Policy_Manager {
                 }
             }
         }
-        
+
         // Step #2. If there are any params, let's index them and insert into the list
         foreach($addition['Param'] as $param) {
             if (!empty($param['Key'])) {
@@ -363,11 +372,15 @@ final class AAM_Core_Policy_Manager {
                     $tree['Param'][$id] = $this->removeKeys($param, array('Key'));
 
                     if (strpos($id, 'option:') === 0) {
-                        add_filter("pre_option_" . substr($id, 7), function($res, $option) {
+                        add_filter('option_' . substr($id, 7), function($res, $option) {
                             $param = $this->tree['Param']["option:{$option}"];
                             
                             if ($this->isApplicable($param)) {
-                                $res = $param['Value'];
+                                if (is_array($res) && is_array($param['Value'])) {
+                                    $res = array_merge($res, $param['Value']);
+                                } else {
+                                    $res = $param['Value'];
+                                }
                             }
                             
                             return $res;

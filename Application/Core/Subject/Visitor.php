@@ -21,6 +21,15 @@ class AAM_Core_Subject_Visitor extends AAM_Core_Subject {
     const UID = 'visitor';
 
     /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function initialize() {
+        AAM_Core_Policy_Factory::get($this)->initializePolicyTree();
+    }
+
+    /**
      *
      * @param type $value
      * @param type $object

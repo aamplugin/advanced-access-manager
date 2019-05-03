@@ -601,7 +601,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract {
      */
     public static function renderAccessForm() {
         ob_start();
-        require_once AAM_BASEDIR . '/Application/Backend/phtml/partial/post-access-form.phtml';
+        require_once AAM_BASEDIR . '/application/Backend/phtml/partial/post-access-form.phtml';
         $content = ob_get_contents();
         ob_end_clean();
 

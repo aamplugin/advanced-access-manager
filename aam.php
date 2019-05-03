@@ -3,9 +3,11 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 5.9.6.1
+ * Version: 5.9.6.2
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
+ * Text Domain: advanced-access-manager
+ * Domain Path: /lang/
  *
  * -------
  * LICENSE: This file is subject to the terms and conditions defined in
@@ -184,7 +186,7 @@ class AAM {
                 $user->restrainUserAccount($status);
             }
             
-            load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/Lang');
+            load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
         }
 
         return self::$_instance;

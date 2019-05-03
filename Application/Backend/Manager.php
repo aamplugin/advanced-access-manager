@@ -130,7 +130,9 @@ class AAM_Backend_Manager {
         
         //register login widget
         if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
-            add_action('widgets_init', array($this, 'registerLoginWidget'));
+            add_action('widgets_init', function() {
+                register_widget('AAM_Backend_Widget_Login');
+            });
             add_action('wp_ajax_nopriv_aamlogin', array($this, 'handleLogin'));
         }
         
@@ -477,13 +479,6 @@ class AAM_Backend_Manager {
         }
         
         return $text;
-    }
-    
-    /**
-     * 
-     */
-    public function registerLoginWidget() {
-        register_widget('AAM_Backend_Widget_Login');
     }
     
     /**
