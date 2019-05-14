@@ -817,7 +817,7 @@ class AAM_Backend_Manager {
      */
     public function printFooterJavascript() {
         global $menu, $submenu;
-        
+
         if (AAM::isAAM()) {
             $script  = '<script type="text/javascript">';
             $script .= 'var aamEnvData = ' . wp_json_encode(array(
@@ -912,7 +912,7 @@ class AAM_Backend_Manager {
         add_menu_page(
             'AAM', 
             'AAM' . $counter, 
-            'aam_manager', 
+            (AAM_Core_API::capabilityExists('aam_manager') ? 'aam_manager' : 'administrator'), 
             'aam', 
             array($this, 'renderPage'), 
             AAM_MEDIA . '/active-menu.svg'
@@ -923,7 +923,10 @@ class AAM_Backend_Manager {
             'aam', 
             'Access Policies', 
             'Access Policies', 
-            AAM_Core_Config::get('policy.capability', 'aam_manage_policy'), 
+            AAM_Core_Config::get(
+                'policy.capability',
+                (AAM_Core_API::capabilityExists('aam_manage_policy') ? 'aam_manage_policy' : 'administrator')
+            ), 
             'edit.php?post_type=aam_policy'
         );
 

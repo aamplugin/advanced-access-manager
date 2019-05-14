@@ -315,8 +315,12 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract {
                 'message' => __('Permission denied to update this capability', AAM_KEY)
             );
         } else {
+            // First we need to get the current grant status for updating capability
+            $status = $subject->hasCapability($capability);
+            // Remove updating capability
             if ($subject->removeCapability($capability)) {
-                $result = $subject->addCapability($updated);
+                // Add new capability with the original grant status
+                $result = $subject->addCapability($updated, $status);
             }
 
             $response = array('status' => (!empty($result) ? 'success' : 'failure'));

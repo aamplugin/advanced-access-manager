@@ -173,7 +173,10 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
      * @access protected
      */
     protected function filterMenuName($name) {
-        $filtered = trim(wp_strip_all_tags($name));
+        $filtered = trim(wp_strip_all_tags(
+            preg_replace('@<(span)[^>]*?>.*?</\\1>@si', '', $name), 
+            true
+        ));
         
         return preg_replace('/([\d]+)$/', '', $filtered);
     }

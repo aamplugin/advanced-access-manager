@@ -227,7 +227,7 @@ final class AAM_Core_Gateway {
     public function mergeSettings($set1, $set2, $objectType, $preference = null) {
         $combined = array($set1, $set2);
         $merged   = array();
-        
+
         if (is_null($preference)) {
             $preference = $this->getConfig(
                 "core.settings.{$objectType}.merge.preference", 'deny'
@@ -235,8 +235,14 @@ final class AAM_Core_Gateway {
         }
         
         // first get the complete list of unique keys
-        $keys = array_keys(call_user_func_array('array_merge', $combined));
-        
+        $keys = array_keys($set1);
+
+        foreach(array_keys($set2) as $key) {
+            if (!in_array($key, $keys, true)) {
+                $keys[] = $key;
+            }
+        }
+
         foreach($keys as $key) {
             foreach($combined as $options) {
                 // If merging preference is "deny" and at least one of the access

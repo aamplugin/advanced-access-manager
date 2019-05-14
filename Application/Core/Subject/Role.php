@@ -113,14 +113,15 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
      *
      * Keep compatible with WordPress core
      *
-     * @param string $capability
+     * @param string  $capability
+     * @param boolean $grant
      *
      * @return boolean
      *
      * @access public
      */
-    public function addCapability($capability) {
-        $this->getSubject()->add_cap($capability, true);
+    public function addCapability($capability, $grant = true) {
+        $this->getSubject()->add_cap($capability, $grant);
         
         return true;
     }
@@ -146,7 +147,12 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
      * @access public
      */
     public function hasCapability($cap) {
-        $has = $this->getSubject()->has_cap($cap);
+        // If capability is the same as role ID, then capability exists
+        if ($cap === $this->getId()) {
+            $has = true;
+        } else {
+            $has = $this->getSubject()->has_cap($cap);
+        }
         
         // Override by policy if is set
         $manager = AAM::api()->getPolicyManager($this);

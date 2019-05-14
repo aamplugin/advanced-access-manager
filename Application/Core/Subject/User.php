@@ -107,7 +107,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
             $chunks = explode(':', $key);
             $policyCaps[$chunks[1]] = ($stm['Effect'] === 'allow' ? 1 : 0);
         }
-        
+
         // Load Roles from the policy
         $roles    = (array) $subject->roles;
         $allRoles = AAM_Core_API::getRoles();
@@ -456,13 +456,14 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
      * Add capability
      * 
      * @param string $capability
+     * @param bool   $grant
      *
      * @return boolean
      *
      * @access public
      */
-    public function addCapability($capability) {
-        $this->getSubject()->add_cap($capability);
+    public function addCapability($capability, $grant = true) {
+        $this->getSubject()->add_cap($capability, $grant);
 
         return true;
     }
