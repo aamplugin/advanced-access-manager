@@ -16,7 +16,17 @@
                 </div>
             </div>
             <div class="col-xs-4">
-                <button class="btn btn-primary btn-block" id="install-extension"><i class="icon-download-cloud"></i> <?php echo __('Submit', AAM_KEY); ?></button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary btn-block dropdown-toggle" id="download-software" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="icon-download-cloud"></i> <?php echo __('Download', AAM_KEY); ?> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="install-extension"><?php echo __('As extension (legacy)', AAM_KEY); ?></a></li>
+                        <li><a href="#" id="download-plugin"><?php echo __('As standard WP plugin', AAM_KEY); ?></a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="https://aamplugin.com/article/aam-extensions-become-plugins" target="_blank"><?php echo __('Learn more', AAM_KEY); ?></a></li>
+                    </ul>
+                </div>
             </div>
         </div>
         
@@ -45,7 +55,13 @@
                                         </p>
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($product['status'] == AAM_Extension_Repository::STATUS_INSTALLED) { ?>
+                                        <?php if (!is_null($product['pluginStatus'])) { ?>
+                                            <?php if ($product['pluginStatus'] === true) { ?>
+                                                <a href="#" class="btn btn-sm btn-success btn-block disabled"><i class="icon-check"></i> <?php echo __('Plugin Active', AAM_KEY); ?></a>
+                                            <?php } else { ?>
+                                                <a href="#" class="btn btn-sm btn-info btn-block disabled"><i class="icon-attention-circled"></i> <?php echo __('Plugin Inactive', AAM_KEY); ?></a>
+                                            <?php } ?>    
+                                        <?php } elseif ($product['status'] == AAM_Extension_Repository::STATUS_INSTALLED) { ?>
                                             <?php if ($product['title'] === 'Complete Package') { ?>
                                                 <a href="#" class="btn btn-sm btn-success btn-block disabled"><i class="icon-check"></i> <?php echo __('Installed', AAM_KEY); ?></a>
                                             <?php } else { ?>

@@ -57,7 +57,7 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
     public function run() {
         //prepare user
         if (get_current_user_id()) {
-            $roles = reset(AAM::getUser()->roles);
+            $roles = array_merge(AAM::getUser()->roles);
 
             if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
                 $parts = array_merge(array((string)AAM::getUser()->ID), $roles);
@@ -72,7 +72,7 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
         $limit = $this->getAccess('limit');
         $hide  = $this->getAccess('hide');
         $msg   = $this->getMessage();
-        
+
         if (!empty($this->args['callback'])) {
             $content = call_user_func($this->args['callback'], $this);
         } else {
@@ -93,7 +93,7 @@ class AAM_Shortcode_Strategy_Content implements AAM_Shortcode_Strategy_Interface
                 $content = $this->content;
             }
         }
-        
+
         return $content;
     }
     

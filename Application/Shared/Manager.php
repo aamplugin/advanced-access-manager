@@ -447,7 +447,7 @@ class AAM_Shared_Manager {
 
         $objectId = (isset($args[0]) ? $args[0] : null);
 
-        // First of all delete all artificial capability from the $caps
+        // First of all delete all artificial capabilities from the $caps
         foreach($caps as $i => $capability) {
             if (strpos($capability, 'aam|') === 0) {
                 // Remove this capability from the mapped array and let WP Core

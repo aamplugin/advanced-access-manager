@@ -1402,7 +1402,7 @@
              * @returns {undefined}
              */
             function downloadLicense(data, cb) {
-                $.ajax(getLocal().system.apiEndpoint + '/download', {
+                $.ajax(getLocal().system.apiV1Endpoint + '/download', {
                     type: 'GET',
                     dataType: 'json',
                     data: {
@@ -4083,12 +4083,60 @@
 
             /**
              * 
+             * @param {*} base64 
+             */
+            function base64ToArrayBuffer(base64) {
+                const binaryString = window.atob(base64); // Comment this if not using base64
+                const bytes = new Uint8Array(binaryString.length);
+                
+                return bytes.map((byte, i) => binaryString.charCodeAt(i));
+            }
+
+            /**
+             * 
+             * @param {*} data 
+             * @param {*} filename 
+             * @param {*} mime 
+             */
+            function download(data, filename, mime) {
+                var blob = new Blob([data], {type: mime || 'application/octet-stream'});
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were 
+                    // revoked by closing the blob for which they were created. 
+                    // These URLs will no longer resolve as the data backing 
+                    // the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                }
+                else {
+                    var blobURL = window.URL.createObjectURL(blob);
+                    var tempLink = document.createElement('a');
+                    tempLink.style.display = 'none';
+                    tempLink.href = blobURL;
+                    tempLink.setAttribute('download', filename); 
+                    
+                    // Safari thinks _blank anchor are pop ups. We only want to set _blank
+                    // target if the browser does not support the HTML5 download attribute.
+                    // This allows you to download files in desktop safari if pop up blocking 
+                    // is enabled.
+                    if (typeof tempLink.download === 'undefined') {
+                        tempLink.setAttribute('target', '_blank');
+                    }
+                    
+                    document.body.appendChild(tempLink);
+                    tempLink.click();
+                    document.body.removeChild(tempLink);
+                    window.URL.revokeObjectURL(blobURL);
+                }
+            }
+
+            /**
+             * 
              * @param {type} data
              * @param {type} cb
              * @returns {undefined}
              */
             function downloadExtension(data, cb) {
-                $.ajax(getLocal().system.apiEndpoint + '/download', {
+                $.ajax(getLocal().system.apiV1Endpoint + '/download', {
                     type: 'GET',
                     dataType: 'json',
                     data: {
@@ -4136,6 +4184,33 @@
                     error: function (response) {
                         getAAM().notification(
                             'danger', response.responseJSON.message
+                        );
+                    }
+                });
+            }
+
+            /**
+             * 
+             * @param {*} license 
+             * @param {*} cb 
+             */
+            function downloadPlugin(license, cb) {
+                $.ajax(getLocal().system.apiV2Endpoint + '/download/' + license , {
+                    type: 'GET',
+                    dataType: 'json',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    success: function (package) {
+                        download(
+                            base64ToArrayBuffer(package.content), 
+                            `${package.title}.zip`
+                        );
+                        cb();
+                    },
+                    error: function (response) {
+                        getAAM().notification(
+                            'danger', response.responseJSON.reason
                         );
                     }
                 });
@@ -4205,7 +4280,6 @@
                     $('#install-extension').bind('click', function () {
                         $('#extension-key').parent().removeClass('error');
 
-                        var _this = $(this);
                         var license = $.trim($('#extension-key').val());
 
                         if (!license) {
@@ -4214,14 +4288,31 @@
                             return;
                         }
 
-                        $('i', _this).attr('class', 'icon-spin4 animate-spin');
+                        $('i', '#download-software').attr('class', 'icon-spin4 animate-spin');
                         downloadExtension({
                             action: 'aam',
                             sub_action: 'Extension_Manager.install',
                             _ajax_nonce: getLocal().nonce,
                             license: $('#extension-key').val()
                         }, function() {
-                            $('i', _this).attr('class', 'icon-download-cloud');
+                            $('i', '#download-software').attr('class', 'icon-download-cloud');
+                        });
+                    });
+
+                    $('#download-plugin').bind('click', function () {
+                        $('#extension-key').parent().removeClass('error');
+
+                        var license = $.trim($('#extension-key').val());
+
+                        if (!license) {
+                            $('#extension-key').parent().addClass('error');
+                            $('#extension-key').focus();
+                            return;
+                        }
+
+                        $('i', '#download-software').attr('class', 'icon-spin4 animate-spin');
+                        downloadPlugin($('#extension-key').val(), function() {
+                            $('i', '#download-software').attr('class', 'icon-download-cloud');
                         });
                     });
 

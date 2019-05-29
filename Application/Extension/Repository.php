@@ -299,6 +299,10 @@ class AAM_Extension_Repository {
                         $item['license'] = '';
                     }
                 }
+
+                if (!empty($item['plugin'])) {
+                    $item['pluginStatus'] = $this->getPluginStatus($item['plugin']);
+                }
                 
                 //update extension status
                 $item['status'] = $this->checkStatus($item, $check, $index);
@@ -308,6 +312,21 @@ class AAM_Extension_Repository {
         }
         
         return $this->list;
+    }
+
+    protected function getPluginStatus($plugin) {
+        if (file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $filename = WP_PLUGIN_DIR . '/' . $plugin;
+        $status   = null;
+        
+        if (function_exists('get_plugin_data') && file_exists($filename)) {
+            $status = is_plugin_active($plugin);
+        }
+        
+        return $status;
     }
     
     /**

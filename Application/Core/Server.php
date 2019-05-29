@@ -20,7 +20,8 @@ final class AAM_Core_Server {
     /**
      * Server endpoint
      */
-    const SERVER_URL = 'https://aamplugin.com/api/v1';
+    const SERVER_V1_URL = 'https://aamplugin.com/api/v1';
+    const SERVER_V2_URL = 'https://api.aamplugin.com/v2';
     
     /**
      * Fetch the extension list
@@ -67,7 +68,7 @@ final class AAM_Core_Server {
     protected static function send($request, $params, $timeout = 10) {
         $response = self::parseResponse(
             AAM_Core_API::cURL(
-                self::SERVER_URL . $request, $params, $timeout
+                self::SERVER_V1_URL . $request, $params, $timeout
             )
         );
         

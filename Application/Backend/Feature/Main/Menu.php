@@ -81,9 +81,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
 
                 $submenu = $this->getSubmenu($item[2]);
 
-                $allowed = AAM_Backend_Subject::getInstance()->hasCapability($item[1]);
-
-                if ($allowed || count($submenu) > 0) {
+                if ($this->isItemAllowed($item[1]) || count($submenu) > 0) {
                     $menuItem = array(
                         //add menu- prefix to define that this is the top level menu
                         //WordPress by default gives the same menu id to the first
@@ -143,7 +141,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
         
         if (array_key_exists($menu, $submenu) && is_array($submenu[$menu])) {
             foreach ($submenu[$menu] as $item) {
-                if ($subject->hasCapability($item[1]) || $isDefault) {
+                if ($this->isItemAllowed($item[1]) || $isDefault) {
                     $id = $this->normalizeItem($item[2]);
                     $menuItem = array(
                         'id'         => $id,
@@ -158,6 +156,19 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
         }
 
         return $response;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $cap
+     * @return boolean
+     */
+    protected function isItemAllowed($cap) {
+        $subject = AAM_Backend_Subject::getInstance();
+        $exists  = AAM_Core_API::capabilityExists($cap);
+
+        return !$exists || $subject->hasCapability($cap);
     }
     
     /**

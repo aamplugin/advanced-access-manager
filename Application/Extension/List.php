@@ -18,6 +18,7 @@ class AAM_Extension_List {
             'AAM_COMPLETE_PACKAGE' => array(
                 'title'       => 'Complete Package',
                 'id'          => 'AAM_COMPLETE_PACKAGE',
+                'plugin'      => 'aam-complete-package/bootstrap.php',
                 'type'        => 'commercial',
                 'description' => 'Get the complete list of all premium AAM extensions in one package and all future premium extensions already included for now additional cost.',
                 'url'         => 'https://aamplugin.com/complete-package',
@@ -27,6 +28,7 @@ class AAM_Extension_List {
             'AAM_PLUS_PACKAGE' => array(
                 'title'       => 'Plus Package',
                 'id'          => 'AAM_PLUS_PACKAGE',
+                'plugin'      => 'aam-plus-package/bootstrap.php',
                 'type'        => 'commercial',
                 'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories and hierarchical taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels. As the bonus, define more granular access to how comments can be managed on the backend by other users.',
                 'url'         => 'https://aamplugin.com/extension/plus-package',
@@ -36,6 +38,7 @@ class AAM_Extension_List {
             'AAM_IP_CHECK' => array(
                 'title'       => 'IP Check',
                 'id'          => 'AAM_IP_CHECK',
+                'plugin'      => 'aam-ip-check/bootstrap.php',
                 'type'        => 'commercial',
                 'description' => 'Manage access to your WordPress website by visitor\'s IP address and referred hosts or completely lockdown the entire website and allow only certain IP ranges.',
                 'url'         => 'https://aamplugin.com/extension/ip-check',
@@ -45,6 +48,7 @@ class AAM_Extension_List {
             'AAM_ROLE_HIERARCHY' => array(
                 'title'       => 'Role Hierarchy',
                 'id'          => 'AAM_ROLE_HIERARCHY',
+                'plugin'      => 'aam-role-hierarchy/bootstrap.php',
                 'type'        => 'commercial',
                 'description' => 'Define and manage complex WordPress role hierarchy where child role inherits all access settings from its parent with ability to override setting for any specific role.',
                 'url'         => 'https://aamplugin.com/extension/role-hierarchy',
@@ -54,6 +58,7 @@ class AAM_Extension_List {
             'AAM_ECOMMERCE' => array(
                 'title'       => 'E-Commerce',
                 'id'          => 'AAM_ECOMMERCE',
+                'plugin'      => 'aam-ecommerce/bootstrap.php',
                 'type'        => 'commercial',
                 'new'         => true,
                 'description' => 'Start monetizing access to your premium content. Restrict access to read any WordPress post, page or custom post type until user purchase access to it.',
