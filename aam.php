@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 5.9.7
+ * Version: 5.9.7.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager

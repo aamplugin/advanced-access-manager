@@ -102,8 +102,8 @@ class AAM_Core_Subject_User extends AAM_Core_Subject {
         // Retrieve all capabilities set in Access Policy
         // Load Capabilities from the policy
         $policyCaps = array();
-        
-        foreach($manager->find("/^Capability:[\w]+/i") as $key => $stm) {
+
+        foreach($manager->find("/^Capability:[\w]+$/i") as $key => $stm) {
             $chunks = explode(':', $key);
             $policyCaps[$chunks[1]] = ($stm['Effect'] === 'allow' ? 1 : 0);
         }
