@@ -47,7 +47,7 @@ class AAM_Core_Media {
         $media   = filter_input(INPUT_GET, 'aam-media');
         $request = (is_numeric($media) ? urldecode(AAM_Core_Request::server('REQUEST_URI')) : $media);
         $root    = AAM_Core_Request::server('DOCUMENT_ROOT');
-        file_put_contents(__DIR__ . '/log.txt', $request . "\n", FILE_APPEND);
+        
         $this->request     = str_replace('\\', '/', $root . $request);
         $this->request_uri = preg_replace('/\?.*$/', '', $request);
     }
