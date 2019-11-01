@@ -5,130 +5,55 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Access denied redirect object
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Object_Redirect extends AAM_Core_Object {
-    
-    /**
-     * Constructor
-     *
-     * @param AAM_Core_Subject $subject
-     *
-     * @return void
-     *
-     * @access public
-     */
-    public function __construct(AAM_Core_Subject $subject) {
-        parent::__construct($subject);
+class AAM_Core_Object_Redirect extends AAM_Core_Object
+{
 
-        $this->initialize();
-    }
-    
     /**
-     * 
-     */
-    public function initialize() {
-        $this->read();
-    }
-    
-    /**
+     * Type of object
      *
-     * @return void
-     *
-     * @access public
+     * @version 6.0.0
      */
-    public function read() {
-        $option = $this->getSubject()->readOption('redirect');
-       
-        //inherit from default Administrator role
-        if (empty($option)) {
-             //inherit from parent subject
-            $option = $this->getSubject()->inheritFromParent('redirect');
-            
-            if (empty($option)) {
-                $option = array();
-                $this->readByArea('frontend', $option);
-                $this->readByArea('backend', $option);
-            }
-        } else {
-            $this->setOverwritten(true);
-        }
-        
-        $this->setOption($option);
-    }
-    
+    const OBJECT_TYPE = 'redirect';
+
     /**
-     * 
-     * @param type $area
-     * @param type $option
+     * @inheritdoc
+     * @version 6.0.0
      */
-    protected function readByArea($area, &$option) {
-        $type = AAM_Core_Config::get("{$area}.redirect.type");
-        if ($type) {
-            $option["{$area}.redirect.type"] = $type;
-            $option["{$area}.redirect.{$type}"] = AAM_Core_Config::get(
-                    "{$area}.redirect.{$type}"
-            );
-        }
+    protected function initialize()
+    {
+        $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
+
+        $this->determineOverwritten($option);
+
+        $this->setOption(is_array($option) ? $option : array());
     }
 
     /**
-     * Save options
-     * 
-     * @param string  $property
-     * @param boolean $value
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function save($property, $value) {
-        $option            = $this->getOption();
-        $option[$property] = $value;
-        
-        return $this->getSubject()->updateOption($option, 'redirect');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return $this->getSubject()->deleteOption('redirect');
-    }
-
-    /**
-     * 
+     * Get access option
+     *
      * @param string $param
-     * 
-     * @return boolean
-     * 
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function has($param) {
+    public function get($param, $default = null)
+    {
         $option = $this->getOption();
-        
-        return !empty($option[$param]);
+
+        return isset($option[$param]) ? $option[$param] : $default;
     }
-    
-    /**
-     * 
-     * @param string $param
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function get($param) {
-        $option = $this->getOption();
-        
-        return !empty($option[$param]) ? $option[$param] : null;
-    }
-    
+
 }

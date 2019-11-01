@@ -5,95 +5,73 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * AAM RESTful Users Resource
- * 
+ * AAM RESTful API Users Resource
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Api_Rest_Resource_User {
-    
+class AAM_Api_Rest_Resource_User
+{
+
+    use AAM_Core_Contract_SingletonTrait;
+
     /**
-     * Instance of itself
-     * 
-     * @var AAM_Api_Rest_Resource_User
-     * 
-     * @access private 
+     * Constructor
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    private static $_instance = null;
-    
-    /**
-     * 
-     */
-    protected function __construct() {
+    protected function __construct()
+    {
         add_filter('rest_user_query', array($this, 'userQuery'));
     }
-    
+
     /**
-     * Authorize User actions
-     * 
-     * @param WP_REST_Request $request
-     * 
-     * @return WP_Error|null
-     * 
+     * Authorize user actions
+     *
+     * @return null
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function authorize($request) {
+    public function authorize()
+    {
         return null;
     }
-    
+
     /**
      * Alter user select query
-     * 
+     *
      * @param array $args
-     * 
+     *
      * @return array
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function userQuery($args) {
+    public function userQuery($args)
+    {
         //current user max level
         $max     = AAM::getUser()->getMaxLevel();
         $exclude = isset($args['role__not_in']) ? $args['role__not_in'] : array();
         $roles   = AAM_Core_API::getRoles();
-        
-        foreach($roles->role_objects as $id => $role) {
+
+        foreach ($roles->role_objects as $id => $role) {
             if (AAM_Core_API::maxLevel($role->capabilities) > $max) {
                 $exclude[] = $id;
             }
         }
-        
+
         $args['role__not_in'] = $exclude;
-        
+
         return $args;
     }
-    
-    /**
-     * Alias for the bootstrap
-     * 
-     * @return AAM_Api_Rest_Resource_User
-     * 
-     * @access public
-     * @static
-     */
-    public static function getInstance() {
-        return self::bootstrap();
-    }
-    
-    /**
-     * Bootstrap authorization layer
-     * 
-     * @return AAM_Api_Rest_Resource_User
-     * 
-     * @access public
-     */
-    public static function bootstrap() {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
-        }
-        
-        return self::$_instance;
-    }
+
 }

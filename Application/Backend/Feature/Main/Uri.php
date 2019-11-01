@@ -5,160 +5,142 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * WordPress API manager
- * 
+ * URI service
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract {
-    
-    /**
-     * Construct
-     */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_uri')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_uri'));
-        }
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function getTable() {
-        return wp_json_encode($this->retrieveAllRules());
-    }
+class AAM_Backend_Feature_Main_Uri
+    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
+
+    use AAM_Core_Contract_RequestTrait;
 
     /**
-     * 
-     * @return type
+     * Default access capability to the feature
+     *
+     * @version 6.0.0
      */
-    public function save() {
-       $uri   = filter_input(INPUT_POST, 'uri');
-       $id    = filter_input(INPUT_POST, 'id');
-       $type  = filter_input(INPUT_POST, 'type');
-       $value = filter_input(INPUT_POST, 'value');
-       $code  = filter_input(INPUT_POST, 'code');
-
-       $object = AAM_Backend_Subject::getInstance()->getObject('uri');
-       
-       if (empty($id)) {
-           $id = uniqid();
-       }
-       
-       $object->save($id, str_replace(site_url(), '', $uri), $type, $value, $code);
-
-       return wp_json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return AAM_Backend_Subject::getInstance()->resetObject('uri');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function delete() {
-        $id     = filter_input(INPUT_POST, 'id');
-        $object = AAM_Backend_Subject::getInstance()->getObject('uri');
-        
-        $object->delete($id);
-
-       return wp_json_encode(array('status' => 'success'));
-    }
+    const ACCESS_CAPABILITY = 'aam_manage_uri';
 
     /**
-     * @inheritdoc
+     * Type of AAM core object
+     *
+     * @version 6.0.0
      */
-    public static function getTemplate() {
-        return 'main/uri.phtml';
-    }
-    
+    const OBJECT_TYPE = AAM_Core_Object_Uri::OBJECT_TYPE;
+
     /**
-     * 
-     * @return type
+     * HTML template to render
+     *
+     * @version 6.0.0
      */
-    public function isVisitor() {
+    const TEMPLATE = 'service/uri.php';
+
+    /**
+     * Get list of all rules
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getTable()
+    {
         $subject = AAM_Backend_Subject::getInstance();
-        
-        return $subject->getUID() === AAM_Core_Subject_Visitor::UID;
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    protected function retrieveAllRules() {
-        $rules = AAM_Backend_Subject::getInstance()->getObject('uri')->getOption();
-        
+        $rules   = $subject->getObject(self::OBJECT_TYPE)->getOption();
+
         $response = array(
             'recordsTotal'    => count($rules),
             'recordsFiltered' => count($rules),
-            'draw'            => AAM_Core_Request::request('draw'),
+            'draw'            => $this->getFromRequest('draw'),
             'data'            => array(),
         );
-        
-        foreach($rules as $id => $rule) {
+
+        foreach ($rules as $uri => $rule) {
             $response['data'][] = array(
-                $id,
-                $rule['uri'],
+                $uri,
                 $rule['type'],
                 $rule['action'],
                 isset($rule['code']) ? $rule['code'] : 307,
                 'edit,delete'
             );
         }
-        
-        return $response;
+
+        return wp_json_encode($response);
     }
 
     /**
-     * Check inheritance status
-     * 
-     * Check if menu settings are overwritten
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isOverwritten() {
-        $object = AAM_Backend_Subject::getInstance()->getObject('uri');
-        
-        return $object->isOverwritten();
-    }
-
-    /**
-     * Register Menu feature
-     * 
-     * @return void
-     * 
+     * Save URI access rule
+     *
+     * @return string
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public function save()
+    {
+        $uri   = str_replace(site_url(), '', $this->getFromPost('uri'));
+        $type  = $this->getFromPost('type');
+        $value = $this->getFromPost('value');
+        $code  = $this->getFromPost('code');
+
+        $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+
+        $result = $object->updateOptionItem($uri, array(
+            'type'   => $type,
+            'action' => $value,
+            'code'   => $code
+        ))->save();
+
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
+    }
+
+    /**
+     * Delete URI access rule
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function delete()
+    {
+        $uri     = filter_input(INPUT_POST, 'uri');
+        $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+
+        return wp_json_encode(
+            array('status' => ($object->delete($uri) ? 'success' : 'failure'))
+        );
+    }
+
+    /**
+     * Register service UI
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'uri',
             'position'   => 55,
             'title'      => __('URI Access', AAM_KEY),
-            'capability' => 'aam_manage_uri',
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
+                AAM_Core_Subject_Role::UID,
                 AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.settings.backendAccessControl,core.settings.frontendAccessControl',
             'view'       => __CLASS__
         ));
     }

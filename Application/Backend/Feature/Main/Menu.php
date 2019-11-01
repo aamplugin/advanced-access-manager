@@ -5,153 +5,156 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Backend menu manager
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
-    
-    /**
-     * Construct
-     */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_admin_menu')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_admin_menu'));
-        }
-    }
+class AAM_Backend_Feature_Main_Menu
+    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
 
     /**
-     * Undocumented function
+     * Default access capability to the service
      *
-     * @return void
+     * @version 6.0.0
      */
-    public function save() {
-       $items  = AAM_Core_Request::post('items', array());
-       $status = AAM_Core_Request::post('status');
-
-       $object = AAM_Backend_Subject::getInstance()->getObject('menu');
-
-       foreach($items as $item) {
-           $object->updateOptionItem($item, $status);
-       }
-       
-       $object->save();
-
-       return wp_json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return AAM_Backend_Subject::getInstance()->resetObject('menu');
-    }
+    const ACCESS_CAPABILITY = 'aam_manage_admin_menu';
 
     /**
-     * Get subject's menu
-     * 
+     * Type of AAM core object
+     *
+     * @version 6.0.0
+     */
+    const OBJECT_TYPE = AAM_Core_Object_Menu::OBJECT_TYPE;
+
+    /**
+     * HTML template to render
+     *
+     * @version 6.0.0
+     */
+    const TEMPLATE = 'service/menu.php';
+
+    /**
+     * Save menu settings
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function save()
+    {
+        $status = AAM_Core_Request::post('status');
+
+        $object = AAM_Backend_Subject::getInstance()->getObject(
+            self::OBJECT_TYPE, null, true
+        );
+
+        foreach (AAM_Core_Request::post('items', array()) as $item) {
+            $object->updateOptionItem($item, !empty($status));
+        }
+
+        $result = $object->save();
+
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
+    }
+
+    /**
+     * Get admin menu
+     *
      * Based on the list of capabilities that current subject has, prepare
      * complete menu list and return it.
-     * 
+     *
      * @return array
-     * 
+     *
      * @access public
-     * @global array  $menu
+     * @version 6.0.0
      */
-    public function getMenu() {
-        $menu = json_decode(base64_decode(AAM_Core_Request::post('menu')), 1);
-        
+    public function getMenu()
+    {
         $response = array();
-        
-        //let's create menu list with submenus
-        if (!empty($menu)) {
-            $object = AAM_Backend_Subject::getInstance()->getObject('menu');
-            foreach ($menu as $item) {
+
+        $cache    = AAM_Service_AdminMenu::getInstance()->getMenuCache();
+        $subject  = AAM_Backend_Subject::getInstance();
+
+        // Create menu list with submenus
+        if (!empty($cache)) {
+            $object = $subject->getObject(self::OBJECT_TYPE);
+
+            foreach ($cache['menu'] as $item) {
                 if (preg_match('/^separator/', $item[2])) {
                     continue; //skip separator
                 }
 
-                $submenu = $this->getSubmenu($item[2]);
-
-                if ($this->isItemAllowed($item[1]) || count($submenu) > 0) {
-                    $menuItem = array(
-                        //add menu- prefix to define that this is the top level menu
-                        //WordPress by default gives the same menu id to the first
-                        //submenu
-                        'id'         => 'menu-' . $item[2],
-                        'name'       => $this->filterMenuName($item[0]),
-                        'submenu'    => $submenu,
-                        'capability' => $item[1],
-                        'crc32'      => crc32('menu-' . $item[2]),
-                    );
-                    $menuItem['checked'] = $object->has($menuItem['id']) || $object->has($menuItem['crc32']);
-                    $response[] = $menuItem;
-                }
+                $response[] = array(
+                    // Add menu- prefix to define that this is the top level menu.
+                    // WordPress by default gives the same menu id to the first
+                    // submenu
+                    'id'         => 'menu-' . $item[2],
+                    'uri'        => $this->prepareAdminURI($item[2]),
+                    'name'       => $this->filterMenuName($item[0]),
+                    'submenu'    => $this->getSubmenu($item[2], $cache['submenu']),
+                    'capability' => $item[1],
+                    'checked'    => $object->isRestricted('menu-' . $item[2])
+                );
             }
         }
 
         return $response;
     }
-    
+
     /**
-     * 
-     * @param array $menu
-     * @return array
+     * Normalize menu item
+     *
+     * @param string $menu
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function normalizeItem($menu) {
+    protected function normalizeItem($menu)
+    {
         if (strpos($menu, 'customize.php') === 0) {
             $menu = 'customize.php';
         }
-        
+
         return $menu;
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public static function getTemplate() {
-        return 'main/menu.phtml';
     }
 
     /**
      * Prepare filtered submenu
-     * 
+     *
      * @param string $menu
-     * 
+     *
      * @return array
-     * 
+     *
      * @access protected
-     * @global array  $submenu
+     * @version 6.0.0
      */
-    protected function getSubmenu($menu) {
-        $submenu = json_decode(base64_decode(AAM_Core_Request::post('submenu')), 1);
-        $object  = AAM_Backend_Subject::getInstance()->getObject('menu');
-        
-        $response  = array();
-        $subject   = AAM_Backend_Subject::getInstance();
-        $isDefault = ($subject->getUID() === AAM_Core_Subject_Default::UID);
-        
+    protected function getSubmenu($menu, $submenu)
+    {
+        $response = array();
+
+        $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+
         if (array_key_exists($menu, $submenu) && is_array($submenu[$menu])) {
             foreach ($submenu[$menu] as $item) {
-                if ($this->isItemAllowed($item[1]) || $isDefault) {
-                    $id = $this->normalizeItem($item[2]);
-                    $menuItem = array(
-                        'id'         => $id,
-                        'name'       => $this->filterMenuName($item[0]),
-                        'capability' => $item[1],
-                        'crc32'      => crc32($id)
-                    );
-                    $menuItem['checked'] = $object->has($menuItem['id']) || $object->has($menuItem['crc32']);
-                    $response[] = $menuItem;
-                }
+                $id = $this->normalizeItem($item[2]);
+
+                $response[] = array(
+                    'id'         => $id,
+                    'uri'        => $this->prepareAdminURI($item[2]),
+                    'name'       => $this->filterMenuName($item[0]),
+                    'capability' => $item[1],
+                    'checked'    => $object->isRestricted($id)
+                );
             }
         }
 
@@ -159,94 +162,93 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract {
     }
 
     /**
-     * Undocumented function
+     * Prepare admin URI for the menu item
      *
-     * @param [type] $cap
-     * @return boolean
+     * @param string $resource
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function isItemAllowed($cap) {
-        $subject = AAM_Backend_Subject::getInstance();
-        $exists  = AAM_Core_API::capabilityExists($cap);
+    protected function prepareAdminURI($resource)
+    {
+        $hook = get_plugin_page_hook($resource, 'admin.php');
+        $uri  = (!empty($hook) ? 'admin.php?page=' . $resource : $resource);
 
-        return !$exists || $subject->hasCapability($cap);
+        return '/wp-admin/' . $uri;
     }
-    
+
     /**
      * Filter menu name
-     * 
+     *
      * Strip any HTML tags from the menu name and also remove the trailing
      * numbers in case of Plugin or Comments menu name.
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return string
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function filterMenuName($name) {
+    protected function filterMenuName($name)
+    {
         $filtered = trim(wp_strip_all_tags(
-            preg_replace('@<(span)[^>]*?>.*?</\\1>@si', '', $name), 
+            preg_replace('@<(span)[^>]*?>.*?</\\1>@si', '', $name),
             true
         ));
-        
+
         return preg_replace('/([\d]+)$/', '', $filtered);
     }
 
     /**
-     * 
-     * @param type $subs
+     * Check if there is at least one submenu restricted
+     *
+     * @param array $subs
+     *
      * @return boolean
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function hasSubmenuChecked($subs) {
+    protected function hasSubmenuChecked($subs)
+    {
         $has = false;
-        
+
         if (!empty($subs)) {
-            foreach($subs as $submenu) {
+            foreach ($subs as $submenu) {
                 if ($submenu['checked']) {
                     $has = true;
                     break;
                 }
             }
         }
-        
+
         return $has;
-    }
-    
-    /**
-     * Check inheritance status
-     * 
-     * Check if menu settings are overwritten
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isOverwritten() {
-        $object = AAM_Backend_Subject::getInstance()->getObject('menu');
-        
-        return $object->isOverwritten();
     }
 
     /**
-     * Register Menu feature
-     * 
+     * Register Admin Menu feature
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'admin_menu',
             'position'   => 5,
             'title'      => __('Backend Menu', AAM_KEY),
-            'capability' => 'aam_manage_admin_menu',
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
+                AAM_Core_Subject_Role::UID,
                 AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.settings.backendAccessControl',
             'view'       => __CLASS__
         ));
     }

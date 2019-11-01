@@ -159,6 +159,11 @@ class VersionParser
             try {
                 return $this->normalizeBranch($match[1]);
             } catch (\Exception $e) {
+                _doing_it_wrong(
+                    __CLASS__ . '::' . __METHOD__,
+                    $e->getMessage(),
+                    AAM_VERSION
+                );
             }
         }
 
@@ -474,6 +479,11 @@ class VersionParser
 
                 return array(new Constraint($matches[1] ?: '=', $version));
             } catch (\Exception $e) {
+                _doing_it_wrong(
+                    __CLASS__ . '::' . __METHOD__,
+                    $e->getMessage(),
+                    AAM_VERSION
+                );
             }
         }
 

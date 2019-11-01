@@ -5,149 +5,141 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * AAM Core Config
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Config {
-    
+class AAM_Core_Config
+{
+
     /**
-     * Core settings database option
-     * 
-     * aam-utilities slug is used because AAM Utilities with v3.4 became a core
-     * feature instead of independent extension.
+     * Core AAM config db option
+     *
+     * @version 6.0.0
      */
-    const OPTION = 'aam-utilities';
-    
+    const DB_OPTION = 'aam_config';
+
     /**
      * Core config
-     * 
+     *
      * @var array
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected static $config = array();
-    
+
     /**
-     * Load core AAM settings
-     * 
+     * Load core AAM config
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function bootstrap() {
-        // TODO: Remove in July 2019
-        add_filter(
-            'aam-configpress-compatibility-filter', 
-            'AAM_Core_Compatibility::checkConfigPressCompatibility'
-        );
-        
-        if (is_multisite()) {
-            self::$config = AAM_Core_Compatibility::normalizeConfigOptions(
-                    AAM_Core_API::getOption(self::OPTION, array(), 'site')
-            );
-        } else {
-            self::$config = AAM_Core_Compatibility::getConfig();
-        }
+    public static function bootstrap()
+    {
+        self::$config = AAM_Core_API::getOption(self::DB_OPTION, array());
     }
-    
+
     /**
      * Get config option
-     * 
+     *
      * @param string $option
      * @param mixed  $default
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function get($option, $default = null) {
+    public static function get($option, $default = null)
+    {
         if (array_key_exists($option, self::$config)) {
             $response = self::$config[$option];
         } else {
             $response = self::readConfigPress($option, $default);
         }
-        
+
         return ($response ? self::normalize($response) : $response);
     }
-    
+
     /**
      * Normalize config option
-     * 
+     *
      * @param string $setting
-     * 
+     *
      * @return string
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function normalize($setting) {
+    protected static function normalize($setting)
+    {
         return str_replace(array('{ABSPATH}'), array(ABSPATH), $setting);
     }
-    
+
     /**
-     * Set config
-     * 
+     * Set config option
+     *
      * @param string $option
      * @param mixed  $value
-     * 
+     *
      * @return boolean
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function set($option, $value) {
+    public static function set($option, $value)
+    {
         self::$config[$option] = $value;
-        
+
         //save config to database
-        if (is_multisite()) {
-            $result = AAM_Core_API::updateOption(self::OPTION, self::$config, 'site');
-        } else {
-            $result = AAM_Core_API::updateOption(self::OPTION, self::$config);
-        }
-        
-        
-        return $result;
+        return AAM_Core_API::updateOption(self::DB_OPTION, self::$config);
     }
-    
+
     /**
      * Delete config option
-     * 
+     *
      * @param string $option
-     * 
+     *
+     * @return boolean
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function delete($option) {
+    public static function delete($option)
+    {
         if (array_key_exists($option, self::$config)) {
             unset(self::$config[$option]);
-            
-            if (is_multisite()) {
-                AAM_Core_API::updateOption(self::OPTION, self::$config, 'site');
-            } else {
-                AAM_Core_API::updateOption(self::OPTION, self::$config);
-            }
+
+            $result = AAM_Core_API::updateOption(self::DB_OPTION, self::$config);
         }
+
+        return !empty($result);
     }
-    
+
     /**
      * Get ConfigPress parameter
-     * 
+     *
      * @param string $param
      * @param mixed  $default
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    protected static function readConfigPress($param, $default = null) {
+    protected static function readConfigPress($param, $default = null)
+    {
         $config = AAM_Core_ConfigPress::get('aam.' . $param, $default);
-        
+
         if (is_array($config) && isset($config['userFunc'])) {
             if (is_callable($config['userFunc'])) {
                 $response = call_user_func($config['userFunc']);
@@ -159,6 +151,19 @@ class AAM_Core_Config {
         }
 
         return $response;
+    }
+
+    /**
+     * Reset internal cache
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public static function reset()
+    {
+        self::$config = array();
     }
 
 }

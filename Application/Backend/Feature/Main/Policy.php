@@ -5,93 +5,268 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * WordPress API manager
- * 
+ * Access Policy UI manager
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
-    
+class AAM_Backend_Feature_Main_Policy
+extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
+
+    use AAM_Core_Contract_RequestTrait;
+
     /**
-     * Construct
+     * Default access capability to the feature
+     *
+     * @version 6.0.0
      */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_policy')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_policy'));
-        }
+    const ACCESS_CAPABILITY = 'aam_manage_policy';
+
+    /**
+     * Type of AAM core object
+     *
+     * @version 6.0.0
+     */
+    const OBJECT_TYPE = AAM_Core_Object_Policy::OBJECT_TYPE;
+
+    /**
+     * HTML template to render
+     *
+     * @version 6.0.0
+     */
+    const TEMPLATE = 'service/policy.php';
+
+    /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function __construct()
+    {
+        add_filter('aam_iframe_content_filter', array($this, 'renderPrincipalIframe'), 1, 3);
+        add_filter('aam_role_row_actions_filter', array($this, 'renderRoleActions'), 1, 2);
+        add_filter('aam_user_row_actions_filter', array($this, 'renderUserActions'), 1, 2);
+
+        add_filter('aam_visitor_subject_tab_filter', function ($content, $params) {
+            global $post;
+
+            if (is_a($post, 'WP_Post')
+                    && ($post->post_type === AAM_Service_AccessPolicy::POLICY_CPT)) {
+                $content = AAM_Backend_View::getInstance()->loadPartial(
+                    'visitor-principal-subject-tab',
+                    $params
+                );
+            }
+
+            return $content;
+        }, 10, 2);
+
+        add_filter('aam_default_subject_tab_filter', function ($content, $params) {
+            global $post;
+
+            if (is_a($post, 'WP_Post')
+                    && ($post->post_type === AAM_Service_AccessPolicy::POLICY_CPT)) {
+                $content = AAM_Backend_View::getInstance()->loadPartial(
+                    'default-principal-subject-tab',
+                    $params
+                );
+            }
+
+            return $content;
+        }, 10, 2);
     }
 
     /**
-     * 
-     * @return type
-     */
-    public function getTable() {
-        return wp_json_encode($this->retrievePolicies());
-    }
-    
-    /**
-     * Install policy
-     * 
+     * Render access policy principal metabox
+     *
+     * @param null|string      $content
+     * @param string           $type
+     * @param AAM_Backend_View $view
+     *
      * @return string
-     * 
+     *
      * @access public
-     * @since  v5.7.3
+     * @version 6.0.0
      */
-    public function install() {
-        $package = (object) AAM_Core_Request::post('package');
-        
-        if (!empty($package->content)) {
-            $json = base64_decode($package->content);
-            
-            $result = wp_insert_post(array(
-                'post_author'  => get_current_user_id(),
-                'post_content' => $json,
-                'post_title'   => $package->title,
-                'post_excerpt' => $package->description,
-                'post_status'  => 'publish',
-                'post_type'    => 'aam_policy'
-            ));
-            
-            if (!is_wp_error($result)) {
-                $response = array('status' => 'success');
-            } else {
-                $response = array(
-                    'status' => 'failure', 'reason' => $result->get_error_message()
-                );
-            }
-        } else {
-            $response = array(
-                'status' => 'failure', 
-                'reason' => __('Failed to fetch policy. Please try again.', AAM_KEY)
+    public function renderPrincipalIframe($content, $type, $view)
+    {
+        if ($type === 'principal') {
+            $content = $view->loadTemplate(
+                dirname(__DIR__) . '/../tmpl/metabox/principal-iframe.php',
+                (object) array(
+                    'policyId' => $this->getFromQuery('id', FILTER_VALIDATE_INT)
+                )
             );
         }
-        
+
+        return $content;
+    }
+
+    /**
+     * Render role actions
+     *
+     * @param array  $actions
+     * @param string $id
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function renderRoleActions($actions, $id)
+    {
+        if ($this->getFromPost('ui') === 'principal') {
+            $object = AAM::api()->getRole($id)->getObject(
+                AAM_Core_Object_Policy::OBJECT_TYPE
+            );
+            $policyId = $this->getFromPost('policyId', FILTER_VALIDATE_INT);
+            $actions = array($object->has($policyId) ? 'detach' : 'attach');
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Render user actions
+     *
+     * @param array                 $actions
+     * @param AAM_Core_Subject_User $user
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function renderUserActions($actions, $user)
+    {
+        if ($this->getFromPost('ui') === 'principal') {
+            $object =  $user->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+            $policyId = $this->getFromPost('policyId', FILTER_VALIDATE_INT);
+            $actions = array($object->has($policyId) ? 'detach' : 'attach');
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Get list of access policies
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getTable()
+    {
+        $list = get_posts(array(
+            'post_type'   => AAM_Service_AccessPolicy::POLICY_CPT,
+            'numberposts' => -1,
+            'post_status' => 'publish'
+        ));
+
+        $response = array(
+            'recordsTotal'    => count($list),
+            'recordsFiltered' => count($list),
+            'draw'            => $this->getFromRequest('draw'),
+            'data'            => array(),
+        );
+
+        foreach ($list as $record) {
+            $policy = json_decode($record->post_content);
+
+            if ($policy) {
+                $response['data'][] = array(
+                    $record->ID,
+                    $this->preparePolicyTitle($record),
+                    $this->preparePolicyActionList($record),
+                    get_edit_post_link($record->ID, 'link')
+                );
+            }
+        }
+
         return wp_json_encode($response);
     }
 
     /**
-     * Save post properties
-     * 
+     * Prepare policy title
+     *
+     * @param WP_Post $record
+     *
      * @return string
-     * 
-     * @access public
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    public function save() {
+    protected function preparePolicyTitle($record)
+    {
+        if (!empty($record->post_title)) {
+            $title = $record->post_title;
+        } else {
+            $title = __('(no title)', AAM_KEY);
+        }
+
+        $title .= '<br/>';
+
+        if (isset($record->post_excerpt)) {
+            $title .= '<small>' . esc_js($record->post_excerpt) . '</small>';
+        }
+
+        return $title;
+    }
+
+    /**
+     * Prepare the list of policy actions
+     *
+     * @param WP_Post $record
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function preparePolicyActionList($record)
+    {
         $subject = AAM_Backend_Subject::getInstance();
-        $id      = AAM_Core_Request::post('id');
-        $effect  = AAM_Core_Request::post('effect');
-        
-        $action = (!empty($effect) ? 'attach' : 'detach');
-        
+
+        $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);
+
+        $actions = array(
+            $policy->has($record->ID) ? "detach" : "attach",
+            $post->isAllowedTo('edit') ? 'edit' : 'no-edit'
+        );
+
+        return implode(',', $actions);
+    }
+
+    /**
+     * Save access policy effect
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function save()
+    {
+        $subject = AAM_Backend_Subject::getInstance();
+
+        $id      = $this->getFromPost('id');
+        $effect  = $this->getFromPost('effect', FILTER_VALIDATE_BOOLEAN);
+
         // Verify that current user can perform following action
-        if (AAM_Core_Policy_Factory::get()->canTogglePolicy($id, $action)) {
-            $result = $subject->save($id, $effect, 'policy');
+        if (current_user_can('read_post', $id)) {
+            $object = $subject->getObject(self::OBJECT_TYPE, null, true);
+            $result = $object->updateOptionItem($id, $effect)->save();
         } else {
             $result = false;
         }
@@ -100,125 +275,40 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract {
             'status'  => ($result ? 'success' : 'failure')
         ));
     }
-    
+
     /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return AAM_Backend_Subject::getInstance()->resetObject('policy');
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public static function getTemplate() {
-        return 'main/policy.phtml';
-    }
-    
-    /**
-     * Check inheritance status
-     * 
-     * Check if menu settings are overwritten
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isOverwritten() {
-        $object = AAM_Backend_Subject::getInstance()->getObject('policy');
-        
-        return $object->isOverwritten();
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    protected function retrievePolicies() {
-        $list = get_posts(array(
-            'post_type'   => 'aam_policy',
-            'numberposts' => -1,
-            'post_status' => 'publish'
-        ));
-        
-        $response = array(
-            'recordsTotal'    => count($list),
-            'recordsFiltered' => count($list),
-            'draw'            => AAM_Core_Request::request('draw'),
-            'data'            => array(),
-        );
-        
-        foreach($list as $record) {
-            $policy = json_decode($record->post_content);
-            
-            if ($policy) {
-                $response['data'][] = array(
-                    $record->ID,
-                    $this->buildTitle($record),
-                    $this->buildActionList($record),
-                    get_edit_post_link($record->ID, 'link')
-                );
-            }
-        }
-        
-        return $response;
-    }
-    
-    /**
-     * 
-     * @param type $record
+     * Get default Access Policy
+     *
+     * @global string $wp_version
+     *
      * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    protected function buildTitle($record) {
-        $title  = (!empty($record->post_title) ? $record->post_title : __('(no title)'));
-        $title .= '<br/>';
-        
-        if (isset($record->post_excerpt)) {
-            $title .= '<small>' . esc_js($record->post_excerpt) . '</small>';
-        }
-        
-        return $title;
-    }
-    
-    /**
-     * 
-     * @param type $record
-     * @return type
-     */
-    protected function buildActionList($record) {
-        //'assign,edit,clone,delete'
-        $subject = AAM_Backend_Subject::getInstance();
-        $policy  = $subject->getObject('policy');
-        $post    = $subject->getObject('post', $record->ID);
-        
-        $action  = $policy->has($record->ID) ? 'detach' : 'attach';
-        $prefix  = AAM_Core_Policy_Factory::get()->canTogglePolicy($record->ID, $action) ? '' : 'no-';
-        
-        $actions = array(
-            $policy->has($record->ID) ? "{$prefix}detach" : "{$prefix}attach",
-            $post->has('backend.edit') ? 'no-edit' : 'edit'
-        );
-        
-        return implode(',', $actions);
+    public static function getDefaultPolicy()
+    {
+        return include dirname(__DIR__) . '/../tmpl/policy/default-policy.php';
     }
 
     /**
-     * Register Menu feature
-     * 
+     * Register Access Policy UI feature
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'policy',
             'position'   => 2,
-            'title'      => __('Access Policies', AAM_KEY) . '<span class="badge">NEW</span>',
-            'capability' => 'aam_manage_policy',
+            'title'      => __('Access Policies', AAM_KEY),
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
+                AAM_Core_Subject_Role::UID,
                 AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Visitor::UID,
                 AAM_Core_Subject_Default::UID

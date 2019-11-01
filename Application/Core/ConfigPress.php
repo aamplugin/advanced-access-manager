@@ -5,51 +5,58 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * ConfigPress layer
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-final class AAM_Core_ConfigPress {
-    
+final class AAM_Core_ConfigPress
+{
+
+    use AAM_Core_Contract_SingletonTrait;
+
     /**
-     * Instance of itself
-     * 
-     * @var AAM_Core_ConfigPress 
-     * 
-     * @access private
+     * DB option name
+     *
+     * @version 6.0.0
      */
-    protected static $instance = null;
-    
+    const DB_OPTION = 'aam_configpress';
+
     /**
      * Parsed config
-     * 
+     *
      * @var array
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected $config = null;
-    
+
     /**
      * Raw config text
-     * 
+     *
      * @var string
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected $rawConfig = null;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @return void
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function __construct() {
+    protected function __construct()
+    {
         try {
             $reader = new AAM_Core_ConfigPress_Reader;
             $this->config = $reader->parseString($this->read());
@@ -58,37 +65,55 @@ final class AAM_Core_ConfigPress {
             $this->config = array();
         }
     }
-    
+
     /**
      * Read config from the database
-     * 
+     *
      * @return string
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    public function read() {
-        $blog   = (defined('BLOG_ID_CURRENT_SITE') ? BLOG_ID_CURRENT_SITE : 1);
-        $config = AAM_Core_API::getOption('aam-configpress', 'null', $blog);
+    public function read()
+    {
+        $config = AAM_Core_API::getOption(self::DB_OPTION, 'null');
 
         return ($config === 'null' ? '' : $config);
     }
 
     /**
+     * Save config to the database
+     *
+     * @param string $value
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function save($value)
+    {
+        return AAM_Core_API::updateOption(self::DB_OPTION, $value);
+    }
+
+    /**
      * Get configuration option/setting
-     * 
+     *
      * If $option is defined, return it, otherwise return the $default value
-     * 
+     *
      * @param string $option
      * @param mixed  $default
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function get($option = null, $default = null) {
+    public static function get($option = null, $default = null)
+    {
         //init config only when requested and only one time
         $instance = self::getInstance();
-        
+
         if (is_null($option)) {
             $value = $instance->config;
         } else {
@@ -103,24 +128,8 @@ final class AAM_Core_ConfigPress {
                 }
             }
         }
-        
+
         return $value;
     }
-    
-    /**
-     * Get single instance of itself
-     * 
-     * @return AAM_Core_ConfigPress
-     * 
-     * @access public
-     * @static
-     */
-    public static function getInstance() {
-        if (is_null(self::$instance)) {
-            self::$instance = new self;
-        }
-        
-        return self::$instance;
-    }
-    
+
 }

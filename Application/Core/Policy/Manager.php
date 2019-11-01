@@ -5,410 +5,449 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * AAM core policy manager
- * 
+ * AAM policy manager for a specific subject
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @since AAM v5.7.2
+ * @version 6.0.0
  */
-final class AAM_Core_Policy_Manager {
-    
+class AAM_Core_Policy_Manager
+{
+
     /**
      * Policy core object
-     * 
+     *
      * @var AAM_Core_Object_Policy
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected $policyObject;
-    
+    protected $object;
+
     /**
      * Current subject
-     * 
+     *
      * @var AAM_Core_Subject
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected $subject;
-    
+
     /**
      * Parsed policy tree
-     * 
+     *
      * @var array
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected $tree = null;
-    
+    protected $tree = array(
+        'Statement' => array(),
+        'Param'     => array()
+    );
+
     /**
      * Constructor
-     * 
+     *
      * @access protected
-     * 
-     * @return void
-     */
-    public function __construct(AAM_Core_Subject $subject) {
-        $this->policyObject = $subject->getObject('policy');
-        $this->subject      = $subject;
-    }
-
-    /**
-     * Undocumented function
      *
      * @return void
+     * @version 6.0.0
      */
-    public function initializePolicyTree() {
-        $this->preparePolicyTree();
+    public function __construct(AAM_Core_Subject $subject)
+    {
+        $this->object  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $this->subject = $subject;
     }
-    
+
     /**
-     * Call policy object public methods
-     * 
+     * Get policy parameter
+     *
      * @param string $name
      * @param array  $args
-     * 
-     * @return mixed
-     * 
-     * @access public
-     */
-    public function __call($name, $args) {
-        $result = null;
-        
-        if (method_exists($this->policyObject, $name)) {
-            $result = call_user_func_array(array($this->policyObject, $name), $args);
-        }
-        
-        return $result;
-    }
-    
-    /**
-     * Find all the matching policies
-     * 
-     * @param string  $s      RegEx
-     * @param array   $args   Inline arguments
-     * @param bool    $single Single record only - the last record
-     * 
-     * @return array
-     * 
-     * @access public
-     */
-    public function find($s, $args = array(), $single = false) {
-        $statements = array();
-        $tree       = $this->preparePolicyTree();
-        
-        foreach($tree['Statement'] as $key => $stm) {
-            if (preg_match($s, $key) && $this->isApplicable($stm, $args)) {
-                $statements[$this->strToLower($key)] = $stm;
-            }
-        }
-        
-        return ($single ? end($statements) : $statements);
-    }
-    
-    /**
-     * Check if specified action is allowed for resource
-     * 
-     * This method is working with "Statement" array.
-     * 
-     * @param string $resource Resource name
-     * @param array  $args     Args that will be injected during condition evaluation
-     * 
-     * @return boolean|null
-     * 
-     * @access public
-     */
-    public function isAllowed($resource, $args = array()) {
-        $allowed = null;
-        $tree    = $this->preparePolicyTree();
-        $id      = $this->strToLower($resource);
-        
-        if (isset($tree['Statement'][$id])) {
-            $stm = $tree['Statement'][$id];
-            
-            if ($this->isApplicable($stm, $args)) {
-                $effect  = strtolower($stm['Effect']);
-                $allowed = ($effect === 'allow');
-            }
-        }
-        
-        return $allowed;
-    }
-
-    /**
-     * Convert string to lowercase
      *
-     * @param string $str
-     * 
-     * @return string
-     * 
-     * @access protected
-     */
-    protected function strToLower($str) {
-        if (function_exists('mb_strtolower')) {
-            $result = mb_strtolower($str);
-        } else {
-            $result = strtolower($str);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Determine if resource is the boundary
-     * 
-     * The Boundary is type of resource that is denied and is enforced so no other
-     * statements can override it. For example edit_posts capability can be boundary
-     * for any statement that user Role resource
-     *
-     * @param string $resource
-     * @param array  $args
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function isBoundary($resource, $args = array()) {
-        $denied = false;
-        $tree   = $this->preparePolicyTree();
-        $id     = $this->strToLower($resource);
-        
-        if (isset($tree['Statement'][$id])) {
-            $stm = $tree['Statement'][$id];
-            
-            if ($this->isApplicable($stm, $args)) {
-                $effect  = strtolower($stm['Effect']);
-                $denied = ($effect === 'deny' && !empty($stm['Enforce']));
-            }
-        }
-        
-        return $denied;
-    }
-    
-    /**
-     * Get Policy Param
-     * 
-     * @param string $name
-     * @param array  $args
-     * 
      * @return mixed
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function getParam($id, $args = array()) {
+    public function getParam($id, $args = array())
+    {
         $value = null;
 
         if (isset($this->tree['Param'][$id])) {
             $param = $this->tree['Param'][$id];
-            
+
             if ($this->isApplicable($param, $args)) {
                 if (preg_match_all('/(\$\{[^}]+\})/', $param['Value'], $match)) {
-                    $value = AAM_Core_Policy_Token::evaluate($param['Value'], $match[1]);
+                    $value = AAM_Core_Policy_Token::evaluate(
+                        $param['Value'], $match[1]
+                    );
                 } else {
                     $value = $param['Value'];
                 }
             }
         }
-        
+
         return $value;
     }
-    
-    /**
-     * Check if current subject can toggle specific policy
-     * 
-     * Verify that policy can be attached/detached
-     * 
-     * @param int    $id     Policy ID
-     * @param string $action Either "attach" or "detach"
-     * 
-     * @return bool
-     * 
-     * @access public
-     * @since  v5.9
-     */
-    public function canTogglePolicy($id, $action) {
-        $post = get_post($id);
-            
-        // Verify that current user can perform following action
-        $stm = $this->find(
-            "/^post:{$post->post_type}:({$post->post_name}|{$post->ID}):{$action}/i",
-            array('post' => $post),
-            true
-        );
 
-        return (empty($stm['Effect']) || $stm['Effect'] === 'allow');
-    }
-    
     /**
-     * Check if policy block is applicable
-     * 
-     * @param array $block
-     * @param array $args
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isApplicable($block, $args = array()) {
-        $result = true;
-        
-        if (!empty($block['Condition']) && !is_scalar($block['Condition'])) {
-            $result = AAM_Core_Policy_Condition::getInstance()->evaluate(
-                $block['Condition'], $args
-            );
-        }
-        
-        return $result;
-    }
-   
-    /**
-     * Prepare policy tree
-     * 
-     * This is the lazy load for the policy tree. If tree has not been initialized,
-     * trigger the process of parsing and merging statements and settings.
-     * 
+     * Find all statements that match provided resource of list of resources
+     *
+     * @param string|array $s
+     * @param array        $args
+     *
      * @return array
-     * 
-     * @access protected
+     *
+     * @access public
+     * @version 6.0.0
      */
-    protected function preparePolicyTree() {
-        if (is_null($this->tree)) {
-            $this->tree = array(
-                'Statement' => array(),
-                'Param'     => array()
-            );
+    public function getResources($s, $args = array())
+    {
+        if (is_array($s)) {
+            $regex = '/^(' . implode('|', $s) . '):/i';
+        } else {
+            $regex = "/^{$s}:/i";
+        }
 
-            $ids = array_filter(
-                $this->policyObject->getOption(),
-                function($state) {
-                    return !empty($state);
-                }
-            );
+        $statements = array();
 
-            if (count($ids)) {
-                $policies = get_posts(array(
-                    'include'     => array_keys($ids),
-                    'post_status' => 'publish',
-                    'post_type'   => 'aam_policy'
-                ));
-
-                foreach($policies as $policy) {
-                    $this->extendTree(
-                        $this->tree, $this->parsePolicy($policy->post_content)
-                    );
-                }
+        foreach ($this->tree['Statement'] as $key => $stm) {
+            if (preg_match($regex, $key) && $this->isApplicable($stm, $args)) {
+                // Remove the resource type to keep it clean
+                $statements[preg_replace($regex, '', $key)] = $stm;
             }
         }
-        
+
+        return $this->replaceTokens($statements);
+    }
+
+    /**
+     * Replace all the dynamic tokens recursively
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function replaceTokens($data)
+    {
+        $replaced = array();
+
+        foreach($data as $key => $value) {
+            if (preg_match_all('/(\$\{[^}]+\})/', $key, $match)) {
+                $key = AAM_Core_Policy_Token::evaluate($key, $match[1]);
+            }
+
+            if (is_array($value)) {
+                $replaced[$key] = $this->replaceTokens($value);
+            } elseif (preg_match_all('/(\$\{[^}]+\})/', $value, $match)) {
+                $replaced[$key] = AAM_Core_Policy_Token::evaluate($value, $match[1]);
+            } else {
+                $replaced[$key] = $value;
+            }
+        }
+
+        return $replaced;
+    }
+
+    /**
+     * Hook into WP core function to override WP options
+     *
+     * @param mixed  $res
+     * @param string $option
+     *
+     * @return mixed
+     *
+     * @access public
+     * @see AAM_Core_Policy_Manager::updatePolicyTree
+     * @version 6.0.0
+     */
+    public function getOption($res, $option)
+    {
+        $param = $this->tree['Param']["option:{$option}"];
+
+        if ($this->isApplicable($param)) {
+            if (is_array($res) && is_array($param['Value'])) {
+                $res = array_merge($res, $param['Value']);
+            } else {
+                $res = $param['Value'];
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * Check if specified action is allowed for resource
+     *
+     * This method is working with "Statement" array.
+     *
+     * @param string $resource Resource name
+     * @param array  $args     Args that will be injected during condition evaluation
+     *
+     * @return boolean|null
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function isAllowed($resource, $args = array())
+    {
+        $allowed = null;
+        $id      = strtolower($resource);
+
+        if (isset($this->tree['Statement'][$id])) {
+            $stm = $this->tree['Statement'][$id];
+
+            if ($this->isApplicable($stm, $args)) {
+                $allowed = (strtolower($stm['Effect']) === 'allow');
+            }
+        }
+
+        return $allowed;
+    }
+
+    /**
+     * Get parsed policy tree
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getTree()
+    {
         return $this->tree;
     }
-    
+
     /**
-     * Parse policy post and extract Statements and Params
-     * 
-     * @param string $policy
-     * 
-     * @return array
-     * 
-     * @access protected
+     * Parse all attached policies into the tree
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
      */
-    protected function parsePolicy($policy) {
-        $val = json_decode($policy, true);
-        
+    public function initialize()
+    {
+        // Get the list of all policies that are attached to the subject
+        $ids = array_filter($this->object->getOption(), function ($attached) {
+            return !empty($attached);
+        });
+
+        // If there is at least one policy attached and it is published, then
+        // parse into the tree
+        if (count($ids)) {
+            $policies = $this->fetchPolicies(array_keys($ids));
+
+            foreach ($policies as $policy) {
+                $this->updatePolicyTree($this->tree, $this->parsePolicy($policy));
+            }
+
+            $this->_cleanupTree();
+        }
+    }
+
+    /**
+     * Fetch public policies by IDs
+     *
+     * @param array $ids
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function fetchPolicies($ids)
+    {
+        return get_posts(array(
+            'include'          => $ids,
+            'post_status'      => 'publish',
+            'suppress_filters' => true,
+            'post_type'        => AAM_Service_AccessPolicy::POLICY_CPT
+        ));
+    }
+
+    /**
+     * Parse JSON policy and extract statements and params
+     *
+     * @param WP_Post $policy
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function parsePolicy($policy)
+    {
+        $val = json_decode($policy->post_content, true);
+
         // Do not load the policy if any errors
         if (json_last_error() === JSON_ERROR_NONE) {
             $tree = array(
-                'Statement' => isset($val['Statement']) ? (array) $val['Statement'] : array(),
-                'Param'     => isset($val['Param']) ? (array) $val['Param'] : array(),
+                'Statement' => $this->_getArrayOfArrays($val, 'Statement'),
+                'Param'     => $this->_getArrayOfArrays($val, 'Param'),
             );
         } else {
             $tree = array('Statement' => array(), 'Param' => array());
+
+            // Make sure that this is noticed
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                sprintf(
+                    'Access policy %d error %s', $policy->ID, json_last_error_msg()
+                ),
+                AAM_VERSION
+            );
         }
-        
+
         return $tree;
     }
-    
+
+    /**
+     * Get array of array for Statement and Param policy props
+     *
+     * @param array  $input
+     * @param string $prop
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
+     */
+    private function _getArrayOfArrays($input, $prop)
+    {
+        $response = array();
+
+        // Parse Statements and determine if it is multidimensional
+        if (array_key_exists($prop, $input)) {
+            if (!isset($input[$prop][0]) || !is_array($input[$prop][0])) {
+                $response = array($input[$prop]);
+            } else {
+                $response = $input[$prop];
+            }
+        }
+
+        return $response;
+    }
+
     /**
      * Extend tree with additional statements and params
-     * 
+     *
      * @param array &$tree
      * @param array $addition
-     * 
+     *
      * @return array
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function extendTree(&$tree, $addition) {
+    protected function updatePolicyTree(&$tree, $addition)
+    {
+        $stmts  = &$tree['Statement'];
+        $params = &$tree['Param'];
+
         // Step #1. If there are any statements, let's index them by resource:action
         // and insert into the list of statements
-        foreach($addition['Statement'] as $stm) {
-            $list = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
-            $acts = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
-            
-            foreach($list as $res) {
-                // Allow to build resource name dynamically. 
+        foreach ($addition['Statement'] as $stm) {
+            $resources = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
+            $actions   = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
+
+            foreach ($resources as $res) {
+                // Allow to build resource name dynamically.
                 // e.g. "Term:category:${USERMETA.region}:posts"
                 if (preg_match_all('/(\$\{[^}]+\})/', $res, $match)) {
                     $res = AAM_Core_Policy_Token::evaluate($res, $match[1]);
                 }
-                foreach($acts as $act) {
-                    $id = $this->strToLower($res . (!empty($act) ? ":{$act}" : ''));
-                    
-                    if (!isset($tree['Statement'][$id]) || empty($tree['Statement'][$id]['Enforce'])) {
-                        $tree['Statement'][$id] = $this->removeKeys($stm, array('Resource', 'Action'));
+
+                foreach ($actions as $act) {
+                    $id = strtolower($res . (!empty($act) ? ":{$act}" : ''));
+
+                    if (!isset($stmts[$id]) || empty($stmts[$id]['Enforce'])) {
+                        $stmts[$id] = $stm;
                     }
                 }
             }
         }
+
+        $callback = array($this, 'getOption'); // Callback that hooks into get_option
 
         // Step #2. If there are any params, let's index them and insert into the list
-        foreach($addition['Param'] as $param) {
+        foreach ($addition['Param'] as $param) {
             if (!empty($param['Key'])) {
-                $id = $param['Key'];
+                // Allow to build param name dynamically.
+                // e.g. "${USERMETA.region}_posts"
+                if (preg_match_all('/(\$\{[^}]+\})/', $param['Key'], $match)) {
+                    $id = AAM_Core_Policy_Token::evaluate($param['Key'], $match[1]);
+                } else {
+                    $id = $param['Key'];
+                }
 
-                if (!isset($tree['Param'][$id]) || empty($tree['Param'][$id]['Enforce'])) {
-                    $tree['Param'][$id] = $this->removeKeys($param, array('Key'));
+                if (!isset($params[$id]) || empty($params[$id]['Enforce'])) {
+                    $params[$id] = $param;
 
                     if (strpos($id, 'option:') === 0) {
-                        add_filter('option_' . substr($id, 7), function($res, $option) {
-                            $param = $this->tree['Param']["option:{$option}"];
-                            
-                            if ($this->isApplicable($param)) {
-                                if (is_array($res) && is_array($param['Value'])) {
-                                    $res = array_merge($res, $param['Value']);
-                                } else {
-                                    $res = $param['Value'];
-                                }
-                            }
-                            
-                            return $res;
-                        }, 1, 2);
+                        $name = substr($id, 7);
+
+                        // Hook into the core
+                        add_filter('pre_option_' . $name, $callback, 1, 2);
+                        add_filter('pre_site_option_' . $name, $callback, 1, 2);
                     }
                 }
             }
         }
     }
-    
+
     /**
-     * Remove unnecessary keys from array
-     * 
-     * @param array $arr
-     * @param array $keys
-     * 
-     * @return array
-     * 
+     * Perform some internal clean-up
+     *
+     * @return void
+     *
      * @access private
+     * @version 6.0.0
      */
-    private function removeKeys($arr, $keys) {
-        foreach($keys as $key) {
-            if (isset($arr[$key])) {
-                unset($arr[$key]);
+    private function _cleanupTree()
+    {
+        foreach($this->tree['Statement'] as $id => $stm) {
+            if (isset($stm['Resource'])) {
+                unset($this->tree['Statement'][$id]['Resource']);
+            }
+            if (isset($stm['Action'])) {
+                unset($this->tree['Statement'][$id]['Action']);
             }
         }
-        
-        return $arr;
     }
-    
+
+    /**
+     * Check if policy block is applicable
+     *
+     * @param array $block
+     * @param array $args
+     *
+     * @return boolean
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function isApplicable($block, $args = array())
+    {
+        $result = true;
+
+        if (!empty($block['Condition']) && is_array($block['Condition'])) {
+            $result = AAM_Core_Policy_Condition::getInstance()->evaluate(
+                $block['Condition'], $args
+            );
+        }
+
+        return $result;
+    }
+
 }

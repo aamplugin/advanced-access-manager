@@ -5,113 +5,79 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Login redirect
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_LoginRedirect extends AAM_Backend_Feature_Abstract {
-    
+class AAM_Backend_Feature_Main_LoginRedirect
+    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
+
     /**
-     * Construct
+     * Default access capability to the service
+     *
+     * @version 6.0.0
      */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_login_redirect')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_login_redirect'));
-        }
-    }
-    
+    const ACCESS_CAPABILITY = 'aam_manage_login_redirect';
+
     /**
-     * Undocumented function
+     * Type of AAM core object
+     *
+     * @version 6.0.0
+     */
+    const OBJECT_TYPE = AAM_Core_Object_LoginRedirect::OBJECT_TYPE;
+
+    /**
+     * HTML template to render
+     *
+     * @version 6.0.0
+     */
+    const TEMPLATE = 'service/login-redirect.php';
+
+    /**
+     * Get option value
+     *
+     * @param string $name
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getOption($name, $default = null)
+    {
+        $object = $this->getSubject()->getObject(self::OBJECT_TYPE);
+        $option = $object->getOption();
+
+        return (!empty($option[$name]) ? $option[$name] : $default);
+    }
+
+    /**
+     * Register login redirect feature
      *
      * @return void
-     */
-    public function save() {
-       $param = AAM_Core_Request::post('param');
-       $value = AAM_Core_Request::post('value');
-
-       $object = AAM_Backend_Subject::getInstance()->getObject('loginRedirect');
-
-       $object->save($param, $value);
-
-       return wp_json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return AAM_Backend_Subject::getInstance()->resetObject('loginRedirect');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function isDefault() {
-        $subject = AAM_Backend_Subject::getInstance()->getUID();
-        
-        return ($subject === AAM_Core_Subject_Default::UID);
-    }
-    
-    /**
-     * Check inheritance status
-     * 
-     * Check if redirect settings are overwritten
-     * 
-     * @return boolean
-     * 
-     * @access protected
-     */
-    protected function isOverwritten() {
-        $object = AAM_Backend_Subject::getInstance()->getObject('loginRedirect');
-        
-        return $object->isOverwritten();
-    }
-    
-    /**
-     * 
-     * @param type $option
-     * @return type
-     */
-    public function getOption($option, $default = null) {
-        $object = AAM_Backend_Subject::getInstance()->getObject('loginRedirect');
-        $value  = $object->get($option);
-        
-        return (!is_null($value) ? $value : $default);
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public static function getTemplate() {
-        return 'main/login-redirect.phtml';
-    }
-    
-    /**
-     * Register Contact/Hire feature
-     * 
-     * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'login_redirect',
             'position'   => 40,
             'title'      => __('Login Redirect', AAM_KEY),
-            'capability' => 'aam_manage_login_redirect',
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
-                AAM_Core_Subject_User::UID, 
+                AAM_Core_Subject_Role::UID,
+                AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Default::UID
             ),
             'view'       => __CLASS__

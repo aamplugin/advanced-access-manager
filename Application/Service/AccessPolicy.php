@@ -1,0 +1,769 @@
+<?php
+
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'license.txt', which is part of this source code package.       *
+ * ======================================================================
+ *
+ * @version 6.0.0
+ */
+
+/**
+ * Access Policy service
+ *
+ * @package AAM
+ * @version 6.0.0
+ */
+class AAM_Service_AccessPolicy
+{
+    use AAM_Core_Contract_ServiceTrait,
+        AAM_Core_Contract_RequestTrait;
+
+    /**
+     * AAM configuration setting that is associated with the feature
+     *
+     * @version 6.0.0
+     */
+    const FEATURE_FLAG = 'core.service.access-policy.enabled';
+
+    /**
+     * Access policy CPT
+     *
+     * @version 6.0.0
+     */
+    const POLICY_CPT = 'aam_policy';
+
+    /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function __construct()
+    {
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+                add_action('aam_init_ui_action', function () {
+                    AAM_Backend_Feature_Main_Policy::register();
+                }, 40);
+
+                //register custom access control metabox
+                add_action('add_meta_boxes', array($this, 'registerMetaboxes'));
+
+                //access policy save
+                add_filter('wp_insert_post_data', array($this, 'managePolicyContent'));
+            }
+
+            // Hook that returns the detailed information about the nature of the
+            // service. This is used to display information about service on the
+            // Settings->Services tab
+            add_filter('aam_service_list_filter', function ($services) {
+                $services[] = array(
+                    'title'       => __('Access Policies', AAM_KEY),
+                    'description' => __('Manage access to the website with well documented JSON access policies for any user, role or visitors. Keep the paper-trail of all the access changes with policy revisions.', AAM_KEY),
+                    'setting'     => self::FEATURE_FLAG
+                );
+
+                return $services;
+            }, 40);
+        }
+
+        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            $this->initializeHooks();
+        }
+    }
+
+    /**
+     * Register UI metaboxes for the Access Policy edit screen
+     *
+     * @global WP_Post $post
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function registerMetaboxes()
+    {
+        global $post;
+
+        if (is_a($post, 'WP_Post') && ($post->post_type === self::POLICY_CPT)) {
+            add_meta_box(
+                self::POLICY_CPT,
+                __('Access Policy Document', AAM_KEY),
+                function() {
+                    echo AAM_Backend_View::getInstance()->renderPolicyMetabox();
+                },
+                null,
+                'normal',
+                'high'
+            );
+
+            add_meta_box(
+                'aam-policy-assignee',
+                __('Access Policy Assignee', AAM_KEY),
+                function() {
+                    echo AAM_Backend_View::getInstance()->renderPolicyPrincipalMetabox();
+                },
+                null,
+                'side'
+            );
+        }
+    }
+
+    /**
+     * Hook into policy submission and filter its content
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function managePolicyContent($data)
+    {
+        if (isset($data['post_type']) && ($data['post_type'] === self::POLICY_CPT)) {
+            $content = $this->getFromPost('aam-policy');
+
+            if (empty($data['post_content'])) {
+                $content = AAM_Backend_Feature_Main_Policy::getDefaultPolicy();
+            }
+
+            // Reformat the policy content
+            $json = json_decode($content);
+
+            if (!empty($json)) {
+                $content = wp_json_encode($json, JSON_PRETTY_PRINT);
+            }
+
+            if (!empty($content)) { // Edit form was submitted
+                $content = addslashes($content);
+            }
+
+            $data['post_content'] = $content;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Initialize Access Policy hooks
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function initializeHooks()
+    {
+        // Register Access Policy CPT
+        add_action('init', function () {
+            register_post_type('aam_policy', array(
+                'label'        => __('Access Policy', AAM_KEY),
+                'labels'       => array(
+                    'name'          => __('Access Policies', AAM_KEY),
+                    'edit_item'     => __('Edit Policy', AAM_KEY),
+                    'singular_name' => __('Policy', AAM_KEY),
+                    'add_new_item'  => __('Add New Policy', AAM_KEY),
+                    'new_item'      => __('New Policy', AAM_KEY)
+                ),
+                'description'  => __('Access and security policy', AAM_KEY),
+                'public'       => false,
+                'show_ui'      => true,
+                'show_in_menu' => false,
+                'exclude_from_search' => true,
+                'publicly_queryable' => false,
+                'hierarchical' => false,
+                'supports'     => array('title', 'excerpt', 'revisions'),
+                'delete_with_user' => false,
+                'capabilities' => array(
+                    'edit_post'         => 'aam_edit_policy',
+                    'read_post'         => 'aam_read_policy',
+                    'delete_post'       => 'aam_delete_policy',
+                    'delete_posts'      => 'aam_delete_policies',
+                    'edit_posts'        => 'aam_edit_policies',
+                    'edit_others_posts' => 'aam_edit_others_policies',
+                    'publish_posts'     => 'aam_publish_policies',
+                )
+            ));
+        });
+
+        // Hook into AAM core objects initialization
+        add_filter('aam_menu_object_option_filter', array($this, 'initializeMenu'), 10, 2);
+        add_filter('aam_metabox_object_option_filter', array($this, 'initializeMetabox'), 10, 2);
+        add_filter('aam_toolbar_object_option_filter', array($this, 'initializeToolbar'), 10, 2);
+        add_filter('aam_post_object_option_filter', array($this, 'initializePost'), 10, 2);
+        add_action('aam_visibility_object_init_action', array($this, 'initializeVisibility'));
+        add_filter('aam_uri_object_option_filter', array($this, 'initializeUri'), 10, 2);
+        add_filter('aam_route_object_option_filter', array($this, 'initializeRoute'), 10, 2);
+
+        // Allow third-party to hook into Post resource conversion
+        add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
+
+        // Manage access to the Capabilities
+        add_filter('aam_cap_can_filter', array($this, 'isCapabilityAllowed'), 10, 3);
+        add_action('aam_initialize_user_action', array($this, 'initializeUser'));
+
+        // Manage access to the Plugin list and individual plugins
+        add_filter('aam_allowed_plugin_action_filter', array($this, 'isPluginActionAllowed'), 10, 3);
+        add_filter('all_plugins', array($this, 'filterPlugins'));
+    }
+
+    /**
+     * Initialize Admin Menu Object options
+     *
+     * @param array                $option
+     * @param AAM_Core_Object_Menu $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#backendmenu
+     * @version 6.0.0
+     */
+    public function initializeMenu($option, AAM_Core_Object_Menu $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::MENU);
+        $parsed  = array();
+
+        foreach ($found as $key => $stm) {
+            $parsed[$key] = ($stm['Effect'] === 'deny' ? true : false);
+        }
+
+        return array_replace($option, $parsed); // First-class citizen
+    }
+
+    /**
+     * Initialize Toolbar Object options
+     *
+     * @param array                   $option
+     * @param AAM_Core_Object_Toolbar $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#toolbar
+     * @version 6.0.0
+     */
+    public function initializeToolbar($option, AAM_Core_Object_Toolbar $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::TOOLBAR);
+        $parsed  = array();
+
+        foreach ($found as $key => $stm) {
+            $parsed[$key] = ($stm['Effect'] === 'deny' ? true : false);
+        }
+
+        return array_replace($option, $parsed); // First-class citizen
+    }
+
+    /**
+     * Initialize Metabox Object options
+     *
+     * @param array                   $option
+     * @param AAM_Core_Object_Metabox $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#metabox
+     * @version 6.0.0
+     */
+    public function initializeMetabox($option, AAM_Core_Object_Metabox $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $found   = $manager->getResources(array(
+            AAM_Core_Policy_Resource::METABOX, AAM_Core_Policy_Resource::WIDGET
+        ));
+
+        $parsed  = array();
+
+        foreach ($found as $key => $stm) {
+            $parsed[$key] = ($stm['Effect'] === 'deny' ? true : false);
+        }
+
+        return array_replace($option, $parsed); // First-class citizen
+    }
+
+    /**
+     * Check if specified action is allowed upon capability
+     *
+     * @param boolean $allowed
+     * @param string  $cap
+     * @param string  $action
+     *
+     * @return boolean
+     *
+     * @access public
+     * @link https://aamplugin.com/reference/policy#capability
+     * @version 6.0.0
+     */
+    public function isCapabilityAllowed($allowed, $cap, $action)
+    {
+        $manager = AAM_Core_Policy_Factory::get(AAM::getUser());
+        $result  = $manager->isAllowed("Capability:{$cap}:AAM:{$action}");
+
+        return ($result === null ? $allowed : $result);
+    }
+
+    /**
+     * Initialize user with policy capabilities and roles
+     *
+     * @param AAM_Core_Subject_User $subject
+     *
+     * @return void
+     *
+     * @access public
+     * @link https://aamplugin.com/reference/policy#capability
+     * @link https://aamplugin.com/reference/policy#role
+     * @version 6.0.0
+     */
+    public function initializeUser(AAM_Core_Subject_User $subject)
+    {
+        $manager = AAM_Core_Policy_Factory::get($subject);
+        $wp_user = $subject->getPrincipal();
+
+        // Update user's list of roles if policy states so
+        $roles = $manager->getResources(AAM_Core_Policy_Resource::ROLE);
+
+        if (count($roles)) {
+            foreach($roles as $id => $statement) {
+                $effect = strtolower($statement['Effect']);
+                $exists = array_key_exists($id, $wp_user->caps);
+
+                if ($effect === 'allow') { // Add new
+                    $wp_user->caps[$id] = true;
+                } elseif (($effect === 'deny') && $exists) { // Remove
+                    unset($wp_user->caps[$id]);
+                }
+            }
+
+            // Re-index all user capabilities based on new set of roles
+            $wp_user->get_role_caps();
+
+            // Add siblings to the User subject
+            $user_roles = array_values($wp_user->roles);
+
+            if (count($user_roles) > 1) {
+                $subject->getParent()->setSiblings(array_map(function($id) {
+                    return AAM::api()->getRole($id);
+                }, array_slice($user_roles, 1)));
+            }
+        }
+
+        // Get all the capabilities that mentioned in the policies explicitly
+        $caps = array_filter(
+            $manager->getResources(AAM_Core_Policy_Resource::CAPABILITY),
+            function($stm, $res) {
+                return (strpos($res, ':') === false); // Exclude any :AAM: resources
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        foreach($caps as $cap => $statement) {
+            $effect = (strtolower($statement['Effect']) === 'allow' ? true : false);
+            $wp_user->allcaps[$cap] = $effect;
+
+            // Also update user's specific cap if exists
+            if (array_key_exists($cap, $wp_user->caps)) {
+                $wp_user->caps[$cap] = $effect;
+            }
+        }
+
+        // Finally update user level
+        $wp_user->user_level = array_reduce(
+            array_keys($wp_user->allcaps), array($wp_user, 'level_reduction'), 0
+        );
+    }
+
+    /**
+     * Initialize Post Object options
+     *
+     * @param array                $option
+     * @param AAM_Core_Object_Post $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#post
+     * @version 6.0.0
+     */
+    public function initializePost($option, AAM_Core_Object_Post $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+
+        $found   = $manager->getResources(sprintf(
+            '%s:%s:(%d|%s)',
+            AAM_Core_Policy_Resource::POST,
+            $object->post_type,
+            $object->ID,
+            $object->post_name
+        ));
+
+        $parsed = array();
+
+        foreach($found as $action => $stmt) {
+            $parsed = $this->convertPostStatement($parsed, $action, $stmt);
+        }
+
+        return array_replace_recursive($option, $parsed); // First-class citizen
+    }
+
+    /**
+     * Convert Post resource statement
+     *
+     * @param array  $output
+     * @param string $action
+     * @param array  $stmt
+     * @param string $ns
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function convertPostStatement($output, $action, $stmt, $ns = '')
+    {
+        switch($action) {
+            case 'edit':
+            case 'delete':
+            case 'publish':
+            case 'comment':
+                $this->convertedPostSimpleAction($output, $ns . $action, $stmt);
+                break;
+
+            case 'list':
+                $this->convertedPostSimpleAction($output, $ns . 'hidden', $stmt);
+                break;
+
+            case 'read':
+                $this->convertedPostReadAction($output, $stmt, $ns);
+                break;
+
+            default:
+                break;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Covert simple post action to post object property
+     *
+     * @param array  &$options
+     * @param string $action
+     * @param array  $statement
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function convertedPostSimpleAction(&$options, $action, $statement)
+    {
+        $options[$action] = strtolower($statement['Effect']) !== "allow";
+    }
+
+    /**
+     * Convert Post Read action based on metadata
+     *
+     * @param array  &$options
+     * @param array  $statement
+     * @param string $ns
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function convertedPostReadAction(&$options, $statement, $ns = '')
+    {
+        $effect = strtolower($statement['Effect']) !== "allow";
+
+        if (array_key_exists('Metadata', $statement)) {
+            $metadata = $statement['Metadata'];
+
+            // Password Protected options
+            if(array_key_exists('Password', $metadata)) {
+                $options[$ns . 'protected'] = array(
+                    'enabled'  => $effect,
+                    'password' => $metadata['Password']['Value']
+                );
+            }
+
+            // Teaser message is defined
+            if(array_key_exists('Teaser', $metadata)) {
+                $options[$ns . 'teaser'] = array(
+                    'enabled' => $effect,
+                    'message' => $metadata['Teaser']['Value']
+                );
+            }
+
+            // Redirect options
+            if(array_key_exists('Redirect', $metadata)) {
+                $redirect = $this->convertRedirectAction($metadata['Redirect']);
+                $redirect['enabled'] = $effect;
+                $options[$ns . 'redirected'] = $redirect;
+            }
+        } else { // Simply restrict access to read a post
+            $options[$ns . 'restricted'] = $effect;
+        }
+    }
+
+    /**
+     * Convert Redirect type of action
+     *
+     * @param array $metadata
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function convertRedirectAction($metadata)
+    {
+        $response = array(
+            'type'     => $metadata['Type'],
+            'httpCode' => (int)(isset($metadata['Code']) ? $metadata['Code'] : 307)
+        );
+
+        $destination = null;
+
+        if ($metadata['Type'] === 'page') {
+            if (isset($metadata['Id'])) {
+                $destination = intval($metadata['Id']);
+            } elseif (isset($metadata['Slug'])) {
+                $page        = get_page_by_path($metadata['Slug'], OBJECT);
+                $destination = (is_a($page, 'WP_Post') ? $page->ID : 0);
+            }
+        } elseif ($metadata['Type'] === 'url') {
+            $destination = $metadata['URL'];
+        } elseif ($metadata['Type'] === 'callback') {
+            $destination = $metadata['Callback'];
+        }
+
+        $response['destination'] = $destination;
+
+        return $response;
+    }
+
+    /**
+     * Initialize post visibility options
+     *
+     * @param AAM_Core_Object_Visibility $visibility
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function initializeVisibility(AAM_Core_Object_Visibility $visibility)
+    {
+        $manager = AAM_Core_Policy_Factory::get($visibility->getSubject());
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::POST);
+
+        foreach($found as $resource => $stm) {
+            $chunks = explode(':', $resource);
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+
+            // Take in consideration only visibility properties
+            if ($chunks[2] === 'list') {
+                if (is_numeric($chunks[1])) {
+                    $id = intval($chunks[1]);
+                } else {
+                    $post = get_page_by_path($chunks[1], OBJECT, $chunks[0]);
+                    $id   = (is_a($post, 'WP_Post') ? $post->ID : null);
+                }
+
+                // Making sure that we have at least numeric post ID
+                if (!empty($id)) {
+                    $visibility->pushOptions('post', "{$id}|{$chunks[0]}", array(
+                        'hidden' => $effect
+                    ));
+                }
+            }
+        }
+    }
+
+    /**
+     * Initialize URI Object options
+     *
+     * @param array            $option
+     * @param AAM_Core_Object_Uri $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#uri
+     * @version 6.0.0
+     */
+    public function initializeUri($option, AAM_Core_Object_Uri $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::URI);
+        $parsed  = array();
+
+        foreach($found as $uri => $stm) {
+            $uri    = rtrim($uri, '/'); // No need to honor the trailing forward slash
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+
+            if ($effect === false) {
+                $parsed[$uri] = array(
+                    'type' => 'allow'
+                );
+            } elseif (array_key_exists('Metadata', $stm)) {
+                $option[$uri] = $this->convertUriAction($stm['Metadata']);
+            } else {
+                $option[$uri] = array(
+                    'type' => 'default'
+                );
+            }
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Initialize Route Object options
+     *
+     * @param array                 $option
+     * @param AAM_Core_Object_Route $object
+     *
+     * @return array
+     *
+     * @access public
+     * @see https://aamplugin.com/reference/policy#route
+     * @version 6.0.0
+     */
+    public function initializeRoute($option, AAM_Core_Object_Route $object)
+    {
+        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::ROUTE);
+        $parsed  = array();
+
+        foreach($found as $route => $stm) {
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+            $parsed[strtolower(str_replace(':', '|', $route))] = $effect;
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Convert URI metadata to the URI access option
+     *
+     * @param array $metadata
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function convertUriAction($metadata)
+    {
+        $type   = strtolower($metadata['Type']);
+        $code   = isset($metadata['Code']) ? $metadata['Code'] : 307;
+        $action = null;
+
+        switch($type) {
+            case 'page':
+                if (isset($metadata['Id'])) {
+                    $action = intval($metadata['Id']);
+                } elseif (isset($metadata['Slug'])) {
+                    $page   = get_page_by_path($metadata['Slug'], OBJECT, 'page');
+                    $action = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                }
+                break;
+
+            case 'message':
+                $action = $metadata['Message'];
+                break;
+
+            case 'url':
+                $action = $metadata['URL'];
+                break;
+
+            case 'callback':
+                $action = $metadata['Callback'];
+                break;
+
+            case 'login':
+                $code = 401; //Unauthorized
+                break;
+
+            default:
+                break;
+        }
+
+        return array(
+            'type'   => $type,
+            'action' => $action,
+            'code'   => $code
+        );
+    }
+
+    /**
+     * Check if specific action is allowed upon all plugins or specified plugin
+     *
+     * @param boolean|null $allowed
+     * @param string       $action
+     * @param string       $slug
+     *
+     * @return boolean
+     *
+     * @access public
+     * @link https://aamplugin.com/reference/policy#plugin
+     * @version 6.0.0
+     */
+    public function isPluginActionAllowed($allowed, $action, $slug = null)
+    {
+        $manager = AAM_Core_Policy_Factory::get(AAM::getUser());
+
+        if ($slug === null) {
+            $id = AAM_Core_Policy_Resource::PLUGIN . ":WP:{$action}";
+        } else {
+            $id = AAM_Core_Policy_Resource::PLUGIN . ":{$slug}:WP:{$action}";
+        }
+
+        return $manager->isAllowed($id);
+    }
+
+    /**
+     * Filter out all the plugins that are not allowed to be listed
+     *
+     * @param array $plugins
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function filterPlugins($plugins)
+    {
+        $manager  = AAM_Core_Policy_Factory::get(AAM::getUser());
+        $filtered = array();
+
+        foreach($plugins as $id => $plugin) {
+            list($slug) = explode('/', $id);
+            $resource   = AAM_Core_Policy_Resource::PLUGIN . ":{$slug}:WP:list";
+
+            if ($manager->isAllowed($resource) !== false) {
+                $filtered[$id] = $plugin;
+            }
+        }
+
+        return $filtered;
+    }
+
+}
+
+if (defined('AAM_KEY')) {
+    AAM_Service_AccessPolicy::bootstrap();
+}

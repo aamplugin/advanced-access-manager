@@ -5,54 +5,76 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * Backend Utility manager
- * 
+ * Backend Settings area abstract manager
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Settings_Manager  extends AAM_Backend_Feature_Abstract {
-    
+class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
+{
+
+    use AAM_Core_Contract_RequestTrait;
+
     /**
-     * Save AAM option
-     * 
+     * Default access capability to the settings tab
+     *
+     * @version 6.0.0
+     */
+    const ACCESS_CAPABILITY = 'aam_manage_settings';
+
+    /**
+     * Save the option
+     *
      * @return string
      *
      * @access public
+     * @version 6.0.0
      */
-    public function save() {
-        $param = filter_input(INPUT_POST, 'param');
-        $value = filter_input(INPUT_POST, 'value');
-        
+    public function save()
+    {
+        $param = $this->getFromPost('param');
+        $value = $this->getFromPost('value');
+
         AAM_Core_Config::set($param, $value);
-        
+
         return wp_json_encode(array('status' => 'success'));
     }
-    
+
     /**
      * Clear all AAM settings
-     * 
+     *
      * @return string
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function clearSettings() {
+    public function clearSettings()
+    {
         AAM_Core_API::clearSettings();
 
         return wp_json_encode(array('status' => 'success'));
     }
 
     /**
-     * Clear AAM cache manually
-     * 
-     * @return string
-     * 
+     * Register settings UI manager
+     *
+     * @return void
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function clearCache() {
-        return wp_json_encode(array('status' => 'success'));
+    public static function register()
+    {
+        AAM_Backend_Feature::registerFeature((object) array(
+            'capability' => self::ACCESS_CAPABILITY,
+            'type'       => 'core',
+            'view'       => __CLASS__
+        ));
     }
-    
+
 }

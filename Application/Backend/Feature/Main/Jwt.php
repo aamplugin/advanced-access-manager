@@ -5,132 +5,179 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * JWT manager
- * 
+ * JWT UI manager
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract {
-    
+class AAM_Backend_Feature_Main_Jwt
+    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
+
+    use AAM_Core_Contract_RequestTrait;
+
     /**
-     * Construct
+     * Default access capability to the service
+     *
+     * @version 6.0.0
      */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_jwt')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_jwt'));
-        }
-    }
-    
+    const ACCESS_CAPABILITY = 'aam_manage_jwt';
+
     /**
-     * 
-     * @return type
+     * HTML template to render
+     *
+     * @version 6.0.0
      */
-    public function getTable() {
+    const TEMPLATE = 'service/jwt.php';
+
+    /**
+     * Get list of tokens
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getTable()
+    {
         return wp_json_encode($this->retrieveList());
     }
 
     /**
-     * 
-     * @return type
+     * Generate JWT token
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function generate() {
-        $user        = AAM_Backend_Subject::getInstance()->get();
-        $expires     = filter_input(INPUT_POST, 'expires');
-        $refreshable = filter_input(INPUT_POST, 'refreshable', FILTER_VALIDATE_BOOLEAN);
+    public function generate()
+    {
+        $user   = AAM_Backend_Subject::getInstance();
+        $result = array('status' => 'failure');
 
-        try {
+        if (current_user_can('aam_manage_jwt')) {
+            $expires  = $this->getFromPost('expires');
+            $refresh  = $this->getFromPost('refreshable', FILTER_VALIDATE_BOOLEAN);
+            $register = $this->getFromPost('register', FILTER_VALIDATE_BOOLEAN);
+            $trigger  = $this->getFromPost('trigger', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+
+            // Determine maximum user level
             $max = AAM::getUser()->getMaxLevel();
-            if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
-                $issuer = new AAM_Core_Jwt_Issuer();
-                $jwt =  $issuer->issueToken(
-                    array(
-                        'userId'      => $user->ID, 
-                        'revocable'   => true, 
-                        'refreshable' => $refreshable
-                    ), 
-                    $expires
-                );
-                $result = array(
-                    'status' => 'success',
-                    'jwt'    => $jwt->token
-                );
-            } else {
-                throw new Exception('User ID has higher level than current user');
+
+            // Prepare the list of claims
+            $claims = array(
+                'userId'      => $user->ID,
+                'revocable'   => true,
+                'refreshable' => ($refresh === true)
+            );
+
+            // If token also should contains the trigger action when it is expires,
+            // then add it to the list of claims
+            if (!empty($trigger)) {
+                $claims['trigger'] = $trigger;
             }
-        } catch (Exception $ex) {
-            $result = array('status' => 'failure', 'reason' => $ex->getMessage());
+
+            try {
+                if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
+                    $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(
+                        $claims, $expires
+                    );
+
+                    if ($register === true) {
+                        $status = AAM_Service_Jwt::getInstance()->registerToken(
+                            $user->ID, $jwt->token
+                        );
+                    } else {
+                        $status = true;
+                    }
+
+                    $result = array(
+                        'status' => (!empty($status) ? 'success' : 'failure'),
+                        'jwt' => $jwt->token
+                    );
+                } else {
+                    $result['reason'] = 'You are not allowed to generate JWT for this user';
+                }
+            } catch (Exception $ex) {
+                $result['reason'] = $ex->getMessage();
+            }
+        } else {
+            $result['reason'] = 'You are not allowed to manage JWT tokens';
         }
-        
+
         return wp_json_encode($result);
     }
 
     /**
-     * 
-     * @return type
+     * Save/register new JWT token
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function save() {
-        $user   = AAM_Backend_Subject::getInstance()->get();
+    public function save()
+    {
+        $user   = AAM_Backend_Subject::getInstance();
         $token  = filter_input(INPUT_POST, 'token');
-        $claims = AAM_Core_Jwt_Issuer::extractTokenClaims($token);
-
-        $result = AAM_Core_Jwt_Manager::getInstance()->registerToken(
-            $user->ID, 
-            $token
-        );
+        $result = AAM_Service_Jwt::getInstance()->registerToken($user->ID, $token);
 
         if ($result) {
             $response = array('status' => 'success');
         } else {
             $response = array(
-                'status' => 'failure', 
+                'status' => 'failure',
                 'reason' => __('Failed to register JWT token', AAM_KEY)
             );
         }
 
         return wp_json_encode($response);
     }
-    
+
     /**
-     * 
-     * @return type
+     * Delete existing JWT token
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function delete() {
-        $user  = AAM_Backend_Subject::getInstance()->get();
-        $token = filter_input(INPUT_POST, 'token');
-        $result = AAM_Core_Jwt_Manager::getInstance()->revokeToken($user->ID, $token);
+    public function delete()
+    {
+        $user   = AAM_Backend_Subject::getInstance();
+        $token  = filter_input(INPUT_POST, 'token');
+        $result = AAM_Service_Jwt::getInstance()->revokeToken($user->ID, $token);
 
         if ($result) {
             $response = array('status' => 'success');
         } else {
             $response = array(
-                'status' => 'failure', 
+                'status' => 'failure',
                 'reason' => __('Failed to revoke JWT token', AAM_KEY)
             );
         }
 
-       return wp_json_encode($response);
+        return wp_json_encode($response);
     }
 
     /**
-     * @inheritdoc
+     * Retrieve list of registered JWT tokens
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    public static function getTemplate() {
-        return 'main/jwt.phtml';
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    protected function retrieveList() {
-        $tokens = AAM_Core_Jwt_Manager::getInstance()->getTokenRegistry(
-            AAM_Backend_Subject::getInstance()->get()->ID
+    protected function retrieveList()
+    {
+        $tokens = AAM_Service_Jwt::getInstance()->getTokenRegistry(
+            AAM_Backend_Subject::getInstance()->ID
         );
 
         $response = array(
@@ -140,46 +187,49 @@ class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract {
             'data'            => array(),
         );
 
-        $issuer = new AAM_Core_Jwt_Issuer();
+        $issuer = AAM_Core_Jwt_Issuer::getInstance();
 
-        foreach($tokens as $token) {
-            try {
-                $claims = $issuer->validateToken($token);
-            } catch(Exception $e) {
-                $claims = $issuer->extractTokenClaims($token);
-                $claims->status = 'invalid';
+        foreach ($tokens as $token) {
+            $claims  = $issuer->validateToken($token);
+
+            if ($claims->isValid) {
+                $expires = new DateTime('@' . $claims->exp, new DateTimeZone('UTC'));
+                $details = $expires->format('m/d/Y, H:i O');
+            } else {
+                $details = __('Token is no longer valid', AAM_KEY);
             }
-            
+
             $response['data'][] = array(
                 $token,
                 add_query_arg('aam-jwt', $token, site_url()),
-                $claims->status,
-                $claims->exp,
+                $claims->isValid,
+                $details,
                 'view,delete'
             );
         }
-        
+
         return $response;
     }
 
     /**
-     * Register Menu feature
-     * 
+     * Register JWT service UI
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'jwt',
             'position'   => 65,
-            'title'      => __('JWT Tokens', AAM_KEY) . '<span class="badge">NEW</span>',
-            'capability' => 'aam_manage_jwt',
+            'title'      => __('JWT Tokens', AAM_KEY),
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
                 AAM_Core_Subject_User::UID
             ),
-            'option'     => 'core.settings.jwtAuthentication',
             'view'       => __CLASS__
         ));
     }

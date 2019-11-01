@@ -5,165 +5,89 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * Post option list
+ * Post & Term option list for the Post object
+ *
+ * @package AAM
+ * @version 6.0.0
  */
-class AAM_Backend_View_PostOptionList {
+class AAM_Backend_View_PostOptionList
+{
 
     /**
      * Get post option list
-     * 
+     *
      * @return array
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function get() {
+    public static function get()
+    {
         return array(
-            'frontend' => array(
-                'list' => array(
-                    'title'  => __('List', AAM_KEY),
-                    'descr'  => __('Hide %s however still allow access with direct URL.', AAM_KEY) . sprintf(__(' %sSee in action.%s', AAM_KEY), "<a href='https://youtu.be/2jiu_CL6JJg' target='_blank'>", '</a>'),
-                ),
-                'read' => array(
-                    'title' => __('Read', AAM_KEY),
-                    'descr' => __('Restrict access to view, read or download %s. Any attempts to open %s will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY) . sprintf(__(' %sSee in action.%s', AAM_KEY), "<a href='https://youtu.be/1742nVeGvgs' target='_blank'>", '</a>')
-                ),
-                'limit' => array(
-                    'title'   => __('Limit', AAM_KEY),
-                    'sub'     => __('Teaser message', AAM_KEY),
-                    'option'  => 'frontend.teaser',
-                    'preview' => 'frontend-teaser-preview',
-                    'modal'   => 'modal-teaser',
-                    'descr'   => __('Replace %s content with defined teaser message.', AAM_KEY)
-                ),
-                'access_counter' => array(
-                    'title'   => __('Read Counter', AAM_KEY),
-                    'sub'     => __('Threshold', AAM_KEY),
-                    'option'  => 'frontend.access_counter_limit',
-                    'preview' => 'frontend-access_counter_limit-preview',
-                    'modal'   => 'modal-access-counter',
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Define how many times %s can be read, viewed or download. After number of times exceeds the specified threshold, access will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY)
-                ),
-                'comment' => array(
-                    'title' => __('Comment', AAM_KEY),
-                    'descr' => __('Restrict access to comment on %s if commenting is allowed.', AAM_KEY)
-                ),
-                'redirect'    => array(
-                    'title'   => __('Redirect', AAM_KEY),
-                    'sub'     => __('Redirect Rule', AAM_KEY),
-                    'option'  => 'frontend.location',
-                    'preview' => 'frontend-location-preview',
-                    'modal'   => 'modal-redirect',
-                    'descr'   => __('Redirect user based on the defined redirect rule when user tries to read the %s. The REDIRECT option will be ignored if READ option is checked.', AAM_KEY),
-                ),
-                'protected'   => array(
-                    'title'   => __('Password Protected', AAM_KEY),
-                    'sub'     => __('Password', AAM_KEY),
-                    'option'  => 'frontend.password',
-                    'preview' => 'frontend-option-preview',
-                    'modal'   => 'modal-password',
-                    'descr'   => __('Protect access to %s with password. Available with WordPress 4.7.0 or higher.', AAM_KEY)
-                ),
-                'expire' => array(
-                    'title'   => __('Access Expiration', AAM_KEY),
-                    'sub'     => __('Expires', AAM_KEY),
-                    'option'  => 'frontend.expire_datetime',
-                    'preview' => 'frontend-expire_datetime-preview',
-                    'modal'   => 'modal-access-expires',
-                    'descr'   => __('Define when access will expire for %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied and redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>') . sprintf(__(' %ssee in action.%s', AAM_KEY), "<a href='https://youtu.be/IgtgVoWs35w' target='_blank'>", '</a>')
-                ),
-                'monetize' => array(
-                    'title'   => __('Monetized Access', AAM_KEY),
-                    'sub'     => __('E-Product', AAM_KEY),
-                    'option'  => 'frontend.eproduct',
-                    'preview' => 'frontend-eproduct-preview',
-                    'modal'   => 'modal-eproduct',
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => sprintf(AAM_Backend_View_Helper::preparePhrase('[Premium feature!] Start selling access to %s. Access will be granted to open %s only if selected E-Product had been purchased. For more information %scheck this article%s.', 'b'), '%s', '%s', "<a href='https://aamplugin.com/article/how-to-monetize-access-to-the-wordpress-content' target='_blank'>", '</a>')
-                )
+            'hidden' => array(
+                'title'       => __('Hidden', AAM_KEY),
+                'description' => __('Completely hide the post however, still allow direct access with the valid URL.', AAM_KEY),
             ),
-            'backend' => array(
-                'list' => array(
-                    'title'   => __('List', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Hide %s however still allow access with direct URL.', AAM_KEY),
-                ),
-                'edit' => array(
-                    'title'   => __('Edit', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Restrict access to edit %s. Any attempts to edit %s will result in redirecting user based on the Access Denied Redirect rule.', AAM_KEY)
-                ),
-                'delete' => array(
-                    'title'   => __('Delete', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Restrict access to trash or permanently delete %s.', AAM_KEY)
-                ),
-                'publish' => array(
-                    'title'   => __('Publish', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Restrict access to publish %s. User will be allowed only to submit %s for review.', AAM_KEY)
-                )
+            'restricted' => array(
+                'title'       => __('Restricted', AAM_KEY),
+                'description' => __('Restrict direct access to the post. Any attempt to access the post will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY)
             ),
-            'api' => array(
-                'list' => array(
-                    'title'  => __('List', AAM_KEY),
-                    'descr'  => __('Hide %s however still allow access to retrieve %s.', AAM_KEY),
-                ),
-                'read' => array(
-                    'title' => __('Read', AAM_KEY),
-                    'descr' => __('Restrict access to retrieve %s. Any attempts to retrieve %s will be denied.', AAM_KEY)
-                ),
-                'limit' => array(
-                    'title'   => __('Limit', AAM_KEY),
-                    'sub'     => __('Teaser message', AAM_KEY),
-                    'option'  => 'api.teaser',
-                    'preview' => 'api-teaser-preview',
-                    'modal'   => 'modal-teaser',
-                    'descr'   => __('Replace %s content with defined teaser message.', AAM_KEY)
-                ),
-                'access_counter' => array(
-                    'title'   => __('Read Counter', AAM_KEY),
-                    'sub'     => __('Threshold', AAM_KEY),
-                    'option'  => 'api.access_counter_limit',
-                    'preview' => 'api-access_counter_limit-preview',
-                    'modal'   => 'modal-access-counter',
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Define how many times %s can be retrieved. After number of time exceeds the defined threshold, the access will be denied to %s.', AAM_KEY)
-                ),
-                'comment' => array(
-                    'title' => __('Comment', AAM_KEY),
-                    'descr' => __('Restrict access to comment on %s if commenting feature is enabled.', AAM_KEY)
-                ),
-                'protected' => array(
-                    'title'   => __('Password Protected', AAM_KEY),
-                    'sub'     => __('Password', AAM_KEY),
-                    'option'  => 'api.password',
-                    'preview' => 'api-option-preview',
-                    'modal'   => 'modal-password',
-                    'descr'   => __('Protected %s with password. Available with WordPress 4.7.0 or higher.', AAM_KEY)
-                ),
-                'expire' => array(
-                    'title'   => __('Access Expiration', AAM_KEY),
-                    'sub'     => __('Expires', AAM_KEY),
-                    'option'  => 'api.expire_datetime',
-                    'preview' => 'api-expire_datetime-preview',
-                    'modal'   => 'modal-access-expires',
-                    'descr'   => __('Define when access expires to %s.', AAM_KEY) . sprintf(__('After expiration, the access to %s will be denied. For more information %scheck this article%s or ', AAM_KEY), '%s', "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>')
-                ),
-                'edit' => array(
-                    'title'   => __('Update', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Restrict access to update %s. Any attempts to update %s will be denied.', AAM_KEY)
-                ),
-                'delete' => array(
-                    'title'   => __('Delete', AAM_KEY),
-                    'exclude' => array(AAM_Core_Subject_Visitor::UID),
-                    'descr'   => __('Restrict access to trash or permanently delete %s.', AAM_KEY)
-                )
+            'teaser' => array(
+                'title'       => __('Teaser Message', AAM_KEY),
+                'sub'         => __('Message', AAM_KEY),
+                'modal'       => 'modal-teaser',
+                'description' => __('Dynamically replace the post content with defined plain text or HTML teaser message.', AAM_KEY)
+            ),
+            'limited'  => array(
+                'title'       => __('Limited', AAM_KEY),
+                'sub'         => __('Access Limit', AAM_KEY),
+                'modal'       => 'modal-limited',
+                'exclude'     => array(AAM_Core_Subject_Visitor::UID),
+                'description' => __('Define how many times the post can be accessed. When the number of times exceeds the defined threshold, access will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY)
+            ),
+            'comment' => array(
+                'title'       => __('Leave Comments', AAM_KEY),
+                'description' => __('Restrict access to leave comments for the post.', AAM_KEY)
+            ),
+            'redirected'      => array(
+                'title'       => __('Redirect', AAM_KEY),
+                'sub'         => __('Destination', AAM_KEY),
+                'modal'       => 'modal-redirect',
+                'description' => __('Redirect user based on the defined redirect rule when user tries to access the post. The REDIRECT option has lower precedence and will be ignored if RESTRICTED option is checked.', AAM_KEY),
+            ),
+            'protected'       => array(
+                'title'       => __('Password Protected', AAM_KEY),
+                'sub'         => __('Password', AAM_KEY),
+                'modal'       => 'modal-password',
+                'description' => __('Protect access to the post with a password. Available with WordPress 4.7.0 or higher.', AAM_KEY)
+            ),
+            'ceased' => array(
+                'title'       => __('Access Expires', AAM_KEY),
+                'sub'         => __('After', AAM_KEY),
+                'modal'       => 'modal-cease',
+                'description' => __('Define when access will expire to the post.', AAM_KEY) . sprintf(__('After expiration, the access to the post will be denied and redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>')
+            ),
+            'edit' => array(
+                'title'       => __('Edit', AAM_KEY),
+                'exclude'     => array(AAM_Core_Subject_Visitor::UID),
+                'description' => __('Restrict access to edit the post.', AAM_KEY)
+            ),
+            'delete' => array(
+                'title'       => __('Delete', AAM_KEY),
+                'exclude'     => array(AAM_Core_Subject_Visitor::UID),
+                'description' => __('Restrict access to trash or permanently delete the post.', AAM_KEY)
+            ),
+            'publish' => array(
+                'title'       => __('Publish', AAM_KEY),
+                'exclude'     => array(AAM_Core_Subject_Visitor::UID),
+                'description' => __('Restrict the ability to publish the post. User will be allowed only to submit the post for review.', AAM_KEY)
             )
         );
     }
+
 }

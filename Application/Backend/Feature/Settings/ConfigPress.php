@@ -5,71 +5,69 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * Backend ConfigPress
- * 
+ * Backend ConfigPress tab
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstract {
-    
+class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstract
+{
+
+    use AAM_Core_Contract_RequestTrait;
+
     /**
-     * Construct
+     * Default access capability to the settings
+     *
+     * @version 6.0.0
      */
-    public function __construct() {
-        parent::__construct();
-        
-        if (!current_user_can('aam_manage_settings')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_settings'));
-        }
-    }
-    
+    const ACCESS_CAPABILITY = 'aam_manage_settings';
+
     /**
-     * @inheritdoc
+     * HTML template to render
+     *
+     * @version 6.0.0
      */
-    public static function getTemplate() {
-        return 'settings/configpress.phtml';
-    }
-    
+    const TEMPLATE = 'settings/configpress.php';
+
     /**
      * Save config
-     * 
+     *
      * @return boolean
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    public function save() {
-        $blog   = (defined('BLOG_ID_CURRENT_SITE') ? BLOG_ID_CURRENT_SITE : 1);
-        $config = filter_input(INPUT_POST, 'config');
-        
-        //normalize
+    public function save()
+    {
+        $config = $this->getFromPost('config');
+
+        // Normalize ConfigPress settings
         $data = str_replace(array('“', '”'), '"', $config);
-        
-        return AAM_Core_API::updateOption('aam-configpress', $data, $blog);
+
+        return AAM_Core_ConfigPress::getInstance()->save($data);
     }
-    
+
     /**
-     * Register Contact/Hire feature
-     * 
+     * Register service UI
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'configpress',
             'position'   => 90,
             'title'      => __('ConfigPress', AAM_KEY),
-            'capability' => 'aam_manage_settings',
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'settings',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
-                AAM_Core_Subject_User::UID, 
-                AAM_Core_Subject_Visitor::UID, 
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

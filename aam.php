@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 5.9.7.1
+ * Version: 6.0.0-beta.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager
@@ -17,11 +17,13 @@
 
 /**
  * Main plugin's class
- * 
+ *
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM {
+class AAM
+{
 
     /**
      * Single instance of itself
@@ -29,6 +31,7 @@ class AAM {
      * @var AAM
      *
      * @access private
+     * @version 6.0.0
      */
     private static $_instance = null;
 
@@ -38,6 +41,7 @@ class AAM {
      * @var AAM_Core_Subject_User|AAM_Core_Subject_Visitor
      *
      * @access private
+     * @version 6.0.0
      */
     private $_user = null;
 
@@ -47,14 +51,14 @@ class AAM {
      * @return void
      *
      * @access protected
+     * @version 6.0.0
      */
-    protected function __construct() {
-        //initialize current subject
-        if (is_user_logged_in()) {
-            $this->setUser(new AAM_Core_Subject_User(get_current_user_id()));
-        } else {
-            $this->setUser(new AAM_Core_Subject_Visitor(''));
-        }
+    protected function __construct()
+    {
+        // Initialize current subject
+        $this->changeUser();
+
+        add_action('set_current_user', array($this, 'changeUser'));
     }
 
     /**
@@ -65,32 +69,59 @@ class AAM {
      * @return void
      *
      * @access public
+     * @version 6.0.0
      */
-    protected function setUser(AAM_Core_Subject $user) {
+    public function setUser(AAM_Core_Subject $user)
+    {
         $this->_user = $user;
     }
-    
+
     /**
      * Get AAM API manager
-     * 
+     *
      * @return AAM_Core_Gateway
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function api() {
+    public static function api()
+    {
         return AAM_Core_Gateway::getInstance();
     }
 
     /**
      * Get current user
-     * 
+     *
      * @return AAM_Core_Subject
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function getUser() {
+    public static function getUser()
+    {
         return self::getInstance()->_user;
+    }
+
+    /**
+     * Change current user
+     *
+     * This method is triggered if some process updates current user
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function changeUser()
+    {
+        $id = get_current_user_id();
+
+        // Change current user
+        if ($id) {
+            $this->setUser(self::api()->getUser($id));
+        } else {
+            $this->setUser(new AAM_Core_Subject_Visitor());
+        }
     }
 
     /**
@@ -99,64 +130,57 @@ class AAM {
      * @return boolean
      *
      * @access public
+     * @version 6.0.0
      */
-    public static function isAAM() {
-        $page      = AAM_Core_Request::get('page');
-        $action    = AAM_Core_Request::post('action');
-        
+    public static function isAAM()
+    {
+        $page   = filter_input(INPUT_GET, 'page');
+        $action = filter_input(INPUT_POST, 'action');
+
         $intersect = array_intersect(array('aam', 'aamc'), array($page, $action));
-        
+
         return (is_admin() && count($intersect));
     }
-    
+
     /**
-     * Bootstrap AAM
-     * 
+     * Bootstrap AAM when all plugins are loaded
+     *
      * @return void
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function onPluginsLoaded() {
-        //load AAM core config
+    public static function onPluginsLoaded()
+    {
+        // Load AAM core config
         AAM_Core_Config::bootstrap();
 
-        //login control
-        if (AAM_Core_Config::get('core.settings.secureLogin', true)) {
-            AAM_Core_Login::bootstrap();
+        // Load the core service first
+        require_once __DIR__ . '/application/Service/Core.php';
+
+        // Load all the defined AAM services
+        foreach (new DirectoryIterator(__DIR__ . '/application/Service') as $service) {
+            if ($service->isFile()) {
+                require_once $service->getPathname();
+            }
         }
 
-        //JWT Authentication
-        if (AAM_Core_Config::get('core.settings.jwtAuthentication', true)) {
-            AAM_Core_Jwt_Manager::bootstrap();
-        }
-        
         // Load AAM
         AAM::getInstance();
-        
-        //load all installed extension
-        if (AAM_Core_Config::get('core.settings.extensionSupport', true)) {
-            AAM_Extension_Repository::getInstance()->load();
-        }
-        
-        //load WP Core hooks
-        AAM_Shared_Manager::bootstrap();
     }
-    
+
     /**
      * Hook on WP core init
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function onInit() {
-        //bootstrap the correct interface
-        if (AAM_Core_Api_Area::isBackend()) {
+    public static function onInit()
+    {
+        if (is_admin()) {
             AAM_Backend_Manager::bootstrap();
-        } elseif (AAM_Core_Api_Area::isFrontend()) {
-            AAM_Frontend_Manager::bootstrap();
         }
     }
 
@@ -166,130 +190,86 @@ class AAM {
      * @return AAM
      *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
 
-            // Get current user
-            $user = self::$_instance->getUser();
-            
-            // Load user capabilities
-            $user->initialize();
-
-            // Logout user if he/she is blocked
-            $status = $user->getUserStatus();
-
-            // If user is not active, then perform rollback on user
-            if (!empty($status) && $status->status !== 'active') {
-                $user->restrainUserAccount($status);
-            }
-            
+            // Load AAM internationalization
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
+
+            // Validate logged in user status
+            if (is_user_logged_in()) {
+                AAM::getUser()->validateStatus();
+            }
         }
 
         return self::$_instance;
     }
 
     /**
-     * Run daily routine
-     * 
-     * Check server extension versions
-     * 
+     * Activation hook
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function cron() {
-        $extensions = AAM_Core_API::getOption('aam-extensions', null, 'site');
-        
-        if (!empty($extensions) && AAM_Core_Config::get('core.settings.cron', true)) {
-            //grab the server extension list
-            AAM_Core_API::updateOption(
-                    'aam-check', AAM_Core_Server::check(), 'site'
-            );
-        }
-    }
-
-    /**
-     * Create aam folder
-     * 
-     * @return void
-     * 
-     * @access public
-     */
-    public static function activate() {
+    public static function activate()
+    {
         global $wp_version;
-        
+
         //check PHP Version
-        if (version_compare(PHP_VERSION, '5.3.0') === -1) {
-            exit(__('PHP 5.3.0 or higher is required.', AAM_KEY));
-        } elseif (version_compare($wp_version, '4.0') === -1) {
-            exit(__('WP 4.0 or higher is required.', AAM_KEY));
+        if (version_compare(PHP_VERSION, '5.6.40') === -1) {
+            exit(__('PHP 5.6.40 or higher is required.', AAM_KEY));
+        } elseif (version_compare($wp_version, '4.7.0') === -1) {
+            exit(__('WP 4.7.0 or higher is required.', AAM_KEY));
         }
     }
 
     /**
-     * De-install hook
+     * Deactivate hook
      *
      * Remove all leftovers from AAM execution
      *
      * @return void
      *
      * @access public
+     * @version 6.0.0
      */
-    public static function uninstall() {
+    public static function uninstall()
+    {
         //trigger any uninstall hook that is registered by any extension
         do_action('aam-uninstall-action');
 
-        //remove aam directory if exists
-        $dirname = WP_CONTENT_DIR . '/aam';
-        if (file_exists($dirname)) {
-            AAM_Core_API::removeDirectory($dirname);
-        }
-        
         //clear all AAM settings
         AAM_Core_API::clearSettings();
-        
-        //clear schedules
-        wp_clear_scheduled_hook('aam-cron');
     }
 
 }
 
 if (defined('ABSPATH')) {
     //define few common constants
-    define(
-        'AAM_MEDIA', 
-        preg_replace('/^http[s]?:/', '', plugins_url('/media', __FILE__))
-    );
+    define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_EXTENSION_BASE', WP_CONTENT_DIR . '/aam/extension');
-    define('AAM_BASEDIR', dirname(__FILE__));
-    
+    define('AAM_VERSION', '6.0.0');
+    define('AAM_BASEDIR', __DIR__);
+
     //load vendor
-    require AAM_BASEDIR . '/vendor/autoload.php';
-    
+    require __DIR__ . '/vendor/autoload.php';
+
     //register autoloader
-    require (dirname(__FILE__) . '/autoloader.php');
+    require(__DIR__ . '/autoloader.php');
     AAM_Autoloader::register();
-    
+
     // Keep this as the lowest priority
-    add_action('plugins_loaded', 'AAM::onPluginsLoaded', -1);
-    
+    add_action('plugins_loaded', 'AAM::onPluginsLoaded', -999);
+
     //the highest priority (higher the core)
     //this is important to have to catch events like register core post types
     add_action('init', 'AAM::onInit', -1);
-    
-    //register API manager is applicable
-    add_action('parse_request', 'AAM_Api_Manager::bootstrap', 1);
-    
-    //schedule cron
-    if (!wp_next_scheduled('aam-cron')) {
-        wp_schedule_event(time(), 'daily', 'aam-cron');
-    }
-    add_action('aam-cron', 'AAM::cron');
 
     //activation & deactivation hooks
     register_activation_hook(__FILE__, array('AAM', 'activate'));

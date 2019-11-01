@@ -5,83 +5,91 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * AAM core policy token evaluator
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @since AAM v5.8.2
+ * @version 6.0.0
  */
-final class AAM_Core_Policy_Token {
-    
+class AAM_Core_Policy_Token
+{
+
     /**
      * Literal map token's type to the executable method that returns actual value
-     * 
+     *
      * @var array
-     * 
+     *
      * @access protected
-     * @static 
+     * @version 6.0.0
      */
     protected static $map = array(
-        'USER'      => 'AAM_Core_Policy_Token::getUserValue',
-        'USERMETA'  => 'AAM_Core_Policy_Token::getUserMetaValue',
-        'DATETIME'  => 'AAM_Core_Policy_Token::getDateTimeValue',
-        'GET'       => 'AAM_Core_Request::get',
-        'QUERY'     => 'AAM_Core_Request::get',
-        'POST'      => 'AAM_Core_Request::post',
-        'COOKIE'    => 'AAM_Core_Request::cookie',
-        'SERVER'    => 'AAM_Core_Request::server',
-        'ARGS'      => 'AAM_Core_Policy_Token::getArgValue',
-        'CONST'     => 'AAM_Core_Policy_Token::defined'
+        'USER'         => 'AAM_Core_Policy_Token::getUserValue',
+        'USER_OPTION'  => 'AAM_Core_Policy_Token::getUserOptionValue',
+        'USER_META'    => 'AAM_Core_Policy_Token::getUserMetaValue',
+        'DATETIME'     => 'date',
+        'HTTP_GET'     => 'AAM_Core_Request::get',
+        'HTTP_QUERY'   => 'AAM_Core_Request::get',
+        'HTTP_POST'    => 'AAM_Core_Request::post',
+        'HTTP_COOKIE'  => 'AAM_Core_Request::cookie',
+        'PHP_SERVER'   => 'AAM_Core_Request::server',
+        'ARGS'         => 'AAM_Core_Policy_Token::getArgValue',
+        'CONST'        => 'AAM_Core_Policy_Token::getConstant',
+        'WP_OPTION'    => 'AAM_Core_API::getOption',
+        'JWT'          => 'AAM_Core_Policy_Token::getJwtClaim'
     );
-    
+
     /**
      * Evaluate collection of tokens and replace them with values
-     * 
+     *
      * @param string $part   String with tokens
      * @param array  $tokens Extracted token
-     * 
+     * @param array  $args   Inline arguments
+     *
      * @return string
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function evaluate($part, array $tokens, array $args = array()) {
-        foreach($tokens as $token) {
+    public static function evaluate($part, array $tokens, array $args = array())
+    {
+        foreach ($tokens as $token) {
             $val = self::getValue(
                 preg_replace('/^\$\{([^}]+)\}$/', '${1}', $token),
                 $args
             );
 
             $part = str_replace(
-                $token, 
-                (is_scalar($val) || is_null($val) ? $val : json_encode($val)), 
+                $token,
+                (is_scalar($val) || is_null($val) ? $val : json_encode($val)),
                 $part
             );
         }
 
         return $part;
     }
-    
+
     /**
      * Get token value
-     * 
+     *
      * @param string $token
      * @param array  $args
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function getValue($token, $args) {
+    protected static function getValue($token, $args)
+    {
         $value = null;
         $parts = explode('.', $token);
 
         if (isset(self::$map[$parts[0]])) {
-            if ($parts[0] === 'ARG') {
+            if ($parts[0] === 'ARGS') {
                 $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
             } else {
                 $value = call_user_func(self::$map[$parts[0]], $parts[1]);
@@ -92,65 +100,88 @@ final class AAM_Core_Policy_Token {
 
         return $value;
     }
-    
+
     /**
      * Get USER's value
-     * 
+     *
      * @param string $prop
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function getUserValue($prop) {
-        $user = AAM::api()->getUser();
-        
-        switch(strtolower($prop)) {
+    protected static function getUserValue($prop)
+    {
+        $user = AAM::getUser();
+
+        switch (strtolower($prop)) {
             case 'ip':
             case 'ipaddress':
                 $value = AAM_Core_Request::server('REMOTE_ADDR');
                 break;
-            
+
             case 'authenticated':
             case 'isauthenticated':
-                $value = $user->isVisitor() ? false : true;
+                $value = is_user_logged_in();
                 break;
 
             case 'capabilities':
             case 'caps':
-                $value = array();
-                foreach((array) $user->allcaps as $cap => $effect) {
+                foreach ((array) $user->allcaps as $cap => $effect) {
                     if (!empty($effect)) {
                         $value[] = $cap;
                     }
                 }
                 break;
-            
+
             default:
                 $value = $user->{$prop};
                 break;
         }
-        
+
+        return $value;
+    }
+
+    /**
+     * Get user option value(s)
+     *
+     * @param string $option_name
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected static function getUserOptionValue($option_name)
+    {
+        $value = null;
+        $id    = get_current_user_id();
+
+        if (!empty($id)) { // Only authenticated users have some sort of meta
+            $value = get_user_option($option_name, $id);
+        }
+
         return $value;
     }
 
     /**
      * Get user meta value(s)
      *
-     * @param string $metakey
-     * 
+     * @param string $meta_key
+     *
      * @return void
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function getUserMetaValue($metakey) {
+    protected static function getUserMetaValue($meta_key)
+    {
         $value = null;
         $id    = get_current_user_id();
 
         if (!empty($id)) { // Only authenticated users have some sort of meta
-            $meta = get_user_meta($id, $metakey);
+            $meta = get_user_meta($id, $meta_key);
 
             // If $meta has only one value in the array, then extract it, otherwise
             // return the array of values
@@ -163,48 +194,51 @@ final class AAM_Core_Policy_Token {
 
         return $value;
     }
-    
+
     /**
      * Get inline argument
-     * 
+     *
      * @param string $prop
      * @param array  $args
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function getArgValue($prop, $args) {
+    protected static function getArgValue($prop, $args)
+    {
         return (isset($args[$prop]) ? $args[$prop] : null);
     }
-    
+
     /**
-     * Get current datetime value
-     * 
+     * Get JWT claim property
+     *
      * @param string $prop
-     * 
-     * @return string
-     * 
+     *
+     * @return mixed
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function getDateTimeValue($prop) {
-        return date($prop);
+    protected static function getJwtClaim($prop)
+    {
+        return apply_filters('aam_get_jwt_claim', null, $prop);
     }
-    
+
     /**
      * Get a value for the defined constant
      *
      * @param string $const
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function defined($const) {
+    protected static function getConstant($const)
+    {
         return (defined($const) ? constant($const) : null);
     }
-    
+
 }

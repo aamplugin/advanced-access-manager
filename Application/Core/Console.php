@@ -5,86 +5,85 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * AAM Core Consol Panel
- * 
- * Track and display list of all warnings that has been detected during AAM 
+ * AAM Core notification consol
+ *
+ * Track and display list of all warnings that has been detected during AAM
  * execution. The consol is used only when AAM interface was triggered in Admin side.
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Console {
+class AAM_Core_Console
+{
 
     /**
      * List of Runtime errors related to AAM
-     * 
+     *
      * @var array
-     * 
-     * @access private 
-     * @static 
+     *
+     * @access private
+     * @version 6.0.0
      */
     private static $_messages = array();
 
     /**
      * Add new warning
-     * 
+     *
      * @param string $message
-     * @param stirng $args...
-     * 
+     * @param string $args...
+     *
      * @return void
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function add($message) {
+    public static function add($message)
+    {
         //prepare search patterns
         $num    = func_num_args();
         $search = ($num > 1 ? array_fill(0, ($num - 1) * 2, null) : array());
-        
-        array_walk($search, 'AAM_Core_Console::walk');
-        
+
+        array_walk($search, function (&$value, $index) {
+            $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
+        });
+
         $replace = array();
         foreach (array_slice(func_get_args(), 1) as $key) {
             array_push($replace, "<{$key}>", "</{$key}>");
         }
-        
+
         self::$_messages[] = preg_replace($search, $replace, $message, 1);
     }
 
     /**
      * Get list of all warnings
-     * 
+     *
      * @return array
-     * 
+     *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function getAll() {
+    public static function getAll()
+    {
         return self::$_messages;
     }
-    
+
     /**
-     * 
-     * @return type
+     * Count the list of all notifications
+     *
+     * @return int
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public static function count() {
+    public static function count()
+    {
         return count(self::$_messages);
-    }
-    
-    /**
-     * Replace place holders with markup
-     * 
-     * @param string $value
-     * @param int    $index
-     * 
-     * @access protected
-     * @static
-     */
-    protected static function walk(&$value, $index) {
-        $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
     }
 
 }

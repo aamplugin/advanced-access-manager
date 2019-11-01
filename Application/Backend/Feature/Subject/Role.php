@@ -5,35 +5,38 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Role view manager
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Subject_Role {
-    
+class AAM_Backend_Feature_Subject_Role
+{
+
     /**
-     * Construct
+     * Capability that allows to manage roles
+     *
+     * @version 6.0.0
      */
-    public function __construct() {
-        if (!current_user_can('aam_manage_roles')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_roles'));
-        }
-    }
-    
+    const ACCESS_CAPABILITY = 'aam_manage_roles';
+
     /**
      * Get role list
-     * 
+     *
      * Prepare and return the list of roles for the table view
-     * 
+     *
      * @return string JSON Encoded role list
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function getTable() {
+    public function getTable()
+    {
         //retrieve list of users
         $count = count_users();
         $stats = $count['avail_roles'];
@@ -48,126 +51,156 @@ class AAM_Backend_Feature_Subject_Role {
         );
 
         foreach ($filtered as $id => $data) {
-            $uc = (isset($stats[$id]) ? $stats[$id] : 0);
+            $user_count = (isset($stats[$id]) ? $stats[$id] : 0);
 
             $response['data'][] = array(
                 $id,
-                $uc,
+                $user_count,
                 translate_user_role($data['name']),
-                apply_filters(
-                    'aam-role-row-actions-filter', 
-                    implode(',', $this->prepareRowActions($uc, $id)),
-                    $data
-                ),
+                implode(',', $this->prepareRowActions($user_count, $id)),
                 AAM_Core_API::maxLevel($data['capabilities'])
             );
         }
-        
-        return wp_json_encode(apply_filters('aam-get-role-list-filter', $response));
+
+        return wp_json_encode(apply_filters('aam_get_role_list_filter', $response));
     }
-    
+
     /**
      * Prepare the list of role actions
-     * 
-     * @param int    $count  Number of users in role
-     * @param string $roleId Role slug
-     * 
+     *
+     * @param int    $user_count
+     * @param string $roleId
+     *
      * @return array
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function prepareRowActions($count, $roleId) {
-        $ui = AAM_Core_Request::post('ui', 'main');
-        $id = AAM_Core_Request::post('id');
-        
-        if ($ui === 'principal') {
-            $subject = new AAM_Core_Subject_Role($roleId);
-            
-            $object  = $subject->getObject('policy');
-            $action  = ($object->has($id) ? 'detach' : 'attach');
-            $manager = AAM_Core_Policy_Factory::get();
-            
-            // Verify that current user can perform following action
-            $prefix = ($manager->canTogglePolicy($id, $action) ? '' : 'no-');
-            
-            $actions = array($prefix . $action);
-        } else {
-            $actions = array('manage');
+    protected function prepareRowActions($user_count, $roleId)
+    {
+        $actions = array('manage');
 
-            if (current_user_can('aam_edit_roles')) {
-                $actions[] = 'edit';
-            } else {
-                $actions[] = 'no-edit';
-            }
-            if (current_user_can('aam_create_roles')) {
-                $actions[] = 'clone';
-            } else {
-                $actions[] = 'no-clone';
-            }
-            if (current_user_can('aam_delete_roles') && !$count) {
-                $actions[] = 'delete';
-            } else {
-                $actions[] = 'no-delete';
-            }
+        if (current_user_can('aam_edit_roles')) {
+            $actions[] = 'edit';
+        } else {
+            $actions[] = 'no-edit';
         }
-        
-        return $actions;
+        if (current_user_can('aam_create_roles')) {
+            $actions[] = 'clone';
+        } else {
+            $actions[] = 'no-clone';
+        }
+        if (current_user_can('aam_delete_roles') && !$user_count) {
+            $actions[] = 'delete';
+        } else {
+            $actions[] = 'no-delete';
+        }
+
+        return apply_filters('aam_role_row_actions_filter', $actions, $roleId);
     }
-    
+
     /**
-     * Retrieve Pure Role List
-     * 
+     * Additional layer for method authorization
+     *
+     * This is used to control if user is allowed to perform certain AJAX action
+     *
+     * @param string $method
+     * @param array  $args
+     *
      * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function getList(){
-        return wp_json_encode(
-            apply_filters('aam-get-role-list-filter', $this->fetchRoleList())
+    public function __call($method, $args)
+    {
+        $response = array(
+            'status' => 'failure', 'reason' => __('Unauthorized operation', AAM_KEY)
+        );
+
+        if (method_exists($this, "_{$method}")) {
+            $response = call_user_func(array($this, "_{$method}"));
+        } else {
+            _doing_it_wrong(
+                __CLASS__ . '::' . $method,
+                'User Manager does not have this method defined',
+                AAM_VERSION
+            );
+        }
+
+        return wp_json_encode($response);
+    }
+
+    /**
+     * Get pure list of roles (without any meta info)
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
+     */
+    private function _getList()
+    {
+        return apply_filters(
+            'aam_get_role_list_filter', $this->fetchRoleList()
         );
     }
-    
+
     /**
-     * Fetch role list
-     * 
+     * Fetch role list from the DB
+     *
      * @return array
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function fetchRoleList() {
+    protected function fetchRoleList()
+    {
         $response = array();
-         
-        //filter by name
+
+        // Filter by name
         $search  = trim(AAM_Core_Request::request('search.value'));
         $exclude = trim(AAM_Core_Request::request('exclude'));
         $roles   = get_editable_roles();
-        
+
         foreach ($roles as $id => $role) {
             $match = preg_match('/^' . $search . '/i', $role['name']);
             if (($exclude !== $id) && (!$search || $match)) {
                 $response[$id] = $role;
             }
         }
-        
+
         return $response;
     }
 
     /**
-     * Add New Role
-     * 
-     * @return string
-     * 
-     * @access public
+     * Create new role
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
      */
-    public function add() {
-        $response = array('status' => 'failure');
-        
+    private function _create()
+    {
+        $response = array(
+            'status' => 'failure', 'reason' => __('Unauthorized operation', AAM_KEY)
+        );
+
         if (current_user_can('aam_create_roles')) {
             $name    = sanitize_text_field(filter_input(INPUT_POST, 'name'));
             $roles   = AAM_Core_API::getRoles();
             $role_id = sanitize_key(strtolower($name));
+            $inherit = trim(filter_input(INPUT_POST, 'inherit'));
+            $doClone = filter_input(INPUT_POST, 'clone', FILTER_VALIDATE_BOOLEAN);
 
-            //if inherited role is set get capabilities from it
-            $parent = $roles->get_role(trim(filter_input(INPUT_POST, 'inherit')));
-            $caps   = ($parent ? $parent->capabilities : array());
+            // If inherited role is set get capabilities from it
+            if ($inherit) {
+                $parent = $roles->get_role($inherit);
+                $caps   = ($parent ? $parent->capabilities : array());
+            } else {
+                $caps   = array();
+            }
 
             if ($role = $roles->add_role($role_id, $name, $caps)) {
                 $response = array(
@@ -178,93 +211,110 @@ class AAM_Backend_Feature_Subject_Role {
                         'level' => AAM_Core_API::maxLevel($caps)
                     )
                 );
-                //clone settings if needed
-                if (AAM_Core_Request::post('clone')) {
+
+                // Clone settings if needed
+                if ($doClone && !empty($parent)) {
                     $this->cloneSettings($role, $parent);
                 }
-                
-                do_action('aam-post-add-role-action', $role, $parent);
+
+                do_action('aam_post_add_role_action', $role, $parent);
             } else {
-                $response['reason'] = __("Role with slug [{$role_id}] already exists", AAM_KEY);
+                $response['reason'] = __("Role {$name} already exists", AAM_KEY);
             }
         }
 
-        return wp_json_encode($response);
+        return $response;
     }
-    
+
     /**
-     * 
-     * @global type $wpdb
-     * @param type $role
-     * @param type $parent
+     * Clone access settings
+     *
+     * @param object $role
+     * @param object $parent
+     *
+     * @return boolean
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function cloneSettings($role, $parent) {
-        global $wpdb;
-        
-        //clone _options settings
-        $oquery = "SELECT * FROM {$wpdb->options} WHERE `option_name` LIKE %s";
-        if ($wpdb->query($wpdb->prepare($oquery, 'aam_%_role_' . $parent->name))) {
-            foreach($wpdb->last_result as $setting) {
-                AAM_Core_API::updateOption(
-                    str_replace($parent->name, $role->name, $setting->option_name), 
-                    maybe_unserialize($setting->option_value)
-                );
-            }
-        }
-        
-        //clone _postmeta settings
-        $pquery = "SELECT * FROM {$wpdb->postmeta} WHERE `meta_key` LIKE %s";
-        if ($wpdb->query($wpdb->prepare($pquery, 'aam-%-role' . $parent->name))) {
-            foreach($wpdb->last_result as $setting) {
-                add_post_meta(
-                    $setting->post_id, 
-                    str_replace($parent->name, $role->name, $setting->meta_key), 
-                    maybe_unserialize($setting->meta_value)
-                );
-            }
-        }
+    protected function cloneSettings($role, $parent)
+    {
+        $settings = AAM_Core_AccessSettings::getInstance();
+
+        // Clone the settings
+        $settings->set("role.{$role->name}", $settings->get("role.{$parent->name}"));
+
+        return $settings->save();
     }
-    
+
     /**
      * Edit role name
-     * 
-     * @return string
-     * 
-     * @access public
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
      */
-    public function edit() {
+    private function _edit()
+    {
         if (current_user_can('aam_edit_roles')) {
             $role = AAM_Backend_Subject::getInstance();
 
             $role->update(esc_js(trim(filter_input(INPUT_POST, 'name'))));
-            
-            do_action('aam-post-update-role-action', $role->get());
-            
+
+            do_action('aam_post_update_role_action', $role->getSubject());
+
             $response = array('status' => 'success');
         } else {
-            $response = array('status' => 'failure');
+            $response = array(
+                'status' => 'failure',
+                'reason' => __('Unauthorized operation', AAM_KEY)
+            );
         }
-        
-        return wp_json_encode($response);
+
+        return $response;
     }
 
     /**
      * Delete role
-     * 
-     * @return string
-     * 
-     * @access public
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
      */
-    public function delete() {
-        $status = 'failure';
-        
+    private function _delete()
+    {
+        $response = array('status' => 'failure');
+
         if (current_user_can('aam_delete_roles')) {
             if (AAM_Backend_Subject::getInstance()->delete()) {
-                $status = 'success';
+                $response['status'] = 'success';
+            } else {
+                $response['reason'] = __('Failed to delete the role', AAM_KEY);
             }
+        } else {
+            $response['reason'] = __('Unauthorized operation', AAM_KEY);
         }
 
-        return wp_json_encode(array('status' => $status));
+        return $response;
+    }
+
+    /**
+     * Register Role UI feature
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public static function register()
+    {
+        AAM_Backend_Feature::registerFeature((object) array(
+            'capability' => self::ACCESS_CAPABILITY,
+            'type'       => 'subject',
+            'view'       => __CLASS__
+        ));
     }
 
 }

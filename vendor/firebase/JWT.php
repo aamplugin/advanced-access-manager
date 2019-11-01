@@ -205,6 +205,8 @@ class JWT
                 } else {
                     return $signature;
                 }
+            default:
+                break;
         }
     }
 

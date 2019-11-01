@@ -5,6 +5,8 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
@@ -12,20 +14,22 @@
  *
  * Parse configuration section and evaluate an expression. At this point it
  * does not take in consideration the operator's precedence but you can force
- * the order with parenthesises. 
+ * the order with parentheses.
  *
- * @package ConfigPress
+ * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @copyright Copyright Vasyl Martyniuk
+ * @version 6.0.0
  */
-class AAM_Core_ConfigPress_Evaluator {
+class AAM_Core_ConfigPress_Evaluator
+{
 
     /**
      * Accepted operators
-     * 
+     *
      * @var array
-     * 
-     * @access private 
+     *
+     * @access private
+     * @version 6.0.0
      */
     private $_operators = array(
         array('*', '/'), //the highest priority
@@ -37,55 +41,65 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Expression to parse
-     * 
+     *
      * @var string
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected $expression;
 
     /**
      * Parsing expression alias
-     * 
+     *
      * @var string
-     * 
-     * @access protected 
+     *
+     * @access protected
+     * @version 6.0.0
      */
     protected $alias;
 
     /**
      * Current expression part index
-     * 
+     *
      * @var array
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
     protected $index = array(0);
 
     /**
      * Prepare expression evaluation
-     * 
+     *
      * @param string $expression
-     * 
+     *
      * @return void
+     * @version 6.0.0
      */
-    public function __construct($expression) {
+    public function __construct($expression)
+    {
         $this->alias = $expression;
 
         $regexp = '/(===|!==|==|>=|<=|<>|<|>|\+|\-|\*|\/|&&|\|\||\(|\)|\sas\s)/';
         $this->expression = preg_split(
-                $regexp, $expression, -1, PREG_SPLIT_DELIM_CAPTURE
+            $regexp,
+            $expression,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
         );
     }
 
     /**
      * Evaluate the expression
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function evaluate() {
+    public function evaluate()
+    {
         $queue = array();
 
         $index = &$this->index[count($this->index) - 1];
@@ -93,17 +107,17 @@ class AAM_Core_ConfigPress_Evaluator {
         for ($index; $index < count($this->expression); $index++) {
             $chunk = trim($this->expression[$index]);
 
-            if (empty($chunk)) {
-                continue; //skip empty part
-            } elseif ($chunk === '(') {
-                $this->index[] = ++$index;
-                $queue[] = $this->evaluate();
-            } elseif ($chunk === ')') {
-                array_pop($this->index);
-                $this->index[count($this->index) - 1] = ++$index;
-                break;
-            } else { //evaluate operand or operator
-                $queue[] = $this->evaluateOperand($chunk);
+            if (!empty($chunk)) {
+                if ($chunk === '(') {
+                    $this->index[] = ++$index;
+                    $queue[] = $this->evaluate();
+                } elseif ($chunk === ')') {
+                    array_pop($this->index);
+                    $this->index[count($this->index) - 1] = ++$index;
+                    break;
+                } else { //evaluate operand or operator
+                    $queue[] = $this->evaluateOperand($chunk);
+                }
             }
         }
 
@@ -113,14 +127,16 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Evaluate an operand
-     * 
+     *
      * @param string $operand
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function evaluateOperand($operand) {
+    protected function evaluateOperand($operand)
+    {
         if (strpos($operand, '$') === 0) { //variable
             $operand = $this->parseVariable(substr($operand, 1));
         } elseif (strpos($operand, '@') === 0) { //callback function
@@ -132,14 +148,16 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Evaluate variable
-     * 
+     *
      * @param string $variable
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function parseVariable($variable) {
+    protected function parseVariable($variable)
+    {
         $value = null;
 
         $xpath = explode('.', $variable);
@@ -163,12 +181,16 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Evaluate callback function
-     * 
+     *
      * @param string $callback
-     * 
+     *
      * @return mixed
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function parseCallback($callback) {
+    protected function parseCallback($callback)
+    {
         $value = null;
 
         if (is_callable($callback)) {
@@ -180,22 +202,26 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Compute parsed expression
-     * 
+     *
      * @param array $queue
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function computeQueue($queue) {
+    protected function computeQueue($queue)
+    {
         $value = $queue[0]; //default value
-        
+
         foreach ($this->_operators as $operators) {
             $i = 0;
             while ($i < count($queue)) {
                 if (!is_bool($queue[$i]) && in_array($queue[$i], $operators, true)) {
                     $value = $this->processOperation(
-                            $queue[$i], $queue[$i - 1], $queue[$i + 1]
+                        $queue[$i],
+                        $queue[$i - 1],
+                        $queue[$i + 1]
                     );
                     //replace just calculated value
                     array_splice($queue, --$i, 3, $value);
@@ -210,16 +236,18 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Process the calculation
-     * 
+     *
      * @param string $operation
      * @param mixed $operandA
      * @param mixed $operandB
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function processOperation($operation, $operandA, $operandB) {
+    protected function processOperation($operation, $operandA, $operandB)
+    {
         switch ($operation) {
             case '+':
                 $operandA += $operandB;
@@ -292,12 +320,14 @@ class AAM_Core_ConfigPress_Evaluator {
 
     /**
      * Get section alias
-     * 
+     *
      * @return string
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function getAlias() {
+    public function getAlias()
+    {
         return $this->alias;
     }
 

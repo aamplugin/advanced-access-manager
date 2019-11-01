@@ -5,15 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * HTTP request layer
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Request {
+class AAM_Core_Request
+{
 
     /**
      * Get parameter from global _GET array
@@ -24,8 +27,10 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access public
+     * @version 6.0.0
      */
-    public static function get($param = null, $default = null) {
+    public static function get($param = null, $default = null)
+    {
         return self::readArray($_GET, $param, $default);
     }
 
@@ -38,8 +43,10 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access public
+     * @version 6.0.0
      */
-    public static function post($param = null, $default = null) {
+    public static function post($param = null, $default = null)
+    {
         return self::readArray($_POST, $param, $default);
     }
 
@@ -52,12 +59,13 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function request($param = null, $default = null) {
+    public static function request($param = null, $default = null)
+    {
         return self::readArray($_REQUEST, $param, $default);
     }
-    
+
     /**
      * Get parameter from global _SERVER array
      *
@@ -67,12 +75,13 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function server($param = null, $default = null) {
+    public static function server($param = null, $default = null)
+    {
         return self::readArray($_SERVER, $param, $default);
     }
-    
+
     /**
      * Get parameter from global _COOKIE array
      *
@@ -82,9 +91,10 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access public
-     * @static
+     * @version 6.0.0
      */
-    public static function cookie($param = null, $default = null) {
+    public static function cookie($param = null, $default = null)
+    {
         return self::readArray($_COOKIE, $param, $default);
     }
 
@@ -99,9 +109,10 @@ class AAM_Core_Request {
      * @return mixed
      *
      * @access protected
-     * @static
+     * @version 6.0.0
      */
-    protected static function readArray($array, $param, $default) {
+    protected static function readArray($array, $param, $default)
+    {
         $value = $default;
         if (is_null($param)) {
             $value = $array;

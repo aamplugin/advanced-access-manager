@@ -5,15 +5,34 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * Abstract subject
- * 
+ * Abstract subject class
+ *
+ * Subject is a user or thing that invokes WordPress resources like posts, menus,
+ * URIs, etc. In other words, subject is the abstract access and security layer that
+ * contains set of options that define how end user or visitor access a requested
+ * resource.
+ *
+ * Subjects are related in the hierarchical way where "Default" subject supersede all
+ * other subjects and access & security settings are propagated down the tree.
+ *
+ * Subject sibling is thing that is located on the same hierarchical level and access
+ * settings get merged based on predefined preference. The example of sibling is a
+ * user that has two or more roles. In this case the first role is primary while all
+ * other roles are siblings to it.
+ *
+ * Subject principal is underlying WordPress core user or role. Not all Subjects have
+ * principals (e.g. Visitor or Default).
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-abstract class AAM_Core_Subject {
+abstract class AAM_Core_Subject
+{
 
     /**
      * Subject ID
@@ -23,28 +42,31 @@ abstract class AAM_Core_Subject {
      * @var string|int
      *
      * @access private
+     * @version 6.0.0
      */
     private $_id;
 
     /**
-     * WordPres Subject
+     * WordPres core principal
      *
      * It can be WP_User or WP_Role, based on what class has been used
      *
      * @var WP_Role|WP_User
      *
      * @access private
+     * @version 6.0.0
      */
-    private $_subject;
-    
+    private $_principal;
+
     /**
-     * Covering the scenario of multi-subjects
-     * 
+     * Principal's siblings
+     *
      * For example this is quite typical for the multi-roles
-     * 
+     *
      * @var array
-     * 
-     * @access private 
+     *
+     * @access private
+     * @version 6.0.0
      */
     private $_siblings = array();
 
@@ -56,32 +78,12 @@ abstract class AAM_Core_Subject {
      * @var array
      *
      * @access private
+     * @version 6.0.0
      */
     private $_objects = array();
 
     /**
-     * Constructor
-     *
-     * @param string|int $id
-     *
-     * @return void
-     *
-     * @access public
-     */
-    public function __construct($id = '') {
-        //set subject
-        $this->setId($id);
-        //retrieve and set subject itself
-        $this->setSubject($this->retrieveSubject());
-    }
-    
-    /**
-     * 
-     */
-    public function initialize() { }
-    
-    /**
-     * Trigger Subject native methods
+     * Fallback for any principal native methods
      *
      * @param string $name
      * @param array  $args
@@ -89,308 +91,373 @@ abstract class AAM_Core_Subject {
      * @return mixed
      *
      * @access public
+     * @version 6.0.0
      */
-    public function __call($name, $args) {
-        $subject = $this->getSubject();
-        
-        //make sure that method is callable
-        if (method_exists($subject, $name)) {
-            $response = call_user_func_array(array($subject, $name), $args);
+    public function __call($name, $args)
+    {
+        $response  = null;
+        $principal = $this->getPrincipal();
+
+        // Make sure that method is callable
+        if (method_exists($principal, $name)) {
+            $response = call_user_func_array(array($principal, $name), $args);
         } else {
-            $response = null;
+            _doing_it_wrong(
+                static::class . '::' . $name,
+                'Subject does not have method defined',
+                AAM_VERSION
+            );
         }
 
         return $response;
     }
 
     /**
-     * Get Subject's native properties
+     * Fallback for the principal native properties
      *
      * @param string $name
      *
      * @return mixed
      *
      * @access public
+     * @version 6.0.0
      */
-    public function __get($name) {
-        $subject = $this->getSubject();
-        
-        return (!empty($subject->$name) ? $subject->$name : null);
+    public function __get($name)
+    {
+        return $this->getPrincipal()->$name;
     }
 
     /**
-     * Set Subject's native properties
+     * Fallback for the principal native properties
      *
      * @param string $name
      *
      * @return mixed
      *
      * @access public
+     * @version 6.0.0
      */
-    public function __set($name, $value) {
-        $subject = $this->getSubject();
-        
-        if ($subject) {
-            $subject->$name = $value;
-        }
+    public function __set($name, $value)
+    {
+        $principal = $this->getPrincipal();
+        $principal->$name = $value;
     }
 
     /**
-     * Set Subject ID
+     * Set subject ID
      *
      * @param string|int
      *
      * @return void
      *
      * @access public
+     * @version 6.0.0
      */
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->_id = $id;
     }
 
     /**
-     * Get Subject ID
+     * Get subject ID
      *
      * @return string|int
      *
      * @access public
+     * @version 6.0.0
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->_id;
     }
-    
+
     /**
      * Get subject name
-     * 
+     *
      * @return string
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function getName() {
-        return '';
-    }
-    
+    abstract public function getName();
+
     /**
-     * 
+     * Get maximum subject User level
+     *
      * @return int
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function getMaxLevel() {
+    public function getMaxLevel()
+    {
         return 0;
     }
 
     /**
-     * Get Subject
+     * Get WP core principal
      *
      * @return WP_Role|WP_User
      *
      * @access public
+     * @version 6.0.0
      */
-    public function getSubject() {
-        return $this->_subject;
+    public function getPrincipal()
+    {
+        return $this->_principal;
     }
 
     /**
-     * Set Subject
+     * Set WP core principal
      *
-     * @param WP_Role|WP_User $subject
+     * @param WP_Role|WP_User $principal
      *
      * @return void
      *
      * @access public
+     * @version 6.0.0
      */
-    public function setSubject($subject) {
-        $this->_subject = $subject;
+    public function setPrincipal($principal)
+    {
+        $this->_principal = $principal;
     }
-    
+
     /**
-     * 
-     * @param type $siblings
+     * Get subject siblings
+     *
+     * @param array $siblings
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function setSiblings($siblings) {
+    public function setSiblings(array $siblings)
+    {
         $this->_siblings = $siblings;
     }
-    
+
     /**
-     * 
-     * @return type
+     * Check if subject has siblings
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function hasSiblings() {
-        return count($this->_siblings) ? true : false;
+    public function hasSiblings()
+    {
+        return (count($this->_siblings) > 0);
     }
-    
+
     /**
-     * 
-     * @return type
+     * Get list of subject siblings
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function getSiblings() {
+    public function getSiblings()
+    {
         return $this->_siblings;
     }
 
     /**
-     * Get Individual Object
+     * Get AAM core object
      *
-     * @param string $type
-     * @param mixed  $id
+     * This method will instantiate requested AAM core object with pre-populated
+     * access settings for the subject that requested the object.
+     *
+     * @param string  $type
+     * @param mixed   $id
+     * @param boolean $skipInheritance
      *
      * @return AAM_Core_Object
      *
      * @access public
+     * @version 6.0.0
      */
-    public function getObject($type, $id = 0, $param = null) {
-        $object = null;
-        
-        //performance optimization
-        $id = (is_scalar($id) ? $id : 'none'); //prevent from any surprises
-        
-        //check if there is an object with specified ID
-        if (!isset($this->_objects[$type][$id])) {
-            $classname = 'AAM_Core_Object_' . ucfirst($type);
-            
-            if (class_exists($classname)) {
-                $object = new $classname($this, $id, $param);
+    public function getObject($type, $id = null, $skipInheritance = false)
+    {
+        // Check if there is an object with specified ID
+        if (!isset($this->_objects[$type . $id])) {
+            $class_name = 'AAM_Core_Object_' . ucfirst($type);
+
+            // If requested object is part of the core, instantiate it
+            if (class_exists($class_name)) {
+                $object = new $class_name($this, $id, $skipInheritance);
+            } else {
+                $object = null;
             }
-            
-            $object = apply_filters('aam-object-filter', $object, $type, $id, $this);
-            
+
+            // Run the object through the filter so other plugins can attach to its
+            // initialization
+            $object = apply_filters(
+                'aam_object_filter', $object, $this, $type, $id, $skipInheritance
+            );
+
             if (is_a($object, 'AAM_Core_Object')) {
-                $this->_objects[$type][$id] = $object;
+                // Kick in the inheritance chain if needed
+                if ($skipInheritance === false) {
+                    $this->inheritFromParent($object);
+                }
+
+                // Finally cache the object
+                $this->_objects[$type . $id] = $object;
             }
         } else {
-            $object = $this->_objects[$type][$id];
+            $object = $this->_objects[$type . $id];
         }
 
         return $object;
     }
 
     /**
-     * Check if subject has capability
-     * 
-     * @param string $capability
-     * 
-     * @return boolean
-     * 
-     * @access public
+     * Inherit access settings for provided object from the parent subject(s)
+     *
+     * @param AAM_Core_Object $object
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    public function hasCapability($capability) {
-        $subject = $this->getSubject();
-        
-        return ($subject ? $subject->has_cap($capability) : false);
+    protected function inheritFromParent(AAM_Core_Object $object)
+    {
+        $subject = $this->getParent();
+
+        if (is_a($subject, 'AAM_Core_Subject')) {
+            $option = $subject->getObject(
+                $object::OBJECT_TYPE,
+                $object->getId()
+            )->getOption();
+
+            // Merge access settings while reading hierarchical chain
+            $option = array_replace_recursive($option, $object->getOption());
+
+            // Merge access settings if multi-roles option is enabled
+            $multi = AAM::api()->getConfig('core.settings.multiSubject', false);
+
+            if ($multi && $subject->hasSiblings()) {
+                foreach ($subject->getSiblings() as $sibling) {
+                    $option = $sibling->getObject(
+                        $object::OBJECT_TYPE,
+                        $object->getId()
+                    )->mergeOption(
+                        $option
+                    );
+                }
+            }
+
+            // Finally set the option for provided object
+            $object->setOption($option);
+        }
+
+        return $object->getOption();
     }
-    
+
     /**
-     * Save option
-     * 
-     * @param string $param
+     * Retrieve parent subject
+     *
+     * If there is no parent subject, return null
+     *
+     * @return AAM_Core_Subject|null
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    abstract public function getParent();
+
+    /**
+     * Update subject access option
+     *
      * @param mixed  $value
      * @param string $object
-     * @param mixed  $objectId
-     * 
+     * @param mixed  $id
+     *
      * @return boolean
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function save($param, $value, $object, $objectId = 0) {
-        return $this->getObject($object, $objectId)->save($param, $value);
+    public function updateOption($value, $object, $id = null)
+    {
+        return AAM_Core_AccessSettings::getInstance()->set(
+            $this->getOptionName($object, $id), $value
+        )->save();
     }
 
     /**
-     * Reset object
+     * Read subject access option
      *
      * @param string $object
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function resetObject($object) {
-        return $this->deleteOption($object);
-    }
-    
-    /**
-     * Delete option
-     * 
-     * @param string $object
      * @param mixed  $id
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function deleteOption($object, $id = 0) {
-        return AAM_Core_API::deleteOption($this->getOptionName($object, $id));
-    }
-
-    /**
-     * Retrieve list of subject's capabilities
      *
      * @return array
      *
      * @access public
+     * @version 6.0.0
      */
-    public function getCapabilities() {
-        return array();
+    public function readOption($object, $id = null)
+    {
+        return AAM_Core_AccessSettings::getInstance()->get(
+            $this->getOptionName($object, $id)
+        );
     }
 
     /**
-     * Retrieve subject based on used class
+     * Delete subject access option
+     *
+     * @param string $object
+     * @param mixed  $id
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function deleteOption($object, $id = null)
+    {
+        return AAM_Core_AccessSettings::getInstance()->delete(
+            $this->getOptionName($object, $id)
+        )->save();
+    }
+
+    /**
+     * Compute access option name based on object type
+     *
+     * @param string $object
+     * @param mixed  $id
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    public function getOptionName($object, $id)
+    {
+        $subjectId = $this->getId();
+
+        $name  = static::UID . ($subjectId ? ".{$subjectId}" : '') . '.';
+        $name .= $object . ($id ? ".{$id}" : '');
+
+        return $name;
+    }
+
+    /**
+     * Reset object cache
+     *
+     * Subject caches all instantiated object for performance reasons
      *
      * @return void
      *
-     * @access protected
-     */
-    protected function retrieveSubject() {
-        return null;
-    }
-    
-    /**
-     * 
-     */
-    public function getOptionName($object, $id) {
-        return '';
-    }
-    
-    /**
-     * Read object from parent subject
-     * 
-     * @param string $object
-     * @param mixed  $id
-     * 
-     * @return mixed
-     * 
      * @access public
+     * @version 6.0.0
      */
-    public function inheritFromParent($object, $id = '', $param = null){
-        $subject = $this->getParent();
-        
-        if (is_a($subject, 'AAM_Core_Subject')){
-            $option = $subject->getObject($object, $id, $param)->getOption();
-            $multi  = AAM::api()->getConfig('core.settings.multiSubject', false);
-            
-            if ($multi && $subject->hasSiblings()) {
-                foreach($subject->getSiblings() as $sibling) {
-                    $option = $sibling->getObject($object, $id, $param)->mergeOption(
-                            $option
-                    );
-                }
-            }
-        } else {
-            $option = null;
-        }
-        
-        return $option;
+    public function flushCache()
+    {
+        $this->_objects = array();
     }
-    
-    /**
-     * Retrieve parent subject
-     * 
-     * If there is no parent subject, return null
-     * 
-     * @return AAM_Core_Subject|null
-     * 
-     * @access public
-     */
-    public function getParent() {
-        return null;
-    }
-    
+
 }

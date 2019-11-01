@@ -5,109 +5,39 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Logout redirect object
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object {
-    
-    /**
-     * Constructor
-     *
-     * @param AAM_Core_Subject $subject
-     *
-     * @return void
-     *
-     * @access public
-     */
-    public function __construct(AAM_Core_Subject $subject) {
-        parent::__construct($subject);
-
-        $this->initialize();
-    }
-    
-    /**
-     * 
-     */
-    public function initialize() {
-        $this->read();
-    }
-    
-    /**
-     *
-     * @return void
-     *
-     * @access public
-     */
-    public function read() {
-        $option = $this->getSubject()->readOption('logoutredirect');
-       
-        //inherit from default Administrator role
-        if (empty($option)) {
-             //inherit from parent subject
-            $option = $this->getSubject()->inheritFromParent('logoutredirect');
-        } else {
-            $this->setOverwritten(true);
-        }
-        
-        $this->setOption($option);
-    }
-    
-    /**
-     * Save options
-     * 
-     * @param string  $property
-     * @param boolean $value
-     * 
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function save($property, $value) {
-        $option            = $this->getOption();
-        $option[$property] = $value;
-        
-        return $this->getSubject()->updateOption($option, 'logoutredirect');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return $this->getSubject()->deleteOption('logoutredirect');
-    }
+class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object
+{
 
     /**
-     * 
-     * @param string $param
-     * 
-     * @return boolean
-     * 
-     * @access public
+     * Type of object
+     *
+     * @version 6.0.0
      */
-    public function has($param) {
-        $option = $this->getOption();
-        
-        return !empty($option[$param]);
-    }
-    
+    const OBJECT_TYPE = 'logoutRedirect';
+
     /**
-     * 
-     * @param string $param
-     * 
-     * @return boolean
-     * 
-     * @access public
+     * @inheritdoc
+     * @version 6.0.0
      */
-    public function get($param) {
-        $option = $this->getOption();
-        
-        return !empty($option[$param]) ? $option[$param] : null;
+    protected function initialize()
+    {
+        // Initialize the settings
+        $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
+
+        // If options are defined, set the overwritten flag
+        $this->determineOverwritten($option);
+
+        $this->setOption(is_array($option) ? $option : array());
     }
-    
+
 }

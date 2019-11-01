@@ -5,54 +5,78 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * AAM Shortcode
- * 
+ * Shortcode factory for the [aam] shortcode
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Shortcode_Factory {
-    
+class AAM_Shortcode_Factory
+{
+
     /**
+     * Shortcode handler based on the provided attributes
      *
-     * @var type 
+     * @var AAM_Core_Contract_ShortcodeInterface
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected $strategy = null;
-    
+    protected $handler = null;
+
     /**
      * Initialize shortcode factory
-     * 
-     * @param type $args
-     * @param type $content
+     *
+     * @param array  $args
+     * @param string $content
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function __construct($args, $content) {
+    public function __construct($args, $content)
+    {
         $context = !empty($args['context']) ? $args['context'] : 'content';
-        
-        $classname = 'AAM_Shortcode_Strategy_' . ucfirst($context);
-        
-        if (class_exists($classname)) {
-            $this->strategy = new $classname($args, $content);
+
+        $class_name = 'AAM_Shortcode_Handler_' . ucfirst($context);
+
+        if (class_exists($class_name)) {
+            $this->handler = new $class_name($args, $content);
         } else {
-            $this->strategy = apply_filters(
-                    'aam-shortcode-filter', null, $context, $args, $content
+            $this->handler = apply_filters(
+                'aam_shortcode_filter', null, $context, $args, $content
             );
         }
     }
-    
+
     /**
-     * 
+     * Process the short-code
+     *
      * @return string
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function process() {
-        if (is_a($this->strategy, 'AAM_Shortcode_Strategy_Interface')) {
-            $content = $this->strategy->run();
+    public function process()
+    {
+        $content = null;
+
+        if (is_a($this->handler, 'AAM_Core_Contract_ShortcodeInterface')) {
+            $content = $this->handler->run();
         } else {
-            $content = __('No valid strategy found for the given context', AAM_KEY);
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                'No valid strategy found for the given context',
+                AAM_VERSION
+            );
         }
-        
+
         return $content;
     }
-    
+
 }

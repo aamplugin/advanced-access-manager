@@ -5,211 +5,244 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Backend subject
- * 
- * Currently managed subject. Based on the HTTP request critiria, define what subject
+ *
+ * Currently managed subject. Based on the HTTP request data, define what subject
  * is currently managed with AAM UI.
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Subject {
-    
-    /**
-     * Single instance of itself
-     * 
-     * @var AAM_Backend_Subject
-     * 
-     * @access protected
-     * @static 
-     */
-    protected static $instance = null;
-    
+class AAM_Backend_Subject
+{
+
+    use AAM_Core_Contract_RequestTrait,
+        AAM_Core_Contract_SingletonTrait;
+
     /**
      * Subject information
-     * 
+     *
      * @var AAM_Core_Subject
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
     protected $subject = null;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @return void
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function __construct() {
-        $subject = AAM_Core_Request::request('subject');
-        
+    protected function __construct()
+    {
+        $subject = $this->getFromPost('subject');
+
         if ($subject) {
-            $instance = $this->initRequestedSubject(
-                $subject, AAM_Core_Request::request('subjectId')
-            );
+            $this->initRequestedSubject($subject, $this->getFromPost('subjectId'));
         } else {
             $this->initDefaultSubject();
         }
     }
-    
+
+    /**
+     * Check if current subject is role
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function isRole()
+    {
+        return $this->getSubjectType() === AAM_Core_Subject_Role::UID;
+    }
+
+    /**
+     * Check if current subject is user
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function isUser()
+    {
+        return $this->getSubjectType() === AAM_Core_Subject_User::UID;
+    }
+
+    /**
+     * Check if current subject is visitor
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function isVisitor()
+    {
+        return $this->getSubjectType() === AAM_Core_Subject_Visitor::UID;
+    }
+
+    /**
+     * Check if current subject is default
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function isDefault()
+    {
+        return $this->getSubjectType() === AAM_Core_Subject_Default::UID;
+    }
+
+    /**
+     * Get current subject type
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getSubjectType()
+    {
+        $subject = $this->getSubject();
+
+        return $subject::UID;
+    }
+
     /**
      * Initialize requested subject
-     * 
+     *
      * @param string $type
-     * @param string $id
-     * 
-     * @return void
-     * 
+     * @param mixed  $id
+     *
+     * @return AAM_Core_Subject
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function initRequestedSubject($type, $id) {
-        $classname = 'AAM_Core_Subject_' . ucfirst($type);
-        
-        if (class_exists($classname)) {
-            $subject = new $classname(stripslashes($id));
-            $subject->initialize();
-            
-            $this->setSubject($subject);
+    protected function initRequestedSubject($type, $id)
+    {
+        if ($type === AAM_Core_Subject_User::UID) {
+            $subject = AAM::api()->getUser(intval($id));
+        } elseif ($type === AAM_Core_Subject_Default::UID) {
+            $subject = AAM_Core_Subject_Default::getInstance();
         } else {
-            wp_die('Invalid subject type'); exit;
+            $class_name = 'AAM_Core_Subject_' . ucfirst($type);
+            $subject   = new $class_name(stripslashes($id));
         }
-        
+
+        $this->setSubject($subject);
+
         return $subject;
     }
-    
+
     /**
      * Initialize default subject
-     * 
+     *
      * Based on user permissions, pick the first available subject that current user
      * can manage with AAM UI
-     * 
+     *
      * @return void
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function initDefaultSubject() {
-        // This cover the scenario when we directly go to user e.g. ?page=aam&user=38
-        // or through AJAX post request with user ID
-        $forceUser = AAM_Core_Request::request('user');
-        
-        // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
-        if (!$forceUser && (current_user_can('aam_manage_roles') || current_user_can('aam_list_roles'))) {
+    protected function initDefaultSubject()
+    {
+        if (current_user_can('aam_manage_roles')) {
             $roles = array_keys(get_editable_roles());
-            $this->initRequestedSubject(AAM_Core_Subject_Role::UID, array_shift($roles));
-        // TODO: The list_users is legacy and can be removed in Oct 2021
-        } elseif (current_user_can('aam_manage_users') || current_user_can('list_users')) {
             $this->initRequestedSubject(
-                AAM_Core_Subject_User::UID,
-                ($forceUser ? intval($forceUser) : get_current_user_id())
+                AAM_Core_Subject_Role::UID, array_shift($roles)
             );
-        // TODO: The aam_list_roles is legacy and can be removed in Oct 2021
+        } elseif (current_user_can('aam_manage_users')) {
+            $this->initRequestedSubject(
+                AAM_Core_Subject_User::UID, get_current_user_id()
+            );
         } elseif (current_user_can('aam_manage_visitors')) {
             $this->initRequestedSubject(AAM_Core_Subject_Visitor::UID, null);
         } elseif (current_user_can('aam_manage_default')) {
             $this->initRequestedSubject(AAM_Core_Subject_Default::UID, null);
+        } else {
+            wp_die(__('You are not allowed to manage AAM subjects', AAM_KEY));
         }
     }
-    
+
     /**
-     * Set subject
-     * 
+     * Set AAM core subject
+     *
      * @param AAM_Core_Subject $subject
-     * 
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function setSubject(AAM_Core_Subject $subject) {
+    protected function setSubject(AAM_Core_Subject $subject)
+    {
         $this->subject = $subject;
     }
 
     /**
-     * Check if current subject is allowed to be managed
-     *
-     * @return boolean
-     * 
-     * @access public
-     */
-    public function isAllowedToManage() {
-        // Determine that current user has enough level to manage requested subject
-        $sameLevel = false;
-        if (AAM_Core_API::capabilityExists('manage_same_user_level')) {
-            $sameLevel = current_user_can('manage_same_user_level');
-        } else {
-            $sameLevel = current_user_can('administrator');
-        }
-
-        $userMaxLevel    = AAM::api()->getUser()->getMaxLevel();
-        $subjectMaxLevel = $this->subject->getMaxLevel();
-
-        if ($sameLevel) {
-            $allowed = $userMaxLevel >= $subjectMaxLevel;
-        } else {
-            $allowed = $userMaxLevel > $subjectMaxLevel;
-        }
-
-        return $allowed;
-    }
-    
-    /**
      * Get subject property
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function __get($name) {
-        return (!empty($this->subject->$name) ? $this->subject->$name : null);
+    public function __get($name)
+    {
+        return $this->subject->$name;
     }
-    
+
     /**
      * Call subject's method
-     * 
+     *
      * @param string $name
      * @param array  $args
-     * 
+     *
      * @return mixed
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function __call($name, $args) {
+    public function __call($name, $args)
+    {
+        $response = null;
         //make sure that method is callable
         if (method_exists($this->subject, $name)) {
             $response = call_user_func_array(array($this->subject, $name), $args);
         } else {
-            $response = null;
+            _doing_it_wrong(
+                static::class . '::' . $name,
+                'Backend Subject does not have method defined',
+                AAM_VERSION
+            );
         }
 
         return $response;
     }
-    
+
     /**
-     * Get AAM subject
-     * 
+     * Get AAM core subject
+     *
      * @return AAM_Core_Subject
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function get() {
+    public function getSubject()
+    {
         return $this->subject;
     }
-    
-    /**
-     * Get single instance of the subject
-     * 
-     * @return AAM_Backend_Subject
-     * 
-     * @access public
-     * @static
-     */
-    public static function getInstance() {
-        if (is_null(self::$instance)) {
-            self::$instance = new self;
-        }
-        
-        return self::$instance;
-    }
-    
+
 }

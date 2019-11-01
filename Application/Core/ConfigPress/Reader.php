@@ -5,6 +5,8 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
@@ -12,40 +14,46 @@
  *
  * Parse configuration string
  *
- * @package ConfigPress
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @copyright Copyright Vasyl Martyniuk
+ * @package AAM
+ * @version 6.0.0
  */
-class AAM_Core_ConfigPress_Reader {
+class AAM_Core_ConfigPress_Reader
+{
 
     /**
-     * 
+     * Default param separator
+     *
+     * @version 6.0.0
      */
     const SEPARATOR = '.';
 
     /**
-     * 
+     * Default section inheritance indicator
+     *
+     * @version 6.0.0
      */
     const INHERIT_KEY = ':';
 
     /**
      * Parse INI config
-     * 
+     *
      * Parse configuration string
      *
      * @param  string $string
-     * 
+     *
      * @return array|bool
-     * 
+     *
      * @throws Exception
+     * @version 6.0.0
      */
-    public function parseString($string) {
+    public function parseString($string)
+    {
         if (!empty($string)) {
             //parse the string
             set_error_handler(array($this, 'parserError'));
             $ini = parse_ini_string($string, true);
             restore_error_handler();
-            
+
             $response = $this->process(is_array($ini) ? $ini : array());
         } else {
             $response = array();
@@ -55,14 +63,21 @@ class AAM_Core_ConfigPress_Reader {
     }
 
     /**
-     * 
-     * @param type $error
-     * @param type $message
-     * @throws Exception
+     * Add error to the AAM console
+     *
+     * @param string $error
+     * @param string $message
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function parserError($error, $message = '') {
+    public function parserError($error, $message = '')
+    {
         AAM_Core_Console::add(
-            sprintf('Error parsing config string: %s', $message), $error
+            sprintf('Error parsing config string: %s', $message),
+            $error
         );
     }
 
@@ -70,12 +85,17 @@ class AAM_Core_ConfigPress_Reader {
      * Process data from the parsed ini file.
      *
      * @param  array $data
+     *
      * @return array
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function process(array $data) {
+    protected function process(array $data)
+    {
         $config = array();
-        
-        foreach ($data as $section => $data) {
+
+        foreach ($data as $section => $block) {
             //check if section has parent section or property
             if (preg_match('/[\s\w]{1}' . self::INHERIT_KEY . '[\s\w]{1}/', $section)) {
                 $section = $this->inherit($section, $config);
@@ -90,10 +110,10 @@ class AAM_Core_ConfigPress_Reader {
                 }
             }
 
-            if (is_array($data)) { //this is a INI section, build the nested tree
-                $this->buildNestedSection($data, $config[$section]);
+            if (is_array($block)) { //this is a INI section, build the nested tree
+                $this->buildNestedSection($block, $config[$section]);
             } else { //single property, no need to do anything
-                $config[$section] = $this->parseValue($data);
+                $config[$section] = $this->parseValue($block);
             }
         }
 
@@ -101,12 +121,18 @@ class AAM_Core_ConfigPress_Reader {
     }
 
     /**
-     * 
-     * @param type $section
-     * @param type $config
-     * @return type
+     * Inherit settings from different section
+     *
+     * @param string $section
+     * @param array  $config
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function inherit($section, &$config) {
+    protected function inherit($section, &$config)
+    {
         $sections = explode(self::INHERIT_KEY, $section);
         $target = trim($sections[0]);
         $parent = trim($sections[1]);
@@ -119,15 +145,22 @@ class AAM_Core_ConfigPress_Reader {
     }
 
     /**
-     * 
-     * @param type $data
-     * @param type $config
+     * Build the nested config array
+     *
+     * @param array $data
+     * @param array $config
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function buildNestedSection($data, &$config) {
+    protected function buildNestedSection($data, &$config)
+    {
         foreach ($data as $key => $value) {
             $root = &$config;
-            // TODO - Remove July 2019
-            foreach (explode(self::SEPARATOR, apply_filters('aam-configpress-compatibility-filter', $key)) as $level) {
+
+            foreach (explode(self::SEPARATOR, $key) as $level) {
                 if (!isset($root[$level])) {
                     $root[$level] = array();
                 }
@@ -138,11 +171,17 @@ class AAM_Core_ConfigPress_Reader {
     }
 
     /**
-     * 
-     * @param type $value
-     * @return type
+     * Parse single value
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.0.0
      */
-    protected function parseValue($value) {
+    protected function parseValue($value)
+    {
         return is_string($value) ? trim($value) : $value;
     }
 

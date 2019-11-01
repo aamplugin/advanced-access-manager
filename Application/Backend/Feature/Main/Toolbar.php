@@ -5,150 +5,146 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
- * Backend menu manager
- * 
+ * Admin toolbar manager
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract {
-    
-    /**
-     * Construct
-     */
-    public function __construct() {
-        parent::__construct();
-        
-        $allowed = AAM_Backend_Subject::getInstance()->isAllowedToManage();
-        if (!$allowed || !current_user_can('aam_manage_admin_toolbar')) {
-            AAM::api()->denyAccess(array('reason' => 'aam_manage_admin_toolbar'));
-        }
-    }
+class AAM_Backend_Feature_Main_Toolbar
+    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+{
+
+    use AAM_Core_Contract_RequestTrait;
 
     /**
-     * Undocumented function
+     * Default access capability to the service
      *
-     * @return void
+     * @version 6.0.0
      */
-    public function save() {
-       $items  = AAM_Core_Request::post('items', array());
-       $status = AAM_Core_Request::post('status');
-
-       $object = AAM_Backend_Subject::getInstance()->getObject('toolbar');
-
-       foreach($items as $item) {
-           $object->updateOptionItem($item, $status);
-       }
-       
-       $object->save();
-
-       return wp_json_encode(array('status' => 'success'));
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function reset() {
-        return AAM_Backend_Subject::getInstance()->resetObject('toolbar');
-    }
+    const ACCESS_CAPABILITY = 'aam_manage_admin_toolbar';
 
     /**
-     * Get subject's menu
-     * 
-     * Based on the list of capabilities that current subject has, prepare
-     * complete menu list and return it.
-     * 
-     * @return array
-     * 
+     * Type of AAM core object
+     *
+     * @version 6.0.0
+     */
+    const OBJECT_TYPE = AAM_Core_Object_Toolbar::OBJECT_TYPE;
+
+    /**
+     * HTML template to render
+     *
+     * @version 6.0.0
+     */
+    const TEMPLATE = 'service/toolbar.php';
+
+    /**
+     * Save toolbar settings
+     *
+     * @return string
+     *
      * @access public
-     * @global array  $menu
+     * @version 6.0.0
      */
-    public function getToolbar() {
-        return json_decode(base64_decode(AAM_Core_Request::post('toolbar')));
+    public function save()
+    {
+        $status  = $this->getFromPost('status');
+        $items   = $this->getFromPost('items', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+
+        $subject = AAM_Backend_Subject::getInstance();
+        $object  = $subject->getObject(self::OBJECT_TYPE, null, true);
+
+        foreach ($items as $item) {
+            $object->updateOptionItem($item, !empty($status));
+        }
+
+        return wp_json_encode(
+            array('status' => ($object->save() ? 'success' : 'failure'))
+        );
     }
-    
+
     /**
-     * 
-     * @param type $branch
-     * @return type
+     * Get toolbar
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function getAllChildren($branch) {
+    public function getToolbar()
+    {
+        return AAM_Service_Toolbar::getInstance()->getToolbarCache();
+    }
+
+    /**
+     * Get list of child items
+     *
+     * @param object $branch
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getAllChildren($branch)
+    {
         $children = array();
-        
-        foreach($branch->children as $child) {
-            if (empty($child->type) || !in_array($child->type, array('container', 'group'), true)) {
+        $types    = array('container', 'group');
+
+        foreach ($branch->children as $child) {
+            if (empty($child->type) || !in_array($child->type, $types, true)) {
                 $children[] = $child;
             }
-            if(!empty($child->children)) {
+            if (!empty($child->children)) {
                 $children = array_merge($children, $this->getAllChildren($child));
             }
         }
-        
+
         return $children;
-    }
-    
-    /**
-     * 
-     * @param type $node
-     * @return type
-     */
-    public function normalizeTitle($node) {
-        return ucwords(
-            trim(
-                preg_replace(
-                    '/[\d]/', 
-                    '', 
-                    wp_strip_all_tags(!empty($node->title) ? $node->title : $node->id)
-                )
-            )
-        );
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public static function getTemplate() {
-        return 'main/toolbar.phtml';
     }
 
     /**
-     * Check inheritance status
-     * 
-     * Check if menu settings are overwritten
-     * 
-     * @return boolean
-     * 
+     * Normalize the item title
+     *
+     * @param object $node
+     *
+     * @return string
+     *
      * @access protected
+     * @version 6.0.0
      */
-    protected function isOverwritten() {
-        $object = AAM_Backend_Subject::getInstance()->getObject('toolbar');
-        
-        return $object->isOverwritten();
+    protected function normalizeTitle($node)
+    {
+        $title = wp_strip_all_tags(!empty($node->title) ? $node->title : $node->id);
+
+        return ucwords(trim(preg_replace('/[\d]/', '', $title)));
     }
 
     /**
      * Register Menu feature
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public static function register() {
+    public static function register()
+    {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'toolbar',
             'position'   => 6,
             'title'      => __('Admin Toolbar', AAM_KEY),
-            'capability' => 'aam_manage_admin_toolbar',
+            'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID, 
+                AAM_Core_Subject_Role::UID,
                 AAM_Core_Subject_User::UID,
                 AAM_Core_Subject_Default::UID
             ),
-            'option'     => 'core.settings.backendAccessControl,core.settings.frontendAccessControl',
             'view'       => __CLASS__
         ));
     }

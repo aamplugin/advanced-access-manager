@@ -5,60 +5,101 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
+ *
+ * @version 6.0.0
  */
 
 /**
  * Role subject
- * 
+ *
  * @package AAM
- * @author Vasyl Martyniuk <vasyl@vasyltech.com>
+ * @version 6.0.0
  */
-class AAM_Core_Subject_Role extends AAM_Core_Subject {
+class AAM_Core_Subject_Role extends AAM_Core_Subject
+{
 
     /**
      * Subject UID: ROLE
+     *
+     * @version 6.0.0
      */
     const UID = 'role';
 
     /**
      * Role name
-     * 
+     *
      * Fix the bug that is in the way WP_Roles is initialized
      *
      * @var string
+     * @version 6.0.0
      */
     protected $name;
 
     /**
-     * Retrieve Role based on ID
+     * Parent role's subject
+     *
+     * @var AAM_Core_Subject
+     *
+     * @access private
+     * @version 6.0.0
+     */
+    private $_parent = null;
+
+    /**
+     * Constructor
+     *
+     * @param string $id
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function __construct($id)
+    {
+        // Set subject Id
+        $this->setId($id);
+
+        // Retrieve underlining WP core principal
+        $this->setPrincipal($this->retrievePrincipal());
+    }
+
+    /**
+     * Retrieve WP core role
      *
      * @return WP_Role|null
      *
      * @access protected
+     * @version 6.0.0
      */
-    protected function retrieveSubject() {
-        $wpRoles = AAM_Core_API::getRoles();
+    protected function retrievePrincipal()
+    {
+        $roles = AAM_Core_API::getRoles();
 
-        if (isset($wpRoles->roles[$this->getId()])) {
-            $role       = $wpRoles->get_role($this->getId());
-            $this->name = $wpRoles->roles[$this->getId()]['name'];
+        if (isset($roles->roles[$this->getId()])) {
+            $role       = $roles->get_role($this->getId());
+            $this->name = $roles->roles[$this->getId()]['name'];
         } else {
             $role = null;
         }
 
         return $role;
     }
-    
+
     /**
-     * Delete User Role 
+     * Delete role
+     *
+     * Role is not going to be deleted if there is at least one user assigned to it
      *
      * @return boolean
      *
      * @access public
+     * @version 6.0.0
      */
-    public function delete() {
+    public function delete()
+    {
         $status = false;
-        $roles = AAM_Core_API::getRoles();
+        $roles  = AAM_Core_API::getRoles();
 
         $count = count_users();
         $stats = $count['avail_roles'];
@@ -73,14 +114,16 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
 
     /**
      * Update role name
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return boolean
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function update($name) {
+    public function update($name)
+    {
         $roles = AAM_Core_API::getRoles();
 
         if ($name) {
@@ -94,24 +137,24 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
     }
 
     /**
-     * Remove Capability
+     * Remove capability
      *
-     * @param string  $capability
+     * @param string $capability
      *
      * @return boolean
      *
      * @access public
+     * @version 6.0.0
      */
-    public function removeCapability($capability) {
-        $this->getSubject()->remove_cap($capability);
-        
+    public function removeCapability($capability)
+    {
+        $this->remove_cap($capability);
+
         return true;
     }
 
     /**
-     * Check if Subject has capability
-     *
-     * Keep compatible with WordPress core
+     * Add capability
      *
      * @param string  $capability
      * @param boolean $grant
@@ -119,123 +162,87 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject {
      * @return boolean
      *
      * @access public
+     * @version 6.0.0
      */
-    public function addCapability($capability, $grant = true) {
-        $this->getSubject()->add_cap($capability, $grant);
-        
+    public function addCapability($capability, $grant = true)
+    {
+        $this->add_cap($capability, $grant);
+
         return true;
     }
 
     /**
-     * Get role's capabilities
-     * 
+     * Get role capabilities
+     *
      * @return array
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function getCapabilities() {
-        return $this->getSubject()->capabilities;
+    public function getCapabilities()
+    {
+        return $this->capabilities;
     }
-    
+
     /**
-     * Check if subject has capability
-     * 
+     * Check if role has capability
+     *
      * @param string $cap
-     * 
+     *
      * @return boolean
-     * 
+     *
      * @access public
+     * @version 6.0.0
      */
-    public function hasCapability($cap) {
+    public function hasCapability($cap)
+    {
         // If capability is the same as role ID, then capability exists
         if ($cap === $this->getId()) {
             $has = true;
         } else {
-            $has = $this->getSubject()->has_cap($cap);
+            $has = $this->has_cap($cap);
         }
-        
-        // Override by policy if is set
-        $manager = AAM::api()->getPolicyManager($this);
-        
-        if ($manager->isAllowed("Capability:{$cap}") === false) {
-            $has = false;
-        }
-        
+
         return $has;
     }
 
     /**
-     *
-     * @param type $value
-     * @param type $object
-     * @param type $object_id
-     * @return type
+     * @inheritDoc
+     * @version 6.0.0
      */
-    public function updateOption($value, $object, $object_id = 0) {
-        return AAM_Core_API::updateOption(
-                        $this->getOptionName($object, $object_id), $value
-        );
-    }
-
-    /**
-     *
-     * @param type $object
-     * @param type $object_id
-     * @param type $default
-     * @return type
-     */
-    public function readOption($object, $object_id = 0, $default = null) {
-        return AAM_Core_API::getOption(
-                        $this->getOptionName($object, $object_id), $default
-        );
-    }
-
-    /**
-     *
-     * @param type $object
-     * @param type $id
-     * @return string
-     */
-    public function getOptionName($object, $id) {
-        $name = "aam_{$object}" . ($id ? "_{$id}_" : '_');
-        $name .= self::UID . '_' . $this->getId();
-
-        return $name;
-    }
-
-    /**
-     *
-     * @return type
-     */
-    public function getUID() {
-        return self::UID;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getParent() {
-        return apply_filters(
-                'aam-parent-role-filter', 
-                AAM_Core_Subject_Default::getInstance(), 
+    public function getParent()
+    {
+        if (is_null($this->_parent)) {
+            $this->_parent = apply_filters(
+                'aam_parent_role_filter',
+                AAM_Core_Subject_Default::getInstance(),
                 $this
-        );
+            );
+        }
+
+        return $this->_parent;
     }
-    
+
     /**
-     * 
-     * @return type
+     * @inheritDoc
+     * @version 6.0.0
      */
-    public function getName() {
+    public function getName()
+    {
         return translate_user_role($this->name);
     }
-    
-    /**
-     * 
-     * @return type
+
+   /**
+     * Get max role user level
+     *
+     * @return int
+     *
+     * @access public
+     * @version 6.0.0
      */
-    public function getMaxLevel() {
+    public function getMaxLevel()
+    {
         return AAM_Core_API::maxLevel($this->capabilities);
     }
-    
+
 }
