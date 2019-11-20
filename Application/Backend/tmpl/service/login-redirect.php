@@ -10,7 +10,7 @@
                     </p>
                 <?php } else { ?>
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize login redirect for [%s] when the authentication is completed successfully. [Please note!] Login redirect works with default WordPress login form or %sAAM Secure Login widget%s. It may [not] work with any other login solutions.', 'strong', 'strong', 'strong'), $this->getSubject()->getName(), '<a href="https://aamplugin.com/article/how-does-aam-secure-login-works" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize login redirect for [%s] when the authentication is completed successfully. [Note!] Login redirect works with default WordPress login form or %sAAM Secure Login widget%s. It may [not] work with any other login solutions.', 'strong', 'strong', 'strong'), $this->getSubject()->getName(), '<a href="https://aamplugin.com/article/how-does-aam-secure-login-works" target="_blank">', '</a>'); ?>
                     </p>
                 <?php } ?>
                 <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">

@@ -448,6 +448,9 @@ class AAM_Service_AccessPolicy
                 break;
 
             default:
+                $output = apply_filters(
+                    'aam_convert_post_action_filter', $output, $action, $stmt, $ns
+                );
                 break;
         }
 
@@ -468,7 +471,7 @@ class AAM_Service_AccessPolicy
      */
     protected function convertedPostSimpleAction(&$options, $action, $statement)
     {
-        $options[$action] = strtolower($statement['Effect']) !== "allow";
+        $options[$action] = strtolower($statement['Effect']) !== 'allow';
     }
 
     /**
@@ -485,7 +488,7 @@ class AAM_Service_AccessPolicy
      */
     protected function convertedPostReadAction(&$options, $statement, $ns = '')
     {
-        $effect = strtolower($statement['Effect']) !== "allow";
+        $effect = strtolower($statement['Effect']) !== 'allow';
 
         if (array_key_exists('Metadata', $statement)) {
             $metadata = $statement['Metadata'];
@@ -573,8 +576,15 @@ class AAM_Service_AccessPolicy
             $chunks = explode(':', $resource);
             $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
 
+            // Allow other plugins to determine what access options should be
+            // considered during visibility check. For example Plus Package uses
+            // HIDDEN TO OTHERS options
+            $map = apply_filters('aam_policy_post_visibility_map_filter', array(
+                'list' => 'hidden'
+            ));
+
             // Take in consideration only visibility properties
-            if ($chunks[2] === 'list') {
+            if (array_key_exists($chunks[2], $map)) {
                 if (is_numeric($chunks[1])) {
                     $id = intval($chunks[1]);
                 } else {
@@ -585,7 +595,7 @@ class AAM_Service_AccessPolicy
                 // Making sure that we have at least numeric post ID
                 if (!empty($id)) {
                     $visibility->pushOptions('post', "{$id}|{$chunks[0]}", array(
-                        'hidden' => $effect
+                        $map[$chunks[2]] => $effect
                     ));
                 }
             }
@@ -618,11 +628,12 @@ class AAM_Service_AccessPolicy
                 $parsed[$uri] = array(
                     'type' => 'allow'
                 );
-            } elseif (array_key_exists('Metadata', $stm)) {
-                $option[$uri] = $this->convertUriAction($stm['Metadata']);
+            } elseif(isset($stm['Metadata']['Redirect'])) {
+                $option[$uri] = $this->convertUriAction($stm['Metadata']['Redirect']);
             } else {
                 $option[$uri] = array(
-                    'type' => 'default'
+                    'type'   => 'default',
+                    'action' => null
                 );
             }
         }

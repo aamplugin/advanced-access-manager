@@ -1,0 +1,17 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:1",
+            "Action": "Read",
+            "Metadata": {
+                "Redirect": {
+                    "Type": "page",
+                    "Slug": "sample-page",
+                    "Code": 301
+                }
+            }
+        }
+    ]
+}

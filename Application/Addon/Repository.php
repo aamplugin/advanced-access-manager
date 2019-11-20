@@ -52,7 +52,9 @@ class AAM_Addon_Repository
      */
     public function getRegistry()
     {
-        return AAM_Core_API::getOption(self::DB_OPTION, array(), 'site');
+        $registry = AAM_Core_API::getOption(self::DB_OPTION, array(), 'site');
+
+        return (is_array($registry) ? $registry : array());
     }
 
     /**

@@ -74,7 +74,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
     /**
      * Initialize user subject
      *
-     * @return void
+     * @return AAM_Core_Subject_User
      *
      * @access public
      * @version 6.0.0
@@ -84,6 +84,8 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
         // Initialize current user. This hook is used by Access Policy service to
         // mutate the capability and role lists for current user
         do_action('aam_initialize_user_action', $this);
+
+        return $this;
     }
 
     /**

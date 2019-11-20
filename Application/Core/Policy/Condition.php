@@ -299,7 +299,9 @@ class AAM_Core_Policy_Condition
 
         foreach ($this->prepareConditions($conditions, $args) as $cnd) {
             foreach ((array) $cnd['right'] as $el) {
-                $sub    = str_replace('\*', '.*', preg_quote($el));
+                $sub = str_replace(
+                    array('\*', '@'), array('.*', '\\@'), preg_quote($el)
+                );
                 $result = $result || preg_match('@^' . $sub . '$@', $cnd['left']);
             }
         }

@@ -97,8 +97,7 @@
                 <?php echo get_avatar(AAM::getUser()->ID, 50); ?>
             </div>
             <div style="display:table-cell;">
-                <?php $allowAdmin = !AAM_Core_API::capExists('access_dashboard') || current_user_can('access_dashboard'); ?>
-                <?php if ($allowAdmin) { ?>
+                <?php if (AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) { ?>
                     <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br />
                     <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br />
                 <?php } ?>

@@ -1,0 +1,10 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:1",
+            "Action": ["Edit", "Delete", "Publish", "Comment"]
+        }
+    ]
+}

@@ -57,10 +57,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         add_filter('aam_user_row_actions_filter', array($this, 'renderUserActions'), 1, 2);
 
         add_filter('aam_visitor_subject_tab_filter', function ($content, $params) {
-            global $post;
-
-            if (is_a($post, 'WP_Post')
-                    && ($post->post_type === AAM_Service_AccessPolicy::POLICY_CPT)) {
+            if ($this->getFromQuery('aamframe') === 'principal') {
                 $content = AAM_Backend_View::getInstance()->loadPartial(
                     'visitor-principal-subject-tab',
                     $params

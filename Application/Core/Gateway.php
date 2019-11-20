@@ -182,8 +182,12 @@ final class AAM_Core_Gateway
      * @access public
      * @version 6.0.0
      */
-    public function getAccessPolicyManager(AAM_Core_Subject $subject)
+    public function getAccessPolicyManager(AAM_Core_Subject $subject = null)
     {
+        if (is_null($subject)) {
+            $subject = AAM::getUser();
+        }
+
         if (AAM_Core_Config::get(AAM_Service_AccessPolicy::FEATURE_FLAG, true)) {
             $manager = AAM_Core_Policy_Factory::get($subject);
         } else {

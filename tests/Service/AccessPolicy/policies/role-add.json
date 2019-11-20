@@ -1,0 +1,11 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "allow",
+            "Resource": [
+                "Role:contributor"
+            ]
+        }
+    ]
+}

@@ -37,6 +37,7 @@ class AAM_Core_Policy_Token
         'HTTP_COOKIE'  => 'AAM_Core_Request::cookie',
         'PHP_SERVER'   => 'AAM_Core_Request::server',
         'ARGS'         => 'AAM_Core_Policy_Token::getArgValue',
+        'ENV'          => 'getenv',
         'CONST'        => 'AAM_Core_Policy_Token::getConstant',
         'WP_OPTION'    => 'AAM_Core_API::getOption',
         'JWT'          => 'AAM_Core_Policy_Token::getJwtClaim'
@@ -136,7 +137,7 @@ class AAM_Core_Policy_Token
                 break;
 
             default:
-                $value = $user->{$prop};
+                $value = (is_a($user, 'AAM_Core_Subject_User') ? $user->{$prop} : null);
                 break;
         }
 

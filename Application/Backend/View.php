@@ -21,7 +21,8 @@
 class AAM_Backend_View
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    use AAM_Core_Contract_RequestTrait,
+        AAM_Core_Contract_SingletonTrait;
 
     /**
      * Constructor
@@ -37,9 +38,7 @@ class AAM_Backend_View
 
         // Allow other plugins to register new AAM UI tabs/features
         do_action(
-            'aam_init_ui_action',
-            'AAM_Backend_Feature::registerFeature',
-            $subject
+            'aam_init_ui_action', 'AAM_Backend_Feature::registerFeature', $subject
         );
     }
 
@@ -56,10 +55,10 @@ class AAM_Backend_View
      * @access public
      * @version 6.0.0
      */
-    public function loadPartial($tmpl, $params = array())
+    public static function loadPartial($tmpl, $params = array())
     {
         if (preg_match('/^[a-z-]+$/i', $tmpl)) {
-            $html = $this->loadTemplate(
+            $html = self::loadTemplate(
                 __DIR__ . "/tmpl/partial/{$tmpl}.php",
                 (is_object($params) ? $params : (object) $params)
             );
@@ -81,7 +80,7 @@ class AAM_Backend_View
      * @access public
      * @version 6.0.0
      */
-    public function loadTemplate($file_path, $params =  null)
+    public static function loadTemplate($file_path, $params =  null)
     {
         ob_start();
 
@@ -105,7 +104,7 @@ class AAM_Backend_View
      * @access protected
      * @version 6.0.0
      */
-    protected function prepareIframeWPAssetsURL($type)
+    protected static function prepareIframeWPAssetsURL($type)
     {
         global $wp_scripts, $compress_scripts, $compress_css;
 
@@ -141,7 +140,7 @@ class AAM_Backend_View
     {
         $response = null;
 
-        $action  = AAM_Core_Request::request('sub_action');
+        $action  = $this->getFromPost('sub_action');
         $parts   = explode('.', $action);
         $subject = AAM_Backend_Subject::getInstance();
 
@@ -188,12 +187,12 @@ class AAM_Backend_View
         $basedir = dirname(__FILE__) . '/tmpl/metabox/';
 
         if (current_user_can('aam_manager')) {
-            if (($type === 'post') && current_user_can('aam_manage_posts')) {
+            if (($type === 'post') && current_user_can('aam_manage_content')) {
                 echo $this->loadTemplate(
                     $basedir . 'post-iframe.php',
                     (object) array(
-                        'objectId'    => filter_input(INPUT_GET, 'id'),
-                        'objectType'  => filter_input(INPUT_GET, 'type'),
+                        'objectId'    => $this->getFromQuery('id'),
+                        'objectType'  => $this->getFromQuery('type'),
                         'postManager' => new AAM_Backend_Feature_Main_Post()
                     )
                 );
@@ -201,10 +200,12 @@ class AAM_Backend_View
                 echo $this->loadTemplate(
                     $basedir . 'user-iframe.php',
                     (object) array(
-                        'user' => new WP_User(filter_input(INPUT_GET, 'id')),
+                        'user' => new WP_User($this->getFromQuery('id')),
                         'type' => 'main'
                     )
                 );
+            } elseif ($type === 'main') {
+                echo $this->loadTemplate($basedir . 'main-iframe.php');
             } else {
                 echo apply_filters('aam_iframe_content_filter', null, $type, $this);
             }
@@ -223,9 +224,9 @@ class AAM_Backend_View
      * @access public
      * @version 6.0.0
      */
-    public function renderPostMetabox($post)
+    public static function renderPostMetabox($post)
     {
-        return $this->loadTemplate(
+        return static::loadTemplate(
             dirname(__FILE__) . '/tmpl/metabox/post-metabox.php',
             (object) array('post' => $post)
         );
@@ -241,9 +242,9 @@ class AAM_Backend_View
      * @access public
      * @version 6.0.0
      */
-    public function renderTermMetabox($term)
+    public static function renderTermMetabox($term)
     {
-        return $this->loadTemplate(
+        return static::loadTemplate(
             dirname(__FILE__) . '/tmpl/metabox/term-metabox.php',
             (object) array(
                 'term'     => $term,
@@ -262,9 +263,9 @@ class AAM_Backend_View
      * @access public
      * @version 6.0.0
      */
-    public function renderUserMetabox($user)
+    public static function renderUserMetabox($user)
     {
-        return $this->loadTemplate(
+        return static::loadTemplate(
             dirname(__FILE__) . '/tmpl/metabox/user-metabox.php',
             (object) array(
                 'user' => $user
@@ -281,12 +282,12 @@ class AAM_Backend_View
      * @global WP_Post $post
      * @version 6.0.0
      */
-    public function renderPolicyMetabox()
+    public static function renderPolicyMetabox()
     {
         global $post;
 
         if (is_a($post, 'WP_Post')) {
-            $content = $this->loadTemplate(
+            $content = static::loadTemplate(
                 dirname(__FILE__) . '/tmpl/metabox/policy-metabox.php',
                 (object) array('post' => $post)
             );
@@ -306,12 +307,12 @@ class AAM_Backend_View
      * @global WP_Post $post
      * @version 6.0.0
      */
-    public function renderPolicyPrincipalMetabox()
+    public static function renderPolicyPrincipalMetabox()
     {
         global $post;
 
         if (is_a($post, 'WP_Post')) {
-            $content = $this->loadTemplate(
+            $content = static::loadTemplate(
                 dirname(__FILE__) . '/tmpl/metabox/policy-principal-metabox.php',
                 (object) array('post' => $post)
             );
@@ -359,14 +360,14 @@ class AAM_Backend_View
                 break;
 
             case 'extensions':
-                if (current_user_can('aam_manage_extensions')) {
+                if (current_user_can('aam_manage_addons')) {
                     $content = $this->loadTemplate($basedir . 'addon-panel.php');
                 }
                 break;
 
             case 'post-access-form':
-                $type    = filter_input(INPUT_POST, 'type'); // Type of object to load
-                $id      = filter_input(INPUT_POST, 'id'); // Object Id
+                $type    = $this->getFromPost('type'); // Type of object to load
+                $id      = $this->getFromPost('id'); // Object Id
 
                 $manager = new AAM_Backend_Feature_Main_Post();
                 $content = $manager->getAccessForm($id, $type);

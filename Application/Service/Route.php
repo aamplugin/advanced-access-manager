@@ -27,20 +27,6 @@ class AAM_Service_Route
     const FEATURE_FLAG = 'core.service.route.enabled';
 
     /**
-     * Map of routes and resources
-     *
-     * @var array
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected $resources = array(
-        'user' => array(
-            '/wp/v2/users'
-        )
-    );
-
-    /**
      * Constructor
      *
      * @return void
@@ -139,53 +125,21 @@ class AAM_Service_Route
     }
 
     /**
-     * Undocumented function
+     * Register route controllers
      *
      * @return void
+     *
+     * @access public
+     * @version 6.0.0
      */
     public function registerRouteControllers()
     {
         global $wp;
 
         if (!empty($wp->query_vars['rest_route'])) {
-            // REST API action authorization. Triggered before call is dispatched
-            add_filter(
-                'rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3
-            );
-
             // Manage access to the RESTful endpoints
             add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), 1, 3);
-
-            // Register additional RESTful resources if defined
-            $this->registerAdditionalResources();
         }
-    }
-
-    /**
-     * Authorize RESTful action before it is dispatched by RESTful Server
-     *
-     * @param mixed  $result
-     * @param object $handler
-     * @param object $request
-     *
-     * @return mixed
-     *
-     * @access public
-     */
-    public function beforeDispatch($result, $handler, $request)
-    {
-        if (empty($result)) {
-            foreach ($this->resources as $res => $routes) {
-                foreach ($routes as $regex) {
-                    if (preg_match('#^' . $regex . '$#i', $request->get_route())) {
-                        $class_name = 'AAM_Api_Rest_Resource_' . ucfirst($res);
-                        $result    = $class_name::getInstance()->authorize($request);
-                    }
-                }
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -200,6 +154,7 @@ class AAM_Service_Route
      * @return WP_Error|null
      *
      * @access public
+     * @version 6.0.0
      */
     public function authorizeRequest($response, $server, $request)
     {
@@ -222,24 +177,6 @@ class AAM_Service_Route
         }
 
         return $response;
-    }
-
-    /**
-     * Register additional endpoint resource to control
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function registerAdditionalResources()
-    {
-        // Register any additional endpoints with ConfigPress
-        $additional = AAM_Core_Config::get('rest.manage.endpoint');
-
-        if (!empty($additional) && is_array($additional)) {
-            $this->resources = array_merge_recursive($this->resources, $additional);
-        }
     }
 
 }

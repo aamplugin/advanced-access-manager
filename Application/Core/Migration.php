@@ -83,6 +83,19 @@ final class AAM_Core_Migration
     }
 
     /**
+     * Clear failure log from the database
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.1
+     */
+    public static function resetFailureLog()
+    {
+        return AAM_Core_API::deleteOption(self::DB_FAILURE_OPTION);
+    }
+
+    /**
      * Store completed script
      *
      * @param string $file_name

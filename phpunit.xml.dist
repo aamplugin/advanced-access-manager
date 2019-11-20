@@ -8,8 +8,42 @@
     convertWarningsToExceptions="true"
 >
     <testsuites>
-        <testsuite name="AAM Basic Functionality">
-            <directory suffix="Test.php" phpVersion="5.3.0">./tests/</directory>
+        <testsuite name="Core">
+            <directory suffix="Test.php">./tests/Core</directory>
+        </testsuite>
+        <testsuite name="Services">
+            <directory suffix="Test.php">./tests/Service</directory>
+        </testsuite>
+        <testsuite name="Policy">
+            <directory suffix="Test.php">./tests/Service/AccessPolicy</directory>
+        </testsuite>
+        <testsuite name="Addons">
+            <directory suffix="Test.php">./tests/Addon</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <const name="AAM_UNITTEST_AUTH_USER_ID" value="1" />
+        <const name="AAM_UNITTEST_AUTH_MULTIROLE_USER_ID" value="5" />
+        <const name="AAM_UNITTEST_AUTH_SUBADMIN_USER_ID" value="8" />
+        <const name="AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID" value="9" />
+        <const name="AAM_UNITTEST_POST_ID" value="1" />
+        <const name="AAM_UNITTEST_LEVEL_1_POST_ID" value="2944" />
+        <const name="AAM_UNITTEST_LEVEL_2_POST_ID" value="2946" />
+        <const name="AAM_UNITTEST_ATTACHMENT_ID" value="26" />
+        <const name="AAM_UNITTEST_CATEGORY_ID" value="1" />
+        <const name="AAM_UNITTEST_TAG_ID" value="35" />
+        <const name="AAM_UNITTEST_CATEGORY_LEVEL_1_ID" value="37" />
+        <const name="AAM_UNITTEST_CATEGORY_LEVEL_2_ID" value="38" />
+        <const name="AAM_UNITTEST_CATEGORY_LEVEL_3_ID" value="39" />
+        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID" value="4" />
+        <const name="AAM_UNITTEST_PAGE_ID" value="2" />
+        <const name="AAM_UNITTEST_PAGE_LEVEL_1_ID" value="260" />
+        <const name="AAM_UNITTEST_PAGE_LEVEL_2_ID" value="262" />
+        <const name="AAM_UNITTEST_JOHN_ID" value="2" />
+        <const name="AAM_UNITTEST_USERNAME" value="john" />
+        <const name="AAM_UNITTEST_PASSWORD" value="123456" />
+        <const name="AAM_UNITTEST_NAV_MENU_NAME" value="Main Menu" />
+        <const name="AAM_UNITTEST_ACCESS_POLICY_ID" value="291" />
+        <server name="SERVER_PROTOCOL" value="HTTP/1.0"/>
+    </php>
 </phpunit>

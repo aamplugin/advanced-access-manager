@@ -1,0 +1,9 @@
+config:
+  target: 'http://dev.wordpress'
+  phases:
+    - duration: 60
+      arrivalRate: 20
+scenarios:
+  - flow:
+    - get:
+        url: "/"

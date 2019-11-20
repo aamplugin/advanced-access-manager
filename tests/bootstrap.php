@@ -6,21 +6,22 @@
  */
 
 // Autoloader for the PHPUnit Framework
-spl_autoload_register(function($classname) {
+spl_autoload_register(function ($classname) {
+    $filepath = null;
+
     if (strpos($classname, 'PHPUnit') === 0) {
         $filepath = __DIR__ . '\\' . $classname . '.php';
-        
-        if (file_exists($filepath)) {
-            require $filepath;
-        }
+    } elseif (strpos($classname, 'AAM\UnitTest') === 0) {
+        $filepath = __DIR__ . str_replace(array('AAM\UnitTest', '\\'), array('', '/'), $classname) . '.php';
+    }
+
+    if ($filepath && file_exists($filepath)) {
+        require $filepath;
     }
 });
-
-// Load test subject
-require_once __DIR__ . '/subject.php';
 
 // Load the WordPress library.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
 
-// Set up the WordPress query.
-wp();
+// Very important to allow to test headers
+ob_start();

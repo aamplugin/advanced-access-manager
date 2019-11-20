@@ -31,9 +31,7 @@ class AAM_Backend_Manager
     protected function __construct()
     {
         //print required JS & CSS
-        add_action('admin_print_footer_scripts', array($this, 'printFooterJavascript'));
         add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
-        add_action('admin_print_styles', array($this, 'printStylesheet'));
 
         // Alter user edit screen with support for multiple roles
         if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
@@ -168,22 +166,6 @@ class AAM_Backend_Manager
     }
 
     /**
-     * Print all the necessary AAM styles
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function printStylesheet()
-    {
-        if (AAM::isAAM()) {
-            wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
-            wp_enqueue_style('aam-main', AAM_MEDIA . '/css/aam.css');
-        }
-    }
-
-    /**
      * Adjust user edit/add screen to support multiple roles
      *
      * @param WP_User|string $param
@@ -270,10 +252,8 @@ class AAM_Backend_Manager
         if (AAM::isAAM()) {
             $text  = '<span id="footer-thankyou">';
             $text .= AAM_Backend_View_Helper::preparePhrase('[Help us] to be more noticeable and submit your review', 'b');
-            $text .= '<a href="https://wordpress.org/support/plugin/advanced-access-manager/reviews/"';
-            $text .= 'target="_blank"><i class="icon-star"></i>';
-            $text .= '<i class="icon-star"></i><i class="icon-star"></i>';
-            $text .= '<i class="icon-star"></i><i class="icon-star"></i></a>';
+            $text .= ' <a href="https://wordpress.org/support/plugin/advanced-access-manager/reviews/"';
+            $text .= 'target="_blank">here</a>';
             $text .= '</span>';
         }
 
@@ -334,8 +314,7 @@ class AAM_Backend_Manager
     {
         check_ajax_referer('aam_ajax');
 
-        // flush any output buffer
-        @ob_clean();
+        @ob_clean(); // flush any output buffer
 
         if (current_user_can('aam_manager')) {
             $partial  = filter_input(INPUT_POST, 'partial');

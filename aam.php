@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.0.0-beta.1
+ * Version: 6.0.0
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager
@@ -55,10 +55,13 @@ class AAM
      */
     protected function __construct()
     {
-        // Initialize current subject
-        $this->changeUser();
+        // Initialize current user
+        $this->initializeUser();
 
-        add_action('set_current_user', array($this, 'changeUser'));
+        // Make sure if user is changed dynamically, AAM adjusts accordingly
+        add_action('set_current_user', function() {
+            $this->initializeUser();
+        });
     }
 
     /**
@@ -107,21 +110,28 @@ class AAM
      *
      * This method is triggered if some process updates current user
      *
-     * @return void
+     * @return AAM_Core_Subject
      *
      * @access public
      * @version 6.0.0
      */
-    public function changeUser()
+    public function initializeUser()
     {
-        $id = get_current_user_id();
+        global $current_user;
+
+        // Important! Do not use WP core function to avoid loop
+        $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
 
         // Change current user
         if ($id) {
-            $this->setUser(self::api()->getUser($id));
+            $user = (new AAM_Core_Subject_User($id))->initialize();
         } else {
-            $this->setUser(new AAM_Core_Subject_Visitor());
+            $user = new AAM_Core_Subject_Visitor();
         }
+
+        $this->setUser($user);
+
+        return $user;
     }
 
     /**

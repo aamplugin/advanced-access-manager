@@ -74,19 +74,16 @@ class AAM_Service_ExtendedCapabilities
             add_action('init', function() {
                 if (is_user_logged_in()) {
                     // Check if user is allowed to see backend
-                    if (AAM_Core_API::capExists('access_dashboard')) {
+                    if (!AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) {
                         // If this is the AJAX call, still allow it because it will break a lot
                         // of frontend stuff that depends on it
-                        if (!current_user_can('access_dashboard') && !defined('DOING_AJAX')) {
+                        if (!defined('DOING_AJAX')) {
                             wp_die(__('Access Denied', AAM_KEY), 'aam_access_denied');
                         }
                     }
 
                     // Check if we need to show admin bar for the current user
-                    if (
-                        AAM_Core_API::capExists('show_admin_bar')
-                        && !current_user_can('show_admin_bar')
-                    ) {
+                    if (AAM_Core_API::isAAMCapabilityAllowed('aam_show_toolbar') === false) {
                         add_filter('show_admin_bar', '__return_false', PHP_INT_MAX);
                     }
                 }
@@ -103,10 +100,7 @@ class AAM_Service_ExtendedCapabilities
 
             // Permalink manager
             add_filter('get_sample_permalink_html', function ($html) {
-                if (
-                    AAM_Core_API::capExists('edit_permalink')
-                    && !current_user_can('edit_permalink')
-                ) {
+                if (!AAM_Core_API::isAAMCapabilityAllowed('aam_edit_permalink')) {
                     $html = '';
                 }
 
@@ -129,10 +123,7 @@ class AAM_Service_ExtendedCapabilities
      */
     public function controlAdminNotifications()
     {
-        if (
-            AAM_Core_API::capExists('show_admin_notices')
-            && !current_user_can('show_admin_notices')
-        ) {
+        if (!AAM_Core_API::isAAMCapabilityAllowed('aam_show_admin_notices')) {
             remove_all_actions('admin_notices');
             remove_all_actions('network_admin_notices');
             remove_all_actions('user_admin_notices');
@@ -151,8 +142,8 @@ class AAM_Service_ExtendedCapabilities
      */
     public function screenOptions($flag)
     {
-        if (AAM_Core_API::capExists('show_screen_options')) {
-            $flag = current_user_can('show_screen_options');
+        if (AAM_Core_API::capExists('aam_show_screen_options')) {
+            $flag = current_user_can('aam_show_screen_options');
         }
 
         return $flag;
@@ -172,10 +163,7 @@ class AAM_Service_ExtendedCapabilities
      */
     public function helpOptions($help, $id, $screen)
     {
-        if (
-            AAM_Core_API::capExists('show_help_tabs')
-            && !current_user_can('show_help_tabs')
-        ) {
+        if (!AAM_Core_API::isAAMCapabilityAllowed('aam_show_help_tabs')) {
             $screen->remove_help_tabs();
             $help = array();
         }
@@ -201,16 +189,10 @@ class AAM_Service_ExtendedCapabilities
         $isProfile = $user->ID === get_current_user_id();
 
         if ($isProfile) {
-            if (
-                AAM_Core_API::capExists('change_own_password')
-                && !current_user_can('change_own_password')
-            ) {
+            if (!AAM_Core_API::isAAMCapabilityAllowed('aam_change_own_password')) {
                 $result = false;
             }
-        } elseif (
-            AAM_Core_API::capExists('change_passwords')
-            && !current_user_can('change_passwords')
-        ) {
+        } elseif (!AAM_Core_API::isAAMCapabilityAllowed('aam_change_passwords')) {
             $result = false;
         }
 
@@ -235,16 +217,10 @@ class AAM_Service_ExtendedCapabilities
         $isProfile = $userId === get_current_user_id();
 
         if ($isProfile) {
-            if (
-                AAM_Core_API::capExists('change_own_password')
-                && !current_user_can('change_own_password')
-            ) {
+            if (!AAM_Core_API::isAAMCapabilityAllowed('aam_change_own_password')) {
                 $password = $password2 = null;
             }
-        } elseif (
-            AAM_Core_API::capExists('change_passwords')
-            && !current_user_can('change_passwords')
-        ) {
+        } elseif (!AAM_Core_API::isAAMCapabilityAllowed('aam_change_passwords')) {
             $password = $password2 = null;
         }
     }

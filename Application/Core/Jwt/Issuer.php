@@ -87,13 +87,7 @@ class AAM_Core_Jwt_Issuer
     public function issueToken($args = array(), $expires = null)
     {
         if (!empty($expires)) {
-            if (is_a($expires, 'DateTime')) {
-                $time = $expires;
-            } else {
-                $time = DateTime::createFromFormat(
-                    'm/d/Y, H:i O', $expires, new DateTimeZone('UTC')
-                );
-            }
+            $time = $expires;
         } else {
             $time = new DateTime(
                 AAM_Core_Config::get('authentication.jwt.expires', '+24 hours'),
@@ -102,7 +96,7 @@ class AAM_Core_Jwt_Issuer
         }
 
         $claims = apply_filters(
-            'aam-jwt-claims-filter',
+            'aam_jwt_claims_filter',
             array_merge(
                 array(
                     "iat" => time(),
@@ -130,24 +124,15 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
-     * @access public
+     * @access protected
      * @version 6.0.0
      */
-    public function extractTokenHeaders($token)
+    protected function extractTokenHeaders($token)
     {
         $parts   = explode('.', $token);
-        $headers = array();
-        try {
-            $headers = Firebase\JWT\JWT::jsonDecode(
-                Firebase\JWT\JWT::urlsafeB64Decode($parts[0])
-            );
-        } catch (Exception $ex) {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                'Invalid JWT token: ' . $ex->getMessage(),
-                AAM_VERSION
-            );
-        }
+        $headers = Firebase\JWT\JWT::jsonDecode(
+            Firebase\JWT\JWT::urlsafeB64Decode($parts[0])
+        );
 
         return (object) $headers;
     }

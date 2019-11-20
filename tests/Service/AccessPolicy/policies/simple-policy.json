@@ -1,0 +1,9 @@
+{
+    "Version": "1.0.0",
+    "Statement": {
+        "Effect": "deny",
+        "Resource": [
+            "BackendMenu:edit.php"
+        ]
+    }
+}

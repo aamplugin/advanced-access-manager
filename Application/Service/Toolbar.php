@@ -10,7 +10,7 @@
  */
 
 /**
- * Admin Toolbar service
+ * Toolbar service
  *
  * @package AAM
  * @version 6.0.0

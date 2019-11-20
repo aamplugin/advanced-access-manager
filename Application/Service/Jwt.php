@@ -118,6 +118,9 @@ class AAM_Service_Jwt
         // WP Core current user definition
         add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
 
+        // Disable WP Core cookie and nonce checks to allow JWT authentication
+        add_filter('rest_authentication_errors', '__return_false', PHP_INT_MAX);
+
         // Delete JWT cookie if it is set
         add_action('wp_logout', function() {
             if ($this->getFromCookie('aam_jwt_token')) {
@@ -148,7 +151,7 @@ class AAM_Service_Jwt
     public function registerAPI()
     {
         // Validate JWT token
-        register_rest_route('aam/v1', '/validate-jwt', array(
+        register_rest_route('aam/v2', '/jwt/validate', array(
             'methods'  => 'POST',
             'callback' => array($this, 'validateToken'),
             'args' => array(
@@ -158,9 +161,19 @@ class AAM_Service_Jwt
                 )
             ),
         ));
+        register_rest_route('aam/v1', '/validate-jwt', array(
+            'methods'  => 'POST',
+            'callback' => array($this, 'validateTokenDeprecated'),
+            'args' => array(
+                'jwt' => array(
+                    'description' => __('JWT token.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
+        ));
 
         // Refresh JWT token
-        register_rest_route('aam/v1', '/refresh-jwt', array(
+        register_rest_route('aam/v2', '/jwt/refresh', array(
             'methods'  => 'POST',
             'callback' => array($this, 'refreshToken'),
             'args' => array(
@@ -170,6 +183,46 @@ class AAM_Service_Jwt
                 )
             ),
         ));
+        register_rest_route('aam/v1', '/refresh-jwt', array(
+            'methods'  => 'POST',
+            'callback' => array($this, 'refreshTokenDeprecated'),
+            'args' => array(
+                'jwt' => array(
+                    'description' => __('JWT token.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
+        ));
+
+        // Revoke JWT token
+        register_rest_route('aam/v2', '/jwt/revoke', array(
+            'methods'  => 'POST',
+            'callback' => array($this, 'revokeToken'),
+            'args' => array(
+                'jwt' => array(
+                    'description' => __('JWT token.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
+        ));
+    }
+
+    /**
+     * Validate JWT Token
+     *
+     * Deprecated endpoint that is replaced with V2
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @version 6.0.0
+     * @todo Remove in 6.5.0
+     */
+    public function validateTokenDeprecated(WP_REST_Request $request)
+    {
+        _deprecated_function('aam/v1/validate-jwt', '6.0.0', 'aam/v2/jwt/validate');
+
+        return $this->validateToken($request);
     }
 
     /**
@@ -196,6 +249,24 @@ class AAM_Service_Jwt
         }
 
         return $response;
+    }
+
+    /**
+     * Refresh JWT Token
+     *
+     * Deprecated endpoint that is replaced with V2
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @version 6.0.0
+     * @todo Remove in 6.5.0
+     */
+    public function refreshTokenDeprecated(WP_REST_Request $request)
+    {
+        _deprecated_function('aam/v1/refresh-jwt', '6.0.0', 'aam/v2/jwt/refresh');
+
+        return $this->refreshToken($request);
     }
 
     /**
@@ -238,6 +309,40 @@ class AAM_Service_Jwt
         } else {
             $response = new WP_REST_Response(new WP_Error(
                 'rest_jwt_validation_failure', $result->reason
+            ), 400);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Revoke JWT token
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function revokeToken(WP_REST_Request $request)
+    {
+        $jwt    = $request->get_param('jwt');
+        $claims = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt);
+
+        if ($claims->isValid === true) {
+            if ($this->revokeUserToken($claims->userId, $jwt)) {
+                $response = new WP_REST_Response(
+                    array('message' => 'Token revoked successfully'), 200
+                );
+            } else {
+                $response = new WP_REST_Response(new WP_Error(
+                    'rest_jwt_revoking_failure', 'Failed to revoke provided token'
+                ), 404);
+            }
+        } else {
+            $response = new WP_REST_Response(new WP_Error(
+                'rest_jwt_validation_failure', $claims->reason
             ), 400);
         }
 
@@ -380,7 +485,7 @@ class AAM_Service_Jwt
      * @access public
      * @version 6.0.0
      */
-    public function revokeToken($userId, $token)
+    public function revokeUserToken($userId, $token)
     {
         $filtered = array();
 
@@ -405,8 +510,9 @@ class AAM_Service_Jwt
      */
     public function determineUser($userId)
     {
+
         if (empty($userId)) {
-            $token  = $this->extractToken();
+            $token = $this->extractToken();
 
             if (!empty($token)) {
                 $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($token->jwt);

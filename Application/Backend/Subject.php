@@ -174,7 +174,7 @@ class AAM_Backend_Subject
         } elseif (current_user_can('aam_manage_default')) {
             $this->initRequestedSubject(AAM_Core_Subject_Default::UID, null);
         } else {
-            wp_die(__('You are not allowed to manage AAM subjects', AAM_KEY));
+            wp_die(__('You are not allowed to manage any AAM subject', AAM_KEY));
         }
     }
 

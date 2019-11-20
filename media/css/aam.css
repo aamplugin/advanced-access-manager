@@ -221,6 +221,12 @@ html, body {
     line-height: 34px;
 }
 
+#wpbody-content > p {
+  margin: 5em;
+  text-align: center;
+  font-weight: bold;
+}
+
 .metabox-holder h3 {
     letter-spacing: 1px;
     font-size: 1.2em;
@@ -317,6 +323,8 @@ div.error {
     box-shadow: none;
     height: 34px;
     border-radius: 0;
+    border: 1px solid #ccc !important;
+    padding: 6px 12px !important;
 }
 
 .form-control.highlight {
@@ -956,8 +964,12 @@ input[type=radio]:checked + label:before {
 
 .aam-slide-form.active, .aam-help-context.active {
     left: 0;
-    z-index: 1200;
+    z-index: 999;
     position: relative;
+}
+
+.modal-backdrop {
+  z-index: 998;
 }
 
 .aam-slide-form .table td {

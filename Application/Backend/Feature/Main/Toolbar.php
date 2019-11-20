@@ -10,7 +10,7 @@
  */
 
 /**
- * Admin toolbar manager
+ * Toolbar manager
  *
  * @package AAM
  * @version 6.0.0
@@ -26,7 +26,7 @@ class AAM_Backend_Feature_Main_Toolbar
      *
      * @version 6.0.0
      */
-    const ACCESS_CAPABILITY = 'aam_manage_admin_toolbar';
+    const ACCESS_CAPABILITY = 'aam_manage_toolbar';
 
     /**
      * Type of AAM core object
@@ -137,7 +137,7 @@ class AAM_Backend_Feature_Main_Toolbar
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'toolbar',
             'position'   => 6,
-            'title'      => __('Admin Toolbar', AAM_KEY),
+            'title'      => __('Toolbar', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(

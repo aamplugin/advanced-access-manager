@@ -239,6 +239,21 @@ final class AAM_Core_API
     }
 
     /**
+     * Check if AAM capability is allowed
+     *
+     * @param string $cap
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public static function isAAMCapabilityAllowed($cap)
+    {
+        return !self::capExists($cap) || current_user_can($cap);
+    }
+
+    /**
      * Clear all AAM settings
      *
      * @return void
@@ -255,6 +270,11 @@ final class AAM_Core_API
 
         // Trigger the action to inform other services to clean-up the options
         do_action('aam_clear_settings_action');
+    }
+
+    public static function clearInternalCache()
+    {
+
     }
 
     /**

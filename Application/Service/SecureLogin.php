@@ -136,19 +136,23 @@ class AAM_Service_SecureLogin
             'callback' => array($this, 'authenticate'),
             'args' => apply_filters('aam_restful_authentication_args_filter', array(
                 'username' => array(
-                    'description' => __('Valid username.', AAM_KEY),
+                    'description' => 'Valid username.',
                     'type'        => 'string',
                 ),
                 'password' => array(
-                    'description' => __('Valid password.', AAM_KEY),
+                    'description' => 'Valid password.',
                     'type'        => 'string',
                 ),
                 'redirect' => array(
-                    'description' => __('Redirect URL after authentication.', AAM_KEY),
+                    'description' => 'Redirect URL after authentication.',
                     'type'        => 'string',
                 ),
                 'remember' => array(
-                    'description' => __('Prolong the user session.', AAM_KEY),
+                    'description' => 'Prolong the user session.',
+                    'type'        => 'boolean',
+                ),
+                'returnAuthCookies' => array(
+                    'description' => 'Return auth cookies.',
                     'type'        => 'boolean',
                 )
             )),
@@ -169,9 +173,14 @@ class AAM_Service_SecureLogin
      */
     public function authenticate(WP_REST_Request $request)
     {
-        $status = 200;
+        $status  = 200;
 
         try {
+            // No need to generate Auth cookies, unless explicitly stated so
+            if ($request->get_param('returnAuthCookies') !== true) {
+                add_filter('send_auth_cookies', '__return_false');
+            }
+
             $user = wp_signon(array(
                 'user_login'    => $request->get_param('username'),
                 'user_password' => $request->get_param('password'),

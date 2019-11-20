@@ -54,7 +54,7 @@ class AAM_Service_Content
                 // Check if Access Manager metabox feature is enabled
                 $metaboxEnabled = AAM_Core_Config::get('ui.settings.renderAccessMetabox', true);
 
-                if ($metaboxEnabled && current_user_can('aam_manage_posts')) {
+                if ($metaboxEnabled && current_user_can('aam_manage_content')) {
                     add_action('edit_category_form_fields', array($this, 'renderAccessTermMetabox'), 1);
                     add_action('edit_link_category_form_fields', array($this, 'renderAccessTermMetabox'), 1);
                     add_action('edit_tag_form_fields', array($this, 'renderAccessTermMetabox'), 1);
@@ -119,7 +119,7 @@ class AAM_Service_Content
                 function () {
                     global $post;
 
-                    echo AAM_Backend_View::getInstance()->renderPostMetabox($post);
+                    echo AAM_Backend_View::renderPostMetabox($post);
                 },
                 null,
                 'advanced',
@@ -133,8 +133,11 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.0.1 Fixed bug related to enabling commenting on all posts
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.1
      */
     protected function initializeHooks()
     {
@@ -167,9 +170,17 @@ class AAM_Service_Content
         // capability and meta data
         add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
 
-        //get control over commenting stuff
+        // Get control over commenting stuff
         add_filter('comments_open', function($open, $id) {
-            return AAM::getUser()->getObject('post', $id)->isAllowedTo('comment');
+            $object = AAM::getUser()->getObject('post', $id);
+
+            // If Leave Comments option is defined then override the default status.
+            // Otherwise keep it as-is
+            if ($object->isDefined('comment')) {
+                $open = $object->isAllowedTo('comment');
+            }
+
+            return $open;
         }, 10, 2);
 
         // REST API action authorization. Triggered before call is dispatched
@@ -307,7 +318,7 @@ class AAM_Service_Content
             $response = new WP_REST_Response($data, $status);
 
             if ($auth->get_error_code() === 'post_access_redirected') {
-                $response->set_headers(array('Location' => $data['location']));
+                $response->set_headers(array('Location' => $data['url']));
             }
         } else {
             $this->incrementPostReadCounter($object);
@@ -545,12 +556,7 @@ class AAM_Service_Content
         }
 
         if ($postType === 'any') {
-            $postType = array_keys(
-                get_post_types(
-                    array('public' => true, 'exclude_from_search' => false),
-                    'names'
-                )
-            );
+            $postType = array_keys(get_post_types(array('public' => true), 'names'));
         }
 
         return (array) $postType;
@@ -928,11 +934,12 @@ class AAM_Service_Content
 
         if ($post->is('ceased')) {
             $ceased = $post->get('ceased');
+            $now    = (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
 
-            if (strtotime($ceased['after']) <= time()) {
+            if ($ceased['after'] <= $now) {
                 $result = new WP_Error(
                     'post_access_expired',
-                    "User is unauthorized to access this post. Access Expired.",
+                    'User is unauthorized to access this post. Access Expired.',
                     array('status' => 401)
                 );
             }
@@ -1063,8 +1070,8 @@ class AAM_Service_Content
                 'post_access_redirected',
                 'Direct access is not allowed. Follow the provided redirect rule.',
                 array(
-                    'location' => $location,
-                    'status'   => $redirect['httpCode']
+                    'url'    => $location,
+                    'status' => $redirect['httpCode']
                 )
             );
         }

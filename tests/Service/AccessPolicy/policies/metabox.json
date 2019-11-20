@@ -1,0 +1,12 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [
+                "Widget:widgets|wp_widget_pages",
+                "Metabox:aam_policy|revisionsdiv"
+            ]
+        }
+    ]
+}

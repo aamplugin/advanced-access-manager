@@ -1,0 +1,19 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [
+                "Taxonomy:category:terms"
+            ],
+            "Action": ["Edit", "Delete"]
+        },
+        {
+            "Effect": "allow",
+            "Resource": [
+                "Term:category:39"
+            ],
+            "Action": "Edit"
+        }
+    ]
+}

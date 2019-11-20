@@ -1,0 +1,14 @@
+{
+    "Version": "1.0.0",
+    "Statement": {
+        "Effect": "deny",
+        "Resource": "Post:post:1",
+        "Action": "Read",
+        "Metadata": {
+            "Redirect": {
+                "Type": "url",
+                "URL": "https://aamplugin.com"
+            }
+        }
+    }
+}

@@ -98,6 +98,36 @@ class AAM_Core_Policy_Manager
     }
 
     /**
+     * Find all params that match provided search criteria
+     *
+     * @param string|array $s
+     * @param array        $args
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function getParams($s, $args = array())
+    {
+        if (is_array($s)) {
+            $regex = '/^(' . implode('|', $s) . ')$/i';
+        } else {
+            $regex = "/^{$s}$/i";
+        }
+
+        $params = array();
+
+        foreach ($this->tree['Param'] as $key => $param) {
+            if (preg_match($regex, $key) && $this->isApplicable($param, $args)) {
+                $params[$key] = $param;
+            }
+        }
+
+        return $this->replaceTokens($params);
+    }
+
+    /**
      * Find all statements that match provided resource of list of resources
      *
      * @param string|array $s

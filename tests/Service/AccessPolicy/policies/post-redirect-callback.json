@@ -1,0 +1,16 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:1",
+            "Action": "Read",
+            "Metadata": {
+                "Redirect": {
+                    "Type": "callback",
+                    "Callback": "AAM\\Callback\\Main::helloWorld"
+                }
+            }
+        }
+    ]
+}

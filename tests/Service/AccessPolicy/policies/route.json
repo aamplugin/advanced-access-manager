@@ -1,0 +1,11 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [
+                "Route:RESTful:/posts:GET"
+            ]
+        }
+    ]
+}

@@ -157,6 +157,25 @@ class AAM_Core_Object_Post extends AAM_Core_Object
     }
 
     /**
+     * Determine if property is defined
+     *
+     * This is useful for managing access to commenting system
+     *
+     * @param string $property
+     *
+     * @return boolean
+     *
+     * @access public
+     * @link https://forum.aamplugin.com/d/353-comment-system-activated
+     * @see AAM_Service_Content::initializeHooks
+     * @version 6.0.1
+     */
+    public function isDefined($property)
+    {
+        return array_key_exists($property, $this->getOption());
+    }
+
+    /**
      * Check if particular action is allowed
      *
      * This is alias for the AAM_Core_Object_Post::is($property) method and is used

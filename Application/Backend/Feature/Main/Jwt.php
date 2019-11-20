@@ -86,7 +86,7 @@ class AAM_Backend_Feature_Main_Jwt
             try {
                 if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
                     $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(
-                        $claims, $expires
+                        $claims, new DateTime('@' . $expires)
                     );
 
                     if ($register === true) {
@@ -152,7 +152,7 @@ class AAM_Backend_Feature_Main_Jwt
     {
         $user   = AAM_Backend_Subject::getInstance();
         $token  = filter_input(INPUT_POST, 'token');
-        $result = AAM_Service_Jwt::getInstance()->revokeToken($user->ID, $token);
+        $result = AAM_Service_Jwt::getInstance()->revokeUserToken($user->ID, $token);
 
         if ($result) {
             $response = array('status' => 'success');

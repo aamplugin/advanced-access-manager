@@ -1,0 +1,10 @@
+{
+    "Version": "1.0.0",
+    "Statement": {
+        "Effect": "deny",
+        "Resource": [
+            "Plugin:advanced-access-manager"
+        ],
+        "Action": ["WP:deactivate", "WP:activate"]
+    }
+}

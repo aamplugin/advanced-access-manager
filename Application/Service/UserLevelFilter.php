@@ -68,11 +68,11 @@ class AAM_Service_UserLevelFilter
     {
         // User/role filters
         add_action('init', function() {
-            if (!is_multisite() || !is_super_admin()) {
-                add_filter('editable_roles', array($this, 'filterRoles'));
-                add_action('pre_get_users', array($this, 'filterUserQuery'), 999);
-                add_filter('views_users', array($this, 'filterViews'));
-            }
+            add_filter('editable_roles', array($this, 'filterRoles'));
+            add_action('pre_get_users', array($this, 'filterUserQuery'), 999);
+            add_filter('views_users', array($this, 'filterViews'));
+            // RESTful user querying
+            add_filter('rest_user_query', array($this, 'prepareUserQueryArgs'));
         }, 1);
 
         // Check if user has ability to perform certain task on other users
@@ -99,8 +99,8 @@ class AAM_Service_UserLevelFilter
     {
         $allow_equal_level = true;
 
-        if (AAM_Core_API::capExists('manage_same_user_level')) {
-            $allow_equal_level = current_user_can('manage_same_user_level');
+        if (AAM_Core_API::capExists('aam_manage_same_user_level')) {
+            $allow_equal_level = current_user_can('aam_manage_same_user_level');
         }
 
         $user_level = AAM::getUser()->getMaxLevel();
@@ -144,6 +144,23 @@ class AAM_Service_UserLevelFilter
     }
 
     /**
+     * Prepare the user query arguments
+     *
+     * @param array $args
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function prepareUserQueryArgs($args)
+    {
+        $args['role__not_in'] = $this->prepareExcludedRoleList();
+
+        return $args;
+    }
+
+    /**
      * Filter user query
      *
      * Exclude all users that have higher user level
@@ -157,7 +174,19 @@ class AAM_Service_UserLevelFilter
      */
     public function filterUserQuery($query)
     {
-        //current user max level
+        $query->query_vars['role__not_in'] = $this->prepareExcludedRoleList();
+    }
+
+    /**
+     * Prepare the list of roles that are not allowed
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function prepareExcludedRoleList()
+    {
         $exclude = array();
         $roles   = AAM_Core_API::getRoles();
 
@@ -169,7 +198,7 @@ class AAM_Service_UserLevelFilter
             }
         }
 
-        $query->query_vars['role__not_in'] = $exclude;
+        return $exclude;
     }
 
     /**

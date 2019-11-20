@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website API routes for [%s]. For the full RESTful API experience, consider to use %sJWT authentication%s that is already available in AAM.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-authenticate-wordpress-user-with-jwt-token" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website API routes for [%s]. For the full RESTful API experience, consider to use %sJWT authentication%s that is already available in AAM.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/ultimate-guide-to-wordpress-jwt-authentication" target="_blank">', '</a>'); ?>
                 </p>
             </div>
         </div>

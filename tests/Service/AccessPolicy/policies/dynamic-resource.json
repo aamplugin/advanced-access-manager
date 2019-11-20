@@ -1,0 +1,12 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [
+                "Post:post:${USER.ID}"
+            ],
+            "Action": ["Read"]
+        }
+    ]
+}

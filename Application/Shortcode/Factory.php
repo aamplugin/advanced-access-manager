@@ -41,15 +41,15 @@ class AAM_Shortcode_Factory
      */
     public function __construct($args, $content)
     {
-        $context = !empty($args['context']) ? $args['context'] : 'content';
+        $cnt = strtolower(!empty($args['context']) ? $args['context'] : 'content');
 
-        $class_name = 'AAM_Shortcode_Handler_' . ucfirst($context);
-
-        if (class_exists($class_name)) {
-            $this->handler = new $class_name($args, $content);
+        if ($cnt === 'content') {
+            $this->handler = new AAM_Shortcode_Handler_Content($args, $content);
+        } elseif ($cnt === 'loginredirect') {
+            $this->handler = new AAM_Shortcode_Handler_LoginRedirect($args, $content);
         } else {
             $this->handler = apply_filters(
-                'aam_shortcode_filter', null, $context, $args, $content
+                'aam_shortcode_filter', null, $cnt, $args, $content
             );
         }
     }

@@ -1,0 +1,25 @@
+{
+    "Version": "1.0.0",
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": [
+                "PostType:post:posts"
+            ],
+            "Action": [
+                "Edit",
+                "Delete"
+            ]
+        },
+        {
+            "Effect": "allow",
+            "Resource": [
+                "Post:post:1"
+            ],
+            "Action": [
+                "Edit",
+                "Delete"
+            ]
+        }
+    ]
+}

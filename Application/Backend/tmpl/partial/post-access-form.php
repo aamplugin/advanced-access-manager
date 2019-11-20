@@ -198,7 +198,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <div id="post-expiration-datapicker"></div>
-                        <input type="hidden" id="aam-expire-datetime" value="<?php echo $params->object->get('ceased.after'); ?>" />
+                        <?php $ceased = $params->object->get('ceased.after'); ?>
+                        <input type="hidden" id="aam-expire-datetime" value="<?php echo ($ceased ? $ceased : strtotime('tomorrow')); ?>" />
                     </div>
                 </div>
                 <div class="modal-footer">

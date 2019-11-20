@@ -28,18 +28,16 @@ use WP_Error,
  *
  * The main purpose for this class is to eliminate AAM_Core_Compatibility
  *
+ * @since 6.0.1 Slightly refactored the way errors are collected during the migration
+ *              execution. Fixed fatal error when incorrectly defined "Expire" post
+ *              option
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.1
  */
 class Migration600 implements AAM_Core_Contract_MigrationInterface
 {
-    /**
-     * Migration script version
-     *
-     * @version 6.0.0
-     */
-    const VERSION = '6.0.0';
-
     /**
      * Migration callbacks
      *
@@ -49,6 +47,16 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      * @version 6.0.0
      */
     protected $migrationCallbacks = array();
+
+    /**
+     * Collection of errors during the migration
+     *
+     * @var array
+     *
+     * @access protected
+     * @version 6.0.1
+     */
+    protected $errors = array();
 
     /**
      * Constructor
@@ -82,34 +90,31 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
-     * @version 6.0.0
+     * @since 6.0.1 Changed the way `errors` are collected. Now any method pushes
+     *              directly to the $this->errors array to avoid passing $errors
+     *              array to multiple methods. Also, invoking cache clearing prior to
+     *              fetching settings
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.0.1
      */
     public function run()
     {
+        // Clear any cache that AAM set in the past
+        $this->clearInternalCache();
+
         // Fetch the list of all the access settings that are going to be converted
         // Prior to AAM v6, access settings were distributed between following db
         // tables: wp_options, wp_usermeta, wp_postmeta
         $settings = $this->fetchAccessSettings();
 
-        // Iterate over each group of settings and convert them to AAM v6 format
-        $results = array(
-            'errors' => array(),
-            'dump'   => $settings
-        );
-
         foreach($settings as $group => $collection) {
             if ($group === 'options') {
-                $results['errors'] = array_merge(
-                    $results['errors'], $this->processOptions($collection)
-                );
+                $this->processOptions($collection);
             } elseif ($group === 'usermeta') {
-                $results['errors'] = array_merge(
-                    $results['errors'], $this->processUsermeta($collection)
-                );
+                $this->processUsermeta($collection);
             } elseif ($group === 'postmeta') {
-                $results['errors'] = array_merge(
-                    $results['errors'], $this->processPostmeta($collection)
-                );
+                $this->processPostmeta($collection);
             }
         }
 
@@ -119,10 +124,38 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
         // Clear Scheduled legacy AAM task
         wp_clear_scheduled_hook('aam-cron');
 
+        // Convert all AAM capabilities to new naming convention
+        $this->convertCapabilities();
+
         // Finally store this script as completed
         AAM_Core_Migration::storeCompletedScript(basename(__FILE__));
 
-        return $results;
+        return array(
+            'errors' => $this->errors,
+            'dump'   => $settings
+        );
+    }
+
+    /**
+     * Clear internal AAM cache
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.1
+     */
+    protected function clearInternalCache()
+    {
+        global $wpdb;
+
+        // Delete AAM internal cache from the _options table
+        $opt_query  = "DELETE FROM {$wpdb->options} WHERE (`option_name` LIKE %s) ";
+        $opt_query .= "OR (`option_name` LIKE %s)";
+        $wpdb->query($wpdb->prepare($opt_query, array('aam_cache_%', 'aam_%_cache')));
+
+        // Fetch access settings from the wp_usermeta table
+        $query  = "DELETE FROM {$wpdb->usermeta} WHERE (`meta_key` = %s)";
+        $wpdb->query($wpdb->prepare($query, array("{$wpdb->prefix}aam_cache")));
     }
 
     /**
@@ -167,49 +200,43 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param array $options
      *
-     * @return array
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.1
      */
     protected function processOptions($options)
     {
-        $results = array();
-
         foreach($options as $option) {
             switch($option->option_name) {
                 case 'aam-configpress':
-                    $result = $this->_convertConfigPress($option);
+                    $this->_convertConfigPress($option);
                     break;
 
                 case 'aam-extensions':
-                    $result = $this->_convertExtensionRegistry($option);
+                    $this->_convertExtensionRegistry($option);
                     break;
 
                 case 'aam-utilities':
-                    $result = $this->_convertSettings($option);
+                    $this->_convertSettings($option);
                     break;
 
-                case 'aam_metabox_cache':
-                case 'aam_menu_cache':
-                case 'aam_toolbar_cache':
                 case 'aam-check':
                 case 'aam-uid':
                     // Skip this one and just delete
-                    AAM_Core_API::deleteOption($option->option_name);
+                    // TODO: Enable in the 6.0.2 release
+                    // $result = AAM_Core_API::deleteOption($option->option_name);
                     break;
 
                 default:
-                    $result = $this->_parseObjectOption($option);
+                    $this->_parseObjectOption($option);
                     break;
             }
-
-            if ($result !== true) {
-                $results[] = $result;
-            }
         }
-
-        return $results;
     }
 
     /**
@@ -217,15 +244,17 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $options
      *
-     * @return array
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.1
      */
     protected function processPostmeta($options)
     {
-        $results = array();
-
         foreach($options as $option) {
             $name  = str_replace('aam-post-access-', '', $option->meta_key);
             $value = $this->_convertPostObject(maybe_unserialize($option->meta_value));
@@ -244,17 +273,16 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 AAM_Core_AccessSettings::getInstance()->set($xpath, $value);
 
                 // Delete legacy option
-                delete_post_meta($option->post_id, $option->meta_key);
+                // TODO: Enable in the 6.0.2 release
+                // delete_post_meta($option->post_id, $option->meta_key);
             } else {
-                $results[] = new WP_Error(
+                $this->errors[] = new WP_Error(
                     'migration_error',
                     sprintf('Failed to convert post "%d" options', $option->post_id),
                     $option
                 );
             }
         }
-
-        return $results;
     }
 
     /**
@@ -262,16 +290,18 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $options
      *
-     * @return array
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.1
      */
     protected function processUsermeta($options)
     {
         global $wpdb;
-
-        $results = array();
 
         foreach($options as $option) {
             // e.g. "wp_aam_type_post", "wp_aam_term_1|category"
@@ -305,9 +335,10 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     AAM_Core_AccessSettings::getInstance()->set($xpath, $options);
 
                     // Delete legacy meta
-                    delete_user_meta($option->user_id, $option->meta_key);
+                    // TODO: Enable in the 6.0.2 release
+                    // delete_user_meta($option->user_id, $option->meta_key);
                 } else {
-                    $results[] = new WP_Error(
+                    $this->errors[] = new WP_Error(
                         'migration_error',
                         sprintf('Unrecognized object type "%s"', $match[1]),
                         $option
@@ -316,17 +347,47 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             }elseif ($option->meta_key === 'aam-jwt') {
                 // Just delete it. AAM v5 JWT tokens are no longer valid due to the
                 // new way to calculate exp property
-                delete_user_meta($option->user_id, $option->meta_key);
+                // TODO: Enable in the 6.0.2 release
+                // delete_user_meta($option->user_id, $option->meta_key);
             } else {
-                $results[] = new WP_Error(
+                $this->errors[] = new WP_Error(
                     'migration_error',
                     sprintf('Failed to parse access option %s', $option->meta_key),
                     $option
                 );
             }
         }
+    }
 
-        return $results;
+    /**
+     * Convert all legacy AAM capabilities to new naming convention
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function convertCapabilities()
+    {
+        $legacy_caps = array(
+            'show_admin_notices', 'manage_same_user_level', 'edit_permalink',
+            'show_screen_options', 'show_help_tabs', 'access_dashboard',
+            'change_own_password', 'change_passwords', 'access_dashboard'
+        );
+
+        $roles  = AAM_Core_API::getRoles();
+        $option = AAM_Core_API::getOption($roles->role_key);
+
+        foreach($option as $id => $role) {
+            foreach($role['capabilities'] as $cap => $effect) {
+                if (in_array($cap, $legacy_caps, true)) {
+                    unset($option[$id]['capabilities'][$cap]);
+                    $option[$id]['capabilities']['aam_' . $cap] = $effect;
+                }
+            }
+        }
+
+        AAM_Core_API::updateOption($roles->role_key, $option);
     }
 
     /**
@@ -334,10 +395,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $option
      *
-     * @return array|WP_Error
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.0
+     * @version 6.0.1
      */
     private function _convertConfigPress($option)
     {
@@ -345,14 +410,13 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
 
         if ($result === true) {
             // Delete legacy option
-            AAM_Core_API::deleteOption($option->option_name);
+            // TODO: Enable in the 6.0.2 release
+            // AAM_Core_API::deleteOption($option->option_name);
         } else {
-            $response = new WP_Error(
+            $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert ConfigPress settings', $option
             );
         }
-
-        return (!empty($response) ? $response : true);
     }
 
     /**
@@ -360,10 +424,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $option
      *
-     * @return array|WP_Error
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.0
+     * @version 6.0.1
      */
     private function _convertExtensionRegistry($option)
     {
@@ -373,14 +441,13 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
 
         if ($result === true) {
             // Delete legacy option
-            AAM_Core_API::deleteOption($option->option_name);
+            // TODO: Enable in the 6.0.2 release
+            // AAM_Core_API::deleteOption($option->option_name);
         } else {
-            $response = new WP_Error(
+            $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert Addon settings', $option
             );
         }
-
-        return (!empty($response) ? $response : true);
     }
 
     /**
@@ -388,10 +455,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $option
      *
-     * @return array|WP_Error
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.0
+     * @version 6.0.1
      */
     private function _convertSettings($option)
     {
@@ -441,14 +512,13 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
 
         if ($result === true) {
             // Delete legacy option
-            AAM_Core_API::deleteOption($option->option_name);
+            // TODO: Enable in the 6.0.2 release
+            // AAM_Core_API::deleteOption($option->option_name);
         } else {
-            $response = new WP_Error(
+            $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert core settings', $option
             );
         }
-
-        return (!empty($response) ? $response : true);
     }
 
     /**
@@ -478,10 +548,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @param object $option
      *
-     * @return array
+     * @return void
+     *
+     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
+     *              of returning them.
+     * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.0
+     * @version 6.0.1
      */
     private function _parseObjectOption($option)
     {
@@ -540,23 +614,22 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 AAM_Core_AccessSettings::getInstance()->set($xpath, $options);
 
                 // Delete legacy option
-                AAM_Core_API::deleteOption($option->option_name);
+                // TODO: Enable in the 6.0.2 release
+                // AAM_Core_API::deleteOption($option->option_name);
             } else {
-                $error = new WP_Error(
+                $this->errors[] = new WP_Error(
                     'migration_error',
                     sprintf('Skipped unrecognized object type "%s"', $match[1]),
                     $option
                 );
             }
         } else {
-            $error = new WP_Error(
+            $this->errors[] = new WP_Error(
                 'migration_error',
                 sprintf('Skipped unrecognized option "%s"', $option->option_name),
                 $option
             );
         }
-
-        return (!empty($error) ? $error : true);
     }
 
     /**
@@ -738,34 +811,47 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return array
      *
+     * @since 6.0.1 Improved code formating. Fixed the error when unexpected datetime
+     *              is set for "Expire" option (Uncaught Error: Call to a member
+     *              function setTimezone() on boolean)
+     * @since 6.0.0 Initialize implementation of the method
+     *
      * @access private
-     * @version 6.0.0
+     * @version 6.0.1
      */
     private function _convertPostObject($options, $ns = '')
     {
         $converted  = array();
-        $normalized = $this->_normalizeContentOptions($options);
+        $prepped    = $this->_normalizeContentOptions($options);
 
-        foreach($normalized as $key => $val) {
+        foreach($prepped as $key => $val) {
             switch($key) {
                 case 'list':
-                    $converted[$ns . 'hidden'] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . 'hidden'] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'list_others':
-                    $converted[$ns . 'hidden_others'] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . 'hidden_others'] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'read':
-                    $converted[$ns . 'restricted'] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . 'restricted'] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'read_others':
-                    $converted[$ns . 'restricted_others'] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . 'restricted_others'] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'limit':
-                    $msg = (!empty($normalized['teaser']) ? $normalized['teaser'] : '');
+                    $msg = (!empty($prepped['teaser']) ? $prepped['teaser'] : '');
                     $converted[$ns . 'teaser'] = array(
                         'enabled' => filter_var($val, FILTER_VALIDATE_BOOLEAN),
                         'message' => $msg
@@ -773,10 +859,15 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     break;
 
                 case 'access_counter':
-                    $l = (!empty($normalized['access_counter_limit']) ? $normalized['access_counter_limit'] : 0);
+                    if (!empty($prepped['access_counter_limit'])) {
+                        $threshold = intval($prepped['access_counter_limit']);
+                    } else {
+                        $threshold = 0;
+                    }
+
                     $converted[$ns . 'limited'] = array(
                         'enabled'   => filter_var($val, FILTER_VALIDATE_BOOLEAN),
-                        'threshold' => $l
+                        'threshold' => $threshold
                     );
                     break;
 
@@ -787,36 +878,57 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 case 'edit_others':
                 case 'delete_others':
                 case 'publish_others':
-                    $converted[$ns . $key] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . $key] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'add':
-                    $converted[$ns . 'create'] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                    $converted[$ns . 'create'] = filter_var(
+                        $val, FILTER_VALIDATE_BOOLEAN
+                    );
                     break;
 
                 case 'redirect':
-                    $chunks = explode('|', $normalized['location']);
+                    $chks = explode('|', $prepped['location']);
 
                     $converted[$ns . 'redirected'] = array(
                         'enabled'     => filter_var($val, FILTER_VALIDATE_BOOLEAN),
-                        'type'        => $chunks[0],
-                        'destination' => $chunks[1],
-                        'httpCode'    => (isset($chunks[2]) ? intval($chunks[2]) : 307)
+                        'type'        => $chks[0],
+                        'destination' => $chks[1],
+                        'httpCode'    => (isset($chks[2]) ? intval($chks[2]) : 307)
                     );
                     break;
 
                 case 'protected':
                     $converted[$ns . 'protected'] = array(
                         'enabled'  => filter_var($val, FILTER_VALIDATE_BOOLEAN),
-                        'password' => $normalized['password']
+                        'password' => $prepped['password']
                     );
                     break;
 
                 case 'expire':
-                    $converted[$ns . 'ceased'] = array(
-                        'enabled' => filter_var($val, FILTER_VALIDATE_BOOLEAN),
-                        'after'   => $normalized['expire_datetime']
+                    $datetime = \DateTime::createFromFormat(
+                        'm/d/Y, H:i O', $prepped['expire_datetime']
                     );
+
+                    if ($datetime) { // Cover any unexpected issues with the option
+                        $datetime->setTimezone(new \DateTimeZone('UTC'));
+
+                        $converted[$ns . 'ceased'] = array(
+                            'enabled' => filter_var($val, FILTER_VALIDATE_BOOLEAN),
+                            'after'   => $datetime->getTimestamp()
+                        );
+                    } else {
+                        $this->errors[] = new WP_Error(
+                            'migration_error',
+                            sprintf(
+                                'Unrecognized time format %s',
+                                $prepped['expire_datetime']
+                            ),
+                            $prepped
+                        );
+                    }
                     break;
 
                 case 'access_counter_limit':

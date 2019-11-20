@@ -1,0 +1,8 @@
+{
+    "Version": "1.0.0",
+    "Statement": {
+        "Effect": "deny",
+        "Resource": "Plugin",
+        "Action": ["WP:install", "WP:edit", "WP:update", "WP:delete"]
+    }
+}

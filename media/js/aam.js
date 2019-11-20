@@ -721,7 +721,7 @@
                         $('.dataTables_filter', '#user-list_wrapper').append(create);
 
                         var filter = $('<select>').attr({
-                            'class': 'user-filter',
+                            'class': 'user-filter form-control',
                             'id': 'user-list-filter'
                         })
                             .html('<option value="">' + getAAM().__('Loading roles...') + '</option>')
@@ -1006,7 +1006,7 @@
             });
 
             $('#user-expiration-datapicker').on('dp.change', function (res) {
-                $('#user-expires').val(res.date.format('MM/DD/YYYY, H:mm Z'));
+                $('#user-expires').val(res.date.unix());
             });
 
             //edit role button
@@ -2537,15 +2537,12 @@
                         previous: "icon-angle-left",
                         next: "icon-angle-right"
                     },
-                    minDate: new Date(),
                     inline: true,
-                    defaultDate: $.trim(def) ? def : new Date(),
+                    defaultDate: $.trim(def) ? new Date(def * 1000) : new Date(),
                     sideBySide: true
                 });
                 $('#post-expiration-datapicker').on('dp.change', function (res) {
-                    $('#aam-expire-datetime').val(
-                        res.date.format('MM/DD/YYYY, h:mm a')
-                    );
+                    $('#aam-expire-datetime').val(res.date.unix());
                 });
 
                 getAAM().triggerHook('init-access-form');
@@ -3745,9 +3742,7 @@
                     });
 
                     $('#jwt-expiration-datapicker').on('dp.change', function (res) {
-                        $('#jwt-expires').val(
-                            res.date.format('MM/DD/YYYY, H:mm Z')
-                        );
+                        $('#jwt-expires').val(res.date.unix());
                         generateJWT(
                             $('#jwt-expires').val(),
                             $('#jwt-refreshable').is(':checked')
@@ -4628,10 +4623,8 @@
         //highlight screen if the same level
         if (parseInt(level) >= getLocal().level || type === 'default') {
             $('.aam-current-subject').addClass('danger');
-            $('#wpcontent').css('background-color', '#FAEBEA');
         } else {
             $('.aam-current-subject').removeClass('danger');
-            $('#wpcontent').css('background-color', '#FFFFFF');
         }
 
         this.triggerHook('setSubject');

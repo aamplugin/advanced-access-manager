@@ -27,7 +27,7 @@ class AAM_Backend_Feature_Main_Post
      *
      * @version 6.0.0
      */
-    const ACCESS_CAPABILITY = 'aam_manage_posts';
+    const ACCESS_CAPABILITY = 'aam_manage_content';
 
     /**
      * Type of AAM core object
@@ -367,7 +367,7 @@ class AAM_Backend_Feature_Main_Post
      */
     protected function prepareCeasePreview($cease)
     {
-        return (!empty($cease['after']) ? $cease['after'] : null);
+        return (!empty($cease['after']) ? date('m/d/Y H:i O', $cease['after']) : null);
     }
 
     /**

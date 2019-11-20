@@ -209,9 +209,7 @@ class AAM_Backend_Feature_Subject_User
         $userId  = $this->getFromPost('user');
         $action  = $this->getFromPost('after');
         $role    = $this->getFromPost('role');
-        $expires = DateTime::createFromFormat(
-            'm/d/Y, H:i O', $this->getFromPost('expires'), new DateTimeZone('UTC')
-        );
+        $expires = new DateTime('@' . $this->getFromPost('expires'));
 
         $result = AAM::api()->getUser($userId)->setUserExpiration(array(
             'expires' => $expires->getTimestamp(),
