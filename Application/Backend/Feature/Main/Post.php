@@ -542,15 +542,17 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return object
      *
+     * @since 6.0.3 Fetch list of all possible post types
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.3
      */
     protected function prepareRootLevelList()
     {
-        $args = array('public' => true);
         $list = array_merge(
-            get_post_types($args, 'objects'), // Get all registered post types
-            get_taxonomies($args, 'objects') // Get all registered taxonomies
+            get_post_types(array(), 'objects'), // Get all registered post types
+            get_taxonomies(array(), 'objects') // Get all registered taxonomies
         );
 
         $filtered = array();

@@ -5,15 +5,19 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Posts & Terms service
  *
+ * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins
+ * @since 6.0.2 Refactored the way access to posts is managed. No more pseudo caps
+ *              aam|...
+ * @since 6.0.1 Bug fixing
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.4
  */
 class AAM_Service_Content
 {
@@ -33,6 +37,22 @@ class AAM_Service_Content
      * @version 6.0.0
      */
     const POST_COUNTER_DB_OPTION = 'aam_post_%s_access_counter';
+
+    /**
+     * Collection of post type caps
+     *
+     * This is a collection of post type capabilities for optimization reasons. It
+     * is used by filterMetaMaps method to determine if additional check needs to be
+     * perform
+     *
+     * @var array
+     *
+     * @access protected
+     * @version 6.0.2
+     */
+    protected $postTypeCaps = array(
+        'edit_post', 'edit_page', 'read_post', 'read_page', 'publish_post'
+    );
 
     /**
      * Constructor
@@ -133,6 +153,7 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.0.2 Removed invocation for the pseudo-cap mapping for post types
      * @since 6.0.1 Fixed bug related to enabling commenting on all posts
      * @since 6.0.0 Initial implementation of the method
      *
@@ -163,9 +184,6 @@ class AAM_Service_Content
         // Filter post content
         add_filter('the_content', array($this, 'filterPostContent'), 999);
 
-        // Working with post types
-        add_action('registered_post_type', array($this, 'registerPostType'), 999, 2);
-
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
         add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
@@ -186,69 +204,31 @@ class AAM_Service_Content
         // REST API action authorization. Triggered before call is dispatched
         add_filter('rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3);
 
-        // Cover any kind of surprize things by other funky plugins
-        add_filter('pre_update_option', array($this, 'updateOption'), 10, 2);
-        add_filter('role_has_cap', array($this, 'roleHasCap'), 1, 3);
-    }
+        // REST API. Control if user is allowed to publish content
+        add_action('registered_post_type', function($post_type, $obj) {
+            add_filter("rest_pre_insert_{$post_type}", function($post, $request) {
+                $status = (isset($request['status']) ? $request['status'] : null);
 
-    /**
-     * Hook into option update process
-     *
-     * Filter out AAM dynamically modified post type capabilities before they get into
-     * the database. Some plugins really like the idea to force custom capability
-     * creation during CPT registration. Some themes cause even infinite loop if those
-     * capabilities are not stored in the _user_roles option.
-     *
-     * @param mixed  $value
-     * @param string $option
-     *
-     * @return mixed
-     *
-     * @access public
-     * @global $wpdb
-     * @version 6.0.0
-     */
-    public function updateOption($value, $option)
-    {
-        global $wpdb;
-
-        if ($option === $wpdb->prefix . 'user_roles') {
-            // Remove all pseudo capabilities from list of caps
-            foreach ($value as &$role) {
-                foreach ($role['capabilities'] as $cap => $granted) {
-                    if (strpos($cap, 'aam|') === 0) {
-                        $parts = explode('|', $cap);
-                        unset($role['capabilities'][$cap]);
-                        $role['capabilities'][$parts[2]] = $granted;
+                if (in_array($status, array('publish', 'future'), true)) {
+                    if ($this->isAuthorizedToPublishPost($request['id']) === false) {
+                        $post = new WP_Error(
+                            'rest_cannot_publish',
+                            __('You are not allowed to publish this content', AAM_KEY),
+                            array('status' => rest_authorization_required_code())
+                        );
                     }
                 }
+
+                return $post;
+            }, 10, 2);
+
+            // Populate the collection of post type caps
+            foreach($obj->cap as $cap) {
+                if (!in_array($cap, $this->postTypeCaps, true)) {
+                    $this->postTypeCaps[] = $cap;
+                }
             }
-        }
-
-        return $value;
-    }
-
-    /**
-     * Hook into role has capability check
-     *
-     * @param array  $caps
-     * @param string $cap
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function roleHasCap($caps, $cap)
-    {
-        if (strpos($cap, 'aam|') === 0) {
-            $parts = explode('|', $cap);
-            if (isset($caps[$parts[2]])) {
-                $caps[$cap] = $caps[$parts[2]];
-            }
-        }
-
-        return $caps;
+        }, 10, 2);
     }
 
     /**
@@ -260,8 +240,11 @@ class AAM_Service_Content
      *
      * @return mixed
      *
+     * @since 6.0.2 Making sure that get_post returns actual post object
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.2
      */
     public function beforeDispatch($response, $handler, $request)
     {
@@ -275,10 +258,11 @@ class AAM_Service_Content
         $callback = (!empty($attrs['callback'][0]) ? $attrs['callback'][0] : null);
 
         if (is_a($callback, 'WP_REST_Posts_Controller')) {
-            $post = get_post($request['id']);
+            $post     = get_post($request['id']);
+            $has_pass = isset($request['password']);
 
             // Honor the manually defined password on the post
-            if (empty($post->post_password) && isset($request['password'])) {
+            if (is_a($post, 'WP_Post') && empty($post->post_password) && $has_pass) {
                 $request['_password'] = $request['password'];
                 unset($request['password']);
             }
@@ -474,12 +458,20 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins that
+     *              mutate global state of the WP_Query args
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.4
      */
     public function filterPostQuery($clauses, $wp_query)
     {
-        if (!$wp_query->is_singular) {
+        static $executing = false;
+
+        if (!$wp_query->is_singular && !$executing) {
+            $executing = true;
+
             $object = AAM::getUser()->getObject(
                 AAM_Core_Object_Visibility::OBJECT_TYPE
             );
@@ -489,6 +481,8 @@ class AAM_Service_Content
             $clauses['where'] .= apply_filters(
                 'aam_content_visibility_where_clause_filter', $query, $wp_query
             );
+
+            $executing = false;
         }
 
         return $clauses;
@@ -538,8 +532,11 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.0.3 Fetch list of all possible post types
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.3
      */
     protected function getQueryingPostType($wpQuery)
     {
@@ -556,7 +553,7 @@ class AAM_Service_Content
         }
 
         if ($postType === 'any') {
-            $postType = array_keys(get_post_types(array('public' => true), 'names'));
+            $postType = array_keys(get_post_types(array(), 'names'));
         }
 
         return (array) $postType;
@@ -596,33 +593,6 @@ class AAM_Service_Content
     }
 
     /**
-     * Hook into post type registration process
-     *
-     * @param string       $type
-     * @param WP_Post_Type $object
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function registerPostType($type, $object)
-    {
-        if (is_a($object, 'WP_Post_Type')) { // Work only with WP 4.6.0 or higher
-            // The list of capabilities to override
-            $override = array(
-                'edit_post', 'delete_post', 'read_post', 'publish_posts'
-            );
-
-            foreach ($object->cap as $type => $capability) {
-                if (in_array($type, $override, true)) {
-                    $object->cap->{$type} = "aam|{$type}|{$capability}";
-                }
-            }
-        }
-    }
-
-    /**
      * Check user capability
      *
      * This is a hack function that add additional layout on top of WordPress
@@ -637,6 +607,12 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.0.2 Completely rewrote this method to fixed loop caused by mapped
+     *              aam|... post type capability
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @link https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
+     *
      * @access public
      * @version 6.0.0
      */
@@ -644,21 +620,69 @@ class AAM_Service_Content
     {
         global $post;
 
-        $objectId = (isset($args[0]) ? $args[0] : null);
+        // For optimization reasons, check only caps that belong to registered post
+        // types
+        if (in_array($cap, $this->postTypeCaps, true)) {
+            // Critical part of the implementation. We do not know ahead what
+            // capability is responsible for what action when it comes to post types.
+            if (isset($args[0])) {
+                $objectId = intval($args[0]);
+            } elseif (is_a($post, 'WP_Post')) {
+                $objectId = $post->ID;
+            } else {
+                $objectId = null;
+            }
 
-        // First of all delete all artificial capabilities from the $caps
-        foreach ($caps as $i => $capability) {
-            if (strpos($capability, 'aam|') === 0) {
-                // Remove this capability from the mapped array and let WP Core
-                // handle the correct mapping
-                unset($caps[$i]);
+            // If object ID is not empty, then, potentially we are checking for perms
+            // to perform one of the action against a post
+            if (!empty($objectId)) {
+                $requested = get_post($objectId);
+
+                if (is_a($requested, 'WP_Post')) {
+                    $post_type = get_post_type_object($requested->post_type);
+
+                    if (is_a($post_type, 'WP_Post_Type')) {
+                        $caps = $this->__mapPostTypeCaps(
+                            $post_type, $cap, $caps, $requested, $args
+                        );
+                    }
+                }
             }
         }
 
-        // This part needs to stay to cover scenarios where WP_Post_Type->cap->...
-        // is not used but rather the hard-coded capability
-        switch ($cap) {
+        return $caps;
+    }
+
+    /**
+     * Map post type capability based on set permissions
+     *
+     * @param WP_Post_Type $post_type
+     * @param string       $cap
+     * @param array        $caps
+     * @param WP_Post      $post
+     * @param array        $args
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.2
+     */
+    private function __mapPostTypeCaps(
+        WP_Post_Type $post_type, $cap, $caps, WP_Post $post, $args
+    ) {
+
+        // Cover the scenario when $cap is not part of the post type capabilities
+        // There is a bug in the WP core when user is checked for 'publish_post'
+        // capability
+        $primitive_cap = array_search($cap, (array) $post_type->cap);
+
+        if ($primitive_cap === false) {
+            $primitive_cap = $cap;
+        }
+
+        switch ($primitive_cap) {
             case 'edit_post':
+            case 'edit_page':
                 // Cover the scenario when user uses Bulk Action or Quick Edit to
                 // change the Status to Published and post is not allowed to be
                 // published
@@ -669,40 +693,30 @@ class AAM_Service_Content
                     in_array($action, array('edit', 'inline-save', true))
                     && $status === 'publish'
                 ) {
-                    $caps = $this->mapPublishPostCaps($caps, $objectId);
+                    $caps = $this->mapPublishPostCaps($caps, $post->ID);
                 } else {
-                    $caps = $this->mapEditPostCaps($caps, $objectId);
+                    $caps = $this->mapEditPostCaps($caps, $post->ID);
                 }
                 break;
 
             case 'delete_post':
-                $caps = $this->mapDeletePostCaps($caps, $objectId);
+            case 'delete_page':
+                $caps = $this->mapDeletePostCaps($caps, $post->ID);
                 break;
 
             case 'read_post':
-                $caps = $this->mapReadPostCaps(
-                    $caps, $objectId, (isset($args[1]) ? $args[1] : null)
-                );
+            case 'read_page':
+                $password = (isset($args[1]) ? $args[1] : null);
+                $caps     = $this->mapReadPostCaps($caps, $post->ID, $password);
                 break;
 
-
             case 'publish_post':
+            case 'publish_page':
             case 'publish_posts':
-            case 'publish_pages':
-                // There is a bug in WP core that instead of checking if user has
-                // ability to publish_post, it checks for edit_post. That is why
-                // user has to be on the edit
-                if (is_a($post, 'WP_Post')) {
-                    $caps = $this->mapPublishPostCaps($caps, $post->ID);
-                }
+                $caps = $this->mapPublishPostCaps($caps, $post->ID);
                 break;
 
             default:
-                if (strpos($cap, 'aam|') === 0) {
-                    $caps = $this->checkPostTypePermission(
-                        $caps, $cap, $user_id, $objectId
-                    );
-                }
                 break;
         }
 
@@ -1128,49 +1142,6 @@ class AAM_Service_Content
         }
 
         return $result;
-    }
-
-    /**
-     * Check is user has capability attached to post type
-     *
-     * @param array  $caps
-     * @param string $cap
-     * @param int    $user_id
-     * @param int    $object
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function checkPostTypePermission($caps, $cap, $user_id, $object = null)
-    {
-        // Expecting to have:
-        //   [0] === aam
-        //   [1] === WP_Post_Type->cap key
-        //   [2] === The capability
-        $parts = explode('|', $cap);
-
-        // Build the argument array for the current_user_can
-        $args = array($parts[2]);
-        if (!is_null($object)) {
-            $args[] = $object;
-        }
-
-        if (call_user_func_array('current_user_can', $args)) {
-            if ($parts[1] !== $parts[2]) {
-                $caps = $this->filterMetaMaps(
-                    $caps,
-                    $parts[1],
-                    $user_id,
-                    array($object)
-                );
-            }
-        } else {
-            $caps[] = 'do_not_allow';
-        }
-
-        return $caps;
     }
 
 }

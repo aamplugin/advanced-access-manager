@@ -28,13 +28,14 @@ use WP_Error,
  *
  * The main purpose for this class is to eliminate AAM_Core_Compatibility
  *
+ * @since 6.0.2 Bug fixing
  * @since 6.0.1 Slightly refactored the way errors are collected during the migration
  *              execution. Fixed fatal error when incorrectly defined "Expire" post
  *              option
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.1
+ * @version 6.0.2
  */
 class Migration600 implements AAM_Core_Contract_MigrationInterface
 {
@@ -154,8 +155,11 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
         $wpdb->query($wpdb->prepare($opt_query, array('aam_cache_%', 'aam_%_cache')));
 
         // Fetch access settings from the wp_usermeta table
-        $query  = "DELETE FROM {$wpdb->usermeta} WHERE (`meta_key` = %s)";
-        $wpdb->query($wpdb->prepare($query, array("{$wpdb->prefix}aam_cache")));
+        $query  = "DELETE FROM {$wpdb->usermeta} WHERE (`meta_key` = %s) OR ";
+        $query .= '(`meta_key` = %s)';
+        $wpdb->query(
+            $wpdb->prepare($query, array("{$wpdb->prefix}aam_cache", 'aam-cache'))
+        );
     }
 
     /**
@@ -203,7 +207,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      * @return void
      *
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
-     *              of returning them
+     *              of returning them. Skipping user switch flags
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
@@ -227,13 +231,29 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
 
                 case 'aam-check':
                 case 'aam-uid':
+                case 'aam-extension-list':
+                case 'aam-extension-repository':
+                case 'aam-welcome':
                     // Skip this one and just delete
-                    // TODO: Enable in the 6.0.2 release
-                    // $result = AAM_Core_API::deleteOption($option->option_name);
+                    AAM_Core_API::deleteOption($option->option_name);
+                    break;
+
+                case AAM_Core_AccessSettings::DB_OPTION:
+                case AAM_Core_Config::DB_OPTION:
+                case AAM_Core_ConfigPress::DB_OPTION:
+                case AAM_Core_Migration::DB_OPTION:
+                case AAM_Core_Migration::DB_FAILURE_OPTION:
+                    // Silently skip in case somebody forces to rerun the entire
+                    // migration process
                     break;
 
                 default:
-                    $this->_parseObjectOption($option);
+                    // aam-user-switch-36
+                    if (strpos($option->option_name, 'aam-user-switch') !== false) {
+                        AAM_Core_API::deleteOption($option->option_name);
+                    } else {
+                        $this->_parseObjectOption($option);
+                    }
                     break;
             }
         }
@@ -246,8 +266,9 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @link https://forum.aamplugin.com/d/369-notice-undefined-offset-1-service-content-php-on-line-509
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
-     *              of returning them
+     *              of returning them. Fixed bug with incorrectly set post ID.
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
@@ -259,22 +280,21 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             $name  = str_replace('aam-post-access-', '', $option->meta_key);
             $value = $this->_convertPostObject(maybe_unserialize($option->meta_value));
 
+            $post = get_post($option->post_id);
+            $id   = (is_a($post, 'WP_Post') ? "{$post->ID}|{$post->post_type}" : '');
+
             if (strpos($name, 'user') === 0) {
-                $xpath = 'user.' . substr($name, 4) . '.post.' . $option->post_id;
+                $xpath = 'user.' . substr($name, 4) . '.post.' . $id;
             } elseif (strpos($name, 'role') === 0) {
-                $xpath = 'role.' . substr($name, 4) . '.post.' . $option->post_id;
+                $xpath = 'role.' . substr($name, 4) . '.post.' . $id;
             } elseif (in_array($name, array('visitor', 'default'), true)) {
-                $xpath = $name . '.post.' . $option->post_id;
+                $xpath = $name . '.post.' . $id;
             } else {
                 $xpath = null;
             }
 
             if (!is_null($xpath)) {
                 AAM_Core_AccessSettings::getInstance()->set($xpath, $value);
-
-                // Delete legacy option
-                // TODO: Enable in the 6.0.2 release
-                // delete_post_meta($option->post_id, $option->meta_key);
             } else {
                 $this->errors[] = new WP_Error(
                     'migration_error',
@@ -292,8 +312,9 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.0.2 Added list of known options that should be ignored
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
-     *              of returning them
+     *              of returning them. Skipping wp_aam_capability option
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
@@ -302,6 +323,12 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
     protected function processUsermeta($options)
     {
         global $wpdb;
+
+        $ignored = array(
+            'aam-jwt',
+            "{$wpdb->prefix}aam-original-roles",
+            "{$wpdb->prefix}aam-role-expires"
+        );
 
         foreach($options as $option) {
             // e.g. "wp_aam_type_post", "wp_aam_term_1|category"
@@ -333,22 +360,16 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     }
 
                     AAM_Core_AccessSettings::getInstance()->set($xpath, $options);
-
-                    // Delete legacy meta
-                    // TODO: Enable in the 6.0.2 release
-                    // delete_user_meta($option->user_id, $option->meta_key);
-                } else {
+                } elseif (!in_array($match[1], array('capability'), true)) {
                     $this->errors[] = new WP_Error(
                         'migration_error',
                         sprintf('Unrecognized object type "%s"', $match[1]),
                         $option
                     );
                 }
-            }elseif ($option->meta_key === 'aam-jwt') {
+            }elseif (in_array($option->meta_key, $ignored, true)) {
                 // Just delete it. AAM v5 JWT tokens are no longer valid due to the
                 // new way to calculate exp property
-                // TODO: Enable in the 6.0.2 release
-                // delete_user_meta($option->user_id, $option->meta_key);
             } else {
                 $this->errors[] = new WP_Error(
                     'migration_error',
@@ -364,6 +385,11 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @link https://wordpress.org/support/topic/6-0-issues/
+     * @since 6.0.1 Fixed the bug with `show_admin_bar` not converted to
+     *              `aam_show_toolbar`
+     * @since 6.0.0 Initialize implementation of the method
+     *
      * @access protected
      * @version 6.0.0
      */
@@ -375,6 +401,11 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             'change_own_password', 'change_passwords', 'access_dashboard'
         );
 
+        // Totally replaced caps
+        $replaced_caps = array(
+            'show_admin_bar' => 'aam_show_toolbar'
+        );
+
         $roles  = AAM_Core_API::getRoles();
         $option = AAM_Core_API::getOption($roles->role_key);
 
@@ -383,6 +414,9 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 if (in_array($cap, $legacy_caps, true)) {
                     unset($option[$id]['capabilities'][$cap]);
                     $option[$id]['capabilities']['aam_' . $cap] = $effect;
+                } elseif (array_key_exists($cap, $replaced_caps)) {
+                    unset($option[$id]['capabilities'][$cap]);
+                    $option[$id]['capabilities'][$replaced_caps[$cap]] = $effect;
                 }
             }
         }
@@ -408,11 +442,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
     {
         $result = AAM_Core_ConfigPress::getInstance()->save($option->option_value);
 
-        if ($result === true) {
-            // Delete legacy option
-            // TODO: Enable in the 6.0.2 release
-            // AAM_Core_API::deleteOption($option->option_name);
-        } else {
+        if ($result !== true) {
             $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert ConfigPress settings', $option
             );
@@ -439,11 +469,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             AAM_Addon_Repository::DB_OPTION, $option->option_value, 'site'
         );
 
-        if ($result === true) {
-            // Delete legacy option
-            // TODO: Enable in the 6.0.2 release
-            // AAM_Core_API::deleteOption($option->option_name);
-        } else {
+        if ($result !== true) {
             $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert Addon settings', $option
             );
@@ -510,11 +536,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             );
         }
 
-        if ($result === true) {
-            // Delete legacy option
-            // TODO: Enable in the 6.0.2 release
-            // AAM_Core_API::deleteOption($option->option_name);
-        } else {
+        if ($result !== true) {
             $this->errors[] = new WP_Error(
                 'migration_error', 'Failed to convert core settings', $option
             );
@@ -550,8 +572,8 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
-     * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
-     *              of returning them.
+     * @since 6.0.1 Removed unrecognized option errors. Fixed bug that skips access
+     *              settings conversion for roles that have white space in slug
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
@@ -564,7 +586,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             $regex = '/^aam_visitor_([a-z]+)_?([a-z0-9_\-\|]*)$/i';
         } else {
             // e.g. "aam_route_role_administrator", "aam_type_post_role_editor"
-            $regex = '/^aam_([a-z]+)_([a-z0-9_\-\|]+)?_?(role|default)_?([a-z0-9_\-]*)$/i';
+            $regex = '/^aam_([a-z]+)_([a-z0-9_\-\|]+)?_?(role|default)_?([a-z0-9_\-\s]*)$/i';
         }
 
         // Let's parse the option name and determine object & subject
@@ -612,23 +634,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 }
 
                 AAM_Core_AccessSettings::getInstance()->set($xpath, $options);
-
-                // Delete legacy option
-                // TODO: Enable in the 6.0.2 release
-                // AAM_Core_API::deleteOption($option->option_name);
-            } else {
-                $this->errors[] = new WP_Error(
-                    'migration_error',
-                    sprintf('Skipped unrecognized object type "%s"', $match[1]),
-                    $option
-                );
             }
-        } else {
-            $this->errors[] = new WP_Error(
-                'migration_error',
-                sprintf('Skipped unrecognized option "%s"', $option->option_name),
-                $option
-            );
         }
     }
 
@@ -811,6 +817,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return array
      *
+     * @since 6.0.2 Fixed another fatal error with "Expire" setting
      * @since 6.0.1 Improved code formating. Fixed the error when unexpected datetime
      *              is set for "Expire" option (Uncaught Error: Call to a member
      *              function setTimezone() on boolean)
@@ -908,17 +915,24 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     break;
 
                 case 'expire':
-                    $datetime = \DateTime::createFromFormat(
-                        'm/d/Y, H:i O', $prepped['expire_datetime']
-                    );
+                    $time = strtotime($prepped['expire_datetime']);
 
-                    if ($datetime) { // Cover any unexpected issues with the option
-                        $datetime->setTimezone(new \DateTimeZone('UTC'));
+                    if ($time) { // Cover any unexpected issues with the option
+                        try {
+                            $datetime = new \DateTime('@' . $time);
+                            $datetime->setTimezone(new \DateTimeZone('UTC'));
 
-                        $converted[$ns . 'ceased'] = array(
-                            'enabled' => filter_var($val, FILTER_VALIDATE_BOOLEAN),
-                            'after'   => $datetime->getTimestamp()
-                        );
+                            $converted[$ns . 'ceased'] = array(
+                                'enabled' => filter_var($val, FILTER_VALIDATE_BOOLEAN),
+                                'after'   => $datetime->getTimestamp()
+                            );
+                        } catch (\Exception $e) {
+                            _doing_it_wrong(
+                                __CLASS__ . '::' . __METHOD__,
+                                $e->getMessage(),
+                                AAM_VERSION
+                            );
+                        }
                     } else {
                         $this->errors[] = new WP_Error(
                             'migration_error',

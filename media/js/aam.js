@@ -3802,7 +3802,6 @@
                         },
                         createdRow: function (row, data) {
                             // Render status
-                            console.log(data[2]);
                             if (data[2] === true) {
                                 $('td:eq(0)', row).html(
                                     '<i class="icon-ok-circled text-success"></i>'
@@ -4500,7 +4499,6 @@
     AAM.prototype.initialize = function () {
         // Read default subject and set it for AAM object
         if ($('#aam-subject-type').length > 0) {
-            console.log('Here');
             this.setSubject(
                 $('#aam-subject-type').val(),
                 $('#aam-subject-id').val(),

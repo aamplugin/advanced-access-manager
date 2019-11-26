@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM JWT Issuer
  *
+ * @since 6.0.4 Bug fixing. Timezone was handled incorrectly and ttl did not take in
+ *              consideration numeric "in seconds" value
+ * @since 6.0.0 Initial implementation of the class
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.4
  */
 class AAM_Core_Jwt_Issuer
 {
@@ -27,8 +28,11 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.0.4 Making sure that JWT expiration is checked with UTC timezone
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.4
      */
     public function validateToken($token)
     {
@@ -43,6 +47,11 @@ class AAM_Core_Jwt_Issuer
                     'authentication.jwt.secret', SECURE_AUTH_KEY
                 );
             }
+
+            // Making sure that timestamp is UTC
+            Firebase\JWT\JWT::$timestamp = (new DateTime(
+                'now', new DateTimeZone('UTC')
+            ))->getTimestamp();
 
             // Step #1. Check if token is actually valid
             $response = Firebase\JWT\JWT::decode(
@@ -80,19 +89,26 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.0.4 Fixed the bug when `authentication.jwt.expires` is defined in
+     *              seconds
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @throws Exception
-     * @version 6.0.0
+     * @version 6.0.4
      */
     public function issueToken($args = array(), $expires = null)
     {
         if (!empty($expires)) {
             $time = $expires;
         } else {
-            $time = new DateTime(
-                AAM_Core_Config::get('authentication.jwt.expires', '+24 hours'),
-                new DateTimeZone('UTC')
-            );
+            $ttl = AAM_Core_Config::get('authentication.jwt.expires', '+24 hours');
+
+            if (is_numeric($ttl)) {
+                $ttl = "+{$ttl} seconds";
+            }
+
+            $time = new DateTime($ttl, new DateTimeZone('UTC'));
         }
 
         $claims = apply_filters(

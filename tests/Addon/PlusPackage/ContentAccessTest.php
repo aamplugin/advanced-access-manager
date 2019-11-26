@@ -448,4 +448,33 @@ class ContentAccessTest extends TestCase
         unset($wp_query->queried_object);
     }
 
+    /**
+     * Making sure that AAM returns correct object when user is switched
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.4
+     */
+    public function testCorrectObjectOnSubjectSwitch()
+    {
+        // Define dummy access settings for a post
+        $post = AAM::getUser()->getObject(Type::OBJECT_TYPE, 'post');
+        $post->updateOptionItem('post/restricted', true)->save();
+
+        $this->assertTrue($post->is('restricted', 'post'));
+
+        // Change user to visitor
+        wp_set_current_user(0);
+
+        $subject = AAM::getUser();
+        $this->assertSame('AAM_Core_Subject_Visitor', get_class($subject));
+
+        $post = $subject->getObject(Type::OBJECT_TYPE, 'post');
+        $this->assertFalse($post->is('restricted', 'post'));
+
+        // Reset to default
+        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+    }
+
 }

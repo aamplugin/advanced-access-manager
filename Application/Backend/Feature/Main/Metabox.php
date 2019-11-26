@@ -80,9 +80,13 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return string
      *
+     * @since 6.0.3 Fixed the bug where post types that do not have Gutenberg enabled
+     *              are not shown on the Metaboxes & Widgets tab
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @global array $wp_post_types
-     * @version 6.0.0
+     * @version 6.0.3
      */
     public function prepareInitialization()
     {
@@ -95,10 +99,7 @@ class AAM_Backend_Feature_Main_Metabox
         ));
 
         foreach (array_keys($wp_post_types) as $type) {
-            $isVisible = $wp_post_types[$type]->show_ui;
-            $isClassic = empty($wp_post_types[$type]->show_in_rest);
-
-            if ($isVisible && $isClassic) {
+            if ($wp_post_types[$type]->show_ui) {
                 $endpoints[] = add_query_arg(
                     'init', 'metabox', admin_url('post-new.php?post_type=' . $type)
                 );

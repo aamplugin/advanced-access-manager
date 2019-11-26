@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Post object
  *
+ * @since 6.0.1 Added new method isDefined that is used to determine if access option
+ *              is defined
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.1
  */
 class AAM_Core_Object_Post extends AAM_Core_Object
 {
@@ -47,8 +49,9 @@ class AAM_Core_Object_Post extends AAM_Core_Object
      * @access public
      * @version 6.0.0
      */
-    public function __construct(AAM_Core_Subject $subject, $post, $suppressFilters = false)
-    {
+    public function __construct(
+        AAM_Core_Subject $subject, $post, $suppressFilters = false
+    ) {
         $this->setSubject($subject);
         $this->setSuppressFilters($suppressFilters);
 

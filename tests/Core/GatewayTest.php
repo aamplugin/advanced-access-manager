@@ -14,23 +14,24 @@ use AAM_Core_Gateway,
 
 /**
  * Test AAM core Gateway
- * 
+ *
  * @package AAM\UnitTest
  * @version 6.0.0
  */
 class GatewayTest extends TestCase
 {
+
     /**
      * Test all possible merging permutations with preference
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @dataProvider mergingPreferenceData
      * @version 6.0.0
      */
     public function testAccessOptionsMerging($set1, $set2, $preference, $expected)
-    { 
+    {
         $gateway = AAM_Core_Gateway::getInstance();
 
         $this->assertSame(
@@ -42,12 +43,12 @@ class GatewayTest extends TestCase
      * Return the array of possible access option combinations
      *
      * @return array
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function mergingPreferenceData()
-    { 
+    {
         return array(
             array(array('hidden' => true), array('hidden' => true), 'deny', array('hidden' => true)),
             array(array('hidden' => true), array('hidden' => false), 'deny', array('hidden' => true)),

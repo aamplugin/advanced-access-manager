@@ -1,4 +1,4 @@
-<?php /** @version 6.0.0 */ ?>
+<?php /** @version 6.0.4 */ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -82,10 +82,11 @@
                     a.setRequestHeader("Content-Type", "application/json");
                     a.setRequestHeader("Accept", "application/json");
                     a.send(JSON.stringify({
-                        username: "" + document.getElementById("aam-login-username").value,
-                        password: "" + document.getElementById("aam-login-password").value,
-                        redirect: "" + document.getElementById("aam-login-redirect").value,
-                        remember: "" + document.getElementById("aam-login-remember").checked
+                        username: document.getElementById("aam-login-username").value,
+                        password: document.getElementById("aam-login-password").value,
+                        redirect: document.getElementById("aam-login-redirect").value,
+                        remember: document.getElementById("aam-login-remember").checked,
+                        returnAuthCookies: true
                     }))
                 })
             })();

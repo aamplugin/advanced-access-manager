@@ -9,10 +9,7 @@
 
 namespace AAM\UnitTest\Service\Content;
 
-use AAM,
-    AAM_Service_Content,
-    AAM_Core_Object_Post,
-    PHPUnit\Framework\TestCase,
+use PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
 /**

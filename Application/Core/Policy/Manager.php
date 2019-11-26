@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 6.0.4 Potential bug fix with improperly merged Param option:* values
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.4
  */
 class AAM_Core_Policy_Manager
 {
@@ -197,6 +198,10 @@ class AAM_Core_Policy_Manager
      *
      * @return mixed
      *
+     * @since 6.0.4 Fixed the potential bug with improperly merged options when Value
+     *              is defined as multi-dimensional array
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @see AAM_Core_Policy_Manager::updatePolicyTree
      * @version 6.0.0
@@ -207,7 +212,7 @@ class AAM_Core_Policy_Manager
 
         if ($this->isApplicable($param)) {
             if (is_array($res) && is_array($param['Value'])) {
-                $res = array_merge($res, $param['Value']);
+                $res = array_replace_recursive($res, $param['Value']);
             } else {
                 $res = $param['Value'];
             }

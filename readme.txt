@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.3
-Stable tag: 6.0.0
+Stable tag: 6.0.4
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,33 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.0.4 =
+* Fixed Bug: https://forum.aamplugin.com/d/367-authentication-jwt-expires-fatal-error
+* Fixed Bug: JWT validation endpoint did not check token's expiration based on UTC timezone
+* Fixed Bug: Removed unnecessary console.log invocations from the aam.js library
+* Fixed Bug: Fixed the potential bug with improperly merged options when access policy Param's Value is defined as multi-dimensional array
+* Fixed Bug: https://forum.aamplugin.com/d/339-problem-with-login-shortcode-and-widget
+* Fixed Bug: https://forum.aamplugin.com/d/371-you-are-not-allowed-to-manage-any-aam-subject
+* Fixed Bug: Incompatibility with plugins that are extremely aggressive and modify the WP_Query "suppress_filters" flag. Shame on you guys!
+
+= 6.0.3 =
+* Fixed Bug: Fatal Error - Class 'AAM_Core_Server' not found. https://forum.aamplugin.com/d/358-uncaught-error-class-aam-core-server-not-found
+* Fixed Bug: Fixed the bug where post types that do not have Gutenberg enabled are not shown on the Metaboxes & Widgets tab https://wordpress.org/support/topic/in-metaboxes-widgets-no-pages/
+* Fixed Bug: Not all possible post types are shown on the Posts & Terms tab
+
+= 6.0.2 =
+* Fixed Bug: https://forum.aamplugin.com/d/361-uncaught-error-call-to-a-member-function-settimezone-on-boolean
+* Fixed Bug: https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
+* Fixed Bug: Migration script, fixed couple more minor bugs that were causing warnings
+
+= 6.0.1 =
+* Fixed Bug: Numerous bugs fixed in the migration script. New script prepared to do additional clean-up and fix corrupted data
+* Fixed Bug: https://forum.aamplugin.com/d/369-notice-undefined-offset-1-service-content-php-on-line-509
+* Fixed Bug: https://wordpress.org/support/topic/6-0-issues/
+* Fixed Bug: https://forum.aamplugin.com/d/353-comment-system-activated
+* Fixed Bug: Migration script was skipping access settings conversion for roles that have white space in slug
+* Added New: Additional migration script for clean-up and fixing corrupted data
 
 = 6.0.0 =
 * Complete rewrite of the entire plugin. For more information, check [this article](https://aamplugin.com/article/advanced-access-manager-next-generation)

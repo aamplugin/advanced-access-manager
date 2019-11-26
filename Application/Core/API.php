@@ -272,11 +272,6 @@ final class AAM_Core_API
         do_action('aam_clear_settings_action');
     }
 
-    public static function clearInternalCache()
-    {
-
-    }
-
     /**
      * Get current post
      *

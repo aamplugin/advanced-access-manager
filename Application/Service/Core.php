@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM core service
  *
+ * @since 6.0.4 Bug fixing. Unwanted "Access Denied" metabox on the Your Profile page
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.4
  */
 class AAM_Service_Core
 {
@@ -32,8 +33,12 @@ class AAM_Service_Core
      *
      * @access protected
      *
+     * @since 6.0.4 Fixed bug when Access Manager metabox is rendered on profile edit
+     *              page
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @return void
-     * @version 6.0.0
+     * @version 6.0.4
      */
     protected function __construct()
     {
@@ -47,7 +52,6 @@ class AAM_Service_Core
 
         if (is_admin()) {
             if (AAM_Core_Config::get('ui.settings.renderAccessMetabox', true)) {
-                add_action('show_user_profile', array($this, 'renderAccessWidget'));
                 add_action('edit_user_profile', array($this, 'renderAccessWidget'));
             }
 

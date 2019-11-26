@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * User subject
  *
+ * @since 6.0.2 Enhanced stability of the code
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.2
  */
 class AAM_Core_Subject_User extends AAM_Core_Subject
 {
@@ -308,17 +309,30 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
      *
      * @return array|null
      *
+     * @since 6.0.2 Making sure that we are covering scenario when expiration flag
+     *              contains corrupted data in the database
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.2
      */
     public function getUserExpiration()
     {
         $response = get_user_option(self::EXPIRATION_OPTION, $this->getId());
 
         if (!empty($response)) {
-            $response['expires'] = new DateTime(
-                '@' . $response['expires'], new DateTimeZone('UTC')
-            );
+            try {
+                $response['expires'] = new DateTime(
+                    '@' . $response['expires'], new DateTimeZone('UTC')
+                );
+            } catch (Exception $e) {
+                _doing_it_wrong(
+                    __CLASS__ . '::' . __METHOD__,
+                    $e->getMessage(),
+                    AAM_VERSION
+                );
+                $response['expires'] = new DateTime('now', new DateTimeZone('UTC'));
+            }
         }
 
         return $response;
