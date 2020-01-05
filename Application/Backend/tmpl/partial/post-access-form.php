@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.2.0 Added "Hidden" modal for more granular access controls
+     * @since 6.0.0 Initial implementation of the template
+     *
+     * @version 6.2.0
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-overwrite<?php echo $params->object->isOverwritten() ? '' : ' hidden'; ?>" id="post-term-overwritten">
@@ -8,6 +15,12 @@
 
     <input type="hidden" value="<?php echo $params->type; ?>" id="content-object-type" />
     <input type="hidden" value="<?php echo $params->id; ?>" id="content-object-id" />
+
+    <?php if ($params->object->post_type === 'attachment') { ?>
+        <div class="alert alert-warning aam-outer-bottom-xxs">
+            <?php echo sprintf(__('To fully protect your media library files, please refer to the %sHow to manage access to WordPress media library%s article.', AAM_KEY), '<a href="https://aamplugin.com/article/how-to-manage-access-to-the-wordpress-media-library" target="_blank">', '</a>');  ?>
+        </div>
+    <?php } ?>
 
     <table class="table table-striped table-bordered">
         <tbody>
@@ -26,10 +39,10 @@
                         <?php } ?>
                         <p class="aam-hint">
                             <?php echo str_replace(
-                                        array('{postType}'),
-                                        array(get_post_type_labels($params->postType)->singular_name),
-                                        $data['description']
-                                    ); ?>
+                                array('{postType}'),
+                                array(get_post_type_labels($params->postType)->singular_name),
+                                $data['description']
+                            ); ?>
                         </p>
                     </td>
                     <td>
@@ -41,6 +54,60 @@
             <?php } ?>
         </tbody>
     </table>
+
+    <div class="modal fade" id="modal-hidden" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"><?php echo __('Hidden Areas', AAM_KEY); ?></h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class='aam-setting-title'><?php echo __('Frontend', AAM_KEY); ?></span>
+                                    <p class="aam-setting-description">
+                                        <?php echo __('Hide post on the frontend site of the website'); ?>
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <input data-toggle="toggle" name="hidden.frontend" id="hidden-frontend" type="checkbox" <?php echo ($params->object->get('hidden.frontend') ? 'checked' : ''); ?> data-on="<?php echo __('Hidden', AAM_KEY); ?>" data-off="<?php echo __('Visible', AAM_KEY); ?>" data-size="small" data-onstyle="danger" data-offstyle="success" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class='aam-setting-title'><?php echo __('Backend', AAM_KEY); ?></span>
+                                    <p class="aam-setting-description">
+                                        <?php echo __('Hide post on the backend site of the website'); ?>
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <input data-toggle="toggle" name="hidden.backend" id="hidden-backend" type="checkbox" <?php echo ($params->object->get('hidden.backend') ? 'checked' : ''); ?> data-on="<?php echo __('Hidden', AAM_KEY); ?>" data-off="<?php echo __('Visible', AAM_KEY); ?>" data-size="small" data-onstyle="danger" data-offstyle="success" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class='aam-setting-title'><?php echo __('RESTful API', AAM_KEY); ?></span>
+                                    <p class="aam-setting-description">
+                                        <?php echo __('Hide post in the RESTful API response'); ?>
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <input data-toggle="toggle" name="hidden.api" id="hidden-api" type="checkbox" <?php echo ($params->object->get('hidden.api') ? 'checked' : ''); ?> data-on="<?php echo __('Hidden', AAM_KEY); ?>" data-off="<?php echo __('Visible', AAM_KEY); ?>" data-size="small" data-onstyle="danger" data-offstyle="success" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-save" id="save-hidden-btn"><?php echo __('Save', AAM_KEY); ?></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="modal-teaser" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -127,14 +194,14 @@
                         <div class="form-group post-redirect-value" id="post-redirect-page-value-container" style="display: <?php echo ($type === 'page' ? 'block' : 'none'); ?>;">
                             <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                             <?php
-                                wp_dropdown_pages(array(
-                                    'depth'            => 99,
-                                    'echo'             => 1,
-                                    'selected'         => ($type === 'page' ? $params->object->get('redirected.destination') : null),
-                                    'id'               => 'post-redirect-page-value',
-                                    'class'            => 'form-control',
-                                    'show_option_none' => __('-- Select Page --', AAM_KEY)
-                                ));
+                            wp_dropdown_pages(array(
+                                'depth'            => 99,
+                                'echo'             => 1,
+                                'selected'         => ($type === 'page' ? $params->object->get('redirected.destination') : null),
+                                'id'               => 'post-redirect-page-value',
+                                'class'            => 'form-control',
+                                'show_option_none' => __('-- Select Page --', AAM_KEY)
+                            ));
                             ?>
                         </div>
 

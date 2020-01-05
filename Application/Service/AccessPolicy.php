@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Access Policy service
  *
+ * @since 6.2.0 Bug fixing and enhancements for the multisite support
+ * @since 6.1.0 Changed the way access policy manager is obtained
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Service_AccessPolicy
 {
@@ -156,8 +158,13 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.2.1 Access support for custom-fields
+     * @since 6.2.0 Added new hook into Multisite service through `aam_allowed_site_filter`
+     * @since 6.1.1 Refactored the way access policy is applied to object
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.1
      */
     protected function initializeHooks()
     {
@@ -179,7 +186,9 @@ class AAM_Service_AccessPolicy
                 'exclude_from_search' => true,
                 'publicly_queryable' => false,
                 'hierarchical' => false,
-                'supports'     => array('title', 'excerpt', 'revisions'),
+                'supports'     => array(
+                    'title', 'excerpt', 'revisions', 'custom-fields'
+                ),
                 'delete_with_user' => false,
                 'capabilities' => array(
                     'edit_post'         => 'aam_edit_policy',
@@ -194,13 +203,19 @@ class AAM_Service_AccessPolicy
         });
 
         // Hook into AAM core objects initialization
-        add_filter('aam_menu_object_option_filter', array($this, 'initializeMenu'), 10, 2);
-        add_filter('aam_metabox_object_option_filter', array($this, 'initializeMetabox'), 10, 2);
-        add_filter('aam_toolbar_object_option_filter', array($this, 'initializeToolbar'), 10, 2);
-        add_filter('aam_post_object_option_filter', array($this, 'initializePost'), 10, 2);
-        add_action('aam_visibility_object_init_action', array($this, 'initializeVisibility'));
-        add_filter('aam_uri_object_option_filter', array($this, 'initializeUri'), 10, 2);
-        add_filter('aam_route_object_option_filter', array($this, 'initializeRoute'), 10, 2);
+        add_filter('aam_menu_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_metabox_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_toolbar_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_post_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_action('aam_visibility_object_init_action', function(AAM_Core_Object_Visibility $object) {
+            $subject = $object->getSubject();
+
+            if ($subject::UID === AAM_Core_Subject_User::UID) {
+                $this->initializeVisibility($object);
+            }
+        });
+        add_filter('aam_uri_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_route_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
@@ -212,6 +227,68 @@ class AAM_Service_AccessPolicy
         // Manage access to the Plugin list and individual plugins
         add_filter('aam_allowed_plugin_action_filter', array($this, 'isPluginActionAllowed'), 10, 3);
         add_filter('all_plugins', array($this, 'filterPlugins'));
+
+        // Multisite support
+        add_filter('aam_allowed_site_filter', function() {
+            $manager = AAM::api()->getAccessPolicyManager();
+
+            return $manager->isAllowed('SITE:' . get_current_blog_id()) !== false;
+        });
+    }
+
+    /**
+     * Apply access policy statements to passed object
+     *
+     * @param array           $options
+     * @param AAM_Core_Object $object
+     *
+     * @return array
+     *
+     * @since 6.2.0 Fixed bug when access policy was not applied to visitors
+     * @since 6.1.1 Optimized policy implementation
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access public
+     * @version 6.2.0
+     */
+    public function applyAccessPolicyToObject($options, AAM_Core_Object $object)
+    {
+        $subject      = $object->getSubject();
+        $lowest_level = array(
+            AAM_Core_Subject_User::UID, AAM_Core_Subject_Visitor::UID
+        );
+
+        if (in_array($subject::UID, $lowest_level, true)) {
+            switch($object::OBJECT_TYPE) {
+                case AAM_Core_Object_Menu::OBJECT_TYPE:
+                    $options = $this->initializeMenu($options, $object);
+                    break;
+
+                case AAM_Core_Object_Toolbar::OBJECT_TYPE:
+                    $options = $this->initializeToolbar($options, $object);
+                    break;
+
+                case AAM_Core_Object_Metabox::OBJECT_TYPE:
+                    $options = $this->initializeMetabox($options, $object);
+                    break;
+
+                case AAM_Core_Object_Post::OBJECT_TYPE:
+                    $options = $this->initializePost($options, $object);
+                    break;
+
+                case AAM_Core_Object_Uri::OBJECT_TYPE:
+                    $options = $this->initializeUri($options, $object);
+                    break;
+                case AAM_Core_Object_Route::OBJECT_TYPE:
+                    $options = $this->initializeRoute($options, $object);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return $options;
     }
 
     /**
@@ -222,13 +299,17 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
-     * @access public
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
      * @see https://aamplugin.com/reference/policy#backendmenu
-     * @version 6.0.0
+     * @version 6.1.1
      */
-    public function initializeMenu($option, AAM_Core_Object_Menu $object)
+    protected function initializeMenu($option, AAM_Core_Object_Menu $object)
     {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::MENU);
         $parsed  = array();
 
@@ -247,13 +328,17 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
-     * @access public
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
      * @see https://aamplugin.com/reference/policy#toolbar
-     * @version 6.0.0
+     * @version 6.1.1
      */
-    public function initializeToolbar($option, AAM_Core_Object_Toolbar $object)
+    protected function initializeToolbar($option, AAM_Core_Object_Toolbar $object)
     {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::TOOLBAR);
         $parsed  = array();
 
@@ -272,13 +357,17 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @see https://aamplugin.com/reference/policy#metabox
-     * @version 6.0.0
+     * @version 6.1.1
      */
-    public function initializeMetabox($option, AAM_Core_Object_Metabox $object)
+    protected function initializeMetabox($option, AAM_Core_Object_Metabox $object)
     {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
+        $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(array(
             AAM_Core_Policy_Resource::METABOX, AAM_Core_Policy_Resource::WIDGET
         ));
@@ -293,6 +382,164 @@ class AAM_Service_AccessPolicy
     }
 
     /**
+     * Initialize Post Object options
+     *
+     * @param array                $option
+     * @param AAM_Core_Object_Post $object
+     *
+     * @return array
+     *
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @see https://aamplugin.com/reference/policy#post
+     * @version 6.1.1
+     */
+    protected function initializePost($option, AAM_Core_Object_Post $object)
+    {
+        $manager = AAM::api()->getAccessPolicyManager();
+        $found   = $manager->getResources(sprintf(
+            '%s:%s:(%d|%s)',
+            AAM_Core_Policy_Resource::POST,
+            $object->post_type,
+            $object->ID,
+            $object->post_name
+        ));
+
+        $parsed = array();
+
+        foreach($found as $action => $stmt) {
+            $parsed = $this->convertPostStatement($parsed, $action, $stmt);
+        }
+
+        return array_replace_recursive($option, $parsed); // First-class citizen
+    }
+
+    /**
+     * Initialize post visibility options
+     *
+     * @param AAM_Core_Object_Visibility $visibility
+     *
+     * @return void
+     *
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @version 6.1.1
+     */
+    protected function initializeVisibility(AAM_Core_Object_Visibility $visibility)
+    {
+        $manager = AAM::api()->getAccessPolicyManager();
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::POST);
+
+        foreach($found as $resource => $stm) {
+            $chunks = explode(':', $resource);
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+
+            // Allow other plugins to determine what access options should be
+            // considered during visibility check. For example Plus Package uses
+            // HIDDEN TO OTHERS options
+            $map = apply_filters('aam_policy_post_visibility_map_filter', array(
+                'list' => 'hidden'
+            ));
+
+            // Take in consideration only visibility properties
+            if (array_key_exists($chunks[2], $map)) {
+                if (is_numeric($chunks[1])) {
+                    $id = intval($chunks[1]);
+                } else {
+                    $post = get_page_by_path($chunks[1], OBJECT, $chunks[0]);
+                    $id   = (is_a($post, 'WP_Post') ? $post->ID : null);
+                }
+
+                // Making sure that we have at least numeric post ID
+                if (!empty($id)) {
+                    $visibility->pushOptions('post', "{$id}|{$chunks[0]}", array(
+                        $map[$chunks[2]] => $effect
+                    ));
+                }
+            }
+        }
+    }
+
+    /**
+     * Initialize URI Object options
+     *
+     * @param array            $option
+     * @param AAM_Core_Object_Uri $object
+     *
+     * @return array
+     *
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @see https://aamplugin.com/reference/policy#uri
+     * @version 6.1.1
+     */
+    protected function initializeUri($option, AAM_Core_Object_Uri $object)
+    {
+        $manager = AAM::api()->getAccessPolicyManager();
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::URI);
+        $parsed  = array();
+
+        foreach($found as $uri => $stm) {
+            $uri    = rtrim($uri, '/'); // No need to honor the trailing forward slash
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+
+            if ($effect === false) {
+                $parsed[$uri] = array(
+                    'type' => 'allow'
+                );
+            } elseif(isset($stm['Metadata']['Redirect'])) {
+                $option[$uri] = $this->convertUriAction($stm['Metadata']['Redirect']);
+            } else {
+                $option[$uri] = array(
+                    'type'   => 'default',
+                    'action' => null
+                );
+            }
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Initialize Route Object options
+     *
+     * @param array                 $option
+     * @param AAM_Core_Object_Route $object
+     *
+     * @return array
+     *
+     * @since 6.1.1 Method becomes protected
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @see https://aamplugin.com/reference/policy#route
+     * @version 6.1.1
+     */
+    protected function initializeRoute($option, AAM_Core_Object_Route $object)
+    {
+        $manager = AAM::api()->getAccessPolicyManager();
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::ROUTE);
+        $parsed  = array();
+
+        foreach($found as $route => $stm) {
+            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
+            $parsed[strtolower(str_replace(':', '|', $route))] = $effect;
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
      * Check if specified action is allowed upon capability
      *
      * @param boolean $allowed
@@ -301,13 +548,17 @@ class AAM_Service_AccessPolicy
      *
      * @return boolean
      *
+     * @since 6.1.1 Fixed bug with access policy inheritance
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @link https://aamplugin.com/reference/policy#capability
-     * @version 6.0.0
+     * @version 6.1.1
      */
     public function isCapabilityAllowed($allowed, $cap, $action)
     {
-        $manager = AAM_Core_Policy_Factory::get(AAM::getUser());
+        $manager = AAM::api()->getAccessPolicyManager();
         $result  = $manager->isAllowed("Capability:{$cap}:AAM:{$action}");
 
         return ($result === null ? $allowed : $result);
@@ -320,14 +571,17 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @link https://aamplugin.com/reference/policy#capability
      * @link https://aamplugin.com/reference/policy#role
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function initializeUser(AAM_Core_Subject_User $subject)
     {
-        $manager = AAM_Core_Policy_Factory::get($subject);
+        $manager = AAM::api()->getAccessPolicyManager($subject);
         $wp_user = $subject->getPrincipal();
 
         // Update user's list of roles if policy states so
@@ -381,39 +635,6 @@ class AAM_Service_AccessPolicy
         $wp_user->user_level = array_reduce(
             array_keys($wp_user->allcaps), array($wp_user, 'level_reduction'), 0
         );
-    }
-
-    /**
-     * Initialize Post Object options
-     *
-     * @param array                $option
-     * @param AAM_Core_Object_Post $object
-     *
-     * @return array
-     *
-     * @access public
-     * @see https://aamplugin.com/reference/policy#post
-     * @version 6.0.0
-     */
-    public function initializePost($option, AAM_Core_Object_Post $object)
-    {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
-
-        $found   = $manager->getResources(sprintf(
-            '%s:%s:(%d|%s)',
-            AAM_Core_Policy_Resource::POST,
-            $object->post_type,
-            $object->ID,
-            $object->post_name
-        ));
-
-        $parsed = array();
-
-        foreach($found as $action => $stmt) {
-            $parsed = $this->convertPostStatement($parsed, $action, $stmt);
-        }
-
-        return array_replace_recursive($option, $parsed); // First-class citizen
     }
 
     /**
@@ -515,6 +736,14 @@ class AAM_Service_AccessPolicy
                 $redirect['enabled'] = $effect;
                 $options[$ns . 'redirected'] = $redirect;
             }
+
+            // Limited option
+            if(array_key_exists('Limited', $metadata)) {
+                $options[$ns . 'limited'] = array(
+                    'enabled'   => $effect,
+                    'threshold' => $metadata['Limited']['Threshold']
+                );
+            }
         } else { // Simply restrict access to read a post
             $options[$ns . 'restricted'] = $effect;
         }
@@ -555,116 +784,6 @@ class AAM_Service_AccessPolicy
         $response['destination'] = $destination;
 
         return $response;
-    }
-
-    /**
-     * Initialize post visibility options
-     *
-     * @param AAM_Core_Object_Visibility $visibility
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function initializeVisibility(AAM_Core_Object_Visibility $visibility)
-    {
-        $manager = AAM_Core_Policy_Factory::get($visibility->getSubject());
-        $found   = $manager->getResources(AAM_Core_Policy_Resource::POST);
-
-        foreach($found as $resource => $stm) {
-            $chunks = explode(':', $resource);
-            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
-
-            // Allow other plugins to determine what access options should be
-            // considered during visibility check. For example Plus Package uses
-            // HIDDEN TO OTHERS options
-            $map = apply_filters('aam_policy_post_visibility_map_filter', array(
-                'list' => 'hidden'
-            ));
-
-            // Take in consideration only visibility properties
-            if (array_key_exists($chunks[2], $map)) {
-                if (is_numeric($chunks[1])) {
-                    $id = intval($chunks[1]);
-                } else {
-                    $post = get_page_by_path($chunks[1], OBJECT, $chunks[0]);
-                    $id   = (is_a($post, 'WP_Post') ? $post->ID : null);
-                }
-
-                // Making sure that we have at least numeric post ID
-                if (!empty($id)) {
-                    $visibility->pushOptions('post', "{$id}|{$chunks[0]}", array(
-                        $map[$chunks[2]] => $effect
-                    ));
-                }
-            }
-        }
-    }
-
-    /**
-     * Initialize URI Object options
-     *
-     * @param array            $option
-     * @param AAM_Core_Object_Uri $object
-     *
-     * @return array
-     *
-     * @access public
-     * @see https://aamplugin.com/reference/policy#uri
-     * @version 6.0.0
-     */
-    public function initializeUri($option, AAM_Core_Object_Uri $object)
-    {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
-        $found   = $manager->getResources(AAM_Core_Policy_Resource::URI);
-        $parsed  = array();
-
-        foreach($found as $uri => $stm) {
-            $uri    = rtrim($uri, '/'); // No need to honor the trailing forward slash
-            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
-
-            if ($effect === false) {
-                $parsed[$uri] = array(
-                    'type' => 'allow'
-                );
-            } elseif(isset($stm['Metadata']['Redirect'])) {
-                $option[$uri] = $this->convertUriAction($stm['Metadata']['Redirect']);
-            } else {
-                $option[$uri] = array(
-                    'type'   => 'default',
-                    'action' => null
-                );
-            }
-        }
-
-        return array_merge($option, $parsed); //First-class citizen
-    }
-
-    /**
-     * Initialize Route Object options
-     *
-     * @param array                 $option
-     * @param AAM_Core_Object_Route $object
-     *
-     * @return array
-     *
-     * @access public
-     * @see https://aamplugin.com/reference/policy#route
-     * @version 6.0.0
-     */
-    public function initializeRoute($option, AAM_Core_Object_Route $object)
-    {
-        $manager = AAM_Core_Policy_Factory::get($object->getSubject());
-        $found   = $manager->getResources(AAM_Core_Policy_Resource::ROUTE);
-        $parsed  = array();
-
-        foreach($found as $route => $stm) {
-            $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
-            $parsed[strtolower(str_replace(':', '|', $route))] = $effect;
-        }
-
-        return array_merge($option, $parsed); //First-class citizen
     }
 
     /**
@@ -729,13 +848,16 @@ class AAM_Service_AccessPolicy
      *
      * @return boolean
      *
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @link https://aamplugin.com/reference/policy#plugin
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function isPluginActionAllowed($allowed, $action, $slug = null)
     {
-        $manager = AAM_Core_Policy_Factory::get(AAM::getUser());
+        $manager = AAM::api()->getAccessPolicyManager();
 
         if ($slug === null) {
             $id = AAM_Core_Policy_Resource::PLUGIN . ":WP:{$action}";
@@ -753,12 +875,15 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.1.0 Changed the way access policy manage is obtained
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function filterPlugins($plugins)
     {
-        $manager  = AAM_Core_Policy_Factory::get(AAM::getUser());
+        $manager  = AAM::api()->getAccessPolicyManager();
         $filtered = array();
 
         foreach($plugins as $id => $plugin) {

@@ -43,7 +43,7 @@
         <const name="AAM_UNITTEST_USERNAME" value="john" />
         <const name="AAM_UNITTEST_PASSWORD" value="123456" />
         <const name="AAM_UNITTEST_NAV_MENU_NAME" value="Main Menu" />
-        <const name="AAM_UNITTEST_ACCESS_POLICY_ID" value="291" />
+        <const name="AAM_UNITTEST_ACCESS_POLICY_ID" value="3640" />
         <server name="SERVER_PROTOCOL" value="HTTP/1.0"/>
     </php>
 </phpunit>

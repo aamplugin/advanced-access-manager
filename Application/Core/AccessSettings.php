@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM Access Settings repository
  *
+ * @since 6.2.0 Added new hook `aam_updated_access_settings`
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Core_AccessSettings
 {
@@ -137,12 +138,19 @@ class AAM_Core_AccessSettings
      *
      * @return boolean
      *
+     * @since 6.2.0 Added `aam_updated_access_settings` hook
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function save()
     {
-        return AAM_Core_API::updateOption(self::DB_OPTION, $this->_settings);
+        $result = AAM_Core_API::updateOption(self::DB_OPTION, $this->_settings);
+
+        do_action('aam_updated_access_settings', $this->_settings);
+
+        return $result;
     }
 
     /**

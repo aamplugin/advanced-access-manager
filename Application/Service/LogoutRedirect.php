@@ -5,15 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Logout Redirect service
  *
+ * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
+ *              explicitly selected
+ * @since 6.0.5 Fixed the bug with logout redirect
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Service_LogoutRedirect
 {
@@ -25,6 +28,16 @@ class AAM_Service_LogoutRedirect
      * @version 6.0.0
      */
     const FEATURE_FLAG = 'core.service.logout-redirect.enabled';
+
+    /**
+     * Contains the redirect instructions for just logged out user
+     *
+     * @var array
+     *
+     * @access protected
+     * @since 6.0.5
+     */
+    protected $redirect = null;
 
     /**
      * Constructor
@@ -68,35 +81,44 @@ class AAM_Service_LogoutRedirect
      *
      * @return void
      *
+     * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
+     *              explicitly selected
+     * @since 6.0.5 Fixed bug where user was not redirected properly after logout
+     *              because AAM was already hooking into `set_current_user`.
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.1.0
      */
     protected function initializeHooks()
     {
-        // Fired after the user has been logged out successfully
-        add_action('wp_logout', function() {
-            $settings = AAM::getUser()->getObject(
+        // Capture currently logging out user settings
+        add_action('clear_auth_cookie', function() {
+            $this->redirect = AAM::getUser()->getObject(
                 AAM_Core_Object_LogoutRedirect::OBJECT_TYPE
             )->getOption();
+        });
 
+        // Fired after the user has been logged out successfully
+        add_action('wp_logout', function() {
             // Determining redirect type
             $type = 'default';
-            if (!empty($settings['logout.redirect.type'])) {
-                $type = $settings['logout.redirect.type'];
+            if (!empty($this->redirect['logout.redirect.type'])) {
+                $type = $this->redirect['logout.redirect.type'];
             }
 
             if ($type !== 'default') {
                 AAM_Core_Redirect::execute(
-                    $type, array($type => $settings["logout.redirect.{$type}"])
+                    $type, array($type => $this->redirect["logout.redirect.{$type}"])
                 );
-
-                // Halt the execution. Redirect should carry user away if this is not
-                // a CLI execution (e.g. Unit Test)
-                if (php_sapi_name() !== 'cli') {
-                    exit;
-                }
             }
-        });
+
+            // Halt the execution. Redirect should carry user away if this is not
+            // a CLI execution (e.g. Unit Test)
+            if (php_sapi_name() !== 'cli' && $type !== 'default') {
+                exit;
+            }
+        }, PHP_INT_MAX);
     }
 
 }

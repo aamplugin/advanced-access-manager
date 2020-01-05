@@ -43,11 +43,10 @@ class LoginRedirectTest extends TestCase
         // Set login redirect
         $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
-        $object->setOption(array(
-            'login.redirect.type' => 'url',
-            'login.redirect.url'  => 'https://aamplugin.com'
-        ));
-        $object->save();
+
+        $object->updateOptionItem('login.redirect.type', 'url')
+            ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
+            ->save();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
         $request->set_param('username', AAM_UNITTEST_USERNAME);
@@ -77,11 +76,9 @@ class LoginRedirectTest extends TestCase
         // Set login redirect
         $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
-        $object->setOption(array(
-            'login.redirect.type' => 'page',
-            'login.redirect.page' => AAM_UNITTEST_PAGE_ID
-        ));
-        $object->save();
+        $object->updateOptionItem('login.redirect.type', 'page')
+            ->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID)
+            ->save();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
         $request->set_param('username', AAM_UNITTEST_USERNAME);
@@ -112,11 +109,9 @@ class LoginRedirectTest extends TestCase
         // Set login redirect
         $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
-        $object->setOption(array(
-            'login.redirect.type'     => 'callback',
-            'login.redirect.callback' => 'AAM\\UnitTest\\Service\\LoginRedirect\\Callback::redirectCallback'
-        ));
-        $object->save();
+        $object->updateOptionItem('login.redirect.type', 'callback')
+            ->updateOptionItem('login.redirect.callback', 'AAM\\UnitTest\\Service\\LoginRedirect\\Callback::redirectCallback')
+            ->save();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
         $request->set_param('username', AAM_UNITTEST_USERNAME);
@@ -168,11 +163,9 @@ class LoginRedirectTest extends TestCase
         // Set login redirect
         $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
-        $object->setOption(array(
-            'login.redirect.type' => 'page',
-            'login.redirect.page' => AAM_UNITTEST_PAGE_ID
-        ));
-        $object->save();
+        $object->updateOptionItem('login.redirect.type', 'page')
+            ->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID)
+            ->save();
 
         $redirect = apply_filters('login_redirect', admin_url(), admin_url(), $subject->getPrincipal());
 
@@ -196,11 +189,9 @@ class LoginRedirectTest extends TestCase
         // Set login redirect
         $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
-        $object->setOption(array(
-            'login.redirect.type' => 'url',
-            'login.redirect.url'  => 'https://aamplugin.com'
-        ));
-        $object->save();
+        $object->updateOptionItem('login.redirect.type', 'url')
+            ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
+            ->save();
 
         $redirect = apply_filters(
             'login_redirect',
@@ -211,5 +202,4 @@ class LoginRedirectTest extends TestCase
 
         $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $redirect);
     }
-
 }

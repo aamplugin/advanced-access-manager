@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * JWT Token service
  *
+ * @since 6.1.0 Enriched error response with more details
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Service_Jwt
 {
@@ -232,8 +233,11 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.1.0 Enriched error response with more details
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function validateToken(WP_REST_Request $request)
     {
@@ -243,9 +247,10 @@ class AAM_Service_Jwt
         if ($result->isValid === true) {
             $response = new WP_REST_Response($result);
         } else {
-            $response = new WP_REST_Response(new WP_Error(
-                'rest_jwt_validation_failure', $result->reason
-            ), 400);
+            $response = new WP_REST_Response(array(
+                'code'   => 'rest_jwt_validation_failure',
+                'reason' => $result->reason
+            ), $result->status);
         }
 
         return $response;
@@ -276,8 +281,11 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.1.0 Enriched error response with more details
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function refreshToken(WP_REST_Request $request)
     {
@@ -301,15 +309,16 @@ class AAM_Service_Jwt
                     'token_expires' => $new->claims['exp'],
                 ));
             } else {
-                $response = new WP_REST_Response(new WP_Error(
-                    'rest_jwt_validation_failure',
-                    __('JWT token is not refreshable', AAM_KEY)
-                ), 400);
+                $response = new WP_REST_Response(array(
+                    'code'   => 'rest_jwt_validation_failure',
+                    'reason' =>__('JWT token is not refreshable', AAM_KEY)
+                ), 405);
             }
         } else {
-            $response = new WP_REST_Response(new WP_Error(
-                'rest_jwt_validation_failure', $result->reason
-            ), 400);
+            $response = new WP_REST_Response(array(
+                'code'   => 'rest_jwt_validation_failure',
+                'reason' => $result->reason
+            ), $result->status);
         }
 
         return $response;
@@ -322,8 +331,11 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.1.0 Enriched error response with more details
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function revokeToken(WP_REST_Request $request)
     {
@@ -336,14 +348,16 @@ class AAM_Service_Jwt
                     array('message' => 'Token revoked successfully'), 200
                 );
             } else {
-                $response = new WP_REST_Response(new WP_Error(
-                    'rest_jwt_revoking_failure', 'Failed to revoke provided token'
-                ), 404);
+                $response = new WP_REST_Response(array(
+                    'code'   => 'rest_jwt_revoking_failure',
+                    'reason' => __('Failed to revoke provided token', AAM_KEY)
+                ), 409);
             }
         } else {
-            $response = new WP_REST_Response(new WP_Error(
-                'rest_jwt_validation_failure', $claims->reason
-            ), 400);
+            $response = new WP_REST_Response(array(
+                'code'   => 'rest_jwt_validation_failure',
+                'reason' => $claims->reason
+            ), $claims->status);
         }
 
         return $response;

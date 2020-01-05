@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * URI object
  *
+ * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Core_Object_Uri extends AAM_Core_Object
 {
@@ -27,7 +28,11 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.0.0
+     *
+     * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.1.0
      */
     protected function initialize()
     {
@@ -37,9 +42,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
 
         // Trigger custom functionality that may populate the menu options. For
         // example, this hooks is used by Access Policy service
-        if (empty($option)) {
-            $option = apply_filters('aam_uri_object_option_filter', $option, $this);
-        }
+        $option = apply_filters('aam_uri_object_option_filter', $option, $this);
 
         $this->setOption(is_array($option) ? $option : array());
     }

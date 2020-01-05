@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 use Composer\Semver\Semver;
@@ -14,11 +12,29 @@ use Composer\Semver\Semver;
 /**
  * AAM access policy validator
  *
+ * @since 6.2.0 Allowing to define token in the dependencies array as well as
+ *              enhanced with additional attributes
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Core_Policy_Validator
 {
+
+    /**
+     * Policy dependency exists however version is not satisfied
+     *
+     * @version 6.2.0
+     */
+    const INVALID_DEPENDENCY_VERSION = 10;
+
+    /**
+     * Policy dependency does not exist
+     *
+     * @version 6.2.0
+     */
+    const MISSING_DEPENDENCY = 20;
 
     /**
      * Raw policy text
@@ -136,29 +152,51 @@ class AAM_Core_Policy_Validator
      *
      * @return void
      *
+     * @since 6.2.0 Enhanced dependency with more attributes
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function isValidDependency()
     {
         if (!empty($this->json['Dependency'])) {
-            foreach ($this->json['Dependency'] as $app => $constraints) {
+            foreach ($this->json['Dependency'] as $slug => $info) {
                 try {
-                    $satisfies = Semver::satisfies(
-                        $this->getAppVersion($app),
-                        $constraints
-                    );
+                    $v     = (is_array($info) ? $info['Version'] : $info);
+                    $valid = Semver::satisfies($this->getAppVersion($slug), $v);
 
-                    if ($satisfies === false) {
-                        throw new Exception(
-                            AAM_Backend_View_Helper::preparePhrase(
-                                "The dependency [{$app}] does not satisfy version requirement by the policy",
-                                'b'
-                            )
-                        );
+                    if ($valid === false) {
+                        throw new Exception('', self::INVALID_DEPENDENCY_VERSION);
                     }
                 } catch (Exception $e) {
-                    $this->errors[] = $e->getMessage();
+                    // Build the error message
+                    if (is_array($info)) {
+                        $name = (isset($info['Name']) ? $info['Name'] : $slug);
+                        $url  = (isset($info['URL']) ? $info['URL'] : null);
+                    } else {
+                        $name = $slug;
+                        $url  = null;
+                    }
+
+                    // Prepare $app marker
+                    if (!empty($url) && filter_var($url, FILTER_VALIDATE_URL)) {
+                        $app = sprintf(
+                            '<a href="%s" target="_blank">' . $name . '</a>', $url
+                        );
+                    } else {
+                        $app = $name;
+                    }
+
+                    if ($e->getCode() === self::INVALID_DEPENDENCY_VERSION) {
+                        $message = __('The {$app} does not satisfy minimum required version', AAM_KEY);
+                    } elseif ($e->getCode() === self::MISSING_DEPENDENCY) {
+                        $message = __('The {$app} is required', AAM_KEY);
+                    } else {
+                        $message = $e->getMessage();
+                    }
+
+                    $this->errors[] = str_replace('{$app}', $app, $message);
                 }
             }
         }
@@ -171,8 +209,11 @@ class AAM_Core_Policy_Validator
      *
      * @return void
      *
+     * @since 6.2.0 Allowing token to be a slug
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function getAppVersion($app)
     {
@@ -182,6 +223,8 @@ class AAM_Core_Policy_Validator
 
         if ($slug === 'wordpress') {
             $version = $wp_version;
+        } elseif (strpos($slug, '${') === 0) {
+            $version = AAM_Core_Policy_Token::getTokenValue($app);
         } else {
             $version = $this->getPluginVersion($slug);
         }
@@ -221,12 +264,7 @@ class AAM_Core_Policy_Validator
         }
 
         if (is_null($version)) {
-            throw new Exception(
-                AAM_Backend_View_Helper::preparePhrase(
-                    "The plugin [{$slug}] is required by the policy",
-                    'b'
-                )
-            );
+            throw new Exception('', self::MISSING_DEPENDENCY);
         }
 
         return $version;

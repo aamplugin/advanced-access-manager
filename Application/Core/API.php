@@ -12,8 +12,12 @@
 /**
  * AAM core API
  *
+ * @since 6.0.5 Fixed bug with getOption method where incorrect type could be
+ *              returned
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.0.5
  */
 final class AAM_Core_API
 {
@@ -27,8 +31,11 @@ final class AAM_Core_API
      *
      * @return mixed
      *
+     * @since 6.0.5 Fixed the bug where option may not be returned as proper type
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.5
      */
     public static function getOption($option, $default = null, $blog_id = null)
     {
@@ -47,7 +54,7 @@ final class AAM_Core_API
             $response = self::getCachedOption($option, $default);
         }
 
-        return $response;
+        return maybe_unserialize($response);
     }
 
     /**

@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.3
-Stable tag: 6.0.4
+Tested up to: 5.3.2
+Stable tag: 6.2.1
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,80 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.2.1 =
+* Fixed Bug: Very minor UI issue with Access Policy Delete pop-up
+* Added New: Enhanced Access Policy with new [POLICY_META](https://aamplugin.com/reference/policy#policy_meta) token
+* Change: Access Policy post type supports custom fields now
+
+= 6.2.0 =
+* Fixed Bug: Access policy was not applied to visitors
+* Fixed Bug: Bug fixing that is related to unwanted PHP notices [https://forum.aamplugin.com/d/456-notice-undefined-index-expire](https://forum.aamplugin.com/d/456-notice-undefined-index-expire)
+* Fixed Bug: Failing to delete multiple Access URI rules without reloading the page
+* Added New: Ability to generate Access Policy from user's or role's settings [https://forum.aamplugin.com/d/446-announcement-about-upcoming-features/2](https://forum.aamplugin.com/d/446-announcement-about-upcoming-features/2)
+* Added New: More granular control over the HIDDEN access option [https://forum.aamplugin.com/d/446-announcement-about-upcoming-features](https://forum.aamplugin.com/d/446-announcement-about-upcoming-features)
+* Added New: Export/Import AAM settings [https://aamplugin.com/article/how-to-export-and-import-aam-settings](https://aamplugin.com/article/how-to-export-and-import-aam-settings)
+* Added New: Ability to send support request from the AAM UI
+* Added New: Multisite Settings Sync service that allows to sync access settings changes across all sites
+* Added New: New hook `aam_updated_access_settings` that is triggered when access settings are stored
+* Added New: New data type casting (*date) for Access Policy [https://aamplugin.com/reference/policy#markers](https://aamplugin.com/reference/policy#markers)
+* Added New: New POLICY_PARAM access policy token [https://aamplugin.com/reference/policy#policy_param](https://aamplugin.com/reference/policy#policy_param)
+* Added New: New WP_SITE access policy token [https://aamplugin.com/reference/policy#wp_site](https://aamplugin.com/reference/policy#wp_site)
+* Change: [DATETIME](https://aamplugin.com/reference/policy#marker-datetime) access policy token returns time in UTC timezone
+* Change: Enhanced security over AAM UI
+* Change: Multiple internal simplifications and refactoring
+
+= 6.1.1 =
+* Fixed Bug: Unnecessary backslashes before displaying the access policy [https://forum.aamplugin.com/d/432-access-policy-ui-escaping-slashes](https://forum.aamplugin.com/d/432-access-policy-ui-escaping-slashes)
+* Fixed Bug: aam_access_dashboard custom capability caused "Access Denied"
+* Change: Enforcing default `307` Temporary Redirect code if none is provided for any AAM redirect functionality
+* Change: Persisting the last managed role, user or visitor on the AAM page
+* Change: Improved safety by using the last role on the list instead of the default Administrator role
+* Change: Optimized access policy service. Changed the way it is applied to any given object
+* Added New: Migration script that clears previously detected migration errors
+
+= 6.1.0 =
+* Fixed Bug: Access Policy UI - the "Attach to Default" button was not rendering correctly
+* Fixed Bug: Role Management UI - the PHP notice where `Undefined variable: parent`
+* Fixed Bug: AAM UI page - improperly compressed HTML response if server config does not match PHP executable INI settings
+* Fixed Bug: Login Redirect Settings - incorrectly merged settings for multi-role support
+* Fixed Bug: Logout Redirect Settings - incorrectly merged settings for multi-role support
+* Fixed Bug: Access Denied Redirect Settings - incorrectly merged settings for multi-role support
+* Fixed Bug: API Route Settings - incorrectly halted inheritance mechanism
+* Fixed Bug: Admin Toolbar Settings - incorrectly halted inheritance mechanism
+* Fixed Bug: URI Access Settings - incorrectly halted inheritance mechanism
+* Fixed Bug: Content Visibility Settings - incorrectly merged settings for multi-role support
+* Fixed Bug: Access Policy Core - incorrectly managed internal cache
+* Fixed Bug: AAM Core - incorrectly managed internal object cache
+* Fixed Bug: Content Service - incorrectly mapped `do_not_allow` capability if any of the registered post types have it
+* Fixed Bug: Content Service - fatal error `Cannot use object of type Closure as array` [https://forum.aamplugin.com/d/354-php-fatal-error-cannot-use-object-of-type-closure-as-array](https://forum.aamplugin.com/d/354-php-fatal-error-cannot-use-object-of-type-closure-as-array)
+* Fixed Bug: The `aam_show_toolbar` capability was not taken in consideration
+* Fixed Bug: Logout Redirect Service - White screen occurs if "Default" option is explicitly selected [https://wordpress.org/support/topic/blank-log-out-page-on-6-0-5/](https://wordpress.org/support/topic/blank-log-out-page-on-6-0-5/)
+* Change: Refactored internal inheritance mechanism where AAM objects no longer responsible to check for inheritance flag. This eliminates several constrains that we discovered recently.
+* Change: Multiple minor changes to the codebase to consume internal AAM API in more consistent way
+* Change: JWT & Secure Login Services - enriched RESTful API error responses with more details about an error
+* Change: Content Service - optimization improvements
+* Added New: Implemented new filter `aam_token_typecast_filter` for Access Policy for custom type casting
+* Added New: Implemented support for the `=>` (map to) operator for the Access Policy
+* Added New: Implemented support for the AAM_CONFIG marker for the Access Policy
+
+= 6.0.5 =
+* Fixed Bug: Refactored the license managements. Fixed bugs with license registration https://forum.aamplugin.com/d/356-unregistered-version-message
+* Fixed Bug: Some servers do not allow WP core string concatenation. This was causing 403 https://forum.aamplugin.com/d/389-message-loading-aam-ui-please-wait-403-forbidden
+* Fixed Bug: Media list on Posts & Terms tab is not rendered correctly due to improperly managed DB query for post type `attachment`
+* Fixed Bug: AAM core getOption method did not deserialized settings properly in some cases
+* Fixed Bug: Access Manager metabox was rendered for users that have ability to manage other users https://forum.aamplugin.com/d/371-you-are-not-allowed-to-manage-any-aam-subject
+* Fixed Bug: Logout redirect was no working properly https://forum.aamplugin.com/d/339-problem-with-login-shortcode-and-widget
+* Fixed Bug: The Drill-Down button was not working on Posts & Terms tab
+* Fixed Bug: Access policy Action "Create" was not converted at all for the PostType resource
+* Change:    Simplified the first migration script by removing all error emissions. We captured enough migration logs to be confident about proper migration of the most critical settings
+* Change:    Changed verbiage for the Enterprise Package on the Add-ons area
+* Change:    Added info notification to the Posts & Terms tab for proper Media access controls
+* Change:    Merge internal Settings service with Core service
+* Change:    Added new migration script that fixed issues with legacy names for premium add-ons
+* Change:    Added new internal AddOn manager class
+* Added New: Added the ability to check for new add-on updates from the Add-ons area
+* Added New: Published free AAM add-on AAM Protected Media Files https://wordpress.org/plugins/aam-protected-media-files/
 
 = 6.0.4 =
 * Fixed Bug: https://forum.aamplugin.com/d/367-authentication-jwt-expires-fatal-error

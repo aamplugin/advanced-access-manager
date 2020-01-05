@@ -10,11 +10,13 @@
 /**
  * AAM JWT Issuer
  *
+ * @since 6.1.0 Enriched error response with more details
  * @since 6.0.4 Bug fixing. Timezone was handled incorrectly and ttl did not take in
  *              consideration numeric "in seconds" value
  * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.4
+ * @version 6.1.0
  */
 class AAM_Core_Jwt_Issuer
 {
@@ -28,11 +30,12 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.1.0 Enriched error response with more details
      * @since 6.0.4 Making sure that JWT expiration is checked with UTC timezone
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.4
+     * @version 6.1.0
      */
     public function validateToken($token)
     {
@@ -66,15 +69,20 @@ class AAM_Core_Jwt_Issuer
                 );
 
                 if (!is_array($tokens) || !in_array($token, $tokens, true)) {
-                    throw new Exception(__('Token has been revoked', AAM_KEY));
+                    throw new Exception(
+                        __('Token has been revoked', AAM_KEY),
+                        410
+                    );
                 }
             }
 
             $response->isValid = true;
         } catch (Exception $ex) {
+            $status   = $ex->getCode();
             $response = array(
                 'isValid' => false,
-                'reason'  => $ex->getMessage()
+                'reason'  => $ex->getMessage(),
+                'status'  => (!empty($status) ? $status : 400)
             );
         }
 

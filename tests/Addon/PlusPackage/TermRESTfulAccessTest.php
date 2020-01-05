@@ -121,43 +121,6 @@ class TermRESTfulAccessTest extends TestCase
     }
 
     /**
-     * Test that access is restricted to create a new ter
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testCreationTermDirectly()
-    {
-        global $wp_taxonomies;
-
-        $user   = AAM::getUser();
-        $object = $user->getObject(Taxonomy::OBJECT_TYPE, 'category');
-
-        // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('term/edit', true)->save());
-
-        // Emulate new taxonomy registration
-        do_action('registered_taxonomy', 'category', 'post');
-
-        $server = rest_get_server();
-
-        // Verify that term is no longer in the list of terms
-        $request = new WP_REST_Request('POST', '/wp/v2/categories');
-        $request->set_param('name', 'Test');
-        $request->set_param('description', 'Test');
-
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(403, $response->get_status());
-        $this->assertEquals('rest_cannot_create', $response->get_data()['code']);
-
-        // Restore original
-        $wp_taxonomies['category']->cap->edit_terms = 'edit_categories';
-    }
-
-    /**
      * Test that term cannot be deleted while going through RESTful API endpoint
      *
      * @return void

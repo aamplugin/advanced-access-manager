@@ -80,10 +80,13 @@ class AAM_Service_Uri
     /**
      * Authorize access to current URI
      *
-     * @return void
+     * @return boolean
+     *
+     * @since 6.1.0 The method return boolean `true` if no matches found
+     * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function authorizeUri()
     {
@@ -107,6 +110,8 @@ class AAM_Service_Uri
                 );
             }
         }
+
+        return true;
     }
 
 }

@@ -108,8 +108,8 @@ class JwtTest extends TestCase
 
         $response = $server->dispatch($request);
 
-        $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('Token has been revoked', $response->get_data()->get_error_message());
+        $this->assertEquals(410, $response->get_status());
+        $this->assertEquals('Token has been revoked', $response->get_data()['reason']);
     }
 
     /**
@@ -138,7 +138,8 @@ class JwtTest extends TestCase
         $response = $server->dispatch($request);
 
         $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('Expired token', $response->get_data()->get_error_message());
+        $this->assertEquals('rest_jwt_validation_failure', $response->get_data()['code']);
+        $this->assertEquals('Expired token', $response->get_data()['reason']);
     }
 
     /**
@@ -266,7 +267,7 @@ class JwtTest extends TestCase
         $response = $server->dispatch($request);
 
         $this->assertEquals(400, $response->get_status());
-        $this->assertStringContainsString('Malformed UTF-8 characters', $response->get_data()->get_error_message());
+        $this->assertStringContainsString('Malformed UTF-8 characters', $response->get_data()['reason']);
     }
 
     /**
@@ -297,7 +298,7 @@ class JwtTest extends TestCase
         $response = $server->dispatch($request);
 
         $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('Expired token', $response->get_data()->get_error_message());
+        $this->assertEquals('Expired token', $response->get_data()['reason']);
     }
 
     /**
@@ -327,8 +328,8 @@ class JwtTest extends TestCase
 
         $response = $server->dispatch($request);
 
-        $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('JWT token is not refreshable', $response->get_data()->get_error_message());
+        $this->assertEquals(405, $response->get_status());
+        $this->assertEquals('JWT token is not refreshable', $response->get_data()['reason']);
     }
 
     /**

@@ -5,15 +5,19 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM core policy token evaluator
  *
+ * @since 6.2.1 Added POLICY_META token
+ * @since 6.2.0 Enhanced access policy with more tokens. DATETIME now returns time in
+ *              UTC timezone
+ * @since 6.1.0 Added support for the new token `AAM_CONFIG`
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.1
  */
 class AAM_Core_Policy_Token
 {
@@ -23,14 +27,20 @@ class AAM_Core_Policy_Token
      *
      * @var array
      *
+     * @since 6.2.1 Added `POLICY_META` token
+     * @since 6.2.0 Added `POLICY_PARAM`, `WP_SITE` token & changed the
+     *              DATETIME callback
+     * @since 6.1.0 Added `AAM_CONFIG` token
+     * @since 6.0.0 Initial implementation of the property
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.1
      */
     protected static $map = array(
         'USER'         => 'AAM_Core_Policy_Token::getUserValue',
         'USER_OPTION'  => 'AAM_Core_Policy_Token::getUserOptionValue',
         'USER_META'    => 'AAM_Core_Policy_Token::getUserMetaValue',
-        'DATETIME'     => 'date',
+        'DATETIME'     => 'AAM_Core_Policy_Token::getDatetime',
         'HTTP_GET'     => 'AAM_Core_Request::get',
         'HTTP_QUERY'   => 'AAM_Core_Request::get',
         'HTTP_POST'    => 'AAM_Core_Request::post',
@@ -40,7 +50,11 @@ class AAM_Core_Policy_Token
         'ENV'          => 'getenv',
         'CONST'        => 'AAM_Core_Policy_Token::getConstant',
         'WP_OPTION'    => 'AAM_Core_API::getOption',
-        'JWT'          => 'AAM_Core_Policy_Token::getJwtClaim'
+        'JWT'          => 'AAM_Core_Policy_Token::getJwtClaim',
+        'AAM_CONFIG'   => 'AAM_Core_Policy_Token::getConfig',
+        'POLICY_PARAM' => 'AAM_Core_Policy_Token::getParam',
+        'POLICY_META'  => 'AAM_Core_Policy_Token::getPolicyMeta',
+        'WP_SITE'      => 'AAM_Core_Policy_Token::getSiteParam'
     );
 
     /**
@@ -52,17 +66,16 @@ class AAM_Core_Policy_Token
      *
      * @return string
      *
+     * @since 6.1.0 Changed `getValue` method to `getTokenValue`
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public static function evaluate($part, array $tokens, array $args = array())
     {
         foreach ($tokens as $token) {
-            $val = self::getValue(
-                preg_replace('/^\$\{([^}]+)\}$/', '${1}', $token),
-                $args
-            );
-
+            $val  = self::getTokenValue($token, $args);
             $part = str_replace(
                 $token,
                 (is_scalar($val) || is_null($val) ? $val : json_encode($val)),
@@ -81,13 +94,12 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
-     * @access protected
-     * @version 6.0.0
+     * @access public
+     * @version 6.1.0
      */
-    protected static function getValue($token, $args)
+    public static function getTokenValue($token, $args = array())
     {
-        $value = null;
-        $parts = explode('.', $token);
+        $parts = explode('.', preg_replace('/^\$\{([^}]+)\}$/', '${1}', $token), 2);
 
         if (isset(self::$map[$parts[0]])) {
             if ($parts[0] === 'ARGS') {
@@ -97,6 +109,10 @@ class AAM_Core_Policy_Token
             }
         } elseif ($parts[0] === 'CALLBACK') {
             $value = is_callable($parts[1]) ? call_user_func($parts[1], $args) : null;
+        } else {
+            $value = apply_filters(
+                'aam_get_policy_token_value_filter', $parts[0], $parts[1], $args
+            );
         }
 
         return $value;
@@ -240,6 +256,103 @@ class AAM_Core_Policy_Token
     protected static function getConstant($const)
     {
         return (defined($const) ? constant($const) : null);
+    }
+
+    /**
+     * Get AAM configuration
+     *
+     * @param string $config
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.1.0
+     */
+    protected static function getConfig($config)
+    {
+        return AAM::api()->getConfig($config);
+    }
+
+    /**
+     * Get access policy param
+     *
+     * @param string $param
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.2.0
+     */
+    protected static function getParam($param)
+    {
+        return AAM::api()->getAccessPolicyManager()->getParam($param);
+    }
+
+    /**
+     * Get access policy metadata
+     *
+     * @param string $meta
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.2.1
+     */
+    protected static function getPolicyMeta($meta)
+    {
+        list($policyId, $param) = explode('.', $meta, 2);
+
+        return get_post_meta($policyId, $param, true);
+    }
+
+    /**
+     * Get current datetime
+     *
+     * @param string $format
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.2.0
+     */
+    protected static function getDatetime($format)
+    {
+        $result = null;
+
+        try {
+            $result = (new DateTime('now', new DateTimeZone('UTC')))->format($format);
+        } catch (Exception $e) {
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                'Invalid date/time format: ' . $e->getMessage(),
+                AAM_VERSION
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get current blog details
+     *
+     * @param string $param
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.2.0
+     */
+    protected static function getSiteParam($param)
+    {
+        $result = null;
+
+        if (is_multisite()) {
+            $result = get_blog_details()->{$param};
+        } elseif ($param === 'blog_id') {
+            $result = get_current_blog_id();
+        }
+
+        return $result;
     }
 
 }

@@ -10,11 +10,14 @@
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 6.2.1 Added support for the POLICY_META token
+ * @since 6.2.0 Fetched the way access policies are fetched
+ * @since 6.1.0 Implemented `=>` operator. Improved inheritance mechanism
  * @since 6.0.4 Potential bug fix with improperly merged Param option:* values
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.4
+ * @version 6.2.1
  */
 class AAM_Core_Policy_Manager
 {
@@ -55,14 +58,23 @@ class AAM_Core_Policy_Manager
     /**
      * Constructor
      *
+     * @param AAM_Core_Subject $subject
+     * @param boolean          $skipInheritance
+     *
      * @access protected
      *
+     * @since 6.1.0 Added new `$skipInheritance` mandatory argument
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @return void
-     * @version 6.0.0
+     * @version 6.1.0
      */
-    public function __construct(AAM_Core_Subject $subject)
+    public function __construct(AAM_Core_Subject $subject, $skipInheritance)
     {
-        $this->object  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $this->object  = $subject->getObject(
+            AAM_Core_Object_Policy::OBJECT_TYPE, null, $skipInheritance
+        );
+
         $this->subject = $subject;
     }
 
@@ -268,8 +280,11 @@ class AAM_Core_Policy_Manager
      *
      * @return void
      *
+     * @since 6.2.0 Changed the way access policies are fetched
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function initialize()
     {
@@ -281,7 +296,7 @@ class AAM_Core_Policy_Manager
         // If there is at least one policy attached and it is published, then
         // parse into the tree
         if (count($ids)) {
-            $policies = $this->fetchPolicies(array_keys($ids));
+            $policies = $this->fetchPolicies(array('include' => array_keys($ids)));
 
             foreach ($policies as $policy) {
                 $this->updatePolicyTree($this->tree, $this->parsePolicy($policy));
@@ -298,17 +313,27 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.2.0 Changed the way access policies are fetched to support multisite
+     *              network setup
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
-    protected function fetchPolicies($ids)
+    public function fetchPolicies($args = array())
     {
-        return get_posts(array(
-            'include'          => $ids,
-            'post_status'      => 'publish',
+        do_action('aam_pre_policy_fetch_action');
+
+        $posts = get_posts(wp_parse_args($args, array(
+            'post_status'      => array('publish', 'draft', 'pending'),
             'suppress_filters' => true,
-            'post_type'        => AAM_Service_AccessPolicy::POLICY_CPT
-        ));
+            'post_type'        => AAM_Service_AccessPolicy::POLICY_CPT,
+            'nopaging'         => true
+        )));
+
+        do_action('aam_post_policy_fetch_action');
+
+        return $posts;
     }
 
     /**
@@ -318,12 +343,21 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.2.1 Added support for the POLICY_META token
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.1
      */
     protected function parsePolicy($policy)
     {
-        $val = json_decode($policy->post_content, true);
+        // Any ${POLICY_META. replace with ${POLICY_META.123
+        $json = str_replace(
+            '${POLICY_META.',
+            '${POLICY_META.' . $policy->ID . '.',
+            $policy->post_content
+        );
+        $val  = json_decode($json, true);
 
         // Do not load the policy if any errors
         if (json_last_error() === JSON_ERROR_NONE) {
@@ -382,8 +416,12 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.2.1 Typecasting param's value
+     * @since 6.1.0 Added support for the `=>` (map to) operator
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.1
      */
     protected function updatePolicyTree(&$tree, $addition)
     {
@@ -397,17 +435,31 @@ class AAM_Core_Policy_Manager
             $actions   = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
 
             foreach ($resources as $res) {
+                $map = array(); // Reset map
+
                 // Allow to build resource name dynamically.
-                // e.g. "Term:category:${USERMETA.region}:posts"
-                if (preg_match_all('/(\$\{[^}]+\})/', $res, $match)) {
-                    $res = AAM_Core_Policy_Token::evaluate($res, $match[1]);
+                if (preg_match('/^(.*)[\s]+(map to|=>)[\s]+(.*)$/i', $res, $match)) {
+                    // e.g. "Term:category:%s:posts => ${USER_META.regions}"
+                    $values = (array) AAM_Core_Policy_Token::getTokenValue($match[3]);
+
+                    // Create the map of resources and replace
+                    foreach($values as $value) {
+                        $map[] = sprintf($match[1], $value);
+                    }
+                } elseif (preg_match_all('/(\$\{[^}]+\})/', $res, $match)) {
+                    // e.g. "Term:category:${USER_META.region}:posts"
+                    $map = array(AAM_Core_Policy_Token::evaluate($res, $match[1]));
+                } else {
+                    $map = array($res);
                 }
 
-                foreach ($actions as $act) {
-                    $id = strtolower($res . (!empty($act) ? ":{$act}" : ''));
+                foreach($map as $resource) {
+                    foreach ($actions as $act) {
+                        $id = strtolower($resource . (!empty($act) ? ":{$act}" : ''));
 
-                    if (!isset($stmts[$id]) || empty($stmts[$id]['Enforce'])) {
-                        $stmts[$id] = $stm;
+                        if (!isset($stmts[$id]) || empty($stmts[$id]['Enforce'])) {
+                            $stmts[$id] = $stm;
+                        }
                     }
                 }
             }
@@ -419,12 +471,15 @@ class AAM_Core_Policy_Manager
         foreach ($addition['Param'] as $param) {
             if (!empty($param['Key'])) {
                 // Allow to build param name dynamically.
-                // e.g. "${USERMETA.region}_posts"
+                // e.g. "${USER_META.region}_posts"
                 if (preg_match_all('/(\$\{[^}]+\})/', $param['Key'], $match)) {
                     $id = AAM_Core_Policy_Token::evaluate($param['Key'], $match[1]);
                 } else {
                     $id = $param['Key'];
                 }
+
+                // If necessary typecast the params value
+                $param['Value'] = AAM_Core_Policy_Typecast::execute($param['Value']);
 
                 if (!isset($params[$id]) || empty($params[$id]['Enforce'])) {
                     $params[$id] = $param;

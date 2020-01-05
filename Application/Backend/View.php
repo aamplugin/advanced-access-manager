@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -14,6 +12,9 @@
  *
  * This class is used to manage all AAM UI templates and interaction of the UI with
  * AAM backend core
+ *
+ * @since 6.0.5 Removed prepareIframeWPAssetsURL method
+ * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
  * @version 6.0.0
@@ -90,42 +91,6 @@ class AAM_Backend_View
         ob_end_clean();
 
         return $content;
-    }
-
-    /**
-     * Prepare AAM iFrame WordPress assets URL
-     *
-     * Based on the provided $type, return either JS or CSS URL
-     *
-     * @param string $type
-     *
-     * @return string
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected static function prepareIframeWPAssetsURL($type)
-    {
-        global $wp_scripts, $compress_scripts, $compress_css;
-
-        if ($type === 'js') {
-            $zip    = $compress_scripts ? 1 : 0;
-            $script = 'load-scripts.php';
-            $concat = 'jquery-core,jquery-migrate';
-        } else {
-            $zip    = $compress_css ? 1 : 0;
-            $script = 'load-styles.php';
-            $concat = 'wp-edit-post,common';
-        }
-
-        if ($zip && defined('ENFORCE_GZIP') && ENFORCE_GZIP) {
-            $zip = 'gzip';
-        }
-
-        $src  = $wp_scripts->base_url . "/wp-admin/{$script}?c={$zip}&";
-        $src .= "load%5B%5D={$concat}&ver=" . $wp_scripts->default_version;
-
-        return esc_attr($src);
     }
 
     /**

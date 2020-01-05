@@ -5,15 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Addon repository
  *
+ * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
+ * @since 6.0.5 Refactored the license managements. Fixed couple bugs with license
+ *              information displaying
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Addon_Repository
 {
@@ -45,16 +48,30 @@ class AAM_Addon_Repository
     /**
      * Get license registry
      *
+     * @param boolean $license_only
+     *
      * @return array
      *
+     * @since 6.0.5 Added the $license_only argument
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.5
      */
-    public function getRegistry()
+    public function getRegistry($license_only = false)
     {
+        $response = array();
         $registry = AAM_Core_API::getOption(self::DB_OPTION, array(), 'site');
 
-        return (is_array($registry) ? $registry : array());
+        if ($license_only === true) {
+            foreach($registry as $slug => $data) {
+                $response[$slug] = $data['license'];
+            }
+        } else {
+            $response = $registry;
+        }
+
+        return (is_array($response) ? $response : array());
     }
 
     /**
@@ -76,21 +93,21 @@ class AAM_Addon_Repository
      * @param object $package
      * @param string $license
      *
-     * @return void
+     * @return boolean
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.5
      */
-    public function storeLicense($package, $license)
+    public function registerLicense($package, $license)
     {
         $list = $this->getRegistry();
 
-        $list[$package->id] = array(
-            'license' => $license, 'expire' => $package->expire
+        $list[$package['slug']] = array(
+            'license' => $license, 'expire' => $package['expire']
         );
 
         // Update the registry
-        AAM_Core_API::updateOption(self::DB_OPTION, $list);
+        return AAM_Core_API::updateOption(self::DB_OPTION, $list);
     }
 
     /**
@@ -146,8 +163,11 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.0.5 Added new `hasUpdate` flag
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.5
      */
     protected function buildAddonObject($title, $slug, $description)
     {
@@ -156,11 +176,34 @@ class AAM_Addon_Repository
             'version'     => $this->getPluginVersion("aam-{$slug}/bootstrap.php"),
             'isActive'    => $this->isPluginActive("aam-{$slug}/bootstrap.php"),
             'expires'     => $this->getExpirationDate("aam-{$slug}"),
+            'hasUpdate'   => $this->hasPluginUpdate("aam-{$slug}/bootstrap.php"),
             'license'     => $this->getPluginLicense("aam-{$slug}"),
             'type'        => 'commercial',
             'description' => $description,
             'url'         => 'https://aamplugin.com/pricing/' . $slug
         );
+    }
+
+    /**
+     * Check if plugin has new version available
+     *
+     * @param string $id
+     *
+     * @return boolean
+     *
+     * @access protected
+     * @version 6.0.5
+     */
+    protected function hasPluginUpdate($id)
+    {
+        $has_update = false;
+        $plugins    = get_site_transient('update_plugins');
+
+        if (isset($plugins->response) && is_array($plugins->response)) {
+            $has_update = array_key_exists($id, $plugins->response);
+        }
+
+        return $has_update;
     }
 
     /**
@@ -234,14 +277,19 @@ class AAM_Addon_Repository
      *
      * @return string|null
      *
+     * @since 6.2.0 Fixed bug with PHP notice when `expire` is not defined
+     * @since 6.0.0 Initial implementation of the method
+     * @since 6.0.5 Fixed typo in the property name
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function getExpirationDate($plugin)
     {
-        $registry = $this->getRegistry();
+        $r = $this->getRegistry();
 
-        return (isset($registry[$plugin]) ? $registry[$plugin]['expires'] : null);
+        return (isset($r[$plugin]['expire']) ? $r[$plugin]['expire'] : null);
     }
 
     /**
@@ -251,14 +299,17 @@ class AAM_Addon_Repository
      *
      * @return string|null
      *
+     * @since 6.2.0 Fixed bug with PHP notice when `license` is not defined
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function getPluginLicense($plugin)
     {
-        $registry = $this->getRegistry();
+        $r = $this->getRegistry();
 
-        return (isset($registry[$plugin]) ? $registry[$plugin]['license'] : null);
+        return (isset($r[$plugin]['license']) ? $r[$plugin]['license'] : null);
     }
 
 }

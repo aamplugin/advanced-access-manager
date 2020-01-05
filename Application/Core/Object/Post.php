@@ -10,12 +10,13 @@
 /**
  * Post object
  *
+ * @since 6.1.0 Removed support for the $suppressFilters flag
  * @since 6.0.1 Added new method isDefined that is used to determine if access option
  *              is defined
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.1
+ * @version 6.1.0
  */
 class AAM_Core_Object_Post extends AAM_Core_Object
 {
@@ -42,18 +43,18 @@ class AAM_Core_Object_Post extends AAM_Core_Object
      *
      * @param AAM_Core_Subject $subject
      * @param WP_Post|Int      $post
-     * @param boolean          $suppressFilters
      *
      * @return void
      *
+     * @since 6.1.0 Removed support for the $suppressFilters flag
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
-    public function __construct(
-        AAM_Core_Subject $subject, $post, $suppressFilters = false
-    ) {
+    public function __construct(AAM_Core_Subject $subject, $post)
+    {
         $this->setSubject($subject);
-        $this->setSuppressFilters($suppressFilters);
 
         // Make sure that we are dealing with WP_Post object
         // This is done to remove redundant calls to the database on the backend view
@@ -93,7 +94,11 @@ class AAM_Core_Object_Post extends AAM_Core_Object
 
     /**
      * @inheritDoc
-     * @version 6.0.0
+     *
+     * @since 6.1.0 Removed support for the $suppressFilters flag
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.1.0
      */
     protected function initialize()
     {
@@ -105,15 +110,12 @@ class AAM_Core_Object_Post extends AAM_Core_Object
 
         $this->determineOverwritten($option);
 
-        if ($this->suppressFilters() === false) {
-            // Trigger custom functionality that may populate the post access options
-            // after initial setup. Typically is used by third party functionality and
-            // premium AAM plugins.
-            $option = apply_filters('aam_post_object_option_filter', $option, $this);
-        }
-
-        // Finally set the option for this object
-        $this->setOption($option);
+        // Trigger custom functionality that may populate the post access options
+        // after initial setup. Typically is used by third party functionality and
+        // premium AAM plugins.
+        $this->setOption(
+            apply_filters('aam_post_object_option_filter', $option, $this)
+        );
     }
 
     /**
@@ -234,13 +236,18 @@ class AAM_Core_Object_Post extends AAM_Core_Object
      *
      * @return boolean
      *
+     * @since 6.1.0 Using explicit options to store settings
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function save()
     {
         return $this->getSubject()->updateOption(
-            $this->getOption(), self::OBJECT_TYPE, $this->ID . '|' . $this->post_type
+            $this->getExplicitOption(),
+            self::OBJECT_TYPE,
+            $this->ID . '|' . $this->post_type
         );
     }
 

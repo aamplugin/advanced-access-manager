@@ -10,6 +10,8 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
+ * @since 6.1.0 Multiple bug fixed
  * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins
  * @since 6.0.2 Refactored the way access to posts is managed. No more pseudo caps
  *              aam|...
@@ -17,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.4
+ * @version 6.2.0
  */
 class AAM_Service_Content
 {
@@ -153,12 +155,14 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.1.0 Fixed the bug where `do_not_allow` capability was mapped to the
+     *              list of post type capabilities
      * @since 6.0.2 Removed invocation for the pseudo-cap mapping for post types
      * @since 6.0.1 Fixed bug related to enabling commenting on all posts
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.0.1
+     * @version 6.1.0
      */
     protected function initializeHooks()
     {
@@ -224,7 +228,10 @@ class AAM_Service_Content
 
             // Populate the collection of post type caps
             foreach($obj->cap as $cap) {
-                if (!in_array($cap, $this->postTypeCaps, true)) {
+                if (
+                    !in_array($cap, $this->postTypeCaps, true)
+                    && ($cap !== 'do_not_allow')
+                ) {
                     $this->postTypeCaps[] = $cap;
                 }
             }
@@ -240,11 +247,12 @@ class AAM_Service_Content
      *
      * @return mixed
      *
+     * @since 6.1.0 Fixed bug that causes fatal error when callback is Closure
      * @since 6.0.2 Making sure that get_post returns actual post object
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.2
+     * @version 6.1.0
      */
     public function beforeDispatch($response, $handler, $request)
     {
@@ -254,10 +262,11 @@ class AAM_Service_Content
         }
 
         // Override the password authentication handling ONLY for posts
-        $attrs    = $request->get_attributes();
-        $callback = (!empty($attrs['callback'][0]) ? $attrs['callback'][0] : null);
+        $attrs      = $request->get_attributes();
+        $callback   = $attrs['callback'];
+        $controller = (is_array($callback) ? array_shift($callback) : null);
 
-        if (is_a($callback, 'WP_REST_Posts_Controller')) {
+        if (is_a($controller, 'WP_REST_Posts_Controller')) {
             $post     = get_post($request['id']);
             $has_pass = isset($request['password']);
 
@@ -367,8 +376,11 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.2.0 Enhanced HIDDEN option to be more granular
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function getNavigationMenu($pages)
     {
@@ -376,7 +388,7 @@ class AAM_Service_Content
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'), true)) {
                     $object = AAM::getUser()->getObject('post', $page->object_id);
-                    if ($object->is('hidden')) {
+                    if ($this->_isHidden($object->getOption())) {
                         unset($pages[$i]);
                     }
                 }
@@ -425,8 +437,11 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.2.0 Enhanced HIDDEN option to be more granular
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function filterPages($pages)
     {
@@ -439,7 +454,7 @@ class AAM_Service_Content
                 }
 
                 $object = AAM::getUser()->getObject('post', $post->ID);
-                if ($object->is('hidden')) {
+                if ($this->_isHidden($object->getOption())) {
                     unset($pages[$i]);
                 }
             }
@@ -496,33 +511,73 @@ class AAM_Service_Content
      *
      * @return string
      *
+     * @since 6.2.0 Enhanced HIDDEN option to be more granular
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
      * @global WPDB $wpdb
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function preparePostQuery($visibility, $wpQuery)
     {
         global $wpdb;
 
         $postTypes = $this->getQueryingPostType($wpQuery);
-
-        $not = array();
+        $excluded  = array();
 
         foreach ($visibility as $id => $access) {
             $chunks = explode('|', $id);
 
-            if (in_array($chunks[1], $postTypes, true) && !empty($access['hidden'])) {
-                $not[] = $chunks[0];
+            if (in_array($chunks[1], $postTypes, true) && $this->_isHidden($access)) {
+                $excluded[] = $chunks[0];
             }
         }
 
-        if (!empty($not)) {
-            $query = " AND {$wpdb->posts}.ID NOT IN (" . implode(',', $not) . ")";
+        if (!empty($excluded)) {
+            $query = " AND {$wpdb->posts}.ID NOT IN (" . implode(',', $excluded) . ")";
         } else {
             $query = '';
         }
 
         return $query;
+    }
+
+    /**
+     * Determine if object is hidden based on access settings
+     *
+     * @param array $options
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 6.2.0
+     */
+    private function _isHidden($options)
+    {
+        $hidden = false;
+
+        // Determine current area
+        if (is_admin()) {
+            $area = 'backend';
+        } elseif (defined('REST_REQUEST') && REST_REQUEST) {
+            $area = 'api';
+        } else {
+            $area = 'frontend';
+        }
+
+        if (isset($options['hidden'])) {
+            if (
+                is_array($options['hidden'])
+                && !empty($options['hidden']['enabled'])
+                && !empty($options['hidden'][$area])
+            ) {
+                $hidden = true;
+            } elseif (is_bool($options['hidden']) && ($options['hidden'] === true)) {
+                $hidden = true;
+            }
+        }
+
+        return $hidden;
     }
 
     /**
@@ -607,6 +662,8 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.1.0 Added internal cache to optimize performance for posts that no
+     *              longer exist but still referenced one way or another
      * @since 6.0.2 Completely rewrote this method to fixed loop caused by mapped
      *              aam|... post type capability
      * @since 6.0.0 Initial implementation of the method
@@ -614,10 +671,13 @@ class AAM_Service_Content
      * @link https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function filterMetaMaps($caps, $cap, $user_id, $args)
     {
+        // Internal cache to optimize search for no longer existing posts
+        static $post_cache = array();
+
         global $post;
 
         // For optimization reasons, check only caps that belong to registered post
@@ -635,7 +695,7 @@ class AAM_Service_Content
 
             // If object ID is not empty, then, potentially we are checking for perms
             // to perform one of the action against a post
-            if (!empty($objectId)) {
+            if (!empty($objectId) && !in_array($objectId, $post_cache, true)) {
                 $requested = get_post($objectId);
 
                 if (is_a($requested, 'WP_Post')) {
@@ -646,6 +706,8 @@ class AAM_Service_Content
                             $post_type, $cap, $caps, $requested, $args
                         );
                     }
+                } else {
+                    $post_cache[] = $objectId;
                 }
             }
         }
@@ -1000,19 +1062,22 @@ class AAM_Service_Content
      *
      * @return boolean|WP_Error
      *
+     * @since 6.2.0 Simplified implementation
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @version 6.0.0
      */
     public function checkPostLimitCounter(AAM_Core_Object_Post $post)
     {
         $result = true;
-        $user   = get_current_user_id();
 
         // Check current access counter only for authenticated users
-        if ($user && $post->is('limited')) {
+        if (is_user_logged_in() && $post->is('limited')) {
             $limited = $post->get('limited');
+
             $option  = sprintf(self::POST_COUNTER_DB_OPTION, $post->ID);
-            $counter = intval(get_user_option($option, $user));
+            $counter = intval(get_user_option($option, get_current_user_id()));
 
             if ($counter >= $limited['threshold']) {
                 $result = new WP_Error(

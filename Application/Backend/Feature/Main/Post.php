@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.2.0 Added more granular control over the HIDDEN access option
+ * @since 6.0.3 Allowed to manage access to ALL registered post types
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Backend_Feature_Main_Post
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -42,6 +44,35 @@ class AAM_Backend_Feature_Main_Post
      * @version 6.0.0
      */
     const TEMPLATE = 'service/post.php';
+
+    /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access public
+     * @since 6.2.0
+     */
+    public function __construct()
+    {
+        add_filter('aam_sanitize_post_value_filter', function($value, $option) {
+            if ($option === 'hidden') {
+                $value['frontend'] = isset($value['frontend']) && filter_var(
+                    $value['frontend'], FILTER_VALIDATE_BOOLEAN
+                );
+
+                $value['backend'] = isset($value['backend']) && filter_var(
+                    $value['backend'], FILTER_VALIDATE_BOOLEAN
+                );
+
+                $value['api'] = isset($value['api']) && filter_var(
+                    $value['api'], FILTER_VALIDATE_BOOLEAN
+                );
+            }
+
+            return $value;
+        }, 10, 2);
+    }
 
     /**
      * Get posts & terms list
@@ -184,13 +215,19 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return array
      *
+     * @since 6.2.0 Added additional argument "current subject" to the
+     *              `aam_post_access_options_filter` filter
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function getAccessOptionList()
     {
         $list = apply_filters(
-            'aam_post_access_options_filter', AAM_Backend_View_PostOptionList::get()
+            'aam_post_access_options_filter',
+            AAM_Backend_View_PostOptionList::get(),
+            $this->getSubject()
         );
 
         return array_filter($list, function ($opt) {
@@ -225,12 +262,19 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return string
      *
+     * @since 6.2.0 Added HIDDEN preview value
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function getPreviewValue($option, $value)
     {
         switch ($option) {
+            case 'hidden':
+                $preview = $this->prepareHiddenPreview($value);
+                break;
+
             case 'teaser':
                 $preview = $this->prepareTeaserPreview($value);
                 break;
@@ -259,6 +303,42 @@ class AAM_Backend_Feature_Main_Post
                     $option
                 );
                 break;
+        }
+
+        return $preview;
+    }
+
+    /**
+     * Prepare preview value for the HIDDEN option
+     *
+     * @param array|boolean $hidden
+     *
+     * @return string
+     *
+     * @access protected
+     * @version 6.2.0
+     */
+    protected function prepareHiddenPreview($hidden)
+    {
+        $preview = null;
+
+        if (is_array($hidden)) {
+            if ($hidden['enabled'] === true) {
+                $areas = array();
+                if (!empty($hidden['frontend'])) {
+                    $areas[] = __('Frontend', AAM_KEY);
+                }
+                if (!empty($hidden['backend'])) {
+                    $areas[] = __('Backend', AAM_KEY);
+                }
+                if (!empty($hidden['api'])) {
+                    $areas[] = __('RESTful API', AAM_KEY);
+                }
+
+                $preview = implode(', ', $areas);
+            }
+        } elseif (!empty($hidden)) {
+            $preview = __('All Areas', AAM_KEY);
         }
 
         return $preview;
@@ -449,8 +529,11 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return mixed
      *
+     * @since 6.2.0 Added support for the new filter `aam_sanitize_post_value_filter`
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function sanitizeOption($option, $value)
     {
@@ -460,7 +543,7 @@ class AAM_Backend_Feature_Main_Post
             $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }
 
-        return $value;
+        return apply_filters('aam_sanitize_post_value_filter', $value, $option);
     }
 
     /**
@@ -913,23 +996,38 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return int
      *
+     * @since 6.0.5 Fixed the bug with Media list not showing correctly due to
+     *              improperly managed DB query for post type `attachment`
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @global type $wpdb
-     * @version 6.0.0
+     * @global WPDB $wpdb
+     * @version 6.0.5
      */
-    protected function getPostCount($type, $search)
+    protected function getPostCount($type, $search = null)
     {
         global $wpdb;
 
         $query  = "SELECT COUNT(*) AS total FROM {$wpdb->posts} ";
-        $query .= "WHERE (post_type = %s) AND (post_title LIKE %s || ";
-        $query .= "post_excerpt LIKE %s || post_content LIKE %s)";
+        $query .= 'WHERE (post_type = %s)';
 
-        $args   = array($type, "%{$search}%", "%{$search}%", "%{$search}%");
+        if (!empty($search)) {
+            $query .= ' AND (post_title LIKE %s || ';
+            $query .= "post_excerpt LIKE %s || post_content LIKE %s)";
+            $args   = array($type, "%{$search}%", "%{$search}%", "%{$search}%");
+        } else {
+            $args = array($type);
+        }
 
-        foreach (get_post_stati(array('show_in_admin_all_list' => false)) as $status) {
-            $query .= " AND ({$wpdb->posts}.post_status <> %s)";
-            $args[] = $status;
+        if ($type === 'attachment') {
+            $query .= " AND ({$wpdb->posts}.post_status = %s)";
+            $args[] = 'inherit';
+        } else {
+            $statuses = get_post_stati(array('show_in_admin_all_list' => false));
+            foreach ($statuses as $status) {
+                $query .= " AND ({$wpdb->posts}.post_status <> %s)";
+                $args[] = $status;
+            }
         }
 
         return $wpdb->get_var($wpdb->prepare($query, $args));

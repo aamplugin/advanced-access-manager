@@ -9,9 +9,7 @@
 
 namespace AAM\UnitTest\Service\Core;
 
-use AAM,
-    AAM_Core_Object_Menu,
-    PHPUnit\Framework\TestCase,
+use PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM\UnitTest\Libs\AuthUserTrait;
 

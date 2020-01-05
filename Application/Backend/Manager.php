@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend manager
  *
+ * @since 6.2.0 Added new property to the JS localization `blog_id`
+ * @since 6.1.0 Fixed bug with HTML compression
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Backend_Manager
 {
@@ -123,8 +125,11 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.2.0 Added `blog_id` to the localized array of properties
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function printFooterJavascript()
     {
@@ -154,7 +159,8 @@ class AAM_Backend_Manager
                 'caps'        => array(
                     'create_roles' => current_user_can('aam_create_roles'),
                     'create_users' => current_user_can('create_users')
-                )
+                ),
+                'blog_id' => get_current_blog_id()
             ));
 
             echo '<script type="text/javascript">';
@@ -307,8 +313,12 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.1.0 Fixed bug with improper response if server config does not match
+     *              PHP executable INI settings
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function renderContent()
     {
@@ -325,13 +335,12 @@ class AAM_Backend_Manager
             $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
             header('Content-Type: text/html; charset=UTF-8');
 
-            $zlib       = strtolower(ini_get('zlib.output_compression'));
             $compressed = count(array_intersect(
                 array('zlib output compression', 'ob_gzhandler'),
                 ob_list_handlers()
             )) > 0;
 
-            if (in_array($zlib, array('1', 'on'), true) && !empty($accept)) {
+            if (!empty($accept)) {
                 header('Vary: Accept-Encoding'); // Handle proxies
 
                 if (false !== stripos($accept, 'gzip') && function_exists('gzencode')) {

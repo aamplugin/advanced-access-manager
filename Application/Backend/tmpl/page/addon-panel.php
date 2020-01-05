@@ -1,4 +1,12 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.2.0 Removed expiration date for license to avoid confusion
+     * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
+     * @since 6.0.0 Initial implementation of the template
+     *
+     * @version 6.2.0
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div id="extension-content" class="extension-container">
@@ -22,11 +30,12 @@
             </div>
         </div>
 
-        <?php $commercial = AAM_Addon_Repository::getInstance()->getList('commercial'); ?>
+        <?php $commercial = AAM_Addon_Repository::getInstance()->getList(); ?>
 
-        <div>
+        <div class="aam-outer-top-xs">
             <ul class="nav nav-tabs" role="tablist">
                 <?php if (count($commercial)) { ?><li role="presentation" class="active"><a href="#premium-extensions" aria-controls="premium-extensions" role="tab" data-toggle="tab"><i class='icon-basket'></i> <?php echo __('Premium', AAM_KEY); ?></a></li><?php } ?>
+                <li class="margin-right aam-update-check"><a href="#" id="check-for-updates"><i class='icon-arrows-cw'></i> <?php echo __('Check For Updates', AAM_KEY); ?></a></li>
             </ul>
 
             <div class="tab-content">
@@ -38,7 +47,7 @@
                                     <td width="80%">
                                         <span class='aam-setting-title'><?php echo $product['title'], (!empty($product['tag']) ? '<sup><span class="badge sup">' . $product['tag'] . '</span></sup>' : ''), (!empty($product['version']) ? ' <small class="text-muted">' . $product['version'] . '</small>' : ''); ?></span>
                                         <?php if (!empty($product['license'])) { ?>
-                                            <small class="aam-license-key"><b><?php echo __('License', AAM_KEY); ?>:</b> <a href="https://aamplugin.com/license/<?php echo $product['license']; ?>" target="_blank"><?php echo $product['license']; ?></a> <?php echo (!empty($product['expire']) ? sprintf('(expire on %s)', $product['expire']) : ''); ?></small>
+                                            <small class="aam-license-key"><b><?php echo __('License', AAM_KEY); ?>:</b> <a href="https://aamplugin.com/license/<?php echo $product['license']; ?>" target="_blank"><?php echo $product['license']; ?></a></small>
                                         <?php } elseif (!empty($product['version'])) { ?>
                                             <small class="aam-license-key"><b><?php echo __('License', AAM_KEY); ?>:</b> <span class="text-danger"><?php echo __('unregistered version', AAM_KEY); ?></span></small>
                                         <?php } ?>
@@ -47,10 +56,12 @@
                                         </p>
                                     </td>
                                     <td class="text-center">
-                                        <?php if (!empty($product['isActive'])) { ?>
+                                        <?php if (!empty($product['hasUpdate'])) { ?>
+                                            <a href="#" class="btn btn-sm btn-warning btn-block disabled"><i class="icon-attention-circled"></i> <?php echo __('Update Available', AAM_KEY); ?></a>
+                                        <?php } elseif (!empty($product['isActive'])) { ?>
                                             <a href="#" class="btn btn-sm btn-success btn-block disabled"><i class="icon-check"></i> <?php echo __('Active', AAM_KEY); ?></a>
                                         <?php } elseif (!empty($product['version'])) { ?>
-                                            <a href="#" class="btn btn-sm btn-warning btn-block disabled"><i class="icon-attention-circled"></i> <?php echo __('Inactive', AAM_KEY); ?></a>
+                                            <a href="#" class="btn btn-sm btn-default btn-block disabled"><i class="icon-info-circled"></i> <?php echo __('Inactive', AAM_KEY); ?></a>
                                         <?php } else { ?>
                                             <a href="<?php echo $product['url']; ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
                                         <?php } ?>

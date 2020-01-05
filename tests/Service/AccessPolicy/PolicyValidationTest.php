@@ -61,7 +61,7 @@ class PolicyValidationTest extends TestCase
      * @return void
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function testMissingDependencyPolicy()
     {
@@ -72,10 +72,32 @@ class PolicyValidationTest extends TestCase
         }');
 
         $this->assertEquals(array(
-            AAM_Backend_View_Helper::preparePhrase(
-                "The plugin [advanced-access-manager-x] is required by the policy",
-                'b'
-            )
+                "The advanced-access-manager-x is required"
+        ), $validator->validate());
+    }
+
+    /**
+     * Test that error is triggered when missing dependency (extended version)
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.2.0
+     */
+    public function testMissingDependencyPolicyExtended()
+    {
+        $validator = new AAM_Core_Policy_Validator('{
+            "Dependency": {
+                "advanced-access-manager-x": {
+                    "Name": "AAM X",
+                    "URL": "https://aamplugin.com",
+                    "Version": "^1.0.0"
+                }
+            }
+        }');
+
+        $this->assertEquals(array(
+                "The <a href=\"https://aamplugin.com\" target=\"_blank\">AAM X</a> is required"
         ), $validator->validate());
     }
 
@@ -96,10 +118,7 @@ class PolicyValidationTest extends TestCase
         }');
 
         $this->assertEquals(array(
-            AAM_Backend_View_Helper::preparePhrase(
-                "The dependency [advanced-access-manager] does not satisfy version requirement by the policy",
-                'b'
-            )
+            'The advanced-access-manager does not satisfy minimum required version'
         ), $validator->validate());
     }
 

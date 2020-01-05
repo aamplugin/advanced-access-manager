@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -28,8 +26,11 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.1.0 Fixed bug with incorrectly managed internal cache
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 abstract class AAM_Core_Subject
 {
@@ -275,13 +276,19 @@ abstract class AAM_Core_Subject
      *
      * @return AAM_Core_Object
      *
+     * @since 6.1.0 Fixed the bug where initialize object was not cached correctly
+     *              due to $skipInheritance flag
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function getObject($type, $id = null, $skipInheritance = false)
     {
+        $suffix = ($skipInheritance ? '_direct' : '_full');
+
         // Check if there is an object with specified ID
-        if (!isset($this->_objects[$type . $id])) {
+        if (!isset($this->_objects[$type . $id . $suffix])) {
             $class_name = 'AAM_Core_Object_' . ucfirst($type);
 
             // If requested object is part of the core, instantiate it
@@ -304,10 +311,10 @@ abstract class AAM_Core_Subject
                 }
 
                 // Finally cache the object
-                $this->_objects[$type . $id] = $object;
+                $this->_objects[$type . $id . $suffix] = $object;
             }
         } else {
-            $object = $this->_objects[$type . $id];
+            $object = $this->_objects[$type . $id . $suffix];
         }
 
         return $object;

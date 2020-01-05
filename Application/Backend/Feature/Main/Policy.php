@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Access Policy UI manager
  *
+ * @since 6.2.0 Added ability to generate Access Policy
+ * @since 6.1.0 Fixed bug with "Attach to Default" button
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Backend_Feature_Main_Policy
 extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -47,8 +49,13 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return void
      *
+     * @since 6.2.0 Registering a new action to allow the Access Policy generation
+     * @since 6.1.0 Fixed the bug where "Attach to Default" button was not showing at
+     *              all
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function __construct()
     {
@@ -68,10 +75,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         }, 10, 2);
 
         add_filter('aam_default_subject_tab_filter', function ($content, $params) {
-            global $post;
-
-            if (is_a($post, 'WP_Post')
-                    && ($post->post_type === AAM_Service_AccessPolicy::POLICY_CPT)) {
+            if ($this->getFromQuery('aamframe') === 'principal') {
                 $content = AAM_Backend_View::getInstance()->loadPartial(
                     'default-principal-subject-tab',
                     $params
@@ -80,6 +84,19 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
 
             return $content;
         }, 10, 2);
+
+        // Hook into Users/Roles Manager and add new action
+        if (current_user_can(AAM_Backend_Feature_Main_Policy::ACCESS_CAPABILITY)) {
+            add_filter('aam_top_subject_actions_filter', function($actions) {
+                $actions[] = array(
+                    'icon'    => 'icon-file-code',
+                    'id'      => 'generate-access-policy',
+                    'tooltip' => __('Generate Access Policy', AAM_KEY)
+                );
+
+                return $actions;
+            });
+        }
     }
 
     /**
@@ -159,16 +176,15 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.2.0 Changed the way, all the policies are fetched
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function getTable()
     {
-        $list = get_posts(array(
-            'post_type'   => AAM_Service_AccessPolicy::POLICY_CPT,
-            'numberposts' => -1,
-            'post_status' => 'publish'
-        ));
+        $list = AAM::api()->getAccessPolicyManager()->fetchPolicies();
 
         $response = array(
             'recordsTotal'    => count($list),
@@ -185,7 +201,8 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
                     $record->ID,
                     $this->preparePolicyTitle($record),
                     $this->preparePolicyActionList($record),
-                    get_edit_post_link($record->ID, 'link')
+                    get_edit_post_link($record->ID, 'link'),
+                    (!empty($record->post_title) ? $record->post_title : $record->ID)
                 );
             }
         }
@@ -200,15 +217,26 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.2.0 Added new "icon-attention" if policy has error/warning
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function preparePolicyTitle($record)
     {
-        if (!empty($record->post_title)) {
-            $title = $record->post_title;
+        $errors = (new AAM_Core_Policy_Validator($record->post_content))->validate();
+
+        if (!empty($errors)) {
+            $title = '<i class="icon-attention text-danger"></i>&nbsp;';
         } else {
-            $title = __('(no title)', AAM_KEY);
+            $title = '';
+        }
+
+        if (!empty($record->post_title)) {
+            $title .= $record->post_title;
+        } else {
+            $title .= __('(no title)', AAM_KEY);
         }
 
         $title .= '<br/>';
@@ -227,8 +255,11 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.2.0 Added "delete" action
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function preparePolicyActionList($record)
     {
@@ -239,7 +270,8 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
 
         $actions = array(
             $policy->has($record->ID) ? "detach" : "attach",
-            $post->isAllowedTo('edit') ? 'edit' : 'no-edit'
+            $post->isAllowedTo('edit') ? 'edit' : 'no-edit',
+            $post->isAllowedTo('delete') ? 'delete' : 'no-delete'
         );
 
         return implode(',', $actions);
@@ -250,8 +282,11 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.2.0 Simplified implementation
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public function save()
     {
@@ -260,17 +295,168 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         $id      = $this->getFromPost('id');
         $effect  = $this->getFromPost('effect', FILTER_VALIDATE_BOOLEAN);
 
-        // Verify that current user can perform following action
-        if (current_user_can('read_post', $id)) {
-            $object = $subject->getObject(self::OBJECT_TYPE, null, true);
-            $result = $object->updateOptionItem($id, $effect)->save();
-        } else {
-            $result = false;
-        }
+        $object = $subject->getObject(self::OBJECT_TYPE, null, true);
+        $result = $object->updateOptionItem($id, $effect)->save();
 
         return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure')
         ));
+    }
+
+    /**
+     * Delete policy
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.2.0
+     */
+    public function delete()
+    {
+        $id     = $this->getFromPost('id');
+        $result = wp_delete_post($id);
+
+        return wp_json_encode(array(
+            'status' => (is_a($result, 'WP_Post') ? 'success' : 'failure')
+        ));
+    }
+
+    /**
+     * Generate Access Policy from AAM settings
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.2.0
+     */
+    public function generate()
+    {
+        $subject   = AAM_Backend_Subject::getInstance()->getSubject();
+        $generator = new AAM_Core_Policy_Generator($subject);
+
+        // Prepare the policy name
+        if ($subject::UID === AAM_Core_Subject_User::UID) {
+            $title = sprintf('Policy for %s user', $subject->display_name);
+        } elseif ($subject::UID === AAM_Core_Subject_Role::UID) {
+            $title = sprintf('Policy for %s role', $subject->getId());
+        } elseif ($subject::UID === AAM_Core_Subject_Visitor::UID) {
+            $title = 'Policy for all visitors';
+        } else {
+            $title = 'Policy for everybody';
+        }
+
+        return wp_json_encode(array(
+            'title'  => $title,
+            'policy' => base64_encode($generator->generate())
+        ));
+    }
+
+    /**
+     * Install access policy from the official hub
+     *
+     * @return string
+     *
+     * @since 6.2.1 Added support for the policy_meta property
+     * @since 6.2.0 Initial implementation of the method
+     *
+     * @access public
+     * @version 6.2.1
+     */
+    public function install()
+    {
+        $metadata = json_decode($this->getFromPost('metadata'));
+
+        // Do some basic validation & normalization
+        $title    = esc_js($metadata->title);
+        $excerpt  = esc_js($metadata->description);
+        $assignee = $metadata->assignee;
+        $override = $metadata->override;
+        $consts   = !empty($metadata->policy_meta) ? $metadata->policy_meta: array();
+        $policy   = $this->getFromPost('aam-policy');
+
+        $id = wp_insert_post(array(
+            'post_type'    => AAM_Service_AccessPolicy::POLICY_CPT,
+            'post_content' => $policy,
+            'post_title'   => $title,
+            'post_excerpt' => $excerpt,
+            'post_status'  => 'publish'
+        ));
+
+        $errors = array();
+
+        if (!is_wp_error($id)) { // Assign & override
+            foreach($assignee as $s) {
+                $error = $this->applyToSubject($s, $id, true);
+                if ($error) {
+                    $errors[] = $error;
+                }
+            }
+
+            foreach($override as $s) {
+                $error = $this->applyToSubject($s, $id, false);
+                if ($error) {
+                    $errors[] = $error;
+                }
+            }
+
+            // Insert policy meta values if any
+            foreach($consts as $key => $value) {
+                add_post_meta($id, $key, $value);
+            }
+        } else {
+            $errors[] = $id->get_error_message();
+        }
+
+        if (!empty($errors)) {
+            $response = array(
+                'status' => 'failure', 'errors' => implode('; ', $errors)
+            );
+        } else {
+            $response = array(
+                'status' => 'success', 'redirect' => get_edit_post_link($id, 'link')
+            );
+        }
+
+        return wp_json_encode($response);
+    }
+
+    /**
+     * Apply policy to provided subject
+     *
+     * @param string  $s
+     * @param int     $policyId
+     * @param boolean $effect
+     *
+     * @return string|null
+     *
+     * @access protected
+     * @version 6.2.0
+     */
+    protected function applyToSubject($s, $policyId, $effect = true)
+    {
+        $error = null;
+
+        if ($s === 'visitor') {
+            $subject = AAM::api()->getVisitor();
+        } elseif ($s === 'default') {
+            $subject = AAM::api()->getDefault();
+        } elseif (strpos($s, 'role:') === 0) {
+            $subject = AAM::api()->getRole(substr($s, 5));
+        } elseif (strpos($s, 'user:') === 0) {
+            $uid     = substr($s, 5);
+            $subject = AAM::api()->getUser(($uid === 'current') ? null : $uid);
+        } else {
+            $error   = sprintf(__('Failed applying to %s', AAM_KEY), $s);
+            $subject = null;
+        }
+
+        if ($subject !== null) {
+            $subject->getObject(
+                AAM_Core_Object_Policy::OBJECT_TYPE, null, true
+            )->updateOptionItem($policyId, $effect)->save();
+        }
+
+        return $error;
     }
 
     /**

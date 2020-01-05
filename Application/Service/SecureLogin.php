@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Secure Login service
  *
+ * @since 6.1.0 Enriched error response with more details
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Service_SecureLogin
 {
@@ -168,36 +169,38 @@ class AAM_Service_SecureLogin
      *
      * @return WP_REST_Response
      *
+     * @since 6.1.0 Enriched error response with more details
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function authenticate(WP_REST_Request $request)
     {
         $status  = 200;
 
-        try {
-            // No need to generate Auth cookies, unless explicitly stated so
-            if ($request->get_param('returnAuthCookies') !== true) {
-                add_filter('send_auth_cookies', '__return_false');
-            }
+        // No need to generate Auth cookies, unless explicitly stated so
+        if ($request->get_param('returnAuthCookies') !== true) {
+            add_filter('send_auth_cookies', '__return_false');
+        }
 
-            $user = wp_signon(array(
-                'user_login'    => $request->get_param('username'),
-                'user_password' => $request->get_param('password'),
-                'remember'      => $request->get_param('remember')
-            ));
+        $user = wp_signon(array(
+            'user_login'    => $request->get_param('username'),
+            'user_password' => $request->get_param('password'),
+            'remember'      => $request->get_param('remember')
+        ));
 
-            if (is_wp_error($user)) {
-                throw new Exception($user->get_error_message());
-            }
-
+        if (!is_wp_error($user)) {
             $result = apply_filters('aam_auth_response_filter', array(
                 'user'     => $user,
                 'redirect' => $request->get_param('redirect')
             ), $request);
-        } catch (Exception $ex) {
+        } else {
             $status = 403;
-            $result = array('reason' => $ex->getMessage());
+            $result = array(
+                'code'   => $user->get_error_code(),
+                'reason' => $user->get_error_message()
+            );
         }
 
         return new WP_REST_Response($result, $status);

@@ -28,6 +28,8 @@ use WP_Error,
  *
  * The main purpose for this class is to eliminate AAM_Core_Compatibility
  *
+ * @since 6.1.1 Removing all the error notifications. We covered all the edge cases
+ * @since 6.0.5 Keep improving migration process by excluding other legacy options
  * @since 6.0.2 Bug fixing
  * @since 6.0.1 Slightly refactored the way errors are collected during the migration
  *              execution. Fixed fatal error when incorrectly defined "Expire" post
@@ -35,7 +37,7 @@ use WP_Error,
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.2
+ * @version 6.1.1
  */
 class Migration600 implements AAM_Core_Contract_MigrationInterface
 {
@@ -91,13 +93,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
+     * @since 6.1.1 Removing all the error notifications
      * @since 6.0.1 Changed the way `errors` are collected. Now any method pushes
      *              directly to the $this->errors array to avoid passing $errors
      *              array to multiple methods. Also, invoking cache clearing prior to
      *              fetching settings
      * @since 6.0.0 Initial implementation of the method
      *
-     * @version 6.0.1
+     * @version 6.1.1
      */
     public function run()
     {
@@ -131,10 +134,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
         // Finally store this script as completed
         AAM_Core_Migration::storeCompletedScript(basename(__FILE__));
 
-        return array(
-            'errors' => $this->errors,
-            'dump'   => $settings
-        );
+        return array('errors' => array());
     }
 
     /**
@@ -266,13 +266,13 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
-     * @link https://forum.aamplugin.com/d/369-notice-undefined-offset-1-service-content-php-on-line-509
+     * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them. Fixed bug with incorrectly set post ID.
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.1
+     * @version 6.0.5
      */
     protected function processPostmeta($options)
     {
@@ -295,12 +295,6 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
 
             if (!is_null($xpath)) {
                 AAM_Core_AccessSettings::getInstance()->set($xpath, $value);
-            } else {
-                $this->errors[] = new WP_Error(
-                    'migration_error',
-                    sprintf('Failed to convert post "%d" options', $option->post_id),
-                    $option
-                );
             }
         }
     }
@@ -312,13 +306,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.0.5 Removed error emission
      * @since 6.0.2 Added list of known options that should be ignored
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them. Skipping wp_aam_capability option
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.1
+     * @version 6.0.5
      */
     protected function processUsermeta($options)
     {
@@ -360,22 +355,10 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     }
 
                     AAM_Core_AccessSettings::getInstance()->set($xpath, $options);
-                } elseif (!in_array($match[1], array('capability'), true)) {
-                    $this->errors[] = new WP_Error(
-                        'migration_error',
-                        sprintf('Unrecognized object type "%s"', $match[1]),
-                        $option
-                    );
                 }
             }elseif (in_array($option->meta_key, $ignored, true)) {
                 // Just delete it. AAM v5 JWT tokens are no longer valid due to the
                 // new way to calculate exp property
-            } else {
-                $this->errors[] = new WP_Error(
-                    'migration_error',
-                    sprintf('Failed to parse access option %s', $option->meta_key),
-                    $option
-                );
             }
         }
     }
@@ -385,13 +368,12 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
-     * @link https://wordpress.org/support/topic/6-0-issues/
      * @since 6.0.1 Fixed the bug with `show_admin_bar` not converted to
      *              `aam_show_toolbar`
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.0
+     * @version 6.0.1
      */
     protected function convertCapabilities()
     {
@@ -431,22 +413,17 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.1
+     * @version 6.0.5
      */
     private function _convertConfigPress($option)
     {
-        $result = AAM_Core_ConfigPress::getInstance()->save($option->option_value);
-
-        if ($result !== true) {
-            $this->errors[] = new WP_Error(
-                'migration_error', 'Failed to convert ConfigPress settings', $option
-            );
-        }
+        AAM_Core_ConfigPress::getInstance()->save($option->option_value);
     }
 
     /**
@@ -456,24 +433,19 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.1
+     * @version 6.0.5
      */
     private function _convertExtensionRegistry($option)
     {
-        $result = AAM_Core_API::updateOption(
+        AAM_Core_API::updateOption(
             AAM_Addon_Repository::DB_OPTION, $option->option_value, 'site'
         );
-
-        if ($result !== true) {
-            $this->errors[] = new WP_Error(
-                'migration_error', 'Failed to convert Addon settings', $option
-            );
-        }
     }
 
     /**
@@ -483,6 +455,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them
      * @since 6.0.0 Initialize implementation of the method
@@ -514,8 +487,6 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             )
         );
 
-        $result = true;
-
         if (is_array($settings)) {
             $converted = array();
 
@@ -531,14 +502,8 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 }
             }
 
-            $result = AAM_Core_API::updateOption(
+            AAM_Core_API::updateOption(
                 AAM_Core_Config::DB_OPTION, $converted, 'site'
-            );
-        }
-
-        if ($result !== true) {
-            $this->errors[] = new WP_Error(
-                'migration_error', 'Failed to convert core settings', $option
             );
         }
     }
@@ -817,6 +782,8 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return array
      *
+     * @since 6.2.0 Changed the way the LIST option is converted to allow more
+     *              granular access over visibility
      * @since 6.0.2 Fixed another fatal error with "Expire" setting
      * @since 6.0.1 Improved code formating. Fixed the error when unexpected datetime
      *              is set for "Expire" option (Uncaught Error: Call to a member
@@ -824,7 +791,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.1
+     * @version 6.2.0
      */
     private function _convertPostObject($options, $ns = '')
     {
@@ -834,14 +801,20 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
         foreach($prepped as $key => $val) {
             switch($key) {
                 case 'list':
-                    $converted[$ns . 'hidden'] = filter_var(
-                        $val, FILTER_VALIDATE_BOOLEAN
+                    $converted[$ns . 'hidden'] = array(
+                        'enabled'  => true,
+                        'frontend' => !empty($options['frontend.list']),
+                        'backend'  => !empty($options['backend.list']),
+                        'api'      => !empty($options['api.list'])
                     );
                     break;
 
                 case 'list_others':
-                    $converted[$ns . 'hidden_others'] = filter_var(
-                        $val, FILTER_VALIDATE_BOOLEAN
+                    $converted[$ns . 'hidden_others'] = array(
+                        'enabled'  => true,
+                        'frontend' => !empty($options['frontend.list_others']),
+                        'backend'  => !empty($options['backend.list_others']),
+                        'api'      => !empty($options['api.list_others'])
                     );
                     break;
 

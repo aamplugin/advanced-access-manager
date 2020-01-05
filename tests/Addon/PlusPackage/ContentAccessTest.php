@@ -192,33 +192,6 @@ class ContentAccessTest extends TestCase
     }
 
     /**
-     * Test that access is denied to edit or create a new term of a specific taxonomy
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testDenyCreateOrEditTaxonomy()
-    {
-        $user   = AAM::getUser();
-        $object = $user->getObject(Taxonomy::OBJECT_TYPE, 'aam_test');
-
-        // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('term/edit', true)->save());
-
-        // Reset all internal cache
-        $this->_resetSubjects();
-        ContentHooks::bootstrap()->resetCache();
-
-        register_taxonomy('aam_test', 'post', array('hierarchical' => true));
-
-        $this->assertEquals(
-            get_taxonomy('aam_test')->cap->edit_terms, 'do_not_allow'
-        );
-    }
-
-    /**
      * Test the ability to edit term
      *
      * @return void

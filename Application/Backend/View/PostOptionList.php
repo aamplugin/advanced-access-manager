@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Post & Term option list for the Post object
  *
+ * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Backend_View_PostOptionList
 {
@@ -23,14 +24,19 @@ class AAM_Backend_View_PostOptionList
      *
      * @return array
      *
+     * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.0
      */
     public static function get()
     {
         return array(
             'hidden' => array(
                 'title'       => __('Hidden', AAM_KEY),
+                'sub'         => __('Hidden Areas', AAM_KEY),
+                'modal'       => 'modal-hidden',
                 'description' => __('Completely hide the post however, still allow direct access with the valid URL.', AAM_KEY),
             ),
             'restricted' => array(

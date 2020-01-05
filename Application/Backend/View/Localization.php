@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * JS localization for AAM backend UI
  *
+ * @since 6.2.1 Added new label "Policy is not assigned to anybody"
+ * @since 6.2.0 Added couple new labels
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.1
  */
 class AAM_Backend_View_Localization
 {
@@ -23,8 +25,12 @@ class AAM_Backend_View_Localization
      *
      * @return array
      *
+     * @since 6.2.1 Added new label "Policy is not assigned to anybody"
+     * @since 6.2.0 Added couple new labels
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.1
      */
     public static function get()
     {
@@ -65,6 +71,8 @@ class AAM_Backend_View_Localization
             '_TOTAL_ user(s)' => __('_TOTAL_ user(s)', AAM_KEY),
             'Create New User' => __('Create New User', AAM_KEY),
             'Role' => __('Role', AAM_KEY),
+            'Message has been sent' => __('Message has been sent', AAM_KEY),
+            'Download Exported Settings' => __('Download Exported Settings', AAM_KEY),
             'All Users, Roles and Visitor' => __('All Users, Roles and Visitor', AAM_KEY),
             'Failed to apply policy changes' => __('Failed to apply policy changes', AAM_KEY),
             'Attach Policy To Visitors' => __('Attach Policy To Visitors', AAM_KEY),
@@ -136,6 +144,7 @@ class AAM_Backend_View_Localization
             'All settings has been cleared successfully' => __('All settings has been cleared successfully', AAM_KEY),
             'Clear' => __('Clear', AAM_KEY),
             'Select Role' => __('Select Role', AAM_KEY),
+            'Policy is not assigned to anybody' => __('Policy is not assigned to anybody', AAM_KEY),
             'Data has been saved to clipboard' => __('Data has been saved to clipboard', AAM_KEY),
             'Failed to save data to clipboard' => __('Failed to save data to clipboard', AAM_KEY),
             'Operation completed successfully' => __('Operation completed successfully', AAM_KEY),

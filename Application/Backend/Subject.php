@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -15,8 +13,12 @@
  * Currently managed subject. Based on the HTTP request data, define what subject
  * is currently managed with AAM UI.
  *
+ * @since 6.2.0 Enhanced security & improved general functionality
+ * @since 6.1.1 Improved safety by using a last role as default
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Backend_Subject
 {
@@ -39,12 +41,15 @@ class AAM_Backend_Subject
      *
      * @return void
      *
+     * @since 6.2.0 Enhanced security. Making sure that subject type is normalized
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function __construct()
     {
-        $subject = $this->getFromPost('subject');
+        $subject = strtolower($this->getFromPost('subject'));
 
         if ($subject) {
             $this->initRequestedSubject($subject, $this->getFromPost('subjectId'));
@@ -128,18 +133,29 @@ class AAM_Backend_Subject
      *
      * @return AAM_Core_Subject
      *
+     * @since 6.2.0 Refactored to use AAM API to retrieve subject
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.0
      */
     protected function initRequestedSubject($type, $id)
     {
         if ($type === AAM_Core_Subject_User::UID) {
             $subject = AAM::api()->getUser(intval($id));
         } elseif ($type === AAM_Core_Subject_Default::UID) {
-            $subject = AAM_Core_Subject_Default::getInstance();
+            $subject = AAM::api()->getDefault();
+        } elseif ($type === AAM_Core_Subject_Visitor::UID) {
+            $subject = AAM::api()->getVisitor();
         } else {
-            $class_name = 'AAM_Core_Subject_' . ucfirst($type);
-            $subject   = new $class_name(stripslashes($id));
+            // Covering scenario when changing between sites and they have mismatched
+            // list of roles
+            if (AAM_Core_API::getRoles()->is_role($id)) {
+                $subject = AAM::api()->getRole($id);
+            } else {
+                $roles   = array_keys(get_editable_roles());
+                $subject = AAM::api()->getRole(array_pop($roles));
+            }
         }
 
         $this->setSubject($subject);
@@ -155,15 +171,18 @@ class AAM_Backend_Subject
      *
      * @return void
      *
+     * @since 6.1.1 For safety reasons, using the last role as the default
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.1.1
      */
     protected function initDefaultSubject()
     {
         if (current_user_can('aam_manage_roles')) {
             $roles = array_keys(get_editable_roles());
             $this->initRequestedSubject(
-                AAM_Core_Subject_Role::UID, array_shift($roles)
+                AAM_Core_Subject_Role::UID, array_pop($roles)
             );
         } elseif (current_user_can('aam_manage_users')) {
             $this->initRequestedSubject(

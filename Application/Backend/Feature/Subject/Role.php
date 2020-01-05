@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Role view manager
  *
+ * @since 6.1.0 Fixed bug with role creation process that caused PHP warning
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Backend_Feature_Subject_Role
 {
@@ -178,8 +179,11 @@ class AAM_Backend_Feature_Subject_Role
      *
      * @return array
      *
+     * @since 6.1.0 Fixed the PHP notice where `Undefined variable: parent`
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access private
-     * @version 6.0.0
+     * @version 6.1.0
      */
     private function _create()
     {
@@ -200,6 +204,7 @@ class AAM_Backend_Feature_Subject_Role
                 $caps   = ($parent ? $parent->capabilities : array());
             } else {
                 $caps   = array();
+                $parent = null;
             }
 
             if ($role = $roles->add_role($role_id, $name, $caps)) {

@@ -10,11 +10,12 @@
 /**
  * AAM core service
  *
+ * @since 6.0.5 Making sure that only if user is allowed to manage other users
  * @since 6.0.4 Bug fixing. Unwanted "Access Denied" metabox on the Your Profile page
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.4
+ * @version 6.0.5
  */
 class AAM_Service_Core
 {
@@ -33,12 +34,14 @@ class AAM_Service_Core
      *
      * @access protected
      *
+     * @since 6.0.5 Fixed bug when Access Manager metabox is rendered for users that
+     *              have ability to manage other users
      * @since 6.0.4 Fixed bug when Access Manager metabox is rendered on profile edit
      *              page
      * @since 6.0.0 Initial implementation of the method
      *
      * @return void
-     * @version 6.0.4
+     * @version 6.0.5
      */
     protected function __construct()
     {
@@ -51,15 +54,26 @@ class AAM_Service_Core
         }
 
         if (is_admin()) {
-            if (AAM_Core_Config::get('ui.settings.renderAccessMetabox', true)) {
+            $metaboxEnabled = AAM_Core_Config::get(
+                'ui.settings.renderAccessMetabox', true
+            );
+
+            if ($metaboxEnabled && current_user_can('aam_manager')) {
                 add_action('edit_user_profile', array($this, 'renderAccessWidget'));
             }
 
-            // Register UI elements
+            // Hook that initialize the AAM UI part of the service
             add_action('aam_init_ui_action', function () {
                 AAM_Backend_Feature_Subject_Role::register();
                 AAM_Backend_Feature_Subject_User::register();
-            });
+
+                AAM_Backend_Feature_Settings_Service::register();
+                AAM_Backend_Feature_Settings_Core::register();
+                AAM_Backend_Feature_Settings_Content::register();
+                AAM_Backend_Feature_Settings_ConfigPress::register();
+                AAM_Backend_Feature_Settings_Manager::register();
+                AAM_Backend_Feature_Addons_Manager::register();
+            }, 1);
         }
 
         // Check if user has ability to perform certain task based on provided
@@ -101,7 +115,7 @@ class AAM_Service_Core
                         'Content-Type' => 'application/json'
                     ),
                     // Here we are passing ONLY license numbers and expiration dates
-                    'body'    => wp_json_encode($repository->getRegistry())
+                    'body'    => wp_json_encode($repository->getRegistry(true))
                 )
             );
 
@@ -173,12 +187,18 @@ class AAM_Service_Core
      *
      * @return void
      *
+     * @since 6.0.5 Making sure that user metabox is rendered only if user is allowed
+     *              to manage other users
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.0.5
      */
     public function renderAccessWidget($user)
     {
-        echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
+        if (current_user_can('aam_manage_users')) {
+            echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
+        }
     }
 
     /**

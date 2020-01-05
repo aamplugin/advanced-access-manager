@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Post visibility object
  *
+ * @since 6.1.0 Refactored implementation to fix merging bugs and improve inheritance
+ *              mechanism
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Core_Object_Visibility extends AAM_Core_Object
 {
@@ -40,19 +42,19 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @param AAM_Core_Subject $subject
      * @param mixed            $id
-     * @param boolean          $setSuppressFilters
      *
      * @return void
      *
+     * @since 6.1.0 Removed support for the $suppressFilters flag
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
-    public function __construct(
-        AAM_Core_Subject $subject, $id = null, $suppressFilters = false
-    ) {
+    public function __construct(AAM_Core_Subject $subject, $id = null)
+    {
         $this->setSubject($subject);
         $this->setId($id);
-        $this->setSuppressFilters($suppressFilters);
 
         // Determine post access properties that are responsible for the post
         // visibility
@@ -66,7 +68,11 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
 
     /**
      * @inheritDoc
-     * @version 6.0.0
+     *
+     * @since 6.1.0 Removed support for the $suppressFilters flag
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.1.0
      */
     protected function initialize()
     {
@@ -76,11 +82,9 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
             $this->pushOptions('post', $id, $settings);
         }
 
-        if ($this->suppressFilters() === false) {
-            // Initialize post visibility option. This hooks is used by Access Policy
-            // service as well as Plus Package to populate visibility list
-            do_action('aam_visibility_object_init_action', $this);
-        }
+        // Initialize post visibility option. This hooks is used by Access Policy
+        // service as well as Plus Package to populate visibility list
+        do_action('aam_visibility_object_init_action', $this);
     }
 
     /**
@@ -92,8 +96,12 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.1.0 Changed the way visibility options are indexed (used to be as
+     *              multi-dimensional array and now it is key/value pairs)
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function pushOptions($object, $id, $options)
     {
@@ -113,10 +121,12 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
             );
         }
 
-        if (!isset($option[$object][$id])) {
-            $option[$object][$id] = $filtered;
+        if (!isset($option["{$object}/{$id}"])) {
+            $option["{$object}/{$id}"] = $filtered;
         } else {
-            $option[$object][$id] = array_replace($filtered, $option[$object][$id]);
+            $option["{$object}/{$id}"] = array_replace(
+                $filtered, $option["{$object}/{$id}"]
+            );
         }
         $this->setOption($option);
 
@@ -130,14 +140,24 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.1.0 Changed the way visibility options are fetched (used to be as
+     *              multi-dimensional array and now it is key/value pairs)
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function getSegment($segment)
     {
-        $option = $this->getOption();
+        $response = array();
 
-        return (isset($option[$segment]) ? $option[$segment] : array());
+        foreach($this->getOption() as $key => $value) {
+            if (strpos($key, "{$segment}/") === 0) {
+                $response[str_replace("{$segment}/", '', $key)] = $value;
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -147,14 +167,32 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.1.0 Fixed bug with incorrectly merged settings for users with multiple
+     *              roles
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     public function mergeOption($options)
     {
-        return AAM::api()->mergeSettings(
-            $options, $this->getOption(), AAM_Core_Object_Post::OBJECT_TYPE
-        );
+        $these_options = $this->getOption();
+        $keys          = array_unique(array_merge(
+            array_keys($options), array_keys($this->getOption())
+        ));
+
+        $merged = array();
+
+        // Iterate over each unique key end merge settings accordingly
+        foreach($keys as $key) {
+            $merged[$key] = AAM::api()->mergeSettings(
+                (isset($options[$key]) ? $options[$key] : array()),
+                (isset($these_options[$key]) ? $these_options[$key] : array()),
+                AAM_Core_Object_Post::OBJECT_TYPE
+            );
+        }
+
+        return $merged;
     }
 
 }

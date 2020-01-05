@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM core policy condition evaluator
  *
+ * @since 6.2.0 Added support for the (*date) type casting
+ * @since 6.1.0 Improved type casting functionality
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.0
  */
 class AAM_Core_Policy_Condition
 {
@@ -382,22 +384,23 @@ class AAM_Core_Policy_Condition
      *
      * @return mixed Prepared part of the condition or false on failure
      *
+     * @since 6.2.1 Moved type casting to the separate class
+     * @since 6.2.0 Added support for new `date` type
+     * @since 6.1.0 Improved type casing functionality
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.2.1
      */
-    protected function parseExpression($exp, $args)
+    public function parseExpression($exp, $args)
     {
         if (is_scalar($exp)) {
             if (preg_match_all('/(\$\{[^}]+\})/', $exp, $match)) {
                 $exp = AAM_Core_Policy_Token::evaluate($exp, $match[1], $args);
             }
 
-            $types = 'string|ip|int|boolean|bool|array|null';
-
-            // If there is type scaling, perform it too
-            if (preg_match('/^\(\*(' . $types . ')\)(.*)/i', $exp, $scale)) {
-                $exp = $this->castValue($scale[2], $scale[1]);
-            }
+            // Perform type casting if necessary
+            $exp = AAM_Core_Policy_Typecast::execute($exp);
         } elseif (is_array($exp) || is_object($exp)) {
             foreach ($exp as &$value) {
                 $value = $this->parseExpression($value, $args);
@@ -407,52 +410,6 @@ class AAM_Core_Policy_Condition
         }
 
         return $exp;
-    }
-
-    /**
-     * Cast value to specific type
-     *
-     * @param mixed  $value
-     * @param string $type
-     *
-     * @return mixed
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function castValue($value, $type)
-    {
-        switch (strtolower($type)) {
-            case 'string':
-                $value = (string) $value;
-                break;
-
-            case 'ip':
-                $value = inet_pton($value);
-                break;
-
-            case 'int':
-                $value = (int) $value;
-                break;
-
-            case 'boolean':
-            case 'bool':
-                $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-                break;
-
-            case 'array':
-                $value = json_decode($value, true);
-                break;
-
-            case 'null':
-                $value = ($value === '' ? null : $value);
-                break;
-
-            default:
-                break;
-        }
-
-        return $value;
     }
 
 }

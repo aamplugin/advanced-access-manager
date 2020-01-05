@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -14,8 +12,12 @@
  *
  * Add custom capabilities support that enhance AAM functionality
  *
+ * @since 6.1.0 Fixed the bug where aam_show_toolbar was not taken in consideration
+ *              due to incorrect placement
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 class AAM_Service_ExtendedCapabilities
 {
@@ -65,30 +67,16 @@ class AAM_Service_ExtendedCapabilities
      *
      * @return void
      *
+     * @since 6.1.0 Fixed the bug where aam_show_toolbar was not taken in
+     *              consideration due to incorrect placement
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
     protected function initializeHooks()
     {
         if (is_admin()) {
-            add_action('init', function() {
-                if (is_user_logged_in()) {
-                    // Check if user is allowed to see backend
-                    if (!AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) {
-                        // If this is the AJAX call, still allow it because it will break a lot
-                        // of frontend stuff that depends on it
-                        if (!defined('DOING_AJAX')) {
-                            wp_die(__('Access Denied', AAM_KEY), 'aam_access_denied');
-                        }
-                    }
-
-                    // Check if we need to show admin bar for the current user
-                    if (AAM_Core_API::isAAMCapabilityAllowed('aam_show_toolbar') === false) {
-                        add_filter('show_admin_bar', '__return_false', PHP_INT_MAX);
-                    }
-                }
-            }, 1);
-
             // Control admin area
             add_action('admin_notices', array($this, 'controlAdminNotifications'), -1);
             add_action('network_admin_notices', array($this, 'controlAdminNotifications'), -1);
@@ -107,6 +95,27 @@ class AAM_Service_ExtendedCapabilities
                 return $html;
             });
         }
+
+        add_action('init', function() {
+            if (is_user_logged_in()) {
+                // Check if user is allowed to see backend
+                if (
+                    is_admin()
+                    && !AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')
+                ) {
+                    // If this is the AJAX call, still allow it because it will break a lot
+                    // of frontend stuff that depends on it
+                    if (!defined('DOING_AJAX')) {
+                        wp_die(__('Access Denied', AAM_KEY), 'aam_access_denied');
+                    }
+                }
+
+                // Check if we need to show admin bar for the current user
+                if (AAM_Core_API::isAAMCapabilityAllowed('aam_show_toolbar') === false) {
+                    add_filter('show_admin_bar', '__return_false', PHP_INT_MAX);
+                }
+            }
+        }, 1);
 
         // Password reset feature
         add_filter('show_password_fields', array($this, 'canChangePassword'), 10, 2);

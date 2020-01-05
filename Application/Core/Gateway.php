@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM core API gateway
  *
+ * @since 6.1.0 Significant improvement of the inheritance mechanism
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.1.0
  */
 final class AAM_Core_Gateway
 {
@@ -176,20 +177,26 @@ final class AAM_Core_Gateway
      * Prepare Access Policy manager but only if service is enabled
      *
      * @param AAM_Core_Subject $subject
+     * @param boolean          $skipInheritance
      *
      * @return AAM_Core_Policy_Manager|null
      *
+     * @since 6.1.0 Added $skipInheritance flag to insure proper settings inheritance
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.1.0
      */
-    public function getAccessPolicyManager(AAM_Core_Subject $subject = null)
+    public function getAccessPolicyManager(
+        AAM_Core_Subject $subject = null, $skipInheritance = false
+    )
     {
         if (is_null($subject)) {
             $subject = AAM::getUser();
         }
 
         if (AAM_Core_Config::get(AAM_Service_AccessPolicy::FEATURE_FLAG, true)) {
-            $manager = AAM_Core_Policy_Factory::get($subject);
+            $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
         } else {
             $manager = null;
         }
