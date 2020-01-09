@@ -118,7 +118,7 @@ class PolicyValidationTest extends TestCase
         }');
 
         $this->assertEquals(array(
-            'The advanced-access-manager does not satisfy minimum required version'
+            'The advanced-access-manager is not active or does not satisfy minimum required version'
         ), $validator->validate());
     }
 

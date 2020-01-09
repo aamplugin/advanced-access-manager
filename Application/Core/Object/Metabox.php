@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Metabox object
  *
+ * @since 6.2.2 Added `aam_metabox_is_hidden_filter` filter
+ * @since 6.0.0 Initial implementation of the method
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.2.2
  */
 class AAM_Core_Object_Metabox extends AAM_Core_Object
 {
@@ -50,14 +51,24 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object
      *
      * @return boolean
      *
+     * @since 6.2.2 Added `aam_metabox_is_hidden_filter` filter
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.2
      */
     public function isHidden($screen, $metaboxId)
     {
         $option = $this->getOption();
+        $id     = strtolower("{$screen}|{$metaboxId}");
 
-        return !empty($option[strtolower("{$screen}|{$metaboxId}")]);
+        return apply_filters(
+            'aam_metabox_is_hidden_filter',
+            !empty($option[$id]),
+            $screen,
+            $metaboxId,
+            $this
+        );
     }
 
 }

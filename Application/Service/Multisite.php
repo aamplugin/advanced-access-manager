@@ -10,8 +10,11 @@
 /**
  * Multisite service
  *
+ * @since 6.2.2 Fixed the bug where reset settings was not synced across all sites
+ * @since 6.2.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.2.0
+ * @version 6.2.2
  */
 class AAM_Service_Multisite
 {
@@ -73,8 +76,11 @@ class AAM_Service_Multisite
      *
      * @return void
      *
+     * @since 6.2.2 Hooks to the setting clearing and policy table list
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.2.0
+     * @version 6.2.2
      */
     protected function initializeHooks()
     {
@@ -97,6 +103,11 @@ class AAM_Service_Multisite
 
         add_action('aam_updated_access_settings', function($settings) {
             $this->syncOption(AAM_Core_AccessSettings::DB_OPTION, $settings);
+        });
+
+        // Sync settings resetting
+        add_action('aam_clear_settings_action', function($options) {
+            $this->resetOptions($options);
         });
 
         add_filter('wp_insert_post_data', function($data) {
@@ -124,6 +135,10 @@ class AAM_Service_Multisite
                 wp_die('Access Denied', 'aam_access_denied');
             }
         }, 999);
+
+        add_filter('aam_is_managed_policy_filter', function() {
+            return is_main_site();
+        });
     }
 
     /**
@@ -134,30 +149,63 @@ class AAM_Service_Multisite
      *
      * @return void
      *
+     * @since 6.2.2 Refactored how the list of sites is fetched
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access protected
      * @global WPDB $wpdb
-     * @version 6.2.0
+     * @version 6.2.2
      */
     protected function syncOption($option, $value)
     {
         global $wpdb;
 
-        $sites = get_sites(array(
-            'number'       => PHP_INT_MAX,
-            'offset'       => 0,
-            'orderby'      => 'id',
-            'site__not_in' => array_merge(
-                $this->getExcludedBlogs(), array(get_current_blog_id())
-            )
-        ));
-
-        foreach($sites as $site) {
+        foreach($this->getSitList() as $site) {
             AAM_Core_API::updateOption(
                 str_replace('%s', $wpdb->get_blog_prefix($site->blog_id), $option),
                 $value,
                 $site->blog_id
             );
         }
+    }
+
+    /**
+     * Reset settings across all sites
+     *
+     * @param array $options
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.2.2
+     */
+    protected function resetOptions($options)
+    {
+        foreach($this->getSitList() as $site) {
+            foreach($options as $option) {
+                AAM_Core_API::deleteOption($option, $site->blog_id);
+            }
+        }
+    }
+
+    /**
+     * Get list of sites
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.2.2
+     */
+    protected function getSitList()
+    {
+        return get_sites(array(
+            'number'       => PHP_INT_MAX,
+            'offset'       => 0,
+            'orderby'      => 'id',
+            'site__not_in' => array_merge(
+                $this->getExcludedBlogs(), array(get_current_blog_id())
+            )
+            ));
     }
 
     /**

@@ -18,9 +18,9 @@ use AAM,
     AAM\UnitTest\Libs\MultiRoleOptionInterface;
 
 /**
- * Test AAM access settings inheritance mechanism for multiple roles per user for 
+ * Test AAM access settings inheritance mechanism for multiple roles per user for
  * the Content service
- * 
+ *
  * @package AAM\UnitTest
  * @version 6.0.0
  */
@@ -31,15 +31,15 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
     /**
      * Test that access settings are inherited from multiple parent roles
-     * 
+     *
      * This test is designed to verify that access settings are propagated property
-     * when there access settings defined for multiple parent roles. 
-     * 
+     * when there access settings defined for multiple parent roles.
+     *
      * A. Test that settings can be stored for the parent roles;
      * B. Test that access settings are propagated property to the User level
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -51,7 +51,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Make sure that we have parent roles defined properly
         $this->assertEquals('AAM_Core_Subject_Role', get_class($role));
 
-        // Save access settings for the base role and iterate over each sibling and 
+        // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
             $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
@@ -100,7 +100,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      * Test that access settings are merged with default "deny" preference correctly
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -112,7 +112,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Make sure that we have parent roles defined properly
         $this->assertEquals('AAM_Core_Subject_Role', get_class($role));
 
-        // Save access settings for the base role and iterate over each sibling and 
+        // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
             $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
@@ -141,13 +141,13 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
     /**
      * Test that access settings are merged with default "deny" preference correctly
-     * 
+     *
      * In this test, the first role will have explicitly defined access settings that
      * deny access, while the second role has no settings defined. This way the
      * expected outcome should be access allowed.
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -159,7 +159,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Make sure that we have parent roles defined properly
         $this->assertEquals('AAM_Core_Subject_Role', get_class($role));
 
-        // Save access settings for the base role and iterate over each sibling and 
+        // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
             $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
@@ -169,7 +169,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Override the default "deny" precedence
         AAM_Core_Config::set(
-            sprintf('core.settings.%s.merge.preference', AAM_Core_Object_Post::OBJECT_TYPE), 
+            sprintf('core.settings.%s.merge.preference', AAM_Core_Object_Post::OBJECT_TYPE),
             'allow'
         );
 
@@ -180,7 +180,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Array (
         //  limited => Array (
         //    enabled   => false,
-        //    threshold => 10   
+        //    threshold => 10
         //  )
         // )
         $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID)->getOption();

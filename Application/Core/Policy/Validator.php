@@ -12,12 +12,13 @@ use Composer\Semver\Semver;
 /**
  * AAM access policy validator
  *
+ * @since 6.2.2 Bug fixing
  * @since 6.2.0 Allowing to define token in the dependencies array as well as
  *              enhanced with additional attributes
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.2.2
  */
 class AAM_Core_Policy_Validator
 {
@@ -152,11 +153,12 @@ class AAM_Core_Policy_Validator
      *
      * @return void
      *
+     * @since 6.2.2 Fixed bug with validation when plugin is not installed
      * @since 6.2.0 Enhanced dependency with more attributes
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.2.2
      */
     protected function isValidDependency()
     {
@@ -164,7 +166,8 @@ class AAM_Core_Policy_Validator
             foreach ($this->json['Dependency'] as $slug => $info) {
                 try {
                     $v     = (is_array($info) ? $info['Version'] : $info);
-                    $valid = Semver::satisfies($this->getAppVersion($slug), $v);
+                    $app_v = $this->getAppVersion($slug);
+                    $valid = !empty($app_v) && Semver::satisfies($app_v, $v);
 
                     if ($valid === false) {
                         throw new Exception('', self::INVALID_DEPENDENCY_VERSION);
@@ -189,7 +192,7 @@ class AAM_Core_Policy_Validator
                     }
 
                     if ($e->getCode() === self::INVALID_DEPENDENCY_VERSION) {
-                        $message = __('The {$app} does not satisfy minimum required version', AAM_KEY);
+                        $message = __('The {$app} is not active or does not satisfy minimum required version', AAM_KEY);
                     } elseif ($e->getCode() === self::MISSING_DEPENDENCY) {
                         $message = __('The {$app} is required', AAM_KEY);
                     } else {

@@ -10,12 +10,14 @@
 /**
  * Access Policy UI manager
  *
+ * @since 6.2.2 Integration with multisite network where user is allowed to manage
+ *              policies only on the main site if Multiste Sync Settings is enabled
  * @since 6.2.0 Added ability to generate Access Policy
  * @since 6.1.0 Fixed bug with "Attach to Default" button
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.2.2
  */
 class AAM_Backend_Feature_Main_Policy
 extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -255,11 +257,12 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.2.2 Changed the way list of actions is determined for a policy
      * @since 6.2.0 Added "delete" action
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.2.2
      */
     protected function preparePolicyActionList($record)
     {
@@ -267,11 +270,13 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
 
         $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);
+        $managed = apply_filters('aam_is_managed_policy_filter', true, $record);
+        $prefix  = ($managed ? '' : 'no-');
 
         $actions = array(
-            $policy->has($record->ID) ? "detach" : "attach",
-            $post->isAllowedTo('edit') ? 'edit' : 'no-edit',
-            $post->isAllowedTo('delete') ? 'delete' : 'no-delete'
+            $policy->has($record->ID) ? "{$prefix}detach" : "{$prefix}attach",
+            $managed && $post->isAllowedTo('edit') ? 'edit' : 'no-edit',
+            $managed && $post->isAllowedTo('delete') ? 'delete' : 'no-delete'
         );
 
         return implode(',', $actions);

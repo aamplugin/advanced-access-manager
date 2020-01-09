@@ -5,19 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM core API
  *
+ * @since 6.2.2 Minor refactoring to the clearSettings method
  * @since 6.0.5 Fixed bug with getOption method where incorrect type could be
  *              returned
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.5
+ * @version 6.2.2
  */
 final class AAM_Core_API
 {
@@ -265,18 +264,27 @@ final class AAM_Core_API
      *
      * @return void
      *
+     * @since 6.2.2 Refactored the way we iterate over the deleting list of options
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.2
      */
     public static function clearSettings()
     {
-        self::deleteOption(AAM_Core_AccessSettings::DB_OPTION);
-        self::deleteOption(AAM_Core_Config::DB_OPTION);
-        self::deleteOption(AAM_Core_ConfigPress::DB_OPTION);
-        self::deleteOption(AAM_Core_Migration::DB_FAILURE_OPTION);
+        $options = array(
+            AAM_Core_AccessSettings::DB_OPTION,
+            AAM_Core_Config::DB_OPTION,
+            AAM_Core_ConfigPress::DB_OPTION,
+            AAM_Core_Migration::DB_OPTION
+        );
+
+        foreach($options as $option) {
+            self::deleteOption($option);
+        }
 
         // Trigger the action to inform other services to clean-up the options
-        do_action('aam_clear_settings_action');
+        do_action('aam_clear_settings_action', $options);
     }
 
     /**

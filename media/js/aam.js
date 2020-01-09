@@ -1354,22 +1354,24 @@
                             { visible: false, targets: [0, 3, 4] }
                         ],
                         initComplete: function () {
-                            var create = $('<a/>', {
-                                'href': '#',
-                                'class': 'btn btn-sm btn-primary'
-                            }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
-                                .bind('click', function () {
-                                    window.open(getLocal().url.addPolicy, '_blank');
-                                });
+                            if (getLocal().caps.manage_policies) {
+                                var create = $('<a/>', {
+                                    'href': '#',
+                                    'class': 'btn btn-sm btn-primary'
+                                }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
+                                    .bind('click', function () {
+                                        window.open(getLocal().url.addPolicy, '_blank');
+                                    });
 
-                            var install = $('<a/>', {
-                                'href': '#modal-install-policy',
-                                'class': 'btn btn-sm btn-success aam-outer-left-xxs',
-                                'data-toggle': 'modal'
-                            }).html('<i class="icon-download-cloud"></i> ' + getAAM().__('Install'));
+                                var install = $('<a/>', {
+                                    'href': '#modal-install-policy',
+                                    'class': 'btn btn-sm btn-success aam-outer-left-xxs',
+                                    'data-toggle': 'modal'
+                                }).html('<i class="icon-download-cloud"></i> ' + getAAM().__('Install'));
 
-                            $('.dataTables_filter', '#policy-list_wrapper').append(install);
-                            $('.dataTables_filter', '#policy-list_wrapper').append(create);
+                                $('.dataTables_filter', '#policy-list_wrapper').append(install);
+                                $('.dataTables_filter', '#policy-list_wrapper').append(create);
+                            }
                         },
                         createdRow: function (row, data) {
                             var actions = data[2].split(',');

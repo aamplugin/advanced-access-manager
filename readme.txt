@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.3.2
-Stable tag: 6.2.1
+Stable tag: 6.2.2
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,17 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.2.2 =
+* Fixed Bug: Backend Dashboard index.php still could be restricted with Backend Menu service
+* Fixed Bug: Policy Generator - Fatal error with PHP lower than 7.0.0
+* Fixed Bug: Policy Validator - Improper dependency validation when if it is not installed
+* Fixed Bug: Default access settings not propagated to user that does not have any roles (multisite setup)
+* Fixed Bug: Reset settings where not synced across all subsites in multisite setup
+* Added New: Ability to define wildcard [BackendMenu](https://aamplugin.com/reference/policy#backendmenu) resource with Access Policy
+* Added New: Ability to define wildcard [Metabox](https://aamplugin.com/reference/policy#metabox) resource with Access Policy
+* Added New: Ability to define wildcard [Widget](https://aamplugin.com/reference/policy#widget) resource with Access Policy
+* Added New: Ability to define wildcard [Toolbar](https://aamplugin.com/reference/policy#toolbar) resource with Access Policy
 
 = 6.2.1 =
 * Fixed Bug: Very minor UI issue with Access Policy Delete pop-up

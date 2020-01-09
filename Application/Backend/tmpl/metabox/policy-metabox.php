@@ -1,10 +1,11 @@
 <?php
     /**
+     * @since 6.2.2 Slightly changed the way errors are displayed
      * @since 6.2.0 Escaping backslashes to avoid issue with JSON validation
      * @since 6.1.1 Removing the backslashes before displaying the policy
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.2.0
+     * @version 6.2.2
      */
 ?>
 <?php if (defined('AAM_KEY')) { ?>
@@ -23,7 +24,16 @@
         ?>
 
         <div class="aam-alert-danger<?php echo (empty($errors) ? ' hidden' : ''); ?>" id="policy-parsing-error">
-            <?php echo implode('<br/>', $errors); ?>
+            <?php
+                $list = array();
+                foreach($errors as $error) {
+                    $list[] = '<li>- ' . $error . ';</li>';
+                }
+
+                if (!empty($list)) {
+                    echo '<ul>' . implode('', $list) . '</ul>';
+                }
+            ?>
         </div>
 
         <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" rows="10"><?php echo stripslashes($params->post->post_content); ?></textarea>

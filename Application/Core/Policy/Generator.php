@@ -10,8 +10,11 @@
 /**
  * AAM core policy generator
  *
+ * @since 6.2.2 Fixed bug with incompatibility with PHP lower than 7.0.0
+ * @since 6.2.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.2.0
+ * @version 6.2.2
  */
 class AAM_Core_Policy_Generator
 {
@@ -301,8 +304,11 @@ class AAM_Core_Policy_Generator
      *
      * @return array
      *
+     * @since 6.2.2 Fixed bug that caused fatal error for PHP lower than 7.0.0
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access private
-     * @version 6.2.0
+     * @version 6.2.2
      */
     private function _convertToPostStatements($resource, $options)
     {
@@ -440,7 +446,11 @@ class AAM_Core_Policy_Generator
             }
 
             if ($action !== null) {
-                $$effect[] = $resource . ':' . $action;
+                if ($effect === 'allowed') {
+                    $allowed[] = $resource . ':' . $action;
+                } else {
+                    $denied[] = $resource . ':' . $action;
+                }
             }
         }
 

@@ -40,7 +40,7 @@ class RoleHierarchyTest extends TestCase
         $object      = $contributor->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
 
         // Set fake settings for the Contributor
-        $this->assertTrue($object->updateOptionItem('index.php', true)->save());
+        $this->assertTrue($object->updateOptionItem('edit.php', true)->save());
 
         // Fake the fact that Subscriber has a parent role Contributor
         AAM::api()->updateConfig('system.role.subscriber.parent', 'contributor');
@@ -52,7 +52,7 @@ class RoleHierarchyTest extends TestCase
         $object     = $subscriber->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
 
         $this->assertEquals('contributor', $subscriber->getParent()->getId());
-        $this->assertTrue($object->isRestricted('index.php'));
+        $this->assertTrue($object->isRestricted('edit.php'));
     }
 
 }

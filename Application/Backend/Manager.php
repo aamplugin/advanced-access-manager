@@ -10,12 +10,14 @@
 /**
  * Backend manager
  *
+ * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
+ *              array of properties
  * @since 6.2.0 Added new property to the JS localization `blog_id`
  * @since 6.1.0 Fixed bug with HTML compression
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.2.2
  */
 class AAM_Backend_Manager
 {
@@ -125,11 +127,13 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
+     *              array of properties
      * @since 6.2.0 Added `blog_id` to the localized array of properties
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.0
+     * @version 6.2.2
      */
     public function printFooterJavascript()
     {
@@ -157,10 +161,10 @@ class AAM_Backend_Manager
                 ),
                 'translation' => AAM_Backend_View_Localization::get(),
                 'caps'        => array(
-                    'create_roles' => current_user_can('aam_create_roles'),
-                    'create_users' => current_user_can('create_users')
-                ),
-                'blog_id' => get_current_blog_id()
+                    'create_roles'    => current_user_can('aam_create_roles'),
+                    'create_users'    => current_user_can('create_users'),
+                    'manage_policies' => is_main_site() || !AAM_Core_Config::get(AAM_Service_Multisite::FEATURE_FLAG, true)
+                )
             ));
 
             echo '<script type="text/javascript">';

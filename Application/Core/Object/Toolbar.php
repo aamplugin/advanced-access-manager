@@ -5,18 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Admin toolbar object
  *
+ * @since 6.2.2 Added support for the new `aam_toolbar_is_hidden_filter` filter
  * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.2.2
  */
 class AAM_Core_Object_Toolbar extends AAM_Core_Object
 {
@@ -58,8 +57,11 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object
      *
      * @return boolean
      *
+     * @since 6.2.2 Added `aam_toolbar_is_hidden_filter` filter
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.2.2
      */
     public function isHidden($item, $both = false)
     {
@@ -71,7 +73,9 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object
         // Step #2. Check if whole branch is restricted
         $branch = ($both && !empty($options['toolbar-' . $item]));
 
-        return $direct || $branch;
+        return apply_filters(
+            'aam_toolbar_is_hidden_filter', $direct || $branch, $item, $this
+        );
     }
 
 }

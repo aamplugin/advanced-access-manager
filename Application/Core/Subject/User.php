@@ -10,11 +10,12 @@
 /**
  * User subject
  *
+ * @since 6.2.2 Fixed bug with settings inheritance from the Default subject
  * @since 6.0.2 Enhanced stability of the code
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.2
+ * @version 6.2.2
  */
 class AAM_Core_Subject_User extends AAM_Core_Subject
 {
@@ -165,7 +166,12 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
 
     /**
      * @inheritDoc
-     * @version 6.0.0
+     *
+     * @since 6.2.2 Fixed bug where user did not inherit settings from default if
+     *              user has not roles
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.2.2
      */
     public function getParent()
     {
@@ -186,7 +192,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
                     $this->_parent->setSiblings($siblings);
                 }
             } else {
-                $this->_parent = false;
+                $this->_parent = AAM::api()->getDefault();
             }
         }
 
