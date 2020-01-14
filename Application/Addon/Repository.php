@@ -52,11 +52,12 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing
      * @since 6.0.5 Added the $license_only argument
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.5
+     * @version 6.3.0
      */
     public function getRegistry($license_only = false)
     {
@@ -65,7 +66,9 @@ class AAM_Addon_Repository
 
         if ($license_only === true) {
             foreach($registry as $slug => $data) {
-                $response[$slug] = $data['license'];
+                if (!empty($data['license'])) {
+                    $response[$slug] = $data['license'];
+                }
             }
         } else {
             $response = $registry;
