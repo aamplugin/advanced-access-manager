@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.3.0 =
 * Fixed Bug: PHP Notice about missing license key [https://github.com/aamplugin/advanced-access-manager/issues/12](https://github.com/aamplugin/advanced-access-manager/issues/12)
+* Fixed Bug: Fatal error: Allowed memory size of XXX bytes exhausted [https://github.com/aamplugin/advanced-access-manager/issues/15](https://github.com/aamplugin/advanced-access-manager/issues/15)
 
 = 6.2.2 =
 * Fixed Bug: Backend Dashboard index.php still could be restricted with Backend Menu service

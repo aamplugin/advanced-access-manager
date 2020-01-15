@@ -10,6 +10,8 @@
 /**
  * AAM core policy token evaluator
  *
+ * @since 6.3.0 Fixed bug that was causing fatal error policies that have conditions
+ *              defined for Capability & Role resources
  * @since 6.2.1 Added POLICY_META token
  * @since 6.2.0 Enhanced access policy with more tokens. DATETIME now returns time in
  *              UTC timezone
@@ -17,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.1
+ * @version 6.3.0
  */
 class AAM_Core_Policy_Token
 {
@@ -125,12 +127,16 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.3.0 Fixed bug that caused "Fatal error: Allowed memory size of XXX
+     *              bytes exhausted"
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.3.0
      */
     protected static function getUserValue($prop)
     {
-        $user = AAM::getUser();
+        $user = wp_get_current_user();
 
         switch (strtolower($prop)) {
             case 'ip':
@@ -145,7 +151,9 @@ class AAM_Core_Policy_Token
 
             case 'capabilities':
             case 'caps':
-                foreach ((array) $user->allcaps as $cap => $effect) {
+                $allcaps = is_a($user, 'WP_User') ? (array)$user->allcaps : array();
+
+                foreach ($allcaps as $cap => $effect) {
                     if (!empty($effect)) {
                         $value[] = $cap;
                     }
@@ -153,7 +161,7 @@ class AAM_Core_Policy_Token
                 break;
 
             default:
-                $value = (is_a($user, 'AAM_Core_Subject_User') ? $user->{$prop} : null);
+                $value = (is_a($user, 'WP_User') ? $user->{$prop} : null);
                 break;
         }
 
