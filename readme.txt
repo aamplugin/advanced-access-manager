@@ -91,6 +91,9 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.3.0 =
+* Fixed Bug: PHP Notice about missing license key [https://github.com/aamplugin/advanced-access-manager/issues/12](https://github.com/aamplugin/advanced-access-manager/issues/12)
+
 = 6.2.2 =
 * Fixed Bug: Backend Dashboard index.php still could be restricted with Backend Menu service
 * Fixed Bug: Policy Generator - Fatal error with PHP lower than 7.0.0
