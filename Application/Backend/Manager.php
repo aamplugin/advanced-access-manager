@@ -49,18 +49,13 @@ class AAM_Backend_Manager
         }
 
         // Manager Admin Menu
-        if (is_multisite() && is_network_admin()) {
-            // Register AAM in the network admin panel
-            add_action('_network_admin_menu', array($this, 'adminMenu'));
-        } else {
+        if (!is_network_admin()) {
             add_action('_user_admin_menu', array($this, 'adminMenu'));
             add_action('_admin_menu', array($this, 'adminMenu'));
         }
 
         // Manager AAM Ajax Requests
         add_action('wp_ajax_aam', array($this, 'ajax'));
-        // Manager AAM Features Content rendering
-        add_action('admin_action_aamc', array($this, 'renderContent'));
 
         // Manager user search on the AAM page
         add_filter('user_search_columns', function($columns) {
@@ -144,7 +139,6 @@ class AAM_Backend_Manager
                 'ajaxurl'  => esc_url(admin_url('admin-ajax.php')),
                 'ui'       => AAM_Core_Request::get('aamframe', 'main'),
                 'url' => array(
-                    'site'      => esc_url(admin_url('index.php')),
                     'editUser'  => esc_url(admin_url('user-edit.php')),
                     'addUser'   => esc_url(admin_url('user-new.php')),
                     'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
@@ -163,7 +157,7 @@ class AAM_Backend_Manager
                 'caps'        => array(
                     'create_roles'    => current_user_can('aam_create_roles'),
                     'create_users'    => current_user_can('create_users'),
-                    'manage_policies' => is_main_site() || !AAM_Core_Config::get(AAM_Service_Multisite::FEATURE_FLAG, true)
+                    'manage_policies' => is_main_site()
                 )
             ));
 
@@ -307,58 +301,6 @@ class AAM_Backend_Manager
             },
             AAM_MEDIA . '/active-menu.svg'
         );
-    }
-
-    /**
-     * Render AAM UI html content
-     *
-     * This is more logical separation between JSON response and HTML response with
-     * some additional check for compression
-     *
-     * @return void
-     *
-     * @since 6.1.0 Fixed bug with improper response if server config does not match
-     *              PHP executable INI settings
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.1.0
-     */
-    public function renderContent()
-    {
-        check_ajax_referer('aam_ajax');
-
-        @ob_clean(); // flush any output buffer
-
-        if (current_user_can('aam_manager')) {
-            $partial  = filter_input(INPUT_POST, 'partial');
-            $response = AAM_Backend_View::getInstance()->renderContent(
-                (!empty($partial) ? $partial : 'main')
-            );
-
-            $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
-            header('Content-Type: text/html; charset=UTF-8');
-
-            $compressed = count(array_intersect(
-                array('zlib output compression', 'ob_gzhandler'),
-                ob_list_handlers()
-            )) > 0;
-
-            if (!empty($accept)) {
-                header('Vary: Accept-Encoding'); // Handle proxies
-
-                if (false !== stripos($accept, 'gzip') && function_exists('gzencode')) {
-                    header('Content-Encoding: gzip');
-                    $response = ($compressed ? $response : gzencode($response, 3));
-                }
-            }
-
-            echo $response;
-        } else {
-            echo -1;
-        }
-
-        exit();
     }
 
     /**

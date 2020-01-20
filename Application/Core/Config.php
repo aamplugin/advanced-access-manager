@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM Core Config
  *
+ * @since 6.3.0 Added new method `replace`
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.3.0
  */
 class AAM_Core_Config
 {
@@ -100,7 +101,25 @@ class AAM_Core_Config
     {
         self::$config[$option] = $value;
 
-        //save config to database
+        // Save config to database
+        return AAM_Core_API::updateOption(self::DB_OPTION, self::$config);
+    }
+
+    /**
+     * Replace the entire config
+     *
+     * @param array $config
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.3.0
+     */
+    public static function replace($config)
+    {
+        self::$config = $config;
+
+        // Save config to database
         return AAM_Core_API::updateOption(self::DB_OPTION, self::$config);
     }
 

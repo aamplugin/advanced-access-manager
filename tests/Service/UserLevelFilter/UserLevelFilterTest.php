@@ -7,7 +7,7 @@
  * ======================================================================
  */
 
-namespace AAM\UnitTest\Service\AdminMenu;
+namespace AAM\UnitTest\Service;
 
 use AAM,
     WP_User_Query,

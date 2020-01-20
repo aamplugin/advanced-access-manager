@@ -779,7 +779,7 @@ input[type=radio]:checked + label:before {
 .aam-overwrite .btn {
     margin-top: -5px;
     border: 0;
-    padding: 6px 10px;
+    padding: 5px 10px;
 }
 
 .row.aam-bordered {

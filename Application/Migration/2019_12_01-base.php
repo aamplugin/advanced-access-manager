@@ -29,17 +29,16 @@ class Migration610 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
+     * @since 6.3.0 Optimized for Multisite setup
      * @since 6.2.0 Removed failure log clean-up. Delegating this to the latest
      *              migration script
      * @since 6.1.0 Initial implementation of the method
      *
-     * @version 6.2.0
+     * @version 6.3.0
      */
     public function run()
     {
-        $list = AAM_Core_API::getOption(
-            AAM_Addon_Repository::DB_OPTION, array(), 'site'
-        );
+        $list = AAM_Core_API::getOption(AAM_Addon_Repository::DB_OPTION);
 
         if (is_array($list)) {
             $converted = array();
@@ -58,9 +57,7 @@ class Migration610 implements AAM_Core_Contract_MigrationInterface
                 }
             }
 
-            AAM_Core_API::updateOption(
-                AAM_Addon_Repository::DB_OPTION, $converted, 'site'
-            );
+            AAM_Core_API::updateOption(AAM_Addon_Repository::DB_OPTION, $converted);
         }
 
         // Finally store this script as completed

@@ -257,12 +257,13 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.3.0 Optimized for Multisite Network setup
      * @since 6.2.2 Changed the way list of actions is determined for a policy
      * @since 6.2.0 Added "delete" action
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.2
+     * @version 6.3.0
      */
     protected function preparePolicyActionList($record)
     {
@@ -270,13 +271,10 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
 
         $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);
-        $managed = apply_filters('aam_is_managed_policy_filter', true, $record);
-        $prefix  = ($managed ? '' : 'no-');
-
         $actions = array(
-            $policy->has($record->ID) ? "{$prefix}detach" : "{$prefix}attach",
-            $managed && $post->isAllowedTo('edit') ? 'edit' : 'no-edit',
-            $managed && $post->isAllowedTo('delete') ? 'delete' : 'no-delete'
+            $policy->has($record->ID) ? "detach" : "attach",
+            is_main_site() && $post->isAllowedTo('edit') ? 'edit' : 'no-edit',
+            is_main_site() && $post->isAllowedTo('delete') ? 'delete' : 'no-delete'
         );
 
         return implode(',', $actions);

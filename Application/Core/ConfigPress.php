@@ -38,16 +38,6 @@ final class AAM_Core_ConfigPress
     protected $config = null;
 
     /**
-     * Raw config text
-     *
-     * @var string
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected $rawConfig = null;
-
-    /**
      * Constructor
      *
      * @return void
@@ -58,7 +48,7 @@ final class AAM_Core_ConfigPress
     protected function __construct()
     {
         try {
-            $reader = new AAM_Core_ConfigPress_Reader;
+            $reader       = new AAM_Core_ConfigPress_Reader;
             $this->config = $reader->parseString($this->read());
         } catch (Exception $e) {
             AAM_Core_Console::add($e->getMessage());
@@ -76,9 +66,9 @@ final class AAM_Core_ConfigPress
      */
     public function read()
     {
-        $config = AAM_Core_API::getOption(self::DB_OPTION, 'null');
+        $config = AAM_Core_API::getOption(self::DB_OPTION, null);
 
-        return ($config === 'null' ? '' : $config);
+        return (empty($config) ? '' : $config);
     }
 
     /**

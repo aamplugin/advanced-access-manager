@@ -14,10 +14,10 @@ namespace AAM\Migration;
 use WP_Error,
     AAM_Core_API,
     AAM_Core_Config,
+    AAM_Core_AccessSettings,
     AAM_Core_Migration,
     AAM_Core_ConfigPress,
     AAM_Addon_Repository,
-    AAM_Core_AccessSettings,
     AAM_Backend_Feature_Settings_Core,
     AAM_Core_Contract_MigrationInterface,
     AAM_Backend_Feature_Settings_Content,
@@ -238,9 +238,6 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                     AAM_Core_API::deleteOption($option->option_name);
                     break;
 
-                case AAM_Core_AccessSettings::DB_OPTION:
-                case AAM_Core_Config::DB_OPTION:
-                case AAM_Core_ConfigPress::DB_OPTION:
                 case AAM_Core_Migration::DB_OPTION:
                 case AAM_Core_Migration::DB_FAILURE_OPTION:
                     // Silently skip in case somebody forces to rerun the entire
@@ -368,12 +365,13 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.3.0 Optimized for multisite setup
      * @since 6.0.1 Fixed the bug with `show_admin_bar` not converted to
      *              `aam_show_toolbar`
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access protected
-     * @version 6.0.1
+     * @version 6.3.0
      */
     protected function convertCapabilities()
     {
@@ -433,18 +431,19 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.3.0 Optimized for Multisite setup
      * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.5
+     * @version 6.3.0
      */
     private function _convertExtensionRegistry($option)
     {
         AAM_Core_API::updateOption(
-            AAM_Addon_Repository::DB_OPTION, $option->option_value, 'site'
+            AAM_Addon_Repository::DB_OPTION, $option->option_value
         );
     }
 
@@ -455,13 +454,14 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
      *
      * @return void
      *
+     * @since 6.3.0 Optimized for Multisite setup
      * @since 6.0.5 Removed error emission
      * @since 6.0.1 Any errors are pushed directly to the $this->errors array instead
      *              of returning them
      * @since 6.0.0 Initialize implementation of the method
      *
      * @access private
-     * @version 6.0.1
+     * @version 6.3.0
      */
     private function _convertSettings($option)
     {
@@ -502,9 +502,7 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
                 }
             }
 
-            AAM_Core_API::updateOption(
-                AAM_Core_Config::DB_OPTION, $converted, 'site'
-            );
+            AAM_Core_Config::replace($converted);
         }
     }
 

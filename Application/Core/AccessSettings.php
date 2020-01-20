@@ -10,11 +10,12 @@
 /**
  * AAM Access Settings repository
  *
+ * @since 6.3.0 Added new method `replace`
  * @since 6.2.0 Added new hook `aam_updated_access_settings`
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.3.0
  */
 class AAM_Core_AccessSettings
 {
@@ -151,6 +152,23 @@ class AAM_Core_AccessSettings
         do_action('aam_updated_access_settings', $this->_settings);
 
         return $result;
+    }
+
+    /**
+     * Replace all settings with new set
+     *
+     * @param array $settings
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.3.0
+     */
+    public function replace($settings)
+    {
+        $this->_settings = $settings;
+
+        return $this->save();
     }
 
     /**

@@ -52,7 +52,8 @@ class AAM_Addon_Repository
      *
      * @return array
      *
-     * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing
+     * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing.
+     *              Optimized for Multisite setup
      * @since 6.0.5 Added the $license_only argument
      * @since 6.0.0 Initial implementation of the method
      *
@@ -62,7 +63,9 @@ class AAM_Addon_Repository
     public function getRegistry($license_only = false)
     {
         $response = array();
-        $registry = AAM_Core_API::getOption(self::DB_OPTION, array(), 'site');
+        $registry = AAM_Core_API::getOption(
+            self::DB_OPTION, array(), get_main_site_id()
+        );
 
         if ($license_only === true) {
             foreach($registry as $slug => $data) {
@@ -110,7 +113,7 @@ class AAM_Addon_Repository
         );
 
         // Update the registry
-        return AAM_Core_API::updateOption(self::DB_OPTION, $list);
+        return AAM_Core_API::updateOption(self::DB_OPTION, $list, get_main_site_id());
     }
 
     /**

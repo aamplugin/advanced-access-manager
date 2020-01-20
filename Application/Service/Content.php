@@ -193,7 +193,7 @@ class AAM_Service_Content
         add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
 
         // Get control over commenting stuff
-        add_filter('comments_open', function($open, $id) {
+        add_filter('comments_open', function ($open, $id) {
             $object = AAM::getUser()->getObject('post', $id);
 
             // If Leave Comments option is defined then override the default status.
@@ -209,8 +209,8 @@ class AAM_Service_Content
         add_filter('rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3);
 
         // REST API. Control if user is allowed to publish content
-        add_action('registered_post_type', function($post_type, $obj) {
-            add_filter("rest_pre_insert_{$post_type}", function($post, $request) {
+        add_action('registered_post_type', function ($post_type, $obj) {
+            add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
                 $status = (isset($request['status']) ? $request['status'] : null);
 
                 if (in_array($status, array('publish', 'future'), true)) {
@@ -227,7 +227,7 @@ class AAM_Service_Content
             }, 10, 2);
 
             // Populate the collection of post type caps
-            foreach($obj->cap as $cap) {
+            foreach ($obj->cap as $cap) {
                 if (
                     !in_array($cap, $this->postTypeCaps, true)
                     && ($cap !== 'do_not_allow')
@@ -257,7 +257,7 @@ class AAM_Service_Content
     public function beforeDispatch($response, $handler, $request)
     {
         // Register hooks that check post access
-        foreach(get_post_types(array('show_in_rest' => true)) as $type) {
+        foreach (get_post_types(array('show_in_rest' => true)) as $type) {
             add_filter("rest_prepare_{$type}", array($this, 'authPostAccess'), 10, 3);
         }
 
@@ -293,11 +293,13 @@ class AAM_Service_Content
     public function authPostAccess($response, $post, $request)
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, $post->ID
+            AAM_Core_Object_Post::OBJECT_TYPE,
+            $post->ID
         );
 
         $auth = $this->isAuthorizedToReadPost(
-            $object, (isset($request['_password']) ? $request['_password'] : null)
+            $object,
+            (isset($request['_password']) ? $request['_password'] : null)
         );
 
         if (is_wp_error($auth)) {
@@ -421,7 +423,7 @@ class AAM_Service_Content
                     if ($error->get_error_code() === 'post_access_redirected') {
                         AAM_Core_Redirect::execute('url', $error->get_error_data());
                     } elseif ($error->get_error_code() !== 'post_access_protected') {
-                       wp_die($error->get_error_message(), 'aam_access_denied');
+                        wp_die($error->get_error_message(), 'aam_access_denied');
                     }
                 } else {
                     $this->incrementPostReadCounter($post);
@@ -494,7 +496,9 @@ class AAM_Service_Content
             $query = $this->preparePostQuery($object->getSegment('post'), $wp_query);
 
             $clauses['where'] .= apply_filters(
-                'aam_content_visibility_where_clause_filter', $query, $wp_query
+                'aam_content_visibility_where_clause_filter',
+                $query,
+                $wp_query
             );
 
             $executing = false;
@@ -703,7 +707,11 @@ class AAM_Service_Content
 
                     if (is_a($post_type, 'WP_Post_Type')) {
                         $caps = $this->__mapPostTypeCaps(
-                            $post_type, $cap, $caps, $requested, $args
+                            $post_type,
+                            $cap,
+                            $caps,
+                            $requested,
+                            $args
                         );
                     }
                 } else {
@@ -730,7 +738,11 @@ class AAM_Service_Content
      * @version 6.0.2
      */
     private function __mapPostTypeCaps(
-        WP_Post_Type $post_type, $cap, $caps, WP_Post $post, $args
+        WP_Post_Type $post_type,
+        $cap,
+        $caps,
+        WP_Post $post,
+        $args
     ) {
 
         // Cover the scenario when $cap is not part of the post type capabilities
@@ -818,7 +830,8 @@ class AAM_Service_Content
     public function isAuthorizedToPublishPost($post)
     {
         return AAM::getUser()->getObject(
-            'post', (is_a($post, 'WP_Post') ? $post->ID : $post)
+            'post',
+            (is_a($post, 'WP_Post') ? $post->ID : $post)
         )->isAllowedTo('publish');
     }
 
@@ -857,7 +870,8 @@ class AAM_Service_Content
     public function isAuthorizedToEditPost($post)
     {
         $object  = AAM::getUser()->getObject(
-            'post', (is_a($post, 'WP_Post') ? $post->ID : $post)
+            'post',
+            (is_a($post, 'WP_Post') ? $post->ID : $post)
         );
         $isDraft = $object->post_status === 'auto-draft';
 
@@ -897,7 +911,8 @@ class AAM_Service_Content
     public function isAuthorizedToDeletePost($post)
     {
         return AAM::getUser()->getObject(
-            'post', (is_a($post, 'WP_Post') ? $post->ID : $post)
+            'post',
+            (is_a($post, 'WP_Post') ? $post->ID : $post)
         )->isAllowedTo('delete');
     }
 
@@ -934,7 +949,7 @@ class AAM_Service_Content
      */
     protected function incrementPostReadCounter($post)
     {
-        if(is_user_logged_in() && $post->is('limited')) {
+        if (is_user_logged_in() && $post->is('limited')) {
             $option  = sprintf(self::POST_COUNTER_DB_OPTION, $post->ID);
             $counter = intval(get_user_option($option, get_current_user_id()));
             update_user_option(get_current_user_id(), $option, ++$counter);
@@ -960,7 +975,8 @@ class AAM_Service_Content
             $object = $post;
         } else {
             $object = AAM::getUser()->getObject(
-                'post', (is_a($post, 'WP_Post') ? $post->ID : $post)
+                'post',
+                (is_a($post, 'WP_Post') ? $post->ID : $post)
             );
         }
 
@@ -1189,7 +1205,8 @@ class AAM_Service_Content
                 );
 
                 $isMatched = AAM_Core_API::prepareHasher()->CheckPassword(
-                    $protected['password'], $password
+                    $protected['password'],
+                    $password
                 );
             } else {
                 $isMatched = $protected['password'] === $password;
