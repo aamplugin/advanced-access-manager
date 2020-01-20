@@ -33,13 +33,16 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.3.0 Making sure that boolean value is stored
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public function save()
     {
         $param = $this->getFromPost('param');
-        $value = $this->getFromPost('value');
+        $value = $this->getFromPost('value', FILTER_VALIDATE_BOOLEAN);
 
         AAM_Core_Config::set($param, $value);
 
@@ -66,31 +69,26 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.3.0 Optimized AAM_Core_API::getOption call
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.2.0
+     * @version 6.3.0
      */
     public function getSupportMetadata()
     {
         global $wp_version;
 
         return wp_json_encode(array(
-            'phpVersion' => PHP_VERSION,
-            'wpVersion'  => $wp_version,
-            'aamVersion' => AAM_VERSION,
-            'settings'   => AAM_Core_API::getOption(
-                AAM_Core_AccessSettings::DB_OPTION, array()
-            ),
-            'config'     => AAM_Core_API::getOption(
-                AAM_Core_Config::DB_OPTION, array()
-            ),
-            'configpress' => AAM_Core_API::getOption(
-                AAM_Core_ConfigPress::DB_OPTION, array()
-            ),
-            'roles'      => AAM_Core_API::getOption(
-                AAM_Core_API::getRoles()->role_key, array()
-            ),
-            'addons'     => AAM_Addon_Repository::getInstance()->getRegistry(),
-            'plugins'    => get_plugins()
+            'phpVersion'  => PHP_VERSION,
+            'wpVersion'   => $wp_version,
+            'aamVersion'  => AAM_VERSION,
+            'settings'    => AAM_Core_API::getOption(AAM_Core_AccessSettings::DB_OPTION),
+            'config'      => AAM_Core_API::getOption(AAM_Core_Config::DB_OPTION),
+            'configpress' => AAM_Core_API::getOption(AAM_Core_ConfigPress::DB_OPTION),
+            'roles'       => AAM_Core_API::getOption(AAM_Core_API::getRoles()->role_key),
+            'addons'      => AAM_Addon_Repository::getInstance()->getRegistry(),
+            'plugins'     => get_plugins()
         ));
     }
 
@@ -99,8 +97,11 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.3.0 Optimized AAM_Core_API::getOption call
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.2.0
+     * @version 6.3.0
      */
     public function exportSettings()
     {
@@ -119,26 +120,28 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             $groups = array_map('trim', explode(',', $groups));
         }
 
+        $dataset = &$data['dataset'];
+
         foreach($groups as $group) {
             switch($group) {
                 case 'settings':
-                    $data['dataset']['settings'] = AAM_Core_API::getOption(
+                    $dataset['settings'] = AAM_Core_API::getOption(
                         AAM_Core_AccessSettings::DB_OPTION, array()
                     );
                     break;
 
                 case 'config':
-                    $data['dataset']['config'] = AAM_Core_API::getOption(
+                    $dataset['config']      = AAM_Core_API::getOption(
                         AAM_Core_Config::DB_OPTION, array()
                     );
-                    $data['dataset']['configpress'] = AAM_Core_API::getOption(
+                    $dataset['configpress'] = AAM_Core_API::getOption(
                         AAM_Core_ConfigPress::DB_OPTION, array()
                     );
                     break;
 
                 case 'roles':
-                    $data['dataset']['roles'] = AAM_Core_API::getOption(
-                        AAM_Core_API::getRoles()->role_key, array()
+                    $dataset['roles'] = AAM_Core_API::getOption(
+                        AAM_Core_API::getRoles()->role_key
                     );
                     break;
 
@@ -170,15 +173,15 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                 foreach($data['dataset'] as $group => $settings) {
                     switch($group) {
                         case 'settings':
-                            AAM_Core_API::updateOption(
-                                AAM_Core_AccessSettings::DB_OPTION, $settings
-                            );
+                            AAM_Core_AccessSettings::getInstance()->replace($settings);
                             break;
 
                         case 'config':
-                            AAM_Core_API::updateOption(
-                                AAM_Core_Config::DB_OPTION, $settings
-                            );
+                            AAM_Core_Config::replace($settings);
+                            break;
+
+                        case 'configpress':
+                            AAM_Core_ConfigPress::getInstance()->save($settings);
                             break;
 
                         case 'roles':

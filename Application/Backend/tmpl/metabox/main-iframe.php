@@ -47,6 +47,8 @@
                     </div>
                 <?php } ?>
 
+                <?php do_action('aam_top_right_column_action'); ?>
+
                 <div class="metabox-holder shared-metabox">
                     <div class="postbox">
                         <div class="inside">

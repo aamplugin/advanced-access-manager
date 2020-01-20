@@ -29,6 +29,8 @@ class AAM_Core_Policy_Token
      *
      * @var array
      *
+     * @since 6.3.0 Added PHP_GLOBAL, WP_NETWORK_OPTION token and changed
+     *                    WP_OPTION callback
      * @since 6.2.1 Added `POLICY_META` token
      * @since 6.2.0 Added `POLICY_PARAM`, `WP_SITE` token & changed the
      *              DATETIME callback
@@ -36,27 +38,29 @@ class AAM_Core_Policy_Token
      * @since 6.0.0 Initial implementation of the property
      *
      * @access protected
-     * @version 6.2.1
+     * @version 6.3.0
      */
     protected static $map = array(
-        'USER'         => 'AAM_Core_Policy_Token::getUserValue',
-        'USER_OPTION'  => 'AAM_Core_Policy_Token::getUserOptionValue',
-        'USER_META'    => 'AAM_Core_Policy_Token::getUserMetaValue',
-        'DATETIME'     => 'AAM_Core_Policy_Token::getDatetime',
-        'HTTP_GET'     => 'AAM_Core_Request::get',
-        'HTTP_QUERY'   => 'AAM_Core_Request::get',
-        'HTTP_POST'    => 'AAM_Core_Request::post',
-        'HTTP_COOKIE'  => 'AAM_Core_Request::cookie',
-        'PHP_SERVER'   => 'AAM_Core_Request::server',
-        'ARGS'         => 'AAM_Core_Policy_Token::getArgValue',
-        'ENV'          => 'getenv',
-        'CONST'        => 'AAM_Core_Policy_Token::getConstant',
-        'WP_OPTION'    => 'AAM_Core_API::getOption',
-        'JWT'          => 'AAM_Core_Policy_Token::getJwtClaim',
-        'AAM_CONFIG'   => 'AAM_Core_Policy_Token::getConfig',
-        'POLICY_PARAM' => 'AAM_Core_Policy_Token::getParam',
-        'POLICY_META'  => 'AAM_Core_Policy_Token::getPolicyMeta',
-        'WP_SITE'      => 'AAM_Core_Policy_Token::getSiteParam'
+        'USER'              => 'AAM_Core_Policy_Token::getUserValue',
+        'USER_OPTION'       => 'AAM_Core_Policy_Token::getUserOptionValue',
+        'USER_META'         => 'AAM_Core_Policy_Token::getUserMetaValue',
+        'DATETIME'          => 'AAM_Core_Policy_Token::getDatetime',
+        'HTTP_GET'          => 'AAM_Core_Request::get',
+        'HTTP_QUERY'        => 'AAM_Core_Request::get',
+        'HTTP_POST'         => 'AAM_Core_Request::post',
+        'HTTP_COOKIE'       => 'AAM_Core_Request::cookie',
+        'PHP_SERVER'        => 'AAM_Core_Request::server',
+        'PHP_GLOBAL'        => 'AAM_Core_Policy_Token::getGlobalVariable',
+        'ARGS'              => 'AAM_Core_Policy_Token::getArgValue',
+        'ENV'               => 'getenv',
+        'CONST'             => 'AAM_Core_Policy_Token::getConstant',
+        'WP_OPTION'         => 'AAM_Core_Policy_Token::getWPOption',
+        'JWT'               => 'AAM_Core_Policy_Token::getJwtClaim',
+        'AAM_CONFIG'        => 'AAM_Core_Policy_Token::getConfig',
+        'POLICY_PARAM'      => 'AAM_Core_Policy_Token::getParam',
+        'POLICY_META'       => 'AAM_Core_Policy_Token::getPolicyMeta',
+        'WP_SITE'           => 'AAM_Core_Policy_Token::getSiteParam',
+        'WP_NETWORK_OPTION' => 'AAM_Core_Policy_Token::getNetworkOption',
     );
 
     /**
@@ -267,6 +271,27 @@ class AAM_Core_Policy_Token
     }
 
     /**
+     * Get database option
+     *
+     * @param string $option
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.3.0
+     */
+    protected static function getWPOption($option)
+    {
+        if (is_multisite()) {
+            $result = get_blog_option(get_current_blog_id(), $option);
+        } else {
+            $result = get_option($option);
+        }
+
+        return $result;
+    }
+
+    /**
      * Get AAM configuration
      *
      * @param string $config
@@ -361,6 +386,36 @@ class AAM_Core_Policy_Token
         }
 
         return $result;
+    }
+
+    /**
+     * Get global variable's value
+     *
+     * @param string $var
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.3.0
+     */
+    protected static function getGlobalVariable($var)
+    {
+        return (isset($GLOBALS[$var]) ? $GLOBALS[$var] : null);
+    }
+
+    /**
+     * Get network option
+     *
+     * @param string $option
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.3.0
+     */
+    protected static function getNetworkOption($option)
+    {
+        return get_site_option($option, null);
     }
 
 }

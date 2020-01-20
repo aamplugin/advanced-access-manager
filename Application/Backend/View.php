@@ -117,11 +117,33 @@ class AAM_Backend_View
                     array(AAM_Backend_Feature::getFeatureView($id), $parts[1])
                 );
             }
+
+            $response = apply_filters(
+                'aam_ajax_filter', $response, $subject->getSubject(), $action
+            );
+        } elseif ($action === 'renderContent') {
+            $partial  = filter_input(INPUT_POST, 'partial');
+            $response = $this->renderContent((!empty($partial) ? $partial : 'main'));
+
+            $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
+            header('Content-Type: text/html; charset=UTF-8');
+
+            $compressed = count(array_intersect(
+                array('zlib output compression', 'ob_gzhandler'),
+                ob_list_handlers()
+            )) > 0;
+
+            if (!empty($accept)) {
+                header('Vary: Accept-Encoding'); // Handle proxies
+
+                if (false !== stripos($accept, 'gzip') && function_exists('gzencode')) {
+                    header('Content-Encoding: gzip');
+                    $response = ($compressed ? $response : gzencode($response, 3));
+                }
+            }
         }
 
-        return apply_filters(
-            'aam_ajax_filter', $response, $subject->getSubject(), $action
-        );
+        return $response;
     }
 
     /**

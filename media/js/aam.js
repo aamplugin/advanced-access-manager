@@ -757,9 +757,10 @@
 
                     //add subtitle
                     var expire = (data[5] ? '; <i class="icon-clock"></i>' : '');
+                    var role   = (data[1] ? `${getAAM().__('Role')}: ${data[1]}; ` : '');
                     $('td:eq(0)', row).append(
                         $('<i/>', { 'class': 'aam-row-subtitle' }).html(
-                            `${getAAM().__('Role')}: ${data[1]}; ${getAAM().__('ID')}: <b>${data[0]}</b> ${expire}`
+                            `${role}${getAAM().__('ID')}: <b>${data[0]}</b> ${expire}`
                         )
                     );
 
@@ -2503,11 +2504,12 @@
                 //show overlay if present
                 $('.aam-overlay', container).show();
 
-                $.ajax(getLocal().url.site, {
+                $.ajax(getLocal().ajaxurl, {
                     type: 'POST',
                     dataType: 'html',
                     data: {
-                        action: 'aamc',
+                        action: 'aam',
+                        sub_action: 'renderContent',
                         partial: 'post-access-form',
                         _ajax_nonce: getLocal().nonce,
                         type: object,
@@ -3733,13 +3735,18 @@
                                 uri: $('#uri-delete-btn').attr('data-uri')
                             },
                             beforeSend: function () {
-                                $('#uri-delete-btn').text(getAAM().__('Deleting...')).attr('disabled', true);
+                                $('#uri-delete-btn').text(
+                                    getAAM().__('Deleting...')
+                                ).attr('disabled', true);
                             },
                             success: function (response) {
                                 if (response.status === 'success') {
                                     $('#uri-list').DataTable().ajax.reload();
                                 } else {
-                                    getAAM().notification('danger', getAAM().__('Failed to delete URI rule'));
+                                    getAAM().notification(
+                                        'danger',
+                                        getAAM().__('Failed to delete URI rule')
+                                    );
                                 }
                             },
                             error: function () {
@@ -4373,7 +4380,7 @@
                             $('input[type="checkbox"]', row).bind('change', function () {
                                 save(
                                     $(this).attr('name'),
-                                    ($(this).prop('checked') ? 1 : 0)
+                                    $(this).prop('checked')
                                 );
                             });
                         }
@@ -4382,12 +4389,8 @@
                     $('input[type="checkbox"]', '.aam-feature.settings').bind('change', function () {
                         save(
                             $(this).attr('name'),
-                            ($(this).prop('checked') ? 1 : 0)
+                            $(this).prop('checked')
                         );
-                    });
-
-                    $('input[type="text"]', '.aam-feature.settings').bind('change', function () {
-                        save($(this).attr('name'), $(this).val());
                     });
 
                     $('#clear-settings').bind('click', function () {
@@ -4397,7 +4400,7 @@
                             data: {
                                 action: 'aam',
                                 sub_action: 'Settings_Manager.clearSettings',
-                                _ajax_nonce: getLocal().nonce
+                                _ajax_nonce: getLocal().nonce,
                             },
                             beforeSend: function () {
                                 $('#clear-settings').prop('disabled', true);
@@ -4467,7 +4470,7 @@
                             data: {
                                 action: 'aam',
                                 sub_action: 'Settings_Manager.exportSettings',
-                                _ajax_nonce: getLocal().nonce
+                                _ajax_nonce: getLocal().nonce,
                             },
                             beforeSend: function () {
                                 $('#export-settings').prop('disabled', true);
@@ -4615,7 +4618,7 @@
                             data: {
                                 action: 'aam',
                                 sub_action: 'Settings_Manager.getSupportMetadata',
-                                _ajax_nonce: getLocal().nonce
+                                _ajax_nonce: getLocal().nonce,
                             },
                             success: function(response) {
                                 request.metadata = response;
@@ -4839,14 +4842,15 @@
         var _this = this;
 
         var data = {
-            action: 'aamc',
+            action: 'aam',
+            sub_action: 'renderContent',
             _ajax_nonce: getLocal().nonce,
             partial: view,
             subject: this.getSubject().type,
             subjectId: this.getSubject().id
         };
 
-        $.ajax(getLocal().url.site, {
+        $.ajax(getLocal().ajaxurl, {
             type: 'POST',
             dataType: 'html',
             data: data,
@@ -4909,11 +4913,12 @@
         var object = window.location.search.match(/&id\=([^&]*)/);
         var type = window.location.search.match(/&type\=([^&]*)/);
 
-        $.ajax(getLocal().url.site, {
+        $.ajax(getLocal().ajaxurl, {
             type: 'POST',
             dataType: 'html',
             data: {
-                action: 'aamc',
+                action: 'aam',
+                sub_action: 'renderContent',
                 _ajax_nonce: getLocal().nonce,
                 partial: view,
                 subject: this.getSubject().type,

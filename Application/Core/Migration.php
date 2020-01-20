@@ -37,12 +37,15 @@ final class AAM_Core_Migration
      *
      * @return array
      *
+     * @since 6.3.0 Optimized AAM_Core_API::getOption call
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public static function getPending()
     {
-        $completed = AAM_Core_API::getOption(self::DB_OPTION, array());
+        $completed = AAM_Core_API::getOption(self::DB_OPTION);
         $pending   = array();
 
         foreach (self::getDirectoryIterator() as $mg) {
@@ -74,12 +77,15 @@ final class AAM_Core_Migration
      *
      * @return array
      *
+     * @since 6.3.0 Optimized AAM_Core_API::getOption call
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public static function getFailureLog()
     {
-        return AAM_Core_API::getOption(self::DB_FAILURE_OPTION, array());
+        return AAM_Core_API::getOption(self::DB_FAILURE_OPTION);
     }
 
     /**
@@ -102,12 +108,15 @@ final class AAM_Core_Migration
      *
      * @return boolean
      *
+     * @since 6.3.0 Optimized AAM_Core_API::getOption call
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public static function storeCompletedScript($file_name)
     {
-        $completed   = AAM_Core_API::getOption(self::DB_OPTION, array());
+        $completed   = AAM_Core_API::getOption(self::DB_OPTION);
         $completed[] = $file_name;
 
         return AAM_Core_API::updateOption(self::DB_OPTION, $completed);

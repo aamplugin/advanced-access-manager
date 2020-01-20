@@ -14,9 +14,6 @@
         <testsuite name="Services">
             <directory suffix="Test.php">./tests/Service</directory>
         </testsuite>
-        <testsuite name="Policy">
-            <directory suffix="Test.php">./tests/Service/AccessPolicy</directory>
-        </testsuite>
         <testsuite name="Addons">
             <directory suffix="Test.php">./tests/Addon</directory>
         </testsuite>

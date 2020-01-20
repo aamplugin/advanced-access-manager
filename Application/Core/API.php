@@ -10,13 +10,14 @@
 /**
  * AAM core API
  *
+ * @since 6.3.0 Optimized for Multisite setup
  * @since 6.2.2 Minor refactoring to the clearSettings method
  * @since 6.0.5 Fixed bug with getOption method where incorrect type could be
  *              returned
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.3.0
  */
 final class AAM_Core_API
 {
@@ -30,57 +31,24 @@ final class AAM_Core_API
      *
      * @return mixed
      *
+     * @since 6.3.0 Optimized for Multisite setup
      * @since 6.0.5 Fixed the bug where option may not be returned as proper type
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.5
+     * @version 6.3.0
      */
-    public static function getOption($option, $default = null, $blog_id = null)
+    public static function getOption($option, $default = array(), $blog_id = null)
     {
         if (is_multisite()) {
-            if (is_null($blog_id) || get_current_blog_id() === $blog_id) {
-                $response = self::getCachedOption($option, $default);
-            } else {
-                if ($blog_id === 'site') {
-                    $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
-                } else {
-                    $blog = $blog_id;
-                }
-                $response = get_blog_option($blog, $option, $default);
-            }
+            $result = get_blog_option(
+                ($blog_id ? $blog_id : get_current_blog_id()), $option, $default
+            );
         } else {
-            $response = self::getCachedOption($option, $default);
+            $result = get_option($option, $default);
         }
 
-        return maybe_unserialize($response);
-    }
-
-    /**
-     * Get cached option
-     *
-     * This reduces the number of DB queries
-     *
-     * @param string $option
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected static function getCachedOption($option, $default)
-    {
-        $response = $default;
-        $cache    = wp_cache_get('alloptions', 'options');
-
-        if (empty($cache)) {
-            $response = get_option($option, $default);
-        } elseif(isset($cache[$option])) {
-            $response = maybe_unserialize($cache[$option]);
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -92,26 +60,23 @@ final class AAM_Core_API
      *
      * @return bool
      *
+     * @since 6.3.0 Optimized for Multisite setup
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
-    public static function updateOption(
-        $option, $data, $blog_id = null, $autoload = null
-    ) {
+    public static function updateOption($option, $data, $blog_id = null)
+    {
         if (is_multisite()) {
-            if (is_null($blog_id)) {
-                $blog = get_current_blog_id();
-            } elseif ($blog_id === 'site') {
-                $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
-            } else {
-                $blog = $blog_id;
-            }
-            $response = update_blog_option($blog, $option, $data);
+            $result = update_blog_option(
+                ($blog_id ? $blog_id : get_current_blog_id()), $option, $data
+            );
         } else {
-            $response = update_option($option, $data, $autoload);
+            $result = update_option($option, $data);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -122,25 +87,23 @@ final class AAM_Core_API
      *
      * @return bool
      *
+     * @since 6.3.0 Optimized for Multisite setup
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public static function deleteOption($option, $blog_id = null)
     {
         if (is_multisite()) {
-            if (is_null($blog_id)) {
-                $blog = get_current_blog_id();
-            } elseif ($blog_id == 'site') {
-                $blog = (defined('SITE_ID_CURRENT_SITE') ? SITE_ID_CURRENT_SITE : 1);
-            } else {
-                $blog = $blog_id;
-            }
-            $response = delete_blog_option($blog, $option);
+            $result = delete_blog_option(
+                ($blog_id ? $blog_id : get_current_blog_id()), $option
+            );
         } else {
-            $response = delete_option($option);
+            $result = delete_option($option);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -276,7 +239,9 @@ final class AAM_Core_API
             AAM_Core_AccessSettings::DB_OPTION,
             AAM_Core_Config::DB_OPTION,
             AAM_Core_ConfigPress::DB_OPTION,
-            AAM_Core_Migration::DB_OPTION
+            AAM_Core_Migration::DB_OPTION,
+            AAM_Service_AdminMenu::CACHE_DB_OPTION,
+            AAM_Service_Toolbar::DB_OPTION
         );
 
         foreach($options as $option) {
