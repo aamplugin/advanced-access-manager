@@ -10,12 +10,14 @@
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.3.0 Fixed bug with PHP noticed that was triggered if password was not
+ *              defined
  * @since 6.2.0 Added more granular control over the HIDDEN access option
  * @since 6.0.3 Allowed to manage access to ALL registered post types
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.3.0
  */
 class AAM_Backend_Feature_Main_Post
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -262,11 +264,12 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return string
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/31
      * @since 6.2.0 Added HIDDEN preview value
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.3.0
      */
     protected function getPreviewValue($option, $value)
     {
@@ -288,7 +291,7 @@ class AAM_Backend_Feature_Main_Post
                 break;
 
             case 'protected':
-                $preview = $value['password'];
+                $preview = (!empty($value['password']) ? $value['password'] : '');
                 break;
 
             case 'ceased':

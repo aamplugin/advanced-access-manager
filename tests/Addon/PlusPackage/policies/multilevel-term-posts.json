@@ -1,0 +1,14 @@
+{
+    "Version": "1.0.0",
+    "Dependency": {
+        "wordpress": ">=5.3.2",
+        "advanced-access-manager": ">=6.2.2"
+    },
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Term:category:level-1:posts",
+            "Action": "List"
+        }
+    ]
+}
