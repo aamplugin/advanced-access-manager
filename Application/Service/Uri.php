@@ -5,15 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * URI access service
  *
+ * @since 6.3.0 Fixed bug that causes PHP Notice if URI has not base
+ *              (e.g.`?something=1`)
+ * @since 6.1.0 The `authorizeUri` returns true if no match found
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.3.0
  */
 class AAM_Service_Uri
 {
@@ -82,11 +85,12 @@ class AAM_Service_Uri
      *
      * @return boolean
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/18
      * @since 6.1.0 The method return boolean `true` if no matches found
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.3.0
      */
     public function authorizeUri()
     {
@@ -98,7 +102,11 @@ class AAM_Service_Uri
             parse_str($uri['query'], $params);
         }
 
-        if ($match = $object->findMatch($uri['path'], $params)) {
+        // Get base path from URL
+        $path  = (isset($uri['path']) ? $uri['path'] : null);
+        $match = (!empty($path) ? $object->findMatch($path, $params) : false);
+
+        if (!empty($match)) {
             if ($match['type'] !== 'allow') {
                 AAM_Core_Redirect::execute(
                     $match['type'],
