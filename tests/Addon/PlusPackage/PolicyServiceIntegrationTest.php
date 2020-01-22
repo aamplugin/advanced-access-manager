@@ -190,4 +190,31 @@ class PolicyServiceIntegrationTest extends TestCase
         AAM_Core_Policy_Factory::reset();
     }
 
+    /**
+     * Test multi-level category hierarchy
+     *
+     * Assuming that we have Level 1/Level 2/Level 3 categories and settings are
+     * propagated corrected down the chain and hide all the posts
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.3.0
+     */
+    public function testMultilevelCategoryIntegration()
+    {
+        $this->preparePlayground('multilevel-term-posts');
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => 100,
+            'cache_results'    => false,
+            'suppress_filters' => false
+        ));
+
+        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_1_POST_ID, $posts));
+        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_2_POST_ID, $posts));
+    }
+
 }
