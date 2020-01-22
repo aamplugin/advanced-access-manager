@@ -10,11 +10,12 @@
 /**
  * URI object
  *
+ * @since 6.3.0 Fixed bug where home page could not be protected
  * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.3.0
  */
 class AAM_Core_Object_Uri extends AAM_Core_Object
 {
@@ -55,8 +56,11 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
      *
      * @return null|array
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/17
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public function findMatch($s, $params = array())
     {
@@ -71,17 +75,22 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
             }
 
             // Normalize the search and target URIs
-            $s            = rtrim($s,  '/');
-            $meta['path'] = rtrim(isset($meta['path']) ? $meta['path'] : '', '/');
-            $regex        = '@^' . preg_quote($meta['path']) . '$@';
+            $s    = rtrim($s,  '/');
+            $path = rtrim(isset($meta['path']) ? $meta['path'] : '', '/');
 
-            // Perform the initial match for the base URI
-            $uri_matched = apply_filters(
-                'aam_uri_match_filter', preg_match($regex, $s), $uri, $s
-            );
+            // Check if two URIs are equal
+            $uri_matched = ($s === $path);
+
+            // If match already found, no need to do additional checks
+            if ($uri_matched === false) {
+                $uri_matched = apply_filters(
+                    'aam_uri_match_filter', false, $uri, $s
+                );
+            }
 
             // Perform the initial match for the query params if defined
-            $query_matched = empty($out) || (count(array_intersect_assoc($params, $out)) === count($out));
+            $same          = array_intersect_assoc($params, $out);
+            $query_matched = empty($out) || (count($same) === count($out));
 
             if ($uri_matched && $query_matched) {
                 $match = $rule;
