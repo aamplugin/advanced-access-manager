@@ -3675,9 +3675,10 @@
                     $('#uri-save-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        var uri = $('#uri-rule').val();
+                        var uri  = $('#uri-rule').val();
+                        var original = $(this).attr('data-original-uri');
                         var type = $('input[name="uri.access.type"]:checked').val();
-                        var val = $('#uri-access-deny-' + type + '-value').val();
+                        var val  = $('#uri-access-deny-' + type + '-value').val();
                         var code = $('#uri-access-deny-redirect-code-value').val();
 
                         if (uri && type) {
@@ -3691,6 +3692,7 @@
                                     subject: getAAM().getSubject().type,
                                     subjectId: getAAM().getSubject().id,
                                     uri: uri,
+                                    edited_uri: original,
                                     type: type,
                                     value: val,
                                     code: code
@@ -3796,6 +3798,7 @@
                                 .bind('click', function () {
                                     $('.form-clearable', '#uri-model').val('');
                                     $('.aam-uri-access-action').hide();
+                                    $('#uri-save-btn').removeAttr('data-original-uri');
                                     $('input[type="radio"]', '#uri-model').prop('checked', false);
                                     $('#uri-model').modal('show');
                                 });
@@ -3815,6 +3818,7 @@
                                             $('.form-clearable', '#uri-model').val('');
                                             $('.aam-uri-access-action').hide();
                                             $('#uri-rule').val(data[0]);
+                                            $('#uri-save-btn').attr('data-original-uri', data[0]);
                                             $('input[value="' + data[1] + '"]', '#uri-model').prop('checked', true).trigger('click');
                                             $('#uri-access-deny-' + data[1] + '-value').val(data[2]);
                                             $('#uri-access-deny-redirect-code-value').val(data[3]);

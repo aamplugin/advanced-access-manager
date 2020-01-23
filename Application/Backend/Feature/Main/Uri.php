@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * URI service
  *
+ * @since 6.3.0 Fixed bug with incorrectly handled record editing
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.3.0
  */
 class AAM_Backend_Feature_Main_Uri
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -80,17 +81,27 @@ class AAM_Backend_Feature_Main_Uri
      *
      * @return string
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/35
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public function save()
     {
-        $uri   = str_replace(site_url(), '', $this->getFromPost('uri'));
-        $type  = $this->getFromPost('type');
-        $value = $this->getFromPost('value');
-        $code  = $this->getFromPost('code');
+        $uri    = str_replace(site_url(), '', $this->getFromPost('uri'));
+        $edited = $this->getFromPost('edited_uri');
+        $type   = $this->getFromPost('type');
+        $value  = $this->getFromPost('value');
+        $code   = $this->getFromPost('code');
 
         $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+
+        // If $edited is not empty, then we actually editing existing record. In this
+        // case let's delete it and insert new record after that
+        if (!empty($edited) && $object->has($edited)) {
+            $object->delete($edited);
+        }
 
         $result = $object->updateOptionItem($uri, array(
             'type'   => $type,
@@ -111,11 +122,11 @@ class AAM_Backend_Feature_Main_Uri
      */
     public function delete()
     {
-        $uri     = filter_input(INPUT_POST, 'uri');
         $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+        $result = $object->delete($this->getFromPost('uri'));
 
         return wp_json_encode(
-            array('status' => ($object->delete($uri) ? 'success' : 'failure'))
+            array('status' => ($result ? 'success' : 'failure'))
         );
     }
 

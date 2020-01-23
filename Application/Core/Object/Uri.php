@@ -101,26 +101,51 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     }
 
     /**
+     * Check if exact URI is defined
+     *
+     * @param string  $uri
+     * @param boolean $explicit
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.3.0
+     */
+    public function has($uri, $explicit = true)
+    {
+        if ($explicit) {
+            $option = $this->getExplicitOption();
+        } else {
+            $option = $this->getOption();
+        }
+
+        return isset($option[$uri]);
+    }
+
+    /**
      * Delete specified URI rule
      *
      * @param string $uri
      *
      * @return boolean
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/35
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public function delete($uri)
     {
-        $option = $this->getOption();
+        $option = $this->getExplicitOption();
 
         if (isset($option[$uri])) {
             unset($option[$uri]);
 
-            $this->setOption($option);
+            $this->setExplicitOption($option);
 
             $result = $this->getSubject()->updateOption(
-                $this->getOption(), self::OBJECT_TYPE
+                $this->getExplicitOption(), self::OBJECT_TYPE
             );
         }
 
