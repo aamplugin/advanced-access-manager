@@ -10,11 +10,13 @@
 /**
  * JWT Token service
  *
+ * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
+ *              status through `rest_authentication_errors` filter
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.3.0
  */
 class AAM_Service_Jwt
 {
@@ -78,8 +80,11 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/25
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.3.0
      */
     protected function initializeHooks()
     {
@@ -118,9 +123,6 @@ class AAM_Service_Jwt
 
         // WP Core current user definition
         add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
-
-        // Disable WP Core cookie and nonce checks to allow JWT authentication
-        add_filter('rest_authentication_errors', '__return_false', PHP_INT_MAX);
 
         // Delete JWT cookie if it is set
         add_action('wp_logout', function() {
@@ -524,7 +526,6 @@ class AAM_Service_Jwt
      */
     public function determineUser($userId)
     {
-
         if (empty($userId)) {
             $token = $this->extractToken();
 
