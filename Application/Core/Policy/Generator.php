@@ -10,11 +10,13 @@
 /**
  * AAM core policy generator
  *
+ * @since 6.3.0 Refactored post statement generation to cover the bug
+ *              https://github.com/aamplugin/advanced-access-manager/issues/22
  * @since 6.2.2 Fixed bug with incompatibility with PHP lower than 7.0.0
  * @since 6.2.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.3.0
  */
 class AAM_Core_Policy_Generator
 {
@@ -304,15 +306,20 @@ class AAM_Core_Policy_Generator
      *
      * @return array
      *
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
      * @since 6.2.2 Fixed bug that caused fatal error for PHP lower than 7.0.0
      * @since 6.2.0 Initial implementation of the method
      *
      * @access private
-     * @version 6.2.2
+     * @version 6.3.0
      */
     private function _convertToPostStatements($resource, $options)
     {
-        $allowed = $denied = $statements = array();
+        $tree = (object) array(
+            'allowed'    => array(),
+            'denied'     => array(),
+            'statements' => array()
+        );
 
         foreach($options as $option => $settings) {
             // Compute Effect property
@@ -362,11 +369,11 @@ class AAM_Core_Policy_Generator
                         $item['Condition']['Equals'] = $conditions;
                     }
 
-                    $statements[] = $item;
+                    $tree->statements[] = $item;
                     break;
 
                 case 'teaser':
-                    $statements[] = array(
+                    $tree->statements[] = array(
                         'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
                         'Action'   => 'Read',
                         'Resource' => $resource,
@@ -379,7 +386,7 @@ class AAM_Core_Policy_Generator
                     break;
 
                 case 'limited':
-                    $statements[] = array(
+                    $tree->statements[] = array(
                         'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
                         'Action'   => 'Read',
                         'Resource' => $resource,
@@ -405,8 +412,8 @@ class AAM_Core_Policy_Generator
                         $metadata['Callback'] = trim($settings['destination']);
                     }
 
-                    $statements[] = array(
-                        'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
+                    $tree->statements[] = array(
+                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
                         'Action'   => 'Read',
                         'Resource' => $resource,
                         'Metadata' => array(
@@ -416,7 +423,7 @@ class AAM_Core_Policy_Generator
                     break;
 
                 case 'protected':
-                    $statements[] = array(
+                    $tree->statements[] = array(
                         'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
                         'Action'   => 'Read',
                         'Resource' => $resource,
@@ -429,7 +436,7 @@ class AAM_Core_Policy_Generator
                     break;
 
                 case 'ceased':
-                    $statements[] = array(
+                    $tree->statements[] = array(
                         'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
                         'Action'   => 'Read',
                         'Resource' => $resource,
@@ -442,34 +449,42 @@ class AAM_Core_Policy_Generator
                     break;
 
                 default:
+                    do_action(
+                        'aam_post_option_to_policy_action',
+                        $resource,
+                        $option,
+                        $effect,
+                        $settings,
+                        $tree
+                    );
                     break;
             }
 
             if ($action !== null) {
                 if ($effect === 'allowed') {
-                    $allowed[] = $resource . ':' . $action;
+                    $tree->allowed[] = $resource . ':' . $action;
                 } else {
-                    $denied[] = $resource . ':' . $action;
+                    $tree->denied[] = $resource . ':' . $action;
                 }
             }
         }
 
-        // Finally prepare the statements
-        if (!empty($denied)) {
-            $statements[] = array(
+        // Finally prepare the consolidated statements
+        if (!empty($tree->denied)) {
+            $tree->statements[] = array(
                 'Effect'   => 'deny',
-                'Resource' => $denied
+                'Resource' => $tree->denied
             );
         }
 
-        if (!empty($allowed)) {
-            $statements[] = array(
+        if (!empty($tree->allowed)) {
+            $tree->statements[] = array(
                 'Effect'   => 'allow',
-                'Resource' => $allowed
+                'Resource' => $tree->allowed
             );
         }
 
-        return $statements;
+        return $tree->statements;
     }
 
     /**
