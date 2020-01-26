@@ -1,9 +1,10 @@
 <?php
     /**
+     * @since 6.3.0 Refactored to support https://github.com/aamplugin/advanced-access-manager/issues/27
      * @since 6.2.0 Added `aam_top_subject_actions_filter` hook
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.2.0
+     * @version 6.3.0
      * */
 ?>
 
@@ -12,9 +13,7 @@
         <div class="col-xs-12 col-md-8">
             <div class="aam-current-subject"></div>
             <div class="subject-top-actions">
-                <?php foreach(apply_filters('aam_top_subject_actions_filter', array()) as $action) { ?>
-                    <a href="#" id="<?php echo $action['id']; ?>" data-toggle="tooltip" title="<?php echo $action['tooltip']; ?>"><i class="<?php echo $action['icon']; ?>"></i></a>
-                <?php } ?>
+                <?php do_action('aam_top_subject_panel_action'); ?>
             </div>
         </div>
     </div>

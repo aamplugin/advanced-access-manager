@@ -124,16 +124,23 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.3.0 Enhanced per https://github.com/aamplugin/advanced-access-manager/issues/27
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.0
      */
     public function managePolicyContent($data)
     {
         if (isset($data['post_type']) && ($data['post_type'] === self::POLICY_CPT)) {
             $content = $this->getFromPost('aam-policy');
 
-            if (empty($data['post_content'])) {
-                $content = AAM_Backend_Feature_Main_Policy::getDefaultPolicy();
+            if (empty($content)) {
+                if (empty($data['post_content'])) {
+                    $content = AAM_Backend_Feature_Main_Policy::getDefaultPolicy();
+                } else {
+                    $content = $data['post_content'];
+                }
             }
 
             // Reformat the policy content

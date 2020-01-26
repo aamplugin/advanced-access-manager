@@ -1310,6 +1310,35 @@
 
             /**
              *
+             */
+            function generatePolicy(cb, create) {
+                $.ajax(getLocal().ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Main_Policy.generate',
+                        _ajax_nonce: getLocal().nonce,
+                        createNewPolicy: create,
+                        subject: getAAM().getSubject().type,
+                        subjectId: getAAM().getSubject().id
+                    },
+                    beforeSend: function () {
+                    },
+                    success: function (response) {
+                        cb(response);
+                    },
+                    complete: function() {
+                        $('i', '#policy-generator').attr('class', 'icon-file-code')
+                    }
+                });
+            }
+
+            /**
+             *
              * @returns {undefined}
              */
             function initialize() {
@@ -1593,12 +1622,26 @@
 
             // Generate Policy action
             $('#generate-access-policy').bind('click', function() {
-                const btn = $('i', this);
+                const btn = $('i', '#policy-generator');
 
                 btn.attr('class', 'icon-spin4 animate-spin');
-                getAAM().generatePolicy(function() {
-                    btn.attr('class', 'icon-file-code');
-                })
+                generatePolicy(function(response) {
+                    getAAM().downloadFile(
+                        response.policy,
+                        response.title + '.json',
+                        'application/json'
+                    )
+                }, false)
+            });
+
+            // Create new Policy action
+            $('#create-access-policy').bind('click', function() {
+                const btn = $('i', '#policy-generator');
+
+                btn.attr('class', 'icon-spin4 animate-spin');
+                generatePolicy(function(response) {
+                    window.open(response.redirect, '_blank');
+                }, true)
             });
 
             getAAM().addHook('init', initialize);
@@ -4696,38 +4739,6 @@
             this.queue.requests.shift().call(this);
         }
     };
-
-    /**
-     *
-     */
-    AAM.prototype.generatePolicy = function(cb) {
-        $.ajax(getLocal().ajaxurl, {
-            type: 'POST',
-            dataType: 'json',
-            headers: {
-                "Accept": "application/json"
-            },
-            data: {
-                action: 'aam',
-                sub_action: 'Main_Policy.generate',
-                _ajax_nonce: getLocal().nonce,
-                subject: getAAM().getSubject().type,
-                subjectId: getAAM().getSubject().id
-            },
-            beforeSend: function () {
-            },
-            success: function (response) {
-                getAAM().downloadFile(
-                    response.policy,
-                    response.title + '.json',
-                    'application/json'
-                )
-            },
-            complete: function() {
-                cb();
-            }
-        });
-    }
 
     /**
      *
