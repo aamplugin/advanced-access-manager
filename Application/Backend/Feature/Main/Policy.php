@@ -10,6 +10,8 @@
 /**
  * Access Policy UI manager
  *
+ * @since 6.3.0 Enhanced service to be able to generate policy into new policy
+ *              post type record
  * @since 6.2.2 Integration with multisite network where user is allowed to manage
  *              policies only on the main site if Multiste Sync Settings is enabled
  * @since 6.2.0 Added ability to generate Access Policy
@@ -17,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.3.0
  */
 class AAM_Backend_Feature_Main_Policy
 extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -51,13 +53,14 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return void
      *
+     * @since 6.3.0 Enhanced per https://github.com/aamplugin/advanced-access-manager/issues/27
      * @since 6.2.0 Registering a new action to allow the Access Policy generation
      * @since 6.1.0 Fixed the bug where "Attach to Default" button was not showing at
      *              all
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.0
+     * @version 6.3.0
      */
     public function __construct()
     {
@@ -86,6 +89,10 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
 
             return $content;
         }, 10, 2);
+
+        add_action('aam_top_subject_panel_action', function() {
+            echo AAM_Backend_View::loadPartial('access-policy-action');
+        });
 
         // Hook into Users/Roles Manager and add new action
         if (current_user_can(AAM_Backend_Feature_Main_Policy::ACCESS_CAPABILITY)) {
@@ -329,8 +336,11 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return string
      *
+     * @since 6.3.0 Enhanced per https://github.com/aamplugin/advanced-access-manager/issues/27
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.2.0
+     * @version 6.3.0
      */
     public function generate()
     {
@@ -348,10 +358,26 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
             $title = 'Policy for everybody';
         }
 
-        return wp_json_encode(array(
-            'title'  => $title,
-            'policy' => base64_encode($generator->generate())
-        ));
+        $create = $this->getFromPost('createNewPolicy', FILTER_VALIDATE_BOOLEAN);
+        $policy = $generator->generate();
+
+        if ($create) {
+            $id = wp_insert_post(array(
+                'post_type'    => AAM_Service_AccessPolicy::POLICY_CPT,
+                'post_content' => $policy,
+                'post_title'   => $title,
+                'post_status'  => 'publish'
+            ));
+
+            $response = array('redirect' => get_edit_post_link($id, 'link'));
+        } else {
+            $response = array(
+                'title'  => $title,
+                'policy' => base64_encode($policy)
+            );
+        }
+
+        return wp_json_encode($response);
     }
 
     /**
