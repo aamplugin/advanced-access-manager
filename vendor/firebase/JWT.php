@@ -77,14 +77,14 @@ class JWT
         if (count($tks) != 3) {
             throw new UnexpectedValueException('Wrong number of segments');
         }
-        list($headb64, $bodyb64, $cryptob64) = $tks;
-        if (null === ($header = static::jsonDecode(static::urlsafeB64Decode($headb64)))) {
+
+        if (null === ($header = static::jsonDecode(static::urlsafeB64Decode($tks[0])))) {
             throw new UnexpectedValueException('Invalid header encoding');
         }
-        if (null === $payload = static::jsonDecode(static::urlsafeB64Decode($bodyb64))) {
+        if (null === $payload = static::jsonDecode(static::urlsafeB64Decode($tks[1]))) {
             throw new UnexpectedValueException('Invalid claims encoding');
         }
-        if (false === ($sig = static::urlsafeB64Decode($cryptob64))) {
+        if (false === ($sig = static::urlsafeB64Decode($tks[2]))) {
             throw new UnexpectedValueException('Invalid signature encoding');
         }
         if (empty($header->alg)) {
@@ -108,7 +108,7 @@ class JWT
         }
 
         // Check the signature
-        if (!static::verify("$headb64.$bodyb64", $sig, $key, $header->alg)) {
+        if (!static::verify("{$tks[0]}.{$tks[1]}", $sig, $key, $header->alg)) {
             throw new SignatureInvalidException('Signature verification failed');
         }
 
@@ -193,7 +193,10 @@ class JWT
         if (empty(static::$supported_algs[$alg])) {
             throw new DomainException('Algorithm not supported');
         }
-        list($function, $algorithm) = static::$supported_algs[$alg];
+
+        $function  = static::$supported_algs[$alg][0];
+        $algorithm = static::$supported_algs[$alg][1];
+
         switch($function) {
             case 'hash_hmac':
                 return hash_hmac($algorithm, $msg, $key, true);
@@ -229,7 +232,9 @@ class JWT
             throw new DomainException('Algorithm not supported');
         }
 
-        list($function, $algorithm) = static::$supported_algs[$alg];
+        $function  = static::$supported_algs[$alg][0];
+        $algorithm = static::$supported_algs[$alg][1];
+
         switch($function) {
             case 'openssl':
                 $success = openssl_verify($msg, $signature, $key, $algorithm);

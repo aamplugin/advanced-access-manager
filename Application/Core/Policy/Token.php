@@ -328,14 +328,17 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.3.0 Fixed potential bug https://github.com/aamplugin/advanced-access-manager/issues/38
+     * @since 6.2.1 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.2.1
+     * @version 6.3.0
      */
     protected static function getPolicyMeta($meta)
     {
-        list($policyId, $param) = explode('.', $meta, 2);
+        $parts = explode('.', $meta, 2);
 
-        return get_post_meta($policyId, $param, true);
+        return get_post_meta(intval($parts[0]), $parts[1], true);
     }
 
     /**

@@ -158,8 +158,11 @@ class AAM_Shortcode_Handler_Content
      *
      * @return boolean
      *
+     * @since 6.3.0 Fixed potential bug https://github.com/aamplugin/advanced-access-manager/issues/38
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.3.0
      */
     protected function checkIP($ip, $userIp)
     {
@@ -170,8 +173,9 @@ class AAM_Shortcode_Handler_Content
 
         foreach ($ipSplit as $i => $group) {
             if (strpos($group, '-') !== false) { //range
-                list($start, $end) = explode('-', $group);
-                if ($uipSplit[$i] < $start || $uipSplit[$i] > $end) {
+                $parts = explode('-', $group);
+
+                if ($uipSplit[$i] < $parts[0] || $uipSplit[$i] > $parts[1]) {
                     $match = false;
                     break;
                 }

@@ -10,12 +10,13 @@
 /**
  * Access Policy service
  *
+ * @since 6.3.0 Removed dependency on PHP core `list` function
  * @since 6.2.0 Bug fixing and enhancements for the multisite support
  * @since 6.1.0 Changed the way access policy manager is obtained
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.3.0
  */
 class AAM_Service_AccessPolicy
 {
@@ -882,11 +883,12 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.3.0 Fixed potential bug https://github.com/aamplugin/advanced-access-manager/issues/38
      * @since 6.1.0 Changed the way access policy manage is obtained
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.3.0
      */
     public function filterPlugins($plugins)
     {
@@ -894,8 +896,8 @@ class AAM_Service_AccessPolicy
         $filtered = array();
 
         foreach($plugins as $id => $plugin) {
-            list($slug) = explode('/', $id);
-            $resource   = AAM_Core_Policy_Resource::PLUGIN . ":{$slug}:WP:list";
+            $parts    = explode('/', $id);
+            $resource = AAM_Core_Policy_Resource::PLUGIN . ":{$parts[0]}:WP:list";
 
             if ($manager->isAllowed($resource) !== false) {
                 $filtered[$id] = $plugin;
