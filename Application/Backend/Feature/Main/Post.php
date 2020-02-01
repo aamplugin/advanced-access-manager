@@ -10,6 +10,7 @@
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.3.1 Fixed bug with incorrectly escaped passwords and teaser messages
  * @since 6.3.0 Fixed bug with PHP noticed that was triggered if password was not
  *              defined
  * @since 6.2.0 Added more granular control over the HIDDEN access option
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.3.1
  */
 class AAM_Backend_Feature_Main_Post
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -532,16 +533,23 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return mixed
      *
+     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/42
      * @since 6.2.0 Added support for the new filter `aam_sanitize_post_value_filter`
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.3.1
      */
     protected function sanitizeOption($option, $value)
     {
         if (is_array($value)) {
-            $value['enabled'] = filter_var($value['enabled'], FILTER_VALIDATE_BOOLEAN);
+            foreach($value as $k => $v) {
+                if ($k === 'enabled') {
+                    $value[$k] = filter_var($v, FILTER_VALIDATE_BOOLEAN);
+                } else {
+                    $value[$k] = (is_numeric($v) ? intval($v) : stripslashes($v));
+                }
+            }
         } else { // Any scalar value has to be boolean
             $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }
