@@ -10,6 +10,7 @@
 /**
  * AAM core API
  *
+ * @since 6.3.1 Fixed bug with setting clearing
  * @since 6.3.0 Optimized for Multisite setup
  * @since 6.2.2 Minor refactoring to the clearSettings method
  * @since 6.0.5 Fixed bug with getOption method where incorrect type could be
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.3.1
  */
 final class AAM_Core_API
 {
@@ -227,19 +228,21 @@ final class AAM_Core_API
      *
      * @return void
      *
+     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/48
      * @since 6.2.2 Refactored the way we iterate over the deleting list of options
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.2
+     * @version 6.3.1
      */
     public static function clearSettings()
     {
+        global $wpdb;
+
         $options = array(
             AAM_Core_AccessSettings::DB_OPTION,
             AAM_Core_Config::DB_OPTION,
             AAM_Core_ConfigPress::DB_OPTION,
-            AAM_Core_Migration::DB_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
             AAM_Service_Toolbar::DB_OPTION
         );
@@ -247,6 +250,19 @@ final class AAM_Core_API
         foreach($options as $option) {
             self::deleteOption($option);
         }
+
+        // Delete all legacy options
+        $query  = "DELETE FROM {$wpdb->options} WHERE (`option_name` LIKE %s) AND ";
+        $query .= "(`option_name` NOT IN ('aam_addons', 'aam_migrations'))";
+        $wpdb->query($wpdb->prepare($query, 'aam%'));
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->postmeta} WHERE `meta_key` LIKE %s", 'aam-%'
+        ));
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s", 'aam%'
+        ));
 
         // Trigger the action to inform other services to clean-up the options
         do_action('aam_clear_settings_action', $options);
