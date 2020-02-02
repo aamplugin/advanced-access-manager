@@ -10,13 +10,16 @@
 /**
  * Access Policy service
  *
+ * @since 6.3.1 Fixed incompatibility with plugins that use WP_User::get_role_caps
+ *              method. This method re-index all user capabilities based on assigned
+ *              roles and that flushes capabilities attached with Access Policy
  * @since 6.3.0 Removed dependency on PHP core `list` function
  * @since 6.2.0 Bug fixing and enhancements for the multisite support
  * @since 6.1.0 Changed the way access policy manager is obtained
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.3.1
  */
 class AAM_Service_AccessPolicy
 {
@@ -579,13 +582,14 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/45
      * @since 6.1.0 Changed the way access policy manage is obtained
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
      * @link https://aamplugin.com/reference/policy#capability
      * @link https://aamplugin.com/reference/policy#role
-     * @version 6.1.0
+     * @version 6.3.1
      */
     public function initializeUser(AAM_Core_Subject_User $subject)
     {
@@ -631,12 +635,11 @@ class AAM_Service_AccessPolicy
 
         foreach($caps as $cap => $statement) {
             $effect = (strtolower($statement['Effect']) === 'allow' ? true : false);
+
             $wp_user->allcaps[$cap] = $effect;
 
             // Also update user's specific cap if exists
-            if (array_key_exists($cap, $wp_user->caps)) {
-                $wp_user->caps[$cap] = $effect;
-            }
+            $wp_user->caps[$cap] = $effect;
         }
 
         // Finally update user level
