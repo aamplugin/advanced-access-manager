@@ -10,6 +10,7 @@
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 6.3.1 Fixed bug where draft policies get applied to assignees
  * @since 6.2.1 Added support for the POLICY_META token
  * @since 6.2.0 Fetched the way access policies are fetched
  * @since 6.1.0 Implemented `=>` operator. Improved inheritance mechanism
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.1
+ * @version 6.3.1
  */
 class AAM_Core_Policy_Manager
 {
@@ -280,11 +281,12 @@ class AAM_Core_Policy_Manager
      *
      * @return void
      *
+     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/49
      * @since 6.2.0 Changed the way access policies are fetched
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.0
+     * @version 6.3.1
      */
     public function initialize()
     {
@@ -296,7 +298,10 @@ class AAM_Core_Policy_Manager
         // If there is at least one policy attached and it is published, then
         // parse into the tree
         if (count($ids)) {
-            $policies = $this->fetchPolicies(array('include' => array_keys($ids)));
+            $policies = $this->fetchPolicies(array(
+                'post_status' => array('publish'),
+                'include'     => array_keys($ids)
+            ));
 
             foreach ($policies as $policy) {
                 $this->updatePolicyTree($this->tree, $this->parsePolicy($policy));
