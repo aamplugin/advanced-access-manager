@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.3.2
-Stable tag: 6.3.0
+Stable tag: 6.3.1
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,14 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.3.1 =
+* Fixed Bug: Draft policy still applicable if attached to user or role [https://github.com/aamplugin/advanced-access-manager/issues/49](https://github.com/aamplugin/advanced-access-manager/issues/49)
+* Fixed Bug: Resetting all AAM settings still keep legacy settings in DB [https://github.com/aamplugin/advanced-access-manager/issues/48](https://github.com/aamplugin/advanced-access-manager/issues/48)
+* Fixed Bug: PHP Warning: Invalid argument supplied for foreach() in .../Repository.php on line 71 [https://github.com/aamplugin/advanced-access-manager/issues/47](https://github.com/aamplugin/advanced-access-manager/issues/47)
+* Fixed Bug: User's capabilities, populated through policy, are gone when rebased [https://github.com/aamplugin/advanced-access-manager/issues/45](https://github.com/aamplugin/advanced-access-manager/issues/45)
+* Fixed Bug: Cannot lock user with AAM UI [https://github.com/aamplugin/advanced-access-manager/issues/43](https://github.com/aamplugin/advanced-access-manager/issues/43)
+* Fixed Bug: Teaser Message modified with added backslashes to single and double quotes [https://github.com/aamplugin/advanced-access-manager/issues/42](https://github.com/aamplugin/advanced-access-manager/issues/42)
 
 = 6.3.0 =
 * Fixed Bug: PHP Notice about missing license key [https://github.com/aamplugin/advanced-access-manager/issues/12](https://github.com/aamplugin/advanced-access-manager/issues/12)
