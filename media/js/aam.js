@@ -579,7 +579,7 @@
                     data: {
                         action: 'aam',
                         // TODO: Refactor and move this to the SecureLogin service
-                        sub_action: 'Service.SecureLogin.toggleUserStatus',
+                        sub_action: 'Service_SecureLogin.toggleUserStatus',
                         _ajax_nonce: getLocal().nonce,
                         subject: 'user',
                         subjectId: id

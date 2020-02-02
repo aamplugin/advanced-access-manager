@@ -10,11 +10,12 @@
 /**
  * Secure Login service
  *
+ * @since 6.3.1 Fixed bug with not being able to lock user
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.3.1
  */
 class AAM_Service_SecureLogin
 {
@@ -392,12 +393,15 @@ class AAM_Service_SecureLogin
      *
      * @return mixed
      *
+     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/43
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.3.1
      */
     public function handleAjax($response, $user, $action)
     {
-        if ($action === 'Service.SecureLogin.toggleUserStatus') {
+        if ($action === 'Service_SecureLogin.toggleUserStatus') {
             $result   = $this->toggleUserStatus($user);
             $response = wp_json_encode(
                 array('status' => ($result ? 'success' : 'failure'))
