@@ -16,7 +16,6 @@ use AAM,
     AAM\UnitTest\Libs\AuthUserTrait,
     AAM\AddOn\PlusPackage\Object\Term,
     AAM\AddOn\PlusPackage\Object\Type,
-    AAM\AddOn\PlusPackage\Object\Taxonomy,
     AAM\AddOn\PlusPackage\Hooks\ContentHooks;
 
 /**
@@ -112,53 +111,6 @@ class ContentAccessTest extends TestCase
         );
 
         $this->assertTrue($post->is('hidden'));
-    }
-
-    /**
-     * Test access settings adjusting based on [ACTION]_OTHERS access option
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testAdjustedPostAccessSettings()
-    {
-        // Make other user as the owner of the post
-        wp_update_post(array(
-            'ID'          => AAM_UNITTEST_POST_ID,
-            'post_author' => AAM_UNITTEST_JOHN_ID
-        ));
-
-        $user   = AAM::getUser();
-        $object = $user->getObject(Type::OBJECT_TYPE, 'post');
-
-        foreach(array('edit', 'hidden', 'delete', 'publish', 'restricted') as $act) {
-            $object->updateOptionItem("post/{$act}_others", true);
-        }
-
-        // Check if save returns positive result
-        $this->assertTrue($object->save());
-
-        // Reset all internal cache
-        $this->_resetSubjects();
-        ContentHooks::bootstrap()->resetCache();
-
-        $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
-        );
-
-        $this->assertTrue($post->is('hidden'));
-        $this->assertTrue($post->is('restricted'));
-        $this->assertFalse($post->isAllowedTo('edit'));
-        $this->assertFalse($post->isAllowedTo('delete'));
-        $this->assertFalse($post->isAllowedTo('publish'));
-
-        // Reset back to the original author
-        wp_update_post(array(
-            'ID'          => AAM_UNITTEST_POST_ID,
-            'post_author' => AAM_UNITTEST_AUTH_USER_ID
-        ));
     }
 
     /**

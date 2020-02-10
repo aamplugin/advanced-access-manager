@@ -26,11 +26,12 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.3.2 Added new hook `aam_initialized_{$type}_object_filter`
  * @since 6.1.0 Fixed bug with incorrectly managed internal cache
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.3.2
  */
 abstract class AAM_Core_Subject
 {
@@ -276,12 +277,14 @@ abstract class AAM_Core_Subject
      *
      * @return AAM_Core_Object
      *
+     * @since 6.3.2 Added new hook `aam_initialized_{$type}_object_filter` to solve
+     *              https://github.com/aamplugin/advanced-access-manager/issues/52
      * @since 6.1.0 Fixed the bug where initialize object was not cached correctly
      *              due to $skipInheritance flag
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.3.2
      */
     public function getObject($type, $id = null, $skipInheritance = false)
     {
@@ -295,14 +298,10 @@ abstract class AAM_Core_Subject
             if (class_exists($class_name)) {
                 $object = new $class_name($this, $id, $skipInheritance);
             } else {
-                $object = null;
+                $object = apply_filters(
+                    'aam_object_filter', null, $this, $type, $id, $skipInheritance
+                );
             }
-
-            // Run the object through the filter so other plugins can attach to its
-            // initialization
-            $object = apply_filters(
-                'aam_object_filter', $object, $this, $type, $id, $skipInheritance
-            );
 
             if (is_a($object, 'AAM_Core_Object')) {
                 // Kick in the inheritance chain if needed
@@ -311,7 +310,9 @@ abstract class AAM_Core_Subject
                 }
 
                 // Finally cache the object
-                $this->_objects[$type . $id . $suffix] = $object;
+                $this->_objects[$type . $id . $suffix] = apply_filters(
+                    "aam_initialized_{$type}_object_filter", $object
+                );
             }
         } else {
             $object = $this->_objects[$type . $id . $suffix];
