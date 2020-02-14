@@ -100,8 +100,11 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.3.3 Enhancement for https://github.com/aamplugin/advanced-access-manager/issues/50
+     * @since 6.1.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.1.0
+     * @version 6.3.3
      */
     public static function getTokenValue($token, $args = array())
     {
@@ -117,7 +120,7 @@ class AAM_Core_Policy_Token
             $value = is_callable($parts[1]) ? call_user_func($parts[1], $args) : null;
         } else {
             $value = apply_filters(
-                'aam_get_policy_token_value_filter', $parts[0], $parts[1], $args
+                'aam_policy_token_value_filter', null, $parts[0], $parts[1], $args
             );
         }
 
