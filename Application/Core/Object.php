@@ -17,13 +17,14 @@
  * role or visitor. For example login, logout redirect, default category or access
  * denied redirect rules.
  *
+ * @since 6.3.3 Change visibility level for the setExplicitOption method
  * @since 6.1.0 Significant improvement to the inheritance mechanism. Documented
  *              the class
  * @since 6.0.5 Added `getExplicitOption` method
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.3.3
  */
 abstract class AAM_Core_Object
 {
@@ -406,10 +407,13 @@ abstract class AAM_Core_Object
      *
      * @return void
      *
+     * @since 6.3.3 Changed the method to be public
+     * @since 6.1.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.1.0
+     * @version 6.3.3
      */
-    protected function setExplicitOption($option)
+    public function setExplicitOption($option)
     {
         $this->_explicitOption = $option;
     }
