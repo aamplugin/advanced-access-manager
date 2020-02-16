@@ -386,7 +386,7 @@ class AAM_Service_Jwt
     public function prepareLoginResponse(array $response, WP_REST_Request $request)
     {
         if ($request->get_param('issueJWT') === true) {
-            $refreshable = $request->get_param('refreshableJWT') ??
+            $refreshable = $request->get_param('refreshableJWT') ?:
                 AAM_Core_Config::get('authentication.jwt.refreshable', false);
             $jwt = $this->issueToken($response['user']->ID, null, null, $refreshable);
 
