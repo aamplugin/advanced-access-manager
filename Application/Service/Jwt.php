@@ -115,6 +115,10 @@ class AAM_Service_Jwt
                 'description' => __('Issue JWT Token', AAM_KEY),
                 'type'        => 'boolean',
             );
+            $args['refreshableJWT'] = array(
+                'description' => __('Issue a refreshable JWT Token', AAM_KEY),
+                'type'        => 'boolean',
+            );
 
             return $args;
         });
@@ -382,7 +386,9 @@ class AAM_Service_Jwt
     public function prepareLoginResponse(array $response, WP_REST_Request $request)
     {
         if ($request->get_param('issueJWT') === true) {
-            $jwt = $this->issueToken($response['user']->ID);
+            $refreshable = $request->get_param('refreshableJWT') ?:
+                AAM_Core_Config::get('authentication.jwt.refreshable', false);
+            $jwt = $this->issueToken($response['user']->ID, null, null, $refreshable);
 
             $response['jwt'] = array(
                 'token'         => $jwt->token,
