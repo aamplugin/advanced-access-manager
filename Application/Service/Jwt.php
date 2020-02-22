@@ -10,13 +10,14 @@
 /**
  * JWT Token service
  *
+ * @since 6.4.0 Added the ability to issue refreshable token via API
  * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
  *              status through `rest_authentication_errors` filter
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.4.0
  */
 class AAM_Service_Jwt
 {
@@ -80,11 +81,12 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.4.0 Added the ability to issue refreshable token through API
      * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/25
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.3.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -380,14 +382,30 @@ class AAM_Service_Jwt
      *
      * @return array
      *
+     * @since 6.4.0 Added the ability to issue refreshable token
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.0
      */
     public function prepareLoginResponse(array $response, WP_REST_Request $request)
     {
         if ($request->get_param('issueJWT') === true) {
-            $refreshable = $request->get_param('refreshableJWT') ?:
-                AAM_Core_Config::get('authentication.jwt.refreshable', false);
+            $refreshable = $request->get_param('refreshableJWT');
+
+            if ($refreshable) {
+                $refreshable = user_can(
+                    $response['user']->ID, 'aam_issue_refreshable_jwt'
+                );
+
+                if ($refreshable === false) {
+                    throw new Exception(
+                        __('Current user is not allowed to issue refreshable JWT token', AAM_KEY),
+                        400
+                    );
+                }
+            }
+
             $jwt = $this->issueToken($response['user']->ID, null, null, $refreshable);
 
             $response['jwt'] = array(
