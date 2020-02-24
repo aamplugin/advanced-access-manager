@@ -10,12 +10,13 @@
 /**
  * AAM core service
  *
+ * @since 6.4.0 Added "Manage Access" toolbar item to single & multisite network
  * @since 6.0.5 Making sure that only if user is allowed to manage other users
  * @since 6.0.4 Bug fixing. Unwanted "Access Denied" metabox on the Your Profile page
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.5
+ * @version 6.4.0
  */
 class AAM_Service_Core
 {
@@ -34,6 +35,7 @@ class AAM_Service_Core
      *
      * @access protected
      *
+     * @since 6.4.0 Added "Manage Access" toolbar item
      * @since 6.0.5 Fixed bug when Access Manager metabox is rendered for users that
      *              have ability to manage other users
      * @since 6.0.4 Fixed bug when Access Manager metabox is rendered on profile edit
@@ -41,7 +43,7 @@ class AAM_Service_Core
      * @since 6.0.0 Initial implementation of the method
      *
      * @return void
-     * @version 6.0.5
+     * @version 6.4.0
      */
     protected function __construct()
     {
@@ -74,6 +76,48 @@ class AAM_Service_Core
                 AAM_Backend_Feature_Settings_Manager::register();
                 AAM_Backend_Feature_Addons_Manager::register();
             }, 1);
+        }
+
+        // Add toolbar "Manage Access" item
+        add_action('admin_bar_menu', function($wp_admin_bar) {
+            if (current_user_can('aam_manager')) {
+                $wp_admin_bar->add_menu(
+                    array(
+                        'parent' => 'site-name',
+                        'id'     => 'aam',
+                        'title'  => __('Manager Access', AAM_KEY),
+                        'href'   => admin_url('admin.php?page=aam'),
+                    )
+                );
+            }
+        }, 999);
+
+        // Add "Manage Access" to all sites if multisite network
+        if (is_multisite()) {
+            add_action('admin_bar_menu', function($wp_admin_bar) {
+                $blog_count = count($wp_admin_bar->user->blogs);
+
+                if (count($blog_count) > 0 || current_user_can('manage_network')) {
+                    foreach((array) $wp_admin_bar->user->blogs as $blog) {
+                        switch_to_blog($blog->userblog_id);
+
+                        $menu_id = 'blog-' . $blog->userblog_id;
+
+                        if (current_user_can('aam_manager')) {
+                            $wp_admin_bar->add_menu(
+                                array(
+                                    'parent' => $menu_id,
+                                    'id'     => $menu_id . '-aam',
+                                    'title'  => __('Manage Access', AAM_KEY),
+                                    'href'   => admin_url('admin.php?page=aam'),
+                                )
+                            );
+                        }
+
+                        restore_current_blog();
+                    }
+                }
+            }, 999);
         }
 
         // Check if user has ability to perform certain task based on provided
