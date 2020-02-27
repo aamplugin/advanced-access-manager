@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Metaboxes & Widgets service
  *
+ * @since 6.4.0 Made couple method protected
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 class AAM_Service_Metabox
 {
@@ -142,11 +143,14 @@ class AAM_Service_Metabox
      *
      * @param string $screen
      *
-     * @access public
+     * @since 6.4.0 Making the method protected
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
      * @global array $wp_meta_boxes
      * @version 6.0.0
      */
-    public function filterBackend($screen)
+    protected function filterBackend($screen)
     {
         global $wp_meta_boxes;
 
@@ -162,13 +166,16 @@ class AAM_Service_Metabox
     /**
      * Filter of widgets on the Appearance->Widgets screen
      *
-     * @access public
+     * @access protected
+     *
+     * @since 6.4.0 Making the method protected
+     * @since 6.0.0 Initial implementation of the method
      *
      * @return void
      * @global array $wp_registered_widgets
      * @version 6.0.0
      */
-    public function filterAppearanceWidgets()
+    protected function filterAppearanceWidgets()
     {
         global $wp_registered_widgets;
 

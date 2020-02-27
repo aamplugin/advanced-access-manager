@@ -10,6 +10,7 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
  * @since 6.1.0 Multiple bug fixed
  * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins
@@ -19,12 +20,21 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.4.0
  */
 class AAM_Service_Content
 {
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'content';
 
     /**
      * AAM configuration setting that is associated with the service
@@ -155,6 +165,7 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.1.0 Fixed the bug where `do_not_allow` capability was mapped to the
      *              list of post type capabilities
      * @since 6.0.2 Removed invocation for the pseudo-cap mapping for post types
@@ -162,7 +173,7 @@ class AAM_Service_Content
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.1.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -236,6 +247,9 @@ class AAM_Service_Content
                 }
             }
         }, 10, 2);
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**

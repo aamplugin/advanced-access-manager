@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Reusable elements for each service
  *
+ * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.0.0 Initial implementation of the service
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 trait AAM_Core_Contract_ServiceTrait
 {
@@ -27,6 +28,25 @@ trait AAM_Core_Contract_ServiceTrait
      * @version 6.0.0
      */
     protected static $instance = null;
+
+    /**
+     * Register service to be fetched
+     *
+     * @return null|object
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function registerService()
+    {
+        add_filter('aam_get_service_filter', function($service, $alias) {
+            if (empty($service) && ($alias === self::SERVICE_ALIAS)) {
+                $service = $this;
+            }
+
+            return $service;
+        }, 10, 2);
+    }
 
     /**
      * Bootstrap the service

@@ -5,20 +5,30 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Access Denied Redirect service
  *
+ * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 class AAM_Service_DeniedRedirect
 {
 
     use AAM_Core_Contract_ServiceTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'access-denied-redirect';
 
     /**
      * AAM configuration setting that is associated with the service
@@ -108,8 +118,11 @@ class AAM_Service_DeniedRedirect
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -119,6 +132,9 @@ class AAM_Service_DeniedRedirect
 
             return array($service, 'processDie');
         }, PHP_INT_MAX - 1);
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**

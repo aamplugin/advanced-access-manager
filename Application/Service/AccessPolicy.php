@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.1 Fixed incompatibility with plugins that use WP_User::get_role_caps
  *              method. This method re-index all user capabilities based on assigned
  *              roles and that flushes capabilities attached with Access Policy
@@ -19,12 +20,21 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.1
+ * @version 6.4.0
  */
 class AAM_Service_AccessPolicy
 {
     use AAM_Core_Contract_ServiceTrait,
         AAM_Core_Contract_RequestTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'access-policy';
 
     /**
      * AAM configuration setting that is associated with the feature
@@ -169,13 +179,14 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.2.1 Access support for custom-fields
      * @since 6.2.0 Added new hook into Multisite service through `aam_allowed_site_filter`
      * @since 6.1.1 Refactored the way access policy is applied to object
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.1
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -245,6 +256,9 @@ class AAM_Service_AccessPolicy
 
             return $manager->isAllowed('SITE:' . get_current_blog_id()) !== false;
         });
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**

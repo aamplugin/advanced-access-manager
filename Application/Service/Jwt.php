@@ -10,7 +10,8 @@
 /**
  * JWT Token service
  *
- * @since 6.4.0 Added the ability to issue refreshable token via API
+ * @since 6.4.0 Added the ability to issue refreshable token via API.
+ *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
  *              status through `rest_authentication_errors` filter
  * @since 6.1.0 Enriched error response with more details
@@ -23,6 +24,15 @@ class AAM_Service_Jwt
 {
     use AAM_Core_Contract_ServiceTrait,
         AAM_Core_Contract_RequestTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'jwt';
 
     /**
      * AAM configuration setting that is associated with the service
@@ -81,7 +91,8 @@ class AAM_Service_Jwt
      *
      * @return void
      *
-     * @since 6.4.0 Added the ability to issue refreshable token through API
+     * @since 6.4.0 Added the ability to issue refreshable token through API.
+     *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/25
      * @since 6.0.0 Initial implementation of the method
      *
@@ -147,6 +158,9 @@ class AAM_Service_Jwt
 
         // Fetch specific claim from the JWT token if present
         add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**

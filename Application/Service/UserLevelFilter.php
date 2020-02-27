@@ -5,19 +5,29 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * User Level Filter service
  *
+ * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 class AAM_Service_UserLevelFilter
 {
     use AAM_Core_Contract_ServiceTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'user-level';
 
     /**
      * AAM configuration setting that is associated with the service
@@ -61,8 +71,11 @@ class AAM_Service_UserLevelFilter
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -82,6 +95,9 @@ class AAM_Service_UserLevelFilter
         add_filter(
             'aam_user_can_manage_level_filter', array($this, 'isUserLevelAllowed'), 10, 2
         );
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**

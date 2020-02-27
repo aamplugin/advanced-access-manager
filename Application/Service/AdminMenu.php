@@ -5,19 +5,29 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Admin Menu service
  *
+ * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 class AAM_Service_AdminMenu
 {
     use AAM_Core_Contract_ServiceTrait;
+
+    /**
+     * Service alias
+     *
+     * Is used to get service instance if it is enabled
+     *
+     * @version 6.4.0
+     */
+    const SERVICE_ALIAS = 'admin-menu';
 
     /**
      * DB cache option
@@ -75,8 +85,11 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     public function initializeHooks()
     {
@@ -107,6 +120,9 @@ class AAM_Service_AdminMenu
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
             add_action('admin_init', array($this, 'checkScreenAccess'));
         }
+
+        // Service fetch
+        $this->registerService();
     }
 
     /**
