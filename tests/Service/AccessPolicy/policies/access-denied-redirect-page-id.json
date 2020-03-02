@@ -1,0 +1,18 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:access-denied:backend",
+            "Value": {
+                "Type": "page",
+                "Id": 2
+            }
+        },
+        {
+            "Key": "redirect:on:access-denied:frontend",
+            "Value": {
+                "Type": "page",
+                "Id": 2
+            }
+        }
+    ]
+}

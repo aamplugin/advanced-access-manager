@@ -1,0 +1,18 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:access-denied:backend",
+            "Value": {
+                "Type": "message",
+                "Message": "Backend Access Denied"
+            }
+        },
+        {
+            "Key": "redirect:on:access-denied:frontend",
+            "Value": {
+                "Type": "message",
+                "Message": "Frontend Access Denied"
+            }
+        }
+    ]
+}

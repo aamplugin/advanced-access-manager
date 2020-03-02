@@ -239,6 +239,9 @@ class AAM_Service_AccessPolicy
         add_filter('aam_uri_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_route_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
+        // Hooks to support all available Redirects
+        add_filter('aam_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
 
@@ -269,12 +272,13 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.4.0 Enhanced with redirects support
      * @since 6.2.0 Fixed bug when access policy was not applied to visitors
      * @since 6.1.1 Optimized policy implementation
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.0
+     * @version 6.4.0
      */
     public function applyAccessPolicyToObject($options, AAM_Core_Object $object)
     {
@@ -306,6 +310,10 @@ class AAM_Service_AccessPolicy
                     break;
                 case AAM_Core_Object_Route::OBJECT_TYPE:
                     $options = $this->initializeRoute($options, $object);
+                    break;
+
+                case AAM_Core_Object_Redirect::OBJECT_TYPE:
+                    $options = $this->initializeAccessDeniedRedirect($options);
                     break;
 
                 default:
@@ -565,6 +573,39 @@ class AAM_Service_AccessPolicy
     }
 
     /**
+     * Initialize Access Denied Redirect rules
+     *
+     * @param array $option
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function initializeAccessDeniedRedirect($option)
+    {
+        $manager = AAM::api()->getAccessPolicyManager();
+        $parsed  = array();
+        $params  = $manager->getParams('redirect:on:access-denied:(.*)');
+
+        foreach($params as $key => $param) {
+            $parts    = explode(':', $key);
+            $area     = array_pop($parts);
+            $value    = $this->convertRedirectAction($param['Value']);
+            $type     = (isset($value['type']) ? $value['type'] : 'default');
+
+            // Populate the object
+            $parsed["{$area}.redirect.type"]    = $type;
+
+            if (!empty($value['destination'])) {
+                $parsed["{$area}.redirect.{$type}"] = $value['destination'];
+            }
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
      * Check if specified action is allowed upon capability
      *
      * @param boolean $allowed
@@ -781,8 +822,11 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.4.0 Added support for the "Custom Message" redirect type
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     protected function convertRedirectAction($metadata)
     {
@@ -804,6 +848,8 @@ class AAM_Service_AccessPolicy
             $destination = $metadata['URL'];
         } elseif ($metadata['Type'] === 'callback') {
             $destination = $metadata['Callback'];
+        } elseif ($metadata['Type'] === 'message') {
+            $destination = $metadata['Message'];
         }
 
         $response['destination'] = $destination;

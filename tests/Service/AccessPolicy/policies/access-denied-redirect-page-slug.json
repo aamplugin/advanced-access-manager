@@ -1,0 +1,18 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:access-denied:backend",
+            "Value": {
+                "Type": "page",
+                "Slug": "sample-page"
+            }
+        },
+        {
+            "Key": "redirect:on:access-denied:frontend",
+            "Value": {
+                "Type": "page",
+                "Slug": "sample-page"
+            }
+        }
+    ]
+}

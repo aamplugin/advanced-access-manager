@@ -10,6 +10,7 @@
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 6.4.0 Supporting Param's "Value" to be an array
  * @since 6.3.1 Fixed bug where draft policies get applied to assignees
  * @since 6.2.1 Added support for the POLICY_META token
  * @since 6.2.0 Fetched the way access policies are fetched
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.1
+ * @version 6.4.0
  */
 class AAM_Core_Policy_Manager
 {
@@ -87,6 +88,9 @@ class AAM_Core_Policy_Manager
      *
      * @return mixed
      *
+     * @since 6.4.0 Supporting "Value" to be an array
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @version 6.0.0
      */
@@ -98,7 +102,9 @@ class AAM_Core_Policy_Manager
             $param = $this->tree['Param'][$id];
 
             if ($this->isApplicable($param, $args)) {
-                if (preg_match_all('/(\$\{[^}]+\})/', $param['Value'], $match)) {
+                if (is_scalar($param['Value'])
+                    && preg_match_all('/(\$\{[^}]+\})/', $param['Value'], $match)
+                ) {
                     $value = AAM_Core_Policy_Token::evaluate(
                         $param['Value'], $match[1]
                     );
@@ -421,12 +427,13 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.4.0 Supporting Param's Value to be more than just a scalar value
      * @since 6.2.1 Typecasting param's value
      * @since 6.1.0 Added support for the `=>` (map to) operator
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.1
+     * @version 6.4.0
      */
     protected function updatePolicyTree(&$tree, $addition)
     {
@@ -484,7 +491,11 @@ class AAM_Core_Policy_Manager
                 }
 
                 // If necessary typecast the params value
-                $param['Value'] = AAM_Core_Policy_Typecast::execute($param['Value']);
+                if (is_scalar($param['Value'])) {
+                    $param['Value'] = AAM_Core_Policy_Typecast::execute(
+                        $param['Value']
+                    );
+                }
 
                 if (!isset($params[$id]) || empty($params[$id]['Enforce'])) {
                     $params[$id] = $param;

@@ -1,0 +1,10 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:access-denied:frontend",
+            "Value": {
+                "Type": "login"
+            }
+        }
+    ]
+}

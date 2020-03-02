@@ -146,8 +146,11 @@ class AAM_Service_DeniedRedirect
      *
      * @return void
      *
+     * @since 6.4.0 Small refactoring to meet AAM coding standards
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.0
      */
     public function processDie($message, $title = '', $args = array())
     {
@@ -156,13 +159,11 @@ class AAM_Service_DeniedRedirect
             $isApi  = (defined('REST_REQUEST') && REST_REQUEST);
 
             if (($method !== 'POST') && !$isApi) {
-                if (is_admin()) {
-                    $area = 'backend';
-                } else {
-                    $area = 'frontend';
-                }
+                $area   = (is_admin() ? 'backend' : 'frontend');
+                $object = AAM::getUser()->getObject(
+                    AAM_Core_Object_Redirect::OBJECT_TYPE
+                );
 
-                $object = AAM::getUser()->getObject('redirect');
                 $type   = $object->get("{$area}.redirect.type", 'default');
 
                 AAM_Core_Redirect::execute(

@@ -18,6 +18,7 @@ use AAM,
     AAM_Core_Policy_Factory,
     AAM_Core_Object_Toolbar,
     AAM_Core_Object_Metabox,
+    AAM_Core_Object_Redirect,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM\UnitTest\Libs\AuthUserTrait;
@@ -345,6 +346,162 @@ class PolicyServiceIntegrationTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
 
         $this->assertTrue($object->isRestricted('RESTful', '/posts', 'GET'));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "default" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedDefaultRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-default');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'  => 'default',
+            'frontend.redirect.type' => 'default'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "message" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedMessageRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-message');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'     => 'message',
+            'backend.redirect.message'  => 'Backend Access Denied',
+            'frontend.redirect.type'    => 'message',
+            'frontend.redirect.message' => 'Frontend Access Denied',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "Page Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedPageIdRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-page-id');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'  => 'page',
+            'backend.redirect.page'  => 2,
+            'frontend.redirect.type' => 'page',
+            'frontend.redirect.page' => 2,
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "Page Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedPageSlugRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-page-slug');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'  => 'page',
+            'backend.redirect.page'  => 2,
+            'frontend.redirect.type' => 'page',
+            'frontend.redirect.page' => 2,
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "URL" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedUrlRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-url');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'  => 'url',
+            'backend.redirect.url'   => '/backend-page',
+            'frontend.redirect.type' => 'url',
+            'frontend.redirect.url'  => '/frontend-page',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "Login" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedLoginRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-login');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'frontend.redirect.type' => 'login'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Access Denied Redirect service and
+     * loads the "Callback" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testAccessDeniedCallbackRedirectIntegration()
+    {
+        $this->preparePlayground('access-denied-redirect-callback');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'backend.redirect.type'      => 'callback',
+            'backend.redirect.callback'  => 'backend_redirect',
+            'frontend.redirect.type'     => 'callback',
+            'frontend.redirect.callback' => 'frontend_redirect',
+        ));
     }
 
     /**

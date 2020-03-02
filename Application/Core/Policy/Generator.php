@@ -10,13 +10,14 @@
 /**
  * AAM core policy generator
  *
+ * @since 6.4.0 Enhanced with redirects params generation
  * @since 6.3.0 Refactored post statement generation to cover the bug
  *              https://github.com/aamplugin/advanced-access-manager/issues/22
  * @since 6.2.2 Fixed bug with incompatibility with PHP lower than 7.0.0
  * @since 6.2.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.4.0
  */
 class AAM_Core_Policy_Generator
 {
@@ -74,8 +75,11 @@ class AAM_Core_Policy_Generator
      *
      * @return string
      *
+     * @since 6.4.0 Enhanced with redirect rules generators
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.2.0
+     * @version 6.4.0
      */
     public function generate()
     {
@@ -125,6 +129,13 @@ class AAM_Core_Policy_Generator
                     $generated['Statement'] = array_merge(
                         $generated['Statement'],
                         $this->generateRouteStatements($data)
+                    );
+                    break;
+
+                case AAM_Core_Object_Redirect::OBJECT_TYPE:
+                    $generated['Param'] = array_merge(
+                        $generated['Param'],
+                        $this->generateAccessDeniedRedirectParams($data)
                     );
                     break;
 
@@ -240,6 +251,50 @@ class AAM_Core_Policy_Generator
         }
 
         return $this->_generateBasicStatements($normalized, 'Route');
+    }
+
+    /**
+     * Generate Access Denied Redirect params
+     *
+     * @param array $options
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function generateAccessDeniedRedirectParams($options)
+    {
+        $params = array();
+
+        foreach($options as $key => $val) {
+            $parts = explode('.', $key);
+
+            if ($parts[2] === 'type') {
+                $destination = $options["{$parts[0]}.redirect.{$val}"];
+
+                $value = array(
+                    'Type' => $val
+                );
+
+                if ($val === 'page') {
+                    $value['Id'] = intval($destination);
+                } elseif ($val  === 'url') {
+                    $value['URL'] = trim($destination);
+                } elseif ($val === 'callback') {
+                    $value['Callback'] = trim($destination);
+                } elseif ($val === 'message') {
+                    $value['Message'] = $destination;
+                }
+
+                $params[] = array(
+                    'Key'   => 'redirect:on:access-denied:' . $parts[0],
+                    'Value' => $value
+                );
+            }
+        }
+
+        return $params;
     }
 
     /**
