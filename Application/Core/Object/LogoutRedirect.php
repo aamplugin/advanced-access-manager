@@ -10,11 +10,12 @@
 /**
  * Logout redirect object
  *
+ * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/63
  * @since 6.1.0 Fixed bug with incorrectly merged settings
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.4.0
  */
 class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object
 {
@@ -28,7 +29,11 @@ class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.0.0
+     *
+     * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/63
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.4.0
      */
     protected function initialize()
     {
@@ -37,6 +42,12 @@ class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object
 
         // If options are defined, set the overwritten flag
         $this->determineOverwritten($option);
+
+        // Trigger custom functionality that may populate the redirect options. For
+        // example, this hooks is used by Access Policy service
+        $option = apply_filters(
+            'aam_logout_redirect_object_option_filter', $option, $this
+        );
 
         $this->setOption(is_array($option) ? $option : array());
     }

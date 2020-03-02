@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:logout",
+            "Value": {
+                "Type": "callback",
+                "Callback": "after_logout_redirect"
+            }
+        }
+    ]
+}

@@ -22,6 +22,7 @@ use AAM,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM_Core_Object_LoginRedirect,
+    AAM_Core_Object_LogoutRedirect,
     AAM\UnitTest\Libs\AuthUserTrait;
 
 /**
@@ -590,7 +591,7 @@ class PolicyServiceIntegrationTest extends TestCase
 
     /**
      * Test that access policy is integrated with Login Redirect service and
-     * loads the "Url" redirect correctly
+     * loads the "Callback" redirect correctly
      *
      * @return void
      *
@@ -606,6 +607,110 @@ class PolicyServiceIntegrationTest extends TestCase
         $this->assertEquals($object->getOption(), array(
             'login.redirect.type'     => 'callback',
             'login.redirect.callback' => 'after_login_redirect'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Logout Redirect service and
+     * loads the "Default" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLogoutDefaultRedirectIntegration()
+    {
+        $this->preparePlayground('logout-redirect-default');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'logout.redirect.type' => 'default',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Logout Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLogoutPageIdRedirectIntegration()
+    {
+        $this->preparePlayground('logout-redirect-page-id');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'logout.redirect.type' => 'page',
+            'logout.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLogoutPageSlugRedirectIntegration()
+    {
+        $this->preparePlayground('logout-redirect-page-slug');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'logout.redirect.type' => 'page',
+            'logout.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Logout Redirect service and
+     * loads the "Url" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLogoutUrlRedirectIntegration()
+    {
+        $this->preparePlayground('logout-redirect-url');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'logout.redirect.type' => 'url',
+            'logout.redirect.url'  => '/logout-redirect-page'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Logout Redirect service and
+     * loads the "Callback" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLogoutCallbackRedirectIntegration()
+    {
+        $this->preparePlayground('logout-redirect-callback');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'logout.redirect.type'     => 'callback',
+            'logout.redirect.callback' => 'after_logout_redirect'
         ));
     }
 

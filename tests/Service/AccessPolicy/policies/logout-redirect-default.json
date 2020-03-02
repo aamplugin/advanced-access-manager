@@ -1,0 +1,10 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:logout",
+            "Value": {
+                "Type": "default"
+            }
+        }
+    ]
+}

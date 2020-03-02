@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:logout",
+            "Value": {
+                "Type": "url",
+                "URL": "/logout-redirect-page"
+            }
+        }
+    ]
+}

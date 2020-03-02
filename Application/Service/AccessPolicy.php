@@ -180,6 +180,8 @@ class AAM_Service_AccessPolicy
      * @return void
      *
      * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     *              https://github.com/aamplugin/advanced-access-manager/issues/62
+     *              https://github.com/aamplugin/advanced-access-manager/issues/63
      * @since 6.2.1 Access support for custom-fields
      * @since 6.2.0 Added new hook into Multisite service through `aam_allowed_site_filter`
      * @since 6.1.1 Refactored the way access policy is applied to object
@@ -242,6 +244,7 @@ class AAM_Service_AccessPolicy
         // Hooks to support all available Redirects
         add_filter('aam_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_login_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_logout_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
@@ -320,6 +323,10 @@ class AAM_Service_AccessPolicy
 
                 case AAM_Core_Object_LoginRedirect::OBJECT_TYPE:
                     $options = $this->initializeRedirect($options, 'login', $subject);
+                    break;
+
+                case AAM_Core_Object_LogoutRedirect::OBJECT_TYPE:
+                    $options = $this->initializeRedirect($options, 'logout', $subject);
                     break;
 
                 default:
