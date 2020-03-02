@@ -21,6 +21,7 @@ use AAM,
     AAM_Core_Object_Redirect,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
+    AAM_Core_Object_LoginRedirect,
     AAM\UnitTest\Libs\AuthUserTrait;
 
 /**
@@ -501,6 +502,110 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.callback'  => 'backend_redirect',
             'frontend.redirect.type'     => 'callback',
             'frontend.redirect.callback' => 'frontend_redirect',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Default" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLoginDefaultRedirectIntegration()
+    {
+        $this->preparePlayground('login-redirect-default');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'login.redirect.type' => 'default',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLoginPageIdRedirectIntegration()
+    {
+        $this->preparePlayground('login-redirect-page-id');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'login.redirect.type' => 'page',
+            'login.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLoginPageSlugRedirectIntegration()
+    {
+        $this->preparePlayground('login-redirect-page-slug');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'login.redirect.type' => 'page',
+            'login.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Url" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLoginUrlRedirectIntegration()
+    {
+        $this->preparePlayground('login-redirect-url');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'login.redirect.type' => 'url',
+            'login.redirect.url'  => '/login-redirect-page'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with Login Redirect service and
+     * loads the "Url" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testLoginCallbackRedirectIntegration()
+    {
+        $this->preparePlayground('login-redirect-callback');
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
+
+        $this->assertEquals($object->getOption(), array(
+            'login.redirect.type'     => 'callback',
+            'login.redirect.callback' => 'after_login_redirect'
         ));
     }
 

@@ -241,6 +241,7 @@ class AAM_Service_AccessPolicy
 
         // Hooks to support all available Redirects
         add_filter('aam_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_login_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
@@ -308,12 +309,17 @@ class AAM_Service_AccessPolicy
                 case AAM_Core_Object_Uri::OBJECT_TYPE:
                     $options = $this->initializeUri($options, $object);
                     break;
+
                 case AAM_Core_Object_Route::OBJECT_TYPE:
                     $options = $this->initializeRoute($options, $object);
                     break;
 
                 case AAM_Core_Object_Redirect::OBJECT_TYPE:
                     $options = $this->initializeAccessDeniedRedirect($options);
+                    break;
+
+                case AAM_Core_Object_LoginRedirect::OBJECT_TYPE:
+                    $options = $this->initializeRedirect($options, 'login', $subject);
                     break;
 
                 default:
@@ -599,6 +605,38 @@ class AAM_Service_AccessPolicy
 
             if (!empty($value['destination'])) {
                 $parsed["{$area}.redirect.{$type}"] = $value['destination'];
+            }
+        }
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Initialize Login/Logout/404 Redirect rules
+     *
+     * @param array  $option
+     * @param string $redirect_type
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function initializeRedirect($option, $redirect_type, $subject)
+    {
+        $manager = AAM::api()->getAccessPolicyManager($subject);
+        $parsed  = array();
+        $param   = $manager->getParam("redirect:on:{$redirect_type}");
+
+        if (!empty($param)) {
+            $value    = $this->convertRedirectAction($param);
+            $type     = (isset($value['type']) ? $value['type'] : 'default');
+
+            // Populate the object
+            $parsed["{$redirect_type}.redirect.type"]    = $type;
+
+            if (!empty($value['destination'])) {
+                $parsed["{$redirect_type}.redirect.{$type}"] = $value['destination'];
             }
         }
 

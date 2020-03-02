@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:login",
+            "Value": {
+                "Type": "url",
+                "URL": "/login-redirect-page"
+            }
+        }
+    ]
+}

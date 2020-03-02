@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:login",
+            "Value": {
+                "Type": "callback",
+                "Callback": "after_login_redirect"
+            }
+        }
+    ]
+}

@@ -139,6 +139,13 @@ class AAM_Core_Policy_Generator
                     );
                     break;
 
+                case AAM_Core_Object_LoginRedirect::OBJECT_TYPE:
+                    $generated['Param'] = array_merge(
+                        $generated['Param'],
+                        $this->generateLoginRedirectParams($data)
+                    );
+                    break;
+
                 default:
                     $generated = apply_filters(
                         'aam_generated_policy_filter',
@@ -289,6 +296,48 @@ class AAM_Core_Policy_Generator
 
                 $params[] = array(
                     'Key'   => 'redirect:on:access-denied:' . $parts[0],
+                    'Value' => $value
+                );
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * Generate Login Redirect params
+     *
+     * @param array $options
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function generateLoginRedirectParams($options)
+    {
+        $params = array();
+
+        foreach($options as $key => $val) {
+            $parts = explode('.', $key);
+
+            if ($parts[2] === 'type') {
+                $destination = $options["login.redirect.{$val}"];
+
+                $value = array(
+                    'Type' => $val
+                );
+
+                if ($val === 'page') {
+                    $value['Id'] = intval($destination);
+                } elseif ($val  === 'url') {
+                    $value['URL'] = trim($destination);
+                } elseif ($val === 'callback') {
+                    $value['Callback'] = trim($destination);
+                }
+
+                $params[] = array(
+                    'Key'   => 'redirect:on:login',
                     'Value' => $value
                 );
             }
