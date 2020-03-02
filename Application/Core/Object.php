@@ -453,6 +453,24 @@ abstract class AAM_Core_Object
     }
 
     /**
+     * Store access settings
+     *
+     * Facadę that combines explicit options update and persisting them in DB
+     *
+     * @param string $item
+     * @param mixed  $value
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function store($item, $value)
+    {
+        return static::updateOptionItem($item, $value)->save();
+    }
+
+    /**
      * Reset access settings
      *
      * @return boolean
@@ -466,6 +484,19 @@ abstract class AAM_Core_Object
             static::OBJECT_TYPE,
             $this->getId()
         );
+    }
+
+    /**
+     * Alias for the `getOption` method
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function toArray()
+    {
+        return $this->getOption();
     }
 
 }
