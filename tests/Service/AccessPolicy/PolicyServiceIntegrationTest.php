@@ -715,6 +715,120 @@ class PolicyServiceIntegrationTest extends TestCase
     }
 
     /**
+     * Test that access policy is integrated with Logout Redirect service and
+     * loads the "Default" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function test404DefaultRedirectIntegration()
+    {
+        $this->preparePlayground('404-redirect-default');
+
+        $object = AAM::getUser()->getObject(
+            \AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        );
+
+        $this->assertEquals($object->getOption(), array(
+            '404.redirect.type' => 'default',
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with 404 Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function test404PageIdRedirectIntegration()
+    {
+        $this->preparePlayground('404-redirect-page-id');
+
+        $object = AAM::getUser()->getObject(
+            \AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        );
+
+        $this->assertEquals($object->getOption(), array(
+            '404.redirect.type' => 'page',
+            '404.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with 404 Redirect service and
+     * loads the "Existing Page By Id" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function test404PageSlugRedirectIntegration()
+    {
+        $this->preparePlayground('404-redirect-page-slug');
+
+        $object = AAM::getUser()->getObject(
+            \AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        );
+
+        $this->assertEquals($object->getOption(), array(
+            '404.redirect.type' => 'page',
+            '404.redirect.page' => 2
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with 404 Redirect service and
+     * loads the "Url" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function test404UrlRedirectIntegration()
+    {
+        $this->preparePlayground('404-redirect-url');
+
+        $object = AAM::getUser()->getObject(
+            \AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        );
+
+        $this->assertEquals($object->getOption(), array(
+            '404.redirect.type' => 'url',
+            '404.redirect.url'  => '/404-redirect-page'
+        ));
+    }
+
+    /**
+     * Test that access policy is integrated with 404 Redirect service and
+     * loads the "Callback" redirect correctly
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function test404CallbackRedirectIntegration()
+    {
+        $this->preparePlayground('404-redirect-callback');
+
+        $object = AAM::getUser()->getObject(
+            \AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        );
+
+        $this->assertEquals($object->getOption(), array(
+            '404.redirect.type'     => 'callback',
+            '404.redirect.callback' => 'after_404_redirect'
+        ));
+    }
+
+    /**
      * Test ability to toggle the ability activate/deactivate individual plugin with
      * Access Policy
      *

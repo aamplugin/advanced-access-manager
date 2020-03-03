@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:404",
+            "Value": {
+                "Type": "url",
+                "URL": "/404-redirect-page"
+            }
+        }
+    ]
+}

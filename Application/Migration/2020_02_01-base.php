@@ -9,10 +9,14 @@
 
 namespace AAM\Migration;
 
-use AAM_Core_Contract_MigrationInterface;
+use AAM_Core_Migration,
+    AAM_Core_Contract_MigrationInterface;
 
 /**
  * This migration class that fixes potentially corrupted data with aam_addons option
+ *
+ * @since 6.4.0 Fixed bug with unsaved migration
+ * @since 6.3.1 Initial implementation of the method
  *
  * @package AAM
  * @version 6.3.1
@@ -22,6 +26,9 @@ class Migration631 implements AAM_Core_Contract_MigrationInterface
 
     /**
      * @inheritdoc
+     *
+     * @since 6.4.0 Fixed bug with unsaved migration
+     * @since 6.3.1 Initial implementation of the method
      *
      * @version 6.3.1
      */
@@ -37,6 +44,9 @@ class Migration631 implements AAM_Core_Contract_MigrationInterface
                 \AAM_Addon_Repository::DB_OPTION, $option, get_main_site_id()
             );
         }
+
+        // Finally store this script as completed
+        AAM_Core_Migration::storeCompletedScript(basename(__FILE__));
 
         return array('errors' => array());
     }

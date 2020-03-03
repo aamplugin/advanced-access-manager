@@ -245,6 +245,7 @@ class AAM_Service_AccessPolicy
         add_filter('aam_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_login_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_logout_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_404_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
@@ -327,6 +328,10 @@ class AAM_Service_AccessPolicy
 
                 case AAM_Core_Object_LogoutRedirect::OBJECT_TYPE:
                     $options = $this->initializeRedirect($options, 'logout', $subject);
+                    break;
+
+                case AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE:
+                    $options = $this->initializeRedirect($options, '404', $subject);
                     break;
 
                 default:

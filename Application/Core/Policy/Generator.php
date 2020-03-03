@@ -142,14 +142,21 @@ class AAM_Core_Policy_Generator
                 case AAM_Core_Object_LoginRedirect::OBJECT_TYPE:
                     $generated['Param'] = array_merge(
                         $generated['Param'],
-                        $this->generateLoginRedirectParams($data)
+                        $this->generateRedirectParams($data, 'login')
                     );
                     break;
 
                 case AAM_Core_Object_LogoutRedirect::OBJECT_TYPE:
                     $generated['Param'] = array_merge(
                         $generated['Param'],
-                        $this->generateLogoutRedirectParams($data)
+                        $this->generateRedirectParams($data, 'logout')
+                    );
+                    break;
+
+                case AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE:
+                    $generated['Param'] = array_merge(
+                        $generated['Param'],
+                        $this->generateRedirectParams($data, '404')
                     );
                     break;
 
@@ -312,16 +319,17 @@ class AAM_Core_Policy_Generator
     }
 
     /**
-     * Generate Login Redirect params
+     * Generate Login/Logout/404 Redirect params
      *
-     * @param array $options
+     * @param array  $options
+     * @param string $type
      *
      * @return array
      *
      * @access protected
      * @version 6.4.0
      */
-    protected function generateLoginRedirectParams($options)
+    protected function generateRedirectParams($options, $type)
     {
         $params = array();
 
@@ -329,7 +337,7 @@ class AAM_Core_Policy_Generator
             $parts = explode('.', $key);
 
             if ($parts[2] === 'type') {
-                $destination = $options["login.redirect.{$val}"];
+                $destination = $options["{$type}.redirect.{$val}"];
 
                 $value = array(
                     'Type' => $val
@@ -344,49 +352,7 @@ class AAM_Core_Policy_Generator
                 }
 
                 $params[] = array(
-                    'Key'   => 'redirect:on:login',
-                    'Value' => $value
-                );
-            }
-        }
-
-        return $params;
-    }
-
-    /**
-     * Generate Logout Redirect params
-     *
-     * @param array $options
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 6.4.0
-     */
-    protected function generateLogoutRedirectParams($options)
-    {
-        $params = array();
-
-        foreach($options as $key => $val) {
-            $parts = explode('.', $key);
-
-            if ($parts[2] === 'type') {
-                $destination = $options["logout.redirect.{$val}"];
-
-                $value = array(
-                    'Type' => $val
-                );
-
-                if ($val === 'page') {
-                    $value['Id'] = intval($destination);
-                } elseif ($val  === 'url') {
-                    $value['URL'] = trim($destination);
-                } elseif ($val === 'callback') {
-                    $value['Callback'] = trim($destination);
-                }
-
-                $params[] = array(
-                    'Key'   => 'redirect:on:logout',
+                    'Key'   => "redirect:on:{$type}",
                     'Value' => $value
                 );
             }

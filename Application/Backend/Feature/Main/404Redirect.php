@@ -5,12 +5,14 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend 404 redirect manager
+ *
+ * @since 6.4.0 Changed the way 404 settings are stored
+ *              https://github.com/aamplugin/advanced-access-manager/issues/64
+ * @since 6.0.0 Initial implementation of the method
  *
  * @package AAM
  * @version 6.0.0
@@ -18,8 +20,6 @@
 class AAM_Backend_Feature_Main_404Redirect
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Default access capability to the service
@@ -29,6 +29,13 @@ class AAM_Backend_Feature_Main_404Redirect
     const ACCESS_CAPABILITY = 'aam_manage_404_redirect';
 
     /**
+     * Type of AAM core object
+     *
+     * @version 6.4.0
+     */
+    const OBJECT_TYPE = AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE;
+
+    /**
      * HTML template to render
      *
      * @version 6.0.0
@@ -36,23 +43,22 @@ class AAM_Backend_Feature_Main_404Redirect
     const TEMPLATE = 'service/404redirect.php';
 
     /**
-     * Save 404 redirect options
+     * Get option value
      *
-     * @return string
+     * @param string $name
+     * @param mixed  $default
+     *
+     * @return mixed
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.0
      */
-    public function save()
+    public function getOption($name, $default = null)
     {
-        $param  = AAM_Core_Request::post('param');
-        $value  = $this->getFromPost('value');
+        $object = $this->getSubject()->getObject(self::OBJECT_TYPE);
+        $option = $object->getOption();
 
-        $result = AAM_Core_Config::set($param, $value);
-
-        return wp_json_encode(
-            array('status' => $result ? 'success' : 'failure')
-        );
+        return (!empty($option[$name]) ? $option[$name] : $default);
     }
 
     /**

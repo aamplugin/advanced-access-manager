@@ -1,0 +1,11 @@
+{
+    "Param": [
+        {
+            "Key": "redirect:on:404",
+            "Value": {
+                "Type": "callback",
+                "Callback": "after_404_redirect"
+            }
+        }
+    ]
+}

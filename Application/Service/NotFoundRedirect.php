@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * 404 redirect service
  *
+ * @since 6.4.0 Refactored to use 404 object instead of AAM config
+ * @since 6.0.0 Initial implementation of the service
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.4.0
  */
 class AAM_Service_NotFoundRedirect
 {
@@ -81,21 +82,32 @@ class AAM_Service_NotFoundRedirect
      *
      * @return void
      *
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/64
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @global WP_Post $post
-     * @version 6.0.0
+     * @version 6.4.0
      */
     public function wp()
     {
         global $wp_query;
 
         if ($wp_query->is_404) { // Handle 404 redirect
-            $type = AAM_Core_Config::get('frontend.404redirect.type', 'default');
+            $options = AAM::getUser()->getObject(
+                AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+            )->getOption();
+
+            if (isset($options['404.redirect.type'])) {
+                $type = $options['404.redirect.type'];
+            } else {
+                $type = 'default';
+            }
 
             if ($type !== 'default') {
                 AAM_Core_Redirect::execute(
                     $type,
-                    array($type => AAM_Core_Config::get("frontend.404redirect.{$type}"))
+                    array($type =>  $options["404.redirect.{$type}"])
                 );
             }
         }

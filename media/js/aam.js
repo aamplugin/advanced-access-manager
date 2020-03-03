@@ -3474,7 +3474,7 @@
              * @param {type} value
              * @returns {undefined}
              */
-            function save(param, value) {
+            function save(param, value, cb) {
                 getAAM().queueRequest(function () {
                     $.ajax(getLocal().ajaxurl, {
                         type: 'POST',
@@ -3487,6 +3487,11 @@
                             subjectId: getAAM().getSubject().id,
                             param: param,
                             value: value
+                        },
+                        success: function (response) {
+                            if (typeof cb === 'function') {
+                                cb(response);
+                            }
                         },
                         error: function () {
                             getAAM().notification('danger');
@@ -3506,13 +3511,21 @@
                     $('input[type="radio"]', container).each(function () {
                         $(this).bind('click', function () {
                             //hide group
-                            $('.aam-404redirect-action').hide();
+                            $('.404redirect-action').hide();
 
                             //show the specific one
                             $($(this).data('action')).show();
 
                             //save redirect type
-                            save($(this).attr('name'), $(this).val());
+                            save(
+                                $(this).attr('name'),
+                                $(this).val(),
+                                function (result) {
+                                    if (result.status === 'success') {
+                                        $('#aam-404redirect-overwrite').show();
+                                    }
+                                }
+                            );
                         });
                     });
 
@@ -3521,6 +3534,10 @@
                             //save redirect type
                             save($(this).attr('name'), $(this).val());
                         });
+                    });
+
+                    $('#404redirect-reset').bind('click', function () {
+                        getAAM().reset('Main_404Redirect.reset', $(this));
                     });
                 }
             }
