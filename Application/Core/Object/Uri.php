@@ -56,17 +56,18 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
      *
      * @return null|array
      *
-     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/17
+     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/77
+     * @since 6.3.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/17
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.4.0
      */
     public function findMatch($s, $params = array())
     {
         $match = null;
 
-        foreach ($this->getOption() as $uri => $rule) {
+        foreach ($this->normalizeOrder() as $uri => $rule) {
             $meta = wp_parse_url($uri);
             $out  = array();
 
@@ -185,6 +186,32 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
         }
 
         return $merged;
+    }
+
+    /**
+     * Sort rules in proper order
+     *
+     * Place all "allowed" rules in the end of the list to allow the ability to
+     * define whitelisted set of conditions
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function normalizeOrder()
+    {
+        $rules = $allowed = array();
+
+        foreach ($this->getOption() as $uri => $rule) {
+            if ($rule['type'] === 'allow') {
+                $allowed[$uri] = $rule;
+            } else {
+                $rules[$uri] = $rule;
+            }
+        }
+
+        return array_merge($rules, $allowed);
     }
 
 }

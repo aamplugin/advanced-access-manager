@@ -3765,6 +3765,7 @@
                                 success: function (response) {
                                     if (response.status === 'success') {
                                         $('#uri-list').DataTable().ajax.reload();
+                                        $('#aam-uri-overwrite').show();
                                     } else {
                                         getAAM().notification(
                                             'danger', getAAM().__('Failed to save URI rule')
@@ -3889,6 +3890,15 @@
                                         }));
                                         break;
 
+                                    case 'no-edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-muted'
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Inherited')
+                                        }));
+                                        break;
+
                                     case 'delete':
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-trash-empty text-danger'
@@ -3898,6 +3908,15 @@
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Delete Rule')
+                                        }));
+                                        break;
+
+                                    case 'no-delete':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-trash-empty text-muted'
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Inherited')
                                         }));
                                         break;
 

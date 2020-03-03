@@ -76,14 +76,50 @@ class UriAccessTest extends TestCase
     {
         $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
+        // Allow to only one specific URI
+        $this->assertTrue($object->updateOptionItem('/hello-world', array(
+            'type'   => 'allow',
+            'action' => null
+        ))->save());
+
         // Deny access ot the entire site
         $this->assertTrue($object->updateOptionItem('*', array(
             'type'   => 'default',
             'action' => null
         ))->save());
 
-        // Allow to only one specific URI
-        $this->assertTrue($object->updateOptionItem('/hello-world', array(
+        // Reset all internal cache
+        $this->_resetSubjects();
+
+        $match = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE)->findMatch(
+            '/hello-world'
+        );
+
+        $this->assertEquals($match['type'], 'allow');
+    }
+
+    /**
+     * Test the wild card override rule with reversed order
+     *
+     * Making sure that order of rules does not affect the outcome
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function testWildCardReverseOrderOverride()
+    {
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+
+        // Deny access ot the entire site
+        $this->assertTrue($object->updateOptionItem('*', array(
+            'type'   => 'default',
+            'action' => null
+        ))->save());
+
+         // Allow to only one specific URI
+         $this->assertTrue($object->updateOptionItem('/hello-world', array(
             'type'   => 'allow',
             'action' => null
         ))->save());
