@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.4.0 Added the ability to edit role's slug
+     * @since 6.0.0 Initial implementation of the template
+     *
+     * @version 6.4.0
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="modal fade" id="add-role-modal" tabindex="-1" role="dialog">
@@ -32,8 +39,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="new-role-name"><?php echo __('Role Name', AAM_KEY); ?></label>
+                        <label for="edit-role-name"><?php echo __('Role Name', AAM_KEY); ?></label>
                         <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" name="name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="new-role-slug"><?php echo __('Role Slug', AAM_KEY); ?></label>
+                        <input type="text" class="form-control" id="edit-role-slug" name="slug" />
+                        <small class="text-muted hint"><?php echo __('Can be changed if no users are assigned to role', AAM_KEY); ?></small>
                     </div>
                     <?php do_action('aam_edit_role_ui_action'); ?>
                 </div>

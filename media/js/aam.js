@@ -222,8 +222,15 @@
                                         resetForm('#edit-role-modal .modal-body');
                                         $('#edit-role-btn').data('role', data[0]);
                                         $('#edit-role-name').val(data[2]);
+                                        $('#edit-role-slug').val(data[0]);
                                         $('#edit-role-modal').modal('show');
                                         fetchRoleList(data[0]);
+
+                                        if (data[1] > 0) {
+                                            $('#edit-role-slug').prop('disabled', true);
+                                        } else {
+                                            $('#edit-role-slug').prop('disabled', false);
+                                        }
 
                                         //TODO - Rewrite JavaScript to support $.aam
                                         $.aamEditRole = data;
@@ -368,7 +375,7 @@
             $('#add-role-modal').on('shown.bs.modal', function (e) {
                 fetchRoleList();
                 //clear add role form first
-                $('input[name="name"]', '#add-role-modal').val('').focus();
+                $('input', '#add-role-modal').val('').focus();
             });
 
             $('#edit-role-modal').on('shown.bs.modal', function (e) {
@@ -439,6 +446,7 @@
                 var _this = this;
 
                 $('#edit-role-name').parent().removeClass('has-error');
+                $('#edit-role-slug').parent().removeClass('has-error');
 
                 var data = {
                     action: 'aam',
@@ -468,7 +476,7 @@
                         },
                         success: function (response) {
                             if (response.status === 'success') {
-                                $('#role-list').DataTable().ajax.reload();
+                                location.reload();
                             } else {
                                 getAAM().notification(
                                     'danger', getAAM().__('Failed to update role')
