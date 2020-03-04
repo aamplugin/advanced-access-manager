@@ -11,6 +11,7 @@
  * Access Policy service
  *
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ *              Added new hook `aam_post_read_action_conversion_filter`
  * @since 6.3.1 Fixed incompatibility with plugins that use WP_User::get_role_caps
  *              method. This method re-index all user capabilities based on assigned
  *              roles and that flushes capabilities attached with Access Policy
@@ -820,8 +821,12 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.4.0 Added `aam_post_read_action_conversion_filter` to support
+     *              https://github.com/aamplugin/advanced-access-manager/issues/68
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     protected function convertedPostReadAction(&$options, $statement, $ns = '')
     {
@@ -860,6 +865,10 @@ class AAM_Service_AccessPolicy
                     'threshold' => $metadata['Limited']['Threshold']
                 );
             }
+
+            $options = apply_filters(
+                'aam_post_read_action_conversion_filter', $options, $statement, $ns
+            );
         } else { // Simply restrict access to read a post
             $options[$ns . 'restricted'] = $effect;
         }
