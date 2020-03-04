@@ -1,10 +1,11 @@
 <?php
     /**
+     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/78
      * @since 6.2.0 Removed expiration date for license to avoid confusion
      * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.2.0
+     * @version 6.4.0
      * */
 ?>
 
@@ -61,7 +62,7 @@
                                         <?php } elseif (!empty($product['isActive'])) { ?>
                                             <a href="#" class="btn btn-sm btn-success btn-block disabled"><i class="icon-check"></i> <?php echo __('Active', AAM_KEY); ?></a>
                                         <?php } elseif (!empty($product['version'])) { ?>
-                                            <a href="#" class="btn btn-sm btn-default btn-block disabled"><i class="icon-info-circled"></i> <?php echo __('Inactive', AAM_KEY); ?></a>
+                                            <a href="#" class="btn btn-sm btn-info btn-block disabled"><i class="icon-info-circled"></i> <?php echo __('Inactive', AAM_KEY); ?></a>
                                         <?php } else { ?>
                                             <a href="<?php echo $product['url']; ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
                                         <?php } ?>
