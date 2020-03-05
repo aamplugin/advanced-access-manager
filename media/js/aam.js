@@ -1628,6 +1628,10 @@
                 }
             }
 
+            $('#policy-generator').tooltip({
+                container: 'body'
+            });
+
             // Generate Policy action
             $('#generate-access-policy').bind('click', function() {
                 const btn = $('i', '#policy-generator');
