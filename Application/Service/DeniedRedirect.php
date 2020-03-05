@@ -173,7 +173,13 @@ class AAM_Service_DeniedRedirect
                         );
 
                         if ($val === 'page') {
-                            $value['Id'] = intval($destination);
+                            $page = get_post($destination);
+
+                            if (is_a($page, 'WP_Post')) {
+                                $value['Slug'] = $page->post_name;
+                            } else{
+                                $value['Id'] = intval($destination);
+                            }
                         } elseif ($val  === 'url') {
                             $value['URL'] = trim($destination);
                         } elseif ($val === 'callback') {

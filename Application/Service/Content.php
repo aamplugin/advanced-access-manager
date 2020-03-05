@@ -286,12 +286,16 @@ class AAM_Service_Content
 
                 foreach($options as $id => $data) {
                     $parts    = explode('|', $id);
-                    $resource = "Post:{$parts[1]}:{$parts[0]}";
+                    $post     = get_post($parts[0]);
 
-                    $statements = array_merge(
-                        $statements,
-                        $this->_convertToPostStatements($resource, $data)
-                    );
+                    if (is_a($post, 'WP_Post')) {
+                        $resource = "Post:{$parts[1]}:{$post->post_name}";
+
+                        $statements = array_merge(
+                            $statements,
+                            $this->_convertToPostStatements($resource, $data)
+                        );
+                    }
                 }
 
                 $policy['Statement'] = array_merge($policy['Statement'], $statements);
