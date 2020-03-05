@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.3.2
-Stable tag: 6.3.3
+Stable tag: 6.4.0
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,33 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.4.0 =
+* Fixed Bug: URI Access: Changing existing URI rule puts it in the end of the list [https://github.com/aamplugin/advanced-access-manager/issues/74](https://github.com/aamplugin/advanced-access-manager/issues/74)
+* Fixed Bug: URI Access: Incorrect handling of the inherited rules [https://github.com/aamplugin/advanced-access-manager/issues/77](https://github.com/aamplugin/advanced-access-manager/issues/77)
+* Fixed Bug: CSS issue with add-on button when it is inactive [https://github.com/aamplugin/advanced-access-manager/issues/78](https://github.com/aamplugin/advanced-access-manager/issues/78)
+* Fixed Bug: IP Check add-on: Failure to delete rules [https://github.com/aamplugin/advanced-access-manager/issues/65](https://github.com/aamplugin/advanced-access-manager/issues/65)
+* Fixed Bug: IP Check add-on: Incorrectly evaluated multiple rules [https://github.com/aamplugin/advanced-access-manager/issues/66](https://github.com/aamplugin/advanced-access-manager/issues/66)
+* Fixed Bug: Plus Package add-on: Warning: Invalid argument supplied for foreach() in ...ContentHooks.php on line 800 [https://github.com/aamplugin/advanced-access-manager/issues/73](https://github.com/aamplugin/advanced-access-manager/issues/73)
+* Fixed Bug: Plus Package add-on: Terms & Taxonomies settings take effect when Post & Terms service is off [https://github.com/aamplugin/advanced-access-manager/issues/69](https://github.com/aamplugin/advanced-access-manager/issues/69)
+* Added New: Plus Package add-on: Support for the "ADD NEW" term access option to access policy [https://github.com/aamplugin/advanced-access-manager/issues/57](https://github.com/aamplugin/advanced-access-manager/issues/57)
+* Added New: Plus Package add-on: Wildcard support for the API Routes in access policies [https://github.com/aamplugin/advanced-access-manager/issues/56](https://github.com/aamplugin/advanced-access-manager/issues/56)
+* Added New: Plus Package add-on: More granular access to taxonomy/term visibility [https://github.com/aamplugin/advanced-access-manager/issues/54](https://github.com/aamplugin/advanced-access-manager/issues/54)
+* Added New: IP Check add-on: Integration with Access Policy [https://github.com/aamplugin/advanced-access-manager/issues/68](https://github.com/aamplugin/advanced-access-manager/issues/68)
+* Added New: The ability to define "Access Denied Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/61](https://github.com/aamplugin/advanced-access-manager/issues/61)
+* Added New: The ability to define "Login Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/62](https://github.com/aamplugin/advanced-access-manager/issues/62)
+* Added New: The ability to define "Logout Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/63](https://github.com/aamplugin/advanced-access-manager/issues/63)
+* Added New: The ability to define "404 Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/64](https://github.com/aamplugin/advanced-access-manager/issues/64)
+* Added New: Allow the ability to programmatically get AAM service [https://github.com/aamplugin/advanced-access-manager/issues/71](https://github.com/aamplugin/advanced-access-manager/issues/71)
+* Added New: The ability to change role's slug [https://github.com/aamplugin/advanced-access-manager/issues/72](https://github.com/aamplugin/advanced-access-manager/issues/72)
+* Added New: The ability to issue refreshable JWT token through RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/16](https://github.com/aamplugin/advanced-access-manager/issues/16)
+* Added New: The "Manage Access" toolbar menu item [https://github.com/aamplugin/advanced-access-manager/issues/26](https://github.com/aamplugin/advanced-access-manager/issues/26)
+* Added New: AAM [WP-CLI add-on](https://github.com/aamplugin/aam-cli). Allows to install premium AAM add-ons and access policies. Check [for more details](https://aamplugin.com/reference/plugin#wp-cli-commands)
+* Changed:   Use slugs instead of post/term IDs during policy generation [https://github.com/aamplugin/advanced-access-manager/issues/80](https://github.com/aamplugin/advanced-access-manager/issues/80)
+* Changed:   Policy Generate button does not have tooltip [https://github.com/aamplugin/advanced-access-manager/issues/79](https://github.com/aamplugin/advanced-access-manager/issues/79)
+* Changed:   Access Policy Generator split across services [https://github.com/aamplugin/advanced-access-manager/issues/76](https://github.com/aamplugin/advanced-access-manager/issues/76)
+* Changed:   Enhanced AAM API [https://github.com/aamplugin/advanced-access-manager/issues/75](https://github.com/aamplugin/advanced-access-manager/issues/75)
+* Changed:   The 404 (Not Found) Redirect now is allowed to be customized per user and role [https://github.com/aamplugin/advanced-access-manager/issues/64](https://github.com/aamplugin/advanced-access-manager/issues/64)
 
 = 6.3.3 =
 * Change: Updated core to allow geolocation functionality with IP Check
