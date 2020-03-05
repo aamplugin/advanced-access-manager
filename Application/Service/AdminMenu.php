@@ -112,6 +112,11 @@ class AAM_Service_AdminMenu
             }
         }
 
+        // Policy generation hook
+        add_filter(
+            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        );
+
         add_action('aam_clear_settings_action', function() {
             AAM_Core_API::deleteOption(self::CACHE_DB_OPTION);
         });
@@ -123,6 +128,33 @@ class AAM_Service_AdminMenu
 
         // Service fetch
         $this->registerService();
+    }
+
+    /**
+     * Generate Backend Menu policy statements
+     *
+     * @param array                     $policy
+     * @param string                    $resource_type
+     * @param array                     $options
+     * @param AAM_Core_Policy_Generator $generator
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function generatePolicy($policy, $resource_type, $options, $generator)
+    {
+        if ($resource_type === AAM_Core_Object_Menu::OBJECT_TYPE) {
+            if (!empty($options)) {
+                $policy['Statement'] = array_merge(
+                    $policy['Statement'],
+                    $generator->generateBasicStatements($options, 'BackendMenu')
+                );
+            }
+        }
+
+        return $policy;
     }
 
     /**

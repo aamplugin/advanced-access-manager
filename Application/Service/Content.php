@@ -248,8 +248,247 @@ class AAM_Service_Content
             }
         }, 10, 2);
 
+        // Policy generation hook
+        add_filter(
+            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        );
+
+        // Share post access settings conversion with add-ons and other third-party
+        // solutions
+        add_filter('aam_post_policy_generator_filter', function($list, $res, $opts) {
+            return array_merge(
+                $list, $this->_convertToPostStatements($res, $opts)
+            );
+        }, 10, 3);
+
         // Service fetch
         $this->registerService();
+    }
+
+    /**
+     * Generate Post policy statements
+     *
+     * @param array                     $policy
+     * @param string                    $resource_type
+     * @param array                     $options
+     * @param AAM_Core_Policy_Generator $generator
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function generatePolicy($policy, $resource_type, $options, $generator)
+    {
+        if ($resource_type === AAM_Core_Object_Post::OBJECT_TYPE) {
+            if (!empty($options)) {
+                $statements = array();
+
+                foreach($options as $id => $data) {
+                    $parts    = explode('|', $id);
+                    $resource = "Post:{$parts[1]}:{$parts[0]}";
+
+                    $statements = array_merge(
+                        $statements,
+                        $this->_convertToPostStatements($resource, $data)
+                    );
+                }
+
+                $policy['Statement'] = array_merge($policy['Statement'], $statements);
+            }
+        }
+
+        return $policy;
+    }
+
+    /**
+     * Convert post settings to policy format
+     *
+     * @param string $resource
+     * @param array  $options
+     *
+     * @return array
+     *
+     * @since 6.4.0 Moved this method from AAM_Core_Policy_Generator
+     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
+     * @since 6.2.2 Fixed bug that caused fatal error for PHP lower than 7.0.0
+     * @since 6.2.0 Initial implementation of the method
+     *
+     * @access private
+     * @version 6.4.0
+     */
+    private function _convertToPostStatements($resource, $options)
+    {
+        $tree = (object) array(
+            'allowed'    => array(),
+            'denied'     => array(),
+            'statements' => array()
+        );
+
+        foreach($options as $option => $settings) {
+            // Compute Effect property
+            if (is_bool($settings)) {
+                $effect = ($settings === true ? 'denied' : 'allowed');
+            } else {
+                $effect = (!empty($settings['enabled']) ? 'denied' : 'allowed');
+            }
+
+            $action = null;
+
+            switch($option) {
+                case 'restricted':
+                    $action = 'Read';
+                    break;
+
+                case 'comment':
+                case 'edit':
+                case 'delete':
+                case 'publish':
+                case 'create':
+                    $action = ucfirst($option);
+                    break;
+
+                case 'hidden':
+                    $item = array(
+                        'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'List',
+                        'Resource' => $resource
+                    );
+
+                    $conditions = array();
+
+                    if (is_array($settings)) {
+                        if (!empty($settings['frontend'])) {
+                            $conditions['(*boolean)${CALLBACK.is_admin}'] = false;
+                        }
+                        if (!empty($settings['backend'])) {
+                            $conditions['(*boolean)${CALLBACK.is_admin}'] = true;
+                        }
+                        if (!empty($settings['api'])) {
+                            $conditions['(*boolean)${CONST.REST_REQUEST}'] = true;
+                        }
+                    }
+
+                    if (!empty($conditions)) {
+                        $item['Condition']['Equals'] = $conditions;
+                    }
+
+                    $tree->statements[] = $item;
+                    break;
+
+                case 'teaser':
+                    $tree->statements[] = array(
+                        'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'Read',
+                        'Resource' => $resource,
+                        'Metadata' => array(
+                            'Teaser' => array(
+                                'Value' => $settings['message']
+                            )
+                        )
+                    );
+                    break;
+
+                case 'limited':
+                    $tree->statements[] = array(
+                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'Read',
+                        'Resource' => $resource,
+                        'Metadata' => array(
+                            'Limited' => array(
+                                'Threshold' => intval($settings['threshold'])
+                            )
+                        )
+                    );
+                    break;
+
+                case 'redirected':
+                    $metadata = array(
+                        'Type' => $settings['type'],
+                        'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : 307)
+                    );
+
+                    if ($settings['type'] === 'page') {
+                        $metadata['Id'] = intval($settings['destination']);
+                    } elseif ($settings['type']  === 'url') {
+                        $metadata['URL'] = trim($settings['destination']);
+                    } elseif ($settings['type'] === 'callback') {
+                        $metadata['Callback'] = trim($settings['destination']);
+                    }
+
+                    $tree->statements[] = array(
+                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'Read',
+                        'Resource' => $resource,
+                        'Metadata' => array(
+                            'Redirect' => $metadata
+                        )
+                    );
+                    break;
+
+                case 'protected':
+                    $tree->statements[] = array(
+                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'Read',
+                        'Resource' => $resource,
+                        'Metadata' => array(
+                            'Password' => array(
+                                'Value' => $settings['password']
+                            )
+                        )
+                    );
+                    break;
+
+                case 'ceased':
+                    $tree->statements[] = array(
+                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+                        'Action'   => 'Read',
+                        'Resource' => $resource,
+                        'Condition' => array(
+                            'Greater' => array(
+                                '(*int)${DATETIME.U}' => intval($settings['after'])
+                            )
+                        )
+                    );
+                    break;
+
+                default:
+                    do_action(
+                        'aam_post_option_to_policy_action',
+                        $resource,
+                        $option,
+                        $effect,
+                        $settings,
+                        $tree
+                    );
+                    break;
+            }
+
+            if ($action !== null) {
+                if ($effect === 'allowed') {
+                    $tree->allowed[] = $resource . ':' . $action;
+                } else {
+                    $tree->denied[] = $resource . ':' . $action;
+                }
+            }
+        }
+
+        // Finally prepare the consolidated statements
+        if (!empty($tree->denied)) {
+            $tree->statements[] = array(
+                'Effect'   => 'deny',
+                'Resource' => $tree->denied
+            );
+        }
+
+        if (!empty($tree->allowed)) {
+            $tree->statements[] = array(
+                'Effect'   => 'allow',
+                'Resource' => $tree->allowed
+            );
+        }
+
+        return $tree->statements;
     }
 
     /**

@@ -2090,7 +2090,7 @@
                             var _this = $(this);
                             save(
                                 [$(this).data('metabox')],
-                                $(this).attr('checked') ? 1 : 0,
+                                $(this).attr('checked'),
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-metabox-overwrite').show();
@@ -3576,7 +3576,7 @@
              * @returns {undefined}
              */
             function save(type, route, method, btn) {
-                var value = $(btn).hasClass('icon-check-empty') ? 1 : 0;
+                var value = $(btn).hasClass('icon-check-empty');
 
                 getAAM().queueRequest(function () {
                     //show indicator

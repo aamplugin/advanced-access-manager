@@ -10,13 +10,14 @@
 /**
  * Logout Redirect service
  *
+ * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
  *              explicitly selected
  * @since 6.0.5 Fixed the bug with logout redirect
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.4.0
  */
 class AAM_Service_LogoutRedirect
 {
@@ -81,6 +82,7 @@ class AAM_Service_LogoutRedirect
      *
      * @return void
      *
+     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
      *              explicitly selected
      * @since 6.0.5 Fixed bug where user was not redirected properly after logout
@@ -88,7 +90,7 @@ class AAM_Service_LogoutRedirect
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.1.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
@@ -119,6 +121,38 @@ class AAM_Service_LogoutRedirect
                 exit;
             }
         }, PHP_INT_MAX);
+
+         // Policy generation hook
+         add_filter(
+            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        );
+    }
+
+    /**
+     * Generate Logout Redirect policy params
+     *
+     * @param array                     $policy
+     * @param string                    $resource_type
+     * @param array                     $options
+     * @param AAM_Core_Policy_Generator $generator
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function generatePolicy($policy, $resource_type, $options, $generator)
+    {
+        if ($resource_type === AAM_Core_Object_LogoutRedirect::OBJECT_TYPE) {
+            if (!empty($options)) {
+                $policy['Param'] = array_merge(
+                    $policy['Param'],
+                    $generator->generateRedirectParam($options, 'logout')
+                );
+            }
+        }
+
+        return $policy;
     }
 
 }

@@ -11,6 +11,7 @@
  * 404 redirect service
  *
  * @since 6.4.0 Refactored to use 404 object instead of AAM config
+ *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the service
  *
  * @package AAM
@@ -69,12 +70,20 @@ class AAM_Service_NotFoundRedirect
      *
      * @return void
      *
+     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.0
      */
     protected function initializeHooks()
     {
         add_action('wp', array($this, 'wp'));
+
+        // Policy generation hook
+        add_filter(
+            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        );
     }
 
     /**
@@ -111,6 +120,33 @@ class AAM_Service_NotFoundRedirect
                 );
             }
         }
+    }
+
+    /**
+     * Generate 404 (Not Found) Redirect policy params
+     *
+     * @param array                     $policy
+     * @param string                    $resource_type
+     * @param array                     $options
+     * @param AAM_Core_Policy_Generator $generator
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function generatePolicy($policy, $resource_type, $options, $generator)
+    {
+        if ($resource_type === AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE) {
+            if (!empty($options)) {
+                $policy['Param'] = array_merge(
+                    $policy['Param'],
+                    $generator->generateRedirectParam($options, '404')
+                );
+            }
+        }
+
+        return $policy;
     }
 
 }
