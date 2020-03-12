@@ -1,0 +1,8 @@
+{
+    "Param": [
+        {
+            "Key": "post:default:post_tag",
+            "Value": "(*array)${USER_META.default_tags}"
+        }
+    ]
+}

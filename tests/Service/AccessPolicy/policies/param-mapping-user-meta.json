@@ -1,0 +1,8 @@
+{
+    "Param": [
+        {
+            "Key": "param:%s => ${PHP_GLOBAL.unit_test}",
+            "Value": true
+        }
+    ]
+}

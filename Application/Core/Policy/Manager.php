@@ -88,11 +88,12 @@ class AAM_Core_Policy_Manager
      *
      * @return mixed
      *
+     * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/84
      * @since 6.4.0 Supporting "Value" to be an array
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.1
      */
     public function getParam($id, $args = array())
     {
@@ -102,15 +103,7 @@ class AAM_Core_Policy_Manager
             $param = $this->tree['Param'][$id];
 
             if ($this->isApplicable($param, $args)) {
-                if (is_scalar($param['Value'])
-                    && preg_match_all('/(\$\{[^}]+\})/', $param['Value'], $match)
-                ) {
-                    $value = AAM_Core_Policy_Token::evaluate(
-                        $param['Value'], $match[1]
-                    );
-                } else {
-                    $value = $param['Value'];
-                }
+                $value = $param['Value'];
             }
         }
 
@@ -125,8 +118,11 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/84
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.1
      */
     public function getParams($s, $args = array())
     {
@@ -144,7 +140,7 @@ class AAM_Core_Policy_Manager
             }
         }
 
-        return $this->replaceTokens($params);
+        return $params;
     }
 
     /**
@@ -155,8 +151,11 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/84
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.1
      */
     public function getResources($s, $args = array())
     {
@@ -175,38 +174,7 @@ class AAM_Core_Policy_Manager
             }
         }
 
-        return $this->replaceTokens($statements);
-    }
-
-    /**
-     * Replace all the dynamic tokens recursively
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function replaceTokens($data)
-    {
-        $replaced = array();
-
-        foreach($data as $key => $value) {
-            if (preg_match_all('/(\$\{[^}]+\})/', $key, $match)) {
-                $key = AAM_Core_Policy_Token::evaluate($key, $match[1]);
-            }
-
-            if (is_array($value)) {
-                $replaced[$key] = $this->replaceTokens($value);
-            } elseif (preg_match_all('/(\$\{[^}]+\})/', $value, $match)) {
-                $replaced[$key] = AAM_Core_Policy_Token::evaluate($value, $match[1]);
-            } else {
-                $replaced[$key] = $value;
-            }
-        }
-
-        return $replaced;
+        return $statements;
     }
 
     /**
@@ -222,8 +190,7 @@ class AAM_Core_Policy_Manager
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @see AAM_Core_Policy_Manager::updatePolicyTree
-     * @version 6.0.0
+     * @version 6.0.4
      */
     public function getOption($res, $option)
     {
@@ -287,12 +254,13 @@ class AAM_Core_Policy_Manager
      *
      * @return void
      *
+     * @since 6.4.1 Changed the way updatePolicyTree is invoked
      * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/49
      * @since 6.2.0 Changed the way access policies are fetched
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.1
+     * @version 6.4.1
      */
     public function initialize()
     {
@@ -310,7 +278,7 @@ class AAM_Core_Policy_Manager
             ));
 
             foreach ($policies as $policy) {
-                $this->updatePolicyTree($this->tree, $this->parsePolicy($policy));
+                $this->updatePolicyTree($this->parsePolicy($policy));
             }
 
             $this->_cleanupTree();
@@ -422,23 +390,23 @@ class AAM_Core_Policy_Manager
     /**
      * Extend tree with additional statements and params
      *
-     * @param array &$tree
      * @param array $addition
      *
      * @return array
      *
+     * @since 6.4.1 Simplified by removing &$tree first param
      * @since 6.4.0 Supporting Param's Value to be more than just a scalar value
      * @since 6.2.1 Typecasting param's value
      * @since 6.1.0 Added support for the `=>` (map to) operator
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.4.1
      */
-    protected function updatePolicyTree(&$tree, $addition)
+    protected function updatePolicyTree($addition)
     {
-        $stmts  = &$tree['Statement'];
-        $params = &$tree['Param'];
+        $stmts  = &$this->tree['Statement'];
+        $params = &$this->tree['Param'];
 
         // Step #1. If there are any statements, let's index them by resource:action
         // and insert into the list of statements
@@ -447,25 +415,7 @@ class AAM_Core_Policy_Manager
             $actions   = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
 
             foreach ($resources as $res) {
-                $map = array(); // Reset map
-
-                // Allow to build resource name dynamically.
-                if (preg_match('/^(.*)[\s]+(map to|=>)[\s]+(.*)$/i', $res, $match)) {
-                    // e.g. "Term:category:%s:posts => ${USER_META.regions}"
-                    $values = (array) AAM_Core_Policy_Token::getTokenValue($match[3]);
-
-                    // Create the map of resources and replace
-                    foreach($values as $value) {
-                        $map[] = sprintf($match[1], $value);
-                    }
-                } elseif (preg_match_all('/(\$\{[^}]+\})/', $res, $match)) {
-                    // e.g. "Term:category:${USER_META.region}:posts"
-                    $map = array(AAM_Core_Policy_Token::evaluate($res, $match[1]));
-                } else {
-                    $map = array($res);
-                }
-
-                foreach($map as $resource) {
+                foreach($this->evaluatePolicyKey($res) as $resource) {
                     foreach ($actions as $act) {
                         $id = strtolower($resource . (!empty($act) ? ":{$act}" : ''));
 
@@ -482,34 +432,133 @@ class AAM_Core_Policy_Manager
         // Step #2. If there are any params, let's index them and insert into the list
         foreach ($addition['Param'] as $param) {
             if (!empty($param['Key'])) {
-                // Allow to build param name dynamically.
-                // e.g. "${USER_META.region}_posts"
-                if (preg_match_all('/(\$\{[^}]+\})/', $param['Key'], $match)) {
-                    $id = AAM_Core_Policy_Token::evaluate($param['Key'], $match[1]);
-                } else {
-                    $id = $param['Key'];
-                }
+                $param['Value'] = $this->replaceTokens($param['Value'], true);
 
-                // If necessary typecast the params value
-                if (is_scalar($param['Value'])) {
-                    $param['Value'] = AAM_Core_Policy_Typecast::execute(
-                        $param['Value']
-                    );
-                }
+                foreach($this->evaluatePolicyKey($param['Key']) as $key) {
+                    if (!isset($params[$key]) || empty($params[$key]['Enforce'])) {
+                        $params[$key] = $param;
 
-                if (!isset($params[$id]) || empty($params[$id]['Enforce'])) {
-                    $params[$id] = $param;
+                        // If "option:" - hooks to the WP core for override
+                        if (strpos($key, 'option:') === 0) {
+                            $name = substr($key, 7);
 
-                    if (strpos($id, 'option:') === 0) {
-                        $name = substr($id, 7);
-
-                        // Hook into the core
-                        add_filter('pre_option_' . $name, $callback, 1, 2);
-                        add_filter('pre_site_option_' . $name, $callback, 1, 2);
+                            // Hook into the core
+                            add_filter('pre_option_' . $name, $callback, 1, 2);
+                            add_filter('pre_site_option_' . $name, $callback, 1, 2);
+                        }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Evaluate resource name or param key
+     *
+     * The resource or param key may have tokens that build dynamic keys. This method
+     * covers 3 possible scenario:
+     * - Map To "=>" - the token should return array of values that are mapped to the
+     *                 key;
+     * - Token       - returns scalar value;
+     * - Raw Value   - returns as-is
+     *
+     * @param string $key
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.4.1
+     */
+    protected function evaluatePolicyKey($key)
+    {
+        $response = array();
+
+        // Allow to build resource name or param key dynamically.
+        if (preg_match('/^(.*)[\s]+(map to|=>)[\s]+(.*)$/i', $key, $match)) {
+
+            // e.g. "Term:category:%s:posts => ${USER_META.regions}"
+            // e.g. "%s:default:category => ${HTTP_POST.post_types}"
+            $values = (array) AAM_Core_Policy_Token::getTokenValue($match[3]);
+
+            // Create the map of resources/params and replace
+            foreach($values as $value) {
+                $response[] = sprintf($match[1], $value);
+            }
+        } elseif (preg_match_all('/(\$\{[^}]+\})/', $key, $match)) {
+            // e.g. "Term:category:${USER_META.region}:posts"
+            $response = array(AAM_Core_Policy_Token::evaluate($key, $match[1]));
+        } else {
+            $response = array($key);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Replace all the dynamic tokens recursively
+     *
+     * @param array   $data
+     * @param boolean $type_cast
+     *
+     * @return array
+     *
+     * @since 6.4.1 Added type casting param
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @version 6.4.1
+     */
+    protected function replaceTokens($data, $type_cast = false)
+    {
+        $replaced = array();
+
+        if (is_scalar($data)) {
+            $replaced = $this->_replaceTokensInString($data, $type_cast);
+        } else {
+            foreach($data as $key => $value) {
+                // Evaluate array's key and replace tokens
+                $key = $this->_replaceTokensInString($key);
+
+                // Evaluate array's value and replace tokens
+                if (is_array($value)) {
+                    $replaced[$key] = $this->replaceTokens($value, $type_cast);
+                } else {
+                    $replaced[$key] = $this->_replaceTokensInString(
+                        $value, $type_cast
+                    );
+                }
+            }
+        }
+
+        return $replaced;
+    }
+
+    /**
+     * Replace tokens is provided scalar string
+     *
+     * @param string  $token
+     * @param boolean $type_cast
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 6.4.1
+     */
+    private function _replaceTokensInString($token, $type_cast = false)
+    {
+        if (preg_match_all('/(\$\{[^}]+\})/', $token, $match)) {
+            $value = AAM_Core_Policy_Token::evaluate($token, $match[1]);
+
+            if ($type_cast === true) {
+                $replaced = AAM_Core_Policy_Typecast::execute($value);
+            } else {
+                $replaced = $value;
+            }
+        } else {
+            $replaced = $token;
+        }
+
+        return  $replaced;
     }
 
     /**

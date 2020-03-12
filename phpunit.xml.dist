@@ -28,11 +28,14 @@
         <const name="AAM_UNITTEST_LEVEL_2_POST_ID" value="2946" />
         <const name="AAM_UNITTEST_ATTACHMENT_ID" value="26" />
         <const name="AAM_UNITTEST_CATEGORY_ID" value="1" />
+        <const name="AAM_UNITTEST_CATEGORY_SLUG" value="science" />
         <const name="AAM_UNITTEST_TAG_ID" value="35" />
+        <const name="AAM_UNITTEST_TAG_ID_B" value="36" />
         <const name="AAM_UNITTEST_CATEGORY_LEVEL_1_ID" value="37" />
         <const name="AAM_UNITTEST_CATEGORY_LEVEL_2_ID" value="38" />
         <const name="AAM_UNITTEST_CATEGORY_LEVEL_3_ID" value="39" />
-        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID" value="4" />
+        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID" value="3" />
+        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID_B" value="4" />
         <const name="AAM_UNITTEST_PAGE_ID" value="2" />
         <const name="AAM_UNITTEST_PAGE_LEVEL_1_ID" value="260" />
         <const name="AAM_UNITTEST_PAGE_LEVEL_2_ID" value="262" />

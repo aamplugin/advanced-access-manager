@@ -128,6 +128,34 @@ class PolicyManagerTest extends TestCase
 
         $this->assertArrayHasKey('hello-world-admin', $stub->getTree()['Param']);
     }
+    /**
+     * Test if param mapping is working as expected
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.1
+     */
+    public function testParamMapping()
+    {
+        $GLOBALS['unit_test'] = array('a','b');
+
+        $stub = $this->prepareManagerStub('param-mapping-user-meta');
+
+        $this->assertEquals($stub->getTree(), array(
+            'Statement' => array(),
+            'Param' => array(
+                'param:a' => array(
+                    'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
+                    'Value' => true
+                ),
+                'param:b' => array(
+                    'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
+                    'Value' => true
+                )
+            ),
+        ));
+    }
 
     /**
      * Prepare proper policy manager stub

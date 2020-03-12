@@ -159,6 +159,132 @@ class PolicyServiceIntegrationTest extends TestCase
     }
 
     /**
+     * Test that Access Policy integrates with Content service where a default
+     * category is defined as integer
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testDefaultSingleIntCategory()
+    {
+        $this->preparePlayground('default-term-single-int');
+
+        $this->assertEquals(78, get_option('default_category'));
+    }
+
+    /**
+     * Test that Access Policy integrates with Content service where a default
+     * category is defined as slug
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testDefaultSingleSlugCategory()
+    {
+        $this->preparePlayground('default-term-single-slug');
+
+        $this->assertEquals(91, get_option('default_category'));
+    }
+
+    /**
+     * Test that Access Policy integrates with Content service where a default
+     * category is defined as slug
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testDefaultMultipleTagsMixed()
+    {
+        $this->preparePlayground('default-term-multi-mixed');
+
+        $id = wp_insert_post(array(
+            'post_title'  => 'Unit Test Automation',
+            'post_type'   => 'post',
+            'post_status' => 'draft'
+        ));
+
+        $this->assertTrue(is_int($id));
+
+        $new_terms = wp_get_object_terms($id, 'post_tag', array(
+            'fields' => 'ids'
+        ));
+
+        $this->assertContains(intval(AAM_UNITTEST_TAG_ID), $new_terms);
+        $this->assertContains(intval(AAM_UNITTEST_TAG_ID_B), $new_terms);
+
+        wp_delete_post($id, true);
+    }
+
+    /**
+     * Test that Access Policy integrates with Content service where a default
+     * category is defined as slugs and coming from user_meta option
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.4.0
+     */
+    public function testDefaultMultipleTagsFromUserMeta()
+    {
+        $this->preparePlayground('default-term-multi-meta');
+
+        add_user_meta(
+            AAM_UNITTEST_AUTH_USER_ID, 'default_tags', array('tag-a', 'tag-b')
+        );
+
+        $id = wp_insert_post(array(
+            'post_title'  => 'Unit Test Automation',
+            'post_type'   => 'post',
+            'post_status' => 'draft'
+        ));
+
+        $this->assertTrue(is_int($id));
+
+        $new_terms = wp_get_object_terms($id, 'post_tag', array(
+            'fields' => 'ids'
+        ));
+
+        $this->assertContains(intval(AAM_UNITTEST_TAG_ID), $new_terms);
+        $this->assertContains(intval(AAM_UNITTEST_TAG_ID_B), $new_terms);
+
+        wp_delete_post($id, true);
+        delete_user_meta(AAM_UNITTEST_AUTH_USER_ID, 'default_tags');
+    }
+
+    /**
+     * Test multi-level category hierarchy
+     *
+     * Assuming that we have Level 1/Level 2/Level 3 categories and settings are
+     * propagated corrected down the chain and hide all the posts
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.3.0
+     */
+    public function testMultilevelCategoryIntegration()
+    {
+        $this->preparePlayground('multilevel-term-posts');
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => 100,
+            'cache_results'    => false,
+            'suppress_filters' => false
+        ));
+
+        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_1_POST_ID, $posts));
+        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_2_POST_ID, $posts));
+    }
+
+    /**
      * Prepare the environment
      *
      * Update Unit Test access policy with proper policy
@@ -188,33 +314,6 @@ class PolicyServiceIntegrationTest extends TestCase
 
         // Reset Access Policy Factory cache
         AAM_Core_Policy_Factory::reset();
-    }
-
-    /**
-     * Test multi-level category hierarchy
-     *
-     * Assuming that we have Level 1/Level 2/Level 3 categories and settings are
-     * propagated corrected down the chain and hide all the posts
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.3.0
-     */
-    public function testMultilevelCategoryIntegration()
-    {
-        $this->preparePlayground('multilevel-term-posts');
-
-        $posts = get_posts(array(
-            'post_type'        => 'post',
-            'fields'           => 'ids',
-            'numberposts'      => 100,
-            'cache_results'    => false,
-            'suppress_filters' => false
-        ));
-
-        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_1_POST_ID, $posts));
-        $this->assertFalse(in_array(AAM_UNITTEST_LEVEL_2_POST_ID, $posts));
     }
 
 }
