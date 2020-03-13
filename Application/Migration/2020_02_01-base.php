@@ -15,11 +15,12 @@ use AAM_Core_Migration,
 /**
  * This migration class that fixes potentially corrupted data with aam_addons option
  *
+ * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.4.0 Fixed bug with unsaved migration
  * @since 6.3.1 Initial implementation of the method
  *
  * @package AAM
- * @version 6.3.1
+ * @version 6.4.2
  */
 class Migration631 implements AAM_Core_Contract_MigrationInterface
 {
@@ -27,21 +28,26 @@ class Migration631 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
      * @since 6.4.0 Fixed bug with unsaved migration
      * @since 6.3.1 Initial implementation of the method
      *
-     * @version 6.3.1
+     * @version 6.4.2
      */
     public function run()
     {
         $option = \AAM_Core_API::getOption(
-            \AAM_Addon_Repository::DB_OPTION, array(), get_main_site_id()
+            \AAM_Addon_Repository::DB_OPTION,
+            array(),
+            \AAM_Core_API::getMainSiteId()
         );
 
         if (is_string($option)) {
             $option = maybe_unserialize($option);
             \AAM_Core_API::updateOption(
-                \AAM_Addon_Repository::DB_OPTION, $option, get_main_site_id()
+                \AAM_Addon_Repository::DB_OPTION,
+                $option,
+                \AAM_Core_API::getMainSiteId()
             );
         }
 

@@ -10,12 +10,13 @@
 /**
  * Multisite service
  *
+ * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.3.0 Rewrote the way options are synced across the network
  * @since 6.2.2 Fixed the bug where reset settings was not synced across all sites
  * @since 6.2.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.4.2
  */
 class AAM_Service_Multisite
 {
@@ -89,12 +90,13 @@ class AAM_Service_Multisite
      *
      * @return void
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
      * @since 6.3.0 Optimized for Multisite setup
      * @since 6.2.2 Hooks to the setting clearing and policy table list
      * @since 6.2.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.3.0
+     * @version 6.4.2
      */
     protected function initializeHooks()
     {
@@ -154,7 +156,7 @@ class AAM_Service_Multisite
                 isset($data['post_type'])
                 && ($data['post_type'] === AAM_Service_AccessPolicy::POLICY_CPT)
             ) {
-                switch_to_blog(get_main_site_id());
+                switch_to_blog(AAM_Core_API::getMainSiteId());
             }
 
             return $data;
@@ -162,7 +164,7 @@ class AAM_Service_Multisite
 
         add_action('aam_pre_policy_fetch_action', function() {
             $this->switch_back_blog_id = get_current_blog_id();
-            switch_to_blog(get_main_site_id());
+            switch_to_blog(AAM_Core_API::getMainSiteId());
         });
 
         add_action('aam_post_policy_fetch_action', function() {

@@ -10,13 +10,14 @@
 /**
  * Addon repository
  *
+ * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
  * @since 6.0.5 Refactored the license managements. Fixed couple bugs with license
  *              information displaying
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.4.2
  */
 class AAM_Addon_Repository
 {
@@ -52,19 +53,20 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
      * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing.
      *              Optimized for Multisite setup
      * @since 6.0.5 Added the $license_only argument
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.4.2
      */
     public function getRegistry($license_only = false)
     {
         $response = array();
         $registry = AAM_Core_API::getOption(
-            self::DB_OPTION, array(), get_main_site_id()
+            self::DB_OPTION, array(), AAM_Core_API::getMainSiteId()
         );
 
         if ($license_only === true) {
@@ -101,8 +103,11 @@ class AAM_Addon_Repository
      *
      * @return boolean
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
+     * @since 6.0.5 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.5
+     * @version 6.4.2
      */
     public function registerLicense($package, $license)
     {
@@ -113,7 +118,9 @@ class AAM_Addon_Repository
         );
 
         // Update the registry
-        return AAM_Core_API::updateOption(self::DB_OPTION, $list, get_main_site_id());
+        return AAM_Core_API::updateOption(
+            self::DB_OPTION, $list, AAM_Core_API::getMainSiteId()
+        );
     }
 
     /**

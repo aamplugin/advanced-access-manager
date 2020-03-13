@@ -133,6 +133,30 @@ final class AAM_Core_API
     }
 
     /**
+     * Get main site id
+     *
+     * Compatibility method for sites that are under WP 4.9.0
+     *
+     * @return int
+     *
+     * @access public
+     * @version 6.4.2
+     */
+    public static function getMainSiteId()
+    {
+        if (function_exists('get_main_site_id')) {
+            $id = get_main_site_id();
+        } elseif (is_multisite()) {
+            $network = get_network();
+            $id      = ($network ? $network->site_id : 0);
+        } else {
+            $id = get_current_blog_id();
+        }
+
+        return $id;
+    }
+
+    /**
      * Return max user level
      *
      * @param array $caps
