@@ -10,13 +10,14 @@
 /**
  * AAM core service
  *
+ * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/82
  * @since 6.4.0 Added "Manage Access" toolbar item to single & multisite network
  * @since 6.0.5 Making sure that only if user is allowed to manage other users
  * @since 6.0.4 Bug fixing. Unwanted "Access Denied" metabox on the Your Profile page
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.4.2
  */
 class AAM_Service_Core
 {
@@ -35,6 +36,7 @@ class AAM_Service_Core
      *
      * @access protected
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/82
      * @since 6.4.0 Added "Manage Access" toolbar item
      * @since 6.0.5 Fixed bug when Access Manager metabox is rendered for users that
      *              have ability to manage other users
@@ -43,7 +45,7 @@ class AAM_Service_Core
      * @since 6.0.0 Initial implementation of the method
      *
      * @return void
-     * @version 6.4.0
+     * @version 6.4.2
      */
     protected function __construct()
     {
@@ -97,7 +99,7 @@ class AAM_Service_Core
             add_action('admin_bar_menu', function($wp_admin_bar) {
                 $blog_count = count($wp_admin_bar->user->blogs);
 
-                if (count($blog_count) > 0 || current_user_can('manage_network')) {
+                if ($blog_count > 0 || current_user_can('manage_network')) {
                     foreach((array) $wp_admin_bar->user->blogs as $blog) {
                         switch_to_blog($blog->userblog_id);
 
