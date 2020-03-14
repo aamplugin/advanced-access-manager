@@ -91,6 +91,13 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.4.1 =
+* Fixed Bug: Access Policy does not allow to use token in the param's value [https://github.com/aamplugin/advanced-access-manager/issues/84](https://github.com/aamplugin/advanced-access-manager/issues/84)
+* Fixed Bug: Warning: count(): Parameter must be an array or an object that implements Countable [https://github.com/aamplugin/advanced-access-manager/issues/82](https://github.com/aamplugin/advanced-access-manager/issues/82)
+* Fixed Bug: Fatal error: Call to undefined function get_main_site_id() [https://github.com/aamplugin/advanced-access-manager/issues/81](https://github.com/aamplugin/advanced-access-manager/issues/81)
+* Fixed Bug: Plus Package add-on: Incorrect handling of tags with white space [https://github.com/aamplugin/advanced-access-manager/issues/86](https://github.com/aamplugin/advanced-access-manager/issues/86)
+* Added New: Plus Package add-on: Define multiple default terms (including tags) [https://github.com/aamplugin/advanced-access-manager/issues/83](https://github.com/aamplugin/advanced-access-manager/issues/83)
+
 = 6.4.0 =
 * Fixed Bug: URI Access: Changing existing URI rule puts it in the end of the list [https://github.com/aamplugin/advanced-access-manager/issues/74](https://github.com/aamplugin/advanced-access-manager/issues/74)
 * Fixed Bug: URI Access: Incorrect handling of the inherited rules [https://github.com/aamplugin/advanced-access-manager/issues/77](https://github.com/aamplugin/advanced-access-manager/issues/77)
