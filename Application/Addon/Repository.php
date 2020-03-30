@@ -10,7 +10,8 @@
 /**
  * Addon repository
  *
- * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
+ * @since 6.4.2 Implemented https://github.com/aamplugin/advanced-access-manager/issues/88
+ * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
  * @since 6.0.5 Refactored the license managements. Fixed couple bugs with license
  *              information displaying
@@ -128,8 +129,11 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.2
      */
     public function getList()
     {
@@ -137,17 +141,20 @@ class AAM_Addon_Repository
             'aam-plus-package' => $this->buildAddonObject(
                 'Plus Package',
                 'plus-package',
-                __('Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.', AAM_KEY)
+                __('Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.', AAM_KEY),
+                '5.3.2'
             ),
             'aam-ip-check' => $this->buildAddonObject(
                 'IP Check',
                 'ip-check',
-                __('Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.', AAM_KEY)
+                __('Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.', AAM_KEY),
+                '4.1.2'
             ),
             'aam-role-hierarchy' => $this->buildAddonObject(
                 'Role Hierarchy',
                 'role-hierarchy',
-                __('Define and manage complex WordPress role hierarchy where all the access settings are propagated down the tree with the ability to override any settings for any specific role.', AAM_KEY)
+                __('Define and manage complex WordPress role hierarchy where all the access settings are propagated down the tree with the ability to override any settings for any specific role.', AAM_KEY),
+                '3.0.1'
             ),
             /**
              * TODO: Release this extension after AAM 6.0.0. Enhance it with
@@ -162,7 +169,8 @@ class AAM_Addon_Repository
             'aam-complete-package' => $this->buildAddonObject(
                 'Complete Package',
                 'complete-package',
-                __('Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.', AAM_KEY)
+                __('Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.', AAM_KEY),
+                '5.2.2'
             )
         );
     }
@@ -173,23 +181,34 @@ class AAM_Addon_Repository
      * @param string $title
      * @param string $slug
      * @param string $description
+     * @param string $version
      *
      * @return array
      *
+     * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.5 Added new `hasUpdate` flag
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.0.5
+     * @version 6.4.2
      */
-    protected function buildAddonObject($title, $slug, $description)
+    protected function buildAddonObject($title, $slug, $description, $version = null)
     {
+        // Determining if there is newer version
+        $current_version = $this->getPluginVersion("aam-{$slug}/bootstrap.php");
+
+        if (version_compare($current_version, $version) === -1) {
+            $hasUpdate = true;
+        } else {
+            $hasUpdate = $this->hasPluginUpdate("aam-{$slug}/bootstrap.php");
+        }
+
         return array(
             'title'       => $title,
-            'version'     => $this->getPluginVersion("aam-{$slug}/bootstrap.php"),
+            'version'     => $current_version,
             'isActive'    => $this->isPluginActive("aam-{$slug}/bootstrap.php"),
             'expires'     => $this->getExpirationDate("aam-{$slug}"),
-            'hasUpdate'   => $this->hasPluginUpdate("aam-{$slug}/bootstrap.php"),
+            'hasUpdate'   => $hasUpdate,
             'license'     => $this->getPluginLicense("aam-{$slug}"),
             'type'        => 'commercial',
             'description' => $description,

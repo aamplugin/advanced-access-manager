@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.3.2
-Stable tag: 6.4.0
+Stable tag: 6.4.1
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 

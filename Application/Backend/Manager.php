@@ -29,8 +29,11 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.4.2
      */
     protected function __construct()
     {
@@ -72,6 +75,7 @@ class AAM_Backend_Manager
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
             $this->checkMigrationStatus();
+            $this->checkAddonUpdates();
         }
     }
 
@@ -114,6 +118,33 @@ class AAM_Backend_Manager
                 '<a href="#" id="download-migration-log">', '</a>',
                 '<a href="mailto:support@aamplugin.com">', '</a>'
             ));
+        }
+    }
+
+    /**
+     * Display notification if new version is available
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.4.2
+     */
+    protected function checkAddonUpdates()
+    {
+        $list = AAM_Addon_Repository::getInstance()->getList();
+        $url  = 'https://forum.aamplugin.com/d/530-the-new-version-of-is-available-for-download';
+
+        foreach($list as $addon) {
+            if ($addon['hasUpdate'] === true) {
+                AAM_Core_Console::add(
+                    sprintf(
+                        'The new version of ["%s"] is available for download. %s',
+                        $addon['title'],
+                        '<a href="' . $url . '" target="_blank">' . __('Learn more', AAM_KEY) . '</a>;'
+                    ),
+                    'strong'
+                );
+            }
         }
     }
 

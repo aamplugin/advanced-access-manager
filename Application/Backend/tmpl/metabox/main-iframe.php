@@ -1,9 +1,10 @@
 <?php
     /**
+     * @since 6.4.2 Styling notification metabox
      * @since 6.2.0 Added support & import/export modals
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.2.0
+     * @version 6.4.2
      * */
 ?>
 
@@ -28,7 +29,7 @@
 
             <div class="col-xs-12 col-md-4 aam-sidebar">
                 <?php if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) { ?>
-                    <div class="metabox-holder shared-metabox">
+                    <div class="metabox-holder shared-metabox aam-notification-metabox">
                         <div class="postbox">
                             <h3 class="hndle text-danger">
                                 <i class='icon-attention-circled'></i> <span><?php echo __('Notifications', AAM_KEY); ?></span>

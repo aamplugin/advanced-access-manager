@@ -1115,10 +1115,39 @@ input[type=radio]:checked + label:before {
     font-weight: 700;
 }
 
+.aam-notification-metabox  {
+  background-color: #CB413A;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.aam-notification-metabox .postbox {
+  border: 0;
+}
+
 .aam-error-list {
-    padding: 15px;
-    list-style: disc;
+    padding: 15px 25px 10px 25px;
+    list-style: none;
     margin-bottom: 0;
+}
+
+.aam-error-list > li::before {
+  content: "\2022";
+  color: #FFFFFF;
+  font-weight: 700;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+.aam-error-list a {
+  color: #FFFFFF !important;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.aam-error-list a:hover {
+  color: #F0F0F0 !important;
 }
 
 .aam-menu-capability, .aam-metabox-details {
