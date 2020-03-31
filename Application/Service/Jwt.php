@@ -239,7 +239,6 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      * @version 6.0.0
-     * @todo Remove in 6.5.0
      */
     public function validateTokenDeprecated(WP_REST_Request $request)
     {

@@ -2782,11 +2782,3 @@ msgstr ""
 #: tests/Addon/PlusPackage/ContentAccessTest.php:137
 msgid "AAM Test"
 msgstr ""
-
-#: tests/Addon/PlusPackage/ContentAccessTest.php:138
-msgid "Just for testing purposes"
-msgstr ""
-
-#: tests/Service/Core/CoreServiceTest.php:37
-msgid "<script>alert(1);</script>"
-msgstr ""

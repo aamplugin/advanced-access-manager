@@ -10,6 +10,7 @@
 /**
  * Secure Login service
  *
+ * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16.
  *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.1 Fixed bug with not being able to lock user
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.4.2
  */
 class AAM_Service_SecureLogin
 {
@@ -145,8 +146,11 @@ class AAM_Service_SecureLogin
      *
      * Register AAM authentication endpoint
      *
+     * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @return void
-     * @version 6.0.0
+     * @version 6.4.2
      */
     public function registerRESTfulRoute()
     {
@@ -178,6 +182,22 @@ class AAM_Service_SecureLogin
         );
 
         register_rest_route('aam/v2', '/authenticate', $config);
+
+        // For backward compatibility, keep /v1/authenticate endpoint
+        register_rest_route('aam/v1', '/authenticate', array(
+            'methods'  => 'POST',
+            'callback' => array($this, 'legacyAuthenticate'),
+            'args' => array(
+                'username' => array(
+                    'description' => __('Valid username.', AAM_KEY),
+                    'type'        => 'string',
+                ),
+                'password' => array(
+                    'description' => __('Valid password.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
+        ));
     }
 
     /**
@@ -187,12 +207,13 @@ class AAM_Service_SecureLogin
      *
      * @return WP_REST_Response
      *
-     * @since 6.4.0 Enhanced to support https://github.com/aamplugin/advanced-access-manager/issues/16
+     * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
+     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.4.2
      */
     public function authenticate(WP_REST_Request $request)
     {
@@ -226,6 +247,48 @@ class AAM_Service_SecureLogin
             $status = $e->getCode();
             $result = array(
                 'reason' => $e->getMessage()
+            );
+        }
+
+        return new WP_REST_Response($result, $status);
+    }
+
+    /**
+     * Authenticate user
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 6.4.2
+     */
+    public function legacyAuthenticate(WP_REST_Request $request)
+    {
+        _deprecated_function('aam/v1/authenticate', '6.4.2', 'aam/v2/authenticate');
+
+        $user = wp_signon(array(
+            'user_login'    => $request->get_param('username'),
+            'user_password' => $request->get_param('password')
+        ));
+
+        if (is_a($user, 'WP_User')) {
+            $status = 200;
+
+            // Making sure that token is issued
+            $request->set_param('issueJWT', true);
+
+            $data = apply_filters(
+                'aam_auth_response_filter',
+                array('user' => $user),
+                $request
+            );
+            $result = array_merge(array('user' => $user), $data['jwt']);
+        } else {
+            $status = 403;
+            $result = new WP_Error(
+                'rest_jwt_auth_failure',
+                strip_tags($user->get_error_message())
             );
         }
 
