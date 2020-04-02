@@ -10,12 +10,13 @@
 /**
  * Core AAM redirect handler
  *
+ * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/94
  * @since 6.0.5 Fixed bug where URL redirect was incorrectly validating destination
  *              URL
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.5
+ * @version 6.4.3
  */
 class AAM_Core_Redirect
 {
@@ -128,17 +129,18 @@ class AAM_Core_Redirect
      *
      * @return void
      *
+     * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/94
      * @since 6.0.5 Fixed bug where destination URL was not properly checked against
      *              current page URI
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.5
+     * @version 6.4.3
      */
     public static function doUrlRedirect($meta)
     {
         $dest = isset($meta['url']) ? $meta['url'] : null;
-        $code = isset($meta['code']) ? $meta['code'] : null;
+        $code = isset($meta['code']) ? $meta['code'] : 307;
 
         if ($dest !== AAM_Core_Request::server('REQUEST_URI')) {
             wp_safe_redirect($dest, $code);
