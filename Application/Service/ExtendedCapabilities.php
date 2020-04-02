@@ -12,12 +12,13 @@
  *
  * Add custom capabilities support that enhance AAM functionality
  *
+ * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/93
  * @since 6.1.0 Fixed the bug where aam_show_toolbar was not taken in consideration
  *              due to incorrect placement
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.4.3
  */
 class AAM_Service_ExtendedCapabilities
 {
@@ -67,12 +68,13 @@ class AAM_Service_ExtendedCapabilities
      *
      * @return void
      *
+     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/93
      * @since 6.1.0 Fixed the bug where aam_show_toolbar was not taken in
      *              consideration due to incorrect placement
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.4.3
      */
     protected function initializeHooks()
     {
@@ -84,7 +86,11 @@ class AAM_Service_ExtendedCapabilities
 
             // Screen options & contextual help hooks
             add_filter('screen_options_show_screen', array($this, 'screenOptions'));
-            add_filter('contextual_help', array($this, 'helpOptions'), 10, 3);
+            add_action('in_admin_header', function() {
+                if (!AAM_Core_API::isAAMCapabilityAllowed('aam_show_help_tabs')) {
+                    get_current_screen()->remove_help_tabs();
+                }
+            });
 
             // Permalink manager
             add_filter('get_sample_permalink_html', function ($html) {
@@ -156,28 +162,6 @@ class AAM_Service_ExtendedCapabilities
         }
 
         return $flag;
-    }
-
-    /**
-     * Check if user has access to the Help options
-     *
-     * @param array  $help
-     * @param mixed  $id
-     * @param object $screen
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function helpOptions($help, $id, $screen)
-    {
-        if (!AAM_Core_API::isAAMCapabilityAllowed('aam_show_help_tabs')) {
-            $screen->remove_help_tabs();
-            $help = array();
-        }
-
-        return $help;
     }
 
     /**
