@@ -10,6 +10,7 @@
 /**
  * Addon repository
  *
+ * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/92
  * @since 6.4.2 Implemented https://github.com/aamplugin/advanced-access-manager/issues/88
  * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.2
+ * @version 6.4.3
  */
 class AAM_Addon_Repository
 {
@@ -142,7 +143,7 @@ class AAM_Addon_Repository
                 'Plus Package',
                 'plus-package',
                 __('Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.', AAM_KEY),
-                '5.3.2'
+                '5.3.3'
             ),
             'aam-ip-check' => $this->buildAddonObject(
                 'IP Check',
@@ -170,7 +171,7 @@ class AAM_Addon_Repository
                 'Complete Package',
                 'complete-package',
                 __('Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.', AAM_KEY),
-                '5.2.2'
+                '5.2.3'
             )
         );
     }
@@ -185,19 +186,20 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/92
      * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.5 Added new `hasUpdate` flag
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.2
+     * @version 6.4.3
      */
     protected function buildAddonObject($title, $slug, $description, $version = null)
     {
         // Determining if there is newer version
-        $current_version = $this->getPluginVersion("aam-{$slug}/bootstrap.php");
+        $current = $this->getPluginVersion("aam-{$slug}/bootstrap.php");
 
-        if (version_compare($current_version, $version) === -1) {
+        if (!empty($current) && version_compare($current, $version) === -1) {
             $hasUpdate = true;
         } else {
             $hasUpdate = $this->hasPluginUpdate("aam-{$slug}/bootstrap.php");
@@ -205,7 +207,7 @@ class AAM_Addon_Repository
 
         return array(
             'title'       => $title,
-            'version'     => $current_version,
+            'version'     => $current,
             'isActive'    => $this->isPluginActive("aam-{$slug}/bootstrap.php"),
             'expires'     => $this->getExpirationDate("aam-{$slug}"),
             'hasUpdate'   => $hasUpdate,
