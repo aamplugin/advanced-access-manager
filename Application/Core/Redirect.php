@@ -105,17 +105,18 @@ class AAM_Core_Redirect
      *
      * @return void
      *
+     * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/94
      * @since 6.1.1 Defining default redirect code `307` if none provided
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.1
+     * @version 6.4.3
      */
     public static function doPageRedirect($meta)
     {
         $current = AAM_Core_API::getCurrentPost();
         $dest    = isset($meta['page']) ? $meta['page'] : null;
-        $code    = isset($meta['code']) ? $meta['code'] : 307;
+        $code    = !empty($meta['code']) ? $meta['code'] : 307;
 
         if (!empty($dest) && (empty($current) || ($current->ID !== intval($dest)))) {
             wp_safe_redirect(get_page_link($dest), $code);
@@ -140,7 +141,7 @@ class AAM_Core_Redirect
     public static function doUrlRedirect($meta)
     {
         $dest = isset($meta['url']) ? $meta['url'] : null;
-        $code = isset($meta['code']) ? $meta['code'] : 307;
+        $code = !empty($meta['code']) ? $meta['code'] : 307;
 
         if ($dest !== AAM_Core_Request::server('REQUEST_URI')) {
             wp_safe_redirect($dest, $code);

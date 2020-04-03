@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.3.2
-Stable tag: 6.4.2
+Tested up to: 5.4.0
+Stable tag: 6.4.3
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,11 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.4.3 =
+* Fixed Bug: Invalid AAM notifications [https://github.com/aamplugin/advanced-access-manager/issues/92](https://github.com/aamplugin/advanced-access-manager/issues/92)
+* Fixed Bug: HTTP redirect status code must be a redirection code, 3xx [https://github.com/aamplugin/advanced-access-manager/issues/94](https://github.com/aamplugin/advanced-access-manager/issues/94)
+* Fixed Bug: PHP Deprecated: contextual_help is "deprecated" since version 3.3.0 [https://github.com/aamplugin/advanced-access-manager/issues/93](https://github.com/aamplugin/advanced-access-manager/issues/93)
 
 = 6.4.2 =
 * Fixed Bug: Plus Package add-on: Call to undefined function wp_parse_list() [https://github.com/aamplugin/advanced-access-manager/issues/87](https://github.com/aamplugin/advanced-access-manager/issues/87)
