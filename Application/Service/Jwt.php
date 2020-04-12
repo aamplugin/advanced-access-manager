@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
  * @since 6.4.0 Added the ability to issue refreshable token via API.
  *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.5.0
  */
 class AAM_Service_Jwt
 {
@@ -693,8 +694,11 @@ class AAM_Service_Jwt
      *
      * @return object|null
      *
+     * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.5.0
      */
     protected function extractToken()
     {
@@ -706,7 +710,14 @@ class AAM_Service_Jwt
         foreach ($container as $method) {
             switch (strtolower(trim($method))) {
                 case 'header':
-                    $jwt = $this->getFromServer('HTTP_AUTHENTICATION');
+                    // Fallback for Authorization header
+                    $jwt1 = $this->getFromServer('HTTP_AUTHORIZATION');
+                    $jwt2 = $this->getFromServer(AAM_Core_Config::get(
+                        'authentication.jwt.header',
+                        'HTTP_AUTHENTICATION'
+                    ));
+
+                    $jwt  = (!empty($jwt1) ? $jwt1 : $jwt2);
                     break;
 
                 case 'cookie':
