@@ -10,6 +10,7 @@
 namespace AAM\UnitTest\Service\LoginRedirect;
 
 use WP_REST_Request,
+    AAM_Service_Jwt,
     AAM_Core_Subject_User,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
@@ -202,4 +203,42 @@ class LoginRedirectTest extends TestCase
 
         $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $redirect);
     }
+
+    /**
+     * Test that user is redirected with passwordless URL
+     *
+     * Verify that user is redirected to the proper destination when he uses passwordless
+     * URL (with JWT token as query param)
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.5.0
+     */
+    public function testLoginRedirectWithJWTToken()
+    {
+        $service = AAM_Service_Jwt::getInstance();
+
+        // Issue a token and set it as the query param
+        $_GET['aam-jwt'] = $service->issueToken(AAM_UNITTEST_JOHN_ID)->token;
+
+        // Set custom user's login redirect
+        $redirect = \AAM::api()->getUser(AAM_UNITTEST_JOHN_ID)->getObject('loginRedirect');
+        $redirect->updateOptionItem('login.redirect.type', 'page');
+        $redirect->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID);
+        $this->assertTrue($redirect->save());
+
+        // No need to generate Auth cookies
+        add_filter('send_auth_cookies', '__return_false');
+
+        AAM_Service_Jwt::getInstance()->authenticateUser();
+
+        $this->assertContains(
+            'Location: ' . get_page_link(AAM_UNITTEST_PAGE_ID), xdebug_get_headers()
+        );
+
+        // Reset $_GET
+        unset($_GET['aam-jwt']);
+    }
+
 }

@@ -11,6 +11,7 @@
  * JWT Token service
  *
  * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
+ *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
  * @since 6.4.0 Added the ability to issue refreshable token via API.
  *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
@@ -622,8 +623,11 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.0
      */
     public function authenticateUser()
     {
@@ -647,9 +651,15 @@ class AAM_Service_Jwt
 
             do_action('wp_login', $user->user_login, $user);
 
-            // finally just redirect user to the homepage
-            wp_safe_redirect(get_home_url());
-            exit;
+            // Determine where to redirect user and safely redirect & finally just
+            // redirect user to the homepage
+            wp_safe_redirect(apply_filters('login_redirect', admin_url(), '', $user));
+
+            // Halt the execution. Redirect should carry user away if this is not
+            // a CLI execution (e.g. Unit Test)
+            if (php_sapi_name() !== 'cli') {
+                exit;
+            }
         }
     }
 

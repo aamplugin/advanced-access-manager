@@ -12,10 +12,11 @@
  *
  * @package AAM
  *
+ * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
  * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the class
  *
- * @version 6.4.0
+ * @version 6.5.0
  */
 class AAM_Service_LoginRedirect
 {
@@ -150,12 +151,17 @@ class AAM_Service_LoginRedirect
      *
      * @return string
      *
+     * @since 6.5.0 Fixed the way login redirect is computed
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.0
      */
     public function getLoginRedirect($redirect, $requested, $user)
     {
-        if (is_a($user, 'WP_User') && ($requested === admin_url())) {
+        if (is_a($user, 'WP_User')
+                && in_array($requested, array('', admin_url()), true)
+        ) {
             $requested = $this->getUserRedirect($user);
             $redirect  = (!empty($requested) ? $requested : $redirect);
         }
