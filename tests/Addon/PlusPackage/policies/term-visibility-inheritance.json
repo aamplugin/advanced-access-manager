@@ -1,0 +1,14 @@
+{
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Taxonomy:category:terms",
+            "Action": "List"
+        },
+        {
+            "Effect": "allow",
+            "Resource": "Term:category:level-2",
+            "Action": "List"
+        }
+    ]
+}

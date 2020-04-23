@@ -57,6 +57,28 @@ class PolicyServiceIntegrationTest extends TestCase
     }
 
     /**
+     * Test that visibility settings are inherited
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.5.0
+     */
+    public function testTermVisibilityIntegration()
+    {
+        $this->preparePlayground('term-visibility-inheritance');
+
+        $ids = get_terms(array(
+            'taxonomy'   => 'category',
+            'fields'     => 'ids',
+            'hide_empty' => false
+        ));
+
+        $this->assertContains(intval(AAM_UNITTEST_CATEGORY_LEVEL_2_ID), $ids);
+        $this->assertContains(intval(AAM_UNITTEST_CATEGORY_LEVEL_3_ID), $ids);
+    }
+
+    /**
      * Test that Access Policy integrates with Content service through PostType
      * resource
      *
