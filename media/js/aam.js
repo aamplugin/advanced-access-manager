@@ -515,7 +515,15 @@
                     },
                     success: function (response) {
                         if (response.status === 'success') {
-                            $('#role-list').DataTable().ajax.reload();
+                            var subject = getAAM().getSubject();
+
+                            // Bug fix https://github.com/aamplugin/advanced-access-manager/issues/102
+                            if (subject.type === 'role' && subject.id === $(_this).data('role')) {
+                                window.localStorage.removeItem('aam-subject');
+                                location.reload();
+                            } else {
+                                $('#role-list').DataTable().ajax.reload();
+                            }
                         } else {
                             getAAM().notification('danger', getAAM().__('Failed to delete role'));
                         }
