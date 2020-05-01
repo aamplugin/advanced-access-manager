@@ -1,17 +1,18 @@
 <?php
     /**
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/104
      * @since 6.4.2 Styling notification metabox
      * @since 6.2.0 Added support & import/export modals
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.4.2
+     * @version 6.5.0
      * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php echo static::loadTemplate(__DIR__ . '/iframe-header.php'); ?>
 
-    <div class="wrap" id="aam-container">
+    <div class="wrap">
         <?php echo static::loadTemplate(dirname(__DIR__) . '/page/current-subject.php'); ?>
 
         <div class="row">

@@ -614,7 +614,7 @@ class AAM_Service_AccessPolicy
             $type     = (isset($value['type']) ? $value['type'] : 'default');
 
             // Populate the object
-            $parsed["{$area}.redirect.type"]    = $type;
+            $parsed["{$area}.redirect.type"] = $type;
 
             if (!empty($value['destination'])) {
                 $parsed["{$area}.redirect.{$type}"] = $value['destination'];

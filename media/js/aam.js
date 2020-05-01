@@ -5169,6 +5169,12 @@
         clipboard.on('error', function (e) {
             getAAM().notification('danger', getAAM().__('Failed to save data to clipboard'));
         });
+
+        // Listen to page size change and update iframe height accordingly
+        const container = document.getElementById('aam-container');
+        new ResizeSensor(container, function() {
+            window.parent.postMessage({frameHeight: container.clientHeight}, '*');
+        });
     };
 
     /**
