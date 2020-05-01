@@ -10,11 +10,12 @@
 /**
  * Metabox object
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
  * @since 6.2.2 Added `aam_metabox_is_hidden_filter` filter
  * @since 6.0.0 Initial implementation of the method
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.5.0
  */
 class AAM_Core_Object_Metabox extends AAM_Core_Object
 {
@@ -28,7 +29,11 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.0.0
+     *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.5.0
      */
     protected function initialize()
     {
@@ -40,7 +45,13 @@ class AAM_Core_Object_Metabox extends AAM_Core_Object
         // example, this hooks is used by Access Policy service
         $option = apply_filters('aam_metabox_object_option_filter', $option, $this);
 
-        $this->setOption(is_array($option) ? $option : array());
+        // Making sure that all menu keys are lowercase
+        $normalized = array();
+        foreach($option as $key => $val) {
+            $normalized[strtolower($key)] = $val;
+        }
+
+        $this->setOption(is_array($normalized) ? $normalized : array());
     }
 
     /**

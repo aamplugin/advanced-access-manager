@@ -10,12 +10,13 @@
 /**
  * Menu object
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
  * @since 6.2.2 Added new filter `aam_backend_menu_is_restricted_filter` so it can
  *              be integrated with access policy wildcard
  * @since 6.0.0 Initial implementation of the method
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.5.0
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
@@ -29,7 +30,11 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.0.0
+     *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @version 6.5.0
      */
     protected function initialize()
     {
@@ -41,7 +46,13 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
         // example, this hooks is used by Access Policy service
         $option = apply_filters('aam_menu_object_option_filter', $option, $this);
 
-        $this->setOption(is_array($option) ? $option : array());
+        // Making sure that all menu keys are lowercase
+        $normalized = array();
+        foreach($option as $key => $val) {
+            $normalized[strtolower($key)] = $val;
+        }
+
+        $this->setOption(is_array($normalized) ? $normalized : array());
     }
 
     /**
@@ -55,12 +66,12 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.2
+     * @version 6.5.0
      */
     public function isRestricted($menu)
     {
         // Decode URL in case of any special characters like &amp;
-        $s = htmlspecialchars_decode($menu);
+        $s = strtolower(htmlspecialchars_decode($menu));
 
         if (!in_array($s, array('index.php', 'menu-index.php'))) {
             $options = $this->getOption();

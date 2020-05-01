@@ -17,7 +17,7 @@ use AAM,
 
 /**
  * Test AAM access settings inheritance mechanism for the Metaboxes & Widgets service
- * 
+ *
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  * @version 6.0.0
  */
@@ -28,14 +28,14 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test to insure that access settings are stored property on the User level
-     * 
+     *
      * A. Test that metabox is stored to the database with "true" flag and true
      *    is returned by AAM_Core_Subject_User::updateOption method;
      * B. Test that information is actually stored property in the database and can
      *    be retrieved successfully.
      *
      * @return void
-     * 
+     *
      * @access public
      * @see AAM_Core_Subject_User::updateOption
      * @version 6.0.0
@@ -46,27 +46,27 @@ class SingleRoleInheritanceTest extends TestCase
         $object = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
 
         // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('widgets|WP_Widget_Media_Video', true)->save());
+        $this->assertTrue($object->updateOptionItem('widgets|wp_widget_media_video', true)->save());
 
         // Read from the database saved values and assert that we have
         // Array (
-        //  widgets|WP_Widget_Media_Video => true
+        //  widgets|wp_widget_media_video => true
         // )
         $option = $user->readOption(AAM_Core_Object_Metabox::OBJECT_TYPE);
-        $this->assertSame(array('widgets|WP_Widget_Media_Video' => true), $option);
+        $this->assertSame(array('widgets|wp_widget_media_video' => true), $option);
     }
 
     /**
      * Test that access settings are inherited from the parent role property
-     * 
+     *
      * This test is designed to verify that access settings are propagated property
-     * when there is only one role assigned to a user. 
-     * 
+     * when there is only one role assigned to a user.
+     *
      * A. Test that settings can be stored for the parent role;
      * B. Test that access settings are propagated property to the User level
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -100,20 +100,20 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that access settings are propagated and merged properly
-     * 
+     *
      * The test is designed to verify that access settings are propagated properly
      * from the parent role and merged well with explicitly defined access settings on
      * the User level.
-     * 
+     *
      * The expected result is to have combined array of access settings from the parent
      * role and specific user.
-     * 
+     *
      * A. Test that access settings are stored for the parent role;
      * B. Test that access settings are stored for the user;
      * C. Test that access settings are propagated and merged properly;
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -126,7 +126,7 @@ class SingleRoleInheritanceTest extends TestCase
 
         // Save access settings for the role and make sure they are saved property
         // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('widgets|WP_Widget_Media_Video', true)->save());
+        $this->assertTrue($object->updateOptionItem('widgets|wp_widget_media_video', true)->save());
 
         // Save access setting for the user and make sure they are saved property
         $metabox = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true);
@@ -138,7 +138,7 @@ class SingleRoleInheritanceTest extends TestCase
         $metabox = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
         $this->assertSame(
             array(
-                'widgets|WP_Widget_Media_Video' => true, 
+                'widgets|wp_widget_media_video' => true,
                 'dashboard|dashboard_quick_press' => false
             ),
             $metabox->getOption()
@@ -147,15 +147,15 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that the full inheritance mechanism is working as expected
-     * 
+     *
      * Make sure that access settings are propagated and merged properly from the top
      * (Default Level)to the bottom (User Level).
-     * 
+     *
      * A. Assert that access settings are stored properly for each Access Level;
      * B. Assert that access settings are merged properly and assigned to User Level;
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -170,7 +170,7 @@ class SingleRoleInheritanceTest extends TestCase
         $defaultMetabox = $default->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true);
 
         // Save access settings for all subjects
-        $this->assertTrue($userMetabox->updateOptionItem('widgets|WP_Widget_Media_Video', true)->save());
+        $this->assertTrue($userMetabox->updateOptionItem('widgets|wp_widget_media_video', true)->save());
         $this->assertTrue($roleMetabox->updateOptionItem('dashboard|dashboard_quick_press', true)->save());
         $this->assertTrue($defaultMetabox->updateOptionItem('post|publish_post', true)->save());
 
@@ -183,7 +183,7 @@ class SingleRoleInheritanceTest extends TestCase
             array(
                 'post|publish_post' => true,
                 'dashboard|dashboard_quick_press' => true,
-                'widgets|WP_Widget_Media_Video' => true
+                'widgets|wp_widget_media_video' => true
             ),
             $metabox->getOption()
         );
@@ -191,16 +191,16 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that access settings overwrite works as expected
-     * 
+     *
      * The expected result is lower Access Level overwrite access settings from the
      * higher Access Level.
-     * 
+     *
      * A. Assert that access settings are stored properly for the parent role;
-     * B. Assert that access settings are stored properly for the specific user; 
+     * B. Assert that access settings are stored properly for the specific user;
      * C. Assert that access settings are overwritten properly on the User Level;
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -213,18 +213,18 @@ class SingleRoleInheritanceTest extends TestCase
 
         // Save access settings for the role and make sure they are saved property
         // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('widgets|WP_Widget_Media_Video', true)->save());
+        $this->assertTrue($object->updateOptionItem('widgets|wp_widget_media_video', true)->save());
 
         // Save access setting for the user and make sure they are saved property
         $metabox = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true);
-        $this->assertTrue($metabox->updateOptionItem('widgets|WP_Widget_Media_Video', false)->save());
+        $this->assertTrue($metabox->updateOptionItem('widgets|wp_widget_media_video', false)->save());
 
         // Reset cache and try to kick-in the inheritance mechanism
         $this->_resetSubjects();
 
         $metabox = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
         $this->assertSame(
-            array('widgets|WP_Widget_Media_Video' => false), $metabox->getOption()
+            array('widgets|wp_widget_media_video' => false), $metabox->getOption()
         );
     }
 

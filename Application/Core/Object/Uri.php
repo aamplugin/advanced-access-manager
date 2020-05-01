@@ -10,12 +10,13 @@
 /**
  * URI object
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
  * @since 6.3.0 Fixed bug where home page could not be protected
  * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.5.0
  */
 class AAM_Core_Object_Uri extends AAM_Core_Object
 {
@@ -30,10 +31,11 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     /**
      * @inheritdoc
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
      * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
      * @since 6.0.0 Initial implementation of the method
      *
-     * @version 6.1.0
+     * @version 6.5.0
      */
     protected function initialize()
     {
@@ -45,7 +47,13 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
         // example, this hooks is used by Access Policy service
         $option = apply_filters('aam_uri_object_option_filter', $option, $this);
 
-        $this->setOption(is_array($option) ? $option : array());
+        // Making sure that all menu keys are lowercase
+        $normalized = array();
+        foreach($option as $key => $val) {
+            $normalized[strtolower($key)] = $val;
+        }
+
+        $this->setOption(is_array($normalized) ? $normalized : array());
     }
 
     /**
@@ -67,6 +75,9 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     {
         $match = null;
 
+        // Normalize the search URI
+        $s = strtolower(rtrim($s,  '/'));
+
         foreach ($this->normalizeOrder() as $uri => $rule) {
             $meta = wp_parse_url($uri);
             $out  = array();
@@ -75,8 +86,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
                 parse_str($meta['query'], $out);
             }
 
-            // Normalize the search and target URIs
-            $s    = rtrim($s,  '/');
+            // Normalize the target URI
             $path = rtrim(isset($meta['path']) ? $meta['path'] : '', '/');
 
             // Check if two URIs are equal

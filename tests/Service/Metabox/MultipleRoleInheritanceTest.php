@@ -108,7 +108,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // add additional settings
         $this->assertTrue(
             $role->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true)->updateOptionItem(
-                'widgets|WP_Widget_Media_Video', true
+                'widgets|wp_widget_media_video', true
             )->save()
         );
 
@@ -117,7 +117,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
             // Check if save returns positive result
             $this->assertTrue(
                 $sibling->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true)->updateOptionItem(
-                    'widgets|WP_Widget_Media_Video', false
+                    'widgets|wp_widget_media_video', false
                 )->save()
             );
         }
@@ -127,11 +127,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Assert that we have both roles merged result is as following
         // Array (
-        //  widgets|WP_Widget_Media_Video => true
+        //  widgets|wp_widget_media_video => true
         // )
         $option = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)->getOption();
         $this->assertSame(
-            array('widgets|WP_Widget_Media_Video' => true), $option
+            array('widgets|wp_widget_media_video' => true), $option
         );
     }
 
@@ -156,7 +156,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // add additional settings
         $this->assertTrue(
             $role->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true)->updateOptionItem(
-                'widgets|WP_Widget_Media_Video', true
+                'widgets|wp_widget_media_video', true
             )->save()
         );
 
@@ -165,7 +165,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
             // Check if save returns positive result
             $this->assertTrue(
                 $sibling->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE, null, true)->updateOptionItem(
-                    'widgets|WP_Widget_Media_Video', false
+                    'widgets|wp_widget_media_video', false
                 )->save()
             );
         }
@@ -181,11 +181,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Assert that we have both roles merged result is as following
         // Array (
-        //  widgets|WP_Widget_Media_Video => false
+        //  widgets|wp_widget_media_video => false
         // )
         $option = $user->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)->getOption();
         $this->assertSame(
-            array('widgets|WP_Widget_Media_Video' => false), $option
+            array('widgets|wp_widget_media_video' => false), $option
         );
     }
 

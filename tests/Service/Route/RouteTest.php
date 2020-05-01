@@ -96,4 +96,41 @@ class RouteTest extends TestCase
         $this->assertEquals('Access Denied', $error->get_error_message());
     }
 
+    /**
+     * Asset case-insensitive access to the endpoint
+     *
+     * @return void
+     *
+     * @link https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @access public
+     * @version 6.5.0
+     */
+    public function testCaseInsensitiveRESTfulEndpoint()
+    {
+        global $wp;
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+
+        // Restrict AAM authentication endpoint
+        $this->assertTrue(
+            $object->updateOptionItem('restful|/aam/v2/authenticate|post', true)->save()
+        );
+
+        // Register all the necessary hooks
+
+        $wp->query_vars['rest_route'] = true;
+        AAM_Service_Route::getInstance()->registerRouteControllers();
+
+        $server = rest_get_server();
+
+        $request = new WP_REST_Request('POST', '/aam/v2/Authenticate');
+        $request->set_param('username', AAM_UNITTEST_USERNAME);
+        $request->set_param('password', AAM_UNITTEST_PASSWORD);
+
+        $error = $server->dispatch($request);
+
+        $this->assertEquals('WP_Error', get_class($error));
+        $this->assertEquals('Access Denied', $error->get_error_message());
+    }
+
 }

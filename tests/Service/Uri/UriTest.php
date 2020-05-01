@@ -60,6 +60,41 @@ class UriTest extends TestCase
     }
 
     /**
+     * Test case-insensitive rule
+     *
+     * @return void
+     *
+     * @link https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @access public
+     * @version 6.5.0
+     */
+    public function testCaseInsensitive()
+    {
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        $result = $object->updateOptionItem('/hello-world', array(
+            'type'   => 'default',
+            'action' => null
+        ))->save();
+
+        $this->assertTrue($result);
+
+        // Override the default handlers so we can suppress die exit
+        add_filter('wp_die_handler', function() {
+            return function($message, $title) {
+                _default_wp_die_handler($message, $title, array('exit' => false));
+            };
+        }, PHP_INT_MAX);
+        $_SERVER['REQUEST_URI'] = '/Hello-world';
+
+        ob_start();
+        AAM_Service_Uri::getInstance()->authorizeUri();
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertStringContainsString('Access Denied', $content);
+    }
+
+    /**
      * Test custom wp_die message
      *
      * @return void
