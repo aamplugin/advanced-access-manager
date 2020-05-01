@@ -1,9 +1,10 @@
 <?php
     /**
+     * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/107
      * @since 6.2.0 Added "Hidden" modal for more granular access controls
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.2.0
+     * @version 6.5.0
      * */
 ?>
 
@@ -55,7 +56,7 @@
         </tbody>
     </table>
 
-    <div class="modal fade" id="modal-hidden" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-hidden" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -109,7 +110,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-teaser" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-teaser" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -131,7 +132,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-limited" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-limited" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -161,7 +162,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-redirect" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-redirect" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -234,7 +235,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-password" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-password" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -255,7 +256,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-cease" tabindex="-1" role="dialog">
+    <div class="modal fade" data-backdrop="false" id="modal-cease" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
