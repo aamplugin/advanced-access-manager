@@ -296,36 +296,6 @@ class ContentAccessTest extends TestCase
     }
 
     /**
-     * Test that navigation menu is filtered as expected
-     *
-     * @return void
-     *
-     * @access public
-     * @version 5.0.0
-     */
-    public function testFilterNavMenu()
-    {
-        $user = AAM::getUser();
-        $role = $user->getParent(); // Administrator role
-
-        $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
-        );
-
-       $this->assertTrue($object->updateOptionItem('term/hidden', true)->save());
-
-        // Reset all internal cache
-        $this->_resetSubjects();
-        ContentHooks::bootstrap()->resetCache();
-
-        $menu = wp_get_nav_menu_items(AAM_UNITTEST_NAV_MENU_NAME);
-
-        $this->assertCount(0, array_filter($menu, function($item) {
-            return $item->object_id === AAM_UNITTEST_CATEGORY_ID && $item->object === 'category';
-        }));
-    }
-
-    /**
      * Test that access is denied to browse the category
      *
      * @return void

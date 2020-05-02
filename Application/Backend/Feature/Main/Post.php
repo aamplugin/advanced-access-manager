@@ -10,6 +10,7 @@
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/89
  * @since 6.3.1 Fixed bug with incorrectly escaped passwords and teaser messages
  * @since 6.3.0 Fixed bug with PHP noticed that was triggered if password was not
  *              defined
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.1
+ * @version 6.5.0
  */
 class AAM_Backend_Feature_Main_Post
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -118,8 +119,11 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return string
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/89
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.0
      */
     public function getAccessForm($id, $type)
     {
@@ -176,7 +180,7 @@ class AAM_Backend_Feature_Main_Post
 
             case 'post':
                 $args['postType'] = get_post_type_object($object->post_type);
-                $args['options']  = $this->getAccessOptionList();
+                $args['options']  = $this->getAccessOptionList($object->post_type);
 
                 $response = $view->loadPartial('post-access-form', $args);
                 break;
@@ -216,28 +220,37 @@ class AAM_Backend_Feature_Main_Post
     /**
      * Get post object access options
      *
+     * @param string $post_type
+     *
      * @return array
      *
+     * @since 6.5.0 Added new param $post_type to filter out options by post type
      * @since 6.2.0 Added additional argument "current subject" to the
      *              `aam_post_access_options_filter` filter
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.5.0
      */
-    protected function getAccessOptionList()
+    protected function getAccessOptionList($post_type)
     {
-        $list = apply_filters(
+        $response    = array();
+        $excluded    = array($post_type, $this->getSubject()->getSubjectType());
+        $option_list = apply_filters(
             'aam_post_access_options_filter',
             AAM_Backend_View_PostOptionList::get(),
             $this->getSubject()
         );
 
-        return array_filter($list, function ($opt) {
-            $type = $this->getSubject()->getSubjectType();
+        foreach($option_list as $key => $data) {
+            if (empty($data['exclude'])
+                || (count(array_intersect($data['exclude'], $excluded)) === 0)
+            ) {
+                $response[$key] = $data;
+            }
+        }
 
-            return empty($opt['exclude']) || !in_array($type, $opt['exclude'], true);
-        });
+        return $response;
     }
 
     /**
@@ -749,19 +762,25 @@ class AAM_Backend_Feature_Main_Post
      */
     protected function retrievePostTypeObjects($type)
     {
-        $list     = $this->preparePostTermList($type);
-        $subject  = $this->getSubject();
-        $response = array(
+        $list      = $this->preparePostTermList($type);
+        $subject   = $this->getSubject();
+        $post_type = get_post_type_object($type);
+        $response  = array(
             'data'            => array(),
             'recordsTotal'    => $list->total,
             'recordsFiltered' => $list->filtered
         );
 
+
         foreach ($list->records as $record) {
             if (isset($record->ID)) { // this is a post
-                $link = get_edit_post_link($record->ID, 'link');
+                $parent = $link = null;
 
-                $parent = '';
+                if ($record->post_type === 'nav_menu_item') {
+                    $this->_decorateNavigationMenuItem($record);
+                } elseif ($post_type->show_ui === true) {
+                    $link = get_edit_post_link($record->ID, 'link');
+                }
 
                 if (!empty($record->post_parent)) {
                     $p = get_post($record->post_parent);
@@ -799,6 +818,47 @@ class AAM_Backend_Feature_Main_Post
     }
 
     /**
+     * Decorate navigation menu item
+     *
+     * @param WP_Post $item
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.5.0
+     */
+    private function _decorateNavigationMenuItem($item)
+    {
+        $meta = get_post_meta($item->ID);
+        $pfx  = '_menu_item_';
+
+        // Determining type of menu
+        $type = isset($meta["{$pfx}type"]) ? array_shift($meta["{$pfx}type"]) : null;
+        $obj  = isset($meta["{$pfx}object"]) ? array_shift($meta["{$pfx}object"]) : '';
+        $id   = isset($meta["{$pfx}object_id"]) ? array_shift($meta["{$pfx}object_id"]) : 0;
+
+        if ($type === 'taxonomy') {
+            $object = get_term($id, $obj);
+
+        	if (is_a($object, 'WP_Term')) {
+        		$item->post_title = $object->name;
+        	}
+        } elseif ($type === 'post_type') {
+            $object = get_post($id);
+
+            if (is_a($object, 'WP_Post')) {
+                $item->post_title = $object->post_title;
+            }
+        } elseif ($type === 'post_type_archive') {
+            $object = get_post_type_object($obj);
+
+            if (is_a($object, 'WP_Post_Type')) {
+                $item->post_title = $object->labels->archives;
+            }
+        }
+    }
+
+    /**
      * Prepare the term row for the table view
      *
      * @param WP_Term $term
@@ -811,10 +871,18 @@ class AAM_Backend_Feature_Main_Post
      */
     private function _prepareTermRow($term, $type = null)
     {
+        $taxonomy = get_taxonomy($term->taxonomy);
+
+        if ($taxonomy->show_ui) {
+            $link = get_edit_term_link($term->term_id, $term->taxonomy);
+        } else {
+            $link = null;
+        }
+
         // Prepare list of actions
         $actions = apply_filters(
             'aam_term_row_actions',
-            array('manage', 'edit'),
+            array('manage', ($link ? 'edit' : 'no-edit')),
             $this->getSubject(),
             $term,
             $type
@@ -828,7 +896,7 @@ class AAM_Backend_Feature_Main_Post
 
         return array(
             $id,
-            get_edit_term_link($term->term_id, $term->taxonomy),
+            $link,
             ($is_cat ? 'cat' : 'tag'),
             $term->name,
             implode(',', $actions),
