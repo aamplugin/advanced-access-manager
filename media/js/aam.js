@@ -772,8 +772,8 @@
                     }
 
                     //add subtitle
-                    var expire = (data[5] ? '; <i class="icon-clock"></i>' : '');
-                    var role   = (data[1] ? `${getAAM().__('Role')}: ${data[1]}; ` : '');
+                    var expire = (data[5] ? '; <i class="icon-clock text-danger"></i>' : '');
+                    var role   = (data[1] ? `${getAAM().__('Role')}: <b>${data[1]}</b>; ` : '');
                     $('td:eq(0)', row).append(
                         $('<i/>', { 'class': 'aam-row-subtitle' }).html(
                             `${role}${getAAM().__('ID')}: <b>${data[0]}</b> ${expire}`
