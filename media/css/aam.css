@@ -110,6 +110,7 @@
 .icon-tag:before { content: '\e821' !important; } /* 'î ¡' */
 .icon-file-code:before { content: '\f1c9' !important; } /* 'ï' */
 .icon-chat:before { content: '\e825' !important; } /* 'î ¥' */
+.icon-ccw:before { content: '\e827' !important; } /* 'î §' */
 
 .icon-image-40 {
   font-size: 40px;
@@ -425,12 +426,21 @@ a.btn:focus, a.btn:active {
   top: 15px;
   right: 30px;
   font-size: 1.5em;
-  color:
-  #FFF;
+  color:#FFF;
+  display: table;
+}
+
+.subject-top-actions .action-row {
+  display: table-row;
+}
+
+.subject-top-actions .action-row div {
+  display: inline-block;
 }
 
 .subject-top-actions a > i {
   color: #FFFFFF !important;
+  display: table-cell;
 }
 
 .btn-group-xs > .btn, .btn-xs {

@@ -10,11 +10,12 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
  * @since 6.2.0 Added Import/Export functionality
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.5.0
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -60,6 +61,24 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
     public function clearSettings()
     {
         AAM_Core_API::clearSettings();
+
+        return wp_json_encode(array('status' => 'success'));
+    }
+
+    /**
+     * Reset access settings for specific subject
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.5.0
+     */
+    public function clearSubjectSettings()
+    {
+        $subject  = AAM_Backend_Subject::getInstance()->getSubject();
+        $xpath    = $subject::UID . '.' . $subject->getId();
+
+        AAM_Core_AccessSettings::getInstance()->delete($xpath)->save();
 
         return wp_json_encode(array('status' => 'success'));
     }

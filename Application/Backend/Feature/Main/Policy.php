@@ -10,6 +10,7 @@
 /**
  * Access Policy UI manager
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
  * @since 6.3.0 Enhanced service to be able to generate policy into new policy
  *              post type record
  * @since 6.2.2 Integration with multisite network where user is allowed to manage
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.5.0
  */
 class AAM_Backend_Feature_Main_Policy
 extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -53,6 +54,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      *
      * @return void
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
      * @since 6.3.0 Enhanced per https://github.com/aamplugin/advanced-access-manager/issues/27
      * @since 6.2.0 Registering a new action to allow the Access Policy generation
      * @since 6.1.0 Fixed the bug where "Attach to Default" button was not showing at
@@ -60,7 +62,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.5.0
      */
     public function __construct()
     {
@@ -90,20 +92,9 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
             return $content;
         }, 10, 2);
 
-        add_action('aam_top_subject_panel_action', function() {
-            echo AAM_Backend_View::loadPartial('access-policy-action');
-        });
-
-        // Hook into Users/Roles Manager and add new action
         if (current_user_can(AAM_Backend_Feature_Main_Policy::ACCESS_CAPABILITY)) {
-            add_filter('aam_top_subject_actions_filter', function($actions) {
-                $actions[] = array(
-                    'icon'    => 'icon-file-code',
-                    'id'      => 'generate-access-policy',
-                    'tooltip' => __('Generate Access Policy', AAM_KEY)
-                );
-
-                return $actions;
+            add_action('aam_top_subject_panel_action', function() {
+                echo AAM_Backend_View::loadPartial('access-policy-action');
             });
         }
     }

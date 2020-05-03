@@ -4740,6 +4740,55 @@
 
         })(jQuery);
 
+        /**
+         * Top subject bar
+         */
+        (function ($) {
+            $('#reset-subject-settings').bind('click', function() {
+                const subject = getAAM().getSubject();
+
+                $('#reset-subject-msg').html(
+                    $('#reset-subject-msg')
+                        .data('message')
+                        .replace('%s', '<b>' + subject.name + '</b>')
+                );
+                $('#reset-subject-modal').modal('show');
+            });
+
+            $('#reset-subject-btn').bind('click', function() {
+                const _this = $(this);
+
+                $.ajax(getLocal().ajaxurl, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'aam',
+                        sub_action: 'Settings_Manager.clearSubjectSettings',
+                        _ajax_nonce: getLocal().nonce,
+                        subject: getAAM().getSubject().type,
+                        subjectId: getAAM().getSubject().id
+                    },
+                    beforeSend: function () {
+                        _this.text(getAAM().__('Resetting...')).prop('disabled', true);
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            getAAM().fetchContent('main');
+                            $('#reset-subject-modal').modal('hide');
+                        } else {
+                            getAAM().notification('danger', response.reason);
+                        }
+                    },
+                    error: function () {
+                        getAAM().notification('danger');
+                    },
+                    complete: function () {
+                        _this.text(getAAM().__('Reset')).prop('disabled', false);
+                    }
+                });
+            });
+        })(jQuery);
+
         getAAM().fetchContent('main'); //fetch default AAM content
     }
 

@@ -61,7 +61,7 @@ class AAM_Backend_View_Localization
             'Failed to update role' => __('Failed to update role', AAM_KEY),
             'Update' => __('Update', AAM_KEY),
             'Reset' => __('Reset', AAM_KEY),
-            'Resetting...' => __('Update...', AAM_KEY),
+            'Resetting...' => __('Resetting...', AAM_KEY),
             'Deleting...' => __('Deleting...', AAM_KEY),
             'Failed to delete role' => __('Failed to delete role', AAM_KEY),
             'Delete Role' => __('Delete Role', AAM_KEY),
