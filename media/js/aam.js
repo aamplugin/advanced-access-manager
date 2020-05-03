@@ -2937,7 +2937,7 @@
                             }
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 1, 5, 6] },
+                            { visible: false, targets: [0, 1, 5, 6, 7] },
                             { orderable: false, targets: [0, 1, 2, 4, 5, 6] }
                         ],
                         language: {
@@ -3030,7 +3030,7 @@
                                 // Add additional information about post type
                                 $('td:eq(1)', row).append(
                                     $('<i class="aam-row-subtitle"></i>')
-                                    .append($('<span/>').text(getAAM().__('ID:') + ' '))
+                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
                                     .append($('<strong/>').text(data[0]))
                                 );
                             } else if ($.inArray(data[2], ['taxonomy-category', 'taxonomy-tag']) !== -1) {
@@ -3056,7 +3056,7 @@
 
                                 $('td:eq(1)', row).append(
                                     $('<i class="aam-row-subtitle"></i>')
-                                    .append($('<span/>').text(getAAM().__('ID:') + ' '))
+                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
                                     .append($('<strong/>').text(data[0]))
                                 );
                             } else if (data[2] === 'cat') {
@@ -3070,7 +3070,9 @@
                                 }
 
                                 sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
-                                sub.append($('<strong/>').text(data[0].split('|')[0]));
+                                sub.append($('<strong/>').text(data[0].split('|')[0] + '; '));
+                                sub.append($('<span/>').text(getAAM().__('Slug:') + ' '));
+                                sub.append($('<strong/>').text(data[7]));
 
                                 $('td:eq(1)', row).append(sub);
                             } else if (data[2] === 'tag') {
@@ -3079,7 +3081,9 @@
                                 $('td:eq(1)', row).append(
                                     $('<i class="aam-row-subtitle"></i>')
                                     .append($('<span/>').text(getAAM().__('ID:') + ' '))
-                                    .append($('<strong/>').text(data[0].split('|')[0]))
+                                    .append($('<strong/>').text(data[0].split('|')[0] + '; '))
+                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
+                                    .append($('<strong/>').text(data[7]))
                                 );
                             } else {
                                 $('td:eq(1)', row).html($('<span/>').text(data[3]));
@@ -3092,7 +3096,9 @@
                                 }
 
                                 sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
-                                sub.append($('<strong/>').text(data[0]));
+                                sub.append($('<strong/>').text(data[0] + '; '));
+                                sub.append($('<span/>').text(getAAM().__('Slug:') + ' '));
+                                sub.append($('<strong/>').text(data[7]));
 
                                 $('td:eq(1)', row).append(sub);
                             }

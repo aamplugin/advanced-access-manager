@@ -920,9 +920,10 @@ input[type=radio]:checked + label:before {
     display: block;
     font-size: 0.8em;
     font-style: normal;
+    color: #437798;
 }
 
-.aam-row-subtitle b {
+.aam-row-subtitle b, .aam-row-subtitle strong {
     color: #777777;
 }
 

@@ -11,6 +11,7 @@
  * Backend posts & terms service UI
  *
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/89
+ *              https://github.com/aamplugin/advanced-access-manager/issues/108
  * @since 6.3.1 Fixed bug with incorrectly escaped passwords and teaser messages
  * @since 6.3.0 Fixed bug with PHP noticed that was triggered if password was not
  *              defined
@@ -595,8 +596,11 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return array
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/108
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.5.0
      */
     protected function retrieveRootLevelList()
     {
@@ -621,7 +625,8 @@ class AAM_Backend_Feature_Main_Post
                         false,
                         $type->name,
                         $this->getSubject()
-                    )
+                    ),
+                    $type->name
                 );
             } elseif(is_a($type, 'WP_Taxonomy')) {
                 $response['data'][] = array(
@@ -636,7 +641,8 @@ class AAM_Backend_Feature_Main_Post
                         false,
                         $type->name,
                         $this->getSubject()
-                    )
+                    ),
+                    $type->name
                 );
             }
         }
@@ -757,8 +763,11 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return array
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/108
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.5.0
      */
     protected function retrievePostTypeObjects($type)
     {
@@ -807,7 +816,8 @@ class AAM_Backend_Feature_Main_Post
                     get_the_title($record),
                     'manage' . ($link ? ',edit' : ',no-edit'),
                     $parent,
-                    $subject->getObject('post', $record->ID, true)->isOverwritten()
+                    $subject->getObject('post', $record->ID, true)->isOverwritten(),
+                    $record->post_name
                 );
             } else { // this is a term
                 $response['data'][] = $this->_prepareTermRow($record, $type);
@@ -866,8 +876,11 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return array
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/108
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access private
-     * @version 6.0.0
+     * @version 6.5.0
      */
     private function _prepareTermRow($term, $type = null)
     {
@@ -903,7 +916,8 @@ class AAM_Backend_Feature_Main_Post
             $path,
             apply_filters(
                 'aam_term_settings_override_status_filter', false, $id, $this->getSubject()
-            )
+            ),
+            $term->slug
         );
     }
 
