@@ -11,6 +11,7 @@
  * Backend Settings area abstract manager
  *
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
+ *              https://github.com/aamplugin/advanced-access-manager/issues/106
  * @since 6.2.0 Added Import/Export functionality
  * @since 6.0.0 Initial implementation of the class
  *
@@ -88,18 +89,18 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/106
      * @since 6.3.0 Optimized AAM_Core_API::getOption call
      * @since 6.2.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.5.0
      */
     public function getSupportMetadata()
     {
         global $wp_version;
 
         return wp_json_encode(array(
-            'phpVersion'  => PHP_VERSION,
             'wpVersion'   => $wp_version,
             'aamVersion'  => AAM_VERSION,
             'settings'    => AAM_Core_API::getOption(AAM_Core_AccessSettings::DB_OPTION),
@@ -107,7 +108,14 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             'configpress' => AAM_Core_API::getOption(AAM_Core_ConfigPress::DB_OPTION),
             'roles'       => AAM_Core_API::getOption(AAM_Core_API::getRoles()->role_key),
             'addons'      => AAM_Addon_Repository::getInstance()->getRegistry(),
-            'plugins'     => get_plugins()
+            'plugins'     => array_map(function($plugin) {
+                return array(
+                    'Name'      => (isset($plugin['Name']) ? $plugin['Name'] : null),
+                    'PluginURI' => (isset($plugin['PluginURI']) ? $plugin['PluginURI'] : null),
+                    'Version'   => (isset($plugin['Version']) ? $plugin['Version'] : null),
+                    'AuthorURI' => (isset($plugin['AuthorURI']) ? $plugin['AuthorURI'] : null),
+                );
+            }, get_plugins())
         ));
     }
 
