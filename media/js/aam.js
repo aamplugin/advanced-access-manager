@@ -38,7 +38,7 @@
             function isCurrent(id) {
                 var subject = getAAM().getSubject();
 
-                return (getAAM().isUI('main') && subject.type === 'role' && subject.id === id);
+                return (!getAAM().isUI('principal') && subject.type === 'role' && subject.id === id);
             }
 
             /**
@@ -186,9 +186,11 @@
                                         $('td:eq(0) span', row).replaceWith(
                                             '<strong class="aam-highlight">' + title + '</strong>'
                                         );
+
                                         $('i.icon-cog', container).attr(
-                                            'class', 'aam-row-action icon-cog text-muted'
+                                            'class', 'aam-row-action icon-spin4 animate-spin'
                                         );
+
                                         if (getAAM().isUI('main')) {
                                             $('i.icon-cog', container).attr(
                                                 'class', 'aam-row-action icon-spin4 animate-spin'
@@ -205,6 +207,9 @@
                                                     $('#content-object-id').val(),
                                                     $(this)
                                                 ]);
+                                                $('i.icon-spin4', container).attr(
+                                                    'class', 'aam-row-action icon-cog text-muted'
+                                                );
                                             });
                                         }
                                     }
@@ -577,7 +582,7 @@
             function isCurrent(id) {
                 var subject = getAAM().getSubject();
 
-                return (subject.type === 'user' && parseInt(subject.id) === id);
+                return (!getAAM().isUI('principal') && subject.type === 'user' && parseInt(subject.id) === id);
             }
 
             /**
@@ -796,12 +801,17 @@
                                             $('td:eq(0) span', row).replaceWith(
                                                 '<strong class="aam-highlight">' + data[2] + '</strong>'
                                             );
-                                            $('i.icon-cog', container).attr('class', 'aam-row-action icon-cog text-muted');
+
+                                            $('i.icon-cog', container).attr(
+                                                'class', 'aam-row-action icon-spin4 animate-spin'
+                                            );
 
                                             if (getAAM().isUI('main')) {
-                                                $('i.icon-cog', container).attr('class', 'aam-row-action icon-spin4 animate-spin');
                                                 getAAM().fetchContent('main');
-                                                $('i.icon-spin4', container).attr('class', 'aam-row-action icon-cog text-muted');
+
+                                                $('i.icon-spin4', container).attr(
+                                                    'class', 'aam-row-action icon-cog text-muted'
+                                                );
                                             } else {
                                                 getAAM().fetchPartial('post-access-form', function (content) {
                                                     $('#metabox-post-access-form').html(content);
@@ -810,6 +820,10 @@
                                                         $('#content-object-id').val(),
                                                         $(this)
                                                     ]);
+
+                                                    $('i.icon-spin4', container).attr(
+                                                        'class', 'aam-row-action icon-cog text-muted'
+                                                    );
                                                 });
                                             }
                                         }
@@ -5030,6 +5044,7 @@
      *
      * @param {type} view
      * @param {type} success
+     * @param {type} failure
      * @returns {undefined}
      */
     AAM.prototype.fetchPartial = function (view, success) {
@@ -5054,6 +5069,9 @@
             },
             success: function (response) {
                 success.call(_this, response);
+            },
+            error: function() {
+                getAAM().notification('danger');
             }
         });
     };
