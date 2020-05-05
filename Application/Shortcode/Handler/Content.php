@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM shortcode handler for content visibility
  *
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/96
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.5.0
  */
 class AAM_Shortcode_Handler_Content
     implements AAM_Core_Contract_ShortcodeInterface
@@ -43,9 +44,9 @@ class AAM_Shortcode_Handler_Content
      * Initialize shortcode decorator
      *
      * Expecting attributes in $args are:
-     *   "hide"     => comma-separated list of role and user IDs to hide content
-     *   "show"     => comma-separated list of role and user IDs to show content
-     *   "limit"    => comma-separated list of role and user IDs to limit content
+     *   "hide"     => comma-separated list of role, caps, user IDs to hide content
+     *   "show"     => comma-separated list of role, caps, user IDs to show content
+     *   "limit"    => comma-separated list of role, caps, user IDs to limit content
      *   "message"  => message to show if "limit" is defined
      *   "callback" => callback function that returns message if "limit" is defined
      *
@@ -68,8 +69,11 @@ class AAM_Shortcode_Handler_Content
      *
      * @return string
      *
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/96
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.0
      */
     public function run()
     {
@@ -77,11 +81,21 @@ class AAM_Shortcode_Handler_Content
         if (get_current_user_id()) {
             $roles = array_merge(AAM::getUser()->roles);
 
+            // Build the list of assigned capabilities
+            $caps = array();
+            foreach(AAM::getUser()->allcaps as $key => $effect) {
+                if (!empty($effect)) {
+                    $caps[] = $key;
+                }
+            }
+
             if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
                 $parts = array_merge(array((string) AAM::getUser()->ID), $roles);
             } else {
                 $parts = array((string) AAM::getUser()->ID, array_shift($roles));
             }
+
+            $parts = array_merge($parts, $caps);
         } else {
             $parts = array('visitor');
         }
