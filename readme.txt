@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.4.0
-Stable tag: 6.4.3
+Tested up to: 5.4.1
+Stable tag: 6.5.0
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,22 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.5.0 =
+* Fixed Bug: No visual loading process in the Post Access metabox [https://github.com/aamplugin/advanced-access-manager/issues/111](https://github.com/aamplugin/advanced-access-manager/issues/111)
+* Fixed Bug: Safari browser cropps the modals [https://github.com/aamplugin/advanced-access-manager/issues/107](https://github.com/aamplugin/advanced-access-manager/issues/107)
+* Fixed Bug: Backend menu IDs with upper-case letters fail to restrict [https://github.com/aamplugin/advanced-access-manager/issues/105](https://github.com/aamplugin/advanced-access-manager/issues/105)
+* Fixed Bug: Deleting role does not reload the main panel [https://github.com/aamplugin/advanced-access-manager/issues/102](https://github.com/aamplugin/advanced-access-manager/issues/102)
+* Fixed Bug: Incorrect user login redirect with passworless URL [https://github.com/aamplugin/advanced-access-manager/issues/98](https://github.com/aamplugin/advanced-access-manager/issues/98)
+* Added New: The ability to reset access settings for any specific subject [https://github.com/aamplugin/advanced-access-manager/issues/109](https://github.com/aamplugin/advanced-access-manager/issues/109)
+* Added New: Slug to the Posts & Terms tab [https://github.com/aamplugin/advanced-access-manager/issues/108](https://github.com/aamplugin/advanced-access-manager/issues/108)
+* Added New: Use `Authorization` header with fallback to `Authentication` [https://github.com/aamplugin/advanced-access-manager/issues/99](https://github.com/aamplugin/advanced-access-manager/issues/99)
+* Added New: Filter post's content with [aam] shortcode and capability [https://github.com/aamplugin/advanced-access-manager/issues/96](https://github.com/aamplugin/advanced-access-manager/issues/96)
+* Added New: The ability to manage access to navigation menu[https://github.com/aamplugin/advanced-access-manager/issues/89](https://github.com/aamplugin/advanced-access-manager/issues/89)
+* Changed: Simplify support message payload [https://github.com/aamplugin/advanced-access-manager/issues/106](https://github.com/aamplugin/advanced-access-manager/issues/106)
+* Changed: Update bootstrap to 3.4.1 [https://github.com/aamplugin/advanced-access-manager/issues/95](https://github.com/aamplugin/advanced-access-manager/issues/95)
+* Changed: Dynamically adjust AAM iFrame to its content [https://github.com/aamplugin/advanced-access-manager/issues/104](https://github.com/aamplugin/advanced-access-manager/issues/104)
+* Changed: Enhance role cloning feature [https://github.com/aamplugin/advanced-access-manager/issues/97](https://github.com/aamplugin/advanced-access-manager/issues/97)
 
 = 6.4.3 =
 * Fixed Bug: Invalid AAM notifications [https://github.com/aamplugin/advanced-access-manager/issues/92](https://github.com/aamplugin/advanced-access-manager/issues/92)
