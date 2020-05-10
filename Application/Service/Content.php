@@ -10,6 +10,7 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
  * @since 6.1.0 Multiple bug fixed
@@ -20,7 +21,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.5.1
  */
 class AAM_Service_Content
 {
@@ -71,8 +72,11 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.5.1
      */
     protected function __construct()
     {
@@ -87,9 +91,21 @@ class AAM_Service_Content
                 $metaboxEnabled = AAM_Core_Config::get('ui.settings.renderAccessMetabox', true);
 
                 if ($metaboxEnabled && current_user_can('aam_manage_content')) {
-                    add_action('edit_category_form_fields', array($this, 'renderAccessTermMetabox'), 1);
-                    add_action('edit_link_category_form_fields', array($this, 'renderAccessTermMetabox'), 1);
-                    add_action('edit_tag_form_fields', array($this, 'renderAccessTermMetabox'), 1);
+                    // Make sure that all already registered taxonomies are hooked
+                    foreach(get_taxonomies() as $taxonomy) {
+                        add_action(
+                            "{$taxonomy}_edit_form_fields",
+                            array($this, 'renderAccessTermMetabox')
+                        );
+                    }
+
+                    // Hook into still up-coming taxonomies down the pipeline
+                    add_action('registered_taxonomy', function($taxonomy) {
+                        add_action(
+                            "{$taxonomy}_edit_form_fields",
+                            array($this, 'renderAccessTermMetabox')
+                        );
+                    });
 
                     //register custom access control metabox
                     add_action('add_meta_boxes', array($this, 'registerAccessPostMetabox'));
