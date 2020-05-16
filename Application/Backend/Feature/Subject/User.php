@@ -240,7 +240,7 @@ class AAM_Backend_Feature_Subject_User
     private function _resetExpiration()
     {
         $userId = $this->getFromPost('user');
-        $result = AAM::api()->getUser($userId)->resetExpiration();
+        $result = AAM::api()->getUser($userId)->resetUserExpiration();
 
         if ($result) {
             $response = array('status' => 'success');
