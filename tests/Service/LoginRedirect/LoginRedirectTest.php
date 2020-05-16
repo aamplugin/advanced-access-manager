@@ -241,4 +241,38 @@ class LoginRedirectTest extends TestCase
         unset($_GET['aam-jwt']);
     }
 
+    /**
+     * Test that user is redirected with passwordless URL to the provided location
+     *
+     * Verify that user is redirected to the provided destination when he uses passwordless
+     * URL (with JWT token as query param). The provided destination is explicitly
+     * defined as "redirect_to" query param
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.5.2
+     */
+    public function testRedirectWithJWTTokenAndRedirectTo()
+    {
+        $service = AAM_Service_Jwt::getInstance();
+
+        // Issue a token and set it as the query param
+        $_GET['aam-jwt']     = $service->issueToken(AAM_UNITTEST_JOHN_ID)->token;
+        $_GET['redirect_to'] = get_page_link(AAM_UNITTEST_PAGE_LEVEL_1_ID);
+
+        // No need to generate Auth cookies
+        add_filter('send_auth_cookies', '__return_false');
+
+        AAM_Service_Jwt::getInstance()->authenticateUser();
+
+        $this->assertContains(
+            'Location: ' . get_page_link(AAM_UNITTEST_PAGE_LEVEL_1_ID), xdebug_get_headers()
+        );
+
+        // Reset $_GET
+        unset($_GET['aam-jwt']);
+        unset($_GET['redirect_to']);
+    }
+
 }
