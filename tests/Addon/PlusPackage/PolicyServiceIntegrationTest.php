@@ -338,4 +338,85 @@ class PolicyServiceIntegrationTest extends TestCase
         AAM_Core_Policy_Factory::reset();
     }
 
+    /**
+     * Test that access to edit or delete is allowed only for posts in one term
+     *
+     * @return void
+     *
+     * @access public
+     * @version 5.4.2
+     */
+    public function testAllowedPostsInWhitelistedCategory()
+    {
+        $this->preparePlayground('default-posts-allowed-term');
+
+        $allowed_post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+        );
+
+        $this->assertTrue($allowed_post->isAllowedTo('edit'));
+        $this->assertTrue($allowed_post->isAllowedTo('delete'));
+
+        $not_allowed_post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_CATEGORIZED_ID
+        );
+
+        $this->assertFalse($not_allowed_post->isAllowedTo('edit'));
+        $this->assertFalse($not_allowed_post->isAllowedTo('delete'));
+    }
+
+    /**
+     * Test that access to edit or delete denied with multi-term setup even when
+     * one term is allowed
+     *
+     * @return void
+     *
+     * @access public
+     * @version 5.4.2
+     */
+    public function testDeniedPostsInWhitelistedMultiTermCategory()
+    {
+        $this->preparePlayground('default-posts-allowed-term');
+
+        // Add tag to testing post
+        wp_add_post_tags(AAM_UNITTEST_POST_ID, AAM_UNITTEST_TAG_A_SLUG);
+
+        $allowed_post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+        );
+
+        $this->assertFalse($allowed_post->isAllowedTo('edit'));
+        $this->assertFalse($allowed_post->isAllowedTo('delete'));
+
+        // Reset to default
+        wp_remove_object_terms(AAM_UNITTEST_POST_ID, AAM_UNITTEST_TAG_A_SLUG, 'post_tag');
+    }
+
+    /**
+     * Test that access to edit or delete denied with multi-term setup even when
+     * one term is allowed
+     *
+     * @return void
+     *
+     * @access public
+     * @version 5.4.2
+     */
+    public function testAllowPostsInWhitelistedMultiTermCategory()
+    {
+        $this->preparePlayground('default-posts-allowed-multi-term');
+
+        // Add tag to testing post
+        wp_add_post_tags(AAM_UNITTEST_POST_ID, AAM_UNITTEST_TAG_A_SLUG);
+
+        $allowed_post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+        );
+
+        $this->assertTrue($allowed_post->isAllowedTo('edit'));
+        $this->assertTrue($allowed_post->isAllowedTo('delete'));
+
+        // Reset to default
+        wp_remove_object_terms(AAM_UNITTEST_POST_ID, AAM_UNITTEST_TAG_A_SLUG, 'post_tag');
+    }
+
 }

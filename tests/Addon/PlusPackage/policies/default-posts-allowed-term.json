@@ -1,0 +1,22 @@
+{
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "PostType:post:posts",
+            "Action": [
+                "Edit",
+                "Delete"
+            ]
+        },
+        {
+            "Effect": "allow",
+            "Resource": [
+                "Term:category:1:posts"
+            ],
+            "Action": [
+                "Edit",
+                "Delete"
+            ]
+        }
+    ]
+}

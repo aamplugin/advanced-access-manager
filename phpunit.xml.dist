@@ -24,12 +24,14 @@
         <const name="AAM_UNITTEST_AUTH_SUBADMIN_USER_ID" value="16" />
         <const name="AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID" value="17" />
         <const name="AAM_UNITTEST_POST_ID" value="1" />
+        <const name="AAM_UNITTEST_POST_CATEGORIZED_ID" value="4374" />
         <const name="AAM_UNITTEST_LEVEL_1_POST_ID" value="2944" />
         <const name="AAM_UNITTEST_LEVEL_2_POST_ID" value="2946" />
         <const name="AAM_UNITTEST_ATTACHMENT_ID" value="26" />
         <const name="AAM_UNITTEST_CATEGORY_ID" value="1" />
         <const name="AAM_UNITTEST_CATEGORY_SLUG" value="science" />
         <const name="AAM_UNITTEST_TAG_ID" value="35" />
+        <const name="AAM_UNITTEST_TAG_A_SLUG" value="tag-a" />
         <const name="AAM_UNITTEST_TAG_ID_B" value="36" />
         <const name="AAM_UNITTEST_CATEGORY_LEVEL_1_ID" value="37" />
         <const name="AAM_UNITTEST_CATEGORY_LEVEL_2_ID" value="38" />
