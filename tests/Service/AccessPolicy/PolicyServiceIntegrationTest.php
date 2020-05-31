@@ -877,6 +877,26 @@ class PolicyServiceIntegrationTest extends TestCase
     }
 
     /**
+     * Test that params are initialized prior to statements
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.5.3
+     */
+    public function testDynamicResourceFromParam()
+    {
+        $this->preparePlayground('dynamic-resource-from-param');
+
+       // print_R(AAM::api()->getAccessPolicyManager()->getTree()); die();
+
+        $this->assertArrayHasKey(
+            'post:post:unit:read',
+            AAM::api()->getAccessPolicyManager()->getTree()['Statement']
+        );
+    }
+
+    /**
      * Prepare the environment
      *
      * Update Unit Test access policy with proper policy

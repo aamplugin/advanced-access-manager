@@ -10,6 +10,7 @@
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/122
  * @since 6.4.0 Supporting Param's "Value" to be an array
  * @since 6.3.1 Fixed bug where draft policies get applied to assignees
  * @since 6.2.1 Added support for the POLICY_META token
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.5.3
  */
 class AAM_Core_Policy_Manager
 {
@@ -394,6 +395,7 @@ class AAM_Core_Policy_Manager
      *
      * @return array
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/122
      * @since 6.4.1 Simplified by removing &$tree first param
      * @since 6.4.0 Supporting Param's Value to be more than just a scalar value
      * @since 6.2.1 Typecasting param's value
@@ -401,35 +403,16 @@ class AAM_Core_Policy_Manager
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.1
+     * @version 6.5.3
      */
     protected function updatePolicyTree($addition)
     {
         $stmts  = &$this->tree['Statement'];
         $params = &$this->tree['Param'];
 
-        // Step #1. If there are any statements, let's index them by resource:action
-        // and insert into the list of statements
-        foreach ($addition['Statement'] as $stm) {
-            $resources = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
-            $actions   = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
-
-            foreach ($resources as $res) {
-                foreach($this->evaluatePolicyKey($res) as $resource) {
-                    foreach ($actions as $act) {
-                        $id = strtolower($resource . (!empty($act) ? ":{$act}" : ''));
-
-                        if (!isset($stmts[$id]) || empty($stmts[$id]['Enforce'])) {
-                            $stmts[$id] = $stm;
-                        }
-                    }
-                }
-            }
-        }
-
         $callback = array($this, 'getOption'); // Callback that hooks into get_option
 
-        // Step #2. If there are any params, let's index them and insert into the list
+        // Step #1. If there are any params, let's index them and insert into the list
         foreach ($addition['Param'] as $param) {
             if (!empty($param['Key'])) {
                 $param['Value'] = $this->replaceTokens($param['Value'], true);
@@ -445,6 +428,25 @@ class AAM_Core_Policy_Manager
                             // Hook into the core
                             add_filter('pre_option_' . $name, $callback, 1, 2);
                             add_filter('pre_site_option_' . $name, $callback, 1, 2);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step #2. If there are any statements, let's index them by resource:action
+        // and insert into the list of statements
+        foreach ($addition['Statement'] as $stm) {
+            $resources = (isset($stm['Resource']) ? (array) $stm['Resource'] : array());
+            $actions   = (isset($stm['Action']) ? (array) $stm['Action'] : array(''));
+
+            foreach ($resources as $res) {
+                foreach($this->evaluatePolicyKey($res) as $resource) {
+                    foreach ($actions as $act) {
+                        $id = strtolower($resource . (!empty($act) ? ":{$act}" : ''));
+
+                        if (!isset($stmts[$id]) || empty($stmts[$id]['Enforce'])) {
+                            $stmts[$id] = $stm;
                         }
                     }
                 }

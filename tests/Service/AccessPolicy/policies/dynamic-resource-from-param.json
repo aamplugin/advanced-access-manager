@@ -1,0 +1,17 @@
+{
+    "Statement": {
+        "Effect": "deny",
+        "Resource": [
+            "Post:post:${POLICY_PARAM.test}"
+        ],
+        "Action": [
+            "Read"
+        ]
+    },
+    "Param": [
+        {
+            "Key": "test",
+            "Value": "unit"
+        }
+    ]
+}
