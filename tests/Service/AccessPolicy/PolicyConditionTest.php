@@ -306,15 +306,21 @@ class PolicyConditionTest extends TestCase
      *
      * @return void
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
+     * @since 6.0.0 Initial implementation of the testcase
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.3
      */
     public function inDataProvider()
     {
         return array(
             array(array('In' => array('test' => array('test', 'test1'))), true),
             array(array('In' => array(2 => array(2, 5, 7))), true),
-            array(array('In' => array('no' => array('yes', 'maybe'))), false)
+            array(array('In' => array('no' => array('yes', 'maybe'))), false),
+            array(array('In' => array('(*array)["a","b"]' => array('a', 'b'))), true),
+            array(array('In' => array('(*array)["a","b"]' => array('a', 'c'))), false),
+            array(array('In' => array('(*array)["a","b"]' => '(*array)["a","b"]')), true)
         );
     }
 
@@ -342,15 +348,21 @@ class PolicyConditionTest extends TestCase
      *
      * @return void
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
+     * @since 6.0.0 Initial implementation of the testcase
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.3
      */
     public function notInDataProvider()
     {
         return array(
             array(array('NotIn' => array('test' => array('test', 'test1'))), false),
             array(array('NotIn' => array(2 => array(2, 5, 7))), false),
-            array(array('NotIn' => array('no' => array('yes', 'maybe'))), true)
+            array(array('NotIn' => array('no' => array('yes', 'maybe'))), true),
+            array(array('NotIn' => array('(*array)["a","b"]' => array('a', 'b'))), false),
+            array(array('NotIn' => array('(*array)["a","b"]' => array('a', 'c'))), true),
+            array(array('NotIn' => array('(*array)["a","b"]' => '(*array)["a","b"]')), false)
         );
     }
 

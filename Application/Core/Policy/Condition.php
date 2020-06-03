@@ -10,12 +10,13 @@
 /**
  * AAM core policy condition evaluator
  *
+ * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
  * @since 6.2.0 Added support for the (*date) type casting
  * @since 6.1.0 Improved type casting functionality
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.5.3
  */
 class AAM_Core_Policy_Condition
 {
@@ -254,18 +255,29 @@ class AAM_Core_Policy_Condition
      *
      * @return boolean
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.5.3
      */
     protected function evaluateInConditions($conditions, $args)
     {
-        $result = false;
+        $res = false;
 
         foreach ($this->prepareConditions($conditions, $args) as $cnd) {
-            $result = $result || in_array($cnd['left'], (array) $cnd['right'], true);
+            if (is_array($cnd['left'])) {
+                $cl = count($cnd['left']);
+                $cr = count($cnd['right']);
+                $ci = count(array_intersect($cnd['left'], (array) $cnd['right']));
+
+                $res = $res || (($cl === $cr) && ($ci === $cl));
+            } else {
+                $res = $res || in_array($cnd['left'], (array) $cnd['right'], true);
+            }
         }
 
-        return $result;
+        return $res;
     }
 
     /**
