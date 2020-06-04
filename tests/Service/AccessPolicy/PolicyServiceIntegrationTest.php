@@ -888,8 +888,6 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('dynamic-resource-from-param');
 
-       // print_R(AAM::api()->getAccessPolicyManager()->getTree()); die();
-
         $this->assertArrayHasKey(
             'post:post:unit:read',
             AAM::api()->getAccessPolicyManager()->getTree()['Statement']

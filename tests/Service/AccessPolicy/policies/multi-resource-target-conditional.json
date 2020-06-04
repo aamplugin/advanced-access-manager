@@ -1,0 +1,23 @@
+{
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:1",
+            "Action": [
+                "Read"
+            ]
+        },
+        {
+            "Effect": "allow",
+            "Resource": "Post:post:1",
+            "Action": [
+                "Read"
+            ],
+            "Condition": {
+                "Equals": {
+                    "${HTTP_GET.q}": "testing"
+                }
+            }
+        }
+    ]
+}

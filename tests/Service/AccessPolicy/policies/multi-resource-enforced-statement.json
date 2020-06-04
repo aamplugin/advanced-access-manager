@@ -1,0 +1,19 @@
+{
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:1",
+            "Action": [
+                "Read"
+            ]
+        },
+        {
+            "Effect": "allow",
+            "Enforce": true,
+            "Resource": "Post:post:1",
+            "Action": [
+                "Read"
+            ]
+        }
+    ]
+}
