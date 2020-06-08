@@ -10,6 +10,7 @@
 /**
  * AAM core service
  *
+ * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/126
  * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/82
  * @since 6.4.0 Added "Manage Access" toolbar item to single & multisite network
  * @since 6.0.5 Making sure that only if user is allowed to manage other users
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.2
+ * @version 6.5.3
  */
 class AAM_Service_Core
 {
@@ -144,8 +145,11 @@ class AAM_Service_Core
      *
      * @return array
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/126
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.3
      */
     public function checkForUpdates($response, $r, $url)
     {
@@ -177,12 +181,14 @@ class AAM_Service_Core
                 // currently installed version on the website and if match found,
                 // override the original response to indicate that new version is
                 // available
-                foreach ($new_body['products'] as $item) {
-                    $v     = $repository->getPluginVersion($item['plugin']);
-                    $new_v = $item['new_version'];
+                if (!empty($new_body['products']) && is_array($new_body['products'])) {
+                    foreach ($new_body['products'] as $item) {
+                        $v     = $repository->getPluginVersion($item['plugin']);
+                        $new_v = $item['new_version'];
 
-                    if (!empty($v) && (version_compare($v, $new_v) === -1)) {
-                        $original['plugins'][$item['plugin']] = $item;
+                        if (!empty($v) && (version_compare($v, $new_v) === -1)) {
+                            $original['plugins'][$item['plugin']] = $item;
+                        }
                     }
                 }
 
@@ -283,15 +289,18 @@ class AAM_Service_Core
      *
      * @return array
      *
+     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/126
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.5.3
      */
     public function mapMetaCaps($caps, $cap, $user_id, $args)
     {
         $objectId = (isset($args[0]) ? $args[0] : null);
 
         // Mutate any AAM specific capability if it does not exist
-        foreach ($caps as $i => $capability) {
+        foreach ((array) $caps as $i => $capability) {
             if (
                 (strpos($capability, 'aam_') === 0)
                 && !AAM_Core_API::capExists($capability)
