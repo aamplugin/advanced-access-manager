@@ -143,13 +143,13 @@ class AAM_Addon_Repository
                 'Plus Package',
                 'plus-package',
                 __('Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.', AAM_KEY),
-                '5.4.0'
+                '5.4.2'
             ),
             'aam-ip-check' => $this->buildAddonObject(
                 'IP Check',
                 'ip-check',
                 __('Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.', AAM_KEY),
-                '4.1.3'
+                '4.1.4'
             ),
             'aam-role-hierarchy' => $this->buildAddonObject(
                 'Role Hierarchy',
@@ -171,7 +171,7 @@ class AAM_Addon_Repository
                 'Complete Package',
                 'complete-package',
                 __('Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.', AAM_KEY),
-                '5.2.5'
+                '5.2.8'
             )
         );
     }
