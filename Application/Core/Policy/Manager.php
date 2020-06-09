@@ -10,6 +10,7 @@
 /**
  * AAM policy manager for a specific subject
  *
+ * @since 5.5.4 https://github.com/aamplugin/advanced-access-manager/issues/128
  * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/122
  *              https://github.com/aamplugin/advanced-access-manager/issues/124
  * @since 6.4.0 Supporting Param's "Value" to be an array
@@ -256,8 +257,11 @@ class AAM_Core_Policy_Manager
      *
      * @return array|null
      *
+     * @since 5.5.4 https://github.com/aamplugin/advanced-access-manager/issues/128
+     * @since 6.5.3 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.5.3
+     * @version 6.5.4
      */
     protected function getCandidateStatement($statements, $args = array())
     {
@@ -278,7 +282,7 @@ class AAM_Core_Policy_Manager
                     }
                 }
             }
-        } else {
+        } else if ($this->isApplicable($statements, $args)) {
             $candidate = $statements;
         }
 
