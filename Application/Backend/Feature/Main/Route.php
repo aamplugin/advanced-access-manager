@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * WordPress API manager
  *
+ * @since 6.6.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/131
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.6.0
  */
 class AAM_Backend_Feature_Main_Route
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -84,15 +85,18 @@ class AAM_Backend_Feature_Main_Route
      *
      * @return string
      *
+     * @since 6.6.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/131
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.0
      */
     public function save()
     {
         $type   = $this->getFromPost('type');
         $route  = $this->getFromPost('route');
         $method = $this->getFromPost('method');
-        $value  = $this->getFromPost('value');
+        $value  = $this->getFromPost('value', FILTER_VALIDATE_BOOLEAN);
 
         $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
         $id     = strtolower("{$type}|{$route}|{$method}");
