@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
  * @since 6.5.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/117
  * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
  *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
@@ -21,7 +22,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.2
+ * @version 6.6.0
  */
 class AAM_Service_Jwt
 {
@@ -94,13 +95,14 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
      * @since 6.4.0 Added the ability to issue refreshable token through API.
      *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/25
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.6.0
      */
     protected function initializeHooks()
     {
@@ -139,25 +141,9 @@ class AAM_Service_Jwt
             return $args;
         });
         add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 2);
-        add_action('set_logged_in_cookie', array($this, 'setJwtCookie'), 10, 6);
 
         // WP Core current user definition
         add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
-
-        // Delete JWT cookie if it is set
-        add_action('wp_logout', function() {
-            if ($this->getFromCookie('aam_jwt_token')) {
-                setcookie(
-                    'aam_jwt_token',
-                    null,
-                    time() - 1,
-                    COOKIEPATH,
-                    COOKIE_DOMAIN,
-                    is_ssl(),
-                    true
-                );
-            }
-        });
 
         // Fetch specific claim from the JWT token if present
         add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
@@ -670,39 +656,6 @@ class AAM_Service_Jwt
             // a CLI execution (e.g. Unit Test)
             if (php_sapi_name() !== 'cli') {
                 exit;
-            }
-        }
-    }
-
-    /**
-     * Set custom cookie with JWT
-     *
-     * This can be used later by services like Access Policy to dynamically
-     * evaluate conditions based on claims
-     *
-     * @param string $logged_in_cookie
-     * @param int    $expire
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function setJwtCookie($logged_in_cookie, $expire)
-    {
-        if (apply_filters('send_auth_cookies', true)) {
-            $token = $this->extractToken();
-
-            if (!empty($token)) {
-                setcookie(
-                    'aam_jwt_token',
-                    $token->jwt,
-                    $expire,
-                    COOKIEPATH,
-                    COOKIE_DOMAIN,
-                    is_ssl(),
-                    true
-                );
             }
         }
     }
