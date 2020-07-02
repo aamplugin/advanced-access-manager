@@ -10,13 +10,14 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
  *              https://github.com/aamplugin/advanced-access-manager/issues/106
  * @since 6.2.0 Added Import/Export functionality
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.0
+ * @version 6.6.0
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -124,11 +125,12 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
      * @since 6.3.0 Optimized AAM_Core_API::getOption call
      * @since 6.2.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.6.0
      */
     public function exportSettings()
     {
@@ -152,13 +154,14 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
         foreach($groups as $group) {
             switch($group) {
                 case 'settings':
-                    $dataset['settings'] = AAM_Core_API::getOption(
+                    $this->_prepareSettings(
+                        AAM_Core_API::getOption(
                         AAM_Core_AccessSettings::DB_OPTION, array()
-                    );
+                    ), $dataset);
                     break;
 
                 case 'config':
-                    $dataset['config']      = AAM_Core_API::getOption(
+                    $dataset['config'] = AAM_Core_API::getOption(
                         AAM_Core_Config::DB_OPTION, array()
                     );
                     $dataset['configpress'] = AAM_Core_API::getOption(
@@ -183,12 +186,112 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
     }
 
     /**
+     * Prepare exported access settings
+     *
+     * Change the way access policies are exported
+     *
+     * @param array $settings
+     * @param array &$dataset
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.0.0
+     */
+    private function _prepareSettings($settings, &$dataset)
+    {
+        $policies = array();
+
+        // Extract all defined policies from roles
+        if (isset($settings['role'])) {
+            foreach($settings['role'] as $role => &$data) {
+                if (isset($data['policy'])) {
+                    $policies = $this->_preparePolicyList(
+                        'role', $role, $data['policy'], $policies
+                    );
+                    unset($data['policy']);
+                }
+            }
+        }
+
+        // Extract all defined policies from users
+        if (isset($settings['user'])) {
+            foreach($settings['user'] as $user => &$data) {
+                if (isset($data['policy'])) {
+                    $policies = $this->_preparePolicyList(
+                        'user', $user, $data['policy'], $policies
+                    );
+                    unset($data['policy']);
+                }
+            }
+        }
+
+        // Extract all defined policies from visitors
+        if (isset($settings['visitor']['policy'])) {
+            $policies = $this->_preparePolicyList(
+                'visitor', null, $settings['visitor']['policy'], $policies
+            );
+            unset($settings['visitor']['policy']);
+        }
+
+        // Extract all defined policies from default
+        if (isset($settings['default']['policy'])) {
+            $policies = $this->_preparePolicyList(
+                'default', null, $settings['default']['policy'], $policies
+            );
+            unset($settings['default']['policy']);
+        }
+
+        $dataset['settings'] = $settings;
+        $dataset['policies'] = $policies;
+    }
+
+    /**
+     * Prepare collection of policies
+     *
+     * @param string $type
+     * @param mixed  $id
+     * @param array  $settings
+     * @param array  $policies
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.0.0
+     */
+    private function _preparePolicyList($type, $id, $settings, $policies)
+    {
+        foreach($settings as $policyId => $effect) {
+            if (!isset($policies[$policyId])) {
+                $p = get_post($policyId);
+
+                if (is_a($p, 'WP_Post')) { // Only existing policies
+                    $policies[$policyId] = array(
+                        'policy'      => wp_json_encode(json_decode($p->post_content)),
+                        'title'       => $p->post_title,
+                        'description' => $p->post_excerpt,
+                        'assignee'    => array()
+                    );
+                }
+            }
+
+            $assignee = (!empty($id) ? "{$type}:{$id}" : $type);
+            $policies[$policyId]['assignee'][$assignee] = $effect;
+        }
+
+        return $policies;
+    }
+
+    /**
      * Import AAM settings
      *
      * @return string
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
+     * @since 6.2.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.2.0
+     * @version 6.6.0
      */
     public function importSettings()
     {
@@ -217,6 +320,10 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                             );
                             break;
 
+                        case 'policies':
+                            $this->_importPolicies($settings);
+                        break;
+
                         default:
                             break;
                     }
@@ -232,6 +339,109 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
         }
 
         return wp_json_encode($response);
+    }
+
+    /**
+     * Import policies
+     *
+     * @param array $policies
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.6.0
+     */
+    private function _importPolicies($policies)
+    {
+        foreach($policies as $p) {
+            $pid = $this->_isExistingPolicy($p);
+
+            if ($pid === false) {
+                $pid = wp_insert_post(array(
+                    'post_title'   => $p['title'],
+                    'post_content' => $p['policy'],
+                    'post_type'    => AAM_Service_AccessPolicy::POLICY_CPT,
+                    'post_status'  => 'publish',
+                    'post_excerpt' => $p['description']
+                ));
+            }
+
+            if (!is_wp_error($pid)) {
+                foreach($p['assignee'] as $s => $effect) {
+                    $this->_applyPolicyToSubject($s, $pid, $effect);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the same policy already exists
+     *
+     * @param array $policy
+     *
+     * @return boolean|int
+     *
+     * @access private
+     * @version 6.6.0
+     */
+    private function _isExistingPolicy($policy)
+    {
+        $existing = false;
+
+        $found = get_page_by_title(
+            $policy['title'], OBJECT, AAM_Service_AccessPolicy::POLICY_CPT
+        );
+
+        if (!is_null($found)) {
+            foreach((is_array($found) ? $found : array($found)) as $p) {
+                $title = $p->post_title;
+                $json  = wp_json_encode(json_decode($p->post_content));
+
+                if ($title === $policy['title'] && $json === $policy['policy']) {
+                    $existing = $p->ID;
+                }
+            }
+        }
+
+        return $existing;
+    }
+
+    /**
+     * Apply policy to provided subject
+     *
+     * @param string  $s
+     * @param int     $policyId
+     * @param boolean $effect
+     *
+     * @return string|null
+     *
+     * @access protected
+     */
+    private function _applyPolicyToSubject($s, $policyId, $effect = true)
+    {
+        $error = null;
+
+        if ($s === 'visitor') {
+            $subject = AAM::api()->getVisitor();
+        } elseif ($s === 'default') {
+            $subject = AAM::api()->getDefault();
+        } elseif (strpos($s, 'role:') === 0) {
+            $subject = AAM::api()->getRole(substr($s, 5));
+        } elseif (strpos($s, 'user:') === 0) {
+            $uid     = substr($s, 5);
+            $subject = AAM::api()->getUser(($uid === 'current') ? null : $uid);
+        } else {
+            $error   = sprintf(__('Failed applying to %s', AAM_KEY), $s);
+            $subject = null;
+        }
+
+        if ($subject !== null) {
+            $subject->getObject(
+                AAM_Core_Object_Policy::OBJECT_TYPE, null, true
+            )->updateOptionItem($policyId, $effect)->save();
+        }
+
+        return $error;
     }
 
     /**

@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.6.0 =
 * Fixed Bug: No ability to "allow" API Route [https://github.com/aamplugin/advanced-access-manager/issues/131](https://github.com/aamplugin/advanced-access-manager/issues/131)
+* Added New: The ability to export/import access policies [https://github.com/aamplugin/advanced-access-manager/issues/130](https://github.com/aamplugin/advanced-access-manager/issues/130)
 
 = 6.5.4 =
 * Fixed Bug: Incorectly evaluated best candidate for the conditional statement [https://github.com/aamplugin/advanced-access-manager/issues/128](https://github.com/aamplugin/advanced-access-manager/issues/128)
