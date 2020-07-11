@@ -11,6 +11,8 @@
  * JWT Token service
  *
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
+ *              https://github.com/aamplugin/advanced-access-manager/issues/100
+ *              https://github.com/aamplugin/advanced-access-manager/issues/118
  * @since 6.5.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/117
  * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
  *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
@@ -384,11 +386,12 @@ class AAM_Service_Jwt
      *
      * @return array
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/100
      * @since 6.4.0 Added the ability to issue refreshable token
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.6.0
      */
     public function prepareLoginResponse(array $response, WP_REST_Request $request)
     {
@@ -406,6 +409,16 @@ class AAM_Service_Jwt
                         400
                     );
                 }
+            }
+
+            // Include also roles
+            if ($request->get_param('includeRoles') === true) {
+                add_filter('aam_jwt_claims_filter', function($claims) {
+                    $user = get_user_by('ID', $claims['userId']);
+                    $claims['roles'] = $user->roles;
+
+                    return $claims;
+                });
             }
 
             $jwt = $this->issueToken($response['user']->ID, null, null, $refreshable);
@@ -524,8 +537,11 @@ class AAM_Service_Jwt
      *
      * @return bool
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/118
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.0
      */
     public function revokeUserToken($userId, $token)
     {

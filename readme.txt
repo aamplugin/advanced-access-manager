@@ -95,7 +95,9 @@ We take security and privacy very seriously, that is why there are several non-n
 * Fixed Bug: No ability to "allow" API Route [https://github.com/aamplugin/advanced-access-manager/issues/131](https://github.com/aamplugin/advanced-access-manager/issues/131)
 * Fixed Bug: Passwordless login sets cookie that might logout issues [https://github.com/aamplugin/advanced-access-manager/issues/129](https://github.com/aamplugin/advanced-access-manager/issues/129)
 * Fixed Bug: AAM does not retain selected time [https://github.com/aamplugin/advanced-access-manager/issues/133](https://github.com/aamplugin/advanced-access-manager/issues/133)
+* Changed: Logout user automatically if JWT token is revoked [https://github.com/aamplugin/advanced-access-manager/issues/118](https://github.com/aamplugin/advanced-access-manager/issues/118)
 * Added New: The ability to export/import access policies [https://github.com/aamplugin/advanced-access-manager/issues/130](https://github.com/aamplugin/advanced-access-manager/issues/130)
+* Added New: Add `roles` claim to the issued JWT token [https://github.com/aamplugin/advanced-access-manager/issues/100](https://github.com/aamplugin/advanced-access-manager/issues/100)
 
 = 6.5.4 =
 * Fixed Bug: Incorectly evaluated best candidate for the conditional statement [https://github.com/aamplugin/advanced-access-manager/issues/128](https://github.com/aamplugin/advanced-access-manager/issues/128)
