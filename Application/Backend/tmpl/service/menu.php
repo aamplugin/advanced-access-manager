@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/114
+ * @since 6.0.0 Initial implementation of the template
+ *
+ * @version 6.6.0
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="admin_menu-content">
@@ -6,7 +13,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend main menu for [%s]. For more information check %sHow to manage WordPress backend menu%s.', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-manage-wordpress-backend-menu" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend main menu for [%s]. Any menu that is lighter, indicates that [%s] does not have capability to access it. For more information check %sHow to manage WordPress backend menu%s.', 'b', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-manage-wordpress-backend-menu" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
@@ -22,19 +29,17 @@
 
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
-                $first  = false;
-                $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
-                $menuList = $this->getMenu();
+            $first  = false;
+            $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+            $menuList = $this->getMenu();
 
-                if (!empty($menuList)) {
-                    foreach ($menuList as $i => $menu) {
-                        ?>
-                    <div class="panel panel-default">
+            if (!empty($menuList)) {
+                foreach ($menuList as $i => $menu) {
+            ?>
+                    <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_Subject::getInstance()->hasCapability($menu['capability']) ? 1 : '0.5'; ?>">
                         <div class="panel-heading" role="tab" id="menu-<?php echo $i; ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) {
-                                                                                                                                                                                        echo 'aria-expanded="true"';
-                                                                                                                                                                                    } ?>>
+                                <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
                                     <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
                                 </a>
                                 <?php if ($menu['checked']) { ?>
@@ -46,9 +51,9 @@
                         </div>
 
                         <div id="menu-<?php echo $i; ?>" class="panel-collapse collapse<?php if (!$first) {
-                                                                                                        echo ' in';
-                                                                                                        $first = true;
-                                                                                                    } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
+                                                                                            echo ' in';
+                                                                                            $first = true;
+                                                                                        } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
                             <div class="panel-body">
                                 <?php if ($menu['id'] != 'menu-index.php') { ?>
                                     <div class="row aam-inner-tab">
@@ -106,7 +111,7 @@
                         </div>
                     </div>
                 <?php }
-                    } else { ?>
+            } else { ?>
                 <div class="row">
                     <div class="col-xs-12">
                         <p class="aam-notification">
