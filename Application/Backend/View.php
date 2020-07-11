@@ -13,11 +13,12 @@
  * This class is used to manage all AAM UI templates and interaction of the UI with
  * AAM backend core
  *
+ * @since 6.6.0 Allow partial to be loaded more than once
  * @since 6.0.5 Removed prepareIframeWPAssetsURL method
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.0.0
+ * @version 6.6.0
  */
 class AAM_Backend_View
 {
@@ -78,14 +79,17 @@ class AAM_Backend_View
      *
      * @return string
      *
+     * @since 6.6.0 Fixed the way the partial is loaded
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.0
      */
     public static function loadTemplate($file_path, $params =  null)
     {
         ob_start();
 
-        require_once $file_path;
+        require $file_path;
         $content = ob_get_contents();
 
         ob_end_clean();

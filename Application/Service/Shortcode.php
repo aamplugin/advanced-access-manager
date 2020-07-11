@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM custom shortcodes service
  *
+ * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
+ * @since 6.0.0 Initial implementation of the method
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.6.0
  */
 class AAM_Service_Shortcode
 {
@@ -61,8 +62,11 @@ class AAM_Service_Shortcode
      *
      * @return void
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.6.0
      */
     protected function initializeHooks()
     {
@@ -71,6 +75,11 @@ class AAM_Service_Shortcode
                 $shortcode = new AAM_Shortcode_Factory($args, $content);
 
                 return $shortcode->process();
+            });
+            add_shortcode('aam-login', function($args, $content) {
+                $shortcode = new AAM_Shortcode_Handler_LoginForm($args, $content);
+
+                return $shortcode->run();
             });
         }
     }

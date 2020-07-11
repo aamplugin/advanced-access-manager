@@ -99,7 +99,7 @@ We take security and privacy very seriously, that is why there are several non-n
 * Changed: Enhance Backend Menu service [https://github.com/aamplugin/advanced-access-manager/issues/114](https://github.com/aamplugin/advanced-access-manager/issues/114)
 * Added New: The ability to export/import access policies [https://github.com/aamplugin/advanced-access-manager/issues/130](https://github.com/aamplugin/advanced-access-manager/issues/130)
 * Added New: Add `roles` claim to the issued JWT token [https://github.com/aamplugin/advanced-access-manager/issues/100](https://github.com/aamplugin/advanced-access-manager/issues/100)
-
+* Added New: [aam-login] shortcode that renders AAM secure login form [https://github.com/aamplugin/advanced-access-manager/issues/90](https://github.com/aamplugin/advanced-access-manager/issues/90)
 = 6.5.4 =
 * Fixed Bug: Incorectly evaluated best candidate for the conditional statement [https://github.com/aamplugin/advanced-access-manager/issues/128](https://github.com/aamplugin/advanced-access-manager/issues/128)
 

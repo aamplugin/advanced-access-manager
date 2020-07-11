@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Shortcode factory for the [aam] shortcode
  *
+ * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.6.0
  */
 class AAM_Shortcode_Factory
 {
@@ -36,8 +37,11 @@ class AAM_Shortcode_Factory
      *
      * @return void
      *
+     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.0
      */
     public function __construct($args, $content)
     {
@@ -47,6 +51,8 @@ class AAM_Shortcode_Factory
             $this->handler = new AAM_Shortcode_Handler_Content($args, $content);
         } elseif ($cnt === 'loginredirect') {
             $this->handler = new AAM_Shortcode_Handler_LoginRedirect($args, $content);
+        } elseif ($cnt === 'loginform') {
+            $this->handler = new AAM_Shortcode_Handler_LoginForm($args);
         } else {
             $this->handler = apply_filters(
                 'aam_shortcode_filter', null, $cnt, $args, $content
