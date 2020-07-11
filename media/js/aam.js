@@ -1018,7 +1018,7 @@
                 try {
                     if ($.trim($('#user-expires').val())) {
                         $('#user-expiration-datapicker').data('DateTimePicker').defaultDate(
-                            $('#user-expires').val()
+                            new Date($('#user-expires').val())
                         );
                     } else {
                         var tomorrow = new Date();
@@ -2892,6 +2892,8 @@
                 });
 
                 const def = $('#aam-expire-datetime').val();
+
+                console.log(def);
 
                 $('#post-expiration-datapicker').datetimepicker({
                     icons: {
