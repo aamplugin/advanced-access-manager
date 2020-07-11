@@ -534,6 +534,13 @@ class AAM_Service_Jwt
         foreach($this->getTokenRegistry($userId) as $item) {
             if ($token !== $item) {
                 $filtered[] = $item;
+            } else {
+                // Also delete user session if any is active. The downside here is
+                // that if user logged in with different token, he still is going to
+                // be logged out because AAM does not track the token that user used
+                // to login
+                $sessions = WP_Session_Tokens::get_instance($userId);
+                $sessions->destroy_all();
             }
         }
 

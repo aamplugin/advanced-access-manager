@@ -2893,8 +2893,6 @@
 
                 const def = $('#aam-expire-datetime').val();
 
-                console.log(def);
-
                 $('#post-expiration-datapicker').datetimepicker({
                     icons: {
                         time: "icon-clock",
