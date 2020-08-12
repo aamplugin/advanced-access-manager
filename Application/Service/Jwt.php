@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
  *              https://github.com/aamplugin/advanced-access-manager/issues/100
  *              https://github.com/aamplugin/advanced-access-manager/issues/118
@@ -24,7 +25,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.0
+ * @version 6.6.1
  */
 class AAM_Service_Jwt
 {
@@ -159,16 +160,20 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.6.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/136
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.1
      */
     public function registerAPI()
     {
         // Validate JWT token
         register_rest_route('aam/v2', '/jwt/validate', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'validateToken'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'validateToken'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT token.', AAM_KEY),
                     'type'        => 'string',
@@ -176,9 +181,10 @@ class AAM_Service_Jwt
             ),
         ));
         register_rest_route('aam/v1', '/validate-jwt', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'validateTokenDeprecated'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'validateTokenDeprecated'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT token.', AAM_KEY),
                     'type'        => 'string',
@@ -188,9 +194,10 @@ class AAM_Service_Jwt
 
         // Refresh JWT token
         register_rest_route('aam/v2', '/jwt/refresh', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'refreshToken'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'refreshToken'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT token.', AAM_KEY),
                     'type'        => 'string',
@@ -198,9 +205,10 @@ class AAM_Service_Jwt
             ),
         ));
         register_rest_route('aam/v1', '/refresh-jwt', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'refreshTokenDeprecated'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'refreshTokenDeprecated'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT token.', AAM_KEY),
                     'type'        => 'string',
@@ -210,9 +218,10 @@ class AAM_Service_Jwt
 
         // Revoke JWT token
         register_rest_route('aam/v2', '/jwt/revoke', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'revokeToken'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'revokeToken'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT token.', AAM_KEY),
                     'type'        => 'string',

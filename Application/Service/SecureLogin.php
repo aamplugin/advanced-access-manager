@@ -10,6 +10,7 @@
 /**
  * Secure Login service
  *
+ * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16.
  *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.2
+ * @version 6.6.1
  */
 class AAM_Service_SecureLogin
 {
@@ -146,17 +147,19 @@ class AAM_Service_SecureLogin
      *
      * Register AAM authentication endpoint
      *
+     * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
      * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
      * @since 6.0.0 Initial implementation of the method
      *
      * @return void
-     * @version 6.4.2
+     * @version 6.6.1
      */
     public function registerRESTfulRoute()
     {
         $config = array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'authenticate'),
+            'methods'             => 'POST',
+            'callback'            => array($this, 'authenticate'),
+            'permission_callback' => '__return_true',
             'args' => apply_filters('aam_restful_authentication_args_filter', array(
                 'username' => array(
                     'description' => 'Valid username.',
@@ -185,9 +188,10 @@ class AAM_Service_SecureLogin
 
         // For backward compatibility, keep /v1/authenticate endpoint
         register_rest_route('aam/v1', '/authenticate', array(
-            'methods'  => 'POST',
-            'callback' => array($this, 'legacyAuthenticate'),
-            'args' => array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'legacyAuthenticate'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
                 'username' => array(
                     'description' => __('Valid username.', AAM_KEY),
                     'type'        => 'string',
