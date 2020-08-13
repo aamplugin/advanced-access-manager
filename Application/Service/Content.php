@@ -10,6 +10,7 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
  * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
@@ -21,7 +22,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.1
+ * @version 6.6.1
  */
 class AAM_Service_Content
 {
@@ -196,6 +197,7 @@ class AAM_Service_Content
         if (!is_admin()) {
             // Password protected filter
             add_filter('post_password_required', array($this, 'isPasswordRequired'), 10, 2);
+
             // Manage password check expiration
             add_filter('post_password_expires', array($this, 'checkPassExpiration'));
 
@@ -520,12 +522,13 @@ class AAM_Service_Content
      *
      * @return mixed
      *
+     * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
      * @since 6.1.0 Fixed bug that causes fatal error when callback is Closure
      * @since 6.0.2 Making sure that get_post returns actual post object
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.6.1
      */
     public function beforeDispatch($response, $handler, $request)
     {
@@ -544,7 +547,11 @@ class AAM_Service_Content
             $has_pass = isset($request['password']);
 
             // Honor the manually defined password on the post
-            if (is_a($post, 'WP_Post') && empty($post->post_password) && $has_pass) {
+            if (is_a($post, 'WP_Post')
+                    && empty($post->post_password)
+                    && $has_pass
+                    && ($request->get_method() === 'GET')
+            ) {
                 $request['_password'] = $request['password'];
                 unset($request['password']);
             }
