@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.5.0
-Stable tag: 6.6.1
+Stable tag: 6.6.2
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -93,7 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.6.2 =
 * Fixed Bug: Reported by Wordfence research team issue with multi-role support [https://github.com/aamplugin/advanced-access-manager/issues/138](https://github.com/aamplugin/advanced-access-manager/issues/138)
-
+* Changed: Simplify `aam/v2/authenticate` output [https://github.com/aamplugin/advanced-access-manager/issues/139](https://github.com/aamplugin/advanced-access-manager/issues/139)
 
 = 6.6.1 =
 * Fixed Bug: register_rest_route was called incorrectly in WP 5.5 [https://github.com/aamplugin/advanced-access-manager/issues/136](https://github.com/aamplugin/advanced-access-manager/issues/136)
