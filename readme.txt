@@ -91,6 +91,10 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.6.2 =
+* Fixed Bug: Reported by Wordfence research team issue with multi-role support [https://github.com/aamplugin/advanced-access-manager/issues/138](https://github.com/aamplugin/advanced-access-manager/issues/138)
+
+
 = 6.6.1 =
 * Fixed Bug: register_rest_route was called incorrectly in WP 5.5 [https://github.com/aamplugin/advanced-access-manager/issues/136](https://github.com/aamplugin/advanced-access-manager/issues/136)
 * Fixed Bug: When AAM is active, the Password Protected cannot be set [https://github.com/aamplugin/advanced-access-manager/issues/137](https://github.com/aamplugin/advanced-access-manager/issues/137)

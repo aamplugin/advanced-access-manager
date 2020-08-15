@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
  * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
  *              array of properties
  * @since 6.2.0 Added new property to the JS localization `blog_id`
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.6.2
  */
 class AAM_Backend_Manager
 {
@@ -222,15 +223,19 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.6.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/138
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.2
      */
     public function profileUpdate($id)
     {
         $user = get_user_by('ID', $id);
 
-        //save selected user roles
-        if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
+        $is_multirole = AAM::api()->getConfig('core.settings.multiSubject', false);
+
+        if ($is_multirole && current_user_can('promote_user', $id)) {
             $roles = filter_input(
                 INPUT_POST,
                 'aam_user_roles',
