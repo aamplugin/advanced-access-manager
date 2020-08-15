@@ -12,11 +12,12 @@
  *
  * @package AAM
  *
+ * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
  * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the class
  *
- * @version 6.5.0
+ * @version 6.6.2
  */
 class AAM_Service_LoginRedirect
 {
@@ -72,16 +73,17 @@ class AAM_Service_LoginRedirect
      *
      * @return void
      *
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
      * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.6.2
      */
     protected function initializeHooks()
     {
         // AAM Secure Login hooking
-        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'));
+        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3);
 
         // WP Core login redirect hook
         add_filter('login_redirect', array($this, 'getLoginRedirect'), 10, 3);
@@ -125,18 +127,23 @@ class AAM_Service_LoginRedirect
      * This method hooks into the Secure Login redirect service and override the
      * response for the Ajax login request
      *
-     * @param array $response
+     * @param array           $response
+     * @param WP_REST_Request $request
+     * @param WP_User         $user
      *
      * @return array
      *
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @see AAM_Service_SecureLogin::authenticate
-     * @version 6.0.0
+     * @version 6.6.2
      */
-    public function prepareLoginResponse($response)
+    public function prepareLoginResponse($response, $request, $user)
     {
         if (empty($response['redirect']) || ($response['redirect'] === admin_url())) {
-            $response['redirect'] = $this->getUserRedirect($response['user']);
+            $response['redirect'] = $this->getUserRedirect($user);
         }
 
         return $response;

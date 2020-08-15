@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
  *              https://github.com/aamplugin/advanced-access-manager/issues/100
@@ -25,7 +26,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.1
+ * @version 6.6.2
  */
 class AAM_Service_Jwt
 {
@@ -143,7 +144,7 @@ class AAM_Service_Jwt
 
             return $args;
         });
-        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 2);
+        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3);
 
         // WP Core current user definition
         add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
@@ -392,25 +393,26 @@ class AAM_Service_Jwt
      *
      * @param array           $response
      * @param WP_REST_Request $request
+     * @param WP_User         $user
      *
      * @return array
      *
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
      * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/100
      * @since 6.4.0 Added the ability to issue refreshable token
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.6.0
+     * @version 6.6.2
      */
-    public function prepareLoginResponse(array $response, WP_REST_Request $request)
-    {
+    public function prepareLoginResponse(
+        array $response, WP_REST_Request $request, $user
+    ) {
         if ($request->get_param('issueJWT') === true) {
             $refreshable = $request->get_param('refreshableJWT');
 
             if ($refreshable) {
-                $refreshable = user_can(
-                    $response['user']->ID, 'aam_issue_refreshable_jwt'
-                );
+                $refreshable = user_can($user->ID, 'aam_issue_refreshable_jwt');
 
                 if ($refreshable === false) {
                     throw new Exception(
@@ -430,7 +432,7 @@ class AAM_Service_Jwt
                 });
             }
 
-            $jwt = $this->issueToken($response['user']->ID, null, null, $refreshable);
+            $jwt = $this->issueToken($user->ID, null, null, $refreshable);
 
             $response['jwt'] = array(
                 'token'         => $jwt->token,

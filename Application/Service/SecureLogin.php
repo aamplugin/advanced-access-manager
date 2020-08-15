@@ -10,6 +10,7 @@
 /**
  * Secure Login service
  *
+ * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16.
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.1
+ * @version 6.6.2
  */
 class AAM_Service_SecureLogin
 {
@@ -211,13 +212,14 @@ class AAM_Service_SecureLogin
      *
      * @return WP_REST_Response
      *
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
      * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
      * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.2
+     * @version 6.6.2
      */
     public function authenticate(WP_REST_Request $request)
     {
@@ -237,9 +239,9 @@ class AAM_Service_SecureLogin
         try {
             if (!is_wp_error($user)) {
                 $result = apply_filters('aam_auth_response_filter', array(
-                    'user'     => $user,
+                    'user'     => $this->prepareUserData($user),
                     'redirect' => $request->get_param('redirect')
-                ), $request);
+                ), $request, $user);
             } else {
                 $status = 403;
                 $result = array(
@@ -264,8 +266,11 @@ class AAM_Service_SecureLogin
      *
      * @return WP_REST_Response
      *
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
+     * @since 6.4.2 Initial implementation of the method
+     *
      * @access public
-     * @version 6.4.2
+     * @version 6.6.2
      */
     public function legacyAuthenticate(WP_REST_Request $request)
     {
@@ -282,12 +287,12 @@ class AAM_Service_SecureLogin
             // Making sure that token is issued
             $request->set_param('issueJWT', true);
 
-            $data = apply_filters(
+            $result = apply_filters(
                 'aam_auth_response_filter',
-                array('user' => $user),
-                $request
+                array('user' => $this->prepareUserData($user)),
+                $request,
+                $user
             );
-            $result = array_merge(array('user' => $user), $data['jwt']);
         } else {
             $status = 403;
             $result = new WP_Error(
@@ -297,6 +302,31 @@ class AAM_Service_SecureLogin
         }
 
         return new WP_REST_Response($result, $status);
+    }
+
+    /**
+     * Prepare user data that is returned
+     *
+     * @param WP_User $user
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.6.2
+     */
+    protected function prepareUserData($user) {
+        $response = array('data' => array());
+
+        $props = array(
+            'ID', 'user_login', 'user_nicename', 'display_name', 'user_url',
+            'user_email', 'user_registered'
+        );
+
+        foreach($props as $prop) {
+            $response['data'][$prop] = $user->{$prop};
+        }
+
+        return $response;
     }
 
     /**

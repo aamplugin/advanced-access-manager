@@ -55,7 +55,6 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals('WP_User', get_class($data['user']));
         $this->assertEquals('https://aamplugin.com', $data['redirect']);
     }
 
@@ -87,7 +86,6 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals('WP_User', get_class($data['user']));
         $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $data['redirect']);
     }
 
@@ -120,7 +118,6 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals('WP_User', get_class($data['user']));
         $this->assertEquals(Callback::REDIRECT_URL, $data['redirect']);
     }
 
@@ -145,7 +142,6 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals('WP_User', get_class($data['user']));
         $this->assertNull($data['redirect']);
     }
 
