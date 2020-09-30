@@ -1539,8 +1539,7 @@
                         policy = null;
                     }
 
-                    function buildSubject(subject, effect)
-                    {
+                    function buildSubject(subject, effect) {
                         var response;
 
                         const badge = effect ? '<span class="badge danger">apply</span>' : '<span class="badge success">exclude</span>';
@@ -3205,6 +3204,13 @@
                         $('#content-object-type').val(), $('#content-object-id').val()
                     );
                 }
+            }
+
+            if (getAAM().isUI('post')) {
+                loadAccessForm(
+                    $('#content-object-type').val(),
+                    $('#content-object-id').val()
+                );
             }
 
             getAAM().addHook('init', initialize);
