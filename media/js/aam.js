@@ -2831,6 +2831,7 @@
                         $('#post-redirect-code-value-container').show();
                     });
                 });
+
                 $('#save-redirect-btn').bind('click', function() {
                     $(this).text(getAAM().__('Saving...'));
                     const type = $('.post-redirect-type:checked').val();
@@ -3200,17 +3201,11 @@
                 }
 
                 if ($('#aam-access-form-container').is(':empty') === false) {
-                    initializeAccessForm(
-                        $('#content-object-type').val(), $('#content-object-id').val()
+                    loadAccessForm(
+                        $('#content-object-type').val(),
+                        $('#content-object-id').val()
                     );
                 }
-            }
-
-            if (getAAM().isUI('post')) {
-                loadAccessForm(
-                    $('#content-object-type').val(),
-                    $('#content-object-id').val()
-                );
             }
 
             getAAM().addHook('init', initialize);
