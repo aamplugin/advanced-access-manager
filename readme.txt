@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.6.4 =
 * Fixed Bug: DataTables warning: table id=post-ipcheck-list - Cannot reinitialise DataTable [https://github.com/aamplugin/advanced-access-manager/issues/149](https://github.com/aamplugin/advanced-access-manager/issues/149)
+* Changed: User Level Filter Service: Performance Request by @dannysummerlinjstartorg [https://github.com/aamplugin/advanced-access-manager/issues/142](https://github.com/aamplugin/advanced-access-manager/issues/142)
 
 = 6.6.3 =
 * Fixed Bug: Initial access settings for post are not loaded [https://github.com/aamplugin/advanced-access-manager/issues/143](https://github.com/aamplugin/advanced-access-manager/issues/143)

@@ -10,6 +10,7 @@
 /**
  * AAM core API
  *
+ * @since 6.6.4 https://github.com/aamplugin/advanced-access-manager/issues/142
  * @since 6.3.1 Fixed bug with setting clearing
  * @since 6.3.0 Optimized for Multisite setup
  * @since 6.2.2 Minor refactoring to the clearSettings method
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.1
+ * @version 6.6.4
  */
 final class AAM_Core_API
 {
@@ -164,8 +165,11 @@ final class AAM_Core_API
      *
      * @return int
      *
+     * @since 6.6.4 https://github.com/aamplugin/advanced-access-manager/issues/142
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.6.4
      */
     public static function maxLevel($caps, $default = 0)
     {
@@ -173,8 +177,9 @@ final class AAM_Core_API
 
         if (is_array($caps)) { // WP Error Fix bug report
             foreach ($caps as $cap => $granted) {
-                if (!empty($granted) && preg_match('/^level_([0-9]+)$/', $cap, $match)) {
-                    $max = ($max < $match[1] ? $match[1] : $max);
+                if (!empty($granted) && (strpos($cap, 'level_') === 0)) {
+                    $level = intval(substr($cap, 6));
+                    $max   = ($max < $level ? $level : $max);
                 }
             }
         }
