@@ -14,8 +14,7 @@ use AAM,
     AAM_Service_Content,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test that content access settings are applied and used properly with WordPress core
@@ -25,8 +24,60 @@ use AAM,
  */
 class SingleRoleAccessControlTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Post',
+            'post_name'   => 'content-service-post',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Page',
+            'post_name'   => 'content-service-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that user is not allowed to access the post when access settings are set
@@ -41,7 +92,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -51,14 +102,14 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Make sure that AAM API returns correct result
         $this->assertTrue($post->is('restricted'));
 
         // Check that current user is not allowed to read_post
-        $this->assertFalse(current_user_can('read_post', AAM_UNITTEST_POST_ID));
+        $this->assertFalse(current_user_can('read_post', self::$post_id));
     }
 
     /**
@@ -79,12 +130,12 @@ class SingleRoleAccessControlTest extends TestCase
         ));
 
         // First, confirm that post is in the array of posts
-        $this->assertTrue(in_array(AAM_UNITTEST_POST_ID, $posts));
+        $this->assertTrue(in_array(self::$post_id, $posts));
 
         // Hide the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -101,7 +152,7 @@ class SingleRoleAccessControlTest extends TestCase
         ));
 
         // First, confirm that post is in the array of posts
-        $this->assertFalse(in_array(AAM_UNITTEST_POST_ID, $posts));
+        $this->assertFalse(in_array(self::$post_id, $posts));
     }
 
     /**
@@ -117,7 +168,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -130,7 +181,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         // Confirm that teaser message is returned instead of actual content
-        $GLOBALS['post'] = AAM_UNITTEST_POST_ID;
+        $GLOBALS['post'] = self::$post_id;
         ob_start();
         the_content();
         $this->assertSame(
@@ -157,7 +208,7 @@ class SingleRoleAccessControlTest extends TestCase
         // Limit the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -168,8 +219,8 @@ class SingleRoleAccessControlTest extends TestCase
 
         // Faking the fact that user already seen this post once
         update_user_option(
-            AAM_UNITTEST_AUTH_USER_ID,
-            sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, AAM_UNITTEST_POST_ID),
+            AAM_UNITTEST_ADMIN_USER_ID,
+            sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, self::$post_id),
             1
         );
 
@@ -178,7 +229,7 @@ class SingleRoleAccessControlTest extends TestCase
 
         // Forcing WP_Query to the right path
         $wp_query->is_single = true;
-        $GLOBALS['post'] = get_post(AAM_UNITTEST_POST_ID);
+        $GLOBALS['post'] = get_post(self::$post_id);
 
         // Override the default handlers so we can suppress die exit
         add_filter('wp_die_handler', function() {
@@ -216,7 +267,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that commenting for this feature is set as open
@@ -229,7 +280,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         // First, confirm that post is in the array of posts
-        $this->assertFalse(comments_open(AAM_UNITTEST_POST_ID));
+        $this->assertFalse(comments_open(self::$post_id));
     }
 
     /**
@@ -244,14 +295,14 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('redirected', array(
             'enabled'     => true,
             'type'        => 'page',
-            'destination' => AAM_UNITTEST_PAGE_ID,
+            'destination' => self::$page_id,
             'httpCode'    => 301
         ))->save());
 
@@ -260,7 +311,7 @@ class SingleRoleAccessControlTest extends TestCase
 
         $service  = AAM_Service_Content::getInstance();
         $response = $service->isAuthorizedToReadPost($user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         ));
 
         // Make sure that we have WP Error
@@ -270,7 +321,7 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
-            'url'    => get_page_link(AAM_UNITTEST_PAGE_ID),
+            'url'    => get_page_link(self::$page_id),
             'status' => 301
         ), $response->get_error_data());
     }
@@ -287,7 +338,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -303,7 +354,7 @@ class SingleRoleAccessControlTest extends TestCase
 
         $service  = AAM_Service_Content::getInstance();
         $response = $service->isAuthorizedToReadPost($user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         ));
 
         // Make sure that we have WP Error
@@ -330,7 +381,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -347,7 +398,7 @@ class SingleRoleAccessControlTest extends TestCase
 
         $service  = AAM_Service_Content::getInstance();
         $response = $service->isAuthorizedToReadPost($user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         ));
 
         // Make sure that we have WP Error
@@ -374,7 +425,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -388,12 +439,12 @@ class SingleRoleAccessControlTest extends TestCase
 
         // Get post
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that password is required
         $this->assertTrue(
-            apply_filters('post_password_required', false, get_post(AAM_UNITTEST_POST_ID))
+            apply_filters('post_password_required', false, get_post(self::$post_id))
         );
 
         // Verify that password is not required when explicitly provided
@@ -420,7 +471,7 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -434,12 +485,12 @@ class SingleRoleAccessControlTest extends TestCase
 
         // Get post
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that password is required
         $this->assertTrue(
-            apply_filters('post_password_required', false, get_post(AAM_UNITTEST_POST_ID))
+            apply_filters('post_password_required', false, get_post(self::$post_id))
         );
 
         // Generate cookie
@@ -475,7 +526,7 @@ class SingleRoleAccessControlTest extends TestCase
         // Hide the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -489,7 +540,7 @@ class SingleRoleAccessControlTest extends TestCase
 
         // Get post
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that access to the post is expired
@@ -520,11 +571,11 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that editing is allowed for a specific post
-        $this->assertTrue(current_user_can('edit_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('edit_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('edit', true)->save());
@@ -533,7 +584,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         // Verify that user is no longer allowed to edit a post
-        $this->assertFalse(current_user_can('edit_post', AAM_UNITTEST_POST_ID));
+        $this->assertFalse(current_user_can('edit_post', self::$post_id));
     }
 
     /**
@@ -548,11 +599,11 @@ class SingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that deletion is allowed for a specific post
-        $this->assertTrue(current_user_can('delete_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('delete_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('delete', true)->save());
@@ -561,7 +612,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         // Verify that user is no longer allowed to delete a post
-        $this->assertFalse(current_user_can('delete_post', AAM_UNITTEST_POST_ID));
+        $this->assertFalse(current_user_can('delete_post', self::$post_id));
     }
 
     /**
@@ -578,14 +629,14 @@ class SingleRoleAccessControlTest extends TestCase
 
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Force global post
-        $post = get_post(AAM_UNITTEST_POST_ID);
+        $post = get_post(self::$post_id);
 
         // Verify that publishing is allowed for a specific post
-        $this->assertTrue(current_user_can('publish_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('publish_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('publish', true)->save());
@@ -594,7 +645,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->_resetSubjects();
 
         // Verify that user is no longer allowed to publish a post
-        $this->assertFalse(current_user_can('publish_post', AAM_UNITTEST_POST_ID));
+        $this->assertFalse(current_user_can('publish_post', self::$post_id));
 
         // Reset to default the global state
         unset($post);

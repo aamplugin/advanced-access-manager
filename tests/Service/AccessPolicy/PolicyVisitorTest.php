@@ -10,12 +10,10 @@
 namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
-    AAM_Core_API,
-    AAM_Core_Config,
     AAM_Core_Object_Uri,
-    AAM_Core_Policy_Factory,
     AAM_Core_AccessSettings,
-    PHPUnit\Framework\TestCase;
+    PHPUnit\Framework\TestCase,
+    AAM\UnitTest\Libs\ResetTrait;
 
 
 /**
@@ -25,6 +23,49 @@ use AAM,
  */
 class PolicyVisitorTest extends TestCase
 {
+
+    use ResetTrait;
+
+    /**
+     * Policy ID placeholder
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $policy_id;
+
+    /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * @inheritDoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default policy placeholder
+        self::$policy_id = wp_insert_post(array(
+            'post_title'  => 'Unittest Policy Placeholder',
+            'post_status' => 'publish',
+            'post_type'   => 'aam_policy'
+        ));
+
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Policy Service Integration',
+            'post_name'   => 'policy-service-integration-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
 
     /**
      * Test that policy actually applied to visitor
@@ -59,7 +100,7 @@ class PolicyVisitorTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => get_page_by_path('sample-page', OBJECT, 'page')->ID,
+            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID,
             'code'   => 307
         ), $object->findMatch('/hello-world-4'));
 
@@ -101,38 +142,17 @@ class PolicyVisitorTest extends TestCase
         // Update existing Access Policy with new policy
         $wpdb->update($wpdb->posts, array('post_content' => file_get_contents(
             __DIR__ . '/policies/' . $policy_file . '.json'
-        )), array('ID' => AAM_UNITTEST_ACCESS_POLICY_ID));
+        )), array('ID' => self::$policy_id));
 
         $settings = AAM_Core_AccessSettings::getInstance();
         $settings->set(sprintf(
-            'visitor.policy.%d', AAM_UNITTEST_ACCESS_POLICY_ID
+            'visitor.policy.%d', self::$policy_id
         ), true);
-    }
 
-    /**
-     * Reset all AAM settings to the default
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function tearDown()
-    {
-        // Clear all AAM settings
-        AAM_Core_API::clearSettings();
-
-        // Reset Access Settings repository
-        AAM_Core_AccessSettings::getInstance()->reset();
-
-        // Clear WP core cache
-        wp_cache_flush();
-
-        // Reset internal AAM config cache
-        AAM_Core_Config::bootstrap();
-
-        // Reset Access Policy Factory cache
-        AAM_Core_Policy_Factory::reset();
+        // Resetting all settings as $wpdb->update already initializes it with
+        // settings
+        \AAM_Core_Policy_Factory::reset();
+        $this->_resetSubjects();
     }
 
 }

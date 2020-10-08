@@ -16,7 +16,7 @@ use AAM,
 
 /**
  * Access Denied Redirect service
- * 
+ *
  * @package AAM\UnitTest
  * @version 6.0.0
  */
@@ -25,10 +25,34 @@ class DeniedRedirectTest extends TestCase
     use ResetTrait;
 
     /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Page',
+            'post_name'   => 'content-service-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
      * Test default redirect which is "Access Denied" message
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -47,17 +71,17 @@ class DeniedRedirectTest extends TestCase
      * Test custom WP Die message content
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function testCustomMessageRedirect()
-    { 
+    {
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'message');
         $redirect->updateOptionItem('frontend.redirect.message', 'Denied by test');
-        
+
         $this->assertTrue($redirect->save());
 
         // Reset all internal cache
@@ -76,17 +100,17 @@ class DeniedRedirectTest extends TestCase
      * Test redirect to the existing page
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function testExistingPageRedirect()
-    { 
+    {
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'page');
-        $redirect->updateOptionItem('frontend.redirect.page', AAM_UNITTEST_PAGE_ID);
-        
+        $redirect->updateOptionItem('frontend.redirect.page', self::$page_id);
+
         $this->assertTrue($redirect->save());
 
         // Reset all internal cache
@@ -97,24 +121,24 @@ class DeniedRedirectTest extends TestCase
         wp_die('Access Denied', 'aam_access_denied', array('exit' => false));
         ob_end_clean();
 
-        $this->assertContains('Location: ' . get_page_link(AAM_UNITTEST_PAGE_ID), xdebug_get_headers());
+        $this->assertContains('Location: ' . get_page_link(self::$page_id), xdebug_get_headers());
     }
 
     /**
      * Test redirect to specified URI
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function testUrlRedirect()
-    { 
+    {
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'url');
         $redirect->updateOptionItem('frontend.redirect.url', '/hello-world');
-        
+
         $this->assertTrue($redirect->save());
 
         // Reset all internal cache
@@ -132,16 +156,16 @@ class DeniedRedirectTest extends TestCase
      * Test redirect to the login screen
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function testLoginPageRedirect()
-    { 
+    {
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'login');
-        
+
         $this->assertTrue($redirect->save());
 
         // Reset all internal cache
@@ -161,17 +185,17 @@ class DeniedRedirectTest extends TestCase
      * Test redirect to the PHP callback function
      *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
     public function testCallbackRedirect()
-    { 
+    {
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'callback');
         $redirect->updateOptionItem('frontend.redirect.callback', 'AAM\\UnitTest\\Service\\DeniedRedirect\\Callback::printOutput');
-        
+
         $this->assertTrue($redirect->save());
 
         // Reset all internal cache

@@ -4,7 +4,7 @@
             "Key": "redirect:on:login",
             "Value": {
                 "Type": "page",
-                "Slug": "sample-page"
+                "Slug": "policy-service-integration-page"
             }
         }
     ]

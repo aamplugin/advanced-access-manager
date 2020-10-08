@@ -10,8 +10,7 @@
 namespace AAM\UnitTest\Service\Core;
 
 use PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test AAM core service functionality
@@ -21,8 +20,7 @@ use PHPUnit\Framework\TestCase,
  */
 class CoreServiceTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
 
     /**
      * Test that all AAM related labels are properly escaped to mitigate XSS

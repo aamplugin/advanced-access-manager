@@ -39,7 +39,7 @@ class PolicyTokenTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
 
         $caps = array();
         foreach ((array) AAM::getUser()->allcaps as $cap => $effect) {
@@ -49,7 +49,7 @@ class PolicyTokenTest extends TestCase
         }
 
         $cases = array(
-            array('${USER.ID}', 1),
+            array('${USER.ID}', AAM_UNITTEST_ADMIN_USER_ID),
             array('${USER.ip}', '127.0.0.1'),
             array('${USER.ipAddress}', '127.0.0.1'),
             array('${USER.authenticated}', true),
@@ -80,9 +80,9 @@ class PolicyTokenTest extends TestCase
     public function testUserMetaTokenEvaluation()
     {
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
 
-        update_user_meta(AAM_UNITTEST_AUTH_USER_ID, 'aam_unittest', 'hello');
+        update_user_meta(AAM_UNITTEST_ADMIN_USER_ID, 'aam_unittest', 'hello');
 
         $this->assertEquals(
             'hello',
@@ -94,7 +94,7 @@ class PolicyTokenTest extends TestCase
         // Reset user
         wp_set_current_user(0);
         unset($_SERVER['REMOTE_ADDR']);
-        delete_user_meta(AAM_UNITTEST_AUTH_USER_ID, 'aam_unittest');
+        delete_user_meta(AAM_UNITTEST_ADMIN_USER_ID, 'aam_unittest');
     }
 
     /**
@@ -108,9 +108,9 @@ class PolicyTokenTest extends TestCase
     public function testUserOptionTokenEvaluation()
     {
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
 
-        update_user_option(AAM_UNITTEST_AUTH_USER_ID, 'aam_unittest', 'hello');
+        update_user_option(AAM_UNITTEST_ADMIN_USER_ID, 'aam_unittest', 'hello');
 
         $this->assertEquals(
             'hello',
@@ -122,7 +122,7 @@ class PolicyTokenTest extends TestCase
         // Reset user
         wp_set_current_user(0);
         unset($_SERVER['REMOTE_ADDR']);
-        delete_user_option(AAM_UNITTEST_AUTH_USER_ID, 'aam_unittest');
+        delete_user_option(AAM_UNITTEST_ADMIN_USER_ID, 'aam_unittest');
     }
 
     /**

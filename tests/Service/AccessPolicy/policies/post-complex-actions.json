@@ -1,9 +1,8 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
-            "Resource": "Post:post:1",
+            "Resource": "Post:post:policy-service-integration",
             "Action": "Read",
             "Metadata": {
                 "Password": {

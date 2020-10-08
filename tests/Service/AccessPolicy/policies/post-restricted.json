@@ -1,10 +1,11 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
-            "Resource": "Post:post:1",
-            "Action": ["Read"]
+            "Resource": "Post:post:policy-service-integration",
+            "Action": [
+                "Read"
+            ]
         }
     ]
 }

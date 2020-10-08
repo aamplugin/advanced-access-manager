@@ -26,6 +26,52 @@ class PolicyCoreTest extends TestCase
     use ResetTrait;
 
     /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * Policy ID placeholder
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $policy_id;
+
+    /**
+     * Test setup
+     *
+     * @return void
+     *
+     * @access private
+     * @static
+     * @version 6.7.0
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Policy Core Test',
+            'post_name'   => 'policy-core-test',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default policy placeholder
+        self::$policy_id = wp_insert_post(array(
+            'post_title'  => 'Unittest Policy Placeholder',
+            'post_status' => 'publish',
+            'post_type'   => 'aam_policy'
+        ));
+    }
+
+    /**
      * Test that "denied" policy is selected because second statement is not applicable
      *
      * @return void
@@ -37,7 +83,7 @@ class PolicyCoreTest extends TestCase
     {
         $this->preparePlayground('multi-resource-target-conditional');
 
-        $post = AAM::getUser()->getObject('post', AAM_UNITTEST_POST_ID);
+        $post = AAM::getUser()->getObject('post', self::$post_id);
 
         $this->assertTrue($post->is('restricted'));
     }
@@ -56,7 +102,7 @@ class PolicyCoreTest extends TestCase
         $_GET['q'] = 'testing';
 
         $this->preparePlayground('multi-resource-target-conditional');
-        $post = AAM::getUser()->getObject('post', AAM_UNITTEST_POST_ID);
+        $post = AAM::getUser()->getObject('post', self::$post_id);
 
         $this->assertFalse($post->is('restricted'));
 
@@ -74,7 +120,7 @@ class PolicyCoreTest extends TestCase
     public function testMultiResourceEnforcedAllowed()
     {
         $this->preparePlayground('multi-resource-enforced-statement');
-        $post = AAM::getUser()->getObject('post', AAM_UNITTEST_POST_ID);
+        $post = AAM::getUser()->getObject('post', self::$post_id);
 
         $this->assertFalse($post->is('restricted'));
     }
@@ -90,7 +136,7 @@ class PolicyCoreTest extends TestCase
     public function testMultiResourceEnforcedReversedAllowed()
     {
         $this->preparePlayground('multi-resource-enforced-statement-reversed');
-        $post = AAM::getUser()->getObject('post', AAM_UNITTEST_POST_ID);
+        $post = AAM::getUser()->getObject('post', self::$post_id);
 
         $this->assertFalse($post->is('restricted'));
     }
@@ -114,11 +160,16 @@ class PolicyCoreTest extends TestCase
         // Update existing Access Policy with new policy
         $wpdb->update($wpdb->posts, array('post_content' => file_get_contents(
             __DIR__ . '/policies/' . $policy_file . '.json'
-        )), array('ID' => AAM_UNITTEST_ACCESS_POLICY_ID));
+        )), array('ID' => self::$policy_id));
+
+        // Resetting all settings as $wpdb->update already initializes it with
+        // settings
+        \AAM_Core_Policy_Factory::reset();
+        $this->_resetSubjects();
 
         $settings = AAM_Core_AccessSettings::getInstance();
         $settings->set(sprintf(
-            'visitor.policy.%d', AAM_UNITTEST_ACCESS_POLICY_ID
+            'visitor.policy.%d', self::$policy_id
         ), true);
     }
 

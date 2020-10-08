@@ -11,6 +11,9 @@
         <testsuite name="Core">
             <directory suffix="Test.php">./tests/Core</directory>
         </testsuite>
+         <testsuite name="Single">
+            <directory suffix="Test.php">./tests/Service/Jwt</directory>
+        </testsuite>
         <testsuite name="Services">
             <directory suffix="Test.php">./tests/Service</directory>
         </testsuite>
@@ -19,8 +22,12 @@
         </testsuite>
     </testsuites>
     <php>
-        <const name="AAM_UNITTEST_AUTH_USER_ID" value="1" />
-        <const name="AAM_UNITTEST_AUTH_MULTIROLE_USER_ID" value="5" />
+        <const name="AAM_UNITTEST_RESET_DB" value="1" />
+        <const name="AAM_UNITTEST_ADMIN_USER_ID" value="18" />
+        <const name="AAM_UNITTEST_MULTIROLE_USER_ID" value="5" />
+        <const name="AAM_UNITTEST_USERNAME" value="john" />
+        <const name="AAM_UNITTEST_PASSWORD" value="123456" />
+
         <const name="AAM_UNITTEST_AUTH_SUBADMIN_USER_ID" value="16" />
         <const name="AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID" value="17" />
         <const name="AAM_UNITTEST_POST_ID" value="1" />
@@ -42,8 +49,6 @@
         <const name="AAM_UNITTEST_PAGE_LEVEL_1_ID" value="260" />
         <const name="AAM_UNITTEST_PAGE_LEVEL_2_ID" value="262" />
         <const name="AAM_UNITTEST_JOHN_ID" value="2" />
-        <const name="AAM_UNITTEST_USERNAME" value="john" />
-        <const name="AAM_UNITTEST_PASSWORD" value="123456" />
         <const name="AAM_UNITTEST_NAV_MENU_NAME" value="Unit Testing Menu" />
         <const name="AAM_UNITTEST_NAV_MENU_ID" value="128" />
         <const name="AAM_UNITTEST_NAV_MENU_SLUG" value="unit-testing-menu" />

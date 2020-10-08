@@ -9,8 +9,7 @@
 
 namespace AAM\UnitTest\Service\AccessPolicy;
 
-use AAM_Backend_View_Helper,
-    AAM_Core_Policy_Validator,
+use AAM_Core_Policy_Validator,
     PHPUnit\Framework\TestCase;
 
 /**

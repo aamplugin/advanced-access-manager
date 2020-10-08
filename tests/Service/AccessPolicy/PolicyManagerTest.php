@@ -13,8 +13,7 @@ use AAM,
     AAM_Core_Object_Policy,
     AAM_Core_Policy_Manager,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test policy manager
@@ -26,8 +25,25 @@ use AAM,
  */
 class PolicyManagerTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * @inheritDoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test simple policy load
@@ -109,9 +125,13 @@ class PolicyManagerTest extends TestCase
      */
     public function testDynamicResourcePolicy()
     {
+        $GLOBALS['UT'] = 'test';
+
         $stub = $this->prepareManagerStub('dynamic-resource');
 
-        $this->assertArrayHasKey('post:post:1:read', $stub->getTree()['Statement']);
+        $this->assertArrayHasKey('post:post:test:read', $stub->getTree()['Statement']);
+
+        unset($GLOBALS['UT']);
     }
 
     /**
@@ -124,9 +144,13 @@ class PolicyManagerTest extends TestCase
      */
     public function testDynamicParamPolicy()
     {
+        $GLOBALS['UT'] = 'test';
+
         $stub = $this->prepareManagerStub('dynamic-param');
 
-        $this->assertArrayHasKey('hello-world-admin', $stub->getTree()['Param']);
+        $this->assertArrayHasKey('hello-world-test', $stub->getTree()['Param']);
+
+        unset($GLOBALS['UT']);
     }
     /**
      * Test if param mapping is working as expected
@@ -138,7 +162,7 @@ class PolicyManagerTest extends TestCase
      */
     public function testParamMapping()
     {
-        $GLOBALS['unit_test'] = array('a','b');
+        $GLOBALS['unit_test'] = array('a', 'b');
 
         $stub = $this->prepareManagerStub('param-mapping-user-meta');
 

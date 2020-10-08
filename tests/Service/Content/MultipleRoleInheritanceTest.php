@@ -14,7 +14,6 @@ use AAM,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthMultiRoleUserTrait,
     AAM\UnitTest\Libs\MultiRoleOptionInterface;
 
 /**
@@ -26,8 +25,52 @@ use AAM,
  */
 class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInterface
 {
-    use ResetTrait,
-        AuthMultiRoleUserTrait;
+    use ResetTrait;
+
+    /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
+            // Enable Multiple Role Support
+            AAM_Core_Config::set('core.settings.multiSubject', true);
+        }
+
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Override AAM current user
+        AAM::getInstance()->setUser(
+            new \AAM_Core_Subject_User(AAM_UNITTEST_MULTIROLE_USER_ID)
+        );
+
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Post',
+            'post_name'   => 'content-service-post',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that access settings are inherited from multiple parent roles
@@ -54,7 +97,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
+            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
                 'limited',
                 array(
                     'enabled'   => true,
@@ -66,7 +109,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Set the access settings for the next Sibling
         $sibling = $role->getSiblings()[0];
 
-        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
+        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
             'hidden',
             false
         )->save();
@@ -82,7 +125,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         //  ),
         //  hidden => false
         // )
-        $object = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID);
+        $object = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id);
 
         $this->assertSame(
             array(
@@ -115,7 +158,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
+            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
                 'hidden', true
             )->save()
         );
@@ -123,7 +166,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Set the access settings for the next Sibling
         $sibling = $role->getSiblings()[0];
 
-        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
+        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
             'hidden',
             false
         )->save();
@@ -135,7 +178,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Array (
         //  hidden => true
         // )
-        $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID)->getOption();
+        $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id)->getOption();
         $this->assertSame(array('hidden' => true), $option);
     }
 
@@ -162,7 +205,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
         $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID, true)->updateOptionItem(
+            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
                 'limited', array('enabled' => true, 'threshold' => 10)
             )->save()
         );
@@ -183,7 +226,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         //    threshold => 10
         //  )
         // )
-        $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID)->getOption();
+        $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id)->getOption();
         $this->assertSame(array('limited' => array('enabled' => false, 'threshold' => 10)), $option);
     }
 

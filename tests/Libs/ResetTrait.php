@@ -25,6 +25,68 @@ trait ResetTrait
 {
 
     /**
+     * @inheritDoc
+     */
+    public static function setUpBeforeClass()
+    {
+        global $wpdb;
+
+        if (defined('AAM_UNITTEST_RESET_DB') && AAM_UNITTEST_RESET_DB) {
+            // Reset the database
+            $wpdb->query("TRUNCATE TABLE {$wpdb->posts}");
+            $wpdb->query("TRUNCATE TABLE {$wpdb->postmeta}");
+            $wpdb->query("TRUNCATE TABLE {$wpdb->term_relationships}");
+            $wpdb->query("TRUNCATE TABLE {$wpdb->term_taxonomy}");
+            $wpdb->query("TRUNCATE TABLE {$wpdb->termmeta}");
+            $wpdb->query("TRUNCATE TABLE {$wpdb->terms}");
+
+            static::_setUpBeforeClass();
+        }
+    }
+
+    private static function _setUpBeforeClass()
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function tearDownAfterClass()
+    {
+        global $wpdb;
+
+        // Reset the database
+        $wpdb->query("TRUNCATE TABLE {$wpdb->posts}");
+        $wpdb->query("TRUNCATE TABLE {$wpdb->postmeta}");
+        $wpdb->query("TRUNCATE TABLE {$wpdb->term_relationships}");
+        $wpdb->query("TRUNCATE TABLE {$wpdb->term_taxonomy}");
+        $wpdb->query("TRUNCATE TABLE {$wpdb->termmeta}");
+        $wpdb->query("TRUNCATE TABLE {$wpdb->terms}");
+
+        // Create one default post, page and post category
+        $post_id = wp_insert_post(array(
+            'post_title'  => 'Sample Post',
+            'post_status' => 'publish'
+        ));
+
+        wp_insert_post(array(
+            'post_title'  => 'Sample Page',
+            'post_status' => 'publish',
+            'post_type'   => 'page'
+        ));
+
+        $term = wp_insert_term('Uncategorized', 'category');
+
+        wp_set_post_terms($post_id, $term['term_id'], 'category');
+
+        static::_tearDownAfterClass();
+    }
+
+    private static function _tearDownAfterClass()
+    {
+    }
+
+    /**
      * Reset all AAM settings to the default
      *
      * @return void

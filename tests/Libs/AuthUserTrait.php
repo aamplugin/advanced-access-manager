@@ -22,7 +22,7 @@ trait AuthUserTrait
     public static function setUpBeforeClass()
     {
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
     }
 
     /**

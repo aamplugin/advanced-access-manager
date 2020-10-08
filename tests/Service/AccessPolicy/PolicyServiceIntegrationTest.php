@@ -15,15 +15,13 @@ use AAM,
     AAM_Core_Object_Menu,
     AAM_Core_Object_Route,
     AAM_Core_Object_Policy,
-    AAM_Core_Policy_Factory,
     AAM_Core_Object_Toolbar,
     AAM_Core_Object_Metabox,
     AAM_Core_Object_Redirect,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM_Core_Object_LoginRedirect,
-    AAM_Core_Object_LogoutRedirect,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM_Core_Object_LogoutRedirect;
 
 /**
  * Test access policy integration with core AAM services
@@ -33,8 +31,77 @@ use AAM,
  */
 class PolicyServiceIntegrationTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * Policy ID placeholder
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $policy_id;
+
+    /**
+     * @inheritDoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Policy Service Integration',
+            'post_name'   => 'policy-service-integration',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Policy Service Integration',
+            'post_name'   => 'policy-service-integration-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default policy placeholder
+        self::$policy_id = wp_insert_post(array(
+            'post_title'  => 'Unittest Policy Placeholder',
+            'post_status' => 'publish',
+            'post_type'   => 'aam_policy'
+        ));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that Access Policy integrates with Admin Menu service
@@ -100,7 +167,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-simple-actions');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertFalse($object->isAllowedTo('edit'));
         $this->assertFalse($object->isAllowedTo('delete'));
@@ -120,7 +189,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-restricted');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('restricted'));
     }
@@ -137,7 +208,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-hidden');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('hidden'));
 
@@ -165,7 +238,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-complex-actions');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('protected'));
         $this->assertEquals(array(
@@ -193,7 +268,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-redirect-page-id');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('redirected'));
         $this->assertEquals(array(
@@ -217,14 +294,16 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-redirect-page-slug');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('redirected'));
         $this->assertEquals(array(
             'enabled'     => true,
             'type'        => 'page',
             'httpCode'    => 301,
-            'destination' => get_page_by_path('sample-page', OBJECT)->ID
+            'destination' => get_page_by_path('policy-service-integration-page', OBJECT)->ID
         ), $object->get('redirected'));
     }
 
@@ -241,7 +320,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-redirect-url');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('redirected'));
         $this->assertEquals(array(
@@ -265,7 +346,9 @@ class PolicyServiceIntegrationTest extends TestCase
     {
         $this->preparePlayground('post-redirect-callback');
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Post::OBJECT_TYPE, 1);
+        $object = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
 
         $this->assertTrue($object->is('redirected'));
         $this->assertEquals(array(
@@ -310,7 +393,7 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => get_page_by_path('sample-page', OBJECT, 'page')->ID,
+            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID,
             'code'   => 307
         ), $object->findMatch('/hello-world-4'));
 
@@ -434,9 +517,9 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals($object->getOption(), array(
             'backend.redirect.type'  => 'page',
-            'backend.redirect.page'  => 2,
+            'backend.redirect.page'  => self::$page_id,
             'frontend.redirect.type' => 'page',
-            'frontend.redirect.page' => 2,
+            'frontend.redirect.page' => self::$page_id,
         ));
     }
 
@@ -564,7 +647,7 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals($object->getOption(), array(
             'login.redirect.type' => 'page',
-            'login.redirect.page' => 2
+            'login.redirect.page' => self::$page_id
         ));
     }
 
@@ -668,7 +751,7 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals($object->getOption(), array(
             'logout.redirect.type' => 'page',
-            'logout.redirect.page' => 2
+            'logout.redirect.page' => self::$page_id
         ));
     }
 
@@ -778,7 +861,7 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals($object->getOption(), array(
             '404.redirect.type' => 'page',
-            '404.redirect.page' => 2
+            '404.redirect.page' => self::$page_id
         ));
     }
 
@@ -913,18 +996,17 @@ class PolicyServiceIntegrationTest extends TestCase
         // Update existing Access Policy with new policy
         $wpdb->update($wpdb->posts, array('post_content' => file_get_contents(
             __DIR__ . '/policies/' . $policy_file . '.json'
-        )), array('ID' => AAM_UNITTEST_ACCESS_POLICY_ID));
+        )), array('ID' => self::$policy_id));
 
         $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $this->assertTrue(
-            $object->updateOptionItem(AAM_UNITTEST_ACCESS_POLICY_ID, true)->save()
+            $object->updateOptionItem(self::$policy_id, true)->save()
         );
 
-        // Reset all internal cache
+        // Resetting all settings as $wpdb->update already initializes it with
+        // settings
+        \AAM_Core_Policy_Factory::reset();
         $this->_resetSubjects();
-
-        // Reset Access Policy Factory cache
-        AAM_Core_Policy_Factory::reset();
     }
 
 }

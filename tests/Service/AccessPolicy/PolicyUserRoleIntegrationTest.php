@@ -10,11 +10,9 @@
 namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
-    AAM_Core_API,
-    AAM_Core_Config,
-    AAM_Core_Policy_Factory,
     AAM_Core_AccessSettings,
-    PHPUnit\Framework\TestCase;
+    PHPUnit\Framework\TestCase,
+    AAM\UnitTest\Libs\ResetTrait;
 
 
 /**
@@ -24,6 +22,31 @@ use AAM,
  */
 class PolicyUserRoleIntegrationTest extends TestCase
 {
+
+    use ResetTrait;
+
+    /**
+     * Policy ID placeholder
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $policy_id;
+
+    /**
+     * @inheritDoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default policy placeholder
+        self::$policy_id = wp_insert_post(array(
+            'post_title'  => 'Unittest Policy Placeholder',
+            'post_status' => 'publish',
+            'post_type'   => 'aam_policy'
+        ));
+    }
 
     /**
      * Test that policy allows to assign or deprive specific capabilities
@@ -38,10 +61,12 @@ class PolicyUserRoleIntegrationTest extends TestCase
         $this->preparePlayground('capability-changes');
 
         // Reset current user to trigger policy changes
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
 
         $this->assertFalse(current_user_can('switch_themes'));
         $this->assertTrue(current_user_can('hello_world'));
+
+        wp_set_current_user(0);
     }
 
     /**
@@ -57,10 +82,12 @@ class PolicyUserRoleIntegrationTest extends TestCase
         $this->preparePlayground('role-add');
 
         // Reset current user to trigger policy changes
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
 
         $this->assertContains('administrator', AAM::getUser()->roles);
         $this->assertContains('contributor', AAM::getUser()->roles);
+
+        wp_set_current_user(0);
     }
 
     /**
@@ -73,13 +100,15 @@ class PolicyUserRoleIntegrationTest extends TestCase
      */
     public function testRemovedRole()
     {
-        $this->preparePlayground('role-remove', AAM_UNITTEST_AUTH_MULTIROLE_USER_ID);
+        $this->preparePlayground('role-remove', AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Reset current user to trigger policy changes
-        wp_set_current_user(AAM_UNITTEST_AUTH_MULTIROLE_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         $this->assertFalse(in_array('editor', AAM::getUser()->roles, true));
         $this->assertContains('subscriber', AAM::getUser()->roles);
+
+        wp_set_current_user(0);
     }
 
     /**
@@ -95,48 +124,24 @@ class PolicyUserRoleIntegrationTest extends TestCase
      * @access protected
      * @version 6.0.0
      */
-    protected function preparePlayground($policy_file, $user = AAM_UNITTEST_AUTH_USER_ID)
+    protected function preparePlayground($policy_file, $user = AAM_UNITTEST_ADMIN_USER_ID)
     {
         global $wpdb;
 
         // Update existing Access Policy with new policy
         $wpdb->update($wpdb->posts, array('post_content' => file_get_contents(
             __DIR__ . '/policies/' . $policy_file . '.json'
-        )), array('ID' => AAM_UNITTEST_ACCESS_POLICY_ID));
+        )), array('ID' => self::$policy_id));
 
         $settings = AAM_Core_AccessSettings::getInstance();
         $settings->set(sprintf(
-            'user.%d.policy.%d', $user, AAM_UNITTEST_ACCESS_POLICY_ID
+            'user.%d.policy.%d', $user, self::$policy_id
         ), true);
-    }
 
-    /**
-     * Reset all AAM settings to the default
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function tearDown()
-    {
-        // Clear all AAM settings
-        AAM_Core_API::clearSettings();
-
-        // Reset Access Settings repository
-        AAM_Core_AccessSettings::getInstance()->reset();
-
-        // Unset the forced user
-        wp_set_current_user(0);
-
-        // Clear WP core cache
-        wp_cache_flush();
-
-        // Reset internal AAM config cache
-        AAM_Core_Config::bootstrap();
-
-        // Reset Access Policy Factory cache
-        AAM_Core_Policy_Factory::reset();
+        // Resetting all settings as $wpdb->update already initializes it with
+        // settings
+        \AAM_Core_Policy_Factory::reset();
+        $this->_resetSubjects();
     }
 
 }

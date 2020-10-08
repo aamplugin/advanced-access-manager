@@ -1,10 +1,14 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
-            "Resource": "Post:post:1",
-            "Action": ["Edit", "Delete", "Publish", "Comment"]
+            "Resource": "Post:post:policy-service-integration",
+            "Action": [
+                "Edit",
+                "Delete",
+                "Publish",
+                "Comment"
+            ]
         }
     ]
 }

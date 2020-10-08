@@ -14,7 +14,6 @@ use AAM,
     AAM_Core_Object_Menu,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthMultiRoleUserTrait,
     AAM\UnitTest\Libs\MultiRoleOptionInterface;
 
 /**
@@ -28,8 +27,35 @@ use AAM,
  */
 class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInterface
 {
-    use ResetTrait,
-        AuthMultiRoleUserTrait;
+    use ResetTrait;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
+            // Enable Multiple Role Support
+            AAM_Core_Config::set('core.settings.multiSubject', true);
+        }
+
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Override AAM current user
+        AAM::getInstance()->setUser(
+            new \AAM_Core_Subject_User(AAM_UNITTEST_MULTIROLE_USER_ID)
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that access settings are inherited from multiple parent roles

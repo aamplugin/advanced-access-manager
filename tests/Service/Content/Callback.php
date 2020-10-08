@@ -10,4 +10,5 @@ class Callback
     {
         return self::REDIRECT_URL;
     }
+
 }

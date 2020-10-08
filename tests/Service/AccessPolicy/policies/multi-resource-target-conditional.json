@@ -2,14 +2,14 @@
     "Statement": [
         {
             "Effect": "deny",
-            "Resource": "Post:post:1",
+            "Resource": "Post:post:policy-core-test",
             "Action": [
                 "Read"
             ]
         },
         {
             "Effect": "allow",
-            "Resource": "Post:post:1",
+            "Resource": "Post:post:policy-core-test",
             "Action": [
                 "Read"
             ],

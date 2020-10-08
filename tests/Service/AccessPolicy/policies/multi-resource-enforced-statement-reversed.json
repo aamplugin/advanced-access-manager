@@ -3,14 +3,14 @@
         {
             "Effect": "allow",
             "Enforce": true,
-            "Resource": "Post:post:1",
+            "Resource": "Post:post:policy-core-test",
             "Action": [
                 "Read"
             ]
         },
         {
             "Effect": "deny",
-            "Resource": "Post:post:1",
+            "Resource": "Post:post:policy-core-test",
             "Action": [
                 "Read"
             ]

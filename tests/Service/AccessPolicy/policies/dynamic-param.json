@@ -1,8 +1,7 @@
 {
-    "Version": "1.0.0",
     "Param": [
         {
-            "Key": "hello-world-${USER.user_nicename}",
+            "Key": "hello-world-${PHP_GLOBAL.UT}",
             "Value": "hello"
         }
     ]

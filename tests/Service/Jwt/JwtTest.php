@@ -66,7 +66,7 @@ class JwtTest extends TestCase
 
         // Generate valid JWT token
         $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(array(
-            'userId'      => AAM_UNITTEST_AUTH_USER_ID,
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => false,
             'refreshable' => false
         ));
@@ -95,7 +95,7 @@ class JwtTest extends TestCase
 
         // Generate valid JWT token
         $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(array(
-            'userId'      => AAM_UNITTEST_AUTH_USER_ID,
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => false
         ));
@@ -124,7 +124,7 @@ class JwtTest extends TestCase
 
         // Generate valid JWT token
         $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(array(
-            'userId'      => AAM_UNITTEST_AUTH_USER_ID,
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => false
         ), DateTime::createFromFormat('m/d/Y', '01/01/2018'));
@@ -284,7 +284,7 @@ class JwtTest extends TestCase
 
         // Generate valid JWT token
         $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(array(
-            'userId'      => AAM_UNITTEST_AUTH_USER_ID,
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => true
         ), DateTime::createFromFormat('m/d/Y', '01/01/2018'));
@@ -315,7 +315,7 @@ class JwtTest extends TestCase
 
         // Generate valid JWT token
         $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(array(
-            'userId'      => AAM_UNITTEST_AUTH_USER_ID,
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => false,
             'refreshable' => false
         ));

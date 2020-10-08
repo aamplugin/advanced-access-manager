@@ -14,8 +14,7 @@ use AAM,
     AAM_Service_Content,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test that content access settings through the WP RESTful API
@@ -25,8 +24,60 @@ use AAM,
  */
 class RESTfulSingleRoleAccessControlTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Post',
+            'post_name'   => 'content-service-post',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Content Service Page',
+            'post_name'   => 'content-service-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that user is not allowed to access the post when access settings are set
@@ -41,7 +92,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -52,7 +103,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
@@ -75,7 +126,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         // Hide the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -92,7 +143,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         // First, confirm that post is in the array of posts
         $this->assertCount(0, array_filter($data, function($post) {
-            return $post['id'] === AAM_UNITTEST_POST_ID;
+            return $post['id'] === self::$post_id;
         }));
     }
 
@@ -109,7 +160,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -123,7 +174,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         // Confirm that teaser message is returned instead of actual content
         $server = rest_get_server();
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
@@ -146,7 +197,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         // Limit the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -157,8 +208,8 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         // Faking the fact that user already seen this post once
         update_user_option(
-            AAM_UNITTEST_AUTH_USER_ID,
-            sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, AAM_UNITTEST_POST_ID),
+            AAM_UNITTEST_ADMIN_USER_ID,
+            sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, self::$post_id),
             1
         );
 
@@ -167,7 +218,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
@@ -188,7 +239,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         // Limit the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -198,23 +249,23 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         ))->save());
 
         // Tracking key
-        $key = sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, AAM_UNITTEST_POST_ID);
+        $key = sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, self::$post_id);
 
         // Faking the fact that user already seen this post once
-        update_user_option(AAM_UNITTEST_AUTH_USER_ID, $key, 1);
+        update_user_option(AAM_UNITTEST_ADMIN_USER_ID, $key, 1);
 
         // Reset all internal cache
         $this->_resetSubjects();
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $status = $server->dispatch($request)->get_status();
 
         $this->assertEquals(200, $status);
-        $this->assertEquals(2, get_user_option($key, AAM_UNITTEST_AUTH_USER_ID));
+        $this->assertEquals(2, get_user_option($key, AAM_UNITTEST_ADMIN_USER_ID));
     }
 
     /**
@@ -229,7 +280,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that commenting for this feature is set as open
@@ -244,7 +295,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         $server = rest_get_server();
 
         $request = new WP_REST_Request('POST', '/wp/v2/comments');
-        $request->set_param('post', AAM_UNITTEST_POST_ID);
+        $request->set_param('post', self::$post_id);
         $request->set_param('content', 'Test comment');
 
         $data = $server->dispatch($request)->get_data();
@@ -264,14 +315,14 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('redirected', array(
             'enabled'     => true,
             'type'        => 'page',
-            'destination' => AAM_UNITTEST_PAGE_ID,
+            'destination' => self::$page_id,
             'httpCode'    => 301
         ))->save());
 
@@ -280,13 +331,13 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
 
         $this->assertEquals('post_access_redirected', $data['code']);
-        $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $data['url']);
+        $this->assertEquals(get_page_link(self::$page_id), $data['url']);
     }
 
     /**
@@ -301,7 +352,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -317,7 +368,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
@@ -338,7 +389,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -355,7 +406,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $data = $server->dispatch($request)->get_data();
@@ -376,7 +427,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -390,7 +441,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
         $request->set_param('password', '123456');
 
@@ -409,7 +460,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -423,7 +474,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
         $request->set_param('password', 'abs');
 
@@ -446,7 +497,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         // Hide the post
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -460,7 +511,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('GET', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'view');
 
         $response = $server->dispatch($request);
@@ -481,11 +532,11 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that editing is allowed for a specific post
-        $this->assertTrue(current_user_can('edit_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('edit_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('edit', true)->save());
@@ -495,7 +546,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('POST', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('POST', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('content', 'Test');
 
         $response = $server->dispatch($request);
@@ -516,11 +567,11 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Verify that deletion is allowed for a specific post
-        $this->assertTrue(current_user_can('delete_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('delete_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('delete', true)->save());
@@ -530,7 +581,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request  = new WP_REST_Request('DELETE', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request  = new WP_REST_Request('DELETE', '/wp/v2/posts/' . self::$post_id);
         $response = $server->dispatch($request);
 
         $this->assertEquals(403, $response->get_status());
@@ -551,14 +602,14 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Force global post
-        $post = get_post(AAM_UNITTEST_POST_ID);
+        $post = get_post(self::$post_id);
 
         // Verify that publishing is allowed for a specific post
-        $this->assertTrue(current_user_can('publish_post', AAM_UNITTEST_POST_ID));
+        $this->assertTrue(current_user_can('publish_post', self::$post_id));
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('publish', true)->save());
@@ -568,7 +619,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
 
         $server = rest_get_server();
 
-        $request  = new WP_REST_Request('POST', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request  = new WP_REST_Request('POST', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('status', 'publish');
         $response = $server->dispatch($request);
 

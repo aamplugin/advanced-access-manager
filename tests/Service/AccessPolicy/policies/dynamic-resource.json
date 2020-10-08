@@ -1,10 +1,9 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
             "Resource": [
-                "Post:post:${USER.ID}"
+                "Post:post:${PHP_GLOBAL.UT}"
             ],
             "Action": ["Read"]
         }

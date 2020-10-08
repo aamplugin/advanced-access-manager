@@ -4,7 +4,7 @@
             "Key": "redirect:on:404",
             "Value": {
                 "Type": "page",
-                "Slug": "sample-page"
+                "Slug": "policy-service-integration-page"
             }
         }
     ]

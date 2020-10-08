@@ -37,11 +37,11 @@ trait AuthMultiRoleUserTrait
         }
 
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_AUTH_MULTIROLE_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Override AAM current user
         AAM::getInstance()->setUser(
-            new AAM_Core_Subject_User(AAM_UNITTEST_AUTH_MULTIROLE_USER_ID)
+            new AAM_Core_Subject_User(AAM_UNITTEST_MULTIROLE_USER_ID)
         );
     }
 
