@@ -26,12 +26,13 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/152
  * @since 6.3.2 Added new hook `aam_initialized_{$type}_object_filter`
  * @since 6.1.0 Fixed bug with incorrectly managed internal cache
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.2
+ * @version 6.7.0
  */
 abstract class AAM_Core_Subject
 {
@@ -328,8 +329,11 @@ abstract class AAM_Core_Subject
      *
      * @return array
      *
+     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/152
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.7.0
      */
     protected function inheritFromParent(AAM_Core_Object $object)
     {
@@ -340,9 +344,6 @@ abstract class AAM_Core_Subject
                 $object::OBJECT_TYPE,
                 $object->getId()
             )->getOption();
-
-            // Merge access settings while reading hierarchical chain
-            $option = array_replace_recursive($option, $object->getOption());
 
             // Merge access settings if multi-roles option is enabled
             $multi = AAM::api()->getConfig('core.settings.multiSubject', false);
@@ -357,6 +358,9 @@ abstract class AAM_Core_Subject
                     );
                 }
             }
+
+            // Merge access settings while reading hierarchical chain
+            $option = array_replace_recursive($option, $object->getOption());
 
             // Finally set the option for provided object
             $object->setOption($option);

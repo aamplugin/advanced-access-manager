@@ -205,4 +205,38 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         $this->assertSame(array('index.php' => false), $option);
     }
 
+    /**
+     * Test that access settings are merged correctly with "allowed" precedence
+     * when explicit settings are defined for an individual user
+     *
+     * For more information refer to the Issue #152
+     * https://github.com/aamplugin/advanced-access-manager/issues/152
+     *
+     * @return void
+     * @version 6.7.0
+     */
+    public function testInheritanceAllowPrecedenceFromUserWithMultipleRoles()
+    {
+        $user = AAM::getUser();
+
+        // Set explicit setting for individual user
+        $this->assertTrue(
+            $user->getObject(AAM_Core_Object_Menu::OBJECT_TYPE, null, true)->updateOptionItem(
+                'index.php', true
+            )->save()
+        );
+
+        // Reset internal AAM cache
+        $this->_resetSubjects();
+
+        // Assert that we have both roles merged result is as following
+        // Array (
+        //  index.php => true
+        // )
+        $option = $user->getObject(AAM_Core_Object_Menu::OBJECT_TYPE)->getOption();
+        $this->assertSame(
+            array('index.php' => true), $option
+        );
+    }
+
 }
