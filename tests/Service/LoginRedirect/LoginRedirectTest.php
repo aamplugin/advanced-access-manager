@@ -27,6 +27,43 @@ class LoginRedirectTest extends TestCase
     use ResetTrait;
 
     /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * Undocumented variable
+     *
+     * @var [type]
+     */
+    protected static $another_page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Login Redirect Service Page',
+            'post_name'   => 'login-redirect-service-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+
+        self::$another_page_id = wp_insert_post(array(
+            'post_title'  => 'Login Redirect Service Page 2',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
      * Assert that correct URL login redirect is returns for RESTful auth call
      *
      * @return void
@@ -42,8 +79,10 @@ class LoginRedirectTest extends TestCase
         add_filter('send_auth_cookies', '__return_false');
 
         // Set login redirect
-        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
-        $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
+        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_ADMIN_USER_ID);
+        $object  = $subject->getObject(
+            AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true
+        );
 
         $object->updateOptionItem('login.redirect.type', 'url')
             ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
@@ -74,10 +113,13 @@ class LoginRedirectTest extends TestCase
         add_filter('send_auth_cookies', '__return_false');
 
         // Set login redirect
-        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
-        $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
+        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_ADMIN_USER_ID);
+        $object  = $subject->getObject(
+            AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true
+        );
+
         $object->updateOptionItem('login.redirect.type', 'page')
-            ->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID)
+            ->updateOptionItem('login.redirect.page', self::$page_id)
             ->save();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
@@ -86,7 +128,7 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $data['redirect']);
+        $this->assertEquals(get_page_link(self::$page_id), $data['redirect']);
     }
 
     /**
@@ -106,7 +148,7 @@ class LoginRedirectTest extends TestCase
         add_filter('send_auth_cookies', '__return_false');
 
         // Set login redirect
-        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
+        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_ADMIN_USER_ID);
         $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
         $object->updateOptionItem('login.redirect.type', 'callback')
             ->updateOptionItem('login.redirect.callback', 'AAM\\UnitTest\\Service\\LoginRedirect\\Callback::redirectCallback')
@@ -158,15 +200,20 @@ class LoginRedirectTest extends TestCase
     public function testLoginRedirectHookTriggerChanges()
     {
         // Set login redirect
-        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
-        $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
+        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_ADMIN_USER_ID);
+        $object  = $subject->getObject(
+            AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true
+        );
+
         $object->updateOptionItem('login.redirect.type', 'page')
-            ->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID)
+            ->updateOptionItem('login.redirect.page', self::$page_id)
             ->save();
 
-        $redirect = apply_filters('login_redirect', admin_url(), admin_url(), $subject->getPrincipal());
+        $redirect = apply_filters(
+            'login_redirect', admin_url(), admin_url(), $subject->getPrincipal()
+        );
 
-        $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $redirect);
+        $this->assertEquals(get_page_link(self::$page_id), $redirect);
     }
 
     /**
@@ -184,20 +231,23 @@ class LoginRedirectTest extends TestCase
     public function testLoginRedirectHookTriggerPersistOriginalRedirect()
     {
         // Set login redirect
-        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_JOHN_ID);
-        $object  = $subject->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true);
+        $subject = new AAM_Core_Subject_User(AAM_UNITTEST_ADMIN_USER_ID);
+        $object  = $subject->getObject(
+            AAM_Core_Object_LoginRedirect::OBJECT_TYPE, null, true
+        );
+
         $object->updateOptionItem('login.redirect.type', 'url')
             ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
             ->save();
 
         $redirect = apply_filters(
             'login_redirect',
-            get_page_link(AAM_UNITTEST_PAGE_ID),
-            get_page_link(AAM_UNITTEST_PAGE_ID),
+            get_page_link(self::$page_id),
+            get_page_link(self::$page_id),
             $subject->getPrincipal()
         );
 
-        $this->assertEquals(get_page_link(AAM_UNITTEST_PAGE_ID), $redirect);
+        $this->assertEquals(get_page_link(self::$page_id), $redirect);
     }
 
     /**
@@ -216,12 +266,12 @@ class LoginRedirectTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token and set it as the query param
-        $_GET['aam-jwt'] = $service->issueToken(AAM_UNITTEST_JOHN_ID)->token;
+        $_GET['aam-jwt'] = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID)->token;
 
         // Set custom user's login redirect
-        $redirect = \AAM::api()->getUser(AAM_UNITTEST_JOHN_ID)->getObject('loginRedirect');
+        $redirect = \AAM::api()->getUser(AAM_UNITTEST_ADMIN_USER_ID)->getObject('loginRedirect');
         $redirect->updateOptionItem('login.redirect.type', 'page');
-        $redirect->updateOptionItem('login.redirect.page', AAM_UNITTEST_PAGE_ID);
+        $redirect->updateOptionItem('login.redirect.page', self::$page_id);
         $this->assertTrue($redirect->save());
 
         // No need to generate Auth cookies
@@ -230,7 +280,7 @@ class LoginRedirectTest extends TestCase
         AAM_Service_Jwt::getInstance()->authenticateUser();
 
         $this->assertContains(
-            'Location: ' . get_page_link(AAM_UNITTEST_PAGE_ID), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
         );
 
         // Reset $_GET
@@ -254,8 +304,8 @@ class LoginRedirectTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token and set it as the query param
-        $_GET['aam-jwt']     = $service->issueToken(AAM_UNITTEST_JOHN_ID)->token;
-        $_GET['redirect_to'] = get_page_link(AAM_UNITTEST_PAGE_LEVEL_1_ID);
+        $_GET['aam-jwt']     = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID)->token;
+        $_GET['redirect_to'] = get_page_link(self::$another_page_id);
 
         // No need to generate Auth cookies
         add_filter('send_auth_cookies', '__return_false');
@@ -263,7 +313,7 @@ class LoginRedirectTest extends TestCase
         AAM_Service_Jwt::getInstance()->authenticateUser();
 
         $this->assertContains(
-            'Location: ' . get_page_link(AAM_UNITTEST_PAGE_LEVEL_1_ID), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$another_page_id), xdebug_get_headers()
         );
 
         // Reset $_GET

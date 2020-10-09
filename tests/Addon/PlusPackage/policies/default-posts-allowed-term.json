@@ -11,7 +11,7 @@
         {
             "Effect": "allow",
             "Resource": [
-                "Term:category:1:posts"
+                "Term:category:plus-package-sub-category:posts"
             ],
             "Action": [
                 "Edit",

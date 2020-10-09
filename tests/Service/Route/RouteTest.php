@@ -79,11 +79,6 @@ class RouteTest extends TestCase
             $object->updateOptionItem('restful|/aam/v2/authenticate|post', true)->save()
         );
 
-        // Register all the necessary hooks
-
-        $wp->query_vars['rest_route'] = true;
-        AAM_Service_Route::getInstance()->registerRouteControllers();
-
         $server = rest_get_server();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
@@ -115,11 +110,6 @@ class RouteTest extends TestCase
         $this->assertTrue(
             $object->updateOptionItem('restful|/aam/v2/authenticate|post', true)->save()
         );
-
-        // Register all the necessary hooks
-
-        $wp->query_vars['rest_route'] = true;
-        AAM_Service_Route::getInstance()->registerRouteControllers();
 
         $server = rest_get_server();
 

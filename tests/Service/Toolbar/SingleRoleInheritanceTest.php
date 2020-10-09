@@ -17,22 +17,39 @@ use AAM,
 
 /**
  * Test AAM access settings inheritance mechanism for the Toolbar service
- * 
+ *
  * Toolbar is available only for authenticated users so no Visitors are tested
- * 
+ *
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  * @version 6.0.0
  */
 class SingleRoleInheritanceTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test to insure that access settings are stored property on the User level
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @see AAM_Core_Subject_User::updateOption
      * @version 6.0.0
@@ -55,12 +72,12 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that access settings are inherited from the parent role property
-     * 
+     *
      * This test is designed to verify that access settings are propagated property
-     * when there is only one role assigned to a user. 
-     * 
+     * when there is only one role assigned to a user.
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -92,16 +109,16 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that access settings are propagated and merged properly
-     * 
+     *
      * The test is designed to verify that access settings are propagated properly
      * from the parent role and merged well with explicitly defined access settings on
      * the User level.
-     * 
+     *
      * The expected result is to have combined array of access settings from the parent
      * role and specific user.
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -132,12 +149,12 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that the full inheritance mechanism is working as expected
-     * 
+     *
      * Make sure that access settings are propagated and merged properly from the top
      * (Default Level) to the bottom (User Level).
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -173,12 +190,12 @@ class SingleRoleInheritanceTest extends TestCase
 
     /**
      * Test that access settings overwrite works as expected
-     * 
+     *
      * The expected result is lower Access Level overwrite access settings from the
      * higher Access Level.
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -221,5 +238,5 @@ class SingleRoleInheritanceTest extends TestCase
 
         $this->assertEquals(false, strpos($content, "id='wp-admin-bar-logout'"));
     }
-    
+
 }

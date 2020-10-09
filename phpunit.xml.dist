@@ -11,9 +11,6 @@
         <testsuite name="Core">
             <directory suffix="Test.php">./tests/Core</directory>
         </testsuite>
-         <testsuite name="Single">
-            <directory suffix="Test.php">./tests/Service/Jwt</directory>
-        </testsuite>
         <testsuite name="Services">
             <directory suffix="Test.php">./tests/Service</directory>
         </testsuite>
@@ -25,36 +22,9 @@
         <const name="AAM_UNITTEST_RESET_DB" value="1" />
         <const name="AAM_UNITTEST_ADMIN_USER_ID" value="18" />
         <const name="AAM_UNITTEST_MULTIROLE_USER_ID" value="5" />
-        <const name="AAM_UNITTEST_USERNAME" value="john" />
-        <const name="AAM_UNITTEST_PASSWORD" value="123456" />
-
-        <const name="AAM_UNITTEST_AUTH_SUBADMIN_USER_ID" value="16" />
-        <const name="AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID" value="17" />
-        <const name="AAM_UNITTEST_POST_ID" value="1" />
-        <const name="AAM_UNITTEST_POST_CATEGORIZED_ID" value="4374" />
-        <const name="AAM_UNITTEST_LEVEL_1_POST_ID" value="2944" />
-        <const name="AAM_UNITTEST_LEVEL_2_POST_ID" value="2946" />
-        <const name="AAM_UNITTEST_ATTACHMENT_ID" value="26" />
-        <const name="AAM_UNITTEST_CATEGORY_ID" value="1" />
-        <const name="AAM_UNITTEST_CATEGORY_SLUG" value="science" />
-        <const name="AAM_UNITTEST_TAG_ID" value="35" />
-        <const name="AAM_UNITTEST_TAG_A_SLUG" value="tag-a" />
-        <const name="AAM_UNITTEST_TAG_ID_B" value="36" />
-        <const name="AAM_UNITTEST_CATEGORY_LEVEL_1_ID" value="37" />
-        <const name="AAM_UNITTEST_CATEGORY_LEVEL_2_ID" value="38" />
-        <const name="AAM_UNITTEST_CATEGORY_LEVEL_3_ID" value="39" />
-        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID" value="3" />
-        <const name="AAM_UNITTEST_MEDIA_CATEGORY_ID_B" value="4" />
-        <const name="AAM_UNITTEST_PAGE_ID" value="2" />
-        <const name="AAM_UNITTEST_PAGE_LEVEL_1_ID" value="260" />
-        <const name="AAM_UNITTEST_PAGE_LEVEL_2_ID" value="262" />
-        <const name="AAM_UNITTEST_JOHN_ID" value="2" />
-        <const name="AAM_UNITTEST_NAV_MENU_NAME" value="Unit Testing Menu" />
-        <const name="AAM_UNITTEST_NAV_MENU_ID" value="128" />
-        <const name="AAM_UNITTEST_NAV_MENU_SLUG" value="unit-testing-menu" />
-        <const name="AAM_UNITTEST_NAV_MENU_FIRST_MENU_ID" value="4277" />
-        <const name="AAM_UNITTEST_NAV_MENU_FIRST_MENU_SUB1_ID" value="4278" />
-        <const name="AAM_UNITTEST_ACCESS_POLICY_ID" value="3640" />
-        <server name="SERVER_PROTOCOL" value="HTTP/1.0"/>
+        <const name="AAM_UNITTEST_USERNAME" value="unittest-admin" />
+        <const name="AAM_UNITTEST_PASSWORD" value="nGXeOf#u@eF3Q6OF3qkQeTlR" />
+        <const name="AAM_UNITTEST_USER_MANAGER_A_USER_ID" value="16" />
+        <const name="AAM_UNITTEST_USER_MANAGER_B_USER_ID" value="17" />
     </php>
 </phpunit>

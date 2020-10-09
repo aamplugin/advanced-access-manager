@@ -10,12 +10,13 @@
 /**
  * API Route service
  *
+ * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/153
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.7.0
  */
 class AAM_Service_Route
 {
@@ -79,12 +80,13 @@ class AAM_Service_Route
      *
      * @return void
      *
+     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/153
      * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.7.0
      */
     protected function initializeHooks()
     {
@@ -136,7 +138,7 @@ class AAM_Service_Route
         );
 
         // Register API manager is applicable
-        add_action('parse_request', array($this, 'registerRouteControllers'), 1);
+        add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), 1, 3);
 
         // Policy generation hook
         add_filter(
@@ -177,24 +179,6 @@ class AAM_Service_Route
         }
 
         return $policy;
-    }
-
-    /**
-     * Register route controllers
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function registerRouteControllers()
-    {
-        global $wp;
-
-        if (!empty($wp->query_vars['rest_route'])) {
-            // Manage access to the RESTful endpoints
-            add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), 1, 3);
-        }
     }
 
     /**

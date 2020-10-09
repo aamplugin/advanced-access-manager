@@ -122,7 +122,8 @@ class SecureLoginTest extends TestCase
         global $wpdb;
 
         $result = $wpdb->update(
-            $wpdb->users, array('user_status' => 1), array('ID' => AAM_UNITTEST_JOHN_ID)
+            $wpdb->users, array('user_status' => 1),
+            array('ID' => AAM_UNITTEST_ADMIN_USER_ID)
         );
 
         // Make sure that row is updated
@@ -144,7 +145,8 @@ class SecureLoginTest extends TestCase
 
         // Restore user status
         $result = $wpdb->update(
-            $wpdb->users, array('user_status' => 0), array('ID' => AAM_UNITTEST_JOHN_ID)
+            $wpdb->users, array('user_status' => 0),
+            array('ID' => AAM_UNITTEST_ADMIN_USER_ID)
         );
     }
 

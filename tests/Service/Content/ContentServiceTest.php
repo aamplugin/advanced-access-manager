@@ -11,8 +11,7 @@ namespace AAM\UnitTest\Service\Content;
 
 use WP_REST_Request,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test cases for the Content Service itself

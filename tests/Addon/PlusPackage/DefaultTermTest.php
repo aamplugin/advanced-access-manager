@@ -14,7 +14,6 @@ use AAM,
     AAM\AddOn\PlusPackage\Main,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait,
     AAM\AddOn\PlusPackage\Object\System;
 
 /**
@@ -25,8 +24,85 @@ use AAM,
  */
 class DefaultTermTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    protected static $term_id;
+    protected static $media_term_id;
+    protected static $media_term_b_id;
+    protected static $post_id;
+    protected static $media_id;
+    protected static $page_id;
+    protected static $sub_page_id;
+    protected static $term_top_id;
+    protected static $term_sub_id;
+    protected static $tag_a_id;
+    protected static $tag_b_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        $term          = wp_insert_term('Uncategorized', 'category');
+        self::$term_id = $term['term_id'];
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package',
+            'post_name'   => 'plus-package',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms(self::$post_id, self::$term_id, 'category');
+
+        self::$media_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package Media',
+            'post_type'   => 'attachment',
+            'post_status' => 'publish'
+        ));
+
+        AAM_Core_Config::set('core.settings.mediaCategory', true);
+        Main::bootstrap()->registerTaxonomies();
+
+        $media_term          = wp_insert_term('Media Category', 'media_category');
+        self::$media_term_id = $media_term['term_id'];
+
+        $media_term_b          = wp_insert_term('Media Category B', 'media_category');
+        self::$media_term_b_id = $media_term_b['term_id'];
+
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package Page',
+            'post_name'   => 'plus-package-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+
+        self::$sub_page_id = wp_insert_post(array(
+            'post_title'  => 'Sub Plus Package Page',
+            'post_name'   => 'sub-plus-package-page',
+            'post_type'   => 'page',
+            'post_parent' => self::$page_id,
+            'post_status' => 'publish'
+        ));
+
+        self::$term_top_id = wp_insert_term('Top Level', 'category')['term_id'];
+        self::$term_sub_id = wp_insert_term(
+            'Top Level', 'category', array('parent' =>  self::$term_top_id)
+        )['term_id'];
+
+        self::$tag_a_id = wp_insert_term('Tag A', 'post_tag')['term_id'];
+        self::$tag_b_id = wp_insert_term('Tag B', 'post_tag')['term_id'];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test the new default category is assigned to post that has no categories
@@ -40,19 +116,19 @@ class DefaultTermTest extends TestCase
     public function testPostSaveCategoryAssignment()
     {
         // Get original post terms
-        $terms = wp_get_object_terms(AAM_UNITTEST_POST_ID, 'category', array(
+        $terms = wp_get_object_terms(self::$post_id, 'category', array(
             'fields' => 'ids'
         ));
 
         // Remove all the terms from the post(
-        wp_remove_object_terms(AAM_UNITTEST_POST_ID, $terms, 'category');
+        wp_remove_object_terms(self::$post_id, $terms, 'category');
 
         // Set the default category
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
         $this->assertTrue(
             $system->updateOptionItem(
                 'defaultTerm.post.category',
-                intval(AAM_UNITTEST_CATEGORY_LEVEL_1_ID)
+                intval(self::$term_top_id)
             )->save()
         );
 
@@ -60,17 +136,17 @@ class DefaultTermTest extends TestCase
         $this->_resetSubjects();
 
         wp_update_post(array(
-            'ID' => AAM_UNITTEST_POST_ID
+            'ID' => self::$post_id
         ));
 
-        $new_terms = wp_get_object_terms(AAM_UNITTEST_POST_ID, 'category', array(
+        $new_terms = wp_get_object_terms(self::$post_id, 'category', array(
             'fields' => 'ids'
         ));
 
-        $this->assertContains(intval(AAM_UNITTEST_CATEGORY_LEVEL_1_ID), $new_terms);
+        $this->assertContains(intval(self::$term_top_id), $new_terms);
 
         // Restore original categories
-        wp_set_object_terms(AAM_UNITTEST_POST_ID, $terms, 'category');
+        wp_set_object_terms(self::$post_id, $terms, 'category');
     }
 
     /**
@@ -88,10 +164,7 @@ class DefaultTermTest extends TestCase
         $this->assertTrue(
             $system->updateOptionItem(
                 'defaultTerm.post.post_tag',
-                array(
-                    intval(AAM_UNITTEST_TAG_ID),
-                    intval(AAM_UNITTEST_TAG_ID_B)
-                )
+                array(self::$tag_a_id, self::$tag_b_id)
             )->save()
         );
 
@@ -110,8 +183,8 @@ class DefaultTermTest extends TestCase
             'fields' => 'ids'
         ));
 
-        $this->assertContains(intval(AAM_UNITTEST_TAG_ID), $new_terms);
-        $this->assertContains(intval(AAM_UNITTEST_TAG_ID_B), $new_terms);
+        $this->assertContains(intval(self::$tag_a_id), $new_terms);
+        $this->assertContains(intval(self::$tag_b_id), $new_terms);
 
         wp_delete_post($id, true);
     }
@@ -128,7 +201,7 @@ class DefaultTermTest extends TestCase
     public function testPostSaveCategoryPreserved()
     {
         // Get original post terms
-        $terms = wp_get_object_terms(AAM_UNITTEST_POST_ID, 'category', array(
+        $terms = wp_get_object_terms(self::$post_id, 'category', array(
             'fields' => 'ids'
         ));
 
@@ -139,7 +212,7 @@ class DefaultTermTest extends TestCase
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
         $this->assertTrue(
             $system->updateOptionItem(
-                'defaultTerm.post.category', AAM_UNITTEST_CATEGORY_LEVEL_1_ID
+                'defaultTerm.post.category', self::$term_top_id
             )->save()
         );
 
@@ -147,10 +220,10 @@ class DefaultTermTest extends TestCase
         $this->_resetSubjects();
 
         wp_update_post(array(
-            'ID' => AAM_UNITTEST_POST_ID
+            'ID' => self::$post_id
         ));
 
-        $new_terms = wp_get_object_terms(AAM_UNITTEST_POST_ID, 'category', array(
+        $new_terms = wp_get_object_terms(self::$post_id, 'category', array(
             'fields' => 'ids'
         ));
 
@@ -169,22 +242,21 @@ class DefaultTermTest extends TestCase
     {
         // Enable media category
         $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
-        Main::bootstrap()->registerTaxonomies();
 
         // Get original post terms
-        $terms = wp_get_object_terms(AAM_UNITTEST_ATTACHMENT_ID, 'media_category', array(
+        $terms = wp_get_object_terms(self::$media_id, 'media_category', array(
             'fields' => 'ids'
         ));
 
         // Remove all the terms from the post(
-        wp_remove_object_terms(AAM_UNITTEST_ATTACHMENT_ID, $terms, 'media_category');
+        wp_remove_object_terms(self::$media_id, $terms, 'media_category');
 
         // Set the default category
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
         $this->assertTrue(
             $system->updateOptionItem(
                 'defaultTerm.attachment.media_category',
-                intval(AAM_UNITTEST_MEDIA_CATEGORY_ID)
+                self::$media_term_id
             )->save()
         );
 
@@ -192,17 +264,17 @@ class DefaultTermTest extends TestCase
         $this->_resetSubjects();
 
         wp_update_post(array(
-            'ID' => AAM_UNITTEST_ATTACHMENT_ID
+            'ID' => self::$media_id
         ));
 
-        $new_terms = wp_get_object_terms(AAM_UNITTEST_ATTACHMENT_ID, 'media_category', array(
+        $new_terms = wp_get_object_terms(self::$media_id, 'media_category', array(
             'fields' => 'ids'
         ));
 
-        $this->assertContains(intval(AAM_UNITTEST_MEDIA_CATEGORY_ID), $new_terms);
+        $this->assertContains(self::$media_term_id, $new_terms);
 
         // Restore original categories
-        wp_set_object_terms(AAM_UNITTEST_ATTACHMENT_ID, $terms, 'media_category');
+        wp_set_object_terms(self::$media_id, $terms, 'media_category');
     }
 
     /**
@@ -217,15 +289,14 @@ class DefaultTermTest extends TestCase
     {
         // Enable media category
         $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
-        Main::bootstrap()->registerTaxonomies();
 
         // Get original post terms
-        $terms = wp_get_object_terms(AAM_UNITTEST_ATTACHMENT_ID, 'media_category', array(
+        $terms = wp_get_object_terms(self::$media_id, 'media_category', array(
             'fields' => 'ids'
         ));
 
         // Remove all the terms from the post(
-        wp_remove_object_terms(AAM_UNITTEST_ATTACHMENT_ID, $terms, 'media_category');
+        wp_remove_object_terms(self::$media_id, $terms, 'media_category');
 
         // Set the default category
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
@@ -233,8 +304,8 @@ class DefaultTermTest extends TestCase
             $system->updateOptionItem(
                 'defaultTerm.attachment.media_category',
                 array(
-                    intval(AAM_UNITTEST_MEDIA_CATEGORY_ID),
-                    intval(AAM_UNITTEST_MEDIA_CATEGORY_ID_B)
+                    intval(self::$media_term_id),
+                    intval(self::$media_term_b_id)
                 )
             )->save()
         );
@@ -243,18 +314,18 @@ class DefaultTermTest extends TestCase
         $this->_resetSubjects();
 
         wp_update_post(array(
-            'ID' => AAM_UNITTEST_ATTACHMENT_ID
+            'ID' => self::$media_id
         ));
 
-        $new_terms = wp_get_object_terms(AAM_UNITTEST_ATTACHMENT_ID, 'media_category', array(
+        $new_terms = wp_get_object_terms(self::$media_id, 'media_category', array(
             'fields' => 'ids'
         ));
 
-        $this->assertContains(intval(AAM_UNITTEST_MEDIA_CATEGORY_ID), $new_terms);
-        $this->assertContains(intval(AAM_UNITTEST_MEDIA_CATEGORY_ID_B), $new_terms);
+        $this->assertContains(intval(self::$media_term_id), $new_terms);
+        $this->assertContains(intval(self::$media_term_b_id), $new_terms);
 
         // Restore original categories
-        wp_set_object_terms(AAM_UNITTEST_ATTACHMENT_ID, $terms, 'media_category');
+        wp_set_object_terms(self::$media_id, $terms, 'media_category');
     }
 
     /**
@@ -275,7 +346,7 @@ class DefaultTermTest extends TestCase
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
         $this->assertTrue(
             $system->updateOptionItem(
-                'defaultTerm.attachment.media_category', AAM_UNITTEST_MEDIA_CATEGORY_ID
+                'defaultTerm.attachment.media_category', self::$media_term_id
             )->save()
         );
 
@@ -291,7 +362,7 @@ class DefaultTermTest extends TestCase
             'fields' => 'ids'
         ));
 
-        $this->assertContains(AAM_UNITTEST_MEDIA_CATEGORY_ID, $new_terms);
+        $this->assertContains(self::$media_term_id, $new_terms);
 
         // Restore original categories
         wp_delete_post($id, true);
@@ -317,8 +388,8 @@ class DefaultTermTest extends TestCase
             $system->updateOptionItem(
                 'defaultTerm.attachment.media_category',
                 array(
-                    AAM_UNITTEST_MEDIA_CATEGORY_ID,
-                    AAM_UNITTEST_MEDIA_CATEGORY_ID_B,
+                    self::$media_term_id,
+                    self::$media_term_b_id,
                 )
             )->save()
         );
@@ -335,8 +406,8 @@ class DefaultTermTest extends TestCase
             'fields' => 'ids'
         ));
 
-        $this->assertContains(AAM_UNITTEST_MEDIA_CATEGORY_ID, $new_terms);
-        $this->assertContains(AAM_UNITTEST_MEDIA_CATEGORY_ID_B, $new_terms);
+        $this->assertContains(self::$media_term_id, $new_terms);
+        $this->assertContains(self::$media_term_b_id, $new_terms);
 
         // Restore original categories
         wp_delete_post($id, true);
@@ -356,12 +427,12 @@ class DefaultTermTest extends TestCase
         $system = AAM::getUser()->getObject(System::OBJECT_TYPE);
         $this->assertTrue(
             $system->updateOptionItem(
-                'defaultTerm.post.category', AAM_UNITTEST_CATEGORY_LEVEL_2_ID
+                'defaultTerm.post.category', self::$term_sub_id
             )->save()
         );
 
         $this->assertEquals(
-            AAM_UNITTEST_CATEGORY_LEVEL_2_ID, get_option('default_category')
+            self::$term_sub_id, get_option('default_category')
         );
     }
 

@@ -13,7 +13,6 @@ use AAM,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait,
     AAM\AddOn\PlusPackage\Object\Term,
     AAM\AddOn\PlusPackage\Object\Type,
     AAM\AddOn\PlusPackage\Hooks\ContentHooks;
@@ -26,8 +25,55 @@ use AAM,
  */
 class ContentVisibilityTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    protected static $term_id;
+    protected static $post_id;
+    protected static $page_id;
+    protected static $sub_page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        $term          = wp_insert_term('Uncategorized', 'category');
+        self::$term_id = $term['term_id'];
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package',
+            'post_name'   => 'plus-package',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms(self::$post_id, self::$term_id, 'category');
+
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package Page',
+            'post_name'   => 'plus-package-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+
+        self::$sub_page_id = wp_insert_post(array(
+            'post_title'  => 'Sub Plus Package Page',
+            'post_name'   => 'sub-plus-package-page',
+            'post_type'   => 'page',
+            'post_parent' => self::$page_id,
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that page is hidden when parent page is hidden to
@@ -41,7 +87,7 @@ class ContentVisibilityTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_PAGE_LEVEL_1_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$page_id
         );
 
         // Check if save returns positive result
@@ -58,7 +104,7 @@ class ContentVisibilityTest extends TestCase
             'suppress_filters' => false
         ));
 
-        $this->assertFalse(in_array(AAM_UNITTEST_PAGE_LEVEL_2_ID, $posts));
+        $this->assertFalse(in_array(self::$sub_page_id, $posts));
     }
 
     /**
@@ -73,7 +119,7 @@ class ContentVisibilityTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -90,7 +136,7 @@ class ContentVisibilityTest extends TestCase
             'suppress_filters' => false
         ));
 
-        $this->assertFalse(in_array(AAM_UNITTEST_POST_ID, $posts));
+        $this->assertFalse(in_array(self::$post_id, $posts));
     }
 
     /**
@@ -137,14 +183,14 @@ class ContentVisibilityTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('post/hidden', true)->save());
 
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Check if save returns positive result
@@ -161,7 +207,7 @@ class ContentVisibilityTest extends TestCase
             'suppress_filters' => false
         ));
 
-        $this->assertContains(AAM_UNITTEST_POST_ID, $posts);
+        $this->assertContains(self::$post_id, $posts);
     }
 
     /**
@@ -181,7 +227,7 @@ class ContentVisibilityTest extends TestCase
         $this->assertTrue($type->updateOptionItem('post/hidden', true)->save());
 
         $term = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -198,7 +244,7 @@ class ContentVisibilityTest extends TestCase
             'suppress_filters' => false
         ));
 
-        $this->assertContains(AAM_UNITTEST_POST_ID, $posts);
+        $this->assertContains(self::$post_id, $posts);
     }
 
 }

@@ -13,9 +13,7 @@ use AAM,
     WP_REST_Request,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait,
-    AAM\AddOn\PlusPackage\Object\Term,
-    AAM\AddOn\PlusPackage\Object\Taxonomy;
+    AAM\AddOn\PlusPackage\Object\Term;
 
 /**
  * Test cases for the Plus Package term access management
@@ -25,8 +23,38 @@ use AAM,
  */
 class TermRESTfulAccessTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    protected static $post_id;
+    protected static $top_term_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Sample Post',
+            'post_name'   => 'plus-package-post',
+            'post_status' => 'publish'
+        ));
+
+        self::$top_term_id = wp_insert_term('Category', 'category', array(
+            'slug' => 'plus-package-category'
+        ))['term_id'];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that term is hidden while going through RESTful API endpoint
@@ -40,11 +68,12 @@ class TermRESTfulAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$top_term_id . '|category'
         );
 
         // Check if save returns positive result
         $this->assertTrue($object->updateOptionItem('term/hidden', true)->save());
+        $this->_resetSubjects();
 
         $server = rest_get_server();
 
@@ -54,9 +83,9 @@ class TermRESTfulAccessTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        // First, confirm that post is in the array of posts
+        // First, confirm that term is not in the array of terms
         $this->assertCount(0, array_filter($data, function($term) {
-            return $term['id'] === AAM_UNITTEST_CATEGORY_ID;
+            return $term['id'] === self::$top_term_id;
         }));
     }
 
@@ -72,7 +101,7 @@ class TermRESTfulAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$top_term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -81,7 +110,9 @@ class TermRESTfulAccessTest extends TestCase
         $server = rest_get_server();
 
         // Verify that term is no longer in the list of terms
-        $request = new WP_REST_Request('GET', '/wp/v2/categories/' . AAM_UNITTEST_CATEGORY_ID);
+        $request = new WP_REST_Request(
+            'GET', '/wp/v2/categories/' . self::$top_term_id
+        );
         $request->set_param('context', 'view');
 
         $response = $server->dispatch($request);
@@ -102,7 +133,7 @@ class TermRESTfulAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$top_term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -111,7 +142,9 @@ class TermRESTfulAccessTest extends TestCase
         $server = rest_get_server();
 
         // Verify that term is no longer in the list of terms
-        $request = new WP_REST_Request('POST', '/wp/v2/categories/' . AAM_UNITTEST_CATEGORY_ID);
+        $request = new WP_REST_Request(
+            'POST', '/wp/v2/categories/' . self::$top_term_id
+        );
         $request->set_param('description', 'Test');
 
         $response = $server->dispatch($request);
@@ -132,7 +165,7 @@ class TermRESTfulAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$top_term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -141,7 +174,9 @@ class TermRESTfulAccessTest extends TestCase
         $server = rest_get_server();
 
         // Verify that term is no longer in the list of terms
-        $request = new WP_REST_Request('DELETE', '/wp/v2/categories/' . AAM_UNITTEST_CATEGORY_ID);
+        $request = new WP_REST_Request(
+            'DELETE', '/wp/v2/categories/' . self::$top_term_id
+        );
 
         $response = $server->dispatch($request);
 
@@ -162,7 +197,7 @@ class TermRESTfulAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$top_term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -171,9 +206,9 @@ class TermRESTfulAccessTest extends TestCase
         $server = rest_get_server();
 
         // Verify that term is no longer in the list of terms
-        $request = new WP_REST_Request('POST', '/wp/v2/posts/' . AAM_UNITTEST_POST_ID);
+        $request = new WP_REST_Request('POST', '/wp/v2/posts/' . self::$post_id);
         $request->set_param('context', 'edit');
-        $request->set_param('categories', array(AAM_UNITTEST_CATEGORY_ID));
+        $request->set_param('categories', array(self::$top_term_id));
 
         $response = $server->dispatch($request);
 

@@ -25,6 +25,39 @@ class UriTest extends TestCase
 {
     use ResetTrait;
 
+    protected static $post_id;
+
+    /**
+     * Targeting page ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Create dummy post to avoid problem with getCurrentPost
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Sample Post',
+            'post_status' => 'publish'
+        ));
+
+        // Setup a default page
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Login Redirect Service Page',
+            'post_name'   => 'login-redirect-service-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+    }
+
+
     /**
      * Test default "Access Denied" message
      *
@@ -141,7 +174,7 @@ class UriTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
         $result = $object->updateOptionItem('/hello-world', array(
             'type'   => 'page',
-            'action' => AAM_UNITTEST_PAGE_ID
+            'action' => self::$page_id
         ))->save();
 
         $this->assertTrue($result);
@@ -151,7 +184,7 @@ class UriTest extends TestCase
         AAM_Service_Uri::getInstance()->authorizeUri();
 
         $this->assertContains(
-            'Location: ' . get_page_link(AAM_UNITTEST_PAGE_ID), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
         );
     }
 

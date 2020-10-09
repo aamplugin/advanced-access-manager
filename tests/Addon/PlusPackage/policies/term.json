@@ -1,17 +1,16 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
             "Resource": [
-                "Term:category:37"
+                "Term:category:plus-package-category"
             ],
             "Action": "Edit"
         },
         {
             "Effect": "allow",
             "Resource": [
-                "Term:category:39"
+                "Term:category:plus-package-sub-sub-category"
             ],
             "Action": "Edit"
         }

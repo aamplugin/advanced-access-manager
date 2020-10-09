@@ -13,7 +13,6 @@ use AAM,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait,
     AAM\AddOn\PlusPackage\Object\Term,
     AAM\AddOn\PlusPackage\Object\Type,
     AAM\AddOn\PlusPackage\Hooks\ContentHooks;
@@ -26,8 +25,55 @@ use AAM,
  */
 class ContentAccessTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    protected static $term_id;
+    protected static $post_id;
+    protected static $page_id;
+    protected static $sub_page_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
+        $term          = wp_insert_term('Uncategorized', 'category');
+        self::$term_id = $term['term_id'];
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package',
+            'post_name'   => 'plus-package',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms(self::$post_id, self::$term_id, 'category');
+
+        self::$page_id = wp_insert_post(array(
+            'post_title'  => 'Plus Package Page',
+            'post_name'   => 'plus-package-page',
+            'post_type'   => 'page',
+            'post_status' => 'publish'
+        ));
+
+        self::$sub_page_id = wp_insert_post(array(
+            'post_title'  => 'Sub Plus Package Page',
+            'post_name'   => 'sub-plus-package-page',
+            'post_type'   => 'page',
+            'post_parent' => self::$page_id,
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that access settings are inherited from the parent term
@@ -41,7 +87,7 @@ class ContentAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         // Check if save returns positive result
@@ -52,7 +98,7 @@ class ContentAccessTest extends TestCase
         ContentHooks::bootstrap()->resetCache();
 
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $this->assertTrue($post->is('hidden'));
@@ -79,7 +125,7 @@ class ContentAccessTest extends TestCase
         ContentHooks::bootstrap()->resetCache();
 
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $this->assertTrue($post->is('hidden'));
@@ -97,7 +143,7 @@ class ContentAccessTest extends TestCase
     {
         $user   = AAM::getUser();
         $object = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_PAGE_LEVEL_1_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$page_id
         );
 
         // Check if save returns positive result
@@ -107,7 +153,7 @@ class ContentAccessTest extends TestCase
         $this->_resetSubjects();
 
         $post = $user->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_PAGE_LEVEL_2_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$sub_page_id
         );
 
         $this->assertTrue($post->is('hidden'));
@@ -157,7 +203,7 @@ class ContentAccessTest extends TestCase
         $role = $user->getParent(); // Administrator role
 
         $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         $this->assertTrue($object->updateOptionItem('term/edit', true)->save());
@@ -166,7 +212,7 @@ class ContentAccessTest extends TestCase
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
 
-        $this->assertFalse(current_user_can('edit_term', AAM_UNITTEST_CATEGORY_ID));
+        $this->assertFalse(current_user_can('edit_term', self::$term_id));
     }
 
     /**
@@ -183,7 +229,7 @@ class ContentAccessTest extends TestCase
         $role = $user->getParent(); // Administrator role
 
         $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         $this->assertTrue($object->updateOptionItem('term/delete', true)->save());
@@ -192,7 +238,7 @@ class ContentAccessTest extends TestCase
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
 
-        $this->assertFalse(current_user_can('delete_term', AAM_UNITTEST_CATEGORY_ID));
+        $this->assertFalse(current_user_can('delete_term', self::$term_id));
     }
 
     /**
@@ -209,7 +255,7 @@ class ContentAccessTest extends TestCase
         $role = $user->getParent(); // Administrator role
 
         $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         $this->assertTrue($object->updateOptionItem('term/assign', true)->save());
@@ -218,7 +264,7 @@ class ContentAccessTest extends TestCase
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
 
-        $this->assertFalse(current_user_can('assign_term', AAM_UNITTEST_CATEGORY_ID));
+        $this->assertFalse(current_user_can('assign_term', self::$term_id));
     }
 
     /**
@@ -238,7 +284,7 @@ class ContentAccessTest extends TestCase
         $role = $user->getParent(); // Administrator role
 
         $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         $this->assertTrue($object->updateOptionItem('term/hidden', true)->save());
@@ -254,7 +300,7 @@ class ContentAccessTest extends TestCase
             'hide_empty' => false
         ));
 
-        $this->assertFalse(in_array(AAM_UNITTEST_CATEGORY_ID, $terms));
+        $this->assertFalse(in_array(self::$term_id, $terms));
 
         $terms = get_terms(array(
             'number'     => 0,
@@ -263,7 +309,7 @@ class ContentAccessTest extends TestCase
             'hide_empty' => false
         ));
 
-        $this->assertFalse(array_key_exists(AAM_UNITTEST_CATEGORY_ID, $terms));
+        $this->assertFalse(array_key_exists(self::$term_id, $terms));
 
         $terms = get_terms(array(
             'number'     => 0,
@@ -272,7 +318,7 @@ class ContentAccessTest extends TestCase
             'hide_empty' => false
         ));
 
-        $this->assertFalse(array_key_exists(AAM_UNITTEST_CATEGORY_ID, $terms));
+        $this->assertFalse(array_key_exists(self::$term_id, $terms));
 
         $terms = get_terms(array(
             'number'     => 0,
@@ -281,7 +327,7 @@ class ContentAccessTest extends TestCase
             'hide_empty' => false
         ));
 
-        $this->assertFalse(array_key_exists(AAM_UNITTEST_CATEGORY_ID, $terms));
+        $this->assertFalse(array_key_exists(self::$term_id, $terms));
 
         $terms = get_terms(array(
             'number'     => 0,
@@ -291,7 +337,7 @@ class ContentAccessTest extends TestCase
         ));
 
         $this->assertCount(0, array_filter($terms, function($term) {
-            return $term->term_id === AAM_UNITTEST_CATEGORY_ID;
+            return $term->term_id === self::$term_id;
         }));
     }
 
@@ -311,13 +357,13 @@ class ContentAccessTest extends TestCase
         $role = $user->getParent(); // Administrator role
 
         $object = $role->getObject(
-            Term::OBJECT_TYPE, AAM_UNITTEST_CATEGORY_ID . '|category'
+            Term::OBJECT_TYPE, self::$term_id . '|category'
         );
 
         $this->assertTrue($object->updateOptionItem('term/restricted', true)->save());
 
         $wp_query->is_category = true;
-        $wp_query->queried_object = get_term(AAM_UNITTEST_CATEGORY_ID, 'category');
+        $wp_query->queried_object = get_term(self::$term_id, 'category');
 
         // Override the default handlers so we can suppress die exit
         add_filter('wp_die_handler', function() {
@@ -369,7 +415,7 @@ class ContentAccessTest extends TestCase
         $this->assertFalse($post->is('restricted', 'post'));
 
         // Reset to default
-        wp_set_current_user(AAM_UNITTEST_AUTH_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
     }
 
 }

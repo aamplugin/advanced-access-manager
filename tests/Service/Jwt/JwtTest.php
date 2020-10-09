@@ -153,18 +153,18 @@ class JwtTest extends TestCase
     public function testTokenRegistryPopulated()
     {
         $service = AAM_Service_Jwt::getInstance();
-        $tokens  = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens  = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Assert that the registry is empty
         $this->assertEquals(0, count($tokens));
 
         // Issue new token and verify that registry increased by one
-        $res = $service->issueToken(AAM_UNITTEST_JOHN_ID);
+        $res = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Reset cache
         wp_cache_flush();
 
-        $tokens = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Assert that the new token is there
         $this->assertEquals(1, count($tokens));
@@ -188,30 +188,30 @@ class JwtTest extends TestCase
         wp_cache_flush();
 
         $service = AAM_Service_Jwt::getInstance();
-        $tokens  = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens  = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Assert that the registry is empty
         $this->assertEquals(0, count($tokens));
 
         // Issue new token and verify that registry increased by one
-        $res1 = $service->issueToken(AAM_UNITTEST_JOHN_ID);
+        $res1 = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Reset cache
         wp_cache_flush();
 
-        $tokens = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Assert that token is in the registry
         $this->assertEquals(1, count($tokens));
 
         // Issue a new token and make sure that there is only one token in the
         // registry
-        $res2 = $service->issueToken(AAM_UNITTEST_JOHN_ID);
+        $res2 = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Reset cache
         wp_cache_flush();
 
-        $tokens = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Assert that token is in the registry
         $this->assertEquals(1, count($tokens));
@@ -234,7 +234,7 @@ class JwtTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token that later we'll refresh
-        $jwt = $service->issueToken(AAM_UNITTEST_JOHN_ID, null, null, true);
+        $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
 
         // Verify that token was issued
         $this->assertObjectHasAttribute('token', $jwt);
@@ -343,17 +343,17 @@ class JwtTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token that later we'll refresh
-        $jwt = $service->issueToken(AAM_UNITTEST_JOHN_ID, null, null, true);
+        $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
 
         // Verify that token was issued
         $this->assertObjectHasAttribute('token', $jwt);
 
-        $this->assertTrue($service->revokeUserToken(AAM_UNITTEST_JOHN_ID, $jwt->token));
+        $this->assertTrue($service->revokeUserToken(AAM_UNITTEST_ADMIN_USER_ID, $jwt->token));
 
         // Reset cache
         wp_cache_flush();
 
-        $tokens = $service->getTokenRegistry(AAM_UNITTEST_JOHN_ID);
+        $tokens = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
         $this->assertFalse(in_array($jwt->token, $tokens, true));
     }
@@ -372,7 +372,7 @@ class JwtTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token that later we'll refresh
-        $jwt = $service->issueToken(AAM_UNITTEST_JOHN_ID, null, null, true);
+        $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
 
         // Verify that token was issued
         $this->assertObjectHasAttribute('token', $jwt);

@@ -12,7 +12,7 @@
             "Effect": "allow",
             "Resource": [
                 "PostType:post:taxonomy:post_tag:posts",
-                "Term:category:1:posts"
+                "Term:category:plus-package-category:posts"
             ],
             "Action": [
                 "Edit",

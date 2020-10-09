@@ -12,8 +12,7 @@ namespace AAM\UnitTest\Service;
 use AAM,
     WP_User_Query,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthManagerUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test User Level Filter service
@@ -23,8 +22,25 @@ use AAM,
  */
 class UserLevelFilterTest extends TestCase
 {
-    use ResetTrait,
-        AuthManagerUserTrait;
+    use ResetTrait;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_USER_MANAGER_A_USER_ID);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test that only allowed roles are returned
@@ -58,7 +74,9 @@ class UserLevelFilterTest extends TestCase
             'search' => 'a'
         ));
 
-        $this->assertEquals(array('administrator'), $query->query_vars['role__not_in']);
+        $this->assertTrue(
+            in_array('administrator', $query->query_vars['role__not_in'], true)
+        );
     }
 
     /**
@@ -97,7 +115,9 @@ class UserLevelFilterTest extends TestCase
      */
     public function testAllowedUserEdit()
     {
-        $this->assertTrue(current_user_can('edit_user', AAM_UNITTEST_JOHN_ID));
+        $this->assertTrue(
+            current_user_can('edit_user', AAM_UNITTEST_MULTIROLE_USER_ID)
+        );
     }
 
     /**
@@ -110,7 +130,7 @@ class UserLevelFilterTest extends TestCase
      */
     public function testNotAllowedUserEdit()
     {
-        $this->assertFalse(current_user_can('edit_user', AAM_UNITTEST_AUTH_USER_ID));
+        $this->assertFalse(current_user_can('edit_user', AAM_UNITTEST_ADMIN_USER_ID));
     }
 
     /**
@@ -124,7 +144,7 @@ class UserLevelFilterTest extends TestCase
     public function testAllowedSameLevelUserEdit()
     {
         $this->assertTrue(
-            current_user_can('edit_user', AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID)
+            current_user_can('edit_user', AAM_UNITTEST_USER_MANAGER_B_USER_ID)
         );
     }
 
@@ -143,7 +163,7 @@ class UserLevelFilterTest extends TestCase
         $user->caps['aam_manage_same_user_level'] = false;
 
         $this->assertFalse(
-            current_user_can('edit_user', AAM_UNITTEST_AUTH_SUBADMIN2_USER_ID)
+            current_user_can('edit_user', AAM_UNITTEST_USER_MANAGER_B_USER_ID)
         );
     }
 

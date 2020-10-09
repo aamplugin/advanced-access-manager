@@ -1,5 +1,4 @@
 {
-    "Version": "1.0.0",
     "Statement": [
         {
             "Effect": "deny",
@@ -14,7 +13,7 @@
         {
             "Effect": "allow",
             "Resource": [
-                "Post:post:1"
+                "Post:post:plus-package-post"
             ],
             "Action": [
                 "Edit",

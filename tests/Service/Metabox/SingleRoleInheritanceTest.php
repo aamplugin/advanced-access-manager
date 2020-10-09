@@ -12,8 +12,7 @@ namespace AAM\UnitTest\Service\Metabox;
 use AAM,
     AAM_Core_Object_Metabox,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test AAM access settings inheritance mechanism for the Metaboxes & Widgets service
@@ -23,8 +22,25 @@ use AAM,
  */
 class SingleRoleInheritanceTest extends TestCase
 {
-    use ResetTrait,
-        AuthUserTrait;
+    use ResetTrait;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private static function _tearDownAfterClass()
+    {
+        // Unset the forced user
+        wp_set_current_user(0);
+    }
 
     /**
      * Test to insure that access settings are stored property on the User level

@@ -24,6 +24,8 @@ class DeniedRedirectTest extends TestCase
 {
     use ResetTrait;
 
+    protected static $post_id;
+
     /**
      * Targeting page ID
      *
@@ -39,6 +41,12 @@ class DeniedRedirectTest extends TestCase
      */
     private static function _setUpBeforeClass()
     {
+        // Create dummy post to avoid problem with getCurrentPost
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Sample Post',
+            'post_status' => 'publish'
+        ));
+
         // Setup a default page
         self::$page_id = wp_insert_post(array(
             'post_title'  => 'Content Service Page',

@@ -27,6 +27,28 @@ class IpCheckTest extends TestCase
     use ResetTrait;
 
     /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Core',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
      * Test that entire website is restricted when IP matched
      *
      * @return void
@@ -73,7 +95,7 @@ class IpCheckTest extends TestCase
     public function testPageRestrictedByIp()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -91,7 +113,7 @@ class IpCheckTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
@@ -116,7 +138,7 @@ class IpCheckTest extends TestCase
     public function testPageRestrictedByIpWildcard()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -134,7 +156,7 @@ class IpCheckTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '127.0.0.3';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
@@ -156,7 +178,7 @@ class IpCheckTest extends TestCase
     public function testPageRestrictedByIpRange()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -174,7 +196,7 @@ class IpCheckTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '127.0.0.5';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
@@ -196,7 +218,7 @@ class IpCheckTest extends TestCase
     public function testPageRestrictedByHost()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -214,7 +236,7 @@ class IpCheckTest extends TestCase
         $_SERVER['HTTP_REFERER'] = 'https://example.local';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
@@ -236,7 +258,7 @@ class IpCheckTest extends TestCase
     public function testPageRestrictedByRef()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -254,7 +276,7 @@ class IpCheckTest extends TestCase
         $_GET['ref'] = 'test';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
@@ -306,7 +328,7 @@ class IpCheckTest extends TestCase
     public function testPageAccessCookieSetup()
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         // Set restriction
@@ -324,7 +346,7 @@ class IpCheckTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '127.0.0.5';
 
         $post = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, AAM_UNITTEST_POST_ID
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
         $this->assertTrue(

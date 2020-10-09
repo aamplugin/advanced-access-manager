@@ -2,7 +2,7 @@
     "Param": [
         {
             "Key": "post:default:category",
-            "Value": "science"
+            "Value": "plus-package-category"
         }
     ]
 }

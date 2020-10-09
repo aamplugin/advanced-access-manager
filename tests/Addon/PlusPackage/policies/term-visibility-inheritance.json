@@ -7,7 +7,7 @@
         },
         {
             "Effect": "allow",
-            "Resource": "Term:category:level-2",
+            "Resource": "Term:category:plus-package-sub-category",
             "Action": "List"
         }
     ]
