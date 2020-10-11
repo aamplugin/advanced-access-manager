@@ -10,6 +10,7 @@
 /**
  * AAM core API
  *
+ * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/151
  * @since 6.6.4 https://github.com/aamplugin/advanced-access-manager/issues/142
  * @since 6.3.1 Fixed bug with setting clearing
  * @since 6.3.0 Optimized for Multisite setup
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.4
+ * @version 6.7.0
  */
 final class AAM_Core_API
 {
@@ -62,20 +63,27 @@ final class AAM_Core_API
      *
      * @return bool
      *
+     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/151
      * @since 6.3.0 Optimized for Multisite setup
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.7.0
      */
     public static function updateOption($option, $data, $blog_id = null)
     {
-        if (is_multisite()) {
-            $result = update_blog_option(
-                ($blog_id ? $blog_id : get_current_blog_id()), $option, $data
-            );
+        $old_value = self::getOption($option, null, $blog_id);
+
+        if (maybe_serialize($old_value) !== maybe_serialize($data)) {
+            if (is_multisite()) {
+                $result = update_blog_option(
+                    ($blog_id ? $blog_id : get_current_blog_id()), $option, $data
+                );
+            } else {
+                $result = update_option($option, $data);
+            }
         } else {
-            $result = update_option($option, $data);
+            $result = true;
         }
 
         return $result;
