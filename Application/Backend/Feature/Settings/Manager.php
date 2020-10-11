@@ -10,6 +10,7 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/150
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
  *              https://github.com/aamplugin/advanced-access-manager/issues/106
@@ -17,7 +18,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.0
+ * @version 6.7.0
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -123,16 +124,19 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
     /**
      * Export AAM settings as JSON
      *
+     * @param boolean $raw
+     *
      * @return string
      *
+     * @since 6.7.0 Added `$raw` argument
      * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
      * @since 6.3.0 Optimized AAM_Core_API::getOption call
      * @since 6.2.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.6.0
+     * @version 6.7.0
      */
-    public function exportSettings()
+    public function exportSettings($raw = false)
     {
         $data = array(
             'version'   => AAM_VERSION,
@@ -180,9 +184,9 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             }
         }
 
-        return wp_json_encode(array(
+        return ($raw ? $data : wp_json_encode(array(
             'result' => base64_encode(wp_json_encode($data))
-        ));
+        )));
     }
 
     /**
@@ -287,20 +291,24 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.7.0 Added `$payload` argument
      * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
      * @since 6.2.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.6.0
+     * @version 6.7.0
      */
-    public function importSettings()
+    public function importSettings($payload = null)
     {
         $error = __('Invalid data', AAM_KEY);
-        $data  = json_decode($this->getFromPost('payload'), true);
 
-        if ($data) {
-            if (isset($data['dataset']) && is_array($data['dataset'])) {
-                foreach($data['dataset'] as $group => $settings) {
+        if (is_null($payload)) {
+            $payload = json_decode($this->getFromPost('payload'), true);
+        }
+
+        if ($payload) {
+            if (isset($payload['dataset']) && is_array($payload['dataset'])) {
+                foreach($payload['dataset'] as $group => $settings) {
                     switch($group) {
                         case 'settings':
                             AAM_Core_AccessSettings::getInstance()->replace($settings);
