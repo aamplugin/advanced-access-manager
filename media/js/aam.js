@@ -199,7 +199,7 @@
                                             $('i.icon-spin4', container).attr(
                                                 'class', 'aam-row-action icon-cog text-muted'
                                             );
-                                        } else {
+                                        } else if (getAAM().isUI('post')) {
                                             getAAM().fetchPartial('post-access-form', function (content) {
                                                 $('#metabox-post-access-form').html(content);
                                                 getAAM().triggerHook('load-access-form', [
@@ -812,7 +812,7 @@
                                                 $('i.icon-spin4', container).attr(
                                                     'class', 'aam-row-action icon-cog text-muted'
                                                 );
-                                            } else {
+                                            } else if (getAAM().isUI('post')) {
                                                 getAAM().fetchPartial('post-access-form', function (content) {
                                                     $('#metabox-post-access-form').html(content);
                                                     getAAM().triggerHook('load-access-form', [
@@ -1146,9 +1146,10 @@
                     if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
-                    } else {
+                    } else if (getAAM().isUI('post')) {
                         getAAM().fetchPartial('post-access-form', function (content) {
                             $('#metabox-post-access-form').html(content);
+
                             getAAM().triggerHook('load-access-form', [
                                 $('#content-object-type').val(),
                                 $('#content-object-id').val(),
@@ -1221,7 +1222,7 @@
                     if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
                         $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
-                    } else {
+                    } else if (getAAM().isUI('post')) {
                         getAAM().fetchPartial('post-access-form', function (content) {
                             $('#metabox-post-access-form').html(content);
                             getAAM().triggerHook('load-access-form', [
@@ -3201,10 +3202,12 @@
                 }
 
                 if ($('#aam-access-form-container').is(':empty') === false) {
-                    loadAccessForm(
-                        $('#content-object-type').val(),
-                        $('#content-object-id').val()
-                    );
+                    if ($('#content-object-type').val()) {
+                        loadAccessForm(
+                            $('#content-object-type').val(),
+                            $('#content-object-id').val()
+                        );
+                    }
                 }
             }
 
