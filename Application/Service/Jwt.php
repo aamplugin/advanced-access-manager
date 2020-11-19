@@ -263,8 +263,8 @@ class AAM_Service_Jwt
      */
     public function validateToken(WP_REST_Request $request)
     {
-        $jwt    = $request->get_param('jwt');
-        $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt);
+        $jwt    = $this->extractToken();
+        $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt->jwt);
 
         if ($result->isValid === true) {
             $response = new WP_REST_Response($result);
@@ -311,8 +311,8 @@ class AAM_Service_Jwt
      */
     public function refreshToken(WP_REST_Request $request)
     {
-        $jwt    = $request->get_param('jwt');
-        $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt);
+        $jwt    = $this->extractToken();
+        $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt->jwt);
 
         if ($result->isValid === true) {
             if (!empty($result->refreshable)) {
@@ -342,6 +342,8 @@ class AAM_Service_Jwt
                 'reason' => $result->reason
             ), $result->status);
         }
+	    
+	    $this->setJWTCookie($new->token);
 
         return $response;
     }
@@ -361,8 +363,8 @@ class AAM_Service_Jwt
      */
     public function revokeToken(WP_REST_Request $request)
     {
-        $jwt    = $request->get_param('jwt');
-        $claims = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt);
+        $jwt    = $this->extractToken();
+        $claims = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt->jwt);
 
         if ($claims->isValid === true) {
             if ($this->revokeUserToken($claims->userId, $jwt)) {
@@ -381,7 +383,9 @@ class AAM_Service_Jwt
                 'reason' => $claims->reason
             ), $claims->status);
         }
-
+	
+	    $this->setJWTCookie('revoked',time()-3600);
+	    
         return $response;
     }
 
@@ -439,8 +443,10 @@ class AAM_Service_Jwt
                 'token_expires' => $jwt->claims['exp']
             );
         }
+	    
+	$this->setJWTCookie($jwt->token);
 
-        return $response;
+	return $response;
     }
 
     /**
@@ -762,9 +768,25 @@ class AAM_Service_Jwt
 
         return $response;
     }
-
+ /**
+     * Set cookie header if Configpress parameter is set
+     *
+     * @param string  $jwt
+     * @param number  $expiration
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.7.2
+     */
+    protected function setJWTCookie($jwt,$expiration=0)
+    {
+        $cookieurl =  AAM::api()->getConfig('authentication.jwt.cookie',null);
+        if ($cookieurl) {
+           header("Set-Cookie: aam_jwt_token=$jwt;$expiration;path=/;domain=$cookieurl;httpOnly;Secure;SameSite=Lax");      
+        }
+    }
 }
-
 if (defined('AAM_KEY')) {
     AAM_Service_Jwt::bootstrap();
 }
