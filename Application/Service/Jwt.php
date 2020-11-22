@@ -367,7 +367,7 @@ class AAM_Service_Jwt
         $claims = AAM_Core_Jwt_Issuer::getInstance()->validateToken($jwt->jwt);
 
         if ($claims->isValid === true) {
-            if ($this->revokeUserToken($claims->userId, $jwt)) {
+            if ($this->revokeUserToken($claims->userId, $jwt->jwt)) {
                 $response = new WP_REST_Response(
                     array('message' => 'Token revoked successfully'), 200
                 );
