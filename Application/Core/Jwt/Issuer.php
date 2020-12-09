@@ -206,8 +206,13 @@ class AAM_Core_Jwt_Issuer
         );
 
         if (strpos($alg, 'RS') === 0) {
-            $path = AAM_Core_Config::get('authentication.jwt.privateKeyPath');
-            $key = (is_readable($path) ? file_get_contents($path) : null);
+            $path       = AAM_Core_Config::get('authentication.jwt.privateKeyPath');
+            $key        = (is_readable($path) ? file_get_contents($path) : null);
+            $passphrase = AAM_Core_Config::get('authentication.jwt.passphrase', false);
+
+            if($passphrase && extension_loaded('openssl')) {
+                $key = openssl_pkey_get_private($key, $passphrase);
+            }
         } else {
             $key = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
         }
