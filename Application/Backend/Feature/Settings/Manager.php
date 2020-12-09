@@ -10,6 +10,7 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/164
  * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/150
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/109
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.0
+ * @version 6.7.2
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -84,41 +85,6 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
         AAM_Core_AccessSettings::getInstance()->delete($xpath)->save();
 
         return wp_json_encode(array('status' => 'success'));
-    }
-
-    /**
-     * Aggregate support request metadata
-     *
-     * @return string
-     *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/106
-     * @since 6.3.0 Optimized AAM_Core_API::getOption call
-     * @since 6.2.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.5.0
-     */
-    public function getSupportMetadata()
-    {
-        global $wp_version;
-
-        return wp_json_encode(array(
-            'wpVersion'   => $wp_version,
-            'aamVersion'  => AAM_VERSION,
-            'settings'    => AAM_Core_API::getOption(AAM_Core_AccessSettings::DB_OPTION),
-            'config'      => AAM_Core_API::getOption(AAM_Core_Config::DB_OPTION),
-            'configpress' => AAM_Core_API::getOption(AAM_Core_ConfigPress::DB_OPTION),
-            'roles'       => AAM_Core_API::getOption(AAM_Core_API::getRoles()->role_key),
-            'addons'      => AAM_Addon_Repository::getInstance()->getRegistry(),
-            'plugins'     => array_map(function($plugin) {
-                return array(
-                    'Name'      => (isset($plugin['Name']) ? $plugin['Name'] : null),
-                    'PluginURI' => (isset($plugin['PluginURI']) ? $plugin['PluginURI'] : null),
-                    'Version'   => (isset($plugin['Version']) ? $plugin['Version'] : null),
-                    'AuthorURI' => (isset($plugin['AuthorURI']) ? $plugin['AuthorURI'] : null),
-                );
-            }, get_plugins())
-        ));
     }
 
     /**
