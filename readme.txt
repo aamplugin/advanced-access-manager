@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.7.2 =
 * Fixed Bug: PHP Warning: preg_match(): Compilation failed [https://github.com/aamplugin/advanced-access-manager/issues/163](https://github.com/aamplugin/advanced-access-manager/issues/163)
+* Added New: Thx to [@sigysmund](https://github.com/sigysmund). Support for OpenSSL RSA private keys, to have a passphrase [https://github.com/aamplugin/advanced-access-manager/issues/165](https://github.com/aamplugin/advanced-access-manager/issues/165)
 * Changed: Remove Support Message Modal from UI [https://github.com/aamplugin/advanced-access-manager/issues/164](https://github.com/aamplugin/advanced-access-manager/issues/164)
 
 = 6.7.1 =
