@@ -10,13 +10,14 @@
 /**
  * AAM JWT Issuer
  *
+ * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/165
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.4 Bug fixing. Timezone was handled incorrectly and ttl did not take in
  *              consideration numeric "in seconds" value
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.7.2
  */
 class AAM_Core_Jwt_Issuer
 {
@@ -196,8 +197,11 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/165
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.7.2
      */
     protected function getJWTSigningAttributes()
     {
@@ -206,9 +210,10 @@ class AAM_Core_Jwt_Issuer
         );
 
         if (strpos($alg, 'RS') === 0) {
-            $path = AAM_Core_Config::get('authentication.jwt.privateKeyPath');
-            $key = (is_readable($path) ? file_get_contents($path) : null);
+            $path       = AAM_Core_Config::get('authentication.jwt.privateKeyPath');
+            $key        = (is_readable($path) ? file_get_contents($path) : null);
             $passphrase = AAM_Core_Config::get('authentication.jwt.passphrase', false);
+
             if($passphrase && extension_loaded('openssl')) {
                 $key = openssl_pkey_get_private($key, $passphrase);
             }

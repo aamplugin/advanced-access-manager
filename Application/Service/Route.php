@@ -10,13 +10,14 @@
 /**
  * API Route service
  *
+ * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/163
  * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/153
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.0
+ * @version 6.7.2
  */
 class AAM_Service_Route
 {
@@ -192,8 +193,11 @@ class AAM_Service_Route
      *
      * @return WP_Error|null
      *
+     * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/163
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.2
      */
     public function authorizeRequest($response, $server, $request)
     {
@@ -203,7 +207,7 @@ class AAM_Service_Route
         $method  = $request->get_method();
 
         foreach (array_keys($server->get_routes()) as $route) {
-            if ($route === $matched || preg_match("#^{$route}$#i", $matched)) {
+            if ($route === $matched || preg_match('#^' . preg_quote($route) . '$#i', $matched)) {
                 if ($object->isRestricted('restful', $route, $method)) {
                     $response = new WP_Error(
                         'rest_access_denied',

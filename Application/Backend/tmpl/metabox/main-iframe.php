@@ -72,58 +72,15 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="#modal-support" data-toggle="modal" title="Ask For Help">
+                                    <a href="https://aamplugin.com/support" target="_blank" title="Ask For Help">
                                         <i class="icon-chat"></i>
-                                        <span><?php echo __('Help', AAM_KEY); ?></span>
+                                        <span><?php echo __('Support', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <?php if (current_user_can('aam_view_help_btn')) { ?>
-                    <div class="modal fade" id="modal-support" tabindex="-1" role="dialog">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title text-left"><?php echo __('Ask For Help', AAM_KEY); ?></h4>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="alert alert-warning"><?php echo sprintf(__('Before submitting a support request, please get familiar with %show AAM support works%s so you can set the right expectations. Especially pay attention to how do we prioritize support.', AAM_KEY), '<a href="https://aamplugin.com/support" target="_blank">', '</a>'); ?></p>
-
-                                    <div class="form-group aam-outer-top-xxs">
-                                        <label><?php echo __('Name', AAM_KEY); ?></label>
-                                        <input type="text" class="form-control" placeholder="<?php echo __('How should we call you', AAM_KEY); ?>" id="support-name" />
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label><?php echo __('Email', AAM_KEY); ?> <sup class="text-danger">*</sup></label>
-                                        <input type="email" class="form-control" placeholder="<?php echo __('Enter your email', AAM_KEY); ?>" id="support-email" />
-                                        <span class="hint text-muted"><?php echo __('The rest of the conversation will be conducted via provided email', AAM_KEY); ?></span>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label><?php echo __('Message', AAM_KEY); ?> <sup class="text-danger">*</sup></label>
-                                        <textarea class="form-control" placeholder="<?php echo __('Enter your message here...', AAM_KEY); ?>" rows="5" id="support-message"></textarea>
-                                        <span class="hint text-muted"><?php echo AAM_Backend_View_Helper::preparePhrase('Please be [kind], [specific] and [patient], and let us do the rest', 'strong', 'strong', 'strong'); ?></span>
-                                    </div>
-
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" checked id="support-details" /> <?php echo sprintf(__('Attach system details (%slearn more here%s)', AAM_KEY), '<a href="https://forum.aamplugin.com/d/454-support-request-with-attached-system-details" target="_blank">', '</a>'); ?>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" id="submit-support"><?php echo __('Request Support', AAM_KEY); ?></button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php } ?>
 
                 <?php if (current_user_can('aam_manage_settings')) { ?>
                     <div class="metabox-holder settings-metabox" style="display:none;">
