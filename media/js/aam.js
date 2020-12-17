@@ -402,7 +402,7 @@
                 $('input,select', '#add-role-modal .modal-body').each(function () {
                     if ($(this).attr('name')) {
                         if ($(this).attr('type') === 'checkbox') {
-                            data[$(this).attr('name')] = $(this).prop('checked') ? true : false;
+                            data[$(this).attr('name')] = $(this).is(':checked') ? true : false;
                         } else {
                             data[$(this).attr('name')] = $.trim($(this).val());
                         }
@@ -464,7 +464,7 @@
                 $('input,select', '#edit-role-modal .modal-body').each(function () {
                     if ($(this).attr('name')) {
                         if ($(this).attr('type') === 'checkbox') {
-                            data[$(this).attr('name')] = $(this).prop('checked') ? 1 : 0;
+                            data[$(this).attr('name')] = $(this).is(':checked') ? 1 : 0;
                         } else {
                             data[$(this).attr('name')] = $.trim($(this).val());
                         }
@@ -1786,13 +1786,14 @@
                     $('input[type="checkbox"]', '#admin-menu').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
+
                             save(
                                 [_this.data('menu-id')],
-                                _this.attr('checked') ? 1 : 0,
+                                _this.is(':checked') ? 1 : 0,
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-menu-overwrite').show();
-                                        if (_this.attr('checked')) {
+                                        if (_this.is(':checked')) {
                                             _this.next().attr('data-original-title', getAAM().__('Uncheck to allow'));
                                         } else {
                                             _this.next().attr('data-original-title', getAAM().__('Check to restrict'));
@@ -1923,12 +1924,12 @@
                             var _this = $(this);
                             save(
                                 [$(this).data('toolbar')],
-                                $(this).attr('checked') ? 1 : 0,
+                                $(this).is(':checked') ? 1 : 0,
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-toolbar-overwrite').show();
 
-                                        if (_this.attr('checked')) {
+                                        if (_this.is(':checked')) {
                                             _this.next().attr('data-original-title', getAAM().__('Uncheck to show'));
                                         } else {
                                             _this.next().attr('data-original-title', getAAM().__('Check to hide'));
@@ -2112,12 +2113,12 @@
                             var _this = $(this);
                             save(
                                 [$(this).data('metabox')],
-                                $(this).attr('checked'),
+                                $(this).is(':checked'),
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-metabox-overwrite').show();
 
-                                        if (_this.attr('checked')) {
+                                        if (_this.is(':checked')) {
                                             _this.next().attr('data-original-title', getAAM().__('Uncheck to show'));
                                         } else {
                                             _this.next().attr('data-original-title', getAAM().__('Check to hide'));
