@@ -5,3 +5,5 @@ cache
 sonarqube
 *.sh
 .scannerwork
+
+.idea/
