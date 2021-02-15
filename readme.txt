@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.7.4 =
 * Fixed Bug: Access settings are not saved, reported by @argolein [https://github.com/aamplugin/advanced-access-manager/issues/167](https://github.com/aamplugin/advanced-access-manager/issues/167)
+* Changed: INI format warning, reported by @dannysummerlinjstartorg [https://github.com/aamplugin/advanced-access-manager/issues/160](https://github.com/aamplugin/advanced-access-manager/issues/160)
 * Changed: Minor change. Improved the UI consistency between views.
 
 = 6.7.3 =
