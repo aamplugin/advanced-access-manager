@@ -1,11 +1,12 @@
 <?php
     /**
+     * @since 6.7.4 Improved the UI consistency
      * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/104
      * @since 6.4.2 Styling notification metabox
      * @since 6.2.0 Added support & import/export modals
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.5.0
+     * @version 6.7.4
      * */
 ?>
 
@@ -13,10 +14,10 @@
     <?php echo static::loadTemplate(__DIR__ . '/iframe-header.php'); ?>
 
     <div class="wrap">
-        <?php echo static::loadTemplate(dirname(__DIR__) . '/page/current-subject.php'); ?>
-
         <div class="row">
             <div class="col-xs-12 col-md-8">
+                <?php echo static::loadTemplate(dirname(__DIR__) . '/page/current-subject.php'); ?>
+
                 <div class="metabox-holder">
                     <div class="postbox">
                         <div class="inside" id="access-manager-inside">

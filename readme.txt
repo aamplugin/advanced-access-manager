@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.6.0
-Stable tag: 6.7.3
+Tested up to: 5.6.1
+Stable tag: 6.7.4
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,10 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.7.4 =
+* Fixed Bug: Access settings are not saved, reported by @argolein [https://github.com/aamplugin/advanced-access-manager/issues/167](https://github.com/aamplugin/advanced-access-manager/issues/167)
+* Changed: Minor change. Improved the UI consistency between views.
 
 = 6.7.3 =
 * Fixed Bug: Incorrectly handled .attr('checked') by the latest jQuery update [https://github.com/aamplugin/advanced-access-manager/issues/166](https://github.com/aamplugin/advanced-access-manager/issues/166)
