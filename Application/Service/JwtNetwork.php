@@ -97,9 +97,6 @@ class AAM_Service_JwtNetwork
         // Register API endpoint
         add_action('rest_api_init', array($this, 'registerAPI'));
 
-        // WP Core current user definition
-        add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
-
         // Fetch specific claim from the JWT token if present
         add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
 
@@ -134,7 +131,12 @@ class AAM_Service_JwtNetwork
     }
 
     /**
-     * JWT token claim(s) dispatch to WP Network sites
+     * User dispatch to WP Network sites:
+     *   1. JWT token of the WP_REST_request role gets validated if is administrator role
+     *   2. User object is to be checked whenever WP_User with proper role, sites access is configured already in DB
+     *   3. Returns creation status with user_id and roles
+     *
+     * Checked user_id will be used in JWT token claims with roles from external app
      *
      * @param WP_REST_Request $request
      *
@@ -148,7 +150,16 @@ class AAM_Service_JwtNetwork
     public function networkDispatch(WP_REST_Request $request)
     {
         $jwt    = $request->get_param('jwt');
-        $result = AAM_Core_Jwt_NetworkDispatch::getInstance()->tokenClaimsNetworkDispatch($jwt);
+        if(is_null($jwt)) {
+            $authHeader = $request->get_header('authorization');
+            if(!is_null($authHeader) && strpos($authHeader, 'Bearer ') !== false) {
+                $jwt = str_replace('Bearer ', '', $authHeader);
+            }
+        }
+
+        $post = $request->get_json_params();
+
+        $result = AAM_Core_Jwt_NetworkDispatch::getInstance()->adminUserNetworkDispatch($jwt, $post);
 
         if ($result->hasDispatched === true) {
             $response = new WP_REST_Response($result);
@@ -182,55 +193,6 @@ class AAM_Service_JwtNetwork
         return update_user_option($userId, self::DB_OPTION, $filtered);
     }
 
-    /**
-     * Determine current user by JWT
-     *
-     * @param int $userId
-     *
-     * @return int
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function determineUser($userId)
-    {
-        if (empty($userId)) {
-            $token = $this->extractToken();
-
-            if (!empty($token)) {
-                $result = AAM_Core_Jwt_Issuer::getInstance()->validateToken($token->jwt);
-
-                if ($result->isValid === true) {
-                    // Verify that user is can be logged in
-                    $user = apply_filters(
-                        'aam_verify_user_filter', new WP_User($result->userId)
-                    );
-
-                    if (!is_wp_error($user)) {
-                        $userId = $result->userId;
-
-                        if ($token->method === 'get') {
-
-                            //
-                            $user = get_current_user();
-                            $sitesClaim = AAM_Core_Jwt_NetworkDispatch::getInstance()->extractSitesTokenClaims($token);
-
-                            $roleId = 'scenicofficeblogger'; // TODO: Hardcoded
-
-                            foreach ($sitesClaim as $siteId) {
-                               add_user_to_blog($siteId, $userId, $roleId);
-                            }
-
-                            // Also authenticate user if token comes from query param
-                            add_action('init', array($this, 'authenticateUser'), 1);
-                        }
-                    }
-                }
-            }
-        }
-
-        return $userId;
-    }
 }
 
 if (defined('AAM_KEY')) {
