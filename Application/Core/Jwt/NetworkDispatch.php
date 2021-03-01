@@ -7,6 +7,8 @@
  * ======================================================================
  */
 
+include_once ABSPATH . 'wp-includes/rest-api/endpoints/class-wp-rest-users-controller.php';
+
 /**
  * AAM JWT NetworkDispatch
  *
@@ -26,6 +28,7 @@ class AAM_Core_Jwt_NetworkDispatch
      *
      * @param string $token
      * @param array $params
+     * @param WP_REST_Request $request
      *
      * @return object
      *
@@ -36,7 +39,7 @@ class AAM_Core_Jwt_NetworkDispatch
      * @access public
      * @version 6.1.0
      */
-    public function adminUserNetworkDispatch($token, $params)
+    public function adminUserNetworkDispatch($token, $params, $request)
     {
         try {
             $response = $this->validateToken($token);
@@ -47,7 +50,7 @@ class AAM_Core_Jwt_NetworkDispatch
                 if($wpUser) {
                     $this->checkUsersBlogs($wpUser, $params);
                 } else {
-                    $wpUser = $this->createUserAndBlogs($params);
+                    $wpUser = $this->createUserAndBlogs($params, $request);
                 }
 
                 $response->hasDispatched = true;
@@ -68,6 +71,10 @@ class AAM_Core_Jwt_NetworkDispatch
         return (object)$response;
     }
 
+    /**
+     * @param WP_User $WP_User
+     * @param array $params
+     */
     protected function checkUsersBlogs(WP_User $WP_User, $params)
     {
         $blogs = get_sites();
@@ -114,9 +121,18 @@ class AAM_Core_Jwt_NetworkDispatch
         restore_current_blog();
     }
 
-    protected function createUserAndBlogs($params)
+    /**
+     * @param array $params
+     * @param WP_REST_Request $request
+     *
+     * @return false|WP_User
+     */
+    protected function createUserAndBlogs($params, $request)
     {
-        $WP_User = null;
+        $usersController = new WP_REST_Users_Controller();
+        $response = $usersController->create_item($request);
+        $userArr = $response->data;
+        $WP_User = get_user_by('id', $userArr['id']);
 
         $this->checkUsersBlogs($WP_User, $params);
 

@@ -159,7 +159,7 @@ class AAM_Service_JwtNetwork
 
         $post = $request->get_json_params();
 
-        $result = AAM_Core_Jwt_NetworkDispatch::getInstance()->adminUserNetworkDispatch($jwt, $post);
+        $result = AAM_Core_Jwt_NetworkDispatch::getInstance()->adminUserNetworkDispatch($jwt, $post, $request);
 
         if ($result->hasDispatched === true) {
             $response = new WP_REST_Response($result);
