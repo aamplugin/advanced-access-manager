@@ -48,6 +48,7 @@ class AAM_Core_Jwt_NetworkDispatch
 
                 $wpUser = get_user_by('email', $params['email']);
                 if($wpUser) {
+                    $response->wpUserExists = true;
                     $this->checkUsersBlogs($wpUser, $params);
                 } else {
                     $wpUser = $this->createUserAndBlogs($params, $request);
