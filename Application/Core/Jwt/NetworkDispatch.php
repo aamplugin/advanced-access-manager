@@ -24,7 +24,7 @@ class AAM_Core_Jwt_NetworkDispatch
     use AAM_Core_Contract_SingletonTrait;
 
     /**
-     * JWT token claim(s) dispatch to WP Network sites
+     * JWT admin token dispatch to WP Network sites
      *
      * @param string $token
      * @param array $params
@@ -32,12 +32,9 @@ class AAM_Core_Jwt_NetworkDispatch
      *
      * @return object
      *
-     * @since 6.1.0 Enriched error response with more details
-     * @since 6.0.4 Making sure that JWT expiration is checked with UTC timezone
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.7.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
      */
     public function adminUserNetworkDispatch($token, $params, $request)
     {
@@ -71,6 +68,52 @@ class AAM_Core_Jwt_NetworkDispatch
 
         return (object)$response;
     }
+
+    /**
+     * JWT admin token remove WP Network user
+     *
+     * @param string $token
+     * @param array $params
+     * @param WP_REST_Request $request
+     *
+     * @return object
+     *
+     * @since 670.0 Initial implementation of the method
+     *
+     * @access public
+     */
+    public function adminUserRemove($token, $params, $request)
+    {
+        try {
+            $response = $this->validateToken($token);
+
+            if($response->isValid) {
+
+                $wpUser = get_user_by('id', $params['id']);
+                if($wpUser) {
+                    $response->wpUserExists = true;
+                    wpmu_delete_user($params['id']);
+                }
+
+                $response->wasRemoved = true;
+                $response->wpUser = $wpUser;
+            } else {
+                $response->wasRemoved = false;
+            }
+
+        } catch (Exception $ex) {
+            $status = $ex->getCode();
+            $response = array(
+                'wasRemoved' => false,
+                'reason' => $ex->getMessage(),
+                'status' => (!empty($status) ? $status : 400)
+            );
+        }
+
+        return (object)$response;
+    }
+
+
 
     /**
      * @param WP_User $WP_User

@@ -98,7 +98,7 @@ class AAM_Service_JwtNetwork
         add_action('rest_api_init', array($this, 'registerAPI'));
 
         // Fetch specific claim from the JWT token if present
-        add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
+        // add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
 
         // Service fetch
         $this->registerService();
@@ -116,7 +116,7 @@ class AAM_Service_JwtNetwork
      */
     public function registerAPI()
     {
-        // JWT token claim(s) dispatch to WP Network sites
+        // JWT token claim(s) - request dispatch to WP Network sites
         register_rest_route('aam/v2', '/jwt/dispatch', array(
             'methods'             => 'POST',
             'callback'            => array($this, 'networkDispatch'),
@@ -124,6 +124,18 @@ class AAM_Service_JwtNetwork
             'args'                => array(
                 'jwt' => array(
                     'description' => __('JWT: Dispatch to network.', AAM_KEY),
+                    'type'        => 'string',
+                )
+            ),
+        ));
+
+        register_rest_route('aam/v2', '/jwt/urm', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'networkUserRemove'),
+            'permission_callback' => '__return_true',
+            'args'                => array(
+                'jwt' => array(
+                    'description' => __('JWT: Removes user from network.', AAM_KEY),
                     'type'        => 'string',
                 )
             ),
@@ -166,6 +178,44 @@ class AAM_Service_JwtNetwork
         } else {
             $response = new WP_REST_Response(array(
                 'code'   => 'rest_jwt_network_dispatch_failure',
+                'reason' => $result->reason
+            ), $result->status);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Remove WP_User from WP Network sites
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @since 6.7.0 Initial implementation of the method
+     *
+     * @access public
+     * @version 6.1.0
+     */
+    public function networkUserRemove(WP_REST_Request $request)
+    {
+        $jwt    = $request->get_param('jwt');
+        if(is_null($jwt)) {
+            $authHeader = $request->get_header('authorization');
+            if(!is_null($authHeader) && strpos($authHeader, 'Bearer ') !== false) {
+                $jwt = str_replace('Bearer ', '', $authHeader);
+            }
+        }
+
+        $post = $request->get_json_params();
+
+        $result = AAM_Core_Jwt_NetworkDispatch::getInstance()->adminUserRemove($jwt, $post, $request);
+
+        if ($result->wasRemoved === true) {
+            $response = new WP_REST_Response($result);
+        } else {
+            $response = new WP_REST_Response(array(
+                'code'   => 'rest_jwt_network_user_remove_failure',
                 'reason' => $result->reason
             ), $result->status);
         }
