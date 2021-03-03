@@ -137,6 +137,8 @@ class AAM_Core_Jwt_NetworkDispatch
 
         $this->checkUsersBlogs($WP_User, $params);
 
+        $WP_User = get_user_by('id', $userArr['id']);
+
         return $WP_User;
     }
 }
