@@ -43,12 +43,21 @@ class AAM_Core_Jwt_NetworkDispatch
             $response = $this->validateToken($token);
             if($response->isValid) {
 
+                $response->wpUserExists = false;
+                $response->wpUserInSync = false;
                 $wpUser = get_user_by('email', $params['email']);
                 if($wpUser) {
                     $response->wpUserExists = true;
+
                     $this->checkUsersBlogs($wpUser, $params);
+
+                    if(array_key_exists('user_id_sync', $params) && $wpUser->ID === $params['user_id_sync']) {
+                        $response->wpUserInSync = true;
+                    }
+
                 } else {
                     $wpUser = $this->createUserAndBlogs($params, $request);
+                    $response->wpUserInSync = true;
                 }
 
                 $response->hasDispatched = true;
@@ -123,8 +132,6 @@ class AAM_Core_Jwt_NetworkDispatch
 
         return (object)$response;
     }
-
-
 
     /**
      * @param WP_User $WP_User
