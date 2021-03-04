@@ -8,6 +8,7 @@
  */
 
 include_once ABSPATH . 'wp-includes/rest-api/endpoints/class-wp-rest-users-controller.php';
+include_once ABSPATH . 'wp-admin/includes/ms.php';
 
 /**
  * AAM JWT NetworkDispatch
@@ -40,7 +41,6 @@ class AAM_Core_Jwt_NetworkDispatch
     {
         try {
             $response = $this->validateToken($token);
-
             if($response->isValid) {
 
                 $wpUser = get_user_by('email', $params['email']);
@@ -86,17 +86,28 @@ class AAM_Core_Jwt_NetworkDispatch
     {
         try {
             $response = $this->validateToken($token);
-
             if($response->isValid) {
 
-                $wpUser = get_user_by('id', $params['id']);
-                if($wpUser) {
-                    $response->wpUserExists = true;
-                    wpmu_delete_user($params['id']);
-                }
+                $blogs = get_sites();
 
-                $response->wasRemoved = true;
-                $response->wpUser = $wpUser;
+                $wpUser = get_user_by('id', $params['id']);
+                if($wpUser instanceof WP_User) {
+                    /** @var WP_Site $WP_Site */
+                    foreach ($blogs as $WP_Site) {
+
+                        switch_to_blog($WP_Site->blog_id);
+
+                        if(is_user_member_of_blog($wpUser->ID, $WP_Site->blog_id)) {
+                            remove_user_from_blog($wpUser->ID, $WP_Site->blog_id);
+                        }
+
+                    }
+
+                    wpmu_delete_user($wpUser->ID);
+
+                    $response->wasRemoved = true;
+                    $response->wpUser = $wpUser;
+                }
             } else {
                 $response->wasRemoved = false;
             }
