@@ -10,6 +10,7 @@
 /**
  * Addon repository
  *
+ * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
  * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/92
  * @since 6.4.2 Implemented https://github.com/aamplugin/advanced-access-manager/issues/88
  * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.3
+ * @version 6.7.5
  */
 class AAM_Addon_Repository
 {
@@ -32,6 +33,45 @@ class AAM_Addon_Repository
      * @version 6.0.0
      */
     const DB_OPTION = 'aam_addons';
+
+    /**
+     * Collection of license violations
+     *
+     * @version 6.7.5
+     */
+    const DB_VIOLATION_OPTION = 'aam_violations';
+
+    /**
+     * Official list of available addons
+     *
+     * @version 6.7.5
+     */
+    const OFFICIAL_ADDON_LIST = array(
+        'aam-plus-package' => array(
+            'title'       => 'Plus Package',
+            'slug'        => 'plus-package',
+            'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.',
+            'version'     => '5.4.2'
+        ),
+        'aam-ip-check' => array(
+            'title'       => 'IP Check',
+            'slug'        => 'ip-check',
+            'description' => 'Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.',
+            'version'     => '4.1.4'
+        ),
+        'aam-role-hierarchy' => array(
+            'title'       => 'Role Hierarchy',
+            'slug'        => 'role-hierarchy',
+            'description' => 'Define and manage complex WordPress role hierarchy where all the access settings are propagated down the tree with the ability to override any settings for any specific role.',
+            'version'     => '3.0.1'
+        ),
+        'aam-complete-package' => array(
+            'title'       => 'Complete Package',
+            'slug'        => 'complete-package',
+            'description' => 'Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.',
+            'version'     => '5.2.8'
+        ),
+    );
 
     /**
      * Constructor
@@ -64,24 +104,67 @@ class AAM_Addon_Repository
      * @access public
      * @version 6.4.2
      */
-    public function getRegistry($license_only = false)
+    public function getRegistry()
     {
-        $response = array();
-        $registry = AAM_Core_API::getOption(
-            self::DB_OPTION, array(), AAM_Core_API::getMainSiteId()
-        );
+        static $registry = null;
 
-        if ($license_only === true) {
-            foreach($registry as $slug => $data) {
-                if (!empty($data['license'])) {
-                    $response[$slug] = $data['license'];
+        if (is_null($registry)) {
+            $registry = array();
+            $option   = AAM_Core_API::getOption(
+                self::DB_OPTION, array(), AAM_Core_API::getMainSiteId()
+            );
+
+            // Iterate over the list of official add-ons and check if there is any
+            // installed
+            foreach(array_keys(self::OFFICIAL_ADDON_LIST) as $id) {
+                $plugin = $this->getPluginData($id);
+
+                if (!is_null($plugin)) { // Capturing the fact that add-on is installed
+                    $registry[$id] = null;
+                }
+
+                // Finally merge official addons with respective licenses
+                if (!empty($option[$id])) {
+                    $registry[$id] = $option[$id];
                 }
             }
-        } else {
-            $response = $registry;
         }
 
-        return (is_array($response) ? $response : array());
+        return $registry;
+    }
+
+    /**
+     * Get key/value pair of add-ons
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.7.5
+     */
+    public function getAddonLicenseMap()
+    {
+        $response = array();
+
+        foreach($this->getRegistry() as $id => $data) {
+            $response[$id] = !empty($data['license']) ? $data['license'] : null;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get list of violations
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.7.5
+     */
+    public function getViolations()
+    {
+        return AAM_Core_API::getOption(
+            self::DB_VIOLATION_OPTION, array(), AAM_Core_API::getMainSiteId()
+        );
     }
 
     /**
@@ -98,6 +181,19 @@ class AAM_Addon_Repository
     }
 
     /**
+     * Check if there are any violations registered
+     *
+     * @return boolean
+     *
+     * @access public
+     * @since 6.7.5
+     */
+    public function hasViolations()
+    {
+        return count($this->getViolations()) > 0;
+    }
+
+    /**
      * Store the license key
      *
      * @param object $package
@@ -105,11 +201,12 @@ class AAM_Addon_Repository
      *
      * @return boolean
      *
+     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
      * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
      * @since 6.0.5 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.2
+     * @version 6.7.5
      */
     public function registerLicense($package, $license)
     {
@@ -120,9 +217,64 @@ class AAM_Addon_Repository
         );
 
         // Update the registry
-        return AAM_Core_API::updateOption(
+        $result = AAM_Core_API::updateOption(
             self::DB_OPTION, $list, AAM_Core_API::getMainSiteId()
         );
+
+        // If there are any violations, clear them
+        $this->removeViolation($package['slug']);
+
+        return $result;
+    }
+
+    /**
+     * Remove registered violation for a given addon
+     *
+     * @param string $addon
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.7.5
+     */
+    public function removeViolation($addon)
+    {
+        $violations = $this->getViolations();
+
+        if (isset($violations[$addon])) {
+            unset($violations[$addon]);
+
+            AAM_Core_API::updateOption(
+                self::DB_VIOLATION_OPTION, $violations, AAM_Core_API::getMainSiteId()
+            );
+        }
+    }
+
+    /**
+     * Register new license violation and process the action if defined
+     *
+     * @param string $addon
+     * @param string $message
+     * @param string $action
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.7.5
+     */
+    public function processViolation($addon, $message, $action = null)
+    {
+        $violations         = $this->getViolations();
+        $violations[$addon] = $message;
+
+        // Store the violation for the further displaying
+        AAM_Core_API::updateOption(
+            self::DB_VIOLATION_OPTION, $violations, AAM_Core_API::getMainSiteId()
+        );
+
+        if ($action === 'deactivate') {
+            deactivate_plugins("{$addon}/bootstrap.php", true, is_network_admin());
+        }
     }
 
     /**
@@ -130,50 +282,27 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
      * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.2
+     * @version 6.7.5
      */
     public function getList()
     {
-        return array(
-            'aam-plus-package' => $this->buildAddonObject(
-                'Plus Package',
-                'plus-package',
-                __('Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.', AAM_KEY),
-                '5.4.2'
-            ),
-            'aam-ip-check' => $this->buildAddonObject(
-                'IP Check',
-                'ip-check',
-                __('Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.', AAM_KEY),
-                '4.1.4'
-            ),
-            'aam-role-hierarchy' => $this->buildAddonObject(
-                'Role Hierarchy',
-                'role-hierarchy',
-                __('Define and manage complex WordPress role hierarchy where all the access settings are propagated down the tree with the ability to override any settings for any specific role.', AAM_KEY),
-                '3.0.1'
-            ),
-            /**
-             * TODO: Release this extension after AAM 6.0.0. Enhance it with
-             * subscription functionality and possibly with email notification
-             * integration
-            'aam-ecommerce' => $this->buildAddonObject(
-                'E-Commerce',
-                'ecommerce',
-                __('Start monetizing access to your premium content. Restrict access to read any WordPress post, page or custom post type until user purchase access to it.', AAM_KEY)
-            ),
-            */
-            'aam-complete-package' => $this->buildAddonObject(
-                'Complete Package',
-                'complete-package',
-                __('Get the complete list of all premium AAM addons in one package and all future premium addons will be included for now additional cost.', AAM_KEY),
-                '5.2.8'
-            )
-        );
+        $response = array();
+
+        foreach(self::OFFICIAL_ADDON_LIST as $id => $details) {
+            $response[$id] = $this->buildAddonObject(
+                $details['title'],
+                $details['slug'],
+                __($details['description'], AAM_KEY),
+                $details['version']
+            );
+        }
+
+        return $response;
     }
 
     /**
@@ -293,7 +422,7 @@ class AAM_Addon_Repository
      */
     protected function isPluginActive($plugin)
     {
-        $data = self::getPluginData($plugin);
+        $data = $this->getPluginData($plugin);
 
         if (!empty($data)) {
             $active = is_plugin_active($plugin);

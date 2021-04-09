@@ -45,7 +45,7 @@ final class AAM_Core_Server
         $endpoint = getenv("AAM_API_{$v}_ENDPOINT");
 
         if (empty($endpoint)) {
-            $endpoint = ($v === 'V1' ? self::SERVER_V1_URL : self::SERVER_V2_URL);
+            $endpoint = self::SERVER_V2_URL;
         }
 
         return $endpoint;

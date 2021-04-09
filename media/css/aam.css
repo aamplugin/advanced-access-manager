@@ -1127,7 +1127,7 @@ input[type=radio]:checked + label:before {
 }
 
 .aam-notification-metabox  {
-  background-color: #CB413A;
+  background-color: #d9534f;
   color: #FFFFFF;
   letter-spacing: 0.5px;
 }

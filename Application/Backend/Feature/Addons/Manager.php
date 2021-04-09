@@ -10,8 +10,11 @@
 /**
  * Add-on manager
  *
+ * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
+ * @since 6.0.5 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.5
+ * @version 6.7.5
  */
 class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -53,13 +56,16 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
+     * @since 6.0.5 Initial version of the method
+     *
      * @access public
-     * @version 6.0.5
+     * @version 6.7.5
      */
     public function getRegistry()
     {
         return wp_json_encode(
-            AAM_Addon_Repository::getInstance()->getRegistry(true)
+            AAM_Addon_Repository::getInstance()->getAddonLicenseMap()
         );
     }
 
@@ -68,8 +74,11 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
+     * @since 6.0.5 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.5
+     * @version 6.7.5
      */
     public function checkForPluginUpdates()
     {
@@ -84,6 +93,14 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
                 if (version_compare($current_v, $data->new_version) === -1) {
                     $current->response[$data->plugin] = $data;
                     unset($current->no_update[$data->plugin]);
+                }
+
+                if (!empty($data->violation)) {
+                    AAM_Addon_Repository::getInstance()->processViolation(
+                        $data->slug,
+                        $data->violation,
+                        (isset($data->action) ? $data->action : null)
+                    );
                 }
             }
         }
