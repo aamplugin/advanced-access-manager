@@ -92,7 +92,7 @@ We take security and privacy very seriously, that is why there are several non-n
 == Changelog ==
 
 = 6.7.5 =
-
+* Fixed Bug: Access Policy breaks Broadcaster Plugin by @SEA-NET [https://github.com/aamplugin/advanced-access-manager/issues/170](https://github.com/aamplugin/advanced-access-manager/issues/170)
 * Changed: Enhanced the premium life-cycle management [https://github.com/aamplugin/advanced-access-manager/issues/173](https://github.com/aamplugin/advanced-access-manager/issues/173)
 
 = 6.7.4 =
