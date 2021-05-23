@@ -171,8 +171,8 @@ class AAM_Core_Object_Post extends AAM_Core_Object
      * @return boolean
      *
      * @access public
-     * @link https://forum.aamplugin.com/d/353-comment-system-activated
      * @see AAM_Service_Content::initializeHooks
+     *
      * @version 6.0.1
      */
     public function isDefined($property)

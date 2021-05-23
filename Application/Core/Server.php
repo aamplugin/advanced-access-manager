@@ -14,11 +14,9 @@
  * 6.x.x. The problem is with the way AAM registers hooks to WP core `http_response`
  * hook
  *
- * @link https://forum.aamplugin.com/d/358-uncaught-error-class-aam-core-server-not-found
- *
  * @package AAM
  * @since 6.0.3
- * @todo Remove in July 2020
+ * @todo Remove in July 2021
  */
 final class AAM_Core_Server
 {

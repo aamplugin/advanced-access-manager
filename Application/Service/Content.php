@@ -952,8 +952,6 @@ class AAM_Service_Content
      *              aam|... post type capability
      * @since 6.0.0 Initial implementation of the method
      *
-     * @link https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
-     *
      * @access public
      * @version 6.1.0
      */
