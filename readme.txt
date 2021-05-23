@@ -93,7 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.7.6 =
 * Fixed Bug: Incorrectly handled "Add User" for with multisite setup by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/179](https://github.com/aamplugin/advanced-access-manager/issues/179)
-
+* Fixed Bug: WP Notice in logs for fread by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/177](https://github.com/aamplugin/advanced-access-manager/issues/177)
 = 6.7.5 =
 * Fixed Bug: Access Policy breaks Broadcaster Plugin by @SEA-NET [https://github.com/aamplugin/advanced-access-manager/issues/170](https://github.com/aamplugin/advanced-access-manager/issues/170)
 * Changed: Enhanced the premium life-cycle management [https://github.com/aamplugin/advanced-access-manager/issues/173](https://github.com/aamplugin/advanced-access-manager/issues/173)

@@ -10,17 +10,18 @@
 /**
  * Addon repository
  *
+ * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
- * @since 6.4.3 Fixed https://github.com/aamplugin/advanced-access-manager/issues/92
- * @since 6.4.2 Implemented https://github.com/aamplugin/advanced-access-manager/issues/88
- * @since 6.4.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
+ * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/92
+ * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
+ * @since 6.4.1 https://github.com/aamplugin/advanced-access-manager/issues/81
  * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
  * @since 6.0.5 Refactored the license managements. Fixed couple bugs with license
  *              information displaying
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.5
+ * @version 6.7.6
  */
 class AAM_Addon_Repository
 {
@@ -95,6 +96,7 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
      * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
      * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing.
      *              Optimized for Multisite setup
@@ -102,7 +104,7 @@ class AAM_Addon_Repository
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.2
+     * @version 6.7.6
      */
     public function getRegistry()
     {
@@ -117,7 +119,7 @@ class AAM_Addon_Repository
             // Iterate over the list of official add-ons and check if there is any
             // installed
             foreach(array_keys(self::OFFICIAL_ADDON_LIST) as $id) {
-                $plugin = $this->getPluginData($id);
+                $plugin = $this->getPluginData("{$id}/bootstrap.php");
 
                 if (!is_null($plugin)) { // Capturing the fact that add-on is installed
                     $registry[$id] = null;
