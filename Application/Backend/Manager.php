@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
  * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
  * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
  *              array of properties
@@ -18,7 +19,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.2
+ * @version 6.7.6
  */
 class AAM_Backend_Manager
 {
@@ -30,11 +31,12 @@ class AAM_Backend_Manager
      *
      * @return void
      *
-     * @since 6.4.2 Added https://github.com/aamplugin/advanced-access-manager/issues/88
+     * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
+     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.2
+     * @version 6.7.6
      */
     protected function __construct()
     {
@@ -43,13 +45,14 @@ class AAM_Backend_Manager
 
         // Alter user edit screen with support for multiple roles
         if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
-            add_action('show_user_profile', array($this, 'addMultiRoleSupport'));
-            add_action('edit_user_profile', array($this, 'addMultiRoleSupport'));
-            add_action('user_new_form', array($this, 'addMultiRoleSupport'));
+            add_action('edit_user_profile', array($this, 'editUserProfilePage'));
+            add_action('user_new_form', array($this, 'addNewUserPage'));
 
             // User profile update action
-            add_action('profile_update', array($this, 'profileUpdate'), 10, 2);
-            add_action('user_register', array($this, 'profileUpdate'), 10, 2);
+            add_action('profile_update', array($this, 'profileUpdate'));
+            add_action('user_register', array($this, 'profileUpdate'));
+            add_action('added_existing_user', array($this, 'profileUpdate'));
+            add_action('wpmu_activate_user', array($this, 'profileUpdate'));
         }
 
         // Manager Admin Menu
@@ -133,15 +136,13 @@ class AAM_Backend_Manager
     protected function checkAddonUpdates()
     {
         $list = AAM_Addon_Repository::getInstance()->getList();
-        $url  = 'https://forum.aamplugin.com/d/530-the-new-version-of-is-available-for-download';
 
         foreach($list as $addon) {
             if ($addon['hasUpdate'] === true) {
                 AAM_Core_Console::add(
                     sprintf(
-                        'The new version of ["%s"] is available for download. %s',
-                        $addon['title'],
-                        '<a href="' . $url . '" target="_blank">' . __('Learn more', AAM_KEY) . '</a>;'
+                        'The new version of ["%s"] is available for download.',
+                        $addon['title']
                     ),
                     'strong'
                 );
@@ -202,18 +203,37 @@ class AAM_Backend_Manager
     }
 
     /**
+     * Edit existing user page
+     *
+     * Adding support for the multi-role if this feature is enabled
+     *
+     * @param WP_User $user
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.7.6
+     */
+    public function editUserProfilePage($user)
+    {
+        if (current_user_can('promote_user', $user->ID)) {
+            require dirname(__FILE__) . '/tmpl/user/multiple-roles.php';
+        }
+    }
+
+    /**
      * Adjust user edit/add screen to support multiple roles
      *
-     * @param WP_User|string $param
+     * @param string $param
      *
      * @return void
      *
      * @access public
      * @version 6.0.0
      */
-    public function addMultiRoleSupport($param)
+    public function addNewUserPage($param)
     {
-        require_once dirname(__FILE__) . '/tmpl/user/multiple-roles.php';
+        require dirname(__FILE__) . '/tmpl/user/multiple-roles.php';
     }
 
     /**
@@ -250,7 +270,7 @@ class AAM_Backend_Manager
             $newRoles = array_intersect($roles, array_keys(get_editable_roles()));
 
             if (!empty($newRoles)) {
-                //remove all current roles and then set new
+                // remove all current roles and then set new
                 $user->set_role('');
 
                 foreach ($newRoles as $role) {

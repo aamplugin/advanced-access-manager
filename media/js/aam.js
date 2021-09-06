@@ -4315,7 +4315,7 @@
              * @param {type} cb
              * @returns {undefined}
              */
-            function downloadAddon(license, cb, error) {
+            function validateLicense(license, cb, error) {
                 $.ajax(`${getLocal().system.apiEndpoint}/download/${license}`, {
                     type: 'GET',
                     dataType: 'json',
@@ -4333,6 +4333,34 @@
 
             /**
              *
+             * @param {*} license
+             * @param {*} type
+             * @param {*} cb
+             * @param {*} error
+             */
+            function registerDomain(license, type, cb, error) {
+                $.ajax(`${getLocal().system.apiEndpoint}/register/${license}`, {
+                    type: 'POST',
+                    dataType: 'json',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    data: JSON.stringify({
+                        is_dev: (type === 'dev')
+                    }),
+                    success: function (response) {
+                        cb(response);
+                    },
+                    error: function (response) {
+                        error(response.responseJSON);
+                    }
+                });
+            }
+
+            /**
+             *
+             * @param {*} cb
              */
             function checkForUpdates(cb) {
                 $.ajax(getLocal().ajaxurl, {
@@ -4399,7 +4427,7 @@
                         }
 
                         $('i', _this).attr('class', 'icon-spin4 animate-spin');
-                        downloadAddon(license, function (response) {
+                        validateLicense(license, function (response) {
                             if (response) {
                                 getAAM().downloadFile(
                                     response.content,
@@ -4415,6 +4443,36 @@
                         }, function (response) {
                             getAAM().notification('danger', response.reason);
                             $('i', _this).attr('class', 'icon-download-cloud');
+                        });
+                    });
+
+                    $('.register-license').each(function() {
+                        $(this).bind('click', function () {
+                            $('#extension-key').parent().removeClass('error');
+
+                            var _this = $(this);
+                            var license = $.trim($('#extension-key').val());
+
+                            if (!license) {
+                                $('#extension-key').parent().addClass('error');
+                                $('#extension-key').focus();
+                                return;
+                            }
+
+                            $('i', _this).attr('class', 'icon-spin4 animate-spin');
+
+                            registerDomain(license, $(this).data('type'), function (response) {
+                                getAAM().notification(
+                                    'success',
+                                    'The website has been registered successfully'
+                                );
+                                // Store the license in the internal add-ons registry
+                                registerLicense(license, response.slug, response.expire);
+                                $('i', _this).attr('class', 'icon-check');
+                            }, function (response) {
+                                getAAM().notification('danger', response.reason);
+                                $('i', _this).attr('class', 'icon-check');
+                            });
                         });
                     });
 

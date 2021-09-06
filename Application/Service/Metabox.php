@@ -95,7 +95,6 @@ class AAM_Service_Metabox
             }, 999);
 
             // Manage Navigation Menu page to support
-            // https://forum.aamplugin.com/d/61-restrict-role-from-updating-or-deleting-specific-navigation-menus
             add_filter('nav_menu_meta_box_object', function ($postType) {
                 $postType->_default_query['suppress_filters'] = false;
 

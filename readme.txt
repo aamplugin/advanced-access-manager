@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.6.0
-Stable tag: 6.7.3
+Tested up to: 5.7.2
+Stable tag: 6.7.7
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,21 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.7.7 =
+* Changed: A notice "Object of class WP_User…" reported by @it4joy [https://github.com/aamplugin/advanced-access-manager/issues/184](https://github.com/aamplugin/advanced-access-manager/issues/184)
+
+= 6.7.6 =
+* Fixed Bug: Incorrectly handled "Add User" for with multisite setup by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/179](https://github.com/aamplugin/advanced-access-manager/issues/179)
+* Fixed Bug: WP Notice in logs for fread by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/177](https://github.com/aamplugin/advanced-access-manager/issues/177)
+= 6.7.5 =
+* Fixed Bug: Access Policy breaks Broadcaster Plugin by @SEA-NET [https://github.com/aamplugin/advanced-access-manager/issues/170](https://github.com/aamplugin/advanced-access-manager/issues/170)
+* Changed: Enhanced the premium life-cycle management [https://github.com/aamplugin/advanced-access-manager/issues/173](https://github.com/aamplugin/advanced-access-manager/issues/173)
+
+= 6.7.4 =
+* Fixed Bug: Access settings are not saved, reported by @argolein [https://github.com/aamplugin/advanced-access-manager/issues/167](https://github.com/aamplugin/advanced-access-manager/issues/167)
+* Changed: INI format warning, reported by @dannysummerlinjstartorg [https://github.com/aamplugin/advanced-access-manager/issues/160](https://github.com/aamplugin/advanced-access-manager/issues/160)
+* Changed: Minor change. Improved the UI consistency between views.
 
 = 6.7.3 =
 * Fixed Bug: Incorrectly handled .attr('checked') by the latest jQuery update [https://github.com/aamplugin/advanced-access-manager/issues/166](https://github.com/aamplugin/advanced-access-manager/issues/166)

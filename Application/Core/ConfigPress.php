@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * ConfigPress layer
  *
+ * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/160
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.4
  */
 final class AAM_Core_ConfigPress
 {
@@ -61,14 +62,17 @@ final class AAM_Core_ConfigPress
      *
      * @return string
      *
+     * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/160
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.7.4
      */
     public function read()
     {
         $config = AAM_Core_API::getOption(self::DB_OPTION, null);
 
-        return (empty($config) ? '' : $config);
+        return (empty($config) ? '[aam]' : $config);
     }
 
     /**

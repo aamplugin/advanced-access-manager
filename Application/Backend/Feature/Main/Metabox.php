@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend metaboxes & widgets manager
  *
+ * @since 6.0.0 Initial implementation of the class
+ * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.4
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -52,13 +53,16 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return string
      *
+     * @since 6.0.0 Initial implementation of the method
+     * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.4
      */
     public function save()
     {
         $items  = AAM_Core_Request::post('items', array());
-        $status = AAM_Core_Request::post('status');
+        $status = filter_input(INPUT_POST, 'status', FILTER_VALIDATE_BOOLEAN);
 
         $object = AAM_Backend_Subject::getInstance()->getObject(
             self::OBJECT_TYPE, null, true

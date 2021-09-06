@@ -72,8 +72,6 @@ class Migration601 implements AAM_Core_Contract_MigrationInterface
     /**
      * Clear corrupted data from the previously incorrectly executed script
      *
-     * @link https://forum.aamplugin.com/d/369-notice-undefined-offset-1-service-content-php-on-line-509
-     *
      * @return void
      *
      * @access protected

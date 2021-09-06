@@ -10,6 +10,7 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.7.7 https://github.com/aamplugin/advanced-access-manager/issues/184
  * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
  * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
@@ -22,7 +23,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.1
+ * @version 6.7.7
  */
 class AAM_Service_Content
 {
@@ -946,16 +947,15 @@ class AAM_Service_Content
      *
      * @return array
      *
+     * @since 6.7.7 https://github.com/aamplugin/advanced-access-manager/issues/184
      * @since 6.1.0 Added internal cache to optimize performance for posts that no
      *              longer exist but still referenced one way or another
      * @since 6.0.2 Completely rewrote this method to fixed loop caused by mapped
      *              aam|... post type capability
      * @since 6.0.0 Initial implementation of the method
      *
-     * @link https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
-     *
      * @access public
-     * @version 6.1.0
+     * @version 6.7.7
      */
     public function filterMetaMaps($caps, $cap, $user_id, $args)
     {
@@ -969,7 +969,7 @@ class AAM_Service_Content
         if (in_array($cap, $this->postTypeCaps, true)) {
             // Critical part of the implementation. We do not know ahead what
             // capability is responsible for what action when it comes to post types.
-            if (isset($args[0])) {
+            if (isset($args[0]) && is_scalar($args[0])) {
                 $objectId = intval($args[0]);
             } elseif (is_a($post, 'WP_Post')) {
                 $objectId = $post->ID;

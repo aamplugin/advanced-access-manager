@@ -12,8 +12,7 @@ namespace AAM\UnitTest\Addon\RoleHierarchy;
 use AAM,
     AAM_Core_Object_Menu,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\AuthUserTrait;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test cases for the Role Hierarchy addon

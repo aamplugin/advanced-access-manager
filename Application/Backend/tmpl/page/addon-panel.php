@@ -1,12 +1,14 @@
 <?php
-    /**
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/78
-     * @since 6.2.0 Removed expiration date for license to avoid confusion
-     * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.4.0
-     * */
+
+/**
+ * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
+ * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/78
+ * @since 6.2.0 Removed expiration date for license to avoid confusion
+ * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
+ * @since 6.0.0 Initial implementation of the template
+ *
+ * @version 6.7.5
+ * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -19,15 +21,26 @@
             </div>
         </div>
 
-        <label for="extension-key"><?php echo __('Download Addon', AAM_KEY); ?> <a href="#license-key-info-modal" data-toggle="modal"><i class="icon-help-circled"></i></a></label>
+        <label for="extension-key"><?php echo __('License Key', AAM_KEY); ?> <a href="#license-key-info-modal" data-toggle="modal"><i class="icon-help-circled"></i></a></label>
         <div class="row">
-            <div class="col-xs-8">
+            <div class="col-xs-6">
                 <div class="form-group">
                     <input type="text" class="form-control" id="extension-key" placeholder="<?php echo __('Enter The License Key', AAM_KEY); ?>" />
                 </div>
             </div>
-            <div class="col-xs-4">
-                <button class="btn btn-primary btn-block" id="download-extension"><i class="icon-download-cloud"></i> <?php echo __('Download', AAM_KEY); ?></button>
+            <div class="col-xs-3">
+                <button class="btn btn-primary btn-block" id="download-extension"><i class="icon-download-cloud"></i> <?php echo __('Download Addon', AAM_KEY); ?></button>
+            </div>
+            <div class="col-xs-3">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success btn-block dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <?php echo __('Register Website As', AAM_KEY); ?> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" class="register-license" data-type="dev"><?php echo __('Development Site', AAM_KEY); ?></a></li>
+                        <li><a href="#" class="register-license" data-type="prod"><?php echo __('Live Site', AAM_KEY); ?></a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
