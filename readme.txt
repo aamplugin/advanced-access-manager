@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 5.7.2
-Stable tag: 6.7.7
+Tested up to: 5.8.1
+Stable tag: 6.7.8
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -91,12 +91,16 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.7.8 =
+* Changed: Adjusted suite of automated tests, confirmed that AAM is compatible with the latest WP version
+
 = 6.7.7 =
 * Changed: A notice "Object of class WP_User…" reported by @it4joy [https://github.com/aamplugin/advanced-access-manager/issues/184](https://github.com/aamplugin/advanced-access-manager/issues/184)
 
 = 6.7.6 =
 * Fixed Bug: Incorrectly handled "Add User" for with multisite setup by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/179](https://github.com/aamplugin/advanced-access-manager/issues/179)
 * Fixed Bug: WP Notice in logs for fread by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/177](https://github.com/aamplugin/advanced-access-manager/issues/177)
+
 = 6.7.5 =
 * Fixed Bug: Access Policy breaks Broadcaster Plugin by @SEA-NET [https://github.com/aamplugin/advanced-access-manager/issues/170](https://github.com/aamplugin/advanced-access-manager/issues/170)
 * Changed: Enhanced the premium life-cycle management [https://github.com/aamplugin/advanced-access-manager/issues/173](https://github.com/aamplugin/advanced-access-manager/issues/173)

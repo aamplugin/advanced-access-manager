@@ -12,7 +12,8 @@ namespace AAM\UnitTest\Service\DeniedRedirect;
 use AAM,
     AAM_Core_Object_Redirect,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait;
+    AAM\UnitTest\Libs\ResetTrait,
+    AAM\UnitTest\Libs\HeaderTrait;
 
 /**
  * Access Denied Redirect service
@@ -22,7 +23,8 @@ use AAM,
  */
 class DeniedRedirectTest extends TestCase
 {
-    use ResetTrait;
+    use ResetTrait,
+        HeaderTrait;
 
     protected static $post_id;
 
@@ -129,7 +131,10 @@ class DeniedRedirectTest extends TestCase
         wp_die('Access Denied', 'aam_access_denied', array('exit' => false));
         ob_end_clean();
 
-        $this->assertContains('Location: ' . get_page_link(self::$page_id), xdebug_get_headers());
+        $this->assertContains(
+            'Location: ' . get_page_link(self::$page_id),
+            $this->getAllHeaders()
+        );
     }
 
     /**
@@ -157,7 +162,7 @@ class DeniedRedirectTest extends TestCase
         wp_die('Access Denied', 'aam_access_denied', array('exit' => false));
         ob_end_clean();
 
-        $this->assertContains('Location: /hello-world', xdebug_get_headers());
+        $this->assertContains('Location: /hello-world', $this->getAllHeaders());
     }
 
     /**
@@ -184,9 +189,10 @@ class DeniedRedirectTest extends TestCase
         wp_die('Access Denied', 'aam_access_denied', array('exit' => false));
         ob_end_clean();
 
-        $this->assertContains('Location: ' . add_query_arg(
-            array('reason' => 'restricted'), wp_login_url()
-        ), xdebug_get_headers());
+        $this->assertContains(
+            'Location: ' . add_query_arg(array('reason' => 'restricted'), wp_login_url()),
+            $this->getAllHeaders()
+        );
     }
 
     /**
@@ -202,7 +208,10 @@ class DeniedRedirectTest extends TestCase
         // Define custom access denied message
         $redirect = AAM::getUser()->getObject(AAM_Core_Object_Redirect::OBJECT_TYPE);
         $redirect->updateOptionItem('frontend.redirect.type', 'callback');
-        $redirect->updateOptionItem('frontend.redirect.callback', 'AAM\\UnitTest\\Service\\DeniedRedirect\\Callback::printOutput');
+        $redirect->updateOptionItem(
+            'frontend.redirect.callback',
+            'AAM\\UnitTest\\Service\\DeniedRedirect\\Callback::printOutput'
+        );
 
         $this->assertTrue($redirect->save());
 

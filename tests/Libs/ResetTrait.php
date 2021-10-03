@@ -79,6 +79,9 @@ trait ResetTrait
 
         wp_set_post_terms($post_id, $term['term_id'], 'category');
 
+        // Reset Global Headers
+        $GLOBALS['UT_HTTP_HEADERS'] = array();
+
         static::_tearDownAfterClass();
     }
 

@@ -104,7 +104,7 @@ class AAM_Service_DeniedRedirect
     /**
      * Get original wp_die handler
      *
-     * @return callback
+     * @return callable
      *
      * @access public
      * @version 6.0.0
