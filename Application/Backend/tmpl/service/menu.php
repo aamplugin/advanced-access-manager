@@ -115,7 +115,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <p class="aam-notification">
-                            <?php echo __('Current user does not have enough capabilities to access any available backend menu.', AAM_KEY); ?>
+                            <?php echo __('Either current user does not have enough capabilities to access any available backend menu or try to refresh the page so AAM can re-index backend menu.', AAM_KEY); ?>
                         </p>
                     </div>
                 </div>

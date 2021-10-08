@@ -91,6 +91,9 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.7.9 =
+* Changed: Enhanced security pasture by escaping potentially harmful input from users that do not have unfiltered_html capability, reported by WordPress Plugin Review Team [https://github.com/aamplugin/advanced-access-manager/issues/192](https://github.com/aamplugin/advanced-access-manager/issues/192)
+
 = 6.7.8 =
 * Changed: Adjusted suite of automated tests, confirmed that AAM is compatible with the latest WP version
 

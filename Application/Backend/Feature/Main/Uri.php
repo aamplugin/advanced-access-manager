@@ -10,12 +10,13 @@
 /**
  * URI service
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.4.0 Improved UI functionality with better rules handling
  * @since 6.3.0 Fixed bug with incorrectly handled record editing
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Main_Uri
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -86,23 +87,24 @@ class AAM_Backend_Feature_Main_Uri
      *
      * @return string
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
      * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/77
      * @since 6.3.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/35
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.7.9
      */
     public function save()
     {
-        $uri    = str_replace(site_url(), '', $this->getFromPost('uri'));
+        $uri    = str_replace(site_url(), '', $this->getSafeFromPost('uri'));
         $edited = $this->getFromPost('edited_uri');
 
         // Compile rule
         $rule = array(
-            'type'   => $this->getFromPost('type'),
-            'action' => $this->getFromPost('value'),
-            'code'   => $this->getFromPost('code')
+            'type'   => $this->getSafeFromPost('type'),
+            'action' => $this->getSafeFromPost('value'),
+            'code'   => $this->getSafeFromPost('code')
         );
 
         $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);

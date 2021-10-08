@@ -234,7 +234,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         }
 
         if (!empty($record->post_title)) {
-            $title .= $record->post_title;
+            $title .= esc_js($record->post_title);
         } else {
             $title .= __('(no title)', AAM_KEY);
         }

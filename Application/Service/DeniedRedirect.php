@@ -185,7 +185,7 @@ class AAM_Service_DeniedRedirect
                         } elseif ($val === 'callback') {
                             $value['Callback'] = trim($destination);
                         } elseif ($val === 'message') {
-                            $value['Message'] = $destination;
+                            $value['Message'] = esc_js($destination);
                         }
 
                         $params[] = array(

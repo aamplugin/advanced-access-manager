@@ -10,6 +10,7 @@
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/89
  *              https://github.com/aamplugin/advanced-access-manager/issues/108
  * @since 6.3.1 Fixed bug with incorrectly escaped passwords and teaser messages
@@ -20,7 +21,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Main_Post
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -547,12 +548,13 @@ class AAM_Backend_Feature_Main_Post
      *
      * @return mixed
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
      * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/42
      * @since 6.2.0 Added support for the new filter `aam_sanitize_post_value_filter`
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.3.1
+     * @version 6.7.9
      */
     protected function sanitizeOption($option, $value)
     {
@@ -560,8 +562,12 @@ class AAM_Backend_Feature_Main_Post
             foreach($value as $k => $v) {
                 if ($k === 'enabled') {
                     $value[$k] = filter_var($v, FILTER_VALIDATE_BOOLEAN);
+                } elseif (is_numeric($v))  {
+                    $value[$k] = intval($v);
+                } elseif (current_user_can('unfiltered_html')) {
+                    $value[$k] = stripslashes($v);
                 } else {
-                    $value[$k] = (is_numeric($v) ? intval($v) : stripslashes($v));
+                    $value[$k] = wp_kses_post(stripslashes($v));
                 }
             }
         } else { // Any scalar value has to be boolean
@@ -976,7 +982,7 @@ class AAM_Backend_Feature_Main_Post
      *
      * @param string $type
      *
-     * @return array
+     * @return object
      *
      * @access protected
      * @version 6.0.0

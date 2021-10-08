@@ -5,18 +5,21 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Secure login widget
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.0.0 Initial implementation of the method
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.9
  */
 class AAM_Backend_Widget_Login extends WP_Widget
 {
+
+    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Widget arguments
@@ -90,8 +93,11 @@ class AAM_Backend_Widget_Login extends WP_Widget
      *
      * @return array
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.7.9
      */
     protected function normalize($instance)
     {
@@ -103,7 +109,7 @@ class AAM_Backend_Widget_Login extends WP_Widget
             $instance['user-title'] = __('Howdy, %username%', AAM_KEY);
         }
 
-        $instance['redirect'] = filter_input(INPUT_GET, 'redirect_to');
+        $instance['redirect'] = $this->getFromQuery('redirect_to');
 
         return $instance;
     }
