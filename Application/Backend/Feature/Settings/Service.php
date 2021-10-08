@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM services
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
+ * @since 6.0.0 Initial implementation of the method
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
 {
@@ -37,8 +38,11 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public static function getList()
     {
@@ -46,7 +50,10 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
 
         // Get each service status
         foreach ($response as &$service) {
-            $service['status'] = AAM_Core_Config::get($service['setting'], 1);
+            $service['status'] = AAM_Core_Config::get(
+                $service['setting'],
+                isset($service['defaultEnabled']) ? $service['defaultEnabled'] : true
+            );
         }
 
         return $response;

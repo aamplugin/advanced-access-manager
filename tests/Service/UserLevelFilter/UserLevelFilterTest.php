@@ -31,6 +31,14 @@ class UserLevelFilterTest extends TestCase
     {
         // Set current User. Emulate that this is admin login
         wp_set_current_user(AAM_UNITTEST_USER_MANAGER_A_USER_ID);
+
+        \AAM_Core_Config::set('core.service.user-level-filter.enabled', true);
+        $instance = \AAM_Service_UserLevelFilter::getInstance(true);
+
+        add_filter('editable_roles', array($instance, 'filterRoles'));
+        add_action('pre_get_users', array($instance, 'filterUserQuery'), 999);
+        add_filter('views_users', array($instance, 'filterViews'));
+        add_filter('rest_user_query', array($instance, 'prepareUserQueryArgs'));
     }
 
     /**

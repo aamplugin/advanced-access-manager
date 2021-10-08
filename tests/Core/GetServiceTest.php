@@ -65,11 +65,6 @@ class GetServiceTest extends TestCase
             get_class(apply_filters('aam_get_service_filter', null, 'secure-login'))
         );
 
-        $this->assertEquals(
-            'AAM_Service_UserLevelFilter',
-            get_class(apply_filters('aam_get_service_filter', null, 'user-level'))
-        );
-
         $this->assertNull(
             apply_filters('aam_get_service_filter', null, 'testing')
         );

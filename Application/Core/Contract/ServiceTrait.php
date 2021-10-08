@@ -10,11 +10,12 @@
 /**
  * Reusable elements for each service
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
  * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.0.0 Initial implementation of the service
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.7.9
  */
 trait AAM_Core_Contract_ServiceTrait
 {
@@ -53,12 +54,17 @@ trait AAM_Core_Contract_ServiceTrait
      *
      * @return void
      *
+     * @param boolean $reload
+     *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
-    public static function bootstrap()
+    public static function bootstrap($reload = false)
     {
-        if (is_null(self::$instance)) {
+        if (is_null(self::$instance) || $reload) {
             self::$instance = new self;
         }
     }
@@ -68,13 +74,18 @@ trait AAM_Core_Contract_ServiceTrait
      *
      * @return object
      *
+     * @param boolean $reload
+     *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
-    public static function getInstance()
+    public static function getInstance($reload = false)
     {
-        if (is_null(self::$instance)) {
-            self::bootstrap();
+        if (is_null(self::$instance) || $reload) {
+            self::bootstrap($reload);
         }
 
         return self::$instance;
