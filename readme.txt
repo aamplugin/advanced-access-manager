@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 5.8.1
-Stable tag: 6.7.9
+Stable tag: 6.8.0
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,11 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.8.0 =
+* Changed: Enhanced security pasture by escaping potentially harmful output, if information was directly modified in the DB or not escaped during storing AAM settings, reported by WordPress Plugin Review Team
+* Fixed: Cleared potentially corrupted data about status of premium add-ons.
+* Changed: Re-opened direct communication with the AAM developer through the Slack channel [https://aamplugin.com/support](https://aamplugin.com/support)
 
 = 6.7.9 =
 * Changed: Enhanced security pasture by escaping potentially harmful input from users that do not have unfiltered_html capability, reported by WordPress Plugin Review Team [https://github.com/aamplugin/advanced-access-manager/issues/192](https://github.com/aamplugin/advanced-access-manager/issues/192)

@@ -54,7 +54,7 @@ class AAM_Backend_Feature_Main_Uri
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.0
      */
     public function getTable()
     {
@@ -70,6 +70,7 @@ class AAM_Backend_Feature_Main_Uri
 
         foreach ($rules as $uri => $rule) {
             $prefix = ($object->has($uri) ? '' : 'no-');
+
             $response['data'][] = array(
                 $uri,
                 $rule['type'],

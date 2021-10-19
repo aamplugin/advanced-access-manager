@@ -1,4 +1,12 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
+     * @since 6.0.0 Initial implementation of the templates
+     *
+     * @version 6.8.0
+     *
+     */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php $subject = AAM_Backend_Subject::getInstance(); ?>
@@ -84,12 +92,12 @@
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-url-action" style="display: <?php echo ($frontendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" name="frontend.redirect.url" placeholder="https://" value="<?php echo $this->getOption('frontend.redirect.url'); ?>" />
+                                <input type="text" class="form-control" name="frontend.redirect.url" placeholder="https://" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.url'))); ?>" />
                             </div>
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-callback-action" style="display: <?php echo ($frontendType == 'callback' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="frontend.redirect.callback" value="<?php echo $this->getOption('frontend.redirect.callback'); ?>" />
+                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="frontend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.callback'))); ?>" />
                             </div>
                         </div>
                         <div role="tabpanel" class="tab-pane" id="backend-redirect">
@@ -136,12 +144,12 @@
 
                             <div class="form-group aam-redirect-action backend-redirect" id="backend-url" style="display: <?php echo ($backendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="backend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="https://" name="backend.redirect.url" value="<?php echo $this->getOption('backend.redirect.url'); ?>" />
+                                <input type="text" class="form-control" placeholder="https://" name="backend.redirect.url" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.url'))); ?>" />
                             </div>
 
                             <div class="form-group aam-redirect-action backend-redirect" id="backend-callback-action" style="display: <?php echo ($backendType == 'callback' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="backend.redirect.callback" value="<?php echo $this->getOption('backend.redirect.callback'); ?>" />
+                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="backend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.callback'))); ?>" />
                             </div>
                         </div>
                     </div>

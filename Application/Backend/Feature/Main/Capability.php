@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend capability manager
  *
+ * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.8.0
  */
 class AAM_Backend_Feature_Main_Capability
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -73,8 +74,11 @@ class AAM_Backend_Feature_Main_Capability
      *
      * @return string
      *
+     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.0
      */
     public function save()
     {
@@ -84,12 +88,12 @@ class AAM_Backend_Feature_Main_Capability
         $assign = $this->getFromPost('assignToMe', FILTER_VALIDATE_BOOLEAN);
 
         if ($cap && $this->isAllowedToToggle($cap)) {
+            $result = $this->getSubject()->addCapability($cap, $effect);
+
             // Add capability to current user if checkbox checked
-            if ($assign === true) {
+            if ($result && $assign === true) {
                 AAM::getUser()->addCapability($cap);
             }
-
-            $result = $this->getSubject()->addCapability($cap, $effect);
         }
 
         return wp_json_encode(array(
