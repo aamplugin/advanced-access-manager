@@ -8,7 +8,7 @@ class Callback
 
     public static function redirectCallback()
     {
-        header('Location: ' . self::REDIRECT_URL);
+        array_push($GLOBALS['UT_HTTP_HEADERS'], 'Location: ' . self::REDIRECT_URL);
     }
 
 }

@@ -288,36 +288,6 @@ class IpCheckTest extends TestCase
     }
 
     /**
-     * Test that cookie with JWT is sent when access is granted
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testWebsiteAccessCookieSetup()
-    {
-        // Fake the IP address
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-
-        $object = AAM::getUser()->getObject(IPCheckObject::OBJECT_TYPE);
-        $this->assertTrue($object->updateOptionItem('ip|127.0.0.1', false)->save());
-
-        // Capture the WP Die message
-        ob_start();
-        do_action('wp');
-        ob_end_clean();
-
-        $this->assertCount(1, array_filter(xdebug_get_headers(), function($m) {
-            return (strpos($m, 'aam_ipcheck_jwt=') !== false);
-        }));
-
-        // Reset WP Query
-        unset($_SERVER['REMOTE_ADDR']);
-        header_remove('Set-Cookie');
-    }
-
-    /**
      * Test that cookie with JWT is sent when access to page is granted
      *
      * @return void
@@ -352,11 +322,6 @@ class IpCheckTest extends TestCase
         $this->assertTrue(
             AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post)
         );
-
-        // Note! 2 is because there is no way to clear sent headers with xdebug_*
-        $this->assertCount(2, array_filter(xdebug_get_headers(), function($m) {
-            return (strpos($m, 'aam_ipcheck_jwt=') !== false);
-        }));
 
         // Reset WP Query
         unset($_SERVER['REMOTE_ADDR']);

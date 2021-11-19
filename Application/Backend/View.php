@@ -13,12 +13,13 @@
  * This class is used to manage all AAM UI templates and interaction of the UI with
  * AAM backend core
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.6.0 Allow partial to be loaded more than once
  * @since 6.0.5 Removed prepareIframeWPAssetsURL method
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.0
+ * @version 6.7.9
  */
 class AAM_Backend_View
 {
@@ -102,8 +103,11 @@ class AAM_Backend_View
      *
      * @return string
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public function processAjax()
     {
@@ -126,7 +130,7 @@ class AAM_Backend_View
                 'aam_ajax_filter', $response, $subject->getSubject(), $action
             );
         } elseif ($action === 'renderContent') {
-            $partial  = filter_input(INPUT_POST, 'partial');
+            $partial  = $this->getFromPost('partial');
             $response = $this->renderContent((!empty($partial) ? $partial : 'main'));
 
             $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');

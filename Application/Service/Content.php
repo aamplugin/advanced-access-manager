@@ -406,7 +406,7 @@ class AAM_Service_Content
                         'Resource' => $resource,
                         'Metadata' => array(
                             'Teaser' => array(
-                                'Value' => $settings['message']
+                                'Value' => esc_js($settings['message'])
                             )
                         )
                     );

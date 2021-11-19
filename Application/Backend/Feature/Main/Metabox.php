@@ -12,13 +12,16 @@
  *
  * @since 6.0.0 Initial implementation of the class
  * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  *
  * @package AAM
- * @version 6.7.4
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
 {
+
+    use AAM_Core_Contract_RequestTrait;
 
     /**
      * DB cache option
@@ -53,16 +56,17 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return string
      *
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
      * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
+     * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.7.4
+     * @version 6.7.9
      */
     public function save()
     {
         $items  = AAM_Core_Request::post('items', array());
-        $status = filter_input(INPUT_POST, 'status', FILTER_VALIDATE_BOOLEAN);
+        $status = $this->getFromPost('status', FILTER_VALIDATE_BOOLEAN);
 
         $object = AAM_Backend_Subject::getInstance()->getObject(
             self::OBJECT_TYPE, null, true

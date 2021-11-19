@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * JWT UI manager
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Main_Jwt
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -119,13 +120,16 @@ class AAM_Backend_Feature_Main_Jwt
      *
      * @return string
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public function save()
     {
         $user   = AAM_Backend_Subject::getInstance();
-        $token  = filter_input(INPUT_POST, 'token');
+        $token  = $this->getFromPost('token');
         $result = AAM_Service_Jwt::getInstance()->registerToken($user->ID, $token);
 
         if ($result) {
@@ -145,13 +149,16 @@ class AAM_Backend_Feature_Main_Jwt
      *
      * @return string
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public function delete()
     {
         $user   = AAM_Backend_Subject::getInstance();
-        $token  = filter_input(INPUT_POST, 'token');
+        $token  = $this->getFromPost('token');
         $result = AAM_Service_Jwt::getInstance()->revokeUserToken($user->ID, $token);
 
         if ($result) {

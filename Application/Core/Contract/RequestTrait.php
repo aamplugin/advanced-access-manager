@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Work with HTTP requests
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.9
  */
 trait AAM_Core_Contract_RequestTrait
 {
@@ -39,6 +40,25 @@ trait AAM_Core_Contract_RequestTrait
         }
 
         return $post;
+    }
+
+    /**
+     * Get sanitized value from post
+     *
+     * @param string $param
+     * @param int    $filter
+     * @param int    $options
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 6.7.9
+     */
+    public function getSafeFromPost($param, $filter = FILTER_DEFAULT, $options = null)
+    {
+        $value = $this->getFromPost($param, $filter, $options);
+
+        return current_user_can('unfiltered_html') ? $value : wp_kses_post($value);
     }
 
     /**

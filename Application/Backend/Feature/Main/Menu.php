@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend menu manager
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Main_Menu
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -45,12 +46,15 @@ class AAM_Backend_Feature_Main_Menu
      *
      * @return string
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public function save()
     {
-        $status = AAM_Core_Request::post('status');
+        $status = $this->getFromPost('status');
 
         $object = AAM_Backend_Subject::getInstance()->getObject(
             self::OBJECT_TYPE, null, true

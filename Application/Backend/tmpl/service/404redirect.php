@@ -1,10 +1,12 @@
 <?php
     /**
+     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
      * @since 6.4.0 Allowing to define 404 for any user or role
      * @since 6.0.0 Initial implementation of the templates
      *
-     * @version 6.4.0
-     * */
+     * @version 6.8.0
+     *
+     */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -65,12 +67,12 @@
 
                 <div class="form-group 404redirect-action" id="url-404redirect-action" style="display: <?php echo ($type === 'url' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('The URL', AAM_KEY); ?></label>
-                    <input type="text" class="form-control" name="404.redirect.url" placeholder="https://" value="<?php echo $this->getOption('404.redirect.url'); ?>" />
+                    <input type="text" class="form-control" name="404.redirect.url" placeholder="https://" value="<?php echo stripslashes(esc_js($this->getOption('404.redirect.url'))); ?>" />
                 </div>
 
                 <div class="form-group 404-redirect-action" id="callback-404redirect-action" style="display: <?php echo ($type === 'callback' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                    <input type="text" class="form-control" placeholder="Enter valid callback" name="404.redirect.callback" value="<?php echo $this->getOption('404.redirect.callback'); ?>" />
+                    <input type="text" class="form-control" placeholder="Enter valid callback" name="404.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('404.redirect.callback'))); ?>" />
                 </div>
             </div>
         </div>

@@ -10,11 +10,12 @@
 /**
  * User Level Filter service
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.7.9
  */
 class AAM_Service_UserLevelFilter
 {
@@ -41,8 +42,11 @@ class AAM_Service_UserLevelFilter
      *
      * @return void
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.7.9
      */
     protected function __construct()
     {
@@ -52,16 +56,17 @@ class AAM_Service_UserLevelFilter
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('User Level Filter', AAM_KEY),
-                    'description' => __('Extend default WordPress core users and roles handling, and make sure that users with lower user level cannot see or manager users and roles with higher level.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
+                    'title'          => __('User Level Filter', AAM_KEY),
+                    'description'    => __('Extend default WordPress core users and roles handling, and make sure that users with lower user level cannot see or manager users and roles with higher level.', AAM_KEY),
+                    'setting'        => self::FEATURE_FLAG,
+                    'defaultEnabled' => false
                 );
 
                 return $services;
             }, 1);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
             $this->initializeHooks();
         }
     }

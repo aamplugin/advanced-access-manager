@@ -13,7 +13,8 @@ use AAM,
     AAM_Service_Uri,
     AAM_Core_Object_Uri,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait;
+    AAM\UnitTest\Libs\ResetTrait,
+    AAM\UnitTest\Libs\HeaderTrait;
 
 /**
  * URI Access service
@@ -23,7 +24,8 @@ use AAM,
  */
 class UriTest extends TestCase
 {
-    use ResetTrait;
+    use ResetTrait,
+        HeaderTrait;
 
     protected static $post_id;
 
@@ -184,7 +186,7 @@ class UriTest extends TestCase
         AAM_Service_Uri::getInstance()->authorizeUri();
 
         $this->assertContains(
-            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id), $this->getAllHeaders()
         );
     }
 
@@ -211,7 +213,7 @@ class UriTest extends TestCase
         AAM_Service_Uri::getInstance()->authorizeUri();
 
         $this->assertContains(
-            'Location: /another-page', xdebug_get_headers()
+            'Location: /another-page', $this->getAllHeaders()
         );
     }
 
@@ -238,7 +240,7 @@ class UriTest extends TestCase
         AAM_Service_Uri::getInstance()->authorizeUri();
 
         $this->assertContains(
-            'Location: ' . Callback::REDIRECT_URL, xdebug_get_headers()
+            'Location: ' . Callback::REDIRECT_URL, $this->getAllHeaders()
         );
     }
 

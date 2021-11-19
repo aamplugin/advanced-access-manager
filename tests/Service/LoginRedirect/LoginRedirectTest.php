@@ -14,6 +14,7 @@ use WP_REST_Request,
     AAM_Core_Subject_User,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
+    AAM\UnitTest\Libs\HeaderTrait,
     AAM_Core_Object_LoginRedirect;
 
 /**
@@ -24,7 +25,8 @@ use WP_REST_Request,
  */
 class LoginRedirectTest extends TestCase
 {
-    use ResetTrait;
+    use ResetTrait,
+        HeaderTrait;
 
     /**
      * Targeting page ID
@@ -280,7 +282,8 @@ class LoginRedirectTest extends TestCase
         AAM_Service_Jwt::getInstance()->authenticateUser();
 
         $this->assertContains(
-            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id),
+            $this->getAllHeaders()
         );
 
         // Reset $_GET
@@ -313,7 +316,8 @@ class LoginRedirectTest extends TestCase
         AAM_Service_Jwt::getInstance()->authenticateUser();
 
         $this->assertContains(
-            'Location: ' . get_page_link(self::$another_page_id), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$another_page_id),
+            $this->getAllHeaders()
         );
 
         // Reset $_GET

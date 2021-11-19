@@ -10,16 +10,19 @@
 /**
  * Role view manager
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.5.0 Implemented https://github.com/aamplugin/advanced-access-manager/issues/97
  * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/72
  * @since 6.1.0 Fixed bug with role creation process that caused PHP warning
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.0
+ * @version 6.7.9
  */
 class AAM_Backend_Feature_Subject_Role
 {
+
+    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Capability that allows to manage roles
@@ -181,12 +184,13 @@ class AAM_Backend_Feature_Subject_Role
      *
      * @return array
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
      * @since 6.5.0 Implemented https://github.com/aamplugin/advanced-access-manager/issues/97
      * @since 6.1.0 Fixed the PHP notice where `Undefined variable: parent`
      * @since 6.0.0 Initial implementation of the method
      *
      * @access private
-     * @version 6.5.0
+     * @version 6.7.9
      */
     private function _create()
     {
@@ -195,11 +199,11 @@ class AAM_Backend_Feature_Subject_Role
         );
 
         if (current_user_can('aam_create_roles')) {
-            $name    = sanitize_text_field(filter_input(INPUT_POST, 'name'));
+            $name    = sanitize_text_field($this->getFromPost('name'));
             $roles   = AAM_Core_API::getRoles();
             $role_id = sanitize_key(strtolower($name));
-            $inherit = trim(filter_input(INPUT_POST, 'inherit'));
-            $doClone = filter_input(INPUT_POST, 'clone', FILTER_VALIDATE_BOOLEAN);
+            $inherit = trim($this->getFromPost('inherit'));
+            $doClone = $this->getFromPost('clone', FILTER_VALIDATE_BOOLEAN);
 
             // If inherited role is set get capabilities from it
             if ($inherit) {
@@ -264,11 +268,12 @@ class AAM_Backend_Feature_Subject_Role
      *
      * @return array
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
      * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/72
      * @since 6.0.0 Initial implementation of the method
      *
      * @access private
-     * @version 6.4.0
+     * @version 6.7.9
      */
     private function _edit()
     {
@@ -276,8 +281,8 @@ class AAM_Backend_Feature_Subject_Role
             $role = AAM_Backend_Subject::getInstance();
 
             $role->update(
-                esc_js(trim(filter_input(INPUT_POST, 'name'))),
-                sanitize_key(filter_input(INPUT_POST, 'slug'))
+                trim($this->getSafeFromPost('name')),
+                sanitize_key($this->getFromPost('slug'))
             );
 
             do_action('aam_post_update_role_action', $role->getSubject());

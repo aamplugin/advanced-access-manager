@@ -1,4 +1,12 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
+     * @since 6.0.0 Initial implementation of the templates
+     *
+     * @version 6.8.0
+     *
+     */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="logout_redirect-content">
@@ -58,12 +66,12 @@
 
                 <div class="form-group logout-redirect-action" id="url-logout-redirect-action" style="display: <?php echo ($type === 'url' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('The URL', AAM_KEY); ?></label>
-                    <input type="text" class="form-control" name="logout.redirect.url" placeholder="https://" value="<?php echo $this->getOption('logout.redirect.url'); ?>" />
+                    <input type="text" class="form-control" name="logout.redirect.url" placeholder="https://" value="<?php echo stripslashes(esc_js($this->getOption('logout.redirect.url'))); ?>" />
                 </div>
 
                 <div class="form-group logout-redirect-action" id="callback-logout-redirect-action" style="display: <?php echo ($type === 'callback' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                    <input type="text" class="form-control" placeholder="Enter valid callback" name="logout.redirect.callback" value="<?php echo $this->getOption('logout.redirect.callback'); ?>" />
+                    <input type="text" class="form-control" placeholder="Enter valid callback" name="logout.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('logout.redirect.callback'))); ?>" />
                 </div>
             </div>
         </div>

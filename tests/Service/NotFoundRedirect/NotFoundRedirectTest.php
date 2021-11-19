@@ -11,7 +11,8 @@ namespace AAM\UnitTest\Service\NotFoundRedirect;
 
 use PHPUnit\Framework\TestCase,
     AAM_Service_NotFoundRedirect,
-    AAM\UnitTest\Libs\ResetTrait;
+    AAM\UnitTest\Libs\ResetTrait,
+    AAM\UnitTest\Libs\HeaderTrait;
 
 /**
  * 404 Redirect service
@@ -21,7 +22,8 @@ use PHPUnit\Framework\TestCase,
  */
 class NotFoundRedirectTest extends TestCase
 {
-    use ResetTrait;
+    use ResetTrait,
+        HeaderTrait;
 
     protected static $post_id;
 
@@ -75,11 +77,11 @@ class NotFoundRedirectTest extends TestCase
 
         // Reset any already sent "Location" headers. This way insure that no other
         // redirect headers are sent
-        header('Location: empty');
+        $this->setHeader('Location: empty');
 
         $service->wp();
 
-        $this->assertContains('Location: empty', xdebug_get_headers());
+        $this->assertContains('Location: empty', $this->getAllHeaders());
 
         // Reset to default
         $wp_query->is_404 = null;
@@ -114,7 +116,8 @@ class NotFoundRedirectTest extends TestCase
         $service->wp();
 
         $this->assertContains(
-            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id),
+            $this->getAllHeaders()
         );
 
         // Reset to default
@@ -149,7 +152,7 @@ class NotFoundRedirectTest extends TestCase
 
         $service->wp();
 
-        $this->assertContains('Location: /hello-world', xdebug_get_headers());
+        $this->assertContains('Location: /hello-world', $this->getAllHeaders());
 
         // Reset to default
         $wp_query->is_404 = null;
@@ -183,7 +186,10 @@ class NotFoundRedirectTest extends TestCase
 
         $service->wp();
 
-        $this->assertContains('Location: ' . Callback::REDIRECT_URL, xdebug_get_headers());
+        $this->assertContains(
+            'Location: ' . Callback::REDIRECT_URL,
+            $this->getAllHeaders()
+        );
 
         // Reset to default
         $wp_query->is_404 = null;

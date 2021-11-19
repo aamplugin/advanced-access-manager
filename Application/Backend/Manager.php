@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
  * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
  * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
@@ -19,12 +20,13 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.6
+ * @version 6.7.9
  */
 class AAM_Backend_Manager
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    use AAM_Core_Contract_RequestTrait,
+        AAM_Core_Contract_SingletonTrait;
 
     /**
      * Initialize the AAM backend manager
@@ -285,12 +287,15 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.7.9
      */
     public function adminInit()
     {
-        $frame = filter_input(INPUT_GET, 'aamframe');
+        $frame = $this->getFromQuery('aamframe');
 
         if ($frame) {
             echo AAM_Backend_View::getInstance()->renderIFrame($frame);

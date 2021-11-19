@@ -12,6 +12,7 @@ namespace AAM\UnitTest\Service\LogoutRedirect;
 use AAM,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
+    AAM\UnitTest\Libs\HeaderTrait,
     AAM_Core_Object_LogoutRedirect;
 
 /**
@@ -22,7 +23,8 @@ use AAM,
  */
 class LogoutRedirectTest extends TestCase
 {
-    use ResetTrait;
+    use ResetTrait,
+        HeaderTrait;
 
     protected static $post_id;
 
@@ -86,11 +88,12 @@ class LogoutRedirectTest extends TestCase
     {
         // Reset any already sent "Location" headers. This way insure that no other
         // redirect headers are sent
-        header('Location: empty');
+        $this->setHeader('Location: empty');
+
         do_action('clear_auth_cookie');
         do_action('wp_logout');
 
-        $this->assertContains('Location: empty', xdebug_get_headers());
+        $this->assertContains('Location: empty', $this->getAllHeaders());
     }
 
     /**
@@ -118,7 +121,7 @@ class LogoutRedirectTest extends TestCase
         do_action('wp_logout');
 
         $this->assertContains(
-            'Location: ' . get_page_link(self::$page_id), xdebug_get_headers()
+            'Location: ' . get_page_link(self::$page_id), $this->getAllHeaders()
         );
     }
 
@@ -146,7 +149,7 @@ class LogoutRedirectTest extends TestCase
         do_action('clear_auth_cookie');
         do_action('wp_logout');
 
-        $this->assertContains('Location: /hello-world', xdebug_get_headers());
+        $this->assertContains('Location: /hello-world', $this->getAllHeaders());
     }
 
     /**
@@ -167,13 +170,19 @@ class LogoutRedirectTest extends TestCase
         );
 
         $object->updateOptionItem('logout.redirect.type', 'callback')
-            ->updateOptionItem('logout.redirect.callback', 'AAM\\UnitTest\\Service\\LogoutRedirect\\Callback::redirectCallback')
+            ->updateOptionItem(
+                'logout.redirect.callback',
+                'AAM\\UnitTest\\Service\\LogoutRedirect\\Callback::redirectCallback'
+            )
             ->save();
 
         do_action('clear_auth_cookie');
         do_action('wp_logout');
 
-        $this->assertContains('Location: ' . Callback::REDIRECT_URL, xdebug_get_headers());
+        $this->assertContains(
+            'Location: ' . Callback::REDIRECT_URL,
+            $this->getAllHeaders()
+        );
     }
 
 }
