@@ -16,7 +16,11 @@ use AAM_Core_Migration,
  * Clearing the AAM violations repository to remove corrupted data
  *
  * @package AAM
- * @version 6.8.0
+ *
+ * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/198
+ * @since 6.8.0 Initial implementation of the class
+ *
+ * @version 6.8.1
  */
 class Migration680 implements AAM_Core_Contract_MigrationInterface
 {
@@ -24,11 +28,16 @@ class Migration680 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
-     * @version 6.8.0
+     * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/198
+     * @since 6.8.0 Initial implementation of the method
+     *
+     * @version 6.8.1
      */
     public function run()
     {
-        \AAM_Core_API::deleteOption(\AAM_Addon_Repository::DB_VIOLATION_OPTION);
+        if (defined('\AAM_Addon_Repository::DB_VIOLATION_OPTION')) {
+            \AAM_Core_API::deleteOption(\AAM_Addon_Repository::DB_VIOLATION_OPTION);
+        }
 
         // Finally store this script as completed
         AAM_Core_Migration::storeCompletedScript(basename(__FILE__));
