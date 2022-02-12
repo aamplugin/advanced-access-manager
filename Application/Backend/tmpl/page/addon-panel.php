@@ -1,13 +1,14 @@
 <?php
 
 /**
+ * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/203
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
  * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/78
  * @since 6.2.0 Removed expiration date for license to avoid confusion
  * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.7.5
+ * @version 6.8.1
  * */
 ?>
 
@@ -49,6 +50,7 @@
         <div class="aam-outer-top-xs">
             <ul class="nav nav-tabs" role="tablist">
                 <?php if (count($commercial)) { ?><li role="presentation" class="active"><a href="#premium-extensions" aria-controls="premium-extensions" role="tab" data-toggle="tab"><i class='icon-basket'></i> <?php echo __('Premium', AAM_KEY); ?></a></li><?php } ?>
+                <li role="presentation"><a href="#free-extensions" aria-controls="free-extensions" role="tab" data-toggle="tab"><i class='icon-cubes'></i> <?php echo __('Free', AAM_KEY); ?></a></li>
                 <li class="margin-right aam-update-check"><a href="#" id="check-for-updates"><i class='icon-arrows-cw'></i> <?php echo __('Check For Updates', AAM_KEY); ?></a></li>
             </ul>
 
@@ -82,6 +84,34 @@
                                     </td>
                                 </tr>
                             <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="free-extensions">
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+                            <tr>
+                                <td width="80%">
+                                    <span class='aam-setting-title'>AAM Protected Media Files</span>
+                                    <p class="aam-extension-description">
+                                        Prevent direct access to the unlimited number of media library items either for visitors, individual users or groups of users (roles). This plugin does not modify a physical file’s location or URL.
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <a href="<?php echo admin_url('plugin-install.php?tab=plugin-information&plugin=aam-protected-media-files'); ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="80%">
+                                    <span class='aam-setting-title'>Noti - Activity Notification</span>
+                                    <p class="aam-extension-description">
+                                        Noti - Activity Notification (aka Noti) plugin is your single-stop shop for all you need to track any WordPress website activities. And it is completely free.
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <a href="<?php echo admin_url('plugin-install.php?tab=plugin-information&plugin=noti-activity-notification'); ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

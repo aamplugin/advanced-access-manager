@@ -93,6 +93,7 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.8.1 =
 * Fixed: Undefined class constant 'DB_VIOLATION_OPTION' [https://github.com/aamplugin/advanced-access-manager/issues/198](https://github.com/aamplugin/advanced-access-manager/issues/198)
+* Changed: Add "Free" tab to the add-ons page [https://github.com/aamplugin/advanced-access-manager/issues/203](https://github.com/aamplugin/advanced-access-manager/issues/203)
 
 = 6.8.0 =
 * Changed: Enhanced security pasture by escaping potentially harmful output, if information was directly modified in the DB or not escaped during storing AAM settings, reported by WordPress Plugin Review Team
