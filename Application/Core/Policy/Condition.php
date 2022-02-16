@@ -156,7 +156,13 @@ class AAM_Core_Policy_Condition
      */
     protected function evaluateNotEqualsConditions($conditions, $args)
     {
-        return !$this->evaluateEqualsConditions($conditions, $args);
+        $result = false;
+
+        foreach ($this->prepareConditions($conditions, $args) as $condition) {
+            $result = $result || ($condition['left'] !== $condition['right']);
+        }
+
+        return $result;
     }
 
     /**

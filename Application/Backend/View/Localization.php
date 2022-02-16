@@ -10,12 +10,13 @@
 /**
  * JS localization for AAM backend UI
  *
+ * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/199
  * @since 6.2.1 Added new label "Policy is not assigned to anybody"
  * @since 6.2.0 Added couple new labels
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.1
+ * @version 6.8.1
  */
 class AAM_Backend_View_Localization
 {
@@ -25,12 +26,13 @@ class AAM_Backend_View_Localization
      *
      * @return array
      *
+     * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/199
      * @since 6.2.1 Added new label "Policy is not assigned to anybody"
      * @since 6.2.0 Added couple new labels
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.1
+     * @version 6.8.1
      */
     public static function get()
     {
@@ -52,7 +54,7 @@ class AAM_Backend_View_Localization
             'Loading...' => __('Loading...', AAM_KEY),
             'No role' => __('No role', AAM_KEY),
             'Create New Role' => __('Create New Role', AAM_KEY),
-            'Search Role' => __('Search Role', AAM_KEY),
+            'Search role' => __('Search role', AAM_KEY),
             '_TOTAL_ role(s)' => __('_TOTAL_ role(s)', AAM_KEY),
             'Create' => __('Create', AAM_KEY),
             'Users' => __('Users', AAM_KEY),

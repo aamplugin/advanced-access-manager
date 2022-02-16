@@ -92,6 +92,7 @@ We take security and privacy very seriously, that is why there are several non-n
 == Changelog ==
 
 = 6.8.1 =
+* Fixed: Translation issues [https://github.com/aamplugin/advanced-access-manager/issues/199](https://github.com/aamplugin/advanced-access-manager/issues/199)
 * Fixed: Undefined class constant 'DB_VIOLATION_OPTION' [https://github.com/aamplugin/advanced-access-manager/issues/198](https://github.com/aamplugin/advanced-access-manager/issues/198)
 * Changed: Add "Free" tab to the add-ons page [https://github.com/aamplugin/advanced-access-manager/issues/203](https://github.com/aamplugin/advanced-access-manager/issues/203)
 
