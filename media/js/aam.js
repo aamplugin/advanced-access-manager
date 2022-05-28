@@ -1740,7 +1740,7 @@
                             var items = new Array(_this.data('menu-id'));
 
                             $('input', target).each(function () {
-                                $(this).attr('checked', status ? true : false);
+                                $(this).prop('checked', status ? true : false);
                                 items.push($(this).data('menu-id'));
                             });
 
@@ -1768,7 +1768,7 @@
                                         $('.panel-title .icon-eye-off', target + '-heading').remove();
                                     }
                                 } else {
-                                    _this.attr('checked', !status);
+                                    _this.prop('checked', !status);
                                 }
                             });
                         });
@@ -1872,7 +1872,7 @@
                             var items = new Array(_this.data('toolbar'));
 
                             $('input', target).each(function () {
-                                $(this).attr('checked', status ? true : false);
+                                $(this).prop('checked', status ? true : false);
                                 items.push($(this).data('toolbar'));
                             });
 
@@ -1900,7 +1900,7 @@
                                         $('.panel-title .icon-eye-off', target + '-heading').remove();
                                     }
                                 } else {
-                                    _this.attr('checked', !status);
+                                    _this.prop('checked', !status);
                                 }
                             });
                         });
@@ -2388,7 +2388,7 @@
 
                     $('#add-capability-modal').on('shown.bs.modal', function (e) {
                         $('#new-capability-name').val('');
-                        $('#assign-new-capability').attr('checked', true);
+                        $('#assign-new-capability').prop('checked', true);
                         $('#new-capability-name').focus();
                     });
 
