@@ -18,7 +18,7 @@ trait AuthManagerUserTrait
     /**
      * @inheritdoc
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         // Set current User. Emulate that this is admin login
         wp_set_current_user(AAM_UNITTEST_USER_MANAGER_USER_ID);
@@ -27,7 +27,7 @@ trait AuthManagerUserTrait
     /**
      * @inheritdoc
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
         // Unset the forced user
         wp_set_current_user(0);

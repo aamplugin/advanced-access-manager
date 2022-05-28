@@ -27,7 +27,7 @@ trait ResetTrait
     /**
      * @inheritDoc
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         global $wpdb;
 
@@ -51,7 +51,7 @@ trait ResetTrait
     /**
      * @inheritDoc
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
         global $wpdb;
 
@@ -97,7 +97,7 @@ trait ResetTrait
      * @access protected
      * @version 6.0.0
      */
-    protected function tearDown()
+    protected function tearDown() : void
     {
         // Clear all AAM settings
         AAM_Core_API::clearSettings();

@@ -29,7 +29,7 @@ trait AuthMultiRoleUserTrait
     /**
      * @inheritdoc
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
             // Enable Multiple Role Support
@@ -48,7 +48,7 @@ trait AuthMultiRoleUserTrait
     /**
      * @inheritdoc
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
         // Unset the forced user
         wp_set_current_user(0);
