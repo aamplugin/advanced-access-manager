@@ -11,7 +11,11 @@
  * AAM core policy resources
  *
  * @package AAM
- * @version 6.0.0
+ *
+ * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
+ * @since 6.0.0 Initial implementation of the class
+ *
+ * @version 6.8.3
  */
 class AAM_Core_Policy_Resource
 {
@@ -85,5 +89,12 @@ class AAM_Core_Policy_Resource
      * @version 6.0.0
      */
     const ROUTE = 'Route';
+
+    /**
+     * WordPress core hooks (actions and filters)
+     *
+     * @version 6.8.3
+     */
+    const HOOK = 'Hook';
 
 }

@@ -10,6 +10,7 @@
 /**
  * AAM core policy token evaluator
  *
+ * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/205
  * @since 6.3.0 Fixed bug that was causing fatal error policies that have conditions
  *              defined for Capability & Role resources
  * @since 6.2.1 Added POLICY_META token
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.0
+ * @version 6.8.3
  */
 class AAM_Core_Policy_Token
 {
@@ -29,6 +30,7 @@ class AAM_Core_Policy_Token
      *
      * @var array
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/205
      * @since 6.3.0 Added PHP_GLOBAL, WP_NETWORK_OPTION token and changed
      *                    WP_OPTION callback
      * @since 6.2.1 Added `POLICY_META` token
@@ -38,7 +40,7 @@ class AAM_Core_Policy_Token
      * @since 6.0.0 Initial implementation of the property
      *
      * @access protected
-     * @version 6.3.0
+     * @version 6.8.3
      */
     protected static $map = array(
         'USER'              => 'AAM_Core_Policy_Token::getUserValue',
@@ -61,6 +63,7 @@ class AAM_Core_Policy_Token
         'POLICY_META'       => 'AAM_Core_Policy_Token::getPolicyMeta',
         'WP_SITE'           => 'AAM_Core_Policy_Token::getSiteParam',
         'WP_NETWORK_OPTION' => 'AAM_Core_Policy_Token::getNetworkOption',
+        'THE_POST'          => 'AAM_Core_Policy_Token::getCurrentPostValue'
     );
 
     /**
@@ -100,11 +103,12 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
-     * @since 6.3.3 Enhancement for https://github.com/aamplugin/advanced-access-manager/issues/50
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/206
+     * @since 6.3.3 https://github.com/aamplugin/advanced-access-manager/issues/50
      * @since 6.1.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.3
+     * @version 6.8.3
      */
     public static function getTokenValue($token, $args = array())
     {
@@ -117,11 +121,128 @@ class AAM_Core_Policy_Token
                 $value = call_user_func(self::$map[$parts[0]], $parts[1]);
             }
         } elseif ($parts[0] === 'CALLBACK') {
-            $value = is_callable($parts[1]) ? call_user_func($parts[1], $args) : null;
+            $value = self::evaluateCallback($parts[1], $args);
         } else {
             $value = apply_filters(
                 'aam_policy_token_value_filter', null, $parts[0], $parts[1], $args
             );
+        }
+
+        return $value;
+    }
+
+    /**
+     * Evaluate CALLBACK expression
+     *
+     * @param string $exp
+     * @param array  $args
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version 6.8.3
+     */
+    protected static function evaluateCallback($exp, $args)
+    {
+        $response = null;
+        $cb       = self::_parseFunction($exp, $args);
+
+        if (!is_null($cb)) {
+            if (is_callable($cb['func']) || function_exists($cb['func'])) {
+                $result = call_user_func_array($cb['func'], $cb['args']);
+
+                if (!empty($cb['xpath'])) {
+                    $response = self::_getValueByXPath($result, $cb['xpath']);
+                } else {
+                    $response = $result;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Parse CALLBACK expression
+     *
+     * @param string $exp
+     * @param array  $args
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.8.3
+     */
+    private static function _parseFunction($exp, $args)
+    {
+        $response = null;
+        $regex    = '/^([\\a-z_\x80-\xff][\\a-z\d_\x80-\xff]*)\((.*)\)(.*)$/i';
+
+        if (preg_match($regex, $exp, $match)) {
+            // The second part is the collection of arguments that we pass to
+            // the function
+            $markers = array_map('trim', explode(',', $match[2]));
+            $values  = [];
+
+            foreach($markers as $marker) {
+                if (preg_match('/^\'.*\'$/', $marker) === 1) { // This is literal string
+                    array_push($values, trim($marker, '\''));
+                } elseif (strpos($marker, '.') !== false) { // Potentially another marker
+                    array_push($values, self::getTokenValue($marker, $args));
+                } else {
+                    array_push($values, $marker);
+                }
+            }
+
+            $response = array(
+                'func'  => trim($match[1]),
+                'args'  => $values,
+                'xpath' => trim($match[3])
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get value by xpath
+     *
+     * This method supports multiple different path
+     *
+     * @param mixed  $obj
+     * @param string $xpath
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 6.8.3
+     */
+    private static function _getValueByXPath($obj, $xpath)
+    {
+        $value = $obj;
+        $path  = trim(
+            str_replace(
+                array('["', '[', '"]', ']', '..'), '.', $xpath
+            ),
+            ' .' // white space is important!
+        );
+
+        foreach(explode('.', $path) as $l) {
+            if (is_object($value)) {
+                if (isset($value->{$l})) {
+                    $value = $value->{$l};
+                } else {
+                    $value = null;
+                    break;
+                }
+            } else if (is_array($value)) {
+                if (array_key_exists($l, $value)) {
+                    $value = $value[$l];
+                } else {
+                    $value = null;
+                    break;
+                }
+            }
         }
 
         return $value;
@@ -195,6 +316,13 @@ class AAM_Core_Policy_Token
         }
 
         return $value;
+    }
+
+    protected static function getCurrentPostValue($option_name)
+    {
+        $post = AAM_Core_API::getCurrentPost();
+
+        return is_a($post, 'AAM_Core_Object_Post') ? $post->{$option_name} : null;
     }
 
     /**

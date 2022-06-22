@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  *              Added new hook `aam_post_read_action_conversion_filter`
  * @since 6.3.1 Fixed incompatibility with plugins that use WP_User::get_role_caps
@@ -21,7 +22,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.8.3
  */
 class AAM_Service_AccessPolicy
 {
@@ -180,6 +181,7 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
      * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
      *              https://github.com/aamplugin/advanced-access-manager/issues/62
      *              https://github.com/aamplugin/advanced-access-manager/issues/63
@@ -189,7 +191,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.8.3
      */
     protected function initializeHooks()
     {
@@ -226,6 +228,27 @@ class AAM_Service_AccessPolicy
                 )
             ));
         });
+
+        add_action((is_admin() ? 'admin_init' : 'init'), function() {
+            $manager = AAM::api()->getAccessPolicyManager();
+            $found   = $manager->getResources(AAM_Core_Policy_Resource::HOOK);
+
+            foreach($found as $resource => $stm) {
+                $parts = explode(':', $resource);
+
+                if (count($parts) === 2) { // Currently support only name:priority
+                    if (isset($stm['Effect']) && $stm['Effect'] === 'deny') {
+                        $priority = apply_filters(
+                            'aam_hook_resource_priority', $parts[1]
+                        );
+
+                        if (is_bool($priority) || is_numeric($priority)) {
+                            remove_all_filters($parts[0], $priority);
+                        }
+                    }
+                }
+            }
+        }, PHP_INT_MAX);
 
         // Hook into AAM core objects initialization
         add_filter('aam_menu_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
@@ -695,6 +718,7 @@ class AAM_Service_AccessPolicy
      * @access public
      * @link https://aamplugin.com/reference/policy#capability
      * @link https://aamplugin.com/reference/policy#role
+     *
      * @version 6.3.1
      */
     public function initializeUser(AAM_Core_Subject_User $subject)
