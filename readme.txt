@@ -92,6 +92,7 @@ We take security and privacy very seriously, that is why there are several non-n
 == Changelog ==
 
 = 6.8.3 =
+* Fixed: PHP Deprecated: filter_var(): Passing null to parameter [https://github.com/aamplugin/advanced-access-manager/issues/208](https://github.com/aamplugin/advanced-access-manager/issues/208)
 * Added New: Extend CALLBACK to support inline arguments [https://github.com/aamplugin/advanced-access-manager/issues/206](https://github.com/aamplugin/advanced-access-manager/issues/206)
 * Added New: Add support for the THE_POST token [https://github.com/aamplugin/advanced-access-manager/issues/205](https://github.com/aamplugin/advanced-access-manager/issues/205)
 * Added New: Add support for new resource types Filter & Action [https://github.com/aamplugin/advanced-access-manager/issues/207](https://github.com/aamplugin/advanced-access-manager/issues/207)

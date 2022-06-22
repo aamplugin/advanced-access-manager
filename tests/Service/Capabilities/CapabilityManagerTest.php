@@ -17,7 +17,7 @@ use AAM,
 
 /**
  * Test Capability manager features
- * 
+ *
  * @version 6.0.0
  */
 class CapabilityManagerTest extends TestCase
@@ -27,9 +27,9 @@ class CapabilityManagerTest extends TestCase
 
     /**
      * Test if capabilities can be added properly for defined role
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -40,8 +40,8 @@ class CapabilityManagerTest extends TestCase
         $stub = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, true),
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, true),
             ),
             // Subject callback
             function() {
@@ -67,9 +67,9 @@ class CapabilityManagerTest extends TestCase
     /**
      * Test if capabilities can be added properly for the defined role and also
      * current user
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -80,9 +80,9 @@ class CapabilityManagerTest extends TestCase
         $stub = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_c'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, true),
-                array('assignToMe', FILTER_VALIDATE_BOOLEAN, null, true)
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_c'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, true),
+                array('assignToMe', FILTER_VALIDATE_BOOLEAN, 0, true)
             ),
             // Subject callback
             function() {
@@ -113,9 +113,9 @@ class CapabilityManagerTest extends TestCase
 
     /**
      * Test if capabilities can be deprived properly for defined role
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -126,8 +126,8 @@ class CapabilityManagerTest extends TestCase
         $stub = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, false),
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, false),
             ),
             // Subject callback
             function() {
@@ -152,9 +152,9 @@ class CapabilityManagerTest extends TestCase
 
     /**
      * Test if capabilities can be deleted from the very specific role
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -165,9 +165,9 @@ class CapabilityManagerTest extends TestCase
         $stub = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, true),
-                array('subjectOnly', FILTER_VALIDATE_BOOLEAN, null, true)
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, true),
+                array('subjectOnly', FILTER_VALIDATE_BOOLEAN, 0, true)
             ),
             // Subject callback
             function() {
@@ -193,9 +193,9 @@ class CapabilityManagerTest extends TestCase
 
     /**
      * Test if capabilities can be deleted from all roles
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -207,9 +207,9 @@ class CapabilityManagerTest extends TestCase
         $stubA = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, true),
-                array('subjectOnly', FILTER_VALIDATE_BOOLEAN, null, false)
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, true),
+                array('subjectOnly', FILTER_VALIDATE_BOOLEAN, 0, false)
             ),
             // Subject callback
             function() {
@@ -225,8 +225,8 @@ class CapabilityManagerTest extends TestCase
         $stubB = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, true)
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, true)
             ),
             // Subject callback
             function() {
@@ -243,7 +243,7 @@ class CapabilityManagerTest extends TestCase
             $stubA->delete(), wp_json_encode(array('status' => 'success'))
         );
 
-        // Confirm that deleted capability is no longer in the subscriber & editor 
+        // Confirm that deleted capability is no longer in the subscriber & editor
         // roles
         $option = get_option(sprintf('%suser_roles', $wpdb->prefix));
 
@@ -258,9 +258,9 @@ class CapabilityManagerTest extends TestCase
 
     /**
      * Test if capabilities can be updated properly for the defined subject
-     * 
+     *
      * @return void
-     * 
+     *
      * @access public
      * @version 6.0.0
      */
@@ -271,8 +271,8 @@ class CapabilityManagerTest extends TestCase
         $stubA = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('effect', FILTER_VALIDATE_BOOLEAN, null, false),
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('effect', FILTER_VALIDATE_BOOLEAN, 0, false),
             ),
             // Subject callback
             function() {
@@ -289,8 +289,8 @@ class CapabilityManagerTest extends TestCase
         $stubB = $this->prepareRoleStub(
             // Create a map of arguments to return values
             array(
-                array('capability', FILTER_DEFAULT, null, 'aam_test_cap_a'),
-                array('updated', FILTER_DEFAULT, null, 'aam_test_cap_b')
+                array('capability', FILTER_DEFAULT, 0, 'aam_test_cap_a'),
+                array('updated', FILTER_DEFAULT, 0, 'aam_test_cap_b')
             ),
             // Subject callback
             function() {
@@ -322,9 +322,9 @@ class CapabilityManagerTest extends TestCase
      *
      * @param array    $paramMap
      * @param callback $callback
-     * 
+     *
      * @return object
-     * 
+     *
      * @access protected
      * @version 6.0.0
      */

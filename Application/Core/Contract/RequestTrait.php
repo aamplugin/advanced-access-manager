@@ -28,10 +28,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
-    public function getFromPost($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getFromPost($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         $post = filter_input(INPUT_POST, $param, $filter, $options);
 
@@ -51,10 +54,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.7.9 Initial implementation of the method
+     *
      * @access public
-     * @version 6.7.9
+     * @version 6.8.3
      */
-    public function getSafeFromPost($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getSafeFromPost($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         $value = $this->getFromPost($param, $filter, $options);
 
@@ -70,10 +76,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
-    public function getFromQuery($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getFromQuery($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         $get = filter_input(INPUT_GET, $param, $filter, $options);
 
@@ -93,10 +102,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
-    public function getFromRequest($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getFromRequest($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         return filter_var($this->readFromArray($_REQUEST, $param), $filter, $options);
     }
@@ -110,10 +122,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
-    public function getFromCookie($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getFromCookie($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         $cookie = filter_input(INPUT_COOKIE, $param, $filter, $options);
 
@@ -135,10 +150,13 @@ trait AAM_Core_Contract_RequestTrait
      *
      * @return mixed
      *
+     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/208
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
-    public function getFromServer($param, $filter = FILTER_DEFAULT, $options = null)
+    public function getFromServer($param, $filter = FILTER_DEFAULT, $options = 0)
     {
         $var = filter_input(INPUT_SERVER, $param, $filter, $options);
 

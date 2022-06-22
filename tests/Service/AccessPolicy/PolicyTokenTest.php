@@ -27,6 +27,29 @@ class PolicyTokenTest extends TestCase
     use ResetTrait;
 
     /**
+     * Targeting post ID
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $post_id;
+
+    /**
+     * @inheritdoc
+     */
+    private static function _setUpBeforeClass()
+    {
+        // Setup a default post
+        self::$post_id = wp_insert_post(array(
+            'post_title'  => 'Access Policy Service Post',
+            'post_name'   => 'access-policy-service-post',
+            'post_status' => 'publish'
+        ));
+    }
+
+    /**
      * Validate correct USER token evaluation
      *
      * @return void
@@ -259,6 +282,28 @@ class PolicyTokenTest extends TestCase
         );
 
         unset($_SERVER['HTTP_AUTHENTICATION']);
+    }
+
+    /**
+     * Test THE_POST token evaluation
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function testThePostTokenEvaluation()
+    {
+        $GLOBALS['post'] = get_post(self::$post_id);
+
+        $this->assertEquals(
+            self::$post_id,
+            AAM_Core_Policy_Token::evaluate(
+                '${THE_POST.ID}', array('${THE_POST.ID}')
+            )
+        );
+
+        unset($GLOBALS['post']);
     }
 
 }

@@ -72,7 +72,19 @@ class AAM_Core_Policy_Typecast
                 break;
 
             case 'int':
-                $value = (int) $value;
+                $value = intval($value);
+                break;
+
+            case 'float':
+                $value = floatval($value);
+                break;
+
+            case 'numeric':
+                if (is_numeric($value)) {
+                    $value = is_float($value) ? floatval($value) : intval($value);
+                } else {
+                    $value = 0;
+                }
                 break;
 
             case 'boolean':
