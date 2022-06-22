@@ -176,7 +176,7 @@ class AAM_Core_Policy_Token
     private static function _parseFunction($exp, $args)
     {
         $response = null;
-        $regex    = '/^([\\a-z_\x80-\xff][\\a-z\d_\x80-\xff]*)\((.*)\)(.*)$/i';
+        $regex    = '/^([^(]+)\(?([^)]*)\)?(.*)$/i';
 
         if (preg_match($regex, $exp, $match)) {
             // The second part is the collection of arguments that we pass to

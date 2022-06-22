@@ -12,6 +12,7 @@ namespace AAM\UnitTest\Service\AccessPolicy;
 use AAM,
     AAM_Core_Jwt_Issuer,
     AAM_Core_Policy_Token,
+    AAM_Core_Object_Policy,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -37,15 +38,35 @@ class PolicyTokenTest extends TestCase
     protected static $post_id;
 
     /**
+     * Policy ID placeholder
+     *
+     * @var int
+     *
+     * @access protected
+     * @version 6.7.0
+     */
+    protected static $policy_id;
+
+    /**
      * @inheritdoc
      */
     private static function _setUpBeforeClass()
     {
+        // Set current User. Emulate that this is admin login
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+
         // Setup a default post
         self::$post_id = wp_insert_post(array(
             'post_title'  => 'Access Policy Service Post',
             'post_name'   => 'access-policy-service-post',
             'post_status' => 'publish'
+        ));
+
+        // Setup a default policy placeholder
+        self::$policy_id = wp_insert_post(array(
+            'post_title'  => 'Unittest Policy Placeholder',
+            'post_status' => 'publish',
+            'post_type'   => 'aam_policy'
         ));
     }
 
@@ -290,7 +311,7 @@ class PolicyTokenTest extends TestCase
      * @return void
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.3
      */
     public function testThePostTokenEvaluation()
     {
@@ -304,6 +325,88 @@ class PolicyTokenTest extends TestCase
         );
 
         unset($GLOBALS['post']);
+    }
+
+    /**
+     * Test CALLBACK token
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.8.3
+     */
+    public function testCallbackToken()
+    {
+        $this->preparePlayground('callback-token');
+
+        // A simple CALLBACK token
+        $this->assertEquals(
+            'hello',
+            AAM::api()->getAccessPolicyManager()->getParam('callback-simple')
+        );
+
+        // CALLBACK with inline arguments
+        $this->assertEquals(
+            1,
+            AAM::api()->getAccessPolicyManager()->getParam('callback-conditional-a')
+        );
+        $this->assertEquals(
+            2,
+            AAM::api()->getAccessPolicyManager()->getParam('callback-conditional-b')
+        );
+
+        // CALLBACK with xpath
+        $this->assertEquals(
+            'test',
+            AAM::api()->getAccessPolicyManager()->getParam('callback-complex-a')
+        );
+        $this->assertEquals(
+            'another-test',
+            AAM::api()->getAccessPolicyManager()->getParam('callback-complex-b')
+        );
+
+        // CALLBACK function
+        $this->assertEquals(
+            false,
+            AAM::api()->getAccessPolicyManager()->getParam('callback-function-a')
+        );
+
+        $this->assertEquals(
+            '1 KB',
+            AAM::api()->getAccessPolicyManager()->getParam('callback-function-b')
+        );
+    }
+
+    /**
+     * Prepare the environment
+     *
+     * Update Unit Test access policy with proper policy
+     *
+     * @param string $policy_file
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.8.3
+     */
+    protected function preparePlayground($policy_file)
+    {
+        global $wpdb;
+
+        // Update existing Access Policy with new policy
+        $wpdb->update($wpdb->posts, array('post_content' => file_get_contents(
+            __DIR__ . '/policies/' . $policy_file . '.json'
+        )), array('ID' => self::$policy_id));
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $this->assertTrue(
+            $object->updateOptionItem(self::$policy_id, true)->save()
+        );
+
+        // Resetting all settings as $wpdb->update already initializes it with
+        // settings
+        \AAM_Core_Policy_Factory::reset();
+        $this->_resetSubjects();
     }
 
 }
