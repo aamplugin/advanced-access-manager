@@ -5,18 +5,31 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Backend view helper
  *
+ * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/213
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.8.4
  */
 class AAM_Backend_View_Helper
 {
+
+    /**
+     * Was resizer libary already loaded?
+     *
+     * @var boolean
+     *
+     * @access protected
+     * @static
+     *
+     * @version 6.8.4
+     */
+    protected static $isResizerLoaded = false;
 
     /**
      * Prepare phrase or label
@@ -60,6 +73,31 @@ class AAM_Backend_View_Helper
     public static function prepareWalk(&$value, $index)
     {
         $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
+    }
+
+    /**
+     * Prepare and print iframe HTML markup
+     *
+     * @param string $url
+     * @param string $style
+     * @param string $id
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     *
+     * @version 6.8.4
+     */
+    public static function loadIframe($url, $style = null, $id = 'aam-iframe')
+    {
+        echo '<iframe src="' . $url . '" width="100%" id="' . $id . '" style="' . $style . '"></iframe>';
+
+        if (!self::$isResizerLoaded) {
+            echo '<script>' . file_get_contents(AAM_BASEDIR . '/media/js/iframe-resizer.js') . '</script>';
+            self::$isResizerLoaded = true;
+        }
+        echo '<script>iFrameResize({ log: false  }, "#' . $id . '");</script>';
     }
 
 }
