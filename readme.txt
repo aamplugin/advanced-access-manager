@@ -93,7 +93,8 @@ We take security and privacy very seriously, that is why there are several non-n
 
 = 6.8.4 =
 * Fixed: PHP Notice: Undefined property: stdClass::$override [https://github.com/aamplugin/advanced-access-manager/issues/211](https://github.com/aamplugin/advanced-access-manager/issues/211)
-* Changed: Upgraded iframe resizer library [https://github.com/aamplugin/advanced-access-manager/issues/213](https://github.com/aamplugin/advanced-access-manager/issues/213)
+* Changed: Upgraded iFrame resizer library [https://github.com/aamplugin/advanced-access-manager/issues/213](https://github.com/aamplugin/advanced-access-manager/issues/213)
+* Changed: Replace CodeMirror with WP default instance [https://github.com/aamplugin/advanced-access-manager/issues/212](https://github.com/aamplugin/advanced-access-manager/issues/212)
 
 = 6.8.3 =
 * Fixed: PHP Deprecated: filter_var(): Passing null to parameter [https://github.com/aamplugin/advanced-access-manager/issues/208](https://github.com/aamplugin/advanced-access-manager/issues/208)

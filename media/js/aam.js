@@ -4622,8 +4622,8 @@
             getAAM().addHook('menu-feature-click', function (feature) {
                 if (feature === 'configpress'
                     && !$('#configpress-editor').next().hasClass('CodeMirror')) {
-                    var editor = CodeMirror.fromTextArea(
-                        document.getElementById("configpress-editor"), {}
+                    var editor = wp.CodeMirror.fromTextArea(
+                        document.getElementById("aam-configpress-editor"), {}
                     );
 
                     editor.on("blur", function () {
@@ -4996,9 +4996,10 @@
             },
             success: function (response) {
                 $('#aam-content').html(response);
-                //init menu
+                // Init menu
                 _this.initializeMenu();
-                //trigger initialization hook
+
+                // Trigger initialization hook
                 _this.triggerHook('init');
 
                 // There is more than one Services available to manage
@@ -5227,17 +5228,17 @@
         var clipboard = new ClipboardJS('.aam-copy-clipboard');
 
         clipboard.on('success', function (e) {
-            getAAM().notification('success', getAAM().__('Data has been saved to clipboard'));
+            getAAM().notification(
+                'success',
+                getAAM().__('Data has been saved to clipboard')
+            );
         });
 
         clipboard.on('error', function (e) {
-            getAAM().notification('danger', getAAM().__('Failed to save data to clipboard'));
-        });
-
-        // Listen to page size change and update iframe height accordingly
-        const container = document.getElementById('aam-container');
-        new ResizeSensor(container, function() {
-            window.parent.postMessage({frameHeight: container.clientHeight}, '*');
+            getAAM().notification(
+                'danger',
+                getAAM().__('Failed to save data to clipboard')
+            );
         });
     };
 

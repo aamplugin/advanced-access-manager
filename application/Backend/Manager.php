@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
  * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
@@ -20,7 +21,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.8.4
  */
 class AAM_Backend_Manager
 {
@@ -33,16 +34,17 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
      * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
      * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.7.6
+     * @version 6.8.4
      */
     protected function __construct()
     {
-        //print required JS & CSS
+        // Print required JS & CSS
         add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
 
         // Alter user edit screen with support for multiple roles
@@ -83,6 +85,27 @@ class AAM_Backend_Manager
             $this->checkMigrationStatus();
             $this->checkAddonUpdates();
         }
+
+        add_action( 'admin_enqueue_scripts', function() {
+            global $post;
+
+            if (is_a($post, 'WP_Post') && ($post->post_type === 'aam_policy')) {
+                $settings = wp_enqueue_code_editor(
+                    array('type' => 'application/json')
+                );
+
+                if ( false !== $settings ) { // In case Codemirror is disabled
+                    wp_add_inline_script(
+                        'code-editor',
+                        sprintf(
+                            'jQuery(() => wp.codeEditor.initialize("%s", %s));',
+                            'aam-policy-editor',
+                            wp_json_encode($settings)
+                        )
+                    );
+                }
+            }
+        } );
     }
 
     /**
