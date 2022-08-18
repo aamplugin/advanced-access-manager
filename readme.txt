@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 6.0.0
-Stable tag: 6.8.3
+Stable tag: 6.8.5
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,13 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.8.5 =
+* Fixed: Redirect may not always work [https://github.com/aamplugin/advanced-access-manager/issues/214](https://github.com/aamplugin/advanced-access-manager/issues/214)
+* Fixed: PHP Notice: Undefined index: 404.redirect.** [https://github.com/aamplugin/advanced-access-manager/issues/215](https://github.com/aamplugin/advanced-access-manager/issues/215)
+* Changed: Update DataTables to 1.12.1 [https://github.com/aamplugin/advanced-access-manager/issues/217](https://github.com/aamplugin/advanced-access-manager/issues/217)
+* Added New: Allow value chaining for PHP_GLOBAL marker [https://github.com/aamplugin/advanced-access-manager/issues/216](https://github.com/aamplugin/advanced-access-manager/issues/216)
+* Added New: Add the ability to filter assigned/unassigned capabilities [https://github.com/aamplugin/advanced-access-manager/issues/218](https://github.com/aamplugin/advanced-access-manager/issues/218)
 
 = 6.8.4 =
 * Fixed: PHP Notice: Undefined property: stdClass::$override [https://github.com/aamplugin/advanced-access-manager/issues/211](https://github.com/aamplugin/advanced-access-manager/issues/211)

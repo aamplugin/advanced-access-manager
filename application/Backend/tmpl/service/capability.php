@@ -24,6 +24,8 @@
                         <li><a href="#"><?php echo $group; ?></a></li>
                     <?php } ?>
                     <li role="separator" class="divider"></li>
+                    <li><a href="#" data-assigned="true"><?php echo __('All Assigned', AAM_KEY); ?></a></li>
+                    <li><a href="#" data-unassigned="true"><?php echo __('All Unassigned', AAM_KEY); ?></a></li>
                     <li><a href="#" data-clear="true"><?php echo __('All Capabilities', AAM_KEY); ?></a></li>
                 </ul>
             </div>

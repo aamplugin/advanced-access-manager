@@ -2249,7 +2249,7 @@
             function initialize() {
                 if ($('#capability-content').length) {
                     //initialize the role list table
-                    $('#capability-list').DataTable({
+                    const capTable = $('#capability-list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         pagingType: 'simple',
@@ -2266,7 +2266,7 @@
                             }
                         },
                         columnDefs: [
-                            { visible: false, targets: [0] }
+                            { visible: false, targets: [0, 4] }
                         ],
                         language: {
                             search: '_INPUT_',
@@ -2276,7 +2276,7 @@
                             infoEmpty: getAAM().__('No capabilities'),
                             lengthMenu: '_MENU_'
                         },
-                        createdRow: function (row, data) {
+                        createdRow: function (row, data, index, cells) {
                             var actions = data[3].split(',');
 
                             var container = $('<div/>', { 'class': 'aam-row-actions' });
@@ -2286,6 +2286,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-muted icon-check-empty'
                                         }).bind('click', function () {
+                                            capTable.cell(cells[4]).data(true);
                                             toggle(data[0], this);
                                         }));
                                         break;
@@ -2294,6 +2295,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-success icon-check'
                                         }).bind('click', function () {
+                                            capTable.cell(cells[4]).data(false);
                                             toggle(data[0], this);
                                         }));
                                         break;
@@ -2378,10 +2380,14 @@
                     $('a', '#capability-groups').each(function () {
                         $(this).bind('click', function () {
                             var table = $('#capability-list').DataTable();
-                            if ($(this).data('clear') !== true) {
-                                table.column(1).search($(this).text()).draw();
-                            } else {
+                            if ($(this).data('assigned') === true) {
+                                table.column(4).search(true).draw();
+                            } else if ($(this).data('unassigned') === true) {
+                                table.column(4).search(false).draw();
+                            } else if ($(this).data('clear') === true) {
                                 table.column(1).search('').draw();
+                            } else {
+                                table.column(1).search($(this).text()).draw();
                             }
                         });
                     });

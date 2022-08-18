@@ -30,6 +30,7 @@ class AAM_Core_Policy_Token
      *
      * @var array
      *
+     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/216
      * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/205
      * @since 6.3.0 Added PHP_GLOBAL, WP_NETWORK_OPTION token and changed
      *                    WP_OPTION callback
@@ -40,7 +41,7 @@ class AAM_Core_Policy_Token
      * @since 6.0.0 Initial implementation of the property
      *
      * @access protected
-     * @version 6.8.3
+     * @version 6.8.5
      */
     protected static $map = array(
         'USER'              => 'AAM_Core_Policy_Token::getUserValue',
@@ -318,6 +319,16 @@ class AAM_Core_Policy_Token
         return $value;
     }
 
+    /**
+     * Get currently viewed post property
+     *
+     * @param string $option_name
+     *
+     * @return mixed
+     *
+     * @access protected
+     * @version since 6.8.3
+     */
     protected static function getCurrentPostValue($option_name)
     {
         $post = AAM_Core_API::getCurrentPost();
@@ -529,12 +540,15 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/216
+     * @since 6.3.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.3.0
+     * @version 6.8.5
      */
     protected static function getGlobalVariable($var)
     {
-        return (isset($GLOBALS[$var]) ? $GLOBALS[$var] : null);
+        return self::_getValueByXPath($GLOBALS, $var);
     }
 
     /**
