@@ -4,5 +4,4 @@ sami.phar
 build
 cache
 sonarqube
-*.sh
 .scannerwork

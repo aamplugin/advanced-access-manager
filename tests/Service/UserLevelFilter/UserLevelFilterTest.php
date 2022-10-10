@@ -30,7 +30,7 @@ class UserLevelFilterTest extends TestCase
     private static function _setUpBeforeClass()
     {
         // Set current User. Emulate that this is admin login
-        wp_set_current_user(AAM_UNITTEST_USER_MANAGER_A_USER_ID);
+        wp_set_current_user(AAM_UNITTEST_USER_MANAGER_B_USER_ID);
 
         \AAM_Core_Config::set('core.service.user-level-filter.enabled', true);
         $instance = \AAM_Service_UserLevelFilter::getInstance(true);

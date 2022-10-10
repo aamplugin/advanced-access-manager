@@ -10,11 +10,12 @@
 /**
  * JWT UI manager
  *
+ * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.0
  */
 class AAM_Backend_Feature_Main_Jwt
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -54,8 +55,11 @@ class AAM_Backend_Feature_Main_Jwt
      *
      * @return string
      *
+     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.0
      */
     public function generate()
     {
@@ -75,7 +79,8 @@ class AAM_Backend_Feature_Main_Jwt
             $claims = array(
                 'userId'      => $user->ID,
                 'revocable'   => true,
-                'refreshable' => ($refresh === true)
+                'refreshable' => ($refresh === true),
+                'exp'         => (new DateTime('@' . $expires))->getTimestamp()
             );
 
             // If token also should contains the trigger action when it is expires,
@@ -86,13 +91,11 @@ class AAM_Backend_Feature_Main_Jwt
 
             try {
                 if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
-                    $jwt = AAM_Core_Jwt_Issuer::getInstance()->issueToken(
-                        $claims, new DateTime('@' . $expires)
-                    );
+                    $jwt = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
 
                     if ($register === true) {
                         $status = AAM_Service_Jwt::getInstance()->registerToken(
-                            $user->ID, $jwt->token
+                            $user->ID, $jwt
                         );
                     } else {
                         $status = true;
@@ -100,16 +103,20 @@ class AAM_Backend_Feature_Main_Jwt
 
                     $result = array(
                         'status' => (!empty($status) ? 'success' : 'failure'),
-                        'jwt' => $jwt->token
+                        'jwt'    => $jwt
                     );
                 } else {
-                    $result['reason'] = 'You are not allowed to generate JWT for this user';
+                    $result['reason'] = __(
+                        'You are not allowed to generate JWT for this user', AAM_KEY
+                    );
                 }
             } catch (Exception $ex) {
                 $result['reason'] = $ex->getMessage();
             }
         } else {
-            $result['reason'] = 'You are not allowed to manage JWT tokens';
+            $result['reason'] = __(
+                'You are not allowed to manage JWT tokens', AAM_KEY
+            );
         }
 
         return wp_json_encode($result);
@@ -178,8 +185,11 @@ class AAM_Backend_Feature_Main_Jwt
      *
      * @return array
      *
+     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.0
      */
     protected function retrieveList()
     {
@@ -194,10 +204,10 @@ class AAM_Backend_Feature_Main_Jwt
             'data'            => array(),
         );
 
-        $issuer = AAM_Core_Jwt_Issuer::getInstance();
+        $issuer = AAM_Core_Jwt_Manager::getInstance();
 
         foreach ($tokens as $token) {
-            $claims  = $issuer->validateToken($token);
+            $claims  = $issuer->validate($token);
 
             if ($claims->isValid) {
                 $expires = new DateTime('@' . $claims->exp, new DateTimeZone('UTC'));

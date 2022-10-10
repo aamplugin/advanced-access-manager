@@ -10,7 +10,7 @@
 namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
-    AAM_Core_Jwt_Issuer,
+    AAM_Core_Jwt_Manager,
     AAM_Core_Policy_Token,
     AAM_Core_Object_Policy,
     PHPUnit\Framework\TestCase,
@@ -289,11 +289,11 @@ class PolicyTokenTest extends TestCase
     public function testJwtTokenEvaluation()
     {
         // generate token
-        $result = AAM_Core_Jwt_Issuer::getInstance()->issueToken(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(
             array('testProp' => 'helloWorld')
         );
 
-        $_SERVER['HTTP_AUTHENTICATION'] = $result->token;
+        $_SERVER['HTTP_AUTHENTICATION'] = $result;
 
         $this->assertEquals(
             'helloWorld',

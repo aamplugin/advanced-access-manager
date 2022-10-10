@@ -26,5 +26,7 @@
         <const name="AAM_UNITTEST_PASSWORD" value="nGXeOf#u@eF3Q6OF3qkQeTlR" />
         <const name="AAM_UNITTEST_USER_MANAGER_A_USER_ID" value="16" />
         <const name="AAM_UNITTEST_USER_MANAGER_B_USER_ID" value="17" />
+        <ini name="display_errors" value="On" />
+        <ini name="display_startup_errors" value="On" />
     </php>
 </phpunit>

@@ -10,6 +10,8 @@
 /**
  * AAM JWT Issuer
  *
+ * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+ * @since 6.8.6 https://github.com/aamplugin/advanced-access-manager/issues/221
  * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/165
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.4 Bug fixing. Timezone was handled incorrectly and ttl did not take in
@@ -17,7 +19,10 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.2
+ * @version 6.9.0
+ *
+ * @deprecated 6.8.5 Will be removed from AAM in 7.0.0 version
+ * @todo Remove this class in 7.0.0 release
  */
 class AAM_Core_Jwt_Issuer
 {
@@ -31,15 +36,22 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.8.6 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.4 Making sure that JWT expiration is checked with UTC timezone
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.8.6
      */
     public function validateToken($token)
     {
+        _deprecated_function(
+            __CLASS__ . '::' . __FUNCTION__,
+            '6.8.5',
+            'AAM_Core_Jwt_Manager::validate'
+        );
+
         try {
             $headers = $this->extractTokenHeaders($token);
 
@@ -98,16 +110,23 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.8.6 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.0.4 Fixed the bug when `authentication.jwt.expires` is defined in
      *              seconds
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
      * @throws Exception
-     * @version 6.0.4
+     * @version 6.8.6
      */
     public function issueToken($args = array(), $expires = null)
     {
+        _deprecated_function(
+            __CLASS__ . '::' . __FUNCTION__,
+            '6.8.5',
+            'AAM_Core_Jwt_Manager::encode'
+        );
+
         if (!empty($expires)) {
             $time = $expires;
         } else {
@@ -169,11 +188,20 @@ class AAM_Core_Jwt_Issuer
      *
      * @return object
      *
+     * @since 6.8.6 https://github.com/aamplugin/advanced-access-manager/issues/221
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.8.6
      */
     public function extractTokenClaims($token)
     {
+        _deprecated_function(
+            __CLASS__ . '::' . __FUNCTION__,
+            '6.8.5',
+            'AAM_Core_Jwt_Manager::decode'
+        );
+
         $parts  = explode('.', $token);
         $claims = array();
 

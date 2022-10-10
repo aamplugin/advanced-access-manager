@@ -100,7 +100,12 @@ class AAM_Core_Redirect
             array('reason' => 'restricted'),
             wp_login_url(AAM_Core_Request::server('REQUEST_URI'))
         ));
-        exit;
+
+        // Halt the execution. Redirect should carry user away if this is not
+        // a CLI execution (e.g. Unit Test)
+        if (php_sapi_name() !== 'cli') {
+            exit;
+        }
     }
 
     /**
@@ -125,7 +130,13 @@ class AAM_Core_Redirect
         $code    = !empty($meta['code']) ? $meta['code'] : 307;
 
         if (!empty($dest) && (empty($current) || ($current->ID !== intval($dest)))) {
-            wp_safe_redirect(get_page_link($dest), $code); exit;
+            wp_safe_redirect(get_page_link($dest), $code);
+
+            // Halt the execution. Redirect should carry user away if this is not
+            // a CLI execution (e.g. Unit Test)
+            if (php_sapi_name() !== 'cli') {
+                exit;
+            }
         }
     }
 
@@ -151,7 +162,13 @@ class AAM_Core_Redirect
         $code = !empty($meta['code']) ? $meta['code'] : 307;
 
         if ($dest !== AAM_Core_Request::server('REQUEST_URI')) {
-            wp_safe_redirect($dest, $code); exit;
+            wp_safe_redirect($dest, $code);
+
+            // Halt the execution. Redirect should carry user away if this is not
+            // a CLI execution (e.g. Unit Test)
+            if (php_sapi_name() !== 'cli') {
+                exit;
+            }
         }
     }
 

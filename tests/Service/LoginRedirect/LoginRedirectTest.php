@@ -268,7 +268,7 @@ class LoginRedirectTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token and set it as the query param
-        $_GET['aam-jwt'] = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID)->token;
+        $_GET['aam-jwt'] = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Set custom user's login redirect
         $redirect = \AAM::api()->getUser(AAM_UNITTEST_ADMIN_USER_ID)->getObject('loginRedirect');
@@ -307,7 +307,7 @@ class LoginRedirectTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Issue a token and set it as the query param
-        $_GET['aam-jwt']     = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID)->token;
+        $_GET['aam-jwt']     = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
         $_GET['redirect_to'] = get_page_link(self::$another_page_id);
 
         // No need to generate Auth cookies

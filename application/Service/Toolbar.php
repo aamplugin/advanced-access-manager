@@ -10,11 +10,12 @@
 /**
  * Toolbar service
  *
- * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/223
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.0
  */
 class AAM_Service_Toolbar
 {
@@ -86,15 +87,19 @@ class AAM_Service_Toolbar
      *
      * @return void
      *
+     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/223
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
      * @global object $wp_admin_bar
-     * @version 6.0.0
+     * @version 6.9.0
      */
     public function cacheAdminBar()
     {
         global $wp_admin_bar;
 
         $reflection = new ReflectionClass(get_class($wp_admin_bar));
+        $cache      = array();
 
         if ($reflection->hasProperty('nodes')) {
             $prop = $reflection->getProperty('nodes');
@@ -103,7 +108,6 @@ class AAM_Service_Toolbar
             $nodes = $prop->getValue($wp_admin_bar);
 
             if (isset($nodes['root'])) {
-                $cache = array();
                 foreach ($nodes['root']->children as $node) {
                     $cache = array_merge($cache, $node->children);
                 }
@@ -116,12 +120,6 @@ class AAM_Service_Toolbar
                 }
                 AAM_Core_API::updateOption(self::DB_OPTION, $cache);
             }
-        } else {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                'Toolbar object does not have "nodes" property',
-                AAM_VERSION
-            );
         }
 
         return $cache;

@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Project auto-loader
  *
  * @package AAM
- * @version 6.0.0
+ *
+ * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+ * @since 6.0.0 Initial implementation of the class
+ *
+ * @version 6.9.0
  */
 class AAM_Autoloader
 {
@@ -23,10 +25,17 @@ class AAM_Autoloader
      *
      * @var array
      *
+     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+     * @since 6.0.0 Initial implementation of the property
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.0
+     *
+     * @todo Remove in 7.0.0
      */
-    protected static $class_map = array();
+    protected static $class_map = array(
+        'Firebase\JWT\JWT' => __DIR__ . '/firebase/JWT.php',
+    );
 
     /**
      * Add new index
