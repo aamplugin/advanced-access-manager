@@ -92,6 +92,7 @@ We take security and privacy very seriously, that is why there are several non-n
 == Changelog ==
 
 = 6.9.0 =
+* Fixed: Revoking JWT token via UI causes current user to logout [https://github.com/aamplugin/advanced-access-manager/issues/224](https://github.com/aamplugin/advanced-access-manager/issues/224)
 * Fixed: Notice: Undefined variable: cache [https://github.com/aamplugin/advanced-access-manager/issues/223](https://github.com/aamplugin/advanced-access-manager/issues/223)
 * Changed: Update JWT vendor [https://github.com/aamplugin/advanced-access-manager/issues/221](https://github.com/aamplugin/advanced-access-manager/issues/221)
 

@@ -209,7 +209,7 @@ class AAM_Backend_Feature_Main_Jwt
         foreach ($tokens as $token) {
             $claims  = $issuer->validate($token);
 
-            if ($claims->isValid) {
+            if (!is_wp_error($claims)) {
                 $expires = new DateTime('@' . $claims->exp, new DateTimeZone('UTC'));
                 $details = $expires->format('m/d/Y, H:i O');
             } else {
@@ -219,7 +219,7 @@ class AAM_Backend_Feature_Main_Jwt
             $response['data'][] = array(
                 $token,
                 add_query_arg('aam-jwt', $token, site_url()),
-                $claims->isValid,
+                !is_wp_error($claims),
                 $details,
                 'view,delete'
             );

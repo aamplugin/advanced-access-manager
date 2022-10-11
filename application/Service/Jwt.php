@@ -11,6 +11,7 @@
  * JWT Token service
  *
  * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
+ *              https://github.com/aamplugin/advanced-access-manager/issues/224
  * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
@@ -573,11 +574,12 @@ class AAM_Service_Jwt
      *
      * @return bool
      *
+     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/224
      * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/118
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.6.0
+     * @version 6.9.0
      */
     public function revokeUserToken($userId, $token)
     {
@@ -586,7 +588,7 @@ class AAM_Service_Jwt
         foreach($this->getTokenRegistry($userId) as $item) {
             if ($token !== $item) {
                 $filtered[] = $item;
-            } else {
+            } elseif (get_current_user_id() !== $userId) {
                 // Also delete user session if any is active. The downside here is
                 // that if user logged in with different token, he still is going to
                 // be logged out because AAM does not track the token that user used
