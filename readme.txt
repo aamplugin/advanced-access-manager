@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 6.0.2
-Stable tag: 6.9.0
+Tested up to: 6.0.3
+Stable tag: 6.9.1
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,12 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.1 =
+* Fixed: Incorrectly stripped backslashes for Access Policy [https://github.com/aamplugin/advanced-access-manager/issues/228](https://github.com/aamplugin/advanced-access-manager/issues/228)
+* Fixed: PHP Notice: Function AAM_Backend_Subject::hasCapability was called incorrectly [https://github.com/aamplugin/advanced-access-manager/issues/227](https://github.com/aamplugin/advanced-access-manager/issues/227)
+* Fixed: PHP Notice: Undefined offset: -1 in [https://github.com/aamplugin/advanced-access-manager/issues/226](https://github.com/aamplugin/advanced-access-manager/issues/226)
+* Added New: Add the ability to hook into filter [https://github.com/aamplugin/advanced-access-manager/issues/225](https://github.com/aamplugin/advanced-access-manager/issues/225)
 
 = 6.9.0 =
 * Fixed: Revoking JWT token via UI causes current user to logout [https://github.com/aamplugin/advanced-access-manager/issues/224](https://github.com/aamplugin/advanced-access-manager/issues/224)

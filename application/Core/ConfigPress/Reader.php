@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -14,8 +12,11 @@
  *
  * Parse configuration string
  *
+ * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/226
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.1
  */
 class AAM_Core_ConfigPress_Reader
 {
@@ -26,13 +27,6 @@ class AAM_Core_ConfigPress_Reader
      * @version 6.0.0
      */
     const SEPARATOR = '.';
-
-    /**
-     * Default section inheritance indicator
-     *
-     * @version 6.0.0
-     */
-    const INHERIT_KEY = ':';
 
     /**
      * Parse INI config
@@ -88,27 +82,18 @@ class AAM_Core_ConfigPress_Reader
      *
      * @return array
      *
+     * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/226
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.1
      */
     protected function process(array $data)
     {
         $config = array();
 
         foreach ($data as $section => $block) {
-            //check if section has parent section or property
-            if (preg_match('/[\s\w]{1}' . self::INHERIT_KEY . '[\s\w]{1}/', $section)) {
-                $section = $this->inherit($section, $config);
-            } else {
-                //evaluate the section and if not false move forward
-                $evaluator = new AAM_Core_ConfigPress_Evaluator($section);
-                if ($evaluator->evaluate()) {
-                    $section = $evaluator->getAlias();
-                    $config[$section] = array();
-                } else {
-                    continue; //conditional section that did not meet condition
-                }
-            }
+            $config[$section] = array();
 
             if (is_array($block)) { //this is a INI section, build the nested tree
                 $this->buildNestedSection($block, $config[$section]);
@@ -118,30 +103,6 @@ class AAM_Core_ConfigPress_Reader
         }
 
         return $config;
-    }
-
-    /**
-     * Inherit settings from different section
-     *
-     * @param string $section
-     * @param array  $config
-     *
-     * @return string
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function inherit($section, &$config)
-    {
-        $sections = explode(self::INHERIT_KEY, $section);
-        $target = trim($sections[0]);
-        $parent = trim($sections[1]);
-
-        if (isset($config[$parent])) {
-            $config[$target] = $config[$parent];
-        }
-
-        return $target;
     }
 
     /**

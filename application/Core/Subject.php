@@ -267,6 +267,21 @@ abstract class AAM_Core_Subject
     }
 
     /**
+     * Default placeholder for the verifying capability
+     *
+     * @param string $cap
+     *
+     * @return boolean
+     *
+     * @access public
+     * @since 6.9.1
+     */
+    public function hasCapability($cap)
+    {
+        return false;
+    }
+
+    /**
      * Get AAM core object
      *
      * This method will instantiate requested AAM core object with pre-populated

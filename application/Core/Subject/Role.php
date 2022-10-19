@@ -212,20 +212,20 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
     /**
      * Check if role has capability
      *
-     * @param string $cap
+     * @param string $capability
      *
      * @return boolean
      *
      * @access public
      * @version 6.0.0
      */
-    public function hasCapability($cap)
+    public function hasCapability($capability)
     {
         // If capability is the same as role ID, then capability exists
-        if ($cap === $this->getId()) {
+        if ($capability === $this->getId()) {
             $has = true;
         } else {
-            $has = $this->has_cap($cap);
+            $has = $this->has_cap($capability);
         }
 
         return $has;

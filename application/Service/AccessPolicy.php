@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/225
  * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
  * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
  *              Added new hook `aam_post_read_action_conversion_filter`
@@ -22,7 +23,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.8.3
+ * @version 6.9.1
  */
 class AAM_Service_AccessPolicy
 {
@@ -181,8 +182,9 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/225
      * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
      *              https://github.com/aamplugin/advanced-access-manager/issues/62
      *              https://github.com/aamplugin/advanced-access-manager/issues/63
      * @since 6.2.1 Access support for custom-fields
@@ -191,7 +193,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.8.3
+     * @version 6.9.1
      */
     protected function initializeHooks()
     {
@@ -229,15 +231,15 @@ class AAM_Service_AccessPolicy
             ));
         });
 
-        add_action((is_admin() ? 'admin_init' : 'init'), function() {
-            $manager = AAM::api()->getAccessPolicyManager();
-            $found   = $manager->getResources(AAM_Core_Policy_Resource::HOOK);
+        $manager = AAM::api()->getAccessPolicyManager();
+        $found   = $manager->getResources(AAM_Core_Policy_Resource::HOOK);
 
-            foreach($found as $resource => $stm) {
-                $parts = explode(':', $resource);
+        foreach($found as $resource => $stm) {
+            $parts = explode(':', $resource);
 
-                if (count($parts) === 2) { // Currently support only name:priority
-                    if (isset($stm['Effect']) && $stm['Effect'] === 'deny') {
+            if (count($parts) === 2) { // Currently support only name:priority
+                if (isset($stm['Effect'])) {
+                    if ($stm['Effect'] === 'deny') {
                         $priority = apply_filters(
                             'aam_hook_resource_priority', $parts[1]
                         );
@@ -245,10 +247,14 @@ class AAM_Service_AccessPolicy
                         if (is_bool($priority) || is_numeric($priority)) {
                             remove_all_filters($parts[0], $priority);
                         }
+                    } else if ($stm['Effect'] === 'apply') {
+                        add_filter($parts[0], function($response) use ($stm) {
+                            return isset($stm['Response']) ? $stm['Response'] : $response;
+                        }, intval($parts[1]));
                     }
                 }
             }
-        }, PHP_INT_MAX);
+        }
 
         // Hook into AAM core objects initialization
         add_filter('aam_menu_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);

@@ -1,12 +1,13 @@
 <?php
 /**
+ * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/228
  * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.2.2 Slightly changed the way errors are displayed
  * @since 6.2.0 Escaping backslashes to avoid issue with JSON validation
  * @since 6.1.1 Removing the backslashes before displaying the policy
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.8.4
+ * @version 6.9.1
  */
 if (defined('AAM_KEY')) { ?>
     <div>
@@ -36,34 +37,12 @@ if (defined('AAM_KEY')) { ?>
             ?>
         </div>
 
-        <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" style="border: 1px solid #CCCCCC; width: 100%" rows="10"><?php echo stripslashes($params->post->post_content); ?></textarea>
+        <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" style="border: 1px solid #CCCCCC; width: 100%" rows="10"><?php echo $params->post->post_content; ?></textarea>
 
         <p class="aam-infobox">
             <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamplugin.com/reference/policy" target="_blank">', '</a>'); ?>
         </p>
 
         <script type='text/javascript' src="<?php echo AAM_MEDIA . '/js/vendor.js'; ?>"></script>
-
-        <script type='text/javascript'>
-            (function($) {
-                $(document).ready(function() {
-                    $('form[name="post"]').bind('submit', function(event) {
-                        const json = $('#aam-policy-editor').val().replace(/\\/g, '\\\\');
-
-                        $('#policy-parsing-error').addClass('hidden');
-
-                        try {
-                            JSON.parse(json);
-                        } catch (e) {
-                            event.preventDefault();
-
-                            $('#policy-parsing-error').removeClass('hidden').html(
-                                '<b><?php echo __('Syntax Error', AAM_KEY); ?></b>: ' + e.message.replace('JSON.parse:', '')
-                            );
-                        }
-                    });
-                });
-            }(jQuery));
-        </script>
     </div>
 <?php }
