@@ -1,10 +1,11 @@
 <?php
     /**
+     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
      * @since 6.0.5 Changed the way core libraries are loaded to avoid issue with
      *              concatenated styles with PHP
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.0.5
+     * @version 6.9.2
      * */
 ?>
 
@@ -22,8 +23,8 @@
         <?php global $wp_styles; ?>
 
         <?php $wp_styles->do_item('common'); ?>
-        <link rel="stylesheet" href="<?php echo AAM_MEDIA; ?>/css/vendor.min.css" type="text/css" media="all" />
-        <link rel="stylesheet" href="<?php echo AAM_MEDIA; ?>/css/aam.css" type="text/css" media="all" />
+        <?php $wp_styles->do_item('aam-vendor'); ?>
+        <?php $wp_styles->do_item('aam'); ?>
 
         <?php do_action('aam_iframe_header_action'); ?>
     </head>

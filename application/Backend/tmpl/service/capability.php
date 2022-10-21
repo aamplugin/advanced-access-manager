@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
+     * @since 6.0.0 Initial implementation of the template
+     *
+     * @version 6.9.2
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="capability-content">
@@ -21,7 +28,7 @@
                 </a>
                 <ul class="dropdown-menu" id="capability-groups" aria-labelledby="capability-filter">
                     <?php foreach ($this->getGroupList() as $group) { ?>
-                        <li><a href="#"><?php echo $group; ?></a></li>
+                        <li><a href="#"><?php echo esc_js($group); ?></a></li>
                     <?php } ?>
                     <li role="separator" class="divider"></li>
                     <li><a href="#" data-assigned="true"><?php echo __('All Assigned', AAM_KEY); ?></a></li>

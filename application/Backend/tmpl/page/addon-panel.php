@@ -1,14 +1,15 @@
 <?php
 
 /**
+ * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
  * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/203
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
- * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/78
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/78
  * @since 6.2.0 Removed expiration date for license to avoid confusion
  * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.8.1
+ * @version 6.9.2
  * */
 ?>
 
@@ -127,9 +128,7 @@
                     </div>
                     <div class="modal-body aam-info-modal">
                         <p>
-                            <?php echo __('Insert license key that you received after the payment (find the email example below). It might take up to 2 hours to process the payment.', AAM_KEY); ?>
-                            <br /> <br />
-                            <img src="https://aamplugin.com/media/img/email-confirmation.jpg" class="img-responsive" />
+                            <?php echo __('Insert license key that you received after the payment. It might take up to 2 hours to process the payment.', AAM_KEY); ?>
                         </p>
                     </div>
                     <div class="modal-footer">

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
  * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/228
  * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.2.2 Slightly changed the way errors are displayed
@@ -7,7 +8,7 @@
  * @since 6.1.1 Removing the backslashes before displaying the policy
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.9.1
+ * @version 6.9.2
  */
 if (defined('AAM_KEY')) { ?>
     <div>
@@ -42,7 +43,5 @@ if (defined('AAM_KEY')) { ?>
         <p class="aam-infobox">
             <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamplugin.com/reference/policy" target="_blank">', '</a>'); ?>
         </p>
-
-        <script type='text/javascript' src="<?php echo AAM_MEDIA . '/js/vendor.js'; ?>"></script>
     </div>
 <?php }

@@ -1,13 +1,20 @@
 <?php
     /**
+     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
      * @since 6.7.4 Improved the UI consistency
      * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/104
      * @since 6.4.2 Styling notification metabox
      * @since 6.2.0 Added support & import/export modals
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.7.4
+     * @version 6.9.2
      * */
+
+    if (defined('AAM_KEY')) {
+        wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
+        wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'));
+        wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js');
+    }
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -40,7 +47,7 @@
                                 <div class="aam-postbox-inside">
                                     <ul class="aam-error-list">
                                         <?php foreach (AAM_Core_Console::getAll() as $message) { ?>
-                                            <li><?php echo $message; ?></li>
+                                            <li><?php echo esc_js($message); ?></li>
                                         <?php } ?>
                                     </ul>
                                     <div class="hidden" id="migration-errors-container"><?php echo base64_encode(print_r(AAM_Core_Migration::getFailureLog(), 1)); ?></div>
