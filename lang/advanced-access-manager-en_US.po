@@ -1682,7 +1682,7 @@ msgstr ""
 msgid ""
 "You are allowed to manage access to unlimited number of posts, pages or "
 "custom post types but only for any role, user or visitor. Consider to get "
-"%s[Plus Package]%s add-on to have the ability to manage access to categories "
+"%s[Complete Package]%s add-on to have the ability to manage access to categories "
 "and custom taxonomies or to define the default access to all posts, pages or "
 "custom post types. For more information about this functionality check %sHow "
 "to manage access to the WordPress content%s."
@@ -1711,7 +1711,7 @@ msgstr ""
 msgid ""
 "Managing access to the %s \"%s\" is available with the premium %s[Plus "
 "Package]%s add-on only. It also allows to define default access to all child "
-"posts that are related to the %s \"%s\". Consider to purchase Plus Package "
+"posts that are related to the %s \"%s\". Consider to purchase Complete Package "
 "add-on."
 msgstr ""
 
@@ -1729,7 +1729,7 @@ msgstr ""
 #, php-format
 msgid ""
 "Manage default access to all posts that belong to the post type %s. This "
-"feature is available only with the premium %s[Plus Package]%s add-on."
+"feature is available only with the premium %s[Complete Package]%s add-on."
 msgstr ""
 
 #: application/Backend/tmpl/partial/visitor-principal-subject-tab.php:13
@@ -2252,7 +2252,7 @@ msgid "URI Access Rule"
 msgstr ""
 
 #: application/Backend/tmpl/service/uri.php:31
-msgid "Enter URL [(wildcard * is available with Plus Package extension)]"
+msgid "Enter URL [(wildcard * is available with Complete Package extension)]"
 msgstr ""
 
 #: application/Backend/tmpl/service/uri.php:35
@@ -2680,7 +2680,7 @@ msgstr ""
 #: application/Service/Uri.php:58
 msgid ""
 "Manage direct access to the website URIs for any role or individual user. "
-"Define either explicit URI or wildcard (with Plus Package addon) as well as "
+"Define either explicit URI or wildcard (with Complete Package addon) as well as "
 "how to manage user request (allow, deny, redirect, etc.)."
 msgstr ""
 

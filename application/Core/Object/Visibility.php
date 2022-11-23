@@ -83,7 +83,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
         }
 
         // Initialize post visibility option. This hooks is used by Access Policy
-        // service as well as Plus Package to populate visibility list
+        // service as well as Complete Package to populate visibility list
         do_action('aam_visibility_object_init_action', $this);
     }
 

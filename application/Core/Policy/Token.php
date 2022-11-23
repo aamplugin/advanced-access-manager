@@ -10,6 +10,7 @@
 /**
  * AAM core policy token evaluator
  *
+ * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/235
  * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/205
  * @since 6.3.0 Fixed bug that was causing fatal error policies that have conditions
  *              defined for Capability & Role resources
@@ -20,7 +21,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.8.3
+ * @version 6.9.3
  */
 class AAM_Core_Policy_Token
 {
@@ -256,16 +257,18 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/235
      * @since 6.3.0 Fixed bug that caused "Fatal error: Allowed memory size of XXX
      *              bytes exhausted"
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.3.0
+     * @version 6.9.3
      */
     protected static function getUserValue($prop)
     {
-        $user = wp_get_current_user();
+        $value = null;
+        $user  = wp_get_current_user();
 
         switch (strtolower($prop)) {
             case 'ip':

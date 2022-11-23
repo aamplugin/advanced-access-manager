@@ -28,7 +28,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with Plus Package extension)]', 'small'); ?></label>
+                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with Complete Package add-on)]', 'small'); ?></label>
                             <input type="text" class="form-control form-clearable" id="uri-rule" placeholder="Enter valid URL" />
                         </div>
 

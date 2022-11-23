@@ -17,10 +17,11 @@ use AAM_Core_Migration,
  *
  * @package AAM
  *
+ * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
  * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/198
  * @since 6.8.0 Initial implementation of the class
  *
- * @version 6.8.1
+ * @version 6.9.3
  */
 class Migration680 implements AAM_Core_Contract_MigrationInterface
 {
@@ -28,17 +29,14 @@ class Migration680 implements AAM_Core_Contract_MigrationInterface
     /**
      * @inheritdoc
      *
+     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
      * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/198
      * @since 6.8.0 Initial implementation of the method
      *
-     * @version 6.8.1
+     * @version 6.9.3
      */
     public function run()
     {
-        if (defined('\AAM_Addon_Repository::DB_VIOLATION_OPTION')) {
-            \AAM_Core_API::deleteOption(\AAM_Addon_Repository::DB_VIOLATION_OPTION);
-        }
-
         // Finally store this script as completed
         AAM_Core_Migration::storeCompletedScript(basename(__FILE__));
 

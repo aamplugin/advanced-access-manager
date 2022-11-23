@@ -522,7 +522,7 @@ class AAM_Service_AccessPolicy
             $effect = (strtolower($stm['Effect']) === 'allow' ? false : true);
 
             // Allow other plugins to determine what access options should be
-            // considered during visibility check. For example Plus Package uses
+            // considered during visibility check. For example Complete Package uses
             // HIDDEN TO OTHERS options
             $map = apply_filters('aam_policy_post_visibility_map_filter', array(
                 'list' => 'hidden'

@@ -567,6 +567,7 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 table.table-bordered.dataTable tbody th, table.table-bordered.dataTable tbody td {
     vertical-align: middle;
+    word-break: break-all;
 }
 
 .progress {
@@ -976,7 +977,15 @@ input[type=radio]:checked + label:before {
 
 .aam-license-key {
     display: block;
-    margin-bottom: 5px;
+    width: 100%;
+    text-align: left;
+    font-size: 1.1em;
+    color: #a94442;
+}
+
+.aam-license-key:active, .aam-license-key:hover {
+  text-decoration: none;
+  color: #F04748;
 }
 
 .aam-setting-description, .aam-extension-description {

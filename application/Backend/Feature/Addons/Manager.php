@@ -10,11 +10,12 @@
 /**
  * Add-on manager
  *
+ * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
  * @since 6.0.5 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.5
+ * @version 6.9.3
  */
 class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -50,6 +51,21 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
     }
 
     /**
+     * Reset registry
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.9.3
+     */
+    public function clearLicenses()
+    {
+        $result = AAM_Addon_Repository::getInstance()->resetRegistry();
+
+        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
+    }
+
+    /**
      * Get internal registry of add-ons
      *
      * This is used to manually check for the updates on the Add-Ons area
@@ -65,7 +81,7 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
     public function getRegistry()
     {
         return wp_json_encode(
-            AAM_Addon_Repository::getInstance()->getAddonLicenseMap()
+            AAM_Addon_Repository::getInstance()->getRegisteredLicenseList()
         );
     }
 
@@ -74,11 +90,12 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
      * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
      * @since 6.0.5 Initial implementation of the method
      *
      * @access public
-     * @version 6.7.5
+     * @version 6.9.3
      */
     public function checkForPluginUpdates()
     {
@@ -93,14 +110,6 @@ class AAM_Backend_Feature_Addons_Manager extends AAM_Backend_Feature_Abstract
                 if (version_compare($current_v, $data->new_version) === -1) {
                     $current->response[$data->plugin] = $data;
                     unset($current->no_update[$data->plugin]);
-                }
-
-                if (!empty($data->violation)) {
-                    AAM_Addon_Repository::getInstance()->processViolation(
-                        $data->slug,
-                        $data->violation,
-                        (isset($data->action) ? $data->action : null)
-                    );
                 }
             }
         }

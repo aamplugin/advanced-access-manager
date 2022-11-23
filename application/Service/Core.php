@@ -10,6 +10,7 @@
 /**
  * AAM core service
  *
+ * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
  * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/126
  * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/82
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.5
+ * @version 6.9.3
  */
 class AAM_Service_Core
 {
@@ -38,7 +39,8 @@ class AAM_Service_Core
      *
      * @access protected
      *
-     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/82
+     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/236
+     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/82
      * @since 6.4.0 Added "Manage Access" toolbar item
      * @since 6.0.5 Fixed bug when Access Manager metabox is rendered for users that
      *              have ability to manage other users
@@ -47,7 +49,7 @@ class AAM_Service_Core
      * @since 6.0.0 Initial implementation of the method
      *
      * @return void
-     * @version 6.4.2
+     * @version 6.9.3
      */
     protected function __construct()
     {
@@ -135,23 +137,6 @@ class AAM_Service_Core
         add_action('aam_set_user_expiration_action', function($settings) {
             AAM::getUser()->setUserExpiration($settings);
         });
-
-        // If there are any license violations. Display the notification for users
-        // that have enough permissions to manage AAM
-        if (is_admin() && current_user_can('aam_manager')) {
-            if (AAM_Addon_Repository::getInstance()->hasViolations()) {
-                if (!AAM::isAAM()) {
-                    add_action('admin_notices', function() {
-                        require __DIR__ . '/../Backend/tmpl/partial/license-violation-notice.php';
-                    });
-                }
-
-                // Also add all the identified violations to the AAM console
-                foreach(AAM_Addon_Repository::getInstance()->getViolations() as $v) {
-                    AAM_Core_Console::add($v);
-                }
-            }
-        }
     }
 
     /**
@@ -183,7 +168,7 @@ class AAM_Service_Core
                         'Accept'       => 'application/json',
                         'Content-Type' => 'application/json'
                     ),
-                    'body'    => wp_json_encode($repository->getAddonLicenseMap())
+                    'body' => wp_json_encode($repository->getRegisteredLicenseList())
                 )
             );
 
@@ -206,14 +191,6 @@ class AAM_Service_Core
 
                         if (!empty($v) && (version_compare($v, $new_v) === -1)) {
                             $original['plugins'][$item['plugin']] = $item;
-                        }
-
-                        if (!empty($item['violation'])) {
-                            $repository->processViolation(
-                                $item['slug'],
-                                $item['violation'],
-                                (isset($item['action']) ? $item['action'] : null)
-                            );
                         }
                     }
                 }

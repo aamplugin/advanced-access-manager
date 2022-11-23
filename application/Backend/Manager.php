@@ -83,7 +83,6 @@ class AAM_Backend_Manager
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
             $this->checkMigrationStatus();
-            $this->checkAddonUpdates();
         }
 
         add_action( 'admin_enqueue_scripts', function() {
@@ -147,31 +146,6 @@ class AAM_Backend_Manager
                 '<a href="#" id="download-migration-log">', '</a>',
                 '<a href="mailto:support@aamplugin.com">', '</a>'
             ));
-        }
-    }
-
-    /**
-     * Display notification if new version is available
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.4.2
-     */
-    protected function checkAddonUpdates()
-    {
-        $list = AAM_Addon_Repository::getInstance()->getList();
-
-        foreach($list as $addon) {
-            if ($addon['hasUpdate'] === true) {
-                AAM_Core_Console::add(
-                    sprintf(
-                        'The new version of ["%s"] is available for download.',
-                        $addon['title']
-                    ),
-                    'strong'
-                );
-            }
         }
     }
 

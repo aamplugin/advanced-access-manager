@@ -55,7 +55,7 @@ class AAM_Service_Uri
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('URI Access', AAM_KEY),
-                    'description' => __('Manage direct access to the website URIs for any role or individual user. Define either explicit URI or wildcard (with Plus Package addon) as well as how to manage user request (allow, deny, redirect, etc.).', AAM_KEY),
+                    'description' => __('Manage direct access to the website URIs for any role or individual user. Define either explicit URI or wildcard (with Complete Package addon) as well as how to manage user request (allow, deny, redirect, etc.).', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 

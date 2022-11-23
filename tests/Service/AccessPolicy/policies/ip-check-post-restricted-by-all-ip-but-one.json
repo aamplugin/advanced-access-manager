@@ -1,0 +1,25 @@
+{
+    "Statement": [
+        {
+            "Effect": "deny",
+            "Resource": "Post:post:policy-service-integration",
+            "Action": [
+                "Read"
+            ],
+            "Metadata": {
+                "ReferenceCheck": [
+                    {
+                        "Effect": "deny",
+                        "Type": "ip",
+                        "Criteria": "*.*.*.*"
+                    },
+                    {
+                        "Effect": "allow",
+                        "Type": "ip",
+                        "Criteria": "127.0.0.1"
+                    }
+                ]
+            }
+        }
+    ]
+}

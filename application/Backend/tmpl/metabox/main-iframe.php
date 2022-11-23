@@ -163,16 +163,64 @@
                     </div>
                 <?php } ?>
 
-                <div class="metabox-holder extensions-metabox" style="display:none;">
-                    <div class="postbox">
-                        <div class="inside">
-                            <div class="aam-postbox-inside text-center">
-                                <p class="alert alert-info text-larger highlighted-italic"><?php echo AAM_Backend_View_Helper::preparePhrase('With the [Enterprise Package] get dedicated support channel and all the premium add-ons for a [bulk number of live websites]', 'i', 'b'); ?></p>
-                                <a href="https://aamplugin.com/pricing/enterprise-package" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
+                <?php $licenses = AAM_Addon_Repository::getInstance()->getRegisteredLicenseList(); ?>
+
+                <?php if (count($licenses) > 0) { ?>
+                    <div class="metabox-holder extensions-metabox" style="display:none;">
+                        <div class="postbox">
+                            <div class="inside">
+                                <div class="aam-postbox-inside text-center">
+                                    <table class="table table-striped table-bordered dataTable no-footer">
+                                        <thead>
+                                            <tr>
+                                                <th><?php echo __('Registered Licenses', AAM_KEY); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach (AAM_Addon_Repository::getInstance()->getRegisteredLicenseList() as $i => $licenseId) { ?>
+                                                <tr class="<?php echo ($i % 2 === 0 ? 'odd' : 'even'); ?>">
+                                                    <td>
+                                                        <a href="https://aamplugin.com/license/<?php echo esc_attr($licenseId); ?>" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
+                                                    </td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td>
+                                                    <p class="alert alert-info text-left">
+                                                        <strong>NOTE!</strong> <?php echo __('Any listed license above only indicates that you used them on this website to download premium AAM add-ons. It does not mean that AAM add-ons are installed and/or active on your website. You can confirm that the premium add-on is active on the Plugins page. ', AAM_KEY); ?>
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    <a href="#clear-licenses-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Clear All Licenses', AAM_KEY); ?></a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    <div class="modal fade" id="clear-licenses-modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><?php echo __('Clear all licenses', AAM_KEY); ?></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-left alert alert-danger text-larger">
+                                        <?php echo __('You are about to clear all registered licenses on this WordPress instance. Please confirm this operation.', AAM_KEY); ?>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" id="clear-licenses"><?php echo __('Clear', AAM_KEY); ?></button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
 
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel.php'); ?>
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel-advanced.php'); ?>

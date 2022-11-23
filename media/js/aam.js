@@ -4489,6 +4489,41 @@
                             getAAM().fetchContent('extensions');
                         });
                     });
+
+                    $('#clear-licenses').bind('click', function () {
+                        $.ajax(getLocal().ajaxurl, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                action: 'aam',
+                                sub_action: 'Addons_Manager.clearLicenses',
+                                _ajax_nonce: getLocal().nonce,
+                            },
+                            beforeSend: function () {
+                                $('#clear-licenses').prop('disabled', true);
+                                $('#clear-licenses').text(getAAM().__('Processing...'));
+                            },
+                            success: function (response) {
+                                if (response.status === 'success') {
+                                    getAAM().notification(
+                                        'success',
+                                        getAAM().__('All licenses has been cleared successfully')
+                                    );
+                                    location.reload();
+                                } else {
+                                    getAAM().notification('danger', response.reason);
+                                }
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                $('#clear-licenses').prop('disabled', false);
+                                $('#clear-licenses').text(getAAM().__('Clear'));
+                                $('#clear-licenses-modal').modal('hide');
+                            }
+                        });
+                    });
                 }
             }
 

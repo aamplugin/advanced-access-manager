@@ -10,6 +10,7 @@
 namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
+    AAM_Service_Content,
     AAM_Core_Object_Uri,
     AAM_Core_Object_Post,
     AAM_Core_Object_Menu,
@@ -194,6 +195,122 @@ class PolicyServiceIntegrationTest extends TestCase
         );
 
         $this->assertTrue($object->is('restricted'));
+    }
+
+    /**
+     * Test that Access Policy integrates with IP Check
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.2
+     */
+    public function testIPCheckRestrictedByIp()
+    {
+        $this->preparePlayground('ip-check-post-restricted-by-ip');
+
+        // Verify that access is denied by IP address
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
+        $post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+        $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
+
+        $this->assertEquals('WP_Error', get_class($result));
+        $this->assertEquals(
+            'User is unauthorized to access this post. Access Denied.',
+            $result->get_error_message()
+        );
+        $this->assertTrue($post->is('selective'));
+
+        unset($_SERVER['REMOTE_ADDR']);
+    }
+
+    /**
+     * Test that Access Policy integrates with IP Check
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.2
+     */
+    public function testIPCheckRestrictedByIpAllowed()
+    {
+        $this->preparePlayground('ip-check-post-restricted-by-ip');
+
+        // Verify that access is denied by IP address
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.2';
+
+        $post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+        $this->assertTrue(
+            AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post)
+        );
+        $this->assertTrue($post->is('selective'));
+
+        unset($_SERVER['REMOTE_ADDR']);
+    }
+
+    /**
+     * Test that Access Policy integrates with IP Check
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.2
+     */
+    public function testIPCheckRestrictedByIps()
+    {
+        $this->preparePlayground('ip-check-post-restricted-by-ips');
+
+        // Verify that access is denied by IP address
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.3';
+
+        $post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+        $result = AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post);
+
+        $this->assertEquals('WP_Error', get_class($result));
+        $this->assertEquals(
+            'User is unauthorized to access this post. Access Denied.',
+            $result->get_error_message()
+        );
+        $this->assertTrue($post->is('selective'));
+
+        unset($_SERVER['REMOTE_ADDR']);
+    }
+
+    /**
+     * Test that Access Policy integrates with IP Check
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.2
+     */
+    public function testIPCheckRestrictedByIpsAllowed()
+    {
+        $this->preparePlayground('ip-check-post-restricted-by-ips');
+
+        // Verify that access is denied by IP address
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.6';
+
+        $post = AAM::getUser()->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+        $this->assertTrue(
+            AAM_Service_Content::getInstance()->isAuthorizedToReadPost($post)
+        );
+        $this->assertTrue($post->is('selective'));
+
+        unset($_SERVER['REMOTE_ADDR']);
     }
 
     /**

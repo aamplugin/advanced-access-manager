@@ -81,11 +81,10 @@ class Migration600 implements AAM_Core_Contract_MigrationInterface
             'loginredirect'  => array($this, '_convertAsIs'),
             'logoutredirect' => array($this, '_convertAsIs'),
             'policy'         => array($this, '_convertAsIs'),
-            // Plus Package related object
+            // Complete Package related object
             'term'           => array($this, '_convertTermOptions'),
             'type'           => array($this, '_convertTypeOptions'),
             'taxonomy'       => array($this, '_convertTaxonomyOptions'),
-            // IP Check related object
             'ipCheck'        => array($this, '_convertIPCheckOptions')
         );
     }
