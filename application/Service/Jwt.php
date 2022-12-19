@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
  * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
  *              https://github.com/aamplugin/advanced-access-manager/issues/224
  * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
@@ -17,18 +18,18 @@
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
  *              https://github.com/aamplugin/advanced-access-manager/issues/100
  *              https://github.com/aamplugin/advanced-access-manager/issues/118
- * @since 6.5.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/117
- * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
+ * @since 6.5.2 https://github.com/aamplugin/advanced-access-manager/issues/117
+ * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/99
+ *              https://github.com/aamplugin/advanced-access-manager/issues/98
  * @since 6.4.0 Added the ability to issue refreshable token via API.
- *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ *              https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
  *              status through `rest_authentication_errors` filter
  * @since 6.1.0 Enriched error response with more details
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.0
+ * @version 6.9.4
  */
 class AAM_Service_Jwt
 {
@@ -257,35 +258,21 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function validateToken(WP_REST_Request $request)
     {
         $jwt    = $request->get_param('jwt');
-        $result = AAM_Core_Jwt_Manager::getInstance()->validate($jwt);
+        $result = $this->validate($jwt);
 
         if (!is_wp_error($result)) {
             $response = new WP_REST_Response($result);
-
-            // If token is "revocable", make sure that claimed user still has
-            // the token in the meta
-            if (!empty($result->revocable)) {
-                $tokens = get_user_option(
-                    AAM_Service_Jwt::DB_OPTION, $result->userId
-                );
-
-                if (!is_array($tokens) || !in_array($jwt, $tokens, true)) {
-                    $response = new WP_REST_Response(array(
-                        'code'   => 'rest_jwt_validation_failure',
-                        'reason' => __('Token has been revoked', AAM_KEY)
-                    ), 410);
-                }
-            }
         } else {
             $response = new WP_REST_Response(array(
                 'code'   => 'rest_jwt_validation_failure',
@@ -321,17 +308,18 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function refreshToken(WP_REST_Request $request)
     {
         $jwt    = $request->get_param('jwt');
-        $result = AAM_Core_Jwt_Manager::getInstance()->validate($jwt);
+        $result = $this->validate($jwt);
 
         if (!is_wp_error($result)) {
             if (!empty($result->refreshable)) {
@@ -372,17 +360,18 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function revokeToken(WP_REST_Request $request)
     {
         $jwt    = $request->get_param('jwt');
-        $claims = AAM_Core_Jwt_Manager::getInstance()->validate($jwt);
+        $claims = $this->validate($jwt);
 
         if (!is_wp_error($claims)) {
             if ($this->revokeUserToken($claims->userId, $jwt)) {
@@ -608,11 +597,12 @@ class AAM_Service_Jwt
      *
      * @return int
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function determineUser($userId)
     {
@@ -620,7 +610,7 @@ class AAM_Service_Jwt
             $token = $this->extractToken();
 
             if (!empty($token)) {
-                $result = AAM_Core_Jwt_Manager::getInstance()->validate($token->jwt);
+                $result = $this->validate($token->jwt);
 
                 if (!is_wp_error($result)) {
                     // Verify that user is can be logged in
@@ -651,20 +641,19 @@ class AAM_Service_Jwt
      *
      * @return mixed
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function getJwtClaim($value, $prop)
     {
         $token = $this->extractToken();
 
         if ($token) {
-            $claims = AAM_Core_Jwt_Manager::getInstance()->validate(
-                $token->jwt
-            );
+            $claims = $this->validate($token->jwt);
 
             if (!is_wp_error($claims)) {
                 $value = (property_exists($claims, $prop) ? $claims->$prop : null);
@@ -679,18 +668,19 @@ class AAM_Service_Jwt
      *
      * @return void
      *
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
-     * @since 6.5.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/117
-     * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
+     * @since 6.5.2 https://github.com/aamplugin/advanced-access-manager/issues/117
+     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/98
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.4
      */
     public function authenticateUser()
     {
         $token  = $this->extractToken();
-        $claims = AAM_Core_Jwt_Manager::getInstance()->validate($token->jwt);
+        $claims = $this->validate($token->jwt);
 
         if (!is_wp_error($claims)) {
             // Check if account is active
@@ -801,6 +791,43 @@ class AAM_Service_Jwt
         }
 
         return $response;
+    }
+
+    /**
+     * Determine if provided token is valid
+     *
+     * This method adds additional validation layer. Besides checking if token itself
+     * is valid (which is done in the core JWT manager), this method verifies that
+     * token is part of JWT token registry.
+     *
+     * @param string $token
+     *
+     * @return object
+     * @since 6.9.4
+     */
+    protected function validate($token)
+    {
+        // First level of validation - making sure that the token is properly signed
+        // and not expired
+        $result = AAM_Core_Jwt_Manager::getInstance()->validate($token);
+
+        if (!is_wp_error($result)) {
+            // Second level of validation
+            // If token is "revocable", make sure that claimed user still has
+            // the token in the meta
+            if (!empty($result->revocable)) {
+                $registry = $this->getTokenRegistry($result->userId);
+
+                if (!is_array($registry) || !in_array($token, $registry, true)) {
+                    $result = new WP_Error(
+                        'rest_jwt_validation_failure',
+                        __('Token has been revoked', AAM_KEY)
+                    );
+                }
+            }
+        }
+
+        return $result;
     }
 
 }

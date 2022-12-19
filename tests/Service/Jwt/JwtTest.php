@@ -102,7 +102,7 @@ class JwtTest extends TestCase
 
         $response = $server->dispatch($request);
 
-        $this->assertEquals(410, $response->get_status());
+        $this->assertEquals(400, $response->get_status());
         $this->assertEquals('Token has been revoked', $response->get_data()['reason']);
     }
 
@@ -363,5 +363,69 @@ class JwtTest extends TestCase
 
         $this->assertEquals(200, $response->get_status());
     }
+
+    /**
+     * Verify that issued JWT is no longer valid if it is not part of JWT registry
+     *
+     * @access public
+     * @version 6.9.4
+     */
+    public function testRevokedValidToken()
+    {
+        $server = rest_get_server();
+
+        // Generate valid JWT token
+        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
+            'revocable'   => true,
+            'refreshable' => false
+        ));
+
+        $request = new WP_REST_Request('POST', '/wp/v2/posts');
+        $request->set_header('Authorization', "Bearer {$jwt}");
+        $request->set_body(json_encode(array(
+            'title' => 'Test'
+        )));
+
+        $response = $server->dispatch($request);
+
+        $this->assertEquals(401, $response->get_status());
+        $this->assertEquals('Sorry, you are not allowed to create posts as this user.', $response->get_data()['message']);
+    }
+
+    /**
+     * Verify that issued JWT is is actually valid for the same operation as tested
+     * in the `testRevokedValidToken` test case.
+     *
+     * @access public
+     * @version 6.9.4
+     * @todo - Figure out how to properly test RESTful API calls
+     */
+    // public function testValidToken()
+    // {
+    //     $server = rest_get_server();
+
+    //     // Generate valid JWT token
+    //     $service = AAM_Service_Jwt::getInstance();
+
+    //     // Issue a token that later we'll refresh
+    //     $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
+
+    //     // Reset cache
+    //     wp_cache_flush();
+
+    //     $request = new WP_REST_Request('POST', '/wp/v2/posts');
+    //     $_GET['aam-jwt'] = "Bearer {$jwt}";
+    //     // $request->set_header('Authorization', "Bearer {$jwt}");
+    //     $request->set_body(json_encode(array(
+    //         'title' => 'Test'
+    //     )));
+
+    //     $response = $server->dispatch($request);
+
+    //     $this->assertEquals(201, $response->get_status());
+
+    //     unset($_SERVER['aam-jwt']);
+    // }
 
 }

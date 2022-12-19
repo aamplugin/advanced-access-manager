@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 6.0.3
-Stable tag: 6.9.3
+Tested up to: 6.1.1
+Stable tag: 6.9.4
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -90,6 +90,11 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.4 =
+* Fixed: Incorrectly escaped string values [https://github.com/aamplugin/advanced-access-manager/issues/239](https://github.com/aamplugin/advanced-access-manager/issues/239)
+* Fixed : Incorrectly handled revoked token validation [https://github.com/aamplugin/advanced-access-manager/issues/238](https://github.com/aamplugin/advanced-access-manager/issues/238)
+* Fixed: Super-Admin is unable to re-assign roles in network sites [https://github.com/aamplugin/advanced-access-manager/issues/180](https://github.com/aamplugin/advanced-access-manager/issues/180)
 
 = 6.9.3 =
 * Fixed: Fatal error: Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable... [https://github.com/aamplugin/advanced-access-manager/issues/236](https://github.com/aamplugin/advanced-access-manager/issues/236)

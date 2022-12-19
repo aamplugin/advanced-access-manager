@@ -166,7 +166,8 @@ class AAM_Service_Core
                 array(
                     'headers' => array(
                         'Accept'       => 'application/json',
-                        'Content-Type' => 'application/json'
+                        'Content-Type' => 'application/json',
+                        'X-Origin'     => get_site_url()
                     ),
                     'body' => wp_json_encode($repository->getRegisteredLicenseList())
                 )

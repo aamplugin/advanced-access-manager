@@ -1,9 +1,10 @@
 <?php
     /**
+     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/239
      * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.9.2
+     * @version 6.9.4
      * */
 ?>
 
@@ -16,7 +17,7 @@
                         <td>
                             <span class='aam-setting-title'><?php echo esc_js($option['title']); ?></span>
                             <p class="aam-setting-description">
-                                <?php echo esc_js($option['description']); ?>
+                                <?php echo $option['description']; // The values are already properly evaluated so esc_js is not needed ?>
                             </p>
                         </td>
                         <td class="text-center">
