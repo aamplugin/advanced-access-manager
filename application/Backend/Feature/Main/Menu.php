@@ -10,11 +10,12 @@
 /**
  * Backend menu manager
  *
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.5
  */
 class AAM_Backend_Feature_Main_Menu
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -77,8 +78,11 @@ class AAM_Backend_Feature_Main_Menu
      *
      * @return array
      *
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.5
      */
     public function getMenu()
     {
@@ -92,7 +96,7 @@ class AAM_Backend_Feature_Main_Menu
             $object = $subject->getObject(self::OBJECT_TYPE);
 
             foreach ($cache['menu'] as $item) {
-                if (preg_match('/^separator/', $item[2])) {
+                if (preg_match('/^separator/', $item['id'])) {
                     continue; //skip separator
                 }
 
@@ -100,12 +104,12 @@ class AAM_Backend_Feature_Main_Menu
                     // Add menu- prefix to define that this is the top level menu.
                     // WordPress by default gives the same menu id to the first
                     // submenu
-                    'id'         => 'menu-' . $item[2],
-                    'uri'        => $this->prepareAdminURI($item[2]),
-                    'name'       => $this->filterMenuName($item[0]),
-                    'submenu'    => $this->getSubmenu($item[2], $cache['submenu']),
-                    'capability' => $item[1],
-                    'checked'    => $object->isRestricted('menu-' . $item[2])
+                    'id'         => 'menu-' . $item['id'],
+                    'uri'        => $this->prepareAdminURI($item['id']),
+                    'name'       => $this->filterMenuName($item['name']),
+                    'submenu'    => $this->getSubmenu($item['id'], $cache['submenu']),
+                    'capability' => $item['cap'],
+                    'checked'    => $object->isRestricted('menu-' . $item['id'])
                 );
             }
         }

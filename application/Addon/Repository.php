@@ -10,6 +10,7 @@
 /**
  * Addon repository
  *
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
  * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
@@ -22,7 +23,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.3
+ * @version 6.9.5
  */
 class AAM_Addon_Repository
 {
@@ -39,35 +40,18 @@ class AAM_Addon_Repository
     /**
      * Official list of available addons
      *
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
      * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
      * @since 6.7.5 Initial implementation of the constant
      *
-     * @version 6.9.3
+     * @version 6.9.5
      */
     const OFFICIAL_ADDON_LIST = array(
-        'aam-plus-package' => array(
-            'title'       => 'Plus Package',
-            'slug'        => 'plus-package',
-            'description' => 'Manage access to your WordPress website posts, pages, media, custom post types, categories, tags and custom taxonomies for any role, individual user, visitors or even define default access for everybody; and do this separately for frontend, backend or API levels.',
-            'version'     => '5.4.7'
-        ),
-        'aam-ip-check' => array(
-            'title'       => 'IP Check',
-            'slug'        => 'ip-check',
-            'description' => 'Manage access to your WordPress website by users IP address or referred host and completely lock down the entire website if necessary. Define the unlimited number of whitelisted or blacklisted IPs or hosts.',
-            'version'     => '4.1.8'
-        ),
-        'aam-role-hierarchy' => array(
-            'title'       => 'Role Hierarchy',
-            'slug'        => 'role-hierarchy',
-            'description' => 'Define and manage complex WordPress role hierarchy where all the access settings are propagated down the tree with the ability to override any settings for any specific role.',
-            'version'     => '3.0.2'
-        ),
         'aam-complete-package' => array(
             'title'       => 'Complete Package',
             'slug'        => 'complete-package',
             'description' => 'The complete list of all premium AAM features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.',
-            'version'     => '5.2.16'
+            'version'     => '5.3.0'
         ),
     );
 

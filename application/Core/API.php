@@ -10,6 +10,7 @@
 /**
  * AAM core API
  *
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/151
  * @since 6.6.4 https://github.com/aamplugin/advanced-access-manager/issues/142
  * @since 6.3.1 Fixed bug with setting clearing
@@ -20,7 +21,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.0
+ * @version 6.9.5
  */
 final class AAM_Core_API
 {
@@ -380,14 +381,17 @@ final class AAM_Core_API
      *
      * @return string
      *
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.5
      */
     public static function getAPIEndpoint()
     {
         $endpoint = getenv('AAM_ENDPOINT');
 
-        return ($endpoint ? $endpoint : 'https://api.aamplugin.com/v2');
+        return ($endpoint ? $endpoint : 'https://api.aamportal.com');
     }
 
 }

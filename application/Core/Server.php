@@ -16,7 +16,7 @@
  *
  * @package AAM
  * @since 6.0.3
- * @todo Remove in July 2021
+ * @todo Remove in 7.0.0
  */
 final class AAM_Core_Server
 {
@@ -26,7 +26,7 @@ final class AAM_Core_Server
      *
      * @version 6.0.3
      */
-    const SERVER_V2_URL = 'https://api.aamplugin.com/v2';
+    const SERVER_V2_URL = 'https://api.aamportal.com';
 
     /**
      * Get AAM server endpoint

@@ -10,11 +10,12 @@
 /**
  * Admin Menu service
  *
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.5
  */
 class AAM_Service_AdminMenu
 {
@@ -85,11 +86,12 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.5
      */
     public function initializeHooks()
     {
@@ -104,10 +106,10 @@ class AAM_Service_AdminMenu
                 add_filter('parent_file', function() {
                     global $menu, $submenu;
 
-                    AAM_Core_API::updateOption(self::CACHE_DB_OPTION, array(
-                        'menu'    => $menu,
+                    set_transient(self::CACHE_DB_OPTION, array(
+                        'menu'    => $this->_filterMenuItems($menu),
                         'submenu' => $submenu
-                    ));
+                    ), 86400);
                 }, PHP_INT_MAX - 1);
             }
         }
@@ -117,6 +119,7 @@ class AAM_Service_AdminMenu
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
 
+        // TODO - legacy and can be deleted in version 7.0.0
         add_action('aam_clear_settings_action', function() {
             AAM_Core_API::deleteOption(self::CACHE_DB_OPTION);
         });
@@ -162,12 +165,17 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.5
      */
     public function getMenuCache()
     {
-        return AAM_Core_API::getOption(self::CACHE_DB_OPTION, array());
+        $cache = get_transient(self::CACHE_DB_OPTION);
+
+        return is_array($cache) ? $cache : array();
     }
 
     /**
@@ -285,6 +293,33 @@ class AAM_Service_AdminMenu
         }
 
         return $menu;
+    }
+
+    /**
+     * Filter menu items
+     *
+     * @param array $items
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.5
+     */
+    private function _filterMenuItems($items)
+    {
+        $response = array();
+
+        if (is_array($items)) {
+            foreach($items as $item) {
+                array_push($response, array(
+                    'id'   => $item[2],
+                    'cap'  => $item[1],
+                    'name' => $item[0]
+                ));
+            }
+        }
+
+        return $response;
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
  * @since 6.8.1 https://github.com/aamplugin/advanced-access-manager/issues/203
  * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
@@ -9,7 +10,7 @@
  * @since 6.0.5 Fixed typo in the license expiration property. Enriched plugin' status display
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.9.2
+ * @version 6.9.5
  * */
 ?>
 
@@ -33,7 +34,6 @@
             <ul class="nav nav-tabs" role="tablist">
                 <?php if (count($commercial)) { ?><li role="presentation" class="active"><a href="#premium-extensions" aria-controls="premium-extensions" role="tab" data-toggle="tab"><i class='icon-basket'></i> <?php echo __('Premium', AAM_KEY); ?></a></li><?php } ?>
                 <li role="presentation"><a href="#free-extensions" aria-controls="free-extensions" role="tab" data-toggle="tab"><i class='icon-cubes'></i> <?php echo __('Free', AAM_KEY); ?></a></li>
-                <li class="margin-right aam-update-check"><a href="#" id="check-for-updates"><i class='icon-arrows-cw'></i> <?php echo __('Check For Updates', AAM_KEY); ?></a></li>
             </ul>
 
             <div class="tab-content">

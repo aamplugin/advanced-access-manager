@@ -502,15 +502,12 @@ a.btn:focus, a.btn:active {
 }
 
 .aam-iframe .aam-subject-title {
-  display: none;
+  display: block;
+  font-size: 0.9em;
 }
 
 .aam-iframe .postbox .hndle {
   display: none;
-}
-
-.aam-subject-title {
-  margin-left: 4px;
 }
 
 .aam-api-method.post {

@@ -4296,123 +4296,6 @@
 
             /**
              *
-             * @param {*} license
-             * @param {*} slug
-             * @param {*} expire
-             */
-            function registerLicense(license, slug, expire) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Addons_Manager.registerLicense',
-                        _ajax_nonce: getLocal().nonce,
-                        license: license,
-                        slug: slug,
-                        expire: expire
-                    }
-                });
-            }
-
-            /**
-             *
-             * @param {type} data
-             * @param {type} cb
-             * @returns {undefined}
-             */
-            function validateLicense(license, cb, error) {
-                $.ajax(`${getLocal().system.apiEndpoint}/download/${license}`, {
-                    type: 'GET',
-                    dataType: 'json',
-                    headers: {
-                        "Accept": "application/json"
-                    },
-                    success: function (response) {
-                        cb(response);
-                    },
-                    error: function (response) {
-                        error(response.responseJSON);
-                    }
-                });
-            }
-
-            /**
-             *
-             * @param {*} license
-             * @param {*} type
-             * @param {*} cb
-             * @param {*} error
-             */
-            function registerDomain(license, type, cb, error) {
-                $.ajax(`${getLocal().system.apiEndpoint}/register/${license}`, {
-                    type: 'POST',
-                    dataType: 'json',
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    data: JSON.stringify({
-                        is_dev: (type === 'dev')
-                    }),
-                    success: function (response) {
-                        cb(response);
-                    },
-                    error: function (response) {
-                        error(response.responseJSON);
-                    }
-                });
-            }
-
-            /**
-             *
-             * @param {*} cb
-             */
-            function checkForUpdates(cb) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Addons_Manager.getRegistry',
-                        _ajax_nonce: getLocal().nonce
-                    },
-                    success: function(response) {
-                        $.ajax(`${getLocal().system.apiEndpoint}/registry`, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: JSON.stringify(response),
-                            contentType: 'application/json',
-                            headers: {
-                                "Accept": "application/json"
-                            },
-                            success: function (response) {
-                                $.ajax(getLocal().ajaxurl, {
-                                    type: 'POST',
-                                    dataType: 'json',
-                                    data: {
-                                        action: 'aam',
-                                        sub_action: 'Addons_Manager.checkForPluginUpdates',
-                                        _ajax_nonce: getLocal().nonce,
-                                        payload: JSON.stringify(response)
-                                    },
-                                    success: function() {
-                                        cb();
-                                    }
-                                });
-                            },
-                            error: function (response) {
-                                getAAM().notification(
-                                    'danger', response.responseJSON.reason
-                                );
-                            }
-                        });
-                    }
-                });
-            }
-
-            /**
-             *
              * @returns {undefined}
              */
             function initialize() {
@@ -4421,73 +4304,14 @@
 
                     //init refresh list button
                     $('#download-extension').bind('click', function () {
-                        $('#extension-key').parent().removeClass('error');
+                        const license = $.trim($('#extension-key').val());
 
-                        var _this = $(this);
-                        var license = $.trim($('#extension-key').val());
-
-                        if (!license) {
-                            $('#extension-key').parent().addClass('error');
-                            $('#extension-key').focus();
-                            return;
+                        if (license) {
+                            window.open(
+                                `${getLocal().system.apiEndpoint}/download/${license}`,
+                                '_blank'
+                            );
                         }
-
-                        $('i', _this).attr('class', 'icon-spin4 animate-spin');
-                        validateLicense(license, function (response) {
-                            if (response) {
-                                getAAM().downloadFile(
-                                    response.content,
-                                    response.slug + '.zip',
-                                    'application/zip'
-                                );
-                                $('#downloaded-info-modal').modal('show');
-
-                                // Store the license in the internal add-ons registry
-                                registerLicense(license, response.slug, response.expire);
-                            }
-                            $('i', _this).attr('class', 'icon-download-cloud');
-                        }, function (response) {
-                            getAAM().notification('danger', response.reason);
-                            $('i', _this).attr('class', 'icon-download-cloud');
-                        });
-                    });
-
-                    $('.register-license').each(function() {
-                        $(this).bind('click', function () {
-                            $('#extension-key').parent().removeClass('error');
-
-                            var _this = $(this);
-                            var license = $.trim($('#extension-key').val());
-
-                            if (!license) {
-                                $('#extension-key').parent().addClass('error');
-                                $('#extension-key').focus();
-                                return;
-                            }
-
-                            $('i', _this).attr('class', 'icon-spin4 animate-spin');
-
-                            registerDomain(license, $(this).data('type'), function (response) {
-                                getAAM().notification(
-                                    'success',
-                                    'The website has been registered successfully'
-                                );
-                                // Store the license in the internal add-ons registry
-                                registerLicense(license, response.slug, response.expire);
-                                $('i', _this).attr('class', 'icon-check');
-                            }, function (response) {
-                                getAAM().notification('danger', response.reason);
-                                $('i', _this).attr('class', 'icon-check');
-                            });
-                        });
-                    });
-
-                    $('#check-for-updates').bind('click', function() {
-                        $('i', $(this)).attr('class', 'icon-spin4 animate-spin');
-                        checkForUpdates(function() {
-                            $('i', '#check-for-updates').attr('class', 'icon-arrows-cw');
-                            getAAM().fetchContent('extensions');
-                        });
                     });
 
                     $('#clear-licenses').bind('click', function () {
@@ -4662,7 +4486,7 @@
             // ConfigPress hook
             getAAM().addHook('menu-feature-click', function (feature) {
                 if (feature === 'configpress'
-                    && !$('#configpress-editor').next().hasClass('CodeMirror')) {
+                    && !$('#aam-configpress-editor').next().hasClass('CodeMirror')) {
                     var editor = wp.CodeMirror.fromTextArea(
                         document.getElementById("aam-configpress-editor"), {}
                     );

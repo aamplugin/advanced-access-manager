@@ -1,5 +1,6 @@
 <?php
     /**
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
      * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
      * @since 6.7.4 Improved the UI consistency
      * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/104
@@ -7,7 +8,7 @@
      * @since 6.2.0 Added support & import/export modals
      * @since 6.0.0 Initial implementation of the template
      *
-     * @version 6.9.2
+     * @version 6.9.5
      * */
 
     if (defined('AAM_KEY')) {
@@ -47,7 +48,7 @@
                                 <div class="aam-postbox-inside">
                                     <ul class="aam-error-list">
                                         <?php foreach (AAM_Core_Console::getAll() as $message) { ?>
-                                            <li><?php echo esc_js($message); ?></li>
+                                            <li><?php echo $message; // Already properly handled in the AAM_Core_Console ?></li>
                                         <?php } ?>
                                     </ul>
                                     <div class="hidden" id="migration-errors-container"><?php echo base64_encode(print_r(AAM_Core_Migration::getFailureLog(), 1)); ?></div>
@@ -180,7 +181,7 @@
                                             <?php foreach (AAM_Addon_Repository::getInstance()->getRegisteredLicenseList() as $i => $licenseId) { ?>
                                                 <tr class="<?php echo ($i % 2 === 0 ? 'odd' : 'even'); ?>">
                                                     <td>
-                                                        <a href="https://aamplugin.com/license/<?php echo esc_attr($licenseId); ?>" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
+                                                        <a href="https://aamportal.com/license/<?php echo esc_attr($licenseId); ?>" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
                                                     </td>
                                                 </tr>
                                             <?php } ?>

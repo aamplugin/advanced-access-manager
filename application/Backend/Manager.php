@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
@@ -21,7 +22,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.8.4
+ * @version 6.9.5
  */
 class AAM_Backend_Manager
 {
@@ -34,13 +35,14 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
      * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
      * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
      * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.8.4
+     * @version 6.9.5
      */
     protected function __construct()
     {
@@ -83,6 +85,10 @@ class AAM_Backend_Manager
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
             $this->checkMigrationStatus();
+
+            // Also checking for any legacy add-ons presence. If are available, let
+            // user know
+            $this->checkForLegacyAddons();
         }
 
         add_action( 'admin_enqueue_scripts', function() {
@@ -145,6 +151,48 @@ class AAM_Backend_Manager
                 __('There was at least one error detected with the automated migration script. %sDownload the log%s for more details and contact our support at %ssupport@aamplugin.com%s for further assistance.', AAM_KEY),
                 '<a href="#" id="download-migration-log">', '</a>',
                 '<a href="mailto:support@aamplugin.com">', '</a>'
+            ));
+        }
+    }
+
+    /**
+     * Check for presence of legacy add-ons
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.5
+     */
+    protected function checkForLegacyAddons()
+    {
+        static $plugins = null;
+
+        if (is_null($plugins)) {
+            if (file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+
+            $plugins = get_plugins();
+        }
+
+        if (array_key_exists('aam-plus-package/bootstrap.php', $plugins)) {
+            AAM_Core_Console::add(sprintf(
+                __('The Plus Package is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
+            ));
+        }
+
+        if (array_key_exists('aam-ip-check/bootstrap.php', $plugins)) {
+            AAM_Core_Console::add(sprintf(
+                __('The IP Check is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
+            ));
+        }
+
+        if (array_key_exists('aam-role-hierarchy/bootstrap.php', $plugins)) {
+            AAM_Core_Console::add(sprintf(
+                __('The Role Hierarchy is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
             ));
         }
     }
