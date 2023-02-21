@@ -12,15 +12,6 @@
     <div class="aam-feature" id="logout_redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if ($this->getSubject()->isDefault()) {  ?>
-                    <p class="aam-info">
-                        <?php echo AAM_Backend_View_Helper::preparePhrase('Define the [default] logout redirect for all the users and roles.', 'strong'); ?>
-                    </p>
-                <?php } else { ?>
-                    <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize logout redirect for [%s].', 'strong'), $this->getSubject()->getName()); ?>
-                    </p>
-                <?php } ?>
                 <div class="aam-overwrite" id="aam-logout-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="logout-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>

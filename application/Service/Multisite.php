@@ -89,7 +89,7 @@ class AAM_Service_Multisite
      */
     protected function initializeHooks()
     {
-        $roles = AAM_Core_API::getRoles();
+        $roles = AAM_Framework_Manager::roles();
 
         if (is_main_site()) {
             // Any changes to the user_roles option should be replicated

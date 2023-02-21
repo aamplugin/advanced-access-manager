@@ -89,14 +89,14 @@ class PolicyValidationTest extends TestCase
             "Dependency": {
                 "advanced-access-manager-x": {
                     "Name": "AAM X",
-                    "URL": "https://aamplugin.com",
+                    "URL": "https://aamportal.com",
                     "Version": "^1.0.0"
                 }
             }
         }');
 
         $this->assertEquals(array(
-                "The <a href=\"https://aamplugin.com\" target=\"_blank\">AAM X</a> is required"
+                "The <a href=\"https://aamportal.com\" target=\"_blank\">AAM X</a> is required"
         ), $validator->validate());
     }
 

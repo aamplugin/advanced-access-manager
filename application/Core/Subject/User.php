@@ -102,11 +102,10 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
      */
     public function getCapabilities()
     {
-        $caps  = $this->caps;
-        $roles = AAM_Core_API::getRoles();
+        $caps = $this->caps;
 
         foreach (array_keys($caps) as $cap) {
-            if ($roles->is_role($cap)) {
+            if (AAM_Framework_Manager::roles()->is_role($cap)) {
                 unset($caps[$cap]);
             }
         }

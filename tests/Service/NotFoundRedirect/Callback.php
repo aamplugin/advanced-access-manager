@@ -4,7 +4,7 @@ namespace AAM\UnitTest\Service\NotFoundRedirect;
 
 class Callback
 {
-    const REDIRECT_URL = 'https://aamplugin.com/redirect';
+    const REDIRECT_URL = 'https://aamportal.com/redirect';
 
     public static function redirectCallback()
     {

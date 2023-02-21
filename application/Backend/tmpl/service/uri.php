@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website URL(s) for the [%s]. Note! All entered URLs have to belong to this particular website and processed by the WordPress core. For more information check %sHow to restrict access to any WordPress website URL%s.', 'b'), $this->getSubject()->getName(), '<a href="https://aamplugin.com/article/how-to-restrict-access-to-any-wordpress-website-url" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website URL(s) for the [%s]. Note! All entered URLs have to belong to this particular website.', 'b'), $this->getSubject()->getName()); ?>
                 </p>
             </div>
         </div>

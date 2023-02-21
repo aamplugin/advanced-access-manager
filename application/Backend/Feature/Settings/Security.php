@@ -45,12 +45,12 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
         $settings = array(
             'service.secureLogin.feature.singleSession' => array(
                 'title'       => __('One Session Per User', AAM_KEY),
-                'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically destroy all other sessions for a user if he/she tries to login from different location. For more information about this option please refer to %sHow does AAM Secure Login works%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/article/how-does-aam-secure-login-works" target="_blank">', '</a>'),
+                'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically destroy all other sessions for a user if he/she tries to login from different location. For more information refer to the %sOne Session Per User%s page.', 'strong', 'strong'), '<a href="https://aamportal.com/plugin/advanced-access-manager/setting/one-session-per-user" target="_blank">', '</a>'),
                 'value'       => AAM_Core_Config::get('service.secureLogin.feature.singleSession', false)
             ),
             'service.secureLogin.feature.bruteForceLockout' => array(
                 'title'       => __('Brute Force Lockout', AAM_KEY),
-                'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically reject login attempts if number of unsuccessful login attempts is more than 20 over the period of 2 minutes (both values are configurable). For more information about this option please refer to %sHow does AAM Secure Login works%s.', 'strong', 'strong'), '<a href="https://aamplugin.com/article/how-does-aam-secure-login-works" target="_blank">', '</a>'),
+                'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically reject login request if number of unsuccessful attempts exceeds 20 over the period of 2 minutes (both values are configurable). For more information refer to the %sBrute Force Lockout%s page.', 'strong', 'strong'), '<a href="https://aamportal.com/plugin/advanced-access-manager/setting/bruteforce-lockout" target="_blank">', '</a>'),
                 'value'       => AAM_Core_Config::get('service.secureLogin.feature.bruteForceLockout', false)
             ),
         );

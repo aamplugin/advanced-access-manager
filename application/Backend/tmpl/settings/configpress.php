@@ -11,7 +11,7 @@ if (defined('AAM_KEY')) { ?>
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(__('Fore more information about AAM configurations check %sAAM Configurations%s article.', AAM_KEY), '<a href="https://aamplugin.com/article/aam-configurations">', '</a>'); ?>
+                    <?php echo sprintf(__('For detail about AAM configurations, refer to the %sConfigPress%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/advanced-access-manager/configpress/">', '</a>'); ?>
                 </p>
             </div>
         </div>

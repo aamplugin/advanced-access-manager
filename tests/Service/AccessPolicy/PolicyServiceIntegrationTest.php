@@ -446,7 +446,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'enabled'     => true,
             'type'        => 'url',
             'httpCode'    => 307,
-            'destination' => 'https://aamplugin.com'
+            'destination' => 'https://aamportal.com'
         ), $object->get('redirected'));
     }
 

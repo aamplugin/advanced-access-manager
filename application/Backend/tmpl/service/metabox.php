@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage classic (not Gutenberg) metaboxes and widgets visibility for [%s]. For more information please check %sHow to hide WordPress metaboxes and widgets%s.', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-hide-wordpress-metaboxes-and-widgets" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage classic (not Gutenberg) metaboxes and widgets visibility for [%s].', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName()); ?>
                     </p>
                 </div>
             </div>

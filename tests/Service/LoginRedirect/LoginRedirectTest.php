@@ -87,7 +87,7 @@ class LoginRedirectTest extends TestCase
         );
 
         $object->updateOptionItem('login.redirect.type', 'url')
-            ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
+            ->updateOptionItem('login.redirect.url', 'https://aamportal.com')
             ->save();
 
         $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
@@ -96,7 +96,7 @@ class LoginRedirectTest extends TestCase
 
         $data = $server->dispatch($request)->get_data();
 
-        $this->assertEquals('https://aamplugin.com', $data['redirect']);
+        $this->assertEquals('https://aamportal.com', $data['redirect']);
     }
 
     /**
@@ -239,7 +239,7 @@ class LoginRedirectTest extends TestCase
         );
 
         $object->updateOptionItem('login.redirect.type', 'url')
-            ->updateOptionItem('login.redirect.url', 'https://aamplugin.com')
+            ->updateOptionItem('login.redirect.url', 'https://aamportal.com')
             ->save();
 
         $redirect = apply_filters(

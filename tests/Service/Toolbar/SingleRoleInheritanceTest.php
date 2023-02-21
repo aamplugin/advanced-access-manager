@@ -223,7 +223,7 @@ class SingleRoleInheritanceTest extends TestCase
 
     public function testToolbarRendering()
     {
-        $_SERVER['HTTP_HOST'] = 'aamplugin.com';
+        $_SERVER['HTTP_HOST'] = 'aamportal.com';
         $_SERVER['REQUEST_URI'] = '/wp-admin';
 
         // Restrict access to the Log Out menu and make sure it is not rendered

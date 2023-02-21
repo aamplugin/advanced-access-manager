@@ -80,8 +80,6 @@ class ContentServiceTest extends TestCase
      * Making sure that original status of commenting is preserved when no access
      * settings are defined
      *
-     * @link https://forum.aamplugin.com/d/353-comment-system-activated
-     *
      * @access public
      * @version 6.0.1
      */

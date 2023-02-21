@@ -68,19 +68,19 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
     /**
      * Retrieve WP core role
      *
-     * @return WP_Role|null
+     * @return AAM_Framework_Proxy_Role|null
      *
      * @access protected
      * @version 6.0.0
      */
     protected function retrievePrincipal()
     {
-        $roles = AAM_Core_API::getRoles();
-
-        if (isset($roles->roles[$this->getId()])) {
-            $role       = $roles->get_role($this->getId());
-            $this->name = $roles->roles[$this->getId()]['name'];
-        } else {
+        try {
+            $role = AAM_Framework_Manager::roles()->get_role_by_slug(
+                $this->getId(), false
+            );
+            $this->name = $role->display_name;
+        } catch (Exception $_) {
             $role = null;
         }
 
@@ -99,18 +99,16 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      */
     public function delete()
     {
-        $status = false;
-        $roles  = AAM_Core_API::getRoles();
+        $result = false;
 
-        $count = count_users();
-        $stats = $count['avail_roles'];
-
-        if (empty($stats[$this->getId()])) {
-            $roles->remove_role($this->getId());
-            $status = true;
+        try {
+            $role   = AAM_Framework_Manager::roles()->get_role_by_slug($this->getId());
+            $result = AAM_Framework_Manager::roles()->delete_role($role);
+        } catch (Exception $_) {
+            // Do nothing
         }
 
-        return $status;
+        return $result;
     }
 
     /**
@@ -121,7 +119,7 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      *
      * @return boolean
      *
-     * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/72
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/72
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
@@ -129,36 +127,25 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      */
     public function update($name, $slug = null)
     {
-        $roles = AAM_Core_API::getRoles();
+        $role = $this->getPrincipal();
 
-        if ($name) {
-            if (!empty($slug) && ($slug !== $this->getId())) {
-                $stats = count_users()['avail_roles'];
-                $n = (isset($stats[$this->getId()]) ? $stats[$this->getId()] : 0);
+        // Setting new attributes
+        $role->set_display_name($name);
 
-                if ($n === 0) {
-                    $new_roles = array();
-
-                    foreach($roles->roles as $id => $data) {
-                        if ($id === $this->getId()) {
-                            $new_roles[$slug] = $data; // Replace role and preserve order
-                        } else {
-                            $new_roles[$id] = $data;
-                        }
-                    }
-
-                    $roles->roles = $new_roles;
-                    $this->setId($slug); // New role's id
-                }
-            }
-
-            $roles->roles[$this->getId()]['name'] = $name;
-            $status = AAM_Core_API::updateOption($roles->role_key, $roles->roles);
-        } else {
-            $status = false;
+        // If new slug is defined set it as well
+        if (is_string($slug)) {
+            $role->set_slug($slug);
         }
 
-        return $status;
+        $result = false;
+
+        try {
+            $result = AAM_Framework_Manager::roles()->update_role($role);
+        } catch (Exception $_) {
+            // Do nothing
+        }
+
+        return $result;
     }
 
     /**
@@ -268,6 +255,22 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
     public function getMaxLevel()
     {
         return AAM_Core_API::maxLevel($this->capabilities);
+    }
+
+    /**
+     * Fallback for any principal native methods
+     *
+     * @param string $name
+     * @param array  $args
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function __call($name, $args)
+    {
+        return call_user_func_array(array($this->getPrincipal(), $name), $args);
     }
 
 }

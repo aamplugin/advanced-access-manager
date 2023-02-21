@@ -55,7 +55,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
             ),
             'core.settings.multiSubject' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),
-                'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information check %sWordPress access control for users with multiple roles%s article.', AAM_KEY), '<a href="https://aamplugin.com/article/wordpress-access-control-for-users-with-multiple-roles">', '</a>'),
+                'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/advanced-access-manager/setting/multi-role-support">', '</a>'),
                 'value'       => AAM_Core_Config::get('core.settings.multiSubject', false)
             )
         );

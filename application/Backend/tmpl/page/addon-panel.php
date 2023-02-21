@@ -28,34 +28,36 @@
             </div>
         </div>
 
-        <?php $commercial = AAM_Addon_Repository::getInstance()->getList(); ?>
+        <?php $premium = AAM_Addon_Repository::getInstance()->getPremiumData(); ?>
 
         <div class="aam-outer-top-xs">
             <ul class="nav nav-tabs" role="tablist">
-                <?php if (count($commercial)) { ?><li role="presentation" class="active"><a href="#premium-extensions" aria-controls="premium-extensions" role="tab" data-toggle="tab"><i class='icon-basket'></i> <?php echo __('Premium', AAM_KEY); ?></a></li><?php } ?>
+                <li role="presentation" class="active"><a href="#premium-extensions" aria-controls="premium-extensions" role="tab" data-toggle="tab"><i class='icon-basket'></i> <?php echo __('Premium', AAM_KEY); ?></a></li>
                 <li role="presentation"><a href="#free-extensions" aria-controls="free-extensions" role="tab" data-toggle="tab"><i class='icon-cubes'></i> <?php echo __('Free', AAM_KEY); ?></a></li>
             </ul>
 
             <div class="tab-content">
-                <div role="tabpanel" class="tab-pane<?php echo (count($commercial) ? ' active' : ''); ?>" id="premium-extensions">
+                <div role="tabpanel" class="tab-pane active" id="premium-extensions">
                     <table class="table table-striped table-bordered">
                         <tbody>
-                            <?php foreach ($commercial as $i => $product) { ?>
-                                <tr>
-                                    <td width="80%">
-                                        <span class='aam-setting-title'><?php echo $product['title'], (!empty($product['tag']) ? '<sup><span class="badge sup">' . $product['tag'] . '</span></sup>' : ''), (!empty($product['version']) ? ' <small class="text-muted">' . $product['version'] . '</small>' : ''); ?></span>
-                                        <p class="aam-extension-description">
-                                            <?php echo $product['description']; ?>
-                                        </p>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="<?php echo $product['url']; ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                            <tr>
+                                <td width="80%">
+                                    <span class='aam-setting-title'>
+                                        <?php echo $premium['title'], (!empty($premium['version']) ? ' <small class="text-muted">' . $premium['version'] . '</small>' : ''); ?>
+                                    </span>
+
+                                    <p class="aam-extension-description">
+                                        <?php echo $premium['description']; ?>
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <a href="<?php echo $premium['url']; ?>" target="_blank" class="btn btn-sm btn-primary btn-block"><i class="icon-link"></i> <?php echo __('Read More', AAM_KEY); ?></a>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
+
                 <div role="tabpanel" class="tab-pane" id="free-extensions">
                     <table class="table table-striped table-bordered">
                         <tbody>
@@ -96,7 +98,7 @@
                     </div>
                     <div class="modal-body aam-info-modal">
                         <p>
-                            <?php echo __('Insert license key that you received after the payment. It might take up to 2 hours to process the payment.', AAM_KEY); ?>
+                            <?php echo __('Insert license key that you received after the payment. It might take up to 30 minutes to process the payment.', AAM_KEY); ?>
                         </p>
                     </div>
                     <div class="modal-footer">

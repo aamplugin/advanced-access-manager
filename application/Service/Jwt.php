@@ -749,13 +749,21 @@ class AAM_Service_Jwt
             switch (strtolower(trim($method))) {
                 case 'header':
                     // Fallback for Authorization header
-                    $jwt1 = $this->getFromServer('HTTP_AUTHORIZATION');
-                    $jwt2 = $this->getFromServer(AAM_Core_Config::get(
-                        'authentication.jwt.header',
-                        'HTTP_AUTHENTICATION'
-                    ));
+                    $possibles = array(
+                        'HTTP_AUTHORIZATION',
+                        'REDIRECT_HTTP_AUTHORIZATION',
+                        AAM_Core_Config::get(
+                            'authentication.jwt.header', 'HTTP_AUTHENTICATION'
+                        )
+                    );
 
-                    $jwt  = (!empty($jwt1) ? $jwt1 : $jwt2);
+                    foreach($possibles as $h) {
+                        $jwt = $this->getFromServer($h);
+
+                        if (!empty($jwt)) {
+                            break;
+                        }
+                    }
                     break;
 
                 case 'cookie':

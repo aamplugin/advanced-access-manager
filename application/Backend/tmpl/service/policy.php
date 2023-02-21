@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/reference/policy" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/advanced/access-policy/" target="_blank">', '</a>'); ?>
                 </p>
             </div>
         </div>

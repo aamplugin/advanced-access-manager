@@ -26,13 +26,14 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
  * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/152
  * @since 6.3.2 Added new hook `aam_initialized_{$type}_object_filter`
  * @since 6.1.0 Fixed bug with incorrectly managed internal cache
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.0
+ * @version 6.9.6
  */
 abstract class AAM_Core_Subject
 {
@@ -47,14 +48,15 @@ abstract class AAM_Core_Subject
      * @access private
      * @version 6.0.0
      */
-    private $_id;
+    private $_id = null;
 
     /**
      * WordPres core principal
      *
-     * It can be WP_User or WP_Role, based on what class has been used
+     * It can be WP_User or AAM_Framework_Proxy_Role, based on what class has
+     * been used
      *
-     * @var WP_Role|WP_User
+     * @var AAM_Framework_Proxy_Role|WP_User
      *
      * @access private
      * @version 6.0.0
@@ -164,7 +166,7 @@ abstract class AAM_Core_Subject
     /**
      * Get subject ID
      *
-     * @return string|int
+     * @return mixed
      *
      * @access public
      * @version 6.0.0
@@ -200,7 +202,7 @@ abstract class AAM_Core_Subject
     /**
      * Get WP core principal
      *
-     * @return WP_Role|WP_User
+     * @return AAM_Framework_Proxy_Role|WP_User
      *
      * @access public
      * @version 6.0.0
@@ -213,7 +215,7 @@ abstract class AAM_Core_Subject
     /**
      * Set WP core principal
      *
-     * @param WP_Role|WP_User $principal
+     * @param AAM_Framework_Proxy_Role|WP_User $principal
      *
      * @return void
      *
@@ -485,6 +487,25 @@ abstract class AAM_Core_Subject
     public function flushCache()
     {
         $this->_objects = array();
+    }
+
+    /**
+     * Reset settings
+     *
+     * @return boolean
+     *
+     * @access public
+     * @since 6.9.6
+     */
+    public function reset()
+    {
+        $id = static::UID;
+
+        if ($this->getId() !== null) {
+            $id .= '.' . $this->getId();
+        }
+
+        return AAM_Core_AccessSettings::getInstance()->delete($id)->save();
     }
 
 }

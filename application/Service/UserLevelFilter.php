@@ -209,7 +209,7 @@ class AAM_Service_UserLevelFilter
     protected function prepareExcludedRoleList()
     {
         $exclude = array();
-        $roles   = AAM_Core_API::getRoles();
+        $roles   = AAM_Framework_Manager::roles();
 
         foreach ($roles->role_objects as $id => $role) {
             $roleMax = AAM_Core_API::maxLevel($role->capabilities);
@@ -234,7 +234,7 @@ class AAM_Service_UserLevelFilter
      */
     public function filterViews($views)
     {
-        $roles = AAM_Core_API::getRoles();
+        $roles = AAM_Framework_Manager::roles();
 
         foreach ($roles->role_objects as $id => $role) {
             $roleMax = AAM_Core_API::maxLevel($role->capabilities);

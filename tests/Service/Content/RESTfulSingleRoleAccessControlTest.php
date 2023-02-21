@@ -359,7 +359,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         $this->assertTrue($object->updateOptionItem('redirected', array(
             'enabled'     => true,
             'type'        => 'url',
-            'destination' => 'https://aamplugin.com',
+            'destination' => 'https://aamportal.com',
             'httpCode'    => 307
         ))->save());
 
@@ -374,7 +374,7 @@ class RESTfulSingleRoleAccessControlTest extends TestCase
         $data = $server->dispatch($request)->get_data();
 
         $this->assertEquals('post_access_redirected', $data['code']);
-        $this->assertEquals('https://aamplugin.com', $data['url']);
+        $this->assertEquals('https://aamportal.com', $data['url']);
     }
 
     /**

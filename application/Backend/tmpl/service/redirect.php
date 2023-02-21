@@ -1,9 +1,10 @@
 <?php
     /**
+     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
      * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
      * @since 6.0.0 Initial implementation of the templates
      *
-     * @version 6.8.0
+     * @version 6.9.6
      *
      */
 ?>
@@ -20,7 +21,7 @@
                     </p>
                 <?php } else { ?>
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for %s when access is denied to restricted resources like posts, categories, menus, etc. For more information about this feature, please check %sHow to redirect WordPress user when access is denied%s.'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-redirect-wordpress-user-when-access-is-denied" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for [%s] when access is denied to restricted resources like posts, categories, menus, etc.', 'b'), AAM_Backend_Subject::getInstance()->getName()); ?>
                     </p>
                 <?php } ?>
                 <div class="aam-overwrite" id="aam-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
@@ -72,7 +73,8 @@
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-message-action" style="display: <?php echo ($frontendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
-                                <textarea class="form-control" name="frontend.redirect.message" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"><?php echo stripslashes($this->getOption('frontend.redirect.message')); ?></textarea>
+                                <?php $redirect_message = $this->getOption('frontend.redirect.message') ?>
+                                <textarea class="form-control" name="frontend.redirect.message" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"><?php echo is_string($redirect_message) ? stripslashes($redirect_message) : ''; ?></textarea>
                             </div>
 
                             <div class="form-group aam-redirect-action frontend-redirect" id="frontend-page-action" style="display: <?php echo ($frontendType == 'page' ? 'block' : 'none'); ?>;">

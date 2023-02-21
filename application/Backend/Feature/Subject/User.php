@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * User view manager
  *
+ * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.6
  */
 class AAM_Backend_Feature_Subject_User
 {
@@ -154,7 +155,7 @@ class AAM_Backend_Feature_Subject_User
     {
         $response = array();
 
-        $names = AAM_Core_API::getRoles()->get_names();
+        $names = AAM_Framework_Manager::roles()->get_names();
 
         if (is_array($roles)) {
             foreach ($roles as $role) {
@@ -261,13 +262,20 @@ class AAM_Backend_Feature_Subject_User
      *
      * @return \WP_User_Query
      *
+     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.6
      */
     protected function query()
     {
-        $search = trim(AAM_Core_Request::request('search.value'));
-        $role   = trim(AAM_Core_Request::request('role'));
+        $search = AAM_Core_Request::request('search.value');
+        $role   = AAM_Core_Request::request('role');
+
+        // Normalize the input
+        if (is_string($search)) { $search = trim($search); }
+        if (is_string($role)) { $search = trim($role); }
 
         $args = array(
             'blog_id' => get_current_blog_id(),

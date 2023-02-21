@@ -41,17 +41,17 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     {
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
-        $this->determineOverwritten($option);
-
-        // Trigger custom functionality that may populate the menu options. For
-        // example, this hooks is used by Access Policy service
-        $option = apply_filters('aam_uri_object_option_filter', $option, $this);
-
-        // Making sure that all menu keys are lowercase
+        // Making sure that all URL are lowercase
         $normalized = array();
         foreach($option as $key => $val) {
             $normalized[strtolower($key)] = $val;
         }
+
+        $this->determineOverwritten($normalized);
+
+        // Trigger custom functionality that may populate the menu options. For
+        // example, this hooks is used by Access Policy service
+        $normalized = apply_filters('aam_uri_object_option_filter', $normalized, $this);
 
         $this->setOption(is_array($normalized) ? $normalized : array());
     }

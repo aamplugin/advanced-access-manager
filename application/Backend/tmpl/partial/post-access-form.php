@@ -19,7 +19,7 @@
 
     <?php if ($params->object->post_type === 'attachment') { ?>
         <div class="alert alert-warning aam-outer-bottom-xxs">
-            <?php echo sprintf(__('To fully protect your media library files, please refer to the %sHow to manage access to WordPress media library%s article.', AAM_KEY), '<a href="https://aamplugin.com/article/how-to-manage-access-to-the-wordpress-media-library" target="_blank">', '</a>');  ?>
+            <?php echo sprintf(__('To fully protect your media items, refer to the %sAAM Protected Media Files%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/protected-media-files/" target="_blank">', '</a>');  ?>
         </div>
     <?php } ?>
 

@@ -68,7 +68,6 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
     public function __construct()
     {
         add_filter('aam_iframe_content_filter', array($this, 'renderPrincipalIframe'), 1, 3);
-        add_filter('aam_role_row_actions_filter', array($this, 'renderRoleActions'), 1, 2);
         add_filter('aam_user_row_actions_filter', array($this, 'renderUserActions'), 1, 2);
 
         add_filter('aam_visitor_subject_tab_filter', function ($content, $params) {
@@ -124,30 +123,6 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         }
 
         return $content;
-    }
-
-    /**
-     * Render role actions
-     *
-     * @param array  $actions
-     * @param string $id
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function renderRoleActions($actions, $id)
-    {
-        if ($this->getFromPost('ui') === 'principal') {
-            $object = AAM::api()->getRole($id)->getObject(
-                AAM_Core_Object_Policy::OBJECT_TYPE
-            );
-            $policyId = $this->getFromPost('policyId', FILTER_VALIDATE_INT);
-            $actions = array($object->has($policyId) ? 'detach' : 'attach');
-        }
-
-        return $actions;
     }
 
     /**

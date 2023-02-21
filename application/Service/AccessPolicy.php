@@ -299,6 +299,9 @@ class AAM_Service_AccessPolicy
             return $manager->isAllowed('SITE:' . get_current_blog_id()) !== false;
         });
 
+        // Enrich the RESTful API
+        add_filter('aam_role_rest_field_filter', array($this, 'enrich_role_rest_output'), 1, 3);
+
         // Service fetch
         $this->registerService();
     }
@@ -389,7 +392,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamplugin.com/reference/policy#backendmenu
+     * @see https://aamportal.com/advanced/access-policy/resource-action/backendmenu
      * @version 6.1.1
      */
     protected function initializeMenu($option, AAM_Core_Object_Menu $object)
@@ -418,7 +421,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamplugin.com/reference/policy#toolbar
+     * @see https://aamportal.com/advanced/access-policy/resource-action/toolbar
      * @version 6.1.1
      */
     protected function initializeToolbar($option, AAM_Core_Object_Toolbar $object)
@@ -447,7 +450,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @see https://aamplugin.com/reference/policy#metabox
+     * @see https://aamportal.com/advanced/access-policy/resource-action/metabox
      * @version 6.1.1
      */
     protected function initializeMetabox($option, AAM_Core_Object_Metabox $object)
@@ -479,7 +482,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamplugin.com/reference/policy#post
+     * @see https://aamportal.com/advanced/access-policy/resource-action/post
      * @version 6.1.1
      */
     protected function initializePost($option, AAM_Core_Object_Post $object)
@@ -564,7 +567,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamplugin.com/reference/policy#uri
+     * @see https://aamportal.com/advanced/access-policy/resource-action/uri
      * @version 6.1.1
      */
     protected function initializeUri($option, AAM_Core_Object_Uri $object)
@@ -607,7 +610,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamplugin.com/reference/policy#route
+     * @see https://aamportal.com/advanced/access-policy/resource-action/route
      * @version 6.1.1
      */
     protected function initializeRoute($option, AAM_Core_Object_Route $object)
@@ -703,7 +706,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamplugin.com/reference/policy#capability
+     * @link https://aamportal.com/advanced/access-policy/resource-action/capability
      * @version 6.1.1
      */
     public function isCapabilityAllowed($allowed, $cap, $action)
@@ -726,8 +729,8 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamplugin.com/reference/policy#capability
-     * @link https://aamplugin.com/reference/policy#role
+     * @link https://aamportal.com/advanced/access-policy/resource-action/capability
+     * @link https://aamportal.com/advanced/access-policy/resource-action/role
      *
      * @version 6.3.1
      */
@@ -1016,7 +1019,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamplugin.com/reference/policy#plugin
+     * @link https://aamportal.com/advanced/access-policy/resource-action/plugin
      * @version 6.1.0
      */
     public function isPluginActionAllowed($allowed, $action, $slug = null)
@@ -1061,6 +1064,37 @@ class AAM_Service_AccessPolicy
         }
 
         return $filtered;
+    }
+
+    /**
+     * Get the list of attached policies to role
+     *
+     * @param null                     $output
+     * @param AAM_Framework_Proxy_Role $id
+     * @param string                   $field
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.6
+     */
+    public function enrich_role_rest_output($output, $role, $field)
+    {
+        if ($field === 'applied_policy_ids') {
+            $object = AAM::api()->getRole($role->slug)->getObject(
+                AAM_Core_Object_Policy::OBJECT_TYPE
+            );
+
+            $output = array();
+
+            foreach($object->getOption() as $id => $effect) {
+                if (!empty($effect)) {
+                    array_push($output, $id);
+                }
+            }
+        }
+
+        return $output;
     }
 
 }

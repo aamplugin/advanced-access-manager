@@ -66,7 +66,6 @@ class AAM_Service_Core
 
             // Hook that initialize the AAM UI part of the service
             add_action('aam_init_ui_action', function () {
-                AAM_Backend_Feature_Subject_Role::register();
                 AAM_Backend_Feature_Subject_User::register();
 
                 AAM_Backend_Feature_Settings_Service::register();
@@ -74,7 +73,6 @@ class AAM_Service_Core
                 AAM_Backend_Feature_Settings_Content::register();
                 AAM_Backend_Feature_Settings_ConfigPress::register();
                 AAM_Backend_Feature_Settings_Manager::register();
-                AAM_Backend_Feature_Addons_Manager::register();
             }, 1);
         }
 
@@ -131,6 +129,9 @@ class AAM_Service_Core
         add_action('aam_set_user_expiration_action', function($settings) {
             AAM::getUser()->setUserExpiration($settings);
         });
+
+        // Bootstrap RESTful API
+        AAM_Core_Restful::bootstrap();
     }
 
     /**

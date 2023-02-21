@@ -139,7 +139,6 @@ trait ResetTrait
      *
      * @access private
      * @see AAM_Core_Subject::getObject
-     * @link https://aamplugin.com/reference/plugin#multiple-roles-support
      * @version 6.0.0
      */
     private function _resetSubjects()

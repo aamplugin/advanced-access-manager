@@ -10,6 +10,7 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
  * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/164
  * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/150
  * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
@@ -19,7 +20,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.2
+ * @version 6.9.6
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -74,15 +75,15 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return void
      *
+     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
+     * @since 6.5.0 Initial implementation of the method
+     *
      * @access public
-     * @version 6.5.0
+     * @version 6.9.6
      */
     public function clearSubjectSettings()
     {
-        $subject  = AAM_Backend_Subject::getInstance()->getSubject();
-        $xpath    = $subject::UID . '.' . $subject->getId();
-
-        AAM_Core_AccessSettings::getInstance()->delete($xpath)->save();
+        AAM_Backend_Subject::getInstance()->getSubject()->reset();
 
         return wp_json_encode(array('status' => 'success'));
     }
@@ -141,7 +142,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 
                 case 'roles':
                     $dataset['roles'] = AAM_Core_API::getOption(
-                        AAM_Core_API::getRoles()->role_key
+                        AAM_Framework_Manager::roles()->role_key
                     );
                     break;
 
@@ -290,7 +291,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 
                         case 'roles':
                             AAM_Core_API::updateOption(
-                                AAM_Core_API::getRoles()->role_key, $settings
+                                AAM_Framework_Manager::roles()->role_key, $settings
                             );
                             break;
 

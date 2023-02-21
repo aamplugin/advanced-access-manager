@@ -345,7 +345,7 @@ class SingleRoleAccessControlTest extends TestCase
         $this->assertTrue($object->updateOptionItem('redirected', array(
             'enabled'     => true,
             'type'        => 'url',
-            'destination' => 'https://aamplugin.com',
+            'destination' => 'https://aamportal.com',
             'httpCode'    => 307
         ))->save());
 
@@ -364,7 +364,7 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
-            'url'    => 'https://aamplugin.com',
+            'url'    => 'https://aamportal.com',
             'status' => 307
         ), $response->get_error_data());
     }

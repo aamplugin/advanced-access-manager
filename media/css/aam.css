@@ -1099,6 +1099,22 @@ input[type=radio]:checked + label:before {
     clear:both;
 }
 
+.error-container {
+  padding: 10px;
+  margin-bottom: 30px;
+}
+
+.error-container > ul {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding-left: 20px;
+  list-style: circle;
+}
+
+.nav>li>a {
+  padding: 10px 10px;
+}
+
 .aam-social {
     font-size: 3em;
     text-align: center;

@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -63,11 +61,7 @@ trait AAM_Core_Contract_SingletonTrait
      */
     public static function getInstance()
     {
-        if (is_null(self::$_instance)) {
-            self::$_instance = self::bootstrap();
-        }
-
-        return self::$_instance;
+        return self::bootstrap();
     }
 
 }

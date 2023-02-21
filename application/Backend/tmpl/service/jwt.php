@@ -6,14 +6,6 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage list of all valid JWT tokens to the website for [%s] account. For more information about JWT tokens please refer to the %sUltimate guide to WordPress JWT authentication%s article.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/ultimate-guide-to-wordpress-jwt-authentication" target="_blank">', '</a>'); ?>
-                </p>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-12">
                 <table id="jwt-list" class="table table-striped table-bordered">
                     <thead>
                         <tr>

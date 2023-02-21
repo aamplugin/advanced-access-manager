@@ -7,7 +7,7 @@
                 <?php echo sprintf(
                     AAM_Backend_View_Helper::preparePhrase('Manage default access to all posts that belong to the post type %s. This feature is available only with the premium %s[Complete Package]%s add-on.', 'b', 'b'),
                     $params->postType->label,
-                    '<a href="https://aamplugin.com/pricing/plus-package">',
+                    '<a href="https://aamportal.com/premium">',
                     '</a>'
                 ); ?>
             </p>

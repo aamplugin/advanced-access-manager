@@ -76,7 +76,7 @@ class AAM_Backend_Feature_Main_Uri
                 $rule['type'],
                 $rule['action'],
                 isset($rule['code']) ? $rule['code'] : 307,
-                "{$prefix}edit,{$prefix}delete"
+                "edit,{$prefix}delete"
             );
         }
 

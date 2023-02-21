@@ -13,7 +13,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend main menu for [%s]. Any menu that is lighter, indicates that [%s] does not have capability to access it. For more information check %sHow to manage WordPress backend menu%s.', 'b', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamplugin.com/article/how-to-manage-wordpress-backend-menu" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend main menu for [%s]. Any menu that is lighter, indicates that [%s] does not have capability to access it. For more information check the %sBackend Menu%s page.', 'b', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/plugin/advanced-access-manager/service/backend-menu" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
@@ -115,7 +115,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <p class="aam-notification">
-                            <?php echo __('Either current user does not have enough capabilities to access any available backend menu or try to refresh the page so AAM can re-index backend menu.', AAM_KEY); ?>
+                            <?php echo __('Try to refresh the page. If no luck, then the current user may not have enough capabilities to access any backend menu item.', AAM_KEY); ?>
                         </p>
                     </div>
                 </div>
@@ -132,7 +132,7 @@
                     <div class="modal-body">
                         <p class="text-center alert alert-warning text-larger">
                             <strong><?php echo __('You cannot restrict access to the Dashboard Home page.', AAM_KEY); ?></strong><br />
-                            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('The [Dashboard Home] is the default page that every user is redirected to after login. To restrict access to the entire backend, check %sHow to lockdown WordPress backend%s article.', 'b'), '<a href="https://aamplugin.com/article/how-to-lockdown-wordpress-backend" target="_blank">', '</a>'); ?>
+                            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('The [Dashboard Home] is the default page every user redirects to after login. To restrict access to the entire backend, check the %sHow to lock down WordPress backend%s Q&A.', 'b'), '<a href="https://aamportal.com/question/backend-access/lockdown-backend-area" target="_blank">', '</a>'); ?>
                         </p>
                     </div>
                     <div class="modal-footer">

@@ -161,9 +161,8 @@ class AAM_Backend_Feature_Main_Capability
             if ($subjectOnly === true) {
                 $this->getSubject()->removeCapability($capability);
             } else {
-                $roles = AAM_Core_API::getRoles();
-                foreach (array_keys($roles->roles) as $roleId) {
-                    $roles->remove_cap($roleId, $capability);
+                foreach (AAM_Framework_Manager::roles()->get_editable_roles() as $role) {
+                    $role->remove_capability($capability, true);
                 }
             }
             $response = array('status' => 'success');

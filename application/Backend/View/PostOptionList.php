@@ -84,7 +84,7 @@ class AAM_Backend_View_PostOptionList
                 'sub'         => __('After', AAM_KEY),
                 'modal'       => 'modal-cease',
                 'exclude'     => array('nav_menu_item'),
-                'description' => __('Define when access will expire to the post.', AAM_KEY) . sprintf(__('After expiration, the access to the post will be denied and redirected based on the Access Denied Redirect rule. For more information %scheck this article%s or ', AAM_KEY), "<a href='https://aamplugin.com/article/how-to-set-expiration-date-for-any-wordpress-content' target='_blank'>", '</a>')
+                'description' => __('Define when access will expire to the post. After expiration, the access to the post will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY)
             ),
             'edit' => array(
                 'title'       => __('Edit', AAM_KEY),

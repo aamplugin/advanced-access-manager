@@ -10,6 +10,7 @@
 /**
  * Addon repository
  *
+ * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/255
  * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
  * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
@@ -23,7 +24,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.5
+ * @version 6.9.6
  */
 class AAM_Addon_Repository
 {
@@ -34,26 +35,10 @@ class AAM_Addon_Repository
      * DB options name
      *
      * @version 6.0.0
+     * @deprecated
+     * @todo Remove in the end of 2023
      */
     const DB_OPTION = 'aam_addons';
-
-    /**
-     * Official list of available addons
-     *
-     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
-     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
-     * @since 6.7.5 Initial implementation of the constant
-     *
-     * @version 6.9.5
-     */
-    const OFFICIAL_ADDON_LIST = array(
-        'aam-complete-package' => array(
-            'title'       => 'Complete Package',
-            'slug'        => 'complete-package',
-            'description' => 'The complete list of all premium AAM features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.',
-            'version'     => '5.3.0'
-        ),
-    );
 
     /**
      * Constructor
@@ -71,13 +56,41 @@ class AAM_Addon_Repository
     }
 
     /**
-     * Get list of all registered licenses
+     * Get premium data
      *
      * @return array
      *
      * @access public
+     * @version 6.9.6
+     */
+    public function getPremiumData()
+    {
+        // Determining if there is newer version
+        $slug      = 'aam-complete-package';
+        $version   = $this->getPluginVersion("{$slug}/bootstrap.php");
+        $hasUpdate = $this->hasPluginUpdate("{$slug}/bootstrap.php");
+
+        return array(
+            'title'       => 'AAM Complete Package',
+            'version'     => $version,
+            'hasUpdate'   => $hasUpdate,
+            'license'     => $this->getPluginLicense($slug),
+            'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', AAM_KEY),
+            'url'         => 'https://aamportal.com/premium'
+        );
+    }
+
+    /**
+     * Get list of all registered licenses
      *
-     * @version 6.9.3
+     * @return array
+     *
+     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/255
+     * @since 6.9.3 Initial implementation of the method
+     *
+     * @access public
+     * @version 6.9.6
+     * @todo Remove support of "registry"
      */
     public function getRegisteredLicenseList()
     {
@@ -88,6 +101,12 @@ class AAM_Addon_Repository
             if (isset($v['license'])) {
                 array_push($response, $v['license']);
             }
+        }
+
+        // New way to handle the licensing
+        if (defined('AAM_COMPLETE_PACKAGE_LICENSE')
+            && !in_array(AAM_COMPLETE_PACKAGE_LICENSE, $response, true)) {
+                array_push($response, AAM_COMPLETE_PACKAGE_LICENSE);
         }
 
         return $response;
@@ -127,130 +146,6 @@ class AAM_Addon_Repository
         }
 
         return $response;
-    }
-
-    /**
-     * Check if there is at least one license registered
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function hasRegistry()
-    {
-        return count($this->getRegistry()) > 0;
-    }
-
-    /**
-     * Reset registry
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.3
-     */
-    public function resetRegistry()
-    {
-        return AAM_Core_API::deleteOption(
-            self::DB_OPTION, AAM_Core_API::getMainSiteId()
-        );
-    }
-
-    /**
-     * Store the license key
-     *
-     * @param object $package
-     * @param string $license
-     *
-     * @return boolean
-     *
-     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
-     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
-     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/81
-     * @since 6.0.5 Initial implementation of the method
-     *
-     * @access public
-     *
-     * @version 6.9.3
-     */
-    public function registerLicense($package, $license)
-    {
-        $list = $this->getRegistry();
-
-        $list[$package['slug']] = array(
-            'license' => $license
-        );
-
-        // Update the registry
-        $result = AAM_Core_API::updateOption(
-            self::DB_OPTION, $list, AAM_Core_API::getMainSiteId()
-        );
-
-        return $result;
-    }
-
-    /**
-     * Get list of all addons with detailed information about each
-     *
-     * @return array
-     *
-     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
-     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
-     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.3
-     */
-    public function getList()
-    {
-        $response = array();
-
-        foreach(self::OFFICIAL_ADDON_LIST as $id => $details) {
-            $response[$id] = $this->buildAddonObject(
-                $details['title'],
-                $details['slug'],
-                __($details['description'], AAM_KEY)
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Build add-on data model
-     *
-     * @param string $title
-     * @param string $slug
-     * @param string $description
-     *
-     * @return array
-     *
-     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
-     * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/92
-     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
-     * @since 6.0.5 Added new `hasUpdate` flag
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.9.3
-     */
-    protected function buildAddonObject($title, $slug, $description)
-    {
-        // Determining if there is newer version
-        $current   = $this->getPluginVersion("aam-{$slug}/bootstrap.php");
-        $hasUpdate = $this->hasPluginUpdate("aam-{$slug}/bootstrap.php");
-
-        return array(
-            'title'       => $title,
-            'version'     => $current,
-            'hasUpdate'   => $hasUpdate,
-            'license'     => $this->getPluginLicense("aam-{$slug}"),
-            'type'        => 'commercial',
-            'description' => $description,
-            'url'         => 'https://aamplugin.com/pricing/' . $slug
-        );
     }
 
     /**

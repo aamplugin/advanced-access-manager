@@ -12,15 +12,6 @@
     <div class="aam-feature" id="login_redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if ($this->getSubject()->isDefault()) {  ?>
-                    <p class="aam-info">
-                        <?php echo AAM_Backend_View_Helper::preparePhrase('Define the [default] login redirect for all the users and roles when authentication is completed successfully.', 'strong'); ?>
-                    </p>
-                <?php } else { ?>
-                    <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize login redirect for [%s] when the authentication is completed successfully. [Note!] Login redirect works with default WordPress login form or %sAAM Secure Login widget%s. It may [not] work with any other login solutions.', 'strong', 'strong', 'strong'), $this->getSubject()->getName(), '<a href="https://aamplugin.com/article/how-does-aam-secure-login-works" target="_blank">', '</a>'); ?>
-                    </p>
-                <?php } ?>
                 <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="login-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>

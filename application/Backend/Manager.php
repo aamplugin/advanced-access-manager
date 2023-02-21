@@ -84,8 +84,6 @@ class AAM_Backend_Manager
 
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
-            $this->checkMigrationStatus();
-
             // Also checking for any legacy add-ons presence. If are available, let
             // user know
             $this->checkForLegacyAddons();
@@ -114,48 +112,6 @@ class AAM_Backend_Manager
     }
 
     /**
-     * Check if there are any pending settings and if so, trigger migration
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function checkMigrationStatus()
-    {
-        if (AAM_Core_Migration::hasPending()) {
-            $results = array('errors' => array(), 'dumps' => array());
-
-            foreach(AAM_Core_Migration::getPending() as $filename) {
-                $executed = AAM_Core_Migration::executeScript($filename);
-
-                if (!empty($executed['errors'])) {
-                    $results['errors'] = array_merge(
-                        $results['errors'], $executed['errors']
-                    );
-                    $results['dumps'][basename($filename)] = $executed['dump'];
-                }
-            }
-
-            // If there are any errors, store the entire log so user can be notified
-            if (!empty($results['errors'])) {
-                AAM_Core_Migration::storeFailureLog($results);
-            }
-        }
-
-        // Check if there are any errors captured during the last migration process
-        $log = AAM_Core_Migration::getFailureLog();
-
-        if (!empty($log['errors'])) {
-            AAM_Core_Console::add(sprintf(
-                __('There was at least one error detected with the automated migration script. %sDownload the log%s for more details and contact our support at %ssupport@aamplugin.com%s for further assistance.', AAM_KEY),
-                '<a href="#" id="download-migration-log">', '</a>',
-                '<a href="mailto:support@aamplugin.com">', '</a>'
-            ));
-        }
-    }
-
-    /**
      * Check for presence of legacy add-ons
      *
      * @return void
@@ -178,21 +134,21 @@ class AAM_Backend_Manager
         if (array_key_exists('aam-plus-package/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
                 __('The Plus Package is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
-                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
+                '<a href="https://aamportal.com/blog/we-are-migrating">', '</a>'
             ));
         }
 
         if (array_key_exists('aam-ip-check/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
                 __('The IP Check is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
-                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
+                '<a href="https://aamportal.com/blog/we-are-migrating">', '</a>'
             ));
         }
 
         if (array_key_exists('aam-role-hierarchy/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
                 __('The Role Hierarchy is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
-                '<a href="https://aamplugin.com/article/we-are-migrating">', '</a>'
+                '<a href="https://aamportal.com/blog/we-are-migrating">', '</a>'
             ));
         }
     }
@@ -215,9 +171,11 @@ class AAM_Backend_Manager
         if (AAM::isAAM()) {
             $subject  = AAM_Backend_Subject::getInstance();
             $locals   = apply_filters('aam_js_localization_filter', array(
-                'nonce'    => wp_create_nonce('aam_ajax'),
-                'ajaxurl'  => esc_url(admin_url('admin-ajax.php')),
-                'ui'       => AAM_Core_Request::get('aamframe', 'main'),
+                'nonce'      => wp_create_nonce('aam_ajax'),
+                'rest_nonce' => wp_create_nonce('wp_rest'),
+                'rest_base'  => esc_url_raw(rest_url('/aam/v2')),
+                'ajaxurl'    => esc_url(admin_url('admin-ajax.php')),
+                'ui'            => AAM_Core_Request::get('aamframe', 'main'),
                 'url' => array(
                     'editUser'  => esc_url(admin_url('user-edit.php')),
                     'addUser'   => esc_url(admin_url('user-new.php')),
@@ -378,7 +336,7 @@ class AAM_Backend_Manager
      * @access public
      * @version 6.0.0
      *
-     * @link https://aamplugin.com/article/how-to-manage-access-to-aam-page-for-other-users
+     * @link https://aamportal.com/question/aam/manage-access-to-aam-for-other-users
      */
     public function adminMenu()
     {
@@ -405,7 +363,7 @@ class AAM_Backend_Manager
             function() {
                 echo AAM_Backend_View::getInstance()->renderPage();
             },
-            AAM_MEDIA . '/active-menu.svg'
+            file_get_contents(AAM_BASEDIR . '/media/active-menu.data')
         );
     }
 

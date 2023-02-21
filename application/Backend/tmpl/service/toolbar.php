@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo AAM_Backend_View_Helper::preparePhrase('[Note!] Toolbar service is not intended to restrict direct access to linked pages. It used only to remove unnecessary items from the top toolbar. Use [Backend Menu] tab to restrict direct access to backend pages or utilize the great power of capabilities.', 'b', 'b'); ?>
+                    <?php echo AAM_Backend_View_Helper::preparePhrase('[Note!] Toolbar service does not restrict direct access to linked pages. It is used only to remove unnecessary items from the top toolbar. Use the [Backend Menu] service to manage direct access to backend pages or customize it with capabilities.', 'b', 'b'); ?>
                 </p>
             </div>
         </div>

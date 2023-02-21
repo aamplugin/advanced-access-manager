@@ -81,7 +81,7 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamplugin.com/support" target="_blank" title="Ask For Help">
+                                    <a href="https://aamportal.com/support" target="_blank" title="Ask For Help">
                                         <i class="icon-chat"></i>
                                         <span><?php echo __('Support', AAM_KEY); ?></span>
                                     </a>
@@ -178,7 +178,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach (AAM_Addon_Repository::getInstance()->getRegisteredLicenseList() as $i => $licenseId) { ?>
+                                            <?php foreach ($licenses as $i => $licenseId) { ?>
                                                 <tr class="<?php echo ($i % 2 === 0 ? 'odd' : 'even'); ?>">
                                                     <td>
                                                         <a href="https://aamportal.com/license/<?php echo esc_attr($licenseId); ?>" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
@@ -190,13 +190,12 @@
                                             <tr>
                                                 <td>
                                                     <p class="alert alert-info text-left">
-                                                        <strong>NOTE!</strong> <?php echo __('Any listed license above only indicates that you used them on this website to download premium AAM add-ons. It does not mean that AAM add-ons are installed and/or active on your website. You can confirm that the premium add-on is active on the Plugins page. ', AAM_KEY); ?>
+                                                        <strong>NOTE!</strong> <?php echo __('Any listed license above only indicates that you used it on this website to download premium AAM add-on(s). It does not mean that the AAM add-on is installed and active on your website. You can verify that the premium add-on is active on the Plugins page.', AAM_KEY); ?>
                                                     </p>
                                                 </td>
                                             </tr>
                                         </tfoot>
                                     </table>
-                                    <a href="#clear-licenses-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Clear All Licenses', AAM_KEY); ?></a>
                                 </div>
                             </div>
                         </div>

@@ -9,16 +9,31 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="modal fade" id="add-role-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title"><?php echo __('Create Role', AAM_KEY); ?></h4>
                 </div>
                 <div class="modal-body">
+                    <div class="error-container hidden aam-notification">
+                        <strong id="role-error-summary"></strong>
+                        <ul id="role-error-list"></ul>
+                    </div>
+
                     <div class="form-group">
                         <label><?php echo __('Role Name', AAM_KEY); ?><span class="aam-asterix">*</span></label>
                         <input type="text" class="form-control" name="name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" />
+                    </div>
+                    <div class="form-group">
+                        <label><?php echo __('Role Slug', AAM_KEY); ?></label>
+                        <input type="text" class="form-control" name="slug" placeholder="<?php echo __('Enter Role Slug', AAM_KEY); ?>" />
+                    </div>
+                    <div class="form-group">
+                        <label><?php echo __('Inherit Capabilities From', AAM_KEY); ?></label>
+                        <select class="form-control inherit-role-list" name="clone_role" id="inherit-role">
+                            <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
+                        </select>
                     </div>
                     <?php echo apply_filters('aam_add_role_ui_filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance')); ?>
                 </div>
@@ -31,22 +46,28 @@
     </div>
 
     <div class="modal fade" id="edit-role-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title"><?php echo __('Update Role', AAM_KEY); ?></h4>
                 </div>
                 <div class="modal-body">
+                    <div class="error-container hidden aam-notification">
+                        <strong id="edit-role-error-summary"></strong>
+                        <ul id="edit-role-error-list"></ul>
+                    </div>
+
                     <div class="form-group">
                         <label for="edit-role-name"><?php echo __('Role Name', AAM_KEY); ?></label>
                         <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', AAM_KEY); ?>" name="name" />
                     </div>
                     <div class="form-group">
                         <label for="new-role-slug"><?php echo __('Role Slug', AAM_KEY); ?></label>
-                        <input type="text" class="form-control" id="edit-role-slug" name="slug" />
+                        <input type="text" class="form-control" id="edit-role-slug" name="new_slug" />
                         <small class="text-muted hint"><?php echo __('Can be changed if no users are assigned to role', AAM_KEY); ?></small>
                     </div>
+
                     <?php do_action('aam_edit_role_ui_action'); ?>
                 </div>
                 <div class="modal-footer">
