@@ -102,7 +102,7 @@ class AAM_Service_Route
                         ),
                         'core.settings.restful' => array(
                             'title'       => __('RESTful WordPress API', AAM_KEY),
-                            'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('RESTful interface that is used to manage WordPress website content and features. For more information check %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
+                            'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] If disabled, the AAM UI may not function as expected. The RESTful interface is used to manage WordPress website content and features. For detail, refer to %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
                             'value'       => AAM_Core_Config::get('core.settings.restful', true)
                         )
                     ));

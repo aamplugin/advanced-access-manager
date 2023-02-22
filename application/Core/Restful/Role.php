@@ -10,8 +10,11 @@
 /**
  * RESTful API for role management
  *
+ * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/259
+ * @since 6.9.6 Initial implementation of the class
+ *
  * @package AAM
- * @since 6.9.6
+ * @since 6.9.7
  */
 class AAM_Core_Restful_Role
 {
@@ -36,7 +39,11 @@ class AAM_Core_Restful_Role
      *
      * @return void
      *
+     * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/259
+     * @since 6.9.7 Initial implementation of the method
+     *
      * @access protected
+     * @version 6.9.7
      */
     protected function __construct()
     {
@@ -100,7 +107,9 @@ class AAM_Core_Restful_Role
                         'description' => __('Unique role slug', AAM_KEY),
                         'type'        => 'string',
                         'validate_callback' => function($value, $request) {
-                            return $this->_validate_role_slug_uniqueness($value, $request);
+                            return $this->_validate_role_slug_uniqueness(
+                                $value, $request
+                            );
                         }
                     ),
                     'name' => array(

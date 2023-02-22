@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/260
  * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
@@ -22,7 +23,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.5
+ * @version 6.9.7
  */
 class AAM_Backend_Manager
 {
@@ -35,6 +36,7 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/260
      * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
      * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
      * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
@@ -42,7 +44,7 @@ class AAM_Backend_Manager
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.5
+     * @version 6.9.7
      */
     protected function __construct()
     {
@@ -87,6 +89,12 @@ class AAM_Backend_Manager
             // Also checking for any legacy add-ons presence. If are available, let
             // user know
             $this->checkForLegacyAddons();
+        }
+
+        if (AAM::api()->getConfig('core.settings.restful', true) === false) {
+            AAM_Core_Console::add(
+                __('The RESTful API is disabled. This may affect the AAM UI. Enable it on the AAM Settings page.', AAM_KEY)
+            );
         }
 
         add_action( 'admin_enqueue_scripts', function() {
