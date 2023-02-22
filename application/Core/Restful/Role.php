@@ -99,8 +99,8 @@ class AAM_Core_Restful_Role
                     'slug' => array(
                         'description' => __('Unique role slug', AAM_KEY),
                         'type'        => 'string',
-                        'validate_callback' => function($value) {
-                            return $this->_validate_role_slug_uniqueness($value);
+                        'validate_callback' => function($value, $request) {
+                            return $this->_validate_role_slug_uniqueness($value, $request);
                         }
                     ),
                     'name' => array(
