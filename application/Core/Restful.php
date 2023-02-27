@@ -29,7 +29,7 @@ class AAM_Core_Restful
     protected function __construct()
     {
         // Register all the RESTful API endpoints
-        AAM_Core_Restful_Role::maybe_bootstrap();
+        AAM_Core_Restful_Role::bootstrap();
     }
 
 }

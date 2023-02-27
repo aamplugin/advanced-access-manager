@@ -293,7 +293,7 @@ class PolicyTokenTest extends TestCase
             array('testProp' => 'helloWorld')
         );
 
-        $_SERVER['HTTP_AUTHENTICATION'] = $result;
+        $_SERVER['HTTP_AUTHENTICATION'] = $result->token;
 
         $this->assertEquals(
             'helloWorld',

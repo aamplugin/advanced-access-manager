@@ -16,6 +16,50 @@
     let aam;
 
     /**
+     * Internal cache
+     */
+    const cache = {
+        roles: null
+    };
+
+    /**
+     * Reset cache value
+     *
+     * @param {string} ns
+     *
+     * @returns {void}
+     */
+    function ResetCache(ns) {
+        cache[ns] = null;
+    }
+
+    /**
+     * Get list of roles
+     *
+     * @param {callback} cb
+     *
+     * @returns {void}
+     */
+    function GetRoles(cb) {
+        if (cache.roles === null) {
+            $.ajax(`${getLocal().rest_base}aam/v2/roles`, {
+                type: 'GET',
+                headers: {
+                    'X-WP-Nonce': getLocal().rest_nonce
+                },
+                dataType: 'json',
+                success: function (response) {
+                    cache.roles = response; // cache the roles
+
+                    cb(response);
+                }
+            });
+        } else {
+            cb(cache.roles);
+        }
+    }
+
+    /**
      *
      * @returns {undefined}
      */
@@ -42,45 +86,39 @@
             }
 
             /**
+             * Load the list of roles
              *
              * @param {type} exclude
              */
-            function fetchRoleList(exclude) {
-                $.ajax(`${getLocal().rest_base}/roles`, {
-                    type: 'GET',
-                    headers: {
-                        'X-WP-Nonce': getLocal().rest_nonce
-                    },
-                    dataType: 'json',
-                    beforeSend: function () {
-                        $('.inherit-role-list').html(
-                            '<option value="">' + getAAM().__('Loading...') + '</option>'
-                        );
-                    },
-                    success: function (response) {
-                        $('.inherit-role-list').html(
-                            '<option value="">' + getAAM().__('No role') + '</option>'
-                        );
+            function LoadRolesDropdown(exclude) {
+                // Display the indicator that the list of roles is loading
+                $('.inherit-role-list').html(
+                    '<option value="">' + getAAM().__('Loading...') + '</option>'
+                );
 
-                        for (var i in response) {
-                            if (exclude !== response[i].slug) {
-                                $('.inherit-role-list').append(
-                                    '<option value="' + response[i].slug + '">' + response[i].name + '</option>'
-                                );
-                            }
+                GetRoles((response) => {
+                    $('.inherit-role-list').html(
+                        '<option value="">' + getAAM().__('No role') + '</option>'
+                    );
+
+                    for (var i in response) {
+                        if (exclude !== response[i].slug) {
+                            $('.inherit-role-list').append(
+                                '<option value="' + response[i].slug + '">' + response[i].name + '</option>'
+                            );
                         }
-
-                        if ($.aamEditRole) {
-                            $('.inherit-role-list').val($.aamEditRole[0]);
-                        }
-
-                        getAAM().triggerHook('post-get-role-list', {
-                            list: response
-                        });
-
-                        //TODO - Rewrite JavaScript to support $.aam
-                        $.aamEditRole = null;
                     }
+
+                    if ($.aamEditRole) {
+                        $('.inherit-role-list').val($.aamEditRole[0]);
+                    }
+
+                    getAAM().triggerHook('post-get-role-list', {
+                        list: response
+                    });
+
+                    //TODO - Rewrite JavaScript to support $.aam
+                    $.aamEditRole = null;
                 });
             }
 
@@ -120,6 +158,15 @@
 
                     getAAM().applyFilters('role-list-fields', fields);
 
+                    // Prepare the RESTful API endpoint
+                    let url = `${getLocal().rest_base}aam/v2/roles`;
+
+                    if (url.indexOf('rest_route') === -1) {
+                        url += `?fields=${fields.join(',')}`;
+                    } else {
+                        url += `&fields=${fields.join(',')}`;
+                    }
+
                     //initialize the role list table
                     $('#role-list').DataTable({
                         autoWidth: false,
@@ -130,7 +177,7 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}/roles?fields=${fields.join(',')}`,
+                            url,
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -292,11 +339,13 @@
                                                 'class': 'aam-row-action icon-pencil text-warning'
                                             }).bind('click', function () {
                                                 resetForm('#edit-role-modal .modal-body');
+
                                                 $('#edit-role-btn').data('role', data[0]);
                                                 $('#edit-role-name').val(data[2]);
                                                 $('#edit-role-slug').val(data[0]);
                                                 $('#edit-role-modal').modal('show');
-                                                fetchRoleList(data[0]);
+
+                                                LoadRolesDropdown(data[0]);
 
                                                 if (data[1] > 0) {
                                                     $('#edit-role-slug').prop('disabled', true);
@@ -445,7 +494,8 @@
                     });
 
                     $('#add-role-modal').on('shown.bs.modal', function (e) {
-                        fetchRoleList();
+                        LoadRolesDropdown();
+
                         //clear add role form first
                         $('input', '#add-role-modal').val('').focus();
                     });
@@ -457,6 +507,8 @@
                     //add role button
                     $('#add-role-btn').bind('click', function () {
                         var _this = this;
+
+                        ResetCache('roles');
 
                         $('input[name="name"]', '#add-role-modal').parent().removeClass(
                             'has-error'
@@ -480,7 +532,7 @@
 
 
                         if (data.name) {
-                            $.ajax(`${getLocal().rest_base}/role`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/role`, {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
@@ -528,6 +580,8 @@
                     $('#edit-role-btn').bind('click', function () {
                         var _this = this;
 
+                        ResetCache('roles');
+
                         $('#edit-role-name').parent().removeClass('has-error');
                         $('#edit-role-slug').parent().removeClass('has-error');
 
@@ -548,10 +602,11 @@
                         });
 
                         if (data.name) {
-                            $.ajax(`${getLocal().rest_base}/role/${$(_this).data('role')}`, {
-                                type: 'PATCH',
+                            $.ajax(`${getLocal().rest_base}aam/v2/role/${$(_this).data('role')}`, {
+                                type: 'POST',
                                 headers: {
-                                    'X-WP-Nonce': getLocal().rest_nonce
+                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-HTTP-Method-Override': 'PATCH'
                                 },
                                 dataType: 'json',
                                 data: data,
@@ -595,10 +650,13 @@
                     $('#delete-role-btn').bind('click', function () {
                         var _this = this;
 
-                        $.ajax(`${getLocal().rest_base}/role/${$(_this).data('role')}`, {
-                            type: 'DELETE',
+                        ResetCache('roles');
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/role/${$(_this).data('role')}`, {
+                            type: 'POST',
                             headers: {
-                                'X-WP-Nonce': getLocal().rest_nonce
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
                             },
                             beforeSend: function () {
                                 $(_this).text(getAAM().__('Deleting...')).attr('disabled', true);
@@ -624,7 +682,6 @@
                         });
                     });
                 }
-                console.log('roles');
             }
 
             //add setSubject hook
@@ -834,23 +891,19 @@
 
                         $('.dataTables_filter', '#user-list_wrapper').append(filter);
 
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Subject_Role.getList',
-                                _ajax_nonce: getLocal().nonce
-                            },
-                            success: function (response) {
-                                $('#user-list-filter').html(
-                                    '<option value="">' + getAAM().__('Filter by role') + '</option>'
+                        $('.inherit-role-list').html(
+                            '<option value="">' + getAAM().__('Loading...') + '</option>'
+                        );
+
+                        GetRoles((response) => {
+                            $('#user-list-filter').html(
+                                '<option value="">' + getAAM().__('Filter by role') + '</option>'
+                            );
+
+                            for (var i in response) {
+                                $('#user-list-filter').append(
+                                    '<option value="' + response[i].slug + '">' + response[i].name + '</option>'
                                 );
-                                for (var i in response) {
-                                    $('#user-list-filter').append(
-                                        '<option value="' + i + '">' + response[i].name + '</option>'
-                                    );
-                                }
                             }
                         });
                     }
@@ -4829,31 +4882,22 @@
      */
     AAM.prototype.loadRoleList = function (selected, target) {
         target = (typeof target === 'undefined' ? '#expiration-change-role' : target);
-        $.ajax(getLocal().ajaxurl, {
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'aam',
-                sub_action: 'Subject_Role.getList',
-                _ajax_nonce: getLocal().nonce
-            },
-            beforeSend: function () {
-                $(target).html(
-                    '<option value="">' + getAAM().__('Loading...') + '</option>'
-                );
-            },
-            success: function (response) {
-                $(target).html(
-                    '<option value="">' + getAAM().__('Select Role') + '</option>'
-                );
-                for (var i in response) {
-                    $(target).append(
-                        '<option value="' + i + '">' + response[i].name + '</option>'
-                    );
-                }
 
-                $(target).val(selected);
+        $(target).html(
+            '<option value="">' + getAAM().__('Loading...') + '</option>'
+        );
+
+        GetRoles((response) => {
+            $(target).html(
+                '<option value="">' + getAAM().__('Select Role') + '</option>'
+            );
+            for (var i in response) {
+                $(target).append(
+                    '<option value="' + response[i].slug + '">' + response[i].name + '</option>'
+                );
             }
+
+            $(target).val(selected);
         });
     }
 

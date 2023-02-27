@@ -65,14 +65,14 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => false,
             'refreshable' => false
         ));
 
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $result->token);
 
         $response = $server->dispatch($request);
 
@@ -91,14 +91,14 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => false
         ));
 
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $result->token);
 
         $response = $server->dispatch($request);
 
@@ -117,7 +117,7 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => false,
@@ -125,7 +125,7 @@ class JwtTest extends TestCase
         ));
 
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $result->token);
 
         $response = $server->dispatch($request);
 
@@ -160,7 +160,7 @@ class JwtTest extends TestCase
 
         // Assert that the new token is there
         $this->assertEquals(1, count($tokens));
-        $this->assertTrue(in_array($res, $tokens, true));
+        $this->assertTrue(in_array($res->token, $tokens, true));
     }
 
     /**
@@ -208,8 +208,8 @@ class JwtTest extends TestCase
         // Assert that token is in the registry
         $this->assertEquals(1, count($tokens));
 
-        $this->assertFalse(in_array($res1, $tokens, true));
-        $this->assertTrue(in_array($res2, $tokens, true));
+        $this->assertFalse(in_array($res1->token, $tokens, true));
+        $this->assertTrue(in_array($res2->token, $tokens, true));
     }
 
     /**
@@ -230,7 +230,7 @@ class JwtTest extends TestCase
 
         // Refresh token
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $jwt->token);
 
         $response = $server->dispatch($request);
 
@@ -272,7 +272,7 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => true,
@@ -280,7 +280,7 @@ class JwtTest extends TestCase
         ));
 
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $result->token);
 
         $response = $server->dispatch($request);
 
@@ -301,14 +301,14 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => false,
             'refreshable' => false
         ));
 
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $result->token);
 
         $response = $server->dispatch($request);
 
@@ -329,14 +329,16 @@ class JwtTest extends TestCase
         // Issue a token that later we'll refresh
         $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
 
-        $this->assertTrue($service->revokeUserToken(AAM_UNITTEST_ADMIN_USER_ID, $jwt));
+        $this->assertTrue(
+            $service->revokeUserToken(AAM_UNITTEST_ADMIN_USER_ID, $jwt->token)
+        );
 
         // Reset cache
         wp_cache_flush();
 
         $tokens = $service->getTokenRegistry(AAM_UNITTEST_ADMIN_USER_ID);
 
-        $this->assertFalse(in_array($jwt, $tokens, true));
+        $this->assertFalse(in_array($jwt->token, $tokens, true));
     }
 
     /**
@@ -357,7 +359,7 @@ class JwtTest extends TestCase
 
         // Refresh token
         $request = new WP_REST_Request('POST', '/aam/v2/jwt/revoke');
-        $request->set_param('jwt', $jwt);
+        $request->set_param('jwt', $jwt->token);
 
         $response = $server->dispatch($request);
 
@@ -375,14 +377,14 @@ class JwtTest extends TestCase
         $server = rest_get_server();
 
         // Generate valid JWT token
-        $jwt = AAM_Core_Jwt_Manager::getInstance()->encode(array(
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
             'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
             'revocable'   => true,
             'refreshable' => false
         ));
 
         $request = new WP_REST_Request('POST', '/wp/v2/posts');
-        $request->set_header('Authorization', "Bearer {$jwt}");
+        $request->set_header('Authorization', "Bearer {$result->token}");
         $request->set_body(json_encode(array(
             'title' => 'Test'
         )));

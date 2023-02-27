@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
  * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
  * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
  *              https://github.com/aamplugin/advanced-access-manager/issues/224
@@ -29,7 +30,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.4
+ * @version 6.9.8
  */
 class AAM_Service_Jwt
 {
@@ -308,13 +309,14 @@ class AAM_Service_Jwt
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
      * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.1.0 Enriched error response with more details
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.4
+     * @version 6.9.8
      */
     public function refreshToken(WP_REST_Request $request)
     {
@@ -331,11 +333,11 @@ class AAM_Service_Jwt
                 $exp = new DateTime();
                 $exp->add($issuedAt->diff($expires));
 
-                $token = $this->issueToken($result->userId, $jwt, $exp, true);
+                $token_result = $this->issueToken($result->userId, $jwt, $exp, true);
 
                 $response = new WP_REST_Response(array(
-                    'token'         => $token,
-                    'token_expires' => $exp->getTimestamp(),
+                    'token'         => $token_result->token,
+                    'token_expires' => $token_result->claims['exp'],
                 ));
             } else {
                 $response = new WP_REST_Response(array(
@@ -406,6 +408,7 @@ class AAM_Service_Jwt
      *
      * @return array
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
      * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/100
@@ -413,7 +416,7 @@ class AAM_Service_Jwt
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.8
      */
     public function prepareLoginResponse(
         array $response, WP_REST_Request $request, $user
@@ -442,10 +445,11 @@ class AAM_Service_Jwt
                 });
             }
 
-            $jwt = $this->issueToken($user->ID, null, null, $refreshable);
+            $token_result = $this->issueToken($user->ID, null, null, $refreshable);
 
             $response['jwt'] = array(
-                'token' => $jwt
+                'token'         => $token_result->token,
+                'token_expires' => $token_result->claims['exp']
             );
         }
 
@@ -462,11 +466,12 @@ class AAM_Service_Jwt
      *
      * @return object
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.8
      */
     public function issueToken(
         $userId,
@@ -484,12 +489,12 @@ class AAM_Service_Jwt
             $claims['exp'] = $expires->getTimestamp();
         }
 
-        $token = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
+        $result = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
 
         // Finally register token so it can be revoked
-        $this->registerToken($userId, $token, $replace);
+        $this->registerToken($userId, $result->token, $replace);
 
-        return $token;
+        return $result;
     }
 
     /**

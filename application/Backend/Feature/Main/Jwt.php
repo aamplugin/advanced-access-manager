@@ -55,11 +55,12 @@ class AAM_Backend_Feature_Main_Jwt
      *
      * @return string
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
      * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.9.0
+     * @version 6.9.8
      */
     public function generate()
     {
@@ -91,11 +92,11 @@ class AAM_Backend_Feature_Main_Jwt
 
             try {
                 if ($max >= AAM_Core_API::maxLevel($user->allcaps)) {
-                    $jwt = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
+                    $res = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
 
                     if ($register === true) {
                         $status = AAM_Service_Jwt::getInstance()->registerToken(
-                            $user->ID, $jwt
+                            $user->ID, $res->token
                         );
                     } else {
                         $status = true;
@@ -103,7 +104,7 @@ class AAM_Backend_Feature_Main_Jwt
 
                     $result = array(
                         'status' => (!empty($status) ? 'success' : 'failure'),
-                        'jwt'    => $jwt
+                        'jwt'    => $res->token
                     );
                 } else {
                     $result['reason'] = __(

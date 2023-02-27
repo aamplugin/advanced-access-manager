@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 6.1.1
-Stable tag: 6.9.7
+Stable tag: 6.9.8
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,11 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.8 =
+* Fixed: Fix the missing token_expires [https://github.com/aamplugin/advanced-access-manager/issues/263](https://github.com/aamplugin/advanced-access-manager/issues/263)
+* Fixed: DataTables warning: table id=role-list - Ajax error [https://github.com/aamplugin/advanced-access-manager/issues/262](https://github.com/aamplugin/advanced-access-manager/issues/262)
+* Fixed: List of users does not filter [https://github.com/aamplugin/advanced-access-manager/issues/261](https://github.com/aamplugin/advanced-access-manager/issues/261)
 
 = 6.9.7 =
 * Fixed: DataTables warning: table id=role-list [https://github.com/aamplugin/advanced-access-manager/issues/258](https://github.com/aamplugin/advanced-access-manager/issues/258)

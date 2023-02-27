@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/262
  * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/260
  * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
@@ -23,7 +24,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.7
+ * @version 6.9.8
  */
 class AAM_Backend_Manager
 {
@@ -166,13 +167,14 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/262
      * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
      *              array of properties
      * @since 6.2.0 Added `blog_id` to the localized array of properties
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.2.2
+     * @version 6.9.8
      */
     public function printFooterJavascript()
     {
@@ -181,7 +183,7 @@ class AAM_Backend_Manager
             $locals   = apply_filters('aam_js_localization_filter', array(
                 'nonce'      => wp_create_nonce('aam_ajax'),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
-                'rest_base'  => esc_url_raw(rest_url('/aam/v2')),
+                'rest_base'  => esc_url_raw(rest_url()),
                 'ajaxurl'    => esc_url(admin_url('admin-ajax.php')),
                 'ui'            => AAM_Core_Request::get('aamframe', 'main'),
                 'url' => array(

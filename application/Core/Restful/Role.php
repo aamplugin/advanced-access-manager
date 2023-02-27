@@ -769,13 +769,13 @@ class AAM_Core_Restful_Role
     }
 
     /**
-     * Making sure that current user can use this namespace
+     * Bootstrap the api
      *
      * @return boolean
      *
      * @access public
      */
-    public static function maybe_bootstrap()
+    public static function bootstrap()
     {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;

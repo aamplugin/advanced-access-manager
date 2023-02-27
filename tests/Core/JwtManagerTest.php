@@ -33,11 +33,11 @@ class JwtManagerTest extends TestCase
     {
         $manager = AAM_Core_Jwt_Manager::getInstance();
 
-        $token = $manager->encode(array('test' => true));
+        $result = $manager->encode(array('test' => true));
 
-        $this->assertIsString($token);
+        $this->assertIsString($result->token);
 
-        $payload = $manager->validate($token);
+        $payload = $manager->validate($result->token);
 
         $this->assertObjectHasAttribute('test', $payload);
         $this->assertObjectHasAttribute('iat', $payload);

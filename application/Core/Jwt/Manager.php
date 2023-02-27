@@ -13,8 +13,11 @@
  * Majority of the work is taken from the Firebase PHP JWT library. The code was
  * adopted to work with PHP 5.6.0+.
  *
+ * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
+ * @since 6.9.0 Initial implementation of the class
+ *
  * @package AAM
- * @since 6.9.0
+ * @version 6.9.8
  *
  * @link https://github.com/firebase/php-jwt
  */
@@ -112,8 +115,11 @@ class AAM_Core_Jwt_Manager
      *
      * @param array $payload
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
+     * @since 6.9.0 Initial implementation of the method
+     *
      * @return string
-     * @version 6.9.0
+     * @version 6.9.8
      */
     public function encode($payload)
     {
@@ -157,7 +163,10 @@ class AAM_Core_Jwt_Manager
             $attrs->alg
         )));
 
-        return implode('.', $segments);
+        return (object) array(
+            'token'  => implode('.', $segments),
+            'claims' => $claims
+        );
     }
 
     /**

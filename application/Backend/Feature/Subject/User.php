@@ -10,11 +10,12 @@
 /**
  * User view manager
  *
+ * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/261
  * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.6
+ * @version 6.9.8
  */
 class AAM_Backend_Feature_Subject_User
 {
@@ -262,11 +263,12 @@ class AAM_Backend_Feature_Subject_User
      *
      * @return \WP_User_Query
      *
+     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/261
      * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.6
+     * @version 6.9.8
      */
     protected function query()
     {
@@ -275,7 +277,7 @@ class AAM_Backend_Feature_Subject_User
 
         // Normalize the input
         if (is_string($search)) { $search = trim($search); }
-        if (is_string($role)) { $search = trim($role); }
+        if (is_string($role)) { $role = trim($role); }
 
         $args = array(
             'blog_id' => get_current_blog_id(),
