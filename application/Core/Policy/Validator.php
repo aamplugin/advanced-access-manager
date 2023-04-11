@@ -12,13 +12,14 @@ use Composer\Semver\Semver;
 /**
  * AAM access policy validator
  *
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/267
  * @since 6.2.2 Bug fixing
  * @since 6.2.0 Allowing to define token in the dependencies array as well as
  *              enhanced with additional attributes
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.2
+ * @version 6.9.9
  */
 class AAM_Core_Policy_Validator
 {
@@ -242,9 +243,12 @@ class AAM_Core_Policy_Validator
      *
      * @return string
      *
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/267
+     * @since 6.0.0 Initial implementation of the method
+     *
      * @access protected
      * @throws Exception
-     * @version 6.0.0
+     * @version 6.9.9
      */
     protected function getPluginVersion($slug)
     {
@@ -255,7 +259,8 @@ class AAM_Core_Policy_Validator
                 require_once ABSPATH . 'wp-admin/includes/plugin.php';
             }
 
-            $plugins = get_plugins();
+            // Also load MU plugins
+            $plugins = array_merge(get_plugins(), $this->_getMUPlugins());
         }
 
         $version = null;
@@ -271,6 +276,41 @@ class AAM_Core_Policy_Validator
         }
 
         return $version;
+    }
+
+    /**
+     * Get list of must-use plugins
+     *
+     * @return array
+     *
+     * @access private
+     * @since 6.9.9
+     */
+    private function _getMUPlugins()
+    {
+        $mu_plugins = array();
+
+        if (is_dir(WPMU_PLUGIN_DIR)) {
+            foreach (new DirectoryIterator(WPMU_PLUGIN_DIR) as $plugin) {
+                if ($plugin->isDir() && !$plugin->isDot()) {
+                    $files = glob($plugin->getPathname() . '/*.php');
+
+                    if ( $files ) {
+                        foreach ($files as $file) {
+                            $info = get_plugin_data($file, false, false);
+
+                            if (!empty( $info['Name'] ) ) {
+                                $slug = $plugin->getBasename() . '/' . basename($file);
+                                $mu_plugins[$slug] = $info;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $mu_plugins;
     }
 
 }

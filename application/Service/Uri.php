@@ -10,14 +10,15 @@
 /**
  * URI access service
  *
- * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.3.0 Fixed bug that causes PHP Notice if URI has not base
  *              (e.g.`?something=1`)
  * @since 6.1.0 The `authorizeUri` returns true if no match found
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.9
  */
 class AAM_Service_Uri
 {
@@ -73,14 +74,19 @@ class AAM_Service_Uri
      *
      * @return void
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.9
      */
     protected function initializeHooks()
     {
+        // Register RESTful API endpoints
+        AAM_Core_Restful_UrlService::bootstrap();
+
+        // Authorize request
         add_action('init', array($this, 'authorizeUri'));
 
         // Policy generation hook
@@ -121,37 +127,43 @@ class AAM_Service_Uri
      *
      * @return boolean
      *
-     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/18
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
+     * @since 6.3.0 https://github.com/aamplugin/advanced-access-manager/issues/18
      * @since 6.1.0 The method return boolean `true` if no matches found
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.9.9
      */
     public function authorizeUri()
     {
-        $uri    = wp_parse_url($this->getFromServer('REQUEST_URI'));
+        // Preparing the list of requested locations that we'll check against the
+        // set list of URL access rules
+        $raw    = $this->getFromServer('REQUEST_URI');
+        $psd    = wp_parse_url($raw);
         $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
         $params = array();
 
-        if (isset($uri['query'])) {
-            parse_str($uri['query'], $params);
+        if (isset($psd['query'])) {
+            parse_str($psd['query'], $params);
         }
 
-        // Get base path from URL
-        $path  = (isset($uri['path']) ? $uri['path'] : null);
-        $match = (!empty($path) ? $object->findMatch($path, $params) : false);
+        if (isset($psd['path'])) {
+            $match = $object->findMatch($psd['path'], $params);
 
-        if (!empty($match)) {
-            if ($match['type'] !== 'allow') {
-                AAM_Core_Redirect::execute(
-                    $match['type'],
-                    array(
-                        $match['type'] => $match['action'],
-                        'code' => (!empty($match['code']) ? $match['code'] : 307)
-                    ),
-                    true
-                );
+            if (!empty($match) && ($match['type'] !== 'allow')) {
+                // Prepare the metadata for the redirect
+                $metadata = array();
+
+                if (!empty($match['code'])){
+                    $metadata['code'] = $match['code'];
+                }
+
+                if (!empty($match['action'])){
+                    $metadata[$match['type']] = $match['action'];
+                }
+
+                AAM_Core_Redirect::execute($match['type'], $metadata, true);
             }
         }
 

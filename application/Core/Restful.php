@@ -24,11 +24,10 @@ class AAM_Core_Restful
      * @return void
      *
      * @access protected
-     * @since 6.9.9
+     * @since 6.9.6
      */
     protected function __construct()
     {
-        // Register all the RESTful API endpoints
         AAM_Core_Restful_Role::bootstrap();
     }
 

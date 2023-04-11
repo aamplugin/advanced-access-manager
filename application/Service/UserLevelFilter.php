@@ -10,12 +10,13 @@
 /**
  * User Level Filter service
  *
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.9
  */
 class AAM_Service_UserLevelFilter
 {
@@ -76,11 +77,12 @@ class AAM_Service_UserLevelFilter
      *
      * @return void
      *
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.9
      */
     protected function initializeHooks()
     {
@@ -100,6 +102,23 @@ class AAM_Service_UserLevelFilter
         add_filter(
             'aam_user_can_manage_level_filter', array($this, 'isUserLevelAllowed'), 10, 2
         );
+
+        // Determine if user is allowed to be managed by other user based on the
+        // user level
+        add_filter('aam_get_user', function($user) {
+            if (is_a($user, WP_User::class)) {
+                $max_cap = AAM_Core_API::maxLevel($user->allcaps);
+
+                if (!$this->isUserLevelAllowed(true, $max_cap)) {
+                    $user = new WP_Error(
+                        'unauthorized_user_level',
+                        'This user is not allowed for managing'
+                    );
+                }
+            }
+
+            return $user;
+        });
 
         // Service fetch
         $this->registerService();

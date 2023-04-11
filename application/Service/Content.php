@@ -10,10 +10,12 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/268
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/264
  * @since 6.7.7 https://github.com/aamplugin/advanced-access-manager/issues/184
  * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
  * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
  * @since 6.1.0 Multiple bug fixed
  * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins
@@ -23,7 +25,7 @@
  * @since 6.0.0 Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.7
+ * @version 6.9.9
  */
 class AAM_Service_Content
 {
@@ -74,11 +76,12 @@ class AAM_Service_Content
      *
      * @return void
      *
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/268
      * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @version 6.5.1
+     * @version 6.9.9
      */
     protected function __construct()
     {
@@ -90,7 +93,9 @@ class AAM_Service_Content
                 });
 
                 // Check if Access Manager metabox feature is enabled
-                $metaboxEnabled = AAM_Core_Config::get('ui.settings.renderAccessMetabox', true);
+                $metaboxEnabled = AAM_Core_Config::get(
+                    'ui.settings.renderAccessMetabox', false
+                );
 
                 if ($metaboxEnabled && current_user_can('aam_manage_content')) {
                     // Make sure that all already registered taxonomies are hooked
@@ -523,13 +528,14 @@ class AAM_Service_Content
      *
      * @return mixed
      *
+     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/264
      * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
      * @since 6.1.0 Fixed bug that causes fatal error when callback is Closure
      * @since 6.0.2 Making sure that get_post returns actual post object
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.6.1
+     * @version 6.9.9
      */
     public function beforeDispatch($response, $handler, $request)
     {
@@ -540,7 +546,7 @@ class AAM_Service_Content
 
         // Override the password authentication handling ONLY for posts
         $attrs      = $request->get_attributes();
-        $callback   = $attrs['callback'];
+        $callback   = isset($attrs['callback']) ? $attrs['callback'] : null;
         $controller = (is_array($callback) ? array_shift($callback) : null);
 
         if (is_a($controller, 'WP_REST_Posts_Controller')) {

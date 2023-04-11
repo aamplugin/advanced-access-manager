@@ -1,11 +1,18 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
+ * @since 6.0.0 Initial implementation of the template
+ *
+ * @version 6.9.9
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="uri-content">
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website URL(s) for the [%s]. Note! All entered URLs have to belong to this particular website.', 'b'), $this->getSubject()->getName()); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website URL(s) for the [%s].', 'b'), $this->getSubject()->getName()); ?>
                 </p>
             </div>
         </div>
@@ -24,7 +31,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('URI Access Rule', AAM_KEY); ?></h4>
+                        <h4 class="modal-title"><?php echo __('URL Access Rule', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -39,53 +46,53 @@
                             <label for="uri-access-allow"><?php echo __('Allow Access', AAM_KEY); ?></label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="uri.access.type" id="uri-access-default" value="default" data-action="none" />
-                            <label for="uri-access-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Deny Access [(show "Access Denied" message)]', 'small'); ?></label>
+                            <input type="radio" name="uri.access.type" id="uri-access-deny" value="deny" data-action="none" />
+                            <label for="uri-access-deny"><?php echo AAM_Backend_View_Helper::preparePhrase('Deny Access [(show "Access Denied" message)]', 'small'); ?></label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="uri.access.type" id="uri-access-deny-message" data-action="#uri-access-deny-message-action" value="message" />
+                            <input type="radio" name="uri.access.type" id="uri-access-deny-message" data-action="#uri-access-custom-message" value="custom_message" />
                             <label for="uri-access-deny-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                         </div>
                         <?php if ($this->getSubject()->isVisitor()) { ?>
                             <div class="radio">
-                                <input type="radio" name="uri.access.type" id="uri-access-deny-login" value="login" />
-                                <label for="uri-access-deny-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
+                                <input type="radio" name="uri.access.type" id="uri-access-deny-login_redirect" value="login_redirect" />
+                                <label for="uri-access-deny-login_redirect"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
                             </div>
                         <?php } ?>
                         <div class="radio">
-                            <input type="radio" name="uri.access.type" id="uri-access-deny-page" data-action="#uri-access-deny-page-action" value="page" />
-                            <label for="uri-access-deny-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing page [(select from the drop-down)]', 'small'); ?></label>
+                            <input type="radio" name="uri.access.type" id="uri-access-deny-page_redirect" data-action="#uri-access-page-redirect" value="page_redirect" />
+                            <label for="uri-access-deny-page_redirect"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing page [(select from the drop-down)]', 'small'); ?></label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="uri.access.type" id="uri-access-deny-url" data-action="#uri-access-deny-url-action" value="url" />
-                            <label for="uri-access-deny-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
+                            <input type="radio" name="uri.access.type" id="uri-access-deny-url_redirect" data-action="#uri-access-url-redirect" value="url_redirect" />
+                            <label for="uri-access-deny-url_redirect"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="uri.access.type" id="uri-access-deny-callback" data-action="#uri-access-deny-callback-action" value="callback" />
-                            <label for="uri-access-deny-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                            <input type="radio" name="uri.access.type" id="uri-access-deny-trigger_callback" data-action="#uri-access-callback" value="trigger_callback" />
+                            <label for="uri-access-deny-trigger_callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
 
-                        <div class="form-group aam-uri-access-action" id="uri-access-deny-message-action" style="display: none;">
+                        <div class="form-group aam-uri-access-action" id="uri-access-custom-message" style="display: none;">
                             <label><?php echo __('Customized Message', AAM_KEY); ?></label>
-                            <textarea class="form-control form-clearable" rows="3" id="uri-access-deny-message-value" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"></textarea>
+                            <textarea class="form-control form-clearable" rows="3" id="uri-access-custom_message-value" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"></textarea>
                         </div>
 
-                        <div class="form-group aam-uri-access-action" id="uri-access-deny-page-action" style="display: none;">
+                        <div class="form-group aam-uri-access-action" id="uri-access-page-redirect" style="display: none;">
                             <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                             <?php
                                 wp_dropdown_pages(array(
                                     'depth' => 99,
                                     'echo' => 1,
-                                    'id' => 'uri-access-deny-page-value',
+                                    'id' => 'uri-access-page_redirect-value',
                                     'class' => 'form-control form-clearable',
                                     'show_option_none' => __('-- Select Page --', AAM_KEY)
                                 ));
                             ?>
                         </div>
 
-                        <div class="form-group aam-uri-access-action" id="uri-access-deny-url-action" style="display: none;">
+                        <div class="form-group aam-uri-access-action" id="uri-access-url-redirect" style="display: none;">
                             <label><?php echo __('The Valid Redirect URL', AAM_KEY); ?></label>
-                            <input type="text" class="form-control form-clearable" placeholder="https://" id="uri-access-deny-url-value" />
+                            <input type="text" class="form-control form-clearable" placeholder="https://" id="uri-access-url_redirect-value" />
                         </div>
 
                         <div class="form-group aam-uri-access-action" id="uri-access-deny-redirect-code" style="display: none;">
@@ -99,9 +106,9 @@
                             </select>
                         </div>
 
-                        <div class="form-group aam-uri-access-action" id="uri-access-deny-callback-action" style="display: none;">
+                        <div class="form-group aam-uri-access-action" id="uri-access-callback" style="display: none;">
                             <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                            <input type="text" class="form-control form-clearable" placeholder="Enter valid callback" id="uri-access-deny-callback-value" />
+                            <input type="text" class="form-control form-clearable" placeholder="Enter valid callback" id="uri-access-trigger_callback-value" />
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -117,12 +124,12 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Delete URI Rule', AAM_KEY); ?></h4>
+                        <h4 class="modal-title"><?php echo __('Delete URL Rule', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <p class="aam-notification">
-                                <?php echo __('You are about to delete the URI Rule. Please confirm!', AAM_KEY); ?>
+                                <?php echo __('You are about to delete the URL Rule. Please confirm!', AAM_KEY); ?>
                             </p>
                         </div>
                     </div>
@@ -139,7 +146,8 @@
                 <table id="uri-list" class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th width="60%"><?php echo __('URI', AAM_KEY); ?></th>
+                            <th>ID</th>
+                            <th width="60%"><?php echo __('URL', AAM_KEY); ?></th>
                             <th width="20%"><?php echo __('Type', AAM_KEY); ?></th>
                             <th>Type Details</th>
                             <th>HTTP Code</th>

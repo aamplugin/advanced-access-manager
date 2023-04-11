@@ -8,7 +8,7 @@
  */
 
 /**
- * AAM framework manager
+ * AAM service role manage
  *
  * @package AAM
  * @since 6.9.6

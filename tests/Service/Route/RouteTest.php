@@ -12,7 +12,6 @@ namespace AAM\UnitTest\Service\Route;
 use AAM,
     WP_REST_Request,
     AAM_Core_Config,
-    AAM_Service_Route,
     AAM_Core_Object_Route,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
@@ -70,8 +69,6 @@ class RouteTest extends TestCase
      */
     public function testRestrictedRESTfulEndpoint()
     {
-        global $wp;
-
         $object = AAM::getUser()->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
 
         // Restrict AAM authentication endpoint
@@ -85,10 +82,12 @@ class RouteTest extends TestCase
         $request->set_param('username', AAM_UNITTEST_USERNAME);
         $request->set_param('password', AAM_UNITTEST_PASSWORD);
 
-        $error = $server->dispatch($request);
+        $response = $server->dispatch($request);
 
-        $this->assertEquals('WP_Error', get_class($error));
-        $this->assertEquals('Access Denied', $error->get_error_message());
+        $this->assertEquals('WP_REST_Response', get_class($response));
+        $this->assertEquals('rest_access_denied', $response->data['code']);
+        $this->assertEquals('Access Denied', $response->data['message']);
+        $this->assertEquals(401, $response->data['data']['status']);
     }
 
     /**
@@ -102,8 +101,6 @@ class RouteTest extends TestCase
      */
     public function testCaseInsensitiveRESTfulEndpoint()
     {
-        global $wp;
-
         $object = AAM::getUser()->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
 
         // Restrict AAM authentication endpoint
@@ -113,14 +110,16 @@ class RouteTest extends TestCase
 
         $server = rest_get_server();
 
-        $request = new WP_REST_Request('POST', '/aam/v2/Authenticate');
+        $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
         $request->set_param('username', AAM_UNITTEST_USERNAME);
         $request->set_param('password', AAM_UNITTEST_PASSWORD);
 
-        $error = $server->dispatch($request);
+        $response = $server->dispatch($request);
 
-        $this->assertEquals('WP_Error', get_class($error));
-        $this->assertEquals('Access Denied', $error->get_error_message());
+        $this->assertEquals('WP_REST_Response', get_class($response));
+        $this->assertEquals('rest_access_denied', $response->data['code']);
+        $this->assertEquals('Access Denied', $response->data['message']);
+        $this->assertEquals(401, $response->data['data']['status']);
     }
 
 }

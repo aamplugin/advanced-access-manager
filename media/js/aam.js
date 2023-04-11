@@ -3897,8 +3897,34 @@
          * @returns {void}
          */
         (function ($) {
+
+            /**
+             *
+             * @returns
+             */
+            function prepareRequestSubjectData(mergeWith = {}) {
+                // Prepare the payload
+                const data = {
+                    access_level: getAAM().getSubject().type
+                };
+
+                if (data.access_level === 'role') {
+                    data.role_id = getAAM().getSubject().id;
+                } else if (data.access_level === 'user') {
+                    data.user_id = getAAM().getSubject().id;
+                }
+
+                return Object.assign({}, mergeWith, data);
+            }
+
+            /**
+             *
+             */
             function initialize() {
-                var container = '#uri-content';
+                const container = '#uri-content';
+
+                // Currently editing rule
+                let editingRule;
 
                 if ($(container).length) {
                     $('input[type="radio"]', container).each(function () {
@@ -3911,7 +3937,7 @@
                                 $(action).show();
                             }
 
-                            if ($(this).val() === 'page' || $(this).val() === 'url') {
+                            if (['page_redirect', 'url_redirect'].includes($(this).val())) {
                                 $('#uri-access-deny-redirect-code').show();
                             }
                         });
@@ -3919,48 +3945,89 @@
 
                     //reset button
                     $('#uri-reset').bind('click', function () {
-                        getAAM().reset('Main_Uri.reset', $(this));
+                        const _btn = $(this);
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/url/reset`, {
+                            type: 'POST',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            data: prepareRequestSubjectData(),
+                            dataType: 'json',
+                            beforeSend: function () {
+                                var label = _btn.text();
+                                _btn.attr('data-original-label', label);
+                                _btn.text(getAAM().__('Resetting...'));
+                            },
+                            success: function () {
+                                getAAM().fetchContent('main');
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                _btn.text(_btn.attr('data-original-label'));
+                            }
+                        });
                     });
 
                     $('#uri-save-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        var uri  = $('#uri-rule').val();
-                        var original = $(this).attr('data-original-uri');
-                        var type = $('input[name="uri.access.type"]:checked').val();
-                        var val  = $('#uri-access-deny-' + type + '-value').val();
-                        var code = $('#uri-access-deny-redirect-code-value').val();
+                        const uri    = $('#uri-rule').val();
+                        const type   = $('input[name="uri.access.type"]:checked').val();
+                        const code   = $('#uri-access-deny-redirect-code-value').val();
 
                         if (uri && type) {
-                            $.ajax(getLocal().ajaxurl, {
+                            // Preparing the payload
+                            const payload = {
+                                url: uri,
+                                type: type
+                            }
+
+                            if (type === 'custom_message') {
+                                payload.message = $.trim(
+                                    $('#uri-access-custom_message-value').val()
+                                );
+                            } else if (type === 'page_redirect') {
+                                payload.redirect_page_id = parseInt(
+                                    $('#uri-access-page_redirect-value').val(), 10
+                                );
+                            } else if (type === 'url_redirect') {
+                                payload.redirect_url = $.trim(
+                                    $('#uri-access-url_redirect-value').val()
+                                );
+                            } else if (type === 'trigger_callback') {
+                                payload.callback = $.trim(
+                                    $('#uri-access-trigger_callback-value').val()
+                                );
+                            }
+
+                            if (code) {
+                                payload.http_redirect_code = parseInt(code, 10);
+                            }
+
+                            let endpoint = `${getLocal().rest_base}aam/v2/service/url`;
+
+                            if (editingRule !== null) {
+                                endpoint += '/' + editingRule[0];
+                            }
+
+                            $.ajax(endpoint, {
                                 type: 'POST',
                                 dataType: 'json',
-                                data: {
-                                    action: 'aam',
-                                    sub_action: 'Main_Uri.save',
-                                    _ajax_nonce: getLocal().nonce,
-                                    subject: getAAM().getSubject().type,
-                                    subjectId: getAAM().getSubject().id,
-                                    uri: uri,
-                                    edited_uri: original,
-                                    type: type,
-                                    value: val,
-                                    code: code
+                                data: prepareRequestSubjectData(payload),
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce,
                                 },
                                 beforeSend: function () {
                                     $('#uri-save-btn').text(
                                         getAAM().__('Saving...')
                                     ).attr('disabled', true);
                                 },
-                                success: function (response) {
-                                    if (response.status === 'success') {
-                                        $('#uri-list').DataTable().ajax.reload();
-                                        $('#aam-uri-overwrite').show();
-                                    } else {
-                                        getAAM().notification(
-                                            'danger', getAAM().__('Failed to save URI rule')
-                                        );
-                                    }
+                                success: function () {
+                                    $('#uri-list').DataTable().ajax.reload();
+                                    $('#aam-uri-overwrite').show();
                                 },
                                 error: function () {
                                     getAAM().notification('danger');
@@ -3976,31 +4043,23 @@
                     $('#uri-delete-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        $.ajax(getLocal().ajaxurl, {
+                        const id = $('#uri-delete-btn').attr('data-id');
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/url/${id}`, {
                             type: 'POST',
                             dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Main_Uri.delete',
-                                _ajax_nonce: getLocal().nonce,
-                                subject: getAAM().getSubject().type,
-                                subjectId: getAAM().getSubject().id,
-                                uri: $('#uri-delete-btn').attr('data-uri')
+                            data: prepareRequestSubjectData(),
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
                             },
                             beforeSend: function () {
                                 $('#uri-delete-btn').text(
                                     getAAM().__('Deleting...')
                                 ).attr('disabled', true);
                             },
-                            success: function (response) {
-                                if (response.status === 'success') {
-                                    $('#uri-list').DataTable().ajax.reload();
-                                } else {
-                                    getAAM().notification(
-                                        'danger',
-                                        getAAM().__('Failed to delete URI rule')
-                                    );
-                                }
+                            success: function () {
+                                $('#uri-list').DataTable().ajax.reload();
                             },
                             error: function () {
                                 getAAM().notification('danger');
@@ -4021,16 +4080,50 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: getLocal().ajaxurl,
-                            type: 'POST',
+                            url: `${getLocal().rest_base}aam/v2/service/url`,
+                            type: 'GET',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            data: prepareRequestSubjectData(),
                             dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Main_Uri.getTable',
-                                _ajax_nonce: getLocal().nonce,
-                                subject: getAAM().getSubject().type,
-                                subjectId: getAAM().getSubject().id
-                            }
+                            dataSrc: function (json) {
+                                // Transform the received data into DT format
+                                const data = [];
+
+                                $.each(json, (_, rule) => {
+                                    const actions = ['edit'];
+
+                                    if (rule.is_inherited) {
+                                        actions.push('no-delete');
+                                    } else {
+                                        actions.push('delete');
+                                    }
+
+                                    let action = null;
+
+                                    if (rule.type === 'custom_message') {
+                                        action = rule.message;
+                                    } else if (rule.type === 'trigger_callback') {
+                                        action = rule.callback;
+                                    } else if (rule.type === 'url_redirect') {
+                                        action = rule.redirect_url;
+                                    } else if (rule.type === 'page_redirect') {
+                                        action = rule.redirect_page_id;
+                                    }
+
+                                    data.push([
+                                        rule.id,
+                                        rule.url,
+                                        rule.type,
+                                        action,
+                                        rule.http_redirect_code || null,
+                                        actions.join(',')
+                                    ]);
+                                });
+
+                                return data;
+                            },
                         },
                         language: {
                             search: '_INPUT_',
@@ -4039,7 +4132,7 @@
                             infoFiltered: ''
                         },
                         columnDefs: [
-                            { visible: false, targets: [2, 3] }
+                            { visible: false, targets: [0, 3, 4] }
                         ],
                         initComplete: function () {
                             var create = $('<a/>', {
@@ -4047,6 +4140,8 @@
                                 'class': 'btn btn-primary'
                             }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
                                 .bind('click', function () {
+                                    editingRule = null;
+
                                     $('.form-clearable', '#uri-model').val('');
                                     $('.aam-uri-access-action').hide();
                                     $('#uri-save-btn').removeAttr('data-original-uri');
@@ -4057,7 +4152,7 @@
                             $('.dataTables_filter', '#uri-list_wrapper').append(create);
                         },
                         createdRow: function (row, data) {
-                            var actions = data[4].split(',');
+                            var actions = data[5].split(',');
 
                             var container = $('<div/>', { 'class': 'aam-row-actions' });
                             $.each(actions, function (i, action) {
@@ -4066,13 +4161,14 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-pencil text-warning'
                                         }).bind('click', function () {
+                                            editingRule = data;
+
                                             $('.form-clearable', '#uri-model').val('');
                                             $('.aam-uri-access-action').hide();
-                                            $('#uri-rule').val(data[0]);
-                                            $('#uri-save-btn').attr('data-original-uri', data[0]);
-                                            $('input[value="' + data[1] + '"]', '#uri-model').prop('checked', true).trigger('click');
-                                            $('#uri-access-deny-' + data[1] + '-value').val(data[2]);
-                                            $('#uri-access-deny-redirect-code-value').val(data[3]);
+                                            $('#uri-rule').val(data[1]);
+                                            $('input[value="' + data[2] + '"]', '#uri-model').prop('checked', true).trigger('click');
+                                            $('#uri-access-' + data[2] + '-value').val(data[3]);
+                                            $('#uri-access-deny-redirect-code-value').val(data[4]);
                                             $('#uri-model').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -4093,7 +4189,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-trash-empty text-danger'
                                         }).bind('click', function () {
-                                            $('#uri-delete-btn').attr('data-uri', data[0]);
+                                            $('#uri-delete-btn').attr('data-id', data[0]);
                                             $('#uri-delete-model').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -4118,21 +4214,21 @@
                             // Decorate the type of access
                             var type = $('<span/>');
 
-                            switch(data[1]) {
-                                case 'default':
-                                case 'message':
+                            switch(data[2]) {
+                                case 'deny':
+                                case 'custom_message':
                                     type.html(getAAM().__('Denied'));
                                     type.attr('class', 'badge danger');
                                     break;
 
-                                case 'login':
-                                case 'page':
-                                case 'url':
+                                case 'login_redirect':
+                                case 'page_redirect':
+                                case 'url_redirect':
                                     type.html(getAAM().__('Redirected'));
                                     type.attr('class', 'badge redirect');
                                     break;
 
-                                case 'callback':
+                                case 'trigger_callback':
                                     type.html(getAAM().__('Callback'));
                                     type.attr('class', 'badge callback');
                                     break;

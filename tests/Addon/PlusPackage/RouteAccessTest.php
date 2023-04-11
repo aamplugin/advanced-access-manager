@@ -45,9 +45,10 @@ class RouteAccessTest extends TestCase
         $server   = rest_get_server();
         $response = $server->dispatch($request);
 
-        $this->assertEquals('WP_Error', get_class($response));
-        $this->assertEquals('Access Denied', $response->get_error_message());
-        $this->assertEquals('rest_access_denied', $response->get_error_code());
+        $this->assertEquals('WP_REST_Response', get_class($response));
+        $this->assertEquals('rest_access_denied', $response->data['code']);
+        $this->assertEquals('Access Denied', $response->data['message']);
+        $this->assertEquals(401, $response->data['data']['status']);
     }
 
     /**
@@ -70,9 +71,10 @@ class RouteAccessTest extends TestCase
         $server   = rest_get_server();
         $response = $server->dispatch($request);
 
-        $this->assertEquals('WP_Error', get_class($response));
-        $this->assertEquals('Access Denied', $response->get_error_message());
-        $this->assertEquals('rest_access_denied', $response->get_error_code());
+        $this->assertEquals('WP_REST_Response', get_class($response));
+        $this->assertEquals('rest_access_denied', $response->data['code']);
+        $this->assertEquals('Access Denied', $response->data['message']);
+        $this->assertEquals(401, $response->data['data']['status']);
     }
 
     /**
@@ -95,9 +97,10 @@ class RouteAccessTest extends TestCase
         $server   = rest_get_server();
         $response = $server->dispatch($request);
 
-        $this->assertEquals('WP_Error', get_class($response));
-        $this->assertEquals('Access Denied', $response->get_error_message());
-        $this->assertEquals('rest_access_denied', $response->get_error_code());
+        $this->assertEquals('WP_REST_Response', get_class($response));
+        $this->assertEquals('rest_access_denied', $response->data['code']);
+        $this->assertEquals('Access Denied', $response->data['message']);
+        $this->assertEquals(401, $response->data['data']['status']);
     }
 
 }

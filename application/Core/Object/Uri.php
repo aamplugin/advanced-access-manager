@@ -64,8 +64,8 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
      *
      * @return null|array
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/77
-     * @since 6.3.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/17
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/77
+     * @since 6.3.0 https://github.com/aamplugin/advanced-access-manager/issues/17
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public

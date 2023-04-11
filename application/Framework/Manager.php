@@ -29,4 +29,32 @@ class AAM_Framework_Manager
         return AAM_Framework_Service_Roles::bootstrap();
     }
 
+    /**
+     * Get the URL Access service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_Urls
+     *
+     * @access public
+     * @since 6.9.9
+     */
+    public static function urls($runtime_context = null)
+    {
+        return AAM_Framework_Service_Urls::get_instance($runtime_context);
+    }
+
+    /**
+     * Get the subject service
+     *
+     * @return AAM_Framework_Service_Subject
+     *
+     * @access public
+     * @since 6.9.9
+     */
+    public static function subject()
+    {
+        return AAM_Framework_Service_Subject::bootstrap();
+    }
+
 }
