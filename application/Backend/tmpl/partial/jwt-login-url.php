@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.10
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="form-group aam-bordered aam-outer-top-xs">
@@ -11,7 +18,6 @@
             <span class="input-group-btn">
                 <a href="#" class="btn btn-primary" id="request-login-url"><?php echo __('Request URL', AAM_KEY); ?></a>
             </span>
-            <input type="hidden" id="login-jwt" />
         </div>
         <small><?php echo AAM_Backend_View_Helper::preparePhrase('With this URL user will be automatically logged in until defined date and time. The JWT token associated with URL is [revokable] however not [refreshable].', 'i', 'i'); ?></small>
     </div>

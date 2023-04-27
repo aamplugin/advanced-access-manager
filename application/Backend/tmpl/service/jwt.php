@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.10
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="jwt-content">
@@ -9,10 +16,11 @@
                 <table id="jwt-list" class="table table-striped table-bordered">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Token</th>
                             <th>URL</th>
                             <th width="8%">&nbsp;</th>
-                            <th width="70%"><?php echo __('Expires', AAM_KEY); ?></th>
+                            <th width="70%"><?php echo __('ID/Status', AAM_KEY); ?></th>
                             <th><?php echo __('Actions', AAM_KEY); ?></th>
                         </tr>
                     </thead>
@@ -53,23 +61,17 @@
                             </tbody>
                         </table>
 
-                        <div class="form-group aam-outer-top-xs">
-                            <label for="jwt-token-preview" class="aam-block">
-                                <?php echo __('JWT Token (for API request)', AAM_KEY); ?>
-                                <a href="#" class="aam-copy-clipboard" data-clipboard-target="#jwt-token-preview"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>
+                        <div class="form-group jwt-claims-container">
+                            <label for="aam-jwt-claims-editor" class="aam-block">
+                                <?php echo __('JWT Additional Claims', AAM_KEY); ?>
                             </label>
-                            <input type="text" class="form-control" id="jwt-token-preview" readonly />
-                        </div>
-
-                        <hr/>
-
-                        <div class="form-group">
-                            <label for="jwt-url-preview" class="aam-block">
-                                <?php echo __('Passwordless Login URL', AAM_KEY); ?>
-                                <a href="#" class="aam-copy-clipboard" data-clipboard-target="#jwt-url-preview"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>
-                            </label>
-                            <input type="text" class="form-control" id="jwt-url-preview" data-url="<?php echo add_query_arg('aam-jwt', '%s', site_url()); ?>" readonly />
-                            <small><?php echo __('With this URL account will be automatically logged in as long as JWT token is valid.', AAM_KEY); ?></small>
+                            <textarea
+                                id="aam-jwt-claims-editor"
+                                class="configpress-editor"
+                                style="border: 1px solid #CCCCCC; width: 100%"
+                                rows="5"
+                            ></textarea>
+                            <small><?php echo __('Additional claims to include in the token.', AAM_KEY); ?></small>
                         </div>
                     </div>
                     <div class="modal-footer">

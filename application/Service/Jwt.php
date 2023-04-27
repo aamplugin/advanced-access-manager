@@ -10,27 +10,28 @@
 /**
  * JWT Token service
  *
- * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
- * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
- * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
- *              https://github.com/aamplugin/advanced-access-manager/issues/224
- * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
- * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/136
- * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
- *              https://github.com/aamplugin/advanced-access-manager/issues/100
- *              https://github.com/aamplugin/advanced-access-manager/issues/118
- * @since 6.5.2 https://github.com/aamplugin/advanced-access-manager/issues/117
- * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/99
- *              https://github.com/aamplugin/advanced-access-manager/issues/98
- * @since 6.4.0 Added the ability to issue refreshable token via API.
- *              https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.3.0 Fixed incompatibility with other plugins that check for RESTful error
- *              status through `rest_authentication_errors` filter
- * @since 6.1.0 Enriched error response with more details
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
+ * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/263
+ * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
+ * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
+ *               https://github.com/aamplugin/advanced-access-manager/issues/224
+ * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
+ * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/136
+ * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/129
+ *               https://github.com/aamplugin/advanced-access-manager/issues/100
+ *               https://github.com/aamplugin/advanced-access-manager/issues/118
+ * @since 6.5.2  https://github.com/aamplugin/advanced-access-manager/issues/117
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/99
+ *               https://github.com/aamplugin/advanced-access-manager/issues/98
+ * @since 6.4.0  Added the ability to issue refreshable token via API.
+ *               https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.3.0  Fixed incompatibility with other plugins that check for RESTful error
+ *               status through `rest_authentication_errors` filter
+ * @since 6.1.0  Enriched error response with more details
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.8
+ * @version 6.9.10
  */
 class AAM_Service_Jwt
 {
@@ -103,14 +104,15 @@ class AAM_Service_Jwt
      *
      * @return void
      *
-     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/129
-     * @since 6.4.0 Added the ability to issue refreshable token through API.
-     *              Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/25
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
+     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/129
+     * @since 6.4.0  Added the ability to issue refreshable token through API.
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.3.0  https://github.com/aamplugin/advanced-access-manager/issues/25
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.6.0
+     * @version 6.9.10
      */
     protected function initializeHooks()
     {
@@ -131,6 +133,9 @@ class AAM_Service_Jwt
                 array('meta_key' => $wpdb->prefix . AAM_Service_Jwt::DB_OPTION)
             );
         });
+
+        // Register RESTful API
+        AAM_Core_Restful_JwtService::bootstrap();
 
         // Register API endpoint
         add_action('rest_api_init', array($this, 'registerAPI'));
@@ -593,6 +598,21 @@ class AAM_Service_Jwt
         }
 
         return update_user_option($userId, self::DB_OPTION, $filtered);
+    }
+
+    /**
+     * Deleting all the tokens for user
+     *
+     * @param int $userId
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 6.9.10
+     */
+    public function resetTokenRegistry($userId)
+    {
+        return delete_user_option($userId, self::DB_OPTION);
     }
 
     /**

@@ -13,11 +13,12 @@
  * Majority of the work is taken from the Firebase PHP JWT library. The code was
  * adopted to work with PHP 5.6.0+.
  *
- * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
- * @since 6.9.0 Initial implementation of the class
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
+ * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/263
+ * @since 6.9.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.8
+ * @version 6.9.10
  *
  * @link https://github.com/firebase/php-jwt
  */
@@ -180,6 +181,29 @@ class AAM_Core_Jwt_Manager
     public function decode($token)
     {
         return $this->validate($token, $this->getSigningAttributes()->key);
+    }
+
+    /**
+     * Just extract claims and ignore errors
+     *
+     * @param string $token
+     *
+     * @return array|null
+     *
+     * @access public
+     * @version 6.9.10
+     */
+    public function extractClaims($token)
+    {
+        $response = null;
+
+        try {
+            $response = $this->decodeSegment($token, 1);
+        } catch (Exception $e) {
+            // Do nothing
+        }
+
+        return $response;
     }
 
     /**

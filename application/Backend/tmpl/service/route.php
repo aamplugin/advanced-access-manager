@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.10
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="route-content">
@@ -16,8 +23,7 @@
         <table id="route-list" class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <th>Route Raw</th>
-                    <th>Type</th>
+                    <th>ID</th>
                     <th width="10%"><?php echo __('Method', AAM_KEY); ?></th>
                     <th width="80%"><?php echo __('Route', AAM_KEY); ?></th>
                     <th><?php echo __('Deny', AAM_KEY); ?></th>

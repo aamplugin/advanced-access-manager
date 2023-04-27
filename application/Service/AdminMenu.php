@@ -10,12 +10,13 @@
 /**
  * Admin Menu service
  *
- * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
- * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
+ * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.5
+ * @version 6.9.10
  */
 class AAM_Service_AdminMenu
 {
@@ -329,33 +330,44 @@ class AAM_Service_AdminMenu
      *
      * @access public
      * @global string $plugin_page
-     * @version 6.0.0
+     *
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
+     * @since 6.0.0  Initial implementation of the method
+     *
+     * @version 6.9.10
      */
     public function checkScreenAccess()
     {
         global $plugin_page;
 
         // Compile menu
-        $menu = $plugin_page;
+        $id = $plugin_page;
 
-        if (empty($menu)) {
-            $menu     = basename(AAM_Core_Request::server('SCRIPT_NAME'));
+        if (empty($id)) {
+            $id       = basename(AAM_Core_Request::server('SCRIPT_NAME'));
             $taxonomy = AAM_Core_Request::get('taxonomy');
             $postType = AAM_Core_Request::get('post_type');
             $page     = AAM_Core_Request::get('page');
+            $params   = array();
 
             if (!empty($taxonomy)) {
-                $menu .= '?taxonomy=' . $taxonomy;
-            } elseif (!empty($postType) && ($postType !== 'post')) {
-                $menu .= '?post_type=' . $postType;
+                array_push($params, 'taxonomy=' . $taxonomy);
+            }
+
+            if (!empty($postType) && ($postType !== 'post')) {
+                array_push($params, 'post_type=' . $postType);
             } elseif (!empty($page)) {
-                $menu .= '?page=' . $page;
+                array_push($params, 'page=' . $page);
+            }
+
+            if (count($params)) {
+                $id = '?' . implode('&', $params);
             }
         }
 
         $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
 
-        if ($object->isRestricted($menu)) {
+        if ($object->isRestricted($id)) {
             wp_die(
                 __('Sorry, you are not allowed to view this page.', AAM_KEY),
                 'aam_access_denied'

@@ -10,11 +10,12 @@
 /**
  * RESTful API for role management
  *
- * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/259
- * @since 6.9.6 Initial implementation of the class
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
+ * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
+ * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @since 6.9.7
+ * @version 6.9.10
  */
 class AAM_Core_Restful_Role
 {
@@ -242,6 +243,7 @@ class AAM_Core_Restful_Role
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @version 6.9.6
      */
     public function get_role_list(WP_REST_Request $request)
     {
@@ -265,6 +267,7 @@ class AAM_Core_Restful_Role
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @version 6.9.6
      */
     public function get_role(WP_REST_Request $request)
     {
@@ -290,6 +293,7 @@ class AAM_Core_Restful_Role
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @version 6.9.6
      */
     public function create_role(WP_REST_Request $request)
     {
@@ -359,6 +363,11 @@ class AAM_Core_Restful_Role
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     *
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
+     * @since 6.9.6  Initial implementation of the method
+     *
+     * @version 6.9.10
      */
     public function update_role(WP_REST_Request $request)
     {
@@ -378,7 +387,7 @@ class AAM_Core_Restful_Role
 
             // Setting new slug if provided
             if (!empty($new_slug)) {
-                $role->set_slug($new_slug);
+                $role->set_slug(sanitize_key($new_slug));
             }
 
             // Set new display name if provided
@@ -427,6 +436,7 @@ class AAM_Core_Restful_Role
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @version 6.9.6
      */
     public function delete_role(WP_REST_Request $request)
     {
@@ -466,6 +476,7 @@ class AAM_Core_Restful_Role
      * @return boolean
      *
      * @access private
+     * @version 6.9.6
      */
     private function _clone_settings($role, $parent)
     {
@@ -484,6 +495,7 @@ class AAM_Core_Restful_Role
      * @param array                    $fields
      *
      * @return array
+     * @version 6.9.6
      */
     protected function prepare_role_output(
         AAM_Framework_Proxy_Role $role, $fields = array()
@@ -523,6 +535,7 @@ class AAM_Core_Restful_Role
      * @param AAM_Framework_Proxy_Role $role
      *
      * @return array
+     * @version 6.9.6
      */
     protected function get_role_permissions(AAM_Framework_Proxy_Role $role)
     {
@@ -556,6 +569,7 @@ class AAM_Core_Restful_Role
      * @return array
      *
      * @access private
+     * @version 6.9.6
      */
     private function _determine_additional_fields(WP_REST_Request $request)
     {
@@ -582,6 +596,7 @@ class AAM_Core_Restful_Role
      * @return void
      *
      * @access private
+     * @version 6.9.6
      */
     private function _register_route($route, $args)
     {
@@ -600,6 +615,7 @@ class AAM_Core_Restful_Role
      * @return bool|WP_Error
      *
      * @access private
+     * @version 6.9.6
      */
     private function _validate_fields_input($value)
     {
@@ -637,6 +653,7 @@ class AAM_Core_Restful_Role
      * @return bool|WP_Error
      *
      * @access private
+     * @version 6.9.6
      */
     private function _validate_role_accessibility($slug)
     {
@@ -667,6 +684,7 @@ class AAM_Core_Restful_Role
      * @return bool|WP_Error
      *
      * @access private
+     * @version 6.9.6
      */
     private function _validate_role_slug_uniqueness($value, WP_REST_Request $request)
     {
@@ -711,6 +729,7 @@ class AAM_Core_Restful_Role
      * @return bool|WP_Error
      *
      * @access private
+     * @version 6.9.6
      */
     private function _validate_keys_array_input($value)
     {
@@ -750,6 +769,7 @@ class AAM_Core_Restful_Role
      * @return WP_REST_Response
      *
      * @access private
+     * @version 6.9.6
      */
     private function _prepare_error_response(
         $ex, $code = 'rest_unexpected_error', $status = 500
@@ -774,6 +794,7 @@ class AAM_Core_Restful_Role
      * @return boolean
      *
      * @access public
+     * @version 6.9.6
      */
     public static function bootstrap()
     {

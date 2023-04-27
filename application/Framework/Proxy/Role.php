@@ -10,8 +10,11 @@
 /**
  * AAM WP_Role proxy
  *
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
+ * @since 6.9.6  Initial implementation of the class
+ *
  * @package AAM
- * @since 6.9.6
+ * @version 6.9.10
  */
 class AAM_Framework_Proxy_Role
 {
@@ -70,12 +73,14 @@ class AAM_Framework_Proxy_Role
      *
      * @access public
      * @throws InvalidArgumentException
-     * @since 6.9.6
+     *
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
+     * @since 6.9.6  Initial implementation of the method
+     *
+     * @version 6.9.10
      */
     public function set_slug($slug)
     {
-        $slug = sanitize_key($slug);
-
         if (!is_string($slug) || strlen($slug) === 0) {
             throw new InvalidArgumentException('Invalid slug');
         }

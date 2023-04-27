@@ -10,14 +10,15 @@
 /**
  * API Route service
  *
- * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/163
- * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/153
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
+ * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
+ * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+ *               https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.2
+ * @version 6.9.10
  */
 class AAM_Service_Route
 {
@@ -81,13 +82,14 @@ class AAM_Service_Route
      *
      * @return void
      *
-     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/153
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
-     *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
+     * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     *               https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.7.0
+     * @version 6.9.10
      */
     protected function initializeHooks()
     {
@@ -111,6 +113,9 @@ class AAM_Service_Route
                 return $settings;
             }, 10, 2);
         }
+
+        // Register RESTful API endpoints
+        AAM_Core_Restful_ApiRouteService::bootstrap();
 
         // Disable XML-RPC if needed
         add_filter('xmlrpc_enabled', function($enabled) {

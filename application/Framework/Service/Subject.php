@@ -11,7 +11,7 @@
  * AAM service to manager subjects
  *
  * @package AAM
- * @since 6.9.9
+ * @version 6.9.9
  */
 class AAM_Framework_Service_Subject
 {
@@ -46,7 +46,7 @@ class AAM_Framework_Service_Subject
      * @return AAM_Core_Subject
      *
      * @access public
-     * @since 6.9.9
+     * @version 6.9.9
      */
     public function get($access_level, $id = null)
     {
@@ -131,7 +131,7 @@ class AAM_Framework_Service_Subject
      *
      * @access public
      * @static
-     * @since 6.9.9
+     * @version 6.9.9
      */
     public static function bootstrap()
     {
