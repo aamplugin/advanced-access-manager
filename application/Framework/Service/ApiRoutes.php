@@ -123,8 +123,9 @@ class AAM_Framework_Service_ApiRoutes
      * @throws UnderflowException If rule does not exist
      * @throws Exception If fails to persist a rule
      */
-    public function update_route($id, $is_restricted = true, $inline_context = null)
-    {
+    public function update_route_permission(
+        $id, $is_restricted = true, $inline_context = null
+    ) {
         $route   = $this->get_route_by_id($id);
         $subject = $this->_get_subject($inline_context);
         $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
@@ -152,7 +153,7 @@ class AAM_Framework_Service_ApiRoutes
      * @throws UnderflowException If rule does not exist
      * @throws Exception If fails to persist a rule
      */
-    public function delete_route($id, $inline_context = null)
+    public function delete_route_permission($id, $inline_context = null)
     {
         $subject = $this->_get_subject($inline_context);
         $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);

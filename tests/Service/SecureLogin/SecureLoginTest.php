@@ -119,15 +119,7 @@ class SecureLoginTest extends TestCase
      */
     public function testUserLockedStatus()
     {
-        global $wpdb;
-
-        $result = $wpdb->update(
-            $wpdb->users, array('user_status' => 1),
-            array('ID' => AAM_UNITTEST_ADMIN_USER_ID)
-        );
-
-        // Make sure that row is updated
-        $this->assertEquals(1, $result);
+        add_user_meta(AAM_UNITTEST_ADMIN_USER_ID, 'aam_user_status', 'locked');
 
         // No need to generate Auth cookies
         add_filter('send_auth_cookies', '__return_false');
@@ -144,10 +136,7 @@ class SecureLoginTest extends TestCase
         $this->assertEquals('<strong>ERROR</strong>: User is locked. Contact website administrator.', $user->get_error_message());
 
         // Restore user status
-        $result = $wpdb->update(
-            $wpdb->users, array('user_status' => 0),
-            array('ID' => AAM_UNITTEST_ADMIN_USER_ID)
-        );
+        delete_user_meta(AAM_UNITTEST_ADMIN_USER_ID, 'aam_user_status');
     }
 
 }

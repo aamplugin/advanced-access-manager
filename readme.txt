@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 6.2.0
-Stable tag: 6.9.9
+Stable tag: 6.9.10
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,15 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.10 =
+* Fixed: Can't see AAM settings when editing page [https://github.com/aamplugin/advanced-access-manager/issues/270](https://github.com/aamplugin/advanced-access-manager/issues/270)
+* Fixed: The set_slug should not sanitize key [https://github.com/aamplugin/advanced-access-manager/issues/271](https://github.com/aamplugin/advanced-access-manager/issues/271)
+* Fixed: Admin Menu restriction edge-case [https://github.com/aamplugin/advanced-access-manager/issues/272](https://github.com/aamplugin/advanced-access-manager/issues/272)
+* Changed: Refactor JWT Token Service [https://github.com/aamplugin/advanced-access-manager/issues/273](https://github.com/aamplugin/advanced-access-manager/issues/273)
+* Changed: Refactor the API Route Service [https://github.com/aamplugin/advanced-access-manager/issues/274](https://github.com/aamplugin/advanced-access-manager/issues/274)
+* Changed: Normalize Role ID [https://github.com/aamplugin/advanced-access-manager/issues/275](https://github.com/aamplugin/advanced-access-manager/issues/275)
+* Changed: Stop using user_status column [https://github.com/aamplugin/advanced-access-manager/issues/276](https://github.com/aamplugin/advanced-access-manager/issues/276)
 
 = 6.9.9 =
 * Fixed: Undefined array key "callback" [https://github.com/aamplugin/advanced-access-manager/issues/264](https://github.com/aamplugin/advanced-access-manager/issues/264)

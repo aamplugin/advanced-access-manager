@@ -497,10 +497,11 @@
                         LoadRolesDropdown();
 
                         //clear add role form first
-                        $('input', '#add-role-modal').val('').focus();
+                        $('input', '#add-role-modal').val('');
+                        $('input[name="name"]', '#add-role-modal').focus();
                     });
 
-                    $('#edit-role-modal').on('shown.bs.modal', function (e) {
+                    $('#edit-role-modal').on('shown.bs.modal', function () {
                         $('input[name="name"]', '#edit-role-modal').focus();
                     });
 

@@ -151,7 +151,7 @@ class AAM_Core_Restful_ApiRouteService
         $service = $this->_get_service($request);
 
         try {
-            $result = $service->update_route(
+            $result = $service->update_route_permission(
                 intval($request->get_param('id')),
                 $request->get_param('is_restricted')
             );
@@ -177,7 +177,9 @@ class AAM_Core_Restful_ApiRouteService
         $service = $this->_get_service($request);
 
         try {
-            $result = $service->delete_route(intval($request->get_param('id')));
+            $result = $service->delete_route_permission(
+                intval($request->get_param('id'))
+            );
         } catch (UnderflowException $e) {
             $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
         } catch (Exception $e) {

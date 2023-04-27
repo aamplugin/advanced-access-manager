@@ -33,6 +33,21 @@ final class AAM_Core_Migration
     const DB_FAILURE_OPTION = 'aam_migration_failures';
 
     /**
+     * Run the pending scripts
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.10
+     */
+    public static function run()
+    {
+        foreach(self::getPending() as $script) {
+            self::executeScript($script);
+        }
+    }
+
+    /**
      * Get list of migrations that are still pending to be executed
      *
      * @return array
