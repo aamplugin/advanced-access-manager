@@ -10,8 +10,11 @@
 /**
  * RESTful API for the JWT Token service
  *
+ * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+ * @since 6.9.10 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.11
  */
 class AAM_Core_Restful_JwtService
 {
@@ -23,8 +26,11 @@ class AAM_Core_Restful_JwtService
      *
      * @return void
      *
+     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.10
+     * @version 6.9.11
      */
     protected function __construct()
     {
@@ -57,6 +63,10 @@ class AAM_Core_Restful_JwtService
                     ),
                     'is_refreshable' => array(
                         'description' => __('Wether issued JWT is refreshable', AAM_KEY),
+                        'type'        => 'boolean'
+                    ),
+                    'is_revocable' => array(
+                        'description' => __('Wether issued JWT is revocable', AAM_KEY),
                         'type'        => 'boolean'
                     ),
                     'additional_claims' => array(
@@ -145,8 +155,11 @@ class AAM_Core_Restful_JwtService
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.10
+     * @version 6.9.11
      */
     public function create_token(WP_REST_Request $request)
     {
@@ -169,6 +182,14 @@ class AAM_Core_Restful_JwtService
             // Wether token is refreshable or not
             $is_ref                = $request->get_param('is_refreshable');
             $claims['refreshable'] = is_bool($is_ref) ? $is_ref : false;
+
+            // Wether token is revocable or not
+            $is_rev = $request->get_param('is_revocable');
+
+            if (!is_bool($is_rev)) {
+                $is_rev = AAM_Core_Config::get('service.jwt.is_revocable', true);
+            }
+            $claims['revocable'] = is_bool($is_rev) ? $is_rev : true;
 
             $result = $service->create_token($claims);
 

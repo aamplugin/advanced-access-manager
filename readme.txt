@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
-Tested up to: 6.2.0
-Stable tag: 6.9.10
+Tested up to: 6.2.2
+Stable tag: 6.9.11
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,12 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.11 =
+* Fixed: Change role does not work for expired access [https://github.com/aamplugin/advanced-access-manager/issues/279](https://github.com/aamplugin/advanced-access-manager/issues/279)
+* Changed: Enhance JWT Token RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/278](https://github.com/aamplugin/advanced-access-manager/issues/278)
+* Changed: Replace deprecated DateTime format [https://github.com/aamplugin/advanced-access-manager/issues/281](https://github.com/aamplugin/advanced-access-manager/issues/281)
+* Changed: Improve user experience during plugin activation [https://github.com/aamplugin/advanced-access-manager/issues/282](https://github.com/aamplugin/advanced-access-manager/issues/282)
 
 = 6.9.10 =
 * Fixed: Can't see AAM settings when editing page [https://github.com/aamplugin/advanced-access-manager/issues/270](https://github.com/aamplugin/advanced-access-manager/issues/270)

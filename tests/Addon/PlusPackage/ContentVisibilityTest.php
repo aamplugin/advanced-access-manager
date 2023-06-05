@@ -247,4 +247,62 @@ class ContentVisibilityTest extends TestCase
         $this->assertContains(self::$post_id, $posts);
     }
 
+    /**
+     * Covering the scenario with conflicting term access
+     *
+     * @return void
+     * @link https://github.com/aamplugin/advanced-access-manager/issues/277
+     */
+    public function testTermDoubleRestrictionConflict()
+    {
+        // Setting up the necessary terms and posts
+        $category_a = wp_insert_term('Category A', 'category')['term_id'];
+        $category_b = wp_insert_term('Category B', 'category')['term_id'];
+        $post_a     = wp_insert_post(array(
+            'post_title'  => 'Post A',
+            'post_name'   => 'post-a',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms($post_a, $category_a, 'category');
+        $post_b     = wp_insert_post(array(
+            'post_title'  => 'Post B',
+            'post_name'   => 'post-b',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms($post_b, [$category_b, $category_a], 'category');
+
+        // Enabling multi-role & term merging preference to true
+        \AAM_Core_Config::set('core.settings.term.merge.preference', 'allow');
+
+        $default = AAM::api()->getDefault();
+
+        // Setting default access controls to both Category A & B
+        $term = $default->getObject(Term::OBJECT_TYPE, $category_a . '|category');
+        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+
+        $term = $default->getObject(Term::OBJECT_TYPE, $category_b . '|category');
+        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+
+        // For the Administrator role, allow Category A
+        $role = AAM::api()->getRole('administrator');
+
+        $term = $role->getObject(Term::OBJECT_TYPE, $category_a . '|category');
+        $this->assertTrue($term->updateOptionItem('post/hidden', false)->save());
+
+        // Reset all internal cache
+        $this->_resetSubjects();
+        ContentHooks::bootstrap()->resetCache();
+        \AAM_Core_Config::bootstrap();
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => -1,
+            'suppress_filters' => false
+        ));
+
+        $this->assertContains($post_a, $posts);
+        $this->assertContains($post_b, $posts);
+    }
+
 }

@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.9.10
+ * Version: 6.9.11
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager
@@ -18,12 +18,14 @@
 /**
  * Main plugin's class
  *
- * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/282
+ * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
- * @version 6.9.4
+ *
+ * @version 6.9.11
  */
 class AAM
 {
@@ -248,6 +250,30 @@ class AAM
     }
 
     /**
+     * Redirect user to AAM page after plugin activation
+     *
+     * @param string $plugin
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     * @version 6.9.11
+     */
+    public static function afterActivation($plugin)
+    {
+        if (
+            $plugin === "advanced-access-manager/aam.php"
+            && !is_network_admin()
+            && AAM_Core_Request::server('REQUEST_METHOD') === 'GET'
+            && AAM_Core_Request::get('action') === 'activate'
+            && AAM_Core_Request::server('SCRIPT_NAME') === '/wp-admin/plugins.php'
+        ) {
+            wp_redirect(admin_url('admin.php?page=aam')); exit;
+        }
+    }
+
+    /**
      * Deactivate hook
      *
      * Remove all leftovers from AAM execution
@@ -272,7 +298,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.10');
+    define('AAM_VERSION', '6.9.11');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor
@@ -292,4 +318,8 @@ if (defined('ABSPATH')) {
     // Activation & deactivation hooks
     register_activation_hook(__FILE__, array('AAM', 'activate'));
     register_uninstall_hook(__FILE__, array('AAM', 'uninstall'));
+
+    // Improve user experience by redirecting user to the AAM page after it is
+    // activated
+    add_action('activated_plugin', array('AAM', 'afterActivation'));
 }

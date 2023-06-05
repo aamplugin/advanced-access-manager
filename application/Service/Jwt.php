@@ -10,6 +10,7 @@
 /**
  * JWT Token service
  *
+ * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
  * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/263
  * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
@@ -31,7 +32,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.11
  */
 class AAM_Service_Jwt
 {
@@ -60,6 +61,17 @@ class AAM_Service_Jwt
      * @version 6.0.0
      */
     const DB_OPTION = 'aam_jwt_registry';
+
+    /**
+     * Options aliases
+     *
+     * @version 6.9.11
+     */
+    const OPTION_ALIAS = array(
+        'service.jwt.registry_size' => 'authentication.jwt.registryLimit',
+        'service.jwt.bearer'        => 'authentication.jwt.container',
+        'service.jwt.header_name'   => 'authentication.jwt.header'
+    );
 
     /**
      * Constructor
@@ -153,10 +165,14 @@ class AAM_Service_Jwt
 
             return $args;
         });
-        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3);
+        add_filter(
+            'aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3
+        );
 
         // WP Core current user definition
-        add_filter('determine_current_user', array($this, 'determineUser'), PHP_INT_MAX);
+        add_filter(
+            'determine_current_user', array($this, 'determineUser'), PHP_INT_MAX
+        );
 
         // Fetch specific claim from the JWT token if present
         add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
@@ -511,13 +527,16 @@ class AAM_Service_Jwt
      *
      * @return bool
      *
+     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.11
      */
     public function registerToken($userId, $token, $replaceExisting = false)
     {
         $registry = $this->getTokenRegistry($userId);
-        $limit    = AAM_Core_Config::get('authentication.jwt.registryLimit', 10);
+        $limit    = $this->_getConfigOption('service.jwt.registry_size', 10);
 
         if ($replaceExisting) {
             // First let's delete existing token
@@ -622,12 +641,13 @@ class AAM_Service_Jwt
      *
      * @return int
      *
-     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
-     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+     * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
+     * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.4
+     * @version 6.9.11
      */
     public function determineUser($userId)
     {
@@ -646,7 +666,9 @@ class AAM_Service_Jwt
                     if (!is_wp_error($user)) {
                         $userId = $result->userId;
 
-                        if ($token->method === 'get') {
+                        if (in_array(
+                            $token->method, array('get', 'query', 'query_param'), true)
+                        ) {
                             // Also authenticate user if token comes from query param
                             add_action('init', array($this, 'authenticateUser'), 1);
                         }
@@ -757,17 +779,18 @@ class AAM_Service_Jwt
      *
      * @return object|null
      *
-     * @since 6.5.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/99
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/99
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.5.0
+     * @version 6.9.11
      */
     protected function extractToken()
     {
-        $container = explode(',', AAM_Core_Config::get(
-            'authentication.jwt.container',
-            'header,get,post,cookie'
+        $container = explode(',', $this->_getConfigOption(
+            'service.jwt.bearer',
+            'header,query_param,post_param,cookie'
         ));
 
         foreach ($container as $method) {
@@ -777,8 +800,8 @@ class AAM_Service_Jwt
                     $possibles = array(
                         'HTTP_AUTHORIZATION',
                         'REDIRECT_HTTP_AUTHORIZATION',
-                        AAM_Core_Config::get(
-                            'authentication.jwt.header', 'HTTP_AUTHENTICATION'
+                        $this->_getConfigOption(
+                            'service.jwt.header_name', 'HTTP_AUTHENTICATION'
                         )
                     );
 
@@ -792,16 +815,24 @@ class AAM_Service_Jwt
                     break;
 
                 case 'cookie':
-                    $jwt = $this->getFromCookie('aam_jwt_token');
+                    $jwt = $this->getFromCookie($this->_getConfigOption(
+                        'service.jwt.cookie_name', 'aam_jwt_token'
+                    ));
                     break;
 
                 case 'post':
-                    $jwt = $this->getFromPost('aam-jwt');
+                case 'post_param':
+                    $jwt = $this->getFromPost($this->_getConfigOption(
+                        'service.jwt.post_param_name', 'aam-jwt'
+                    ));
                     break;
 
                 case 'get':
                 case 'query':
-                    $jwt = $this->getFromQuery('aam-jwt');
+                case 'query_param':
+                    $jwt = $this->getFromQuery($this->_getConfigOption(
+                        'service.jwt.query_param_name', 'aam-jwt'
+                    ));
                     break;
 
                 default:
@@ -861,6 +892,28 @@ class AAM_Service_Jwt
         }
 
         return $result;
+    }
+
+    /**
+     * Get configuration option
+     *
+     * @param string $option
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 6.9.11
+     */
+    private function _getConfigOption($option, $default = null)
+    {
+        $value = AAM_Core_Config::get($option);
+
+        if (is_null($value) && isset(self::OPTION_ALIAS[$option])) {
+            $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
+        }
+
+        return is_null($value) ? $default : $value;
     }
 
 }

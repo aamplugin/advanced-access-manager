@@ -9,13 +9,16 @@
 
 namespace AAM\UnitTest\Service\Jwt;
 
-use DateTime,
-    AAM_Service_Jwt,
-    WP_REST_Request,
+use AAM_Service_Jwt,
     AAM_Core_Config,
     AAM_Core_Jwt_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
+
+// service.jwt.is_revocable
+// service.jwt.private_cert_passphrase
+// service.jwt.private_cert_path
+// service.jwt.public_cert_path
 
 /**
  * Jwt service tests
@@ -23,115 +26,256 @@ use DateTime,
  * @package AAM\UnitTest
  * @version 6.0.0
  */
-class JwtTest extends TestCase
+class JwtRestApiTest extends TestCase
 {
     use ResetTrait;
 
     /**
-     * Assert that jwt token is generated for the authentication request
+     * Testing the standard header bearer
      *
      * @return void
-     *
-     * @access public
-     * @version 6.0.0
+     * @version 6.9.11
      */
-    public function testAuthResponseContainsJwt()
+    public function testTokenBearerStandardHeader()
     {
-        $server = rest_get_server();
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        // No need to generate Auth cookies
-        add_filter('send_auth_cookies', '__return_false');
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'header');
 
-        $request = new WP_REST_Request('POST', '/aam/v2/authenticate');
-        $request->set_param('username', AAM_UNITTEST_USERNAME);
-        $request->set_param('password', AAM_UNITTEST_PASSWORD);
-        $request->set_param('issueJWT', true);
+        // Emulate token set
+        $_SERVER['HTTP_AUTHORIZATION'] = $issued->token;
 
-        $data = $server->dispatch($request)->get_data();
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
 
-        $this->assertArrayHasKey('jwt', $data);
+        // Reset global vars
+        unset($_SERVER['HTTP_AUTHORIZATION']);
     }
 
     /**
-     * Validate that issued JWT token is valid when it is marked as none-revokable
+     * Testing the custom header bearer
      *
      * @return void
-     *
-     * @access public
-     * @version 6.0.0
+     * @version 6.9.11
      */
-    public function testValidateNotRevocableJwtToken()
+    public function testTokenBearerCustomHeader()
     {
-        $server = rest_get_server();
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => false,
-            'refreshable' => false
-        ));
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'header');
+        AAM_Core_Config::set('service.jwt.header_name', 'X-JWT');
 
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $result->token);
+        // Emulate token set
+        $_SERVER['X-JWT'] = $issued->token;
 
-        $response = $server->dispatch($request);
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
 
-        $this->assertEquals(200, $response->get_status());
+        // Reset global vars
+        unset($_SERVER['X-JWT']);
     }
 
     /**
-     * Validate that issued JWT is not valid when it is marked as revokable and is
-     * not stored in the JWT store
+     * Testing the standard query param bearer
      *
-     * @access public
-     * @version 6.0.0
+     * @return void
+     * @version 6.9.11
      */
-    public function testValidateRevocableJwtToken()
+    public function testTokenBearerStandardQueryParam()
     {
-        $server = rest_get_server();
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => true,
-            'refreshable' => false
-        ));
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'query_param');
 
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $result->token);
+        // Emulate token set
+        $_GET['aam-jwt'] = $issued->token;
 
-        $response = $server->dispatch($request);
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
 
-        $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('Token has been revoked', $response->get_data()['reason']);
+        // Reset global vars
+        unset($_GET['aam-jwt']);
     }
 
     /**
-     * Validate that JWT token is invalid when it is expired
+     * Testing the custom query param bearer
      *
-     * @access public
-     * @version 6.0.0
+     * @return void
+     * @version 6.9.11
      */
-    public function testValidateExpiredJwtToken()
+    public function testTokenBearerCustomQueryParam()
     {
-        $server = rest_get_server();
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => true,
-            'refreshable' => false,
-            'exp'         => DateTime::createFromFormat('m/d/Y', '01/01/2018')->getTimestamp()
-        ));
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'query_param');
+        AAM_Core_Config::set('service.jwt.query_param_name', 'jwt');
 
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/validate');
-        $request->set_param('jwt', $result->token);
+        // Emulate token set
+        $_GET['jwt'] = $issued->token;
 
-        $response = $server->dispatch($request);
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
 
-        $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('rest_jwt_validation_failure', $response->get_data()['code']);
-        $this->assertEquals('Expired token', $response->get_data()['reason']);
+        // Reset global vars
+        unset($_GET['jwt']);
+    }
+
+    /**
+     * Testing the standard post param bearer
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenBearerStandardPostParam()
+    {
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'post_param');
+
+        // Emulate token set
+        $_POST['aam-jwt'] = $issued->token;
+
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
+
+        // Reset global vars
+        unset($_POST['aam-jwt']);
+    }
+
+    /**
+     * Testing the custom post param bearer
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenBearerCustomPostParam()
+    {
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'post_param');
+        AAM_Core_Config::set('service.jwt.post_param_name', 'jwt');
+
+        // Emulate token set
+        $_POST['jwt'] = $issued->token;
+
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
+
+        // Reset global vars
+        unset($_POST['jwt']);
+    }
+
+    /**
+     * Testing the cookie bearer
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenBearerStandardCookie()
+    {
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Only header
+        AAM_Core_Config::set('service.jwt.bearer', 'cookie');
+
+        // Emulate token set
+        $_COOKIE['aam_jwt_token'] = $issued->token;
+
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
+
+        // Reset global vars
+        unset($_COOKIE['aam_jwt_token']);
+    }
+
+    /**
+     * Testing the custom cookie bearer
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenBearerCustomCookie()
+    {
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Only cookie
+        AAM_Core_Config::set('service.jwt.bearer', 'cookie');
+        AAM_Core_Config::set('service.jwt.cookie_name', 'jwt_cookie');
+
+        // Emulate token set
+        $_COOKIE['jwt_cookie'] = $issued->token;
+
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
+
+        // Reset global vars
+        unset($_COOKIE['jwt_cookie']);
+    }
+
+    /**
+     * Testing the bearer waterfall
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenBearerWaterfall()
+    {
+        // Let's issue the token first
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+
+        // Only cookie
+        AAM_Core_Config::set('service.jwt.bearer', 'header,cookie');
+        AAM_Core_Config::set('service.jwt.cookie_name', 'jwt_test_cookie');
+
+        // Emulate token set
+        $_COOKIE['jwt_test_cookie'] = $issued->token;
+
+        $this->assertEquals(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            apply_filters('determine_current_user', null)
+        );
+
+        // Reset global vars
+        unset($_COOKIE['jwt_test_cookie']);
     }
 
     /**
@@ -174,7 +318,7 @@ class JwtTest extends TestCase
      */
     public function testTokenRegistryOverflow()
     {
-        AAM_Core_Config::set('authentication.jwt.registryLimit', 1);
+        AAM_Core_Config::set('service.jwt.registry_size', 1);
 
         // Reset cache
         wp_cache_flush();
@@ -213,110 +357,6 @@ class JwtTest extends TestCase
     }
 
     /**
-     * Verify that token can be refreshed successfully
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testTokenRefreshValid()
-    {
-        $server  = rest_get_server();
-        $service = AAM_Service_Jwt::getInstance();
-
-        // Issue a token that later we'll refresh
-        $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
-
-        // Refresh token
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $jwt->token);
-
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(200, $response->get_status());
-    }
-
-    /**
-     * Verify that token can't be refreshed if it is simply invalid JWT token
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testTokenRefreshNotValid()
-    {
-        $server = rest_get_server();
-
-        // Refresh token
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', 'invalid-token');
-
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(400, $response->get_status());
-        $this->assertStringContainsString('Wrong number of segments', $response->get_data()['reason']);
-    }
-
-    /**
-     * Verify that new token is not issued for already expired token
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testTokenRefreshExpired()
-    {
-        $server = rest_get_server();
-
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => true,
-            'refreshable' => true,
-            'exp'         => DateTime::createFromFormat('m/d/Y', '01/01/2018')->getTimestamp()
-        ));
-
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $result->token);
-
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(400, $response->get_status());
-        $this->assertEquals('Expired token', $response->get_data()['reason']);
-    }
-
-    /**
-     * Verify that new token is not issued for none-refreshable token
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function testTokenRefreshNotRefreshable()
-    {
-        $server = rest_get_server();
-
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => false,
-            'refreshable' => false
-        ));
-
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/refresh');
-        $request->set_param('jwt', $result->token);
-
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(405, $response->get_status());
-        $this->assertEquals('JWT token is not refreshable', $response->get_data()['reason']);
-    }
-
-    /**
      * Verify that token is revoked properly
      *
      * @access public
@@ -342,92 +382,76 @@ class JwtTest extends TestCase
     }
 
     /**
-     * Verify that token can be refreshed successfully
+     * Test token expiration setting as a string
      *
      * @return void
-     *
-     * @access public
-     * @version 6.0.0
+     * @version 6.9.11
      */
-    public function testTokenRevokeValid()
+    public function testTokenCustomExpirationString()
     {
-        $server  = rest_get_server();
         $service = AAM_Service_Jwt::getInstance();
 
-        // Issue a token that later we'll refresh
-        $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
+        // Set custom expiration as string
+        AAM_Core_Config::set('service.jwt.expires_in', '1 hour');
 
-        // Refresh token
-        $request = new WP_REST_Request('POST', '/aam/v2/jwt/revoke');
-        $request->set_param('jwt', $jwt->token);
+        $issued = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(200, $response->get_status());
+        $this->assertEquals($issued->claims['exp'], time() + 3600);
     }
 
     /**
-     * Verify that issued JWT is no longer valid if it is not part of JWT registry
+     * Test token expiration setting as a number
      *
-     * @access public
-     * @version 6.9.4
+     * @return void
+     * @version 6.9.11
      */
-    public function testRevokedValidToken()
+    public function testTokenCustomExpirationNumber()
     {
-        $server = rest_get_server();
+        $service = AAM_Service_Jwt::getInstance();
 
-        // Generate valid JWT token
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode(array(
-            'userId'      => AAM_UNITTEST_ADMIN_USER_ID,
-            'revocable'   => true,
-            'refreshable' => false
-        ));
+        // Set custom expiration as string
+        AAM_Core_Config::set('service.jwt.expires_in', 20);
 
-        $request = new WP_REST_Request('POST', '/wp/v2/posts');
-        $request->set_header('Authorization', "Bearer {$result->token}");
-        $request->set_body(json_encode(array(
-            'title' => 'Test'
-        )));
+        $issued = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-        $response = $server->dispatch($request);
-
-        $this->assertEquals(401, $response->get_status());
-        $this->assertEquals('Sorry, you are not allowed to create posts as this user.', $response->get_data()['message']);
+        $this->assertEquals($issued->claims['exp'], time() + 20);
     }
 
     /**
-     * Verify that issued JWT is is actually valid for the same operation as tested
-     * in the `testRevokedValidToken` test case.
+     * Test custom signing algorithm
      *
-     * @access public
-     * @version 6.9.4
-     * @todo - Figure out how to properly test RESTful API calls
+     * @return void
+     * @version 6.9.11
      */
-    // public function testValidToken()
-    // {
-    //     $server = rest_get_server();
+    public function testTokenCustomSigningAlg()
+    {
+        AAM_Core_Config::set('service.jwt.signing_algorithm', 'HS512');
 
-    //     // Generate valid JWT token
-    //     $service = AAM_Service_Jwt::getInstance();
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
-    //     // Issue a token that later we'll refresh
-    //     $jwt = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID, null, null, true);
+        $headers = AAM_Core_Jwt_Manager::getInstance()->extractHeaders(
+            $issued->token
+        );
 
-    //     // Reset cache
-    //     wp_cache_flush();
+        $this->assertEquals($headers->alg, 'HS512');
+    }
 
-    //     $request = new WP_REST_Request('POST', '/wp/v2/posts');
-    //     $_GET['aam-jwt'] = "Bearer {$jwt}";
-    //     // $request->set_header('Authorization', "Bearer {$jwt}");
-    //     $request->set_body(json_encode(array(
-    //         'title' => 'Test'
-    //     )));
+    /**
+     * Test custom signing secret
+     *
+     * @return void
+     * @version 6.9.11
+     */
+    public function testTokenCustomSigningSecret()
+    {
+        AAM_Core_Config::set('service.jwt.signing_secret', '123');
 
-    //     $response = $server->dispatch($request);
+        $service = AAM_Service_Jwt::getInstance();
+        $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
+        $result  = AAM_Core_Jwt_Manager::getInstance()->validate($issued->token);
 
-    //     $this->assertEquals(201, $response->get_status());
-
-    //     unset($_SERVER['aam-jwt']);
-    // }
+        $this->assertFalse(is_wp_error($result));
+    }
 
 }

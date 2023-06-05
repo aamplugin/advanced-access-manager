@@ -10,6 +10,7 @@
 /**
  * Secure Login service
  *
+ * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
  * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/136
@@ -21,7 +22,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.11
  */
 class AAM_Service_SecureLogin
 {
@@ -43,6 +44,19 @@ class AAM_Service_SecureLogin
      * @version 6.0.0
      */
     const FEATURE_FLAG = 'core.service.secure-login.enabled';
+
+    /**
+     * Config options aliases
+     *
+     * The option names changed, but to stay backward compatible, we need to support
+     * legacy names.
+     *
+     * @version 6.9.11
+     */
+    const OPTION_ALIAS = array(
+        'service.secure_login.time_window'    => 'service.secureLogin.settings.attemptWindow',
+        'service.secure_login.login_attempts' => 'service.secureLogin.settings.loginAttempts'
+    );
 
     /**
      * Constructor
@@ -406,9 +420,8 @@ class AAM_Service_SecureLogin
         } else {
             $attempts = 1;
             $timeout  = strtotime(
-                AAM_Core_Config::get(
-                    'service.secureLogin.settings.attemptWindow',
-                    '20 minutes'
+                $this->_getConfigOption(
+                    'service.secure_login.time_window', '20 minutes'
                 )
             );
         }
@@ -449,7 +462,9 @@ class AAM_Service_SecureLogin
         // Brute Force Lockout
         if (AAM_Core_Config::get('service.secureLogin.feature.bruteForceLockout', false)) {
             $attempts  = get_transient($this->getLoginAttemptTransientName());
-            $threshold = AAM_Core_Config::get('service.secureLogin.settings.loginAttempts', 20);
+            $threshold = $this->_getConfigOption(
+                'service.secure_login.login_attempts', 20
+            );
 
             if ($attempts >= $threshold) {
                 $response = new WP_Error(
@@ -630,6 +645,28 @@ class AAM_Service_SecureLogin
         clean_user_cache($user);
 
         return true;
+    }
+
+    /**
+     * Get configuration option
+     *
+     * @param string $option
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 6.9.11
+     */
+    private function _getConfigOption($option, $default = null)
+    {
+        $value = AAM_Core_Config::get($option);
+
+        if (is_null($value) && isset(self::OPTION_ALIAS[$option])) {
+            $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
+        }
+
+        return is_null($value) ? $default : $value;
     }
 
 }
