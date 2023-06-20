@@ -23,7 +23,7 @@ class AAM_Core_Restful_Role
     /**
      * The namespace for the collection of endpoints
      */
-    const NAMESPACE = 'aam/v2';
+    const API_NAMESPACE = 'aam/v2';
 
     /**
      * Single instance of itself
@@ -601,9 +601,11 @@ class AAM_Core_Restful_Role
     private function _register_route($route, $args)
     {
         register_rest_route(
-            self::NAMESPACE,
+            self::API_NAMESPACE,
             $route,
-            apply_filters('aam_rest_route_args_filter', $args, $route, self::NAMESPACE)
+            apply_filters(
+                'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
+            )
         );
     }
 

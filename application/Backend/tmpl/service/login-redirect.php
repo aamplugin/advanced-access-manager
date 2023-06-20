@@ -1,10 +1,10 @@
 <?php
     /**
-     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
-     * @since 6.0.0 Initial implementation of the templates
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+     * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
+     * @since 6.0.0  Initial implementation of the templates
      *
-     * @version 6.8.0
-     *
+     * @version 6.9.12
      */
 ?>
 
@@ -28,16 +28,16 @@
                     <label for="login-redirect-default"><?php echo __('WordPress default behavior', AAM_KEY); ?></label>
                 </div>
                 <div class="radio">
-                    <input type="radio" name="login.redirect.type" id="login-redirect-page" data-action="#page-login-redirect-action" value="page" <?php echo ($type === 'page' ? ' checked' : ''); ?> />
-                    <label for="login-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing page [(select from the drop-down)]', 'small'); ?></label>
+                    <input type="radio" name="login.redirect.type" id="login-redirect-page" data-action="#page-login-redirect-action" value="page_redirect" <?php echo ($type === 'page' ? ' checked' : ''); ?> />
+                    <label for="login-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to an existing page [(select from the drop-down)]', 'small'); ?></label>
                 </div>
                 <div class="radio">
-                    <input type="radio" name="login.redirect.type" id="login-redirect-url" data-action="#url-login-redirect-action" value="url" <?php echo ($type === 'url' ? ' checked' : ''); ?> />
-                    <label for="login-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to the local URL [(enter full URL starting from http or https)]', 'small'); ?></label>
+                    <input type="radio" name="login.redirect.type" id="login-redirect-url" data-action="#url-login-redirect-action" value="url_redirect" <?php echo ($type === 'url' ? ' checked' : ''); ?> />
+                    <label for="login-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to a URL [(enter a valid URL starting from http or https)]', 'small'); ?></label>
                 </div>
                 <div class="radio">
-                    <input type="radio" name="login.redirect.type" id="login-redirect-callback" data-action="#callback-login-redirect-action" value="callback" <?php echo ($type === 'callback' ? ' checked' : ''); ?> />
-                    <label for="login-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                    <input type="radio" name="login.redirect.type" id="login-redirect-callback" data-action="#callback-login-redirect-action" value="trigger_callback" <?php echo ($type === 'callback' ? ' checked' : ''); ?> />
+                    <label for="login-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger a PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                 </div>
 
                 <div class="form-group login-redirect-action" id="page-login-redirect-action" style="display: <?php echo ($type == 'page' ? 'block' : 'none'); ?>;">

@@ -53,7 +53,7 @@ class AAM_Core_Redirect
      */
     public static function execute($type, $metadata, $halt = false)
     {
-        if (isset(self::$redirectTypes[$type])) {
+        if (array_key_exists($type, self::$redirectTypes)) {
             call_user_func(self::$redirectTypes[$type], $metadata);
         }
 

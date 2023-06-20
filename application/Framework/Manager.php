@@ -12,12 +12,13 @@
  *
  * @package AAM
  *
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
+ *               https://github.com/aamplugin/advanced-access-manager/issues/274
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.9.6  Initial implementation of the class
  *
- * @version 6.9.10
+ * @version 6.9.12
  */
 class AAM_Framework_Manager
 {
@@ -78,6 +79,51 @@ class AAM_Framework_Manager
     public static function jwts($runtime_context = null)
     {
         return AAM_Framework_Service_Jwts::get_instance($runtime_context);
+    }
+
+    /**
+     * Get the Login Redirect service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_LoginRedirect
+     *
+     * @access public
+     * @version 6.9.12
+     */
+    public static function login_redirect($runtime_context = null)
+    {
+        return AAM_Framework_Service_LoginRedirect::get_instance($runtime_context);
+    }
+
+    /**
+     * Get the Logout Redirect service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_LogoutRedirect
+     *
+     * @access public
+     * @version 6.9.12
+     */
+    public static function logout_redirect($runtime_context = null)
+    {
+        return AAM_Framework_Service_LogoutRedirect::get_instance($runtime_context);
+    }
+
+    /**
+     * Get the 404 Redirect service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_NotFoundRedirect
+     *
+     * @access public
+     * @version 6.9.12
+     */
+    public static function not_found_redirect($runtime_context = null)
+    {
+        return AAM_Framework_Service_NotFoundRedirect::get_instance($runtime_context);
     }
 
     /**

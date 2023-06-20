@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
+     * @since 6.0.0  Initial implementation of the template
+     *
+     * @version 6.9.12
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="metabox-content">
@@ -40,24 +47,22 @@
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="group-<?php echo $screen; ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo $screen; ?>" aria-controls="group-<?php echo $screen; ?>" <?php if (!$first) {
-                                                                                                                                                                                                        echo 'aria-expanded="true"';
-                                                                                                                                                                                                    } ?>>
+                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo $screen; ?>" aria-controls="group-<?php echo $screen; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
                                     <?php
-                                                switch ($screen) {
-                                                    case 'dashboard':
-                                                        echo __('Dashboard Widgets', AAM_KEY);
-                                                        break;
+                                        switch ($screen) {
+                                            case 'dashboard':
+                                                echo __('Dashboard Widgets', AAM_KEY);
+                                                break;
 
-                                                    case 'widgets':
-                                                        echo AAM_Backend_View_Helper::preparePhrase('Frontend Widgets [(including Appearance->Widgets)]', 'small');
-                                                        break;
+                                            case 'widgets':
+                                                echo AAM_Backend_View_Helper::preparePhrase('Frontend Widgets [(including Appearance->Widgets)]', 'small');
+                                                break;
 
-                                                    default:
-                                                        echo $wp_post_types[$screen]->labels->name;
-                                                        break;
-                                                }
-                                                ?>
+                                            default:
+                                                echo $wp_post_types[$screen]->labels->name;
+                                                break;
+                                        }
+                                    ?>
                                 </a>
                             </h4>
                         </div>
@@ -74,7 +79,12 @@
                                                 <small><a href="#metabox-details-modal" data-toggle="modal" data-title="<?php echo $metabox['title']; ?>" data-screen="<?php echo $screen; ?>" data-id="<?php echo strtolower($screen . '|' . $metabox['id']); ?>" class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                             </div>
 
-                                            <input type="checkbox" class="aam-checkbox-danger" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo strtolower($screen . '|' . $metabox['id']); ?>" <?php echo ($object->isHidden($screen, $metabox['id']) ? ' checked="checked"' : ''); ?> />
+                                            <?php if ($object->isHidden($screen, $metabox['id'])) { ?>
+                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo strtolower($screen . '|' . $metabox['id']); ?>"></i>
+                                            <?php } else { ?>
+                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo strtolower($screen . '|' . $metabox['id']); ?>"></i>
+                                            <?php } ?>
+
                                             <label for="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-toggle="tooltip" title="<?php echo ($object->isHidden($screen, $metabox['id']) ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
                                         </div>
                                     <?php } ?>

@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.9.11
+ * Version: 6.9.12
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager
@@ -18,6 +18,7 @@
 /**
  * Main plugin's class
  *
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
  * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/282
  * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
  * @since 6.0.0  Initial implementation of the class
@@ -25,7 +26,7 @@
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  *
- * @version 6.9.11
+ * @version 6.9.12
  */
 class AAM
 {
@@ -55,8 +56,11 @@ class AAM
      *
      * @return void
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.12
      */
     protected function __construct()
     {
@@ -67,6 +71,11 @@ class AAM
         add_action('set_current_user', function() {
             $this->initializeUser();
         });
+
+        // The same with with after user login. WordPress core has bug with this
+        add_action('wp_login', function($_, $user) {
+            $this->initializeUser($user);
+        }, 10, 2);
     }
 
     /**
@@ -117,15 +126,22 @@ class AAM
      *
      * @return AAM_Core_Subject
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.12
      */
-    public function initializeUser()
+    public function initializeUser($user = null)
     {
         global $current_user;
 
         // Important! Do not use WP core function to avoid loop
-        $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
+        if (is_a($user, 'WP_User')) {
+            $id = $user->ID;
+        } else {
+            $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
+        }
 
         // Change current user
         if ($id) {
@@ -298,7 +314,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.11');
+    define('AAM_VERSION', '6.9.12');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

@@ -7,22 +7,26 @@
  * ======================================================================
  */
 
+use Vectorface\Whip\Whip;
+
 /**
  * Secure Login service
  *
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/284
+ *               https://github.com/aamplugin/advanced-access-manager/issues/244
  * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
  * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/136
  * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/91
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/16.
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/16
  *               https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.3.1  Fixed bug with not being able to lock user
  * @since 6.1.0  Enriched error response with more details
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.11
+ * @version 6.9.12
  */
 class AAM_Service_SecureLogin
 {
@@ -421,7 +425,7 @@ class AAM_Service_SecureLogin
             $attempts = 1;
             $timeout  = strtotime(
                 $this->_getConfigOption(
-                    'service.secure_login.time_window', '20 minutes'
+                    'service.secure_login.time_window', '+20 minutes'
                 )
             );
         }
@@ -434,14 +438,17 @@ class AAM_Service_SecureLogin
      *
      * @return string
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/244
+     * @since 6.0.0  Initial implementation of method
+     *
      * @access private
-     * @version 6.0.0
+     * @version 6.9.12
      */
     private function getLoginAttemptTransientName()
     {
-        return sprintf(
-            'aam_failed_login_attempts_%s', $this->getFromServer('REMOTE_ADDR')
-        );
+        $whip = new Whip();
+
+        return 'aam_failed_login_attempts_' . $whip->getValidIpAddress();
     }
 
     /**
@@ -463,7 +470,7 @@ class AAM_Service_SecureLogin
         if (AAM_Core_Config::get('service.secureLogin.feature.bruteForceLockout', false)) {
             $attempts  = get_transient($this->getLoginAttemptTransientName());
             $threshold = $this->_getConfigOption(
-                'service.secure_login.login_attempts', 20
+                'service.secure_login.login_attempts', 8
             );
 
             if ($attempts >= $threshold) {
@@ -519,17 +526,21 @@ class AAM_Service_SecureLogin
      *
      * @return string
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/284
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.12
      */
     public function loginMessage($message)
     {
         if (empty($message) && ($this->getFromQuery('reason') === 'restricted')) {
-            $message = sprintf(
-                __('%sAccess is restricted. Login to get access.%s', AAM_KEY),
-                '<p class="message">',
-                '</p>'
+            $str = $this->_getConfigOption(
+                'service.secure_login.login_message',
+                __('Access is restricted. Login to get access.', AAM_KEY)
             );
+
+            $message = '<p class="message">' . $str . '</p>';
         }
 
         return $message;
@@ -655,14 +666,17 @@ class AAM_Service_SecureLogin
      *
      * @return mixed
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
+     * @since 6.9.11 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.11
+     * @version 6.9.12
      */
     private function _getConfigOption($option, $default = null)
     {
         $value = AAM_Core_Config::get($option);
 
-        if (is_null($value) && isset(self::OPTION_ALIAS[$option])) {
+        if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
             $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
         }
 

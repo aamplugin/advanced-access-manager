@@ -13,12 +13,13 @@
  * Majority of the work is taken from the Firebase PHP JWT library. The code was
  * adopted to work with PHP 5.6.0+.
  *
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
  * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/263
  * @since 6.9.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.12
  *
  * @link https://github.com/firebase/php-jwt
  */
@@ -798,14 +799,17 @@ class AAM_Core_Jwt_Manager
      *
      * @return mixed
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
+     * @since 6.9.11 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.11
+     * @version 6.9.12
      */
     private function _getConfigOption($option, $default = null)
     {
         $value = AAM_Core_Config::get($option);
 
-        if (is_null($value) && isset(self::OPTION_ALIAS[$option])) {
+        if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
             $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
         }
 

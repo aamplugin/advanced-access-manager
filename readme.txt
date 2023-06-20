@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 6.2.2
-Stable tag: 6.9.11
+Stable tag: 6.9.12
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,18 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.12 =
+* Fixed: URL Access skips query params for new rules [https://github.com/aamplugin/advanced-access-manager/issues/283](https://github.com/aamplugin/advanced-access-manager/issues/283)
+* Fixed: Access policy does not apply for newly logged in user [https://github.com/aamplugin/advanced-access-manager/issues/286](https://github.com/aamplugin/advanced-access-manager/issues/286)
+* Fixed: Compatibility with PHP 5.6 [https://github.com/aamplugin/advanced-access-manager/issues/287](https://github.com/aamplugin/advanced-access-manager/issues/287)
+* Changed: Rewrite the Login Redirect service to use RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/285](https://github.com/aamplugin/advanced-access-manager/issues/285)
+* Changed: Rewrite the Logout Redirect service to use RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/291](https://github.com/aamplugin/advanced-access-manager/issues/291)
+* Changed: Rewrite the 404 Redirect service to use RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/292](https://github.com/aamplugin/advanced-access-manager/issues/292)
+* Changed: Backend Menu UI improvement [https://github.com/aamplugin/advanced-access-manager/issues/288](https://github.com/aamplugin/advanced-access-manager/issues/288)
+* Changed: Admin toolbar UI improvement [https://github.com/aamplugin/advanced-access-manager/issues/289](https://github.com/aamplugin/advanced-access-manager/issues/289)
+* Changed: Metaboxes & Widgets UI improvement [https://github.com/aamplugin/advanced-access-manager/issues/290](https://github.com/aamplugin/advanced-access-manager/issues/290)
+* Added New: Allow redefining the login message when access is restricted [https://github.com/aamplugin/advanced-access-manager/issues/284](https://github.com/aamplugin/advanced-access-manager/issues/284)
 
 = 6.9.11 =
 * Fixed: Change role does not work for expired access [https://github.com/aamplugin/advanced-access-manager/issues/279](https://github.com/aamplugin/advanced-access-manager/issues/279)

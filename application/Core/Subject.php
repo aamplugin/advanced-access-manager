@@ -129,7 +129,9 @@ abstract class AAM_Core_Subject
      */
     public function __get($name)
     {
-        return $this->getPrincipal()->$name;
+        $principal = $this->getPrincipal();
+
+        return is_object($principal) ? $principal->$name : null;
     }
 
     /**
@@ -145,7 +147,10 @@ abstract class AAM_Core_Subject
     public function __set($name, $value)
     {
         $principal = $this->getPrincipal();
-        $principal->$name = $value;
+
+        if (is_object($principal)) {
+            $principal->$name = $value;
+        }
     }
 
     /**

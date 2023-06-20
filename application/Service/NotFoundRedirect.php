@@ -10,13 +10,14 @@
 /**
  * 404 redirect service
  *
- * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/215
- * @since 6.4.0 Refactored to use 404 object instead of AAM config
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the service
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
+ * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/215
+ * @since 6.4.0  Refactored to use 404 object instead of AAM config
+ *               https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the service
  *
  * @package AAM
- * @version 6.8.5
+ * @version 6.9.12
  */
 class AAM_Service_NotFoundRedirect
 {
@@ -71,11 +72,12 @@ class AAM_Service_NotFoundRedirect
      *
      * @return void
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.12
      */
     protected function initializeHooks()
     {
@@ -85,6 +87,9 @@ class AAM_Service_NotFoundRedirect
         add_filter(
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
+
+        // Register the RESTful API
+        AAM_Core_Restful_NotFoundRedirectService::bootstrap();
     }
 
     /**

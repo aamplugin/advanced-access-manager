@@ -10,15 +10,16 @@
 /**
  * AAM core policy generator
  *
- * @since 6.4.0 Enhanced with redirects params generation
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.3.0 Refactored post statement generation to cover the bug
- *              https://github.com/aamplugin/advanced-access-manager/issues/22
- * @since 6.2.2 Fixed bug with incompatibility with PHP lower than 7.0.0
- * @since 6.2.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+ * @since 6.4.0  Enhanced with redirects params generation
+ *               https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.3.0  Refactored post statement generation to cover the bug
+ *               https://github.com/aamplugin/advanced-access-manager/issues/22
+ * @since 6.2.2  Fixed bug with incompatibility with PHP lower than 7.0.0
+ * @since 6.2.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.12
  */
 class AAM_Core_Policy_Generator
 {
@@ -72,12 +73,13 @@ class AAM_Core_Policy_Generator
      *
      * @return string
      *
-     * @since 6.4.0 Enhanced with redirect rules generators
-     *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
+     * @since 6.4.0  Enhanced with redirect rules generators
+     *               https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.2.0 Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.9.12
      */
     public function generate()
     {
@@ -94,10 +96,12 @@ class AAM_Core_Policy_Generator
 
         // If subject is User or Role, then also include explicitly defined
         // capabilities
-        if (in_array($this->subject::UID, array('user', 'role'))) {
+        $subject = $this->subject;
+
+        if (in_array($subject::UID, array('user', 'role'))) {
             $allowed = $denied = array();
 
-            foreach($this->subject->getCapabilities() as $cap => $effect) {
+            foreach($subject->getCapabilities() as $cap => $effect) {
                 if (!empty($effect)) {
                     $allowed[] = 'Capability:' . $cap;
                 } else {
@@ -129,54 +133,60 @@ class AAM_Core_Policy_Generator
     }
 
     /**
-     * Generate Login/Logout/404 Redirect params
+     * Generate redirect param of a given type
      *
      * @param array  $options
-     * @param string $type
+     * @param string $redirect_type
      *
      * @return array
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.9.12
      */
-    public function generateRedirectParam($options, $type)
+    public function generateRedirectParam($options, $redirect_type)
     {
-        $params = array();
+        $param = array(
+            'Key'   => "redirect:on:{$redirect_type}",
+            'Value' => array()
+        );
 
-        foreach($options as $key => $val) {
-            $parts = explode('.', $key);
+        // Get the redirect type
+        if (isset($options["{$redirect_type}.redirect.type"])) {
+            $type = $options["{$redirect_type}.redirect.type"];
+        } else {
+            $type = 'default';
+        }
 
-            if ($parts[2] === 'type') {
-                $destination = $options["{$type}.redirect.{$val}"];
+        if (!empty(AAM_Framework_Service_RedirectAbstract::REDIRECT_TYPE_ALIAS[$type])) {
+            $param['Value']['Type'] = AAM_Framework_Service_RedirectAbstract::REDIRECT_TYPE_ALIAS[$type];
+        } else {
+            $param['Value']['Type'] = 'default';
+        }
 
-                $value = array(
-                    'Type' => $val
+        // Add additional attributes
+        if ($param['Value']['Type'] === 'page_redirect') {
+            $page = get_post($options["{$redirect_type}.redirect.page"]);
+
+            if (is_a($page, 'WP_Post')) {
+                $param['Value']['PageSlug'] = $page->post_name;
+            } else {
+                $param['Value']['PageId'] = intval(
+                    $options["{$redirect_type}.redirect.page"]
                 );
-
-                if ($val === 'page') {
-                    $page = get_post($destination);
-
-                    if (is_a($page, 'WP_Post')) {
-                        $value['Slug'] = $page->post_name;
-                    } else{
-                        $value['Id'] = intval($destination);
-                    }
-                } elseif ($val  === 'url') {
-                    $value['URL'] = trim($destination);
-                } elseif ($val === 'callback') {
-                    $value['Callback'] = trim($destination);
-                }  elseif ($val === 'message') {
-                    $value['Message'] = $destination;
-                }
-
-                $params[] = array(
-                    'Key'   => "redirect:on:{$type}",
-                    'Value' => $value
-                );
+            }
+        } elseif ($param['Value']['Type'] === 'url_redirect') {
+            $param['Value']['Url'] = wp_validate_redirect(
+                $options["{$redirect_type}.redirect.url"], '/'
+            );
+        } elseif ($param['Value']['Type'] === 'trigger_callback') {
+            if (is_callable($options["{$redirect_type}.redirect.callback"], true)) {
+                $param['Value']['Callback'] = $options["{$redirect_type}.redirect.callback"];
+            } else {
+                $param['Value']['Callback'] = '';
             }
         }
 
-        return $params;
+        return array($param);
     }
 
     /**

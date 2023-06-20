@@ -10,21 +10,22 @@
 /**
  * Access Policy service
  *
- * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
- * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/225
- * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
- *              Added new hook `aam_post_read_action_conversion_filter`
- * @since 6.3.1 Fixed incompatibility with plugins that use WP_User::get_role_caps
- *              method. This method re-index all user capabilities based on assigned
- *              roles and that flushes capabilities attached with Access Policy
- * @since 6.3.0 Removed dependency on PHP core `list` function
- * @since 6.2.0 Bug fixing and enhancements for the multisite support
- * @since 6.1.0 Changed the way access policy manager is obtained
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+ * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
+ * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/225
+ * @since 6.8.3  https://github.com/aamplugin/advanced-access-manager/issues/207
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+ *               Added new hook `aam_post_read_action_conversion_filter`
+ * @since 6.3.1  Fixed incompatibility with plugins that use WP_User::get_role_caps
+ *               method. This method re-index all user capabilities based on assigned
+ *               roles and that flushes capabilities attached with Access Policy
+ * @since 6.3.0  Removed dependency on PHP core `list` function
+ * @since 6.2.0  Bug fixing and enhancements for the multi-site support
+ * @since 6.1.0  Changed the way access policy manager is obtained
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.4
+ * @version 6.9.12
  */
 class AAM_Service_AccessPolicy
 {
@@ -183,19 +184,21 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
-     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
-     * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/225
-     * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
-     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
-     *              https://github.com/aamplugin/advanced-access-manager/issues/62
-     *              https://github.com/aamplugin/advanced-access-manager/issues/63
-     * @since 6.2.1 Access support for custom-fields
-     * @since 6.2.0 Added new hook into Multisite service through `aam_allowed_site_filter`
-     * @since 6.1.1 Refactored the way access policy is applied to object
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
+     * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
+     * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/225
+     * @since 6.8.3  https://github.com/aamplugin/advanced-access-manager/issues/207
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     *               https://github.com/aamplugin/advanced-access-manager/issues/62
+     *               https://github.com/aamplugin/advanced-access-manager/issues/63
+     * @since 6.2.1  Access support for custom-fields
+     * @since 6.2.0  Added new hook into Multi-site service through
+     *               `aam_allowed_site_filter`
+     * @since 6.1.1  Refactored the way access policy is applied to object
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.4
+     * @version 6.9.12
      */
     protected function initializeHooks()
     {
@@ -240,21 +243,30 @@ class AAM_Service_AccessPolicy
             foreach($found as $resource => $stm) {
                 $parts = explode(':', $resource);
 
-                if (count($parts) === 2) { // Currently support only name:priority
-                    if (isset($stm['Effect'])) {
-                        if ($stm['Effect'] === 'deny') {
-                            $priority = apply_filters(
-                                'aam_hook_resource_priority', $parts[1]
-                            );
+                if (isset($stm['Effect'])) {
+                    $hook     = trim($parts[0]);
+                    $priority = empty($parts[1]) ? 10 : $parts[1];
 
-                            if (is_bool($priority) || is_numeric($priority)) {
-                                remove_all_filters($parts[0], $priority);
-                            }
-                        } else if ($stm['Effect'] === 'apply') {
-                            add_filter($parts[0], function($response) use ($stm) {
-                                return isset($stm['Response']) ? $stm['Response'] : $response;
-                            }, intval($parts[1]));
+                    if ($stm['Effect'] === 'deny') {
+                        $priority = apply_filters(
+                            'aam_hook_resource_priority', $priority
+                        );
+
+                        if (is_bool($priority) || is_numeric($priority)) {
+                            remove_all_filters($hook, $priority);
                         }
+                    } elseif (in_array($stm['Effect'], array('apply', 'override'))) {
+                        add_filter($hook, function($response) use ($stm) {
+                            return isset($stm['Response']) ? $stm['Response'] : $response;
+                        }, intval($priority));
+                    } elseif ($stm['Effect'] === 'merge') {
+                        add_filter($hook, function($response) use ($stm) {
+                            $n = isset($stm['Response']) ? $stm['Response'] : array();
+                            $a = is_array($n) ? $n : array();
+                            $b = is_array($response) ? $response : array();
+
+                            return array_merge($b, $a);
+                        }, intval($priority));
                     }
                 }
             }
@@ -360,15 +372,15 @@ class AAM_Service_AccessPolicy
                     break;
 
                 case AAM_Core_Object_LoginRedirect::OBJECT_TYPE:
-                    $options = $this->initializeRedirect($options, 'login', $subject);
+                    $options = $this->initializeRedirect($options, $subject, 'login');
                     break;
 
                 case AAM_Core_Object_LogoutRedirect::OBJECT_TYPE:
-                    $options = $this->initializeRedirect($options, 'logout', $subject);
+                    $options = $this->initializeRedirect($options, $subject, 'logout');
                     break;
 
                 case AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE:
-                    $options = $this->initializeRedirect($options, '404', $subject);
+                    $options = $this->initializeRedirect($options, $subject, '404');
                     break;
 
                 default:
@@ -411,8 +423,7 @@ class AAM_Service_AccessPolicy
     /**
      * Initialize Toolbar Object options
      *
-     * @param array                   $option
-     * @param AAM_Core_Object_Toolbar $object
+     * @param array $option
      *
      * @return array
      *
@@ -424,7 +435,7 @@ class AAM_Service_AccessPolicy
      * @see https://aamportal.com/advanced/access-policy/resource-action/toolbar
      * @version 6.1.1
      */
-    protected function initializeToolbar($option, AAM_Core_Object_Toolbar $object)
+    protected function initializeToolbar($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::TOOLBAR);
@@ -440,8 +451,7 @@ class AAM_Service_AccessPolicy
     /**
      * Initialize Metabox Object options
      *
-     * @param array                   $option
-     * @param AAM_Core_Object_Metabox $object
+     * @param array $option
      *
      * @return array
      *
@@ -453,7 +463,7 @@ class AAM_Service_AccessPolicy
      * @see https://aamportal.com/advanced/access-policy/resource-action/metabox
      * @version 6.1.1
      */
-    protected function initializeMetabox($option, AAM_Core_Object_Metabox $object)
+    protected function initializeMetabox($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(array(
@@ -557,8 +567,7 @@ class AAM_Service_AccessPolicy
     /**
      * Initialize URI Object options
      *
-     * @param array            $option
-     * @param AAM_Core_Object_Uri $object
+     * @param array $option
      *
      * @return array
      *
@@ -570,7 +579,7 @@ class AAM_Service_AccessPolicy
      * @see https://aamportal.com/advanced/access-policy/resource-action/uri
      * @version 6.1.1
      */
-    protected function initializeUri($option, AAM_Core_Object_Uri $object)
+    protected function initializeUri($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::URI);
@@ -600,8 +609,7 @@ class AAM_Service_AccessPolicy
     /**
      * Initialize Route Object options
      *
-     * @param array                 $option
-     * @param AAM_Core_Object_Route $object
+     * @param array $option
      *
      * @return array
      *
@@ -613,7 +621,7 @@ class AAM_Service_AccessPolicy
      * @see https://aamportal.com/advanced/access-policy/resource-action/route
      * @version 6.1.1
      */
-    protected function initializeRoute($option, AAM_Core_Object_Route $object)
+    protected function initializeRoute($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::ROUTE);
@@ -661,31 +669,55 @@ class AAM_Service_AccessPolicy
     }
 
     /**
-     * Initialize Login/Logout/404 Redirect rules
+     * Initialize the Redirect rules
      *
-     * @param array  $option
-     * @param string $redirect_type
+     * @param array            $option
+     * @param AAM_Core_Subject $subject
+     * @param string           $redirect_type
      *
      * @return array
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.12
      */
-    protected function initializeRedirect($option, $redirect_type, $subject)
+    protected function initializeRedirect($option, $subject, $redirect_type)
     {
         $manager = AAM::api()->getAccessPolicyManager($subject);
         $parsed  = array();
         $param   = $manager->getParam("redirect:on:{$redirect_type}");
 
         if (!empty($param)) {
-            $value    = $this->convertRedirectAction($param);
-            $type     = (isset($value['type']) ? $value['type'] : 'default');
+            $type = isset($param['Type']) ? $param['Type'] : 'default';
 
-            // Populate the object
-            $parsed["{$redirect_type}.redirect.type"]    = $type;
+            if (in_array($type, array('page', 'page_redirect'))) {
+                // Adding the redirect type
+                $parsed["{$redirect_type}.redirect.type"] = 'page';
 
-            if (!empty($value['destination'])) {
-                $parsed["{$redirect_type}.redirect.{$type}"] = $value['destination'];
+                if (isset($param['PageId'])) {
+                    $parsed["{$redirect_type}.redirect.page"] = intval($param['PageId']);
+                } elseif (isset($param['Id'])) { // legacy param
+                    $parsed["{$redirect_type}.redirect.page"] = intval($param['Id']);
+                } elseif (isset($param['Slug'])) {
+                    $page = get_page_by_path($param['Slug'], OBJECT);
+                    $parsed["{$redirect_type}.redirect.page"] = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                } elseif (isset($param['PageSlug'])) {
+                    $page = get_page_by_path($param['PageSlug'], OBJECT);
+                    $parsed["{$redirect_type}.redirect.page"] = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                }
+            } elseif (in_array($type, array('url', 'url_redirect'))) {
+                // Adding the redirect type
+                $parsed["{$redirect_type}.redirect.type"] = 'url';
+
+                if (isset($param['Url'])) {
+                    $parsed["{$redirect_type}.redirect.url"] = $param['Url'];
+                } elseif (isset($param['URL'])) { // legacy
+                    $parsed["{$redirect_type}.redirect.url"] = $param['URL'];
+                }
+            } elseif (in_array($type, array('callback', 'trigger_callback'))) {
+                $parsed["{$redirect_type}.redirect.type"] = 'callback';
+                $parsed["{$redirect_type}.redirect.callback"] = $param['Callback'];
+            } else {
+                $parsed["{$redirect_type}.redirect.type"] = 'default';
             }
         }
 

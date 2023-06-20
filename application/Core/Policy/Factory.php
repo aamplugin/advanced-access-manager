@@ -10,11 +10,12 @@
 /**
  * AAM core policy manager factory
  *
- * @since 6.1.0 Fixed bug with incorrectly managed internal cache
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
+ * @since 6.1.0  Fixed bug with incorrectly managed internal cache
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.9.12
  */
 final class AAM_Core_Policy_Factory
 {
@@ -37,11 +38,12 @@ final class AAM_Core_Policy_Factory
      *
      * @return AAM_Core_Policy_Manager
      *
-     * @since 6.1.0 Fixed bug with incorrectly managed internal caching
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
+     * @since 6.1.0  Fixed bug with incorrectly managed internal caching
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.1.0
+     * @version 6.9.12
      */
     public static function get(AAM_Core_Subject $subject = null, $skipInheritance)
     {
@@ -50,11 +52,10 @@ final class AAM_Core_Policy_Factory
         }
 
         $id   = $subject->getId();
-
         $sid  = $subject::UID . (empty($id) ? '' : '_' . $id);
         $sid .= ($skipInheritance ? '_direct' : '_complete');
 
-        if (!isset(self::$_instances[$sid])) {
+        if (!array_key_exists($sid, self::$_instances)) {
             self::$_instances[$sid] = new AAM_Core_Policy_Manager(
                 $subject, $skipInheritance
             );

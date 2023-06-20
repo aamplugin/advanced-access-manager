@@ -10,8 +10,11 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
+ * @since 6.9.9  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.9
+ * @version 6.9.12
  */
 class AAM_Framework_Service_Urls
 {
@@ -312,8 +315,11 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.9
+     * @version 6.9.12
      */
     private function _validate_rule(array $rule)
     {
@@ -326,6 +332,11 @@ class AAM_Framework_Service_Urls
         $url    = wp_validate_redirect(
             empty($parsed['path']) ? '/' : $parsed['path']
         );
+
+        // Adding query params if provided
+        if (isset($parsed['query'])) {
+            $url .= '?' . $parsed['query'];
+        }
 
         if (empty($type)) {
             throw new InvalidArgumentException('The `type` is required');

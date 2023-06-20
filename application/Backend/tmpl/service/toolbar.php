@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+    /**
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/289
+     * @since 6.0.0  Initial implementation of the template
+     *
+     * @version 6.9.12
+     * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="toolbar-content">
@@ -34,7 +41,7 @@
                                     <?php echo $this->normalizeTitle($branch); ?> <small class="aam-menu-capability"><?php echo str_replace(site_url(), '', $branch->href); ?></small>
                                 </a>
                                 <?php if ($object->isHidden('toolbar-' . $branch->id)) { ?>
-                                    <i class="aam-panel-title-icon icon-eye-off text-danger"></i>
+                                    <i class="aam-panel-title-icon icon-lock text-danger"></i>
                                 <?php } ?>
                             </h4>
                         </div>
@@ -48,15 +55,21 @@
                                 </div>
                                 <hr class="aam-divider" />
                                 <?php if (!empty($branch->children)) { ?>
-                                    <div class="row aam-inner-tab">
-                                        <?php echo ($object->isHidden('toolbar-' . $branch->id) ? '<div class="aam-lock"></div>' : ''); ?>
+                                    <div class="row aam-inner-tab aam-menu-expended-list">
+                                        <?php echo ($object->isHidden('toolbar-' . $branch->id) ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
                                         <?php foreach ($this->getAllChildren($branch) as $child) { ?>
                                             <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                 <div class="aam-menu-details">
                                                     <?php echo $this->normalizeTitle($child); ?>
                                                     <small><a href="#toolbar-details-modal" data-toggle="modal" data-uri="<?php echo urldecode(str_replace(site_url(), '', $child->href)); ?>" data-id="<?php echo esc_js($child->id); ?>" data-name="<?php echo esc_js($this->normalizeTitle($child)); ?>" class="aam-toolbar-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                                 </div>
-                                                <input type="checkbox" class="aam-checkbox-danger" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>" <?php echo ($object->isHidden($child->id) ? ' checked="checked"' : ''); ?> />
+
+                                                <?php if ($object->isHidden($child->id)) { ?>
+                                                    <i class="aam-accordion-action icon-lock text-danger" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>"></i>
+                                                <?php } else { ?>
+                                                    <i class="aam-accordion-action icon-lock-open text-success" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>"></i>
+                                                <?php } ?>
+
                                                 <label for="toolbar-<?php echo $child->id; ?>" data-toggle="tooltip" title="<?php echo ($object->isHidden($child->id) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                             </div>
                                         <?php } ?>
@@ -67,11 +80,11 @@
                                     <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
                                         <?php if ($object->isHidden('toolbar-' . $branch->id)) { ?>
                                             <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-toolbar" data-toolbar="toolbar-<?php echo $branch->id; ?>" data-target="#toolbar-<?php echo $branch->id; ?>">
-                                                <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
+                                                <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } else { ?>
                                             <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-toolbar" data-toolbar="toolbar-<?php echo $branch->id; ?>" data-target="#toolbar-<?php echo $branch->id; ?>">
-                                                <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                                <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } ?>
                                     </div>

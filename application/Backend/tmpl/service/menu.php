@@ -1,9 +1,10 @@
 <?php
 /**
- * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/114
- * @since 6.0.0 Initial implementation of the template
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/288
+ * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/114
+ * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.6.0
+ * @version 6.9.12
  * */
 ?>
 
@@ -43,7 +44,7 @@
                                     <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
                                 </a>
                                 <?php if ($menu['checked']) { ?>
-                                    <i class="aam-panel-title-icon icon-eye-off text-danger"></i>
+                                    <i class="aam-panel-title-icon icon-lock text-danger"></i>
                                 <?php } elseif ($this->hasSubmenuChecked($menu['submenu'])) { ?>
                                     <i class="aam-panel-title-icon icon-attention-circled text-warning"></i>
                                 <?php } ?>
@@ -64,8 +65,8 @@
                                     <hr class="aam-divider" />
                                 <?php } ?>
                                 <?php if (!empty($menu['submenu'])) { ?>
-                                    <div class="row aam-inner-tab">
-                                        <?php echo ($menu['checked'] ? '<div class="aam-lock"></div>' : ''); ?>
+                                    <div class="row aam-inner-tab aam-menu-expended-list">
+                                        <?php echo ($menu['checked'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
                                         <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
                                             <?php if ($submenu['id'] == 'index.php') { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
@@ -80,7 +81,11 @@
                                                         <?php echo $submenu['name']; ?>
                                                         <small><a href="#menu-details-modal" data-toggle="modal" data-uri="<?php echo urldecode($submenu['uri']); ?>" data-cap="<?php echo $submenu['capability']; ?>" data-name="<?php echo $submenu['name']; ?>" data-id="<?php echo $submenu['id']; ?>" class="aam-menu-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                                     </div>
-                                                    <input type="checkbox" class="aam-checkbox-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>" <?php echo ($submenu['checked'] ? ' checked="checked"' : ''); ?> />
+                                                    <?php if ($submenu['checked']) { ?>
+                                                        <i class="aam-accordion-action icon-lock text-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"></i>
+                                                    <?php } else { ?>
+                                                        <i class="aam-accordion-action icon-lock-open text-success" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"></i>
+                                                    <?php } ?>
                                                     <label for="menu-item-<?php echo $i . $j; ?>" data-toggle="tooltip" title="<?php echo ($object->isRestricted($submenu['id']) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                                 </div>
                                             <?php } ?>
@@ -95,17 +100,17 @@
                                         <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
                                             <?php if ($menu['checked']) { ?>
                                                 <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                                    <i class="icon-eye"></i> <?php echo __('Show Menu', AAM_KEY); ?>
+                                                    <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                                 </a>
                                             <?php } else { ?>
                                                 <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
-                                                    <i class="icon-eye-off"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                                    <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
                                                 </a>
                                             <?php } ?>
                                         </div>
                                     </div>
                                 <?php } else { ?>
-                                    <p class="aam-info"><?php echo __('Dashboard menu cannot be restricted because it is the default page all users are redirected after login. You can restrict only Dashboard submenus if any.', AAM_KEY); ?></p>
+                                    <p class="aam-info"><?php echo __('The "Dashboard" menu cannot be restricted because it is the default page all users are redirected to after login.', AAM_KEY); ?></p>
                                 <?php } ?>
                             </div>
                         </div>

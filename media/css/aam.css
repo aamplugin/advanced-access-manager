@@ -48,26 +48,24 @@
 }
 
 .icon-clock:before { content: '\e800' !important; } /* 'î ' */
-.icon-calendar:before { content: '\e80f' !important; } /* 'î ' */
-.icon-angle-left:before { content: '\f104' !important; } /* 'ï' */
-.icon-angle-right:before { content: '\f105' !important; } /* 'ï' */
-.icon-angle-up:before { content: '\f106' !important; } /* 'ï' */
-.icon-pin:before { content: '\e81a' !important; } /* 'î ' */
-.icon-angle-down:before { content: '\f107' !important; } /* 'ï' */
 .icon-asterisk:before { content: '\e801' !important; } /* 'î ' */
 .icon-spin4:before { content: '\e802' !important; } /* 'î ' */
 .icon-user-secret:before { content: '\e803' !important; } /* 'î ' */
 .icon-folder:before { content: '\e804' !important; } /* 'î ' */
 .icon-stop:before { content: '\e805' !important; } /* 'î ' */
 .icon-left-dir:before { content: '\e806' !important; } /* 'î ' */
+.icon-wrench-circled:before { content: '\e807' !important; } /* 'î ' */
 .icon-mail-alt:before { content: '\e808' !important; } /* 'î ' */
 .icon-download-cloud:before { content: '\e809' !important; } /* 'î ' */
 .icon-eye-off:before { content: '\e80a' !important; } /* 'î ' */
 .icon-attention-circled:before { content: '\e80b' !important; } /* 'î ' */
-.icon-basket:before { content: '\e80c'; } /* 'î ' */
+.icon-basket:before { content: '\e80c' !important; } /* 'î ' */
+.icon-cog-alt:before { content: '\e80d' !important; } /* 'î ' */
+.icon-wrench:before { content: '\e80e' !important; } /* 'î ' */
+.icon-calendar:before { content: '\e80f' !important; } /* 'î ' */
 .icon-sort-down:before { content: '\e810' !important; } /* 'î ' */
 .icon-pencil:before { content: '\e811' !important; } /* 'î ' */
-.icon-arrows-cw:before { content: '\e812' !important; } /* 'î ' */
+.icon-lock-open:before { content: '\e812' !important; } /* 'î ' */
 .icon-sort-up:before { content: '\e813' !important; } /* 'î ' */
 .icon-sort:before { content: '\e814' !important; } /* 'î ' */
 .icon-lock-open-alt:before { content: '\e815' !important; } /* 'î ' */
@@ -75,12 +73,21 @@
 .icon-filter:before { content: '\e817' !important; } /* 'î ' */
 .icon-check:before { content: '\e818' !important; } /* 'î ' */
 .icon-help-circled:before { content: '\e819' !important; } /* 'î ' */
+.icon-pin:before { content: '\e81a' !important; } /* 'î ' */
 .icon-users:before { content: '\e81b' !important; } /* 'î ' */
+.icon-ok-circled:before { content: '\e81c' !important; } /* 'î ' */
+.icon-cancel-circled:before { content: '\e81d' !important; } /* 'î ' */
+.icon-attention:before { content: '\e81e' !important; } /* 'î ' */
+.icon-info-circled:before { content: '\e81f' !important; } /* 'î ' */
 .icon-user-plus:before { content: '\e820' !important; } /* 'î  ' */
+.icon-tag:before { content: '\e821' !important; } /* 'î ¡' */
 .icon-box:before { content: '\e822' !important; } /* 'î ¢' */
 .icon-plus-circled:before { content: '\e823' !important; } /* 'î £' */
 .icon-link:before { content: '\e824' !important; } /* 'î ¤' */
+.icon-chat:before { content: '\e825' !important; } /* 'î ¥' */
 .icon-eye:before { content: '\e826' !important; } /* 'î ¦' */
+.icon-ccw:before { content: '\e827' !important; } /* 'î §' */
+.icon-arrows-cw:before { content: '\e828' !important; } /* 'î ¨' */
 .icon-check-empty:before { content: '\e829' !important; } /* 'î ©' */
 .icon-doc-text-inv:before { content: '\e82a' !important; } /* 'î ª' */
 .icon-home:before { content: '\e82b' !important; } /* 'î «' */
@@ -92,25 +99,20 @@
 .icon-twitter:before { content: '\e83b' !important; } /* 'î »' */
 .icon-user:before { content: '\e83d' !important; } /* 'î ½' */
 .icon-level-down:before { content: '\e83e' !important; } /* 'î ¾' */
+.icon-rss:before { content: '\f09e' !important; } /* 'ï' */
 .icon-chat-empty:before { content: '\f0e6' !important; } /* 'ï¦' */
-.icon-angle-circled-up:before { content: '\f139' !important; } /* '' */
 .icon-exchange:before { content: '\f0ec' !important; } /* 'ï¬' */
+.icon-angle-left:before { content: '\f104' !important; } /* 'ï' */
+.icon-angle-right:before { content: '\f105' !important; } /* 'ï' */
+.icon-angle-up:before { content: '\f106' !important; } /* 'ï' */
+.icon-angle-down:before { content: '\f107' !important; } /* 'ï' */
 .icon-circle:before { content: '\f111' !important; } /* 'ï' */
+.icon-angle-circled-up:before { content: '\f139' !important; } /* 'ï¹' */
+.icon-dollar:before { content: '\f155' !important; } /* 'ï' */
+.icon-cubes:before { content: '\f1b3' !important; } /* 'ï³' */
+.icon-file-code:before { content: '\f1c9' !important; } /* 'ï' */
 .icon-circle-thin:before { content: '\f1db' !important; } /* 'ï' */
 .icon-clone:before { content: '\f24d' !important; } /* 'ï' */
-.icon-rss:before { content: '\f09e' !important; } /* 'ï' */
-.icon-dollar:before { content: '\f155' !important; } /* '' */
-.icon-cubes:before { content: '\f1b3' !important; } /* 'ï³' */
-.icon-cog-alt:before { content: '\e80d' !important; } /* 'î ' */
-.icon-wrench:before { content: '\e80e' !important; } /* 'î ' */
-.icon-ok-circled:before { content: '\e81c' !important; } /* 'î ' */
-.icon-cancel-circled:before { content: '\e81d' !important; } /* 'î ' */
-.icon-info-circled:before { content: '\e81f' !important; } /* 'î ' */
-.icon-attention:before { content: '\e81e' !important; } /* 'î ' */
-.icon-tag:before { content: '\e821' !important; } /* 'î ¡' */
-.icon-file-code:before { content: '\f1c9' !important; } /* 'ï' */
-.icon-chat:before { content: '\e825' !important; } /* 'î ¥' */
-.icon-ccw:before { content: '\e827' !important; } /* 'î §' */
 
 .icon-image-40 {
   font-size: 40px;
@@ -719,7 +721,10 @@ input[type=radio]:checked + label:before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 1);
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.4em;
     z-index: 9999;
 }
 
@@ -836,6 +841,13 @@ input[type=radio]:checked + label:before {
     cursor: pointer;
     font-size: 1.4em;
     line-height: 1em;
+}
+
+.aam-accordion-action {
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.4em;
+  line-height: 1em;
 }
 
 .aam-confirm-message {

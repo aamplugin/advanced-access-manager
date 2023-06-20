@@ -762,7 +762,7 @@
                                 });
                             } else {
                                 $(btn).attr({
-                                    'class': 'aam-row-action icon-lock-open-alt text-warning',
+                                    'class': 'aam-row-action icon-lock-open text-warning',
                                     'title': getAAM().__('Lock user'),
                                     'data-original-title': getAAM().__('Lock user')
                                 });
@@ -1023,7 +1023,7 @@
                                 case 'lock':
                                     if (getAAM().isUI('main')) {
                                         $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-lock-open-alt text-warning'
+                                            'class': 'aam-row-action icon-lock-open text-success'
                                         }).bind('click', function () {
                                             blockUser(data[0], $(this));
                                         }).attr({
@@ -1036,7 +1036,7 @@
                                 case 'no-lock':
                                     if (getAAM().isUI('main')) {
                                         $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-lock-open-alt text-muted'
+                                            'class': 'aam-row-action icon-lock-open text-muted'
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Lock user')
@@ -1860,7 +1860,7 @@
                     $('.aam-restrict-menu').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
-                            var status = ($('i', $(this)).hasClass('icon-eye-off') ? 1 : 0);
+                            var status = ($('i', $(this)).hasClass('icon-lock') ? 1 : 0);
                             var target = _this.data('target');
 
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
@@ -1877,23 +1877,25 @@
                                     $('#aam-menu-overwrite').show();
 
                                     if (status) { //locked the menu
-                                        $('.aam-inner-tab', target).append(
-                                            $('<div/>', { 'class': 'aam-lock' })
+                                        $('.aam-menu-expended-list', target).append(
+                                            $('<div/>', { 'class': 'aam-lock' }).append(
+                                                getAAM().__('The entire menu is restricted with all submenus')
+                                            )
                                         );
                                         _this.removeClass('btn-danger').addClass('btn-primary');
-                                        _this.html('<i class="icon-eye"></i>' + getAAM().__('Show Menu'));
-                                        //add menu restricted indicator
+                                        _this.html('<i class="icon-lock-open"></i>' + getAAM().__('Show Menu'));
+
                                         var ind = $('<i/>', {
-                                            'class': 'aam-panel-title-icon icon-eye-off text-danger'
+                                            'class': 'aam-panel-title-icon icon-lock text-danger'
                                         });
                                         $('.panel-title', target + '-heading').append(ind);
                                     } else {
                                         $('.aam-lock', target).remove();
                                         _this.removeClass('btn-primary').addClass('btn-danger');
                                         _this.html(
-                                            '<i class="icon-eye-off"></i>' + getAAM().__('Restrict Menu')
+                                            '<i class="icon-lock"></i>' + getAAM().__('Restrict Menu')
                                         );
-                                        $('.panel-title .icon-eye-off', target + '-heading').remove();
+                                        $('.panel-title .icon-lock', target + '-heading').remove();
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -1911,20 +1913,26 @@
                         });
                     });
 
-                    $('input[type="checkbox"]', '#admin-menu').each(function () {
+                    $('.aam-accordion-action', '#admin-menu').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
 
+                            const status = _this.hasClass('icon-lock-open') ? 1 : 0;
+
+                            // Show loading indicator
+                            _this.attr('class', 'aam-accordion-action icon-spin4 animate-spin');
+
                             save(
                                 [_this.data('menu-id')],
-                                _this.is(':checked') ? 1 : 0,
+                                status,
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-menu-overwrite').show();
-                                        if (_this.is(':checked')) {
-                                            _this.next().attr('data-original-title', getAAM().__('Uncheck to allow'));
+
+                                        if (status) {
+                                            _this.attr('class', 'aam-accordion-action icon-lock text-danger');
                                         } else {
-                                            _this.next().attr('data-original-title', getAAM().__('Check to restrict'));
+                                            _this.attr('class', 'aam-accordion-action icon-lock-open text-success');
                                         }
                                     }
                                 }
@@ -1992,15 +2000,14 @@
                     $('.aam-restrict-toolbar').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
-                            var status = ($('i', $(this)).hasClass('icon-eye-off') ? 1 : 0);
+                            var status = ($('i', $(this)).hasClass('icon-lock') ? 1 : 0);
                             var target = _this.data('target');
 
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
 
                             var items = new Array(_this.data('toolbar'));
 
-                            $('input', target).each(function () {
-                                $(this).prop('checked', status ? true : false);
+                            $('.aam-accordion-action', target).each(function () {
                                 items.push($(this).data('toolbar'));
                             });
 
@@ -2009,23 +2016,26 @@
                                     $('#aam-toolbar-overwrite').show();
 
                                     if (status) { //locked the menu
-                                        $('.aam-inner-tab', target).append(
-                                            $('<div/>', { 'class': 'aam-lock' })
+                                        $('.aam-menu-expended-list', target).append(
+                                            $('<div/>', { 'class': 'aam-lock' }).append(
+                                                getAAM().__('The entire menu is restricted with all submenus')
+                                            )
                                         );
                                         _this.removeClass('btn-danger').addClass('btn-primary');
-                                        _this.html('<i class="icon-eye"></i>' + getAAM().__('Show Menu'));
+                                        _this.html('<i class="icon-lock-open"></i>' + getAAM().__('Show Menu'));
+
                                         //add menu restricted indicator
                                         var ind = $('<i/>', {
-                                            'class': 'aam-panel-title-icon icon-eye-off text-danger'
+                                            'class': 'aam-panel-title-icon icon-lock text-danger'
                                         });
                                         $('.panel-title', target + '-heading').append(ind);
                                     } else {
                                         $('.aam-lock', target).remove();
                                         _this.removeClass('btn-primary').addClass('btn-danger');
                                         _this.html(
-                                            '<i class="icon-eye-off"></i>' + getAAM().__('Restrict Menu')
+                                            '<i class="icon-lock"></i>' + getAAM().__('Restrict Menu')
                                         );
-                                        $('.panel-title .icon-eye-off', target + '-heading').remove();
+                                        $('.panel-title .icon-lock', target + '-heading').remove();
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -2047,20 +2057,26 @@
                         getAAM().reset('Main_Toolbar.reset', $(this));
                     });
 
-                    $('input[type="checkbox"]', '#toolbar-list').each(function () {
+                    $('.aam-accordion-action', '#toolbar-list').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
+
+                            const status = _this.hasClass('icon-lock-open') ? 1 : 0;
+
+                            // Show loading indicator
+                            _this.attr('class', 'aam-accordion-action icon-spin4 animate-spin');
+
                             save(
-                                [$(this).data('toolbar')],
-                                $(this).is(':checked') ? 1 : 0,
+                                [_this.data('toolbar')],
+                                status,
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-toolbar-overwrite').show();
 
-                                        if (_this.is(':checked')) {
-                                            _this.next().attr('data-original-title', getAAM().__('Uncheck to show'));
+                                        if (status) {
+                                            _this.attr('class', 'aam-accordion-action icon-lock text-danger');
                                         } else {
-                                            _this.next().attr('data-original-title', getAAM().__('Check to hide'));
+                                            _this.attr('class', 'aam-accordion-action icon-lock-open text-success');
                                         }
                                     }
                                 }
@@ -2236,20 +2252,26 @@
                         getAAM().reset('Main_Metabox.reset', $(this));
                     });
 
-                    $('input[type="checkbox"]', '#metabox-list').each(function () {
+                    $('.aam-accordion-action', '#metabox-list').each(function () {
                         $(this).bind('click', function () {
                             var _this = $(this);
+
+                            const status = _this.hasClass('icon-lock-open') ? 1 : 0;
+
+                            // Show loading indicator
+                            _this.attr('class', 'aam-accordion-action icon-spin4 animate-spin');
+
                             save(
                                 [$(this).data('metabox')],
-                                $(this).is(':checked'),
+                                status,
                                 function (result) {
                                     if (result.status === 'success') {
                                         $('#aam-metabox-overwrite').show();
 
-                                        if (_this.is(':checked')) {
-                                            _this.next().attr('data-original-title', getAAM().__('Uncheck to show'));
+                                        if (status) {
+                                            _this.attr('class', 'aam-accordion-action icon-lock text-danger');
                                         } else {
-                                            _this.next().attr('data-original-title', getAAM().__('Check to hide'));
+                                            _this.attr('class', 'aam-accordion-action icon-lock-open text-success');
                                         }
                                     }
                                 }
@@ -3455,25 +3477,39 @@
 
             /**
              *
-             * @param {type} items
-             * @param {type} status
-             * @param {type} successCallback
-             * @returns {undefined}
+             * @returns
              */
-            function save(param, value, successCallback) {
+            function prepareRequestSubjectData(mergeWith = {}) {
+                // Prepare the payload
+                const data = {
+                    access_level: getAAM().getSubject().type
+                };
+
+                if (data.access_level === 'role') {
+                    data.role_id = getAAM().getSubject().id;
+                } else if (data.access_level === 'user') {
+                    data.user_id = getAAM().getSubject().id;
+                }
+
+                return Object.assign({}, mergeWith, data);
+            }
+
+            /**
+             *
+             * @param {payload}  payload
+             * @param {function} successCallback
+             *
+             * @returns {void}
+             */
+            function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getLocal().ajaxurl, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/login`, {
                         type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'aam',
-                            sub_action: 'Main_LoginRedirect.save',
-                            subject: getAAM().getSubject().type,
-                            subjectId: getAAM().getSubject().id,
-                            _ajax_nonce: getLocal().nonce,
-                            param: param,
-                            value: value
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
                         },
+                        dataType: 'json',
+                        data: payload,
                         success: function (response) {
                             successCallback(response);
                         },
@@ -3500,42 +3536,69 @@
                             //show the specific one
                             $($(this).data('action')).show();
 
-                            //save redirect type
-                            save(
-                                $(this).attr('name'),
-                                $(this).val(),
-                                function (result) {
-                                    if (result.status === 'success') {
-                                        $('#aam-login-redirect-overwrite').show();
-                                    }
-                                }
-                            );
+                            // Now, if the login redirect type is default, then
+                            // save the data, otherwise save only when more detail
+                            // provided
+                            const type = $(this).val();
+
+                            if (type === 'default') {
+                                save(prepareRequestSubjectData({ type }), () => {
+                                    $('#aam-login-redirect-overwrite').show();
+                                });
+                            }
                         });
                     });
 
-                    $('input[type="text"],select,textarea', container).each(function () {
+                    $('input[type="text"],select', container).each(function () {
                         $(this).bind('change', function () {
-                            if ($(this).is('input[type="checkbox"]')) {
-                                var val = $(this).prop('checked') ? $(this).val() : 0;
+                            const value = $.trim($(this).val());
+                            const type  = $('input[name="login.redirect.type"]:checked').val();
+
+                            const payload = {
+                                type
+                            };
+
+                            if (type === 'page_redirect') {
+                                payload.redirect_page_id = value;
+                            } else if (type === 'url_redirect') {
+                                payload.redirect_url = value;
                             } else {
-                                val = $.trim($(this).val());
+                                payload.callback = value;
                             }
 
                             //save redirect type
-                            save(
-                                $(this).attr('name'),
-                                val,
-                                function (result) {
-                                    if (result.status === 'success') {
-                                        $('#aam-login-redirect-overwrite').show();
-                                    }
-                                }
-                            );
+                            save(prepareRequestSubjectData(payload), () => {
+                                $('#aam-login-redirect-overwrite').show();
+                            });
                         });
                     });
 
                     $('#login-redirect-reset').bind('click', function () {
-                        getAAM().reset('Main_LoginRedirect.reset', $(this));
+                        const _btn = $(this);
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/login`, {
+                            type: 'POST',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
+                            },
+                            data: prepareRequestSubjectData(),
+                            dataType: 'json',
+                            beforeSend: function () {
+                                var label = _btn.text();
+                                _btn.attr('data-original-label', label);
+                                _btn.text(getAAM().__('Resetting...'));
+                            },
+                            success: function () {
+                                getAAM().fetchContent('main');
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                _btn.text(_btn.attr('data-original-label'));
+                            }
+                        });
                     });
                 }
             }
@@ -3555,25 +3618,39 @@
 
             /**
              *
+             * @returns
+             */
+            function prepareRequestSubjectData(mergeWith = {}) {
+                // Prepare the payload
+                const data = {
+                    access_level: getAAM().getSubject().type
+                };
+
+                if (data.access_level === 'role') {
+                    data.role_id = getAAM().getSubject().id;
+                } else if (data.access_level === 'user') {
+                    data.user_id = getAAM().getSubject().id;
+                }
+
+                return Object.assign({}, mergeWith, data);
+            }
+
+            /**
+             *
              * @param {type} items
              * @param {type} status
              * @param {type} successCallback
              * @returns {undefined}
              */
-            function save(param, value, successCallback) {
+            function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getLocal().ajaxurl, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/logout`, {
                         type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'aam',
-                            sub_action: 'Main_LogoutRedirect.save',
-                            subject: getAAM().getSubject().type,
-                            subjectId: getAAM().getSubject().id,
-                            _ajax_nonce: getLocal().nonce,
-                            param: param,
-                            value: value
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
                         },
+                        dataType: 'json',
+                        data: payload,
                         success: function (response) {
                             successCallback(response);
                         },
@@ -3600,36 +3677,69 @@
                             //show the specific one
                             $($(this).data('action')).show();
 
-                            //save redirect type
-                            save(
-                                $(this).attr('name'),
-                                $(this).val(),
-                                function (result) {
-                                    if (result.status === 'success') {
-                                        $('#aam-logout-redirect-overwrite').show();
-                                    }
-                                }
-                            );
+                            // Now, if the login redirect type is default, then
+                            // save the data, otherwise save only when more detail
+                            // provided
+                            const type = $(this).val();
+
+                            if (type === 'default') {
+                                save(prepareRequestSubjectData({ type }), () => {
+                                    $('#aam-logout-redirect-overwrite').show();
+                                });
+                            }
                         });
                     });
 
-                    $('input[type="text"],select,textarea', container).each(function () {
+                    $('input[type="text"],select', container).each(function () {
                         $(this).bind('change', function () {
+                            const value = $.trim($(this).val());
+                            const type  = $('input[name="logout.redirect.type"]:checked').val();
+
+                            const payload = {
+                                type
+                            };
+
+                            if (type === 'page_redirect') {
+                                payload.redirect_page_id = value;
+                            } else if (type === 'url_redirect') {
+                                payload.redirect_url = value;
+                            } else {
+                                payload.callback = value;
+                            }
+
                             //save redirect type
-                            save(
-                                $(this).attr('name'),
-                                $(this).val(),
-                                function (result) {
-                                    if (result.status === 'success') {
-                                        $('#aam-logout-redirect-overwrite').show();
-                                    }
-                                }
-                            );
+                            save(prepareRequestSubjectData(payload), () => {
+                                $('#aam-logout-redirect-overwrite').show();
+                            });
                         });
                     });
 
                     $('#logout-redirect-reset').bind('click', function () {
-                        getAAM().reset('Main_LogoutRedirect.reset', $(this));
+                        const _btn = $(this);
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/logout`, {
+                            type: 'POST',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
+                            },
+                            data: prepareRequestSubjectData(),
+                            dataType: 'json',
+                            beforeSend: function () {
+                                var label = _btn.text();
+                                _btn.attr('data-original-label', label);
+                                _btn.text(getAAM().__('Resetting...'));
+                            },
+                            success: function () {
+                                getAAM().fetchContent('main');
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                _btn.text(_btn.attr('data-original-label'));
+                            }
+                        });
                     });
                 }
             }
@@ -3649,28 +3759,41 @@
 
             /**
              *
-             * @param {type} param
-             * @param {type} value
+             * @returns
+             */
+            function prepareRequestSubjectData(mergeWith = {}) {
+                // Prepare the payload
+                const data = {
+                    access_level: getAAM().getSubject().type
+                };
+
+                if (data.access_level === 'role') {
+                    data.role_id = getAAM().getSubject().id;
+                } else if (data.access_level === 'user') {
+                    data.user_id = getAAM().getSubject().id;
+                }
+
+                return Object.assign({}, mergeWith, data);
+            }
+
+            /**
+             *
+             * @param {type} items
+             * @param {type} status
+             * @param {type} successCallback
              * @returns {undefined}
              */
-            function save(param, value, cb) {
+            function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getLocal().ajaxurl, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/404`, {
                         type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'aam',
-                            sub_action: 'Main_404Redirect.save',
-                            _ajax_nonce: getLocal().nonce,
-                            subject: getAAM().getSubject().type,
-                            subjectId: getAAM().getSubject().id,
-                            param: param,
-                            value: value
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
                         },
+                        dataType: 'json',
+                        data: payload,
                         success: function (response) {
-                            if (typeof cb === 'function') {
-                                cb(response);
-                            }
+                            successCallback(response);
                         },
                         error: function () {
                             getAAM().notification('danger');
@@ -3695,28 +3818,69 @@
                             //show the specific one
                             $($(this).data('action')).show();
 
-                            //save redirect type
-                            save(
-                                $(this).attr('name'),
-                                $(this).val(),
-                                function (result) {
-                                    if (result.status === 'success') {
-                                        $('#aam-404redirect-overwrite').show();
-                                    }
-                                }
-                            );
+                            // Now, if the login redirect type is default, then
+                            // save the data, otherwise save only when more detail
+                            // provided
+                            const type = $(this).val();
+
+                            if (type === 'default') {
+                                save(prepareRequestSubjectData({ type }), () => {
+                                    $('#aam-404redirect-overwrite').show();
+                                });
+                            }
                         });
                     });
 
-                    $('input[type="text"],select,textarea', container).each(function () {
+                    $('input[type="text"],select', container).each(function () {
                         $(this).bind('change', function () {
+                            const value = $.trim($(this).val());
+                            const type  = $('input[name="404.redirect.type"]:checked').val();
+
+                            const payload = {
+                                type
+                            };
+
+                            if (type === 'page_redirect') {
+                                payload.redirect_page_id = value;
+                            } else if (type === 'url_redirect') {
+                                payload.redirect_url = value;
+                            } else {
+                                payload.callback = value;
+                            }
+
                             //save redirect type
-                            save($(this).attr('name'), $(this).val());
+                            save(prepareRequestSubjectData(payload), () => {
+                                $('#aam-404redirect-overwrite').show();
+                            });
                         });
                     });
 
                     $('#404redirect-reset').bind('click', function () {
-                        getAAM().reset('Main_404Redirect.reset', $(this));
+                        const _btn = $(this);
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/404`, {
+                            type: 'POST',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
+                            },
+                            data: prepareRequestSubjectData(),
+                            dataType: 'json',
+                            beforeSend: function () {
+                                var label = _btn.text();
+                                _btn.attr('data-original-label', label);
+                                _btn.text(getAAM().__('Resetting...'));
+                            },
+                            success: function () {
+                                getAAM().fetchContent('main');
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                _btn.text(_btn.attr('data-original-label'));
+                            }
+                        });
                     });
                 }
             }

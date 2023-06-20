@@ -10,14 +10,15 @@
 /**
  * Logout Redirect service
  *
- * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
- *              explicitly selected
- * @since 6.0.5 Fixed the bug with logout redirect
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
+ *               explicitly selected
+ * @since 6.0.5  Fixed the bug with logout redirect
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.12
  */
 class AAM_Service_LogoutRedirect
 {
@@ -82,15 +83,16 @@ class AAM_Service_LogoutRedirect
      *
      * @return void
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.1.0 Fixed bug where white screen occurs if "Default" option is
-     *              explicitly selected
-     * @since 6.0.5 Fixed bug where user was not redirected properly after logout
-     *              because AAM was already hooking into `set_current_user`.
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
+     *               explicitly selected
+     * @since 6.0.5  Fixed bug where user was not redirected properly after logout
+     *               because AAM was already hooking into `set_current_user`.
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.12
      */
     protected function initializeHooks()
     {
@@ -122,10 +124,13 @@ class AAM_Service_LogoutRedirect
             }
         }, PHP_INT_MAX);
 
-         // Policy generation hook
-         add_filter(
+        // Policy generation hook
+        add_filter(
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
+
+        // Register RESTful API
+        AAM_Core_Restful_LogoutRedirectService::bootstrap();
     }
 
     /**

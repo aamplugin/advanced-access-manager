@@ -12,12 +12,13 @@
  *
  * @package AAM
  *
- * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
- * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/98
- * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+ * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/98
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the class
  *
- * @version 6.6.2
+ * @version 6.9.12
  */
 class AAM_Service_LoginRedirect
 {
@@ -73,17 +74,23 @@ class AAM_Service_LoginRedirect
      *
      * @return void
      *
-     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+     * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.6.2
+     * @version 6.9.12
      */
     protected function initializeHooks()
     {
         // AAM Secure Login hooking
-        add_filter('aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3);
+        add_filter(
+            'aam_auth_response_filter',
+            array($this, 'prepareLoginResponse'),
+            10,
+            3
+        );
 
         // WP Core login redirect hook
         add_filter('login_redirect', array($this, 'getLoginRedirect'), 10, 3);
@@ -92,6 +99,9 @@ class AAM_Service_LoginRedirect
         add_filter(
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
+
+        // Register RESTful API
+        AAM_Core_Restful_LoginRedirectService::bootstrap();
     }
 
     /**

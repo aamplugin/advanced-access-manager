@@ -17,14 +17,15 @@
  * role or visitor. For example login, logout redirect, default category or access
  * denied redirect rules.
  *
- * @since 6.3.3 Change visibility level for the setExplicitOption method
- * @since 6.1.0 Significant improvement to the inheritance mechanism. Documented
- *              the class
- * @since 6.0.5 Added `getExplicitOption` method
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+ * @since 6.3.3  Change visibility level for the setExplicitOption method
+ * @since 6.1.0  Significant improvement to the inheritance mechanism. Documented
+ *               the class
+ * @since 6.0.5  Added `getExplicitOption` method
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.3.3
+ * @version 6.9.12
  */
 abstract class AAM_Core_Object
 {
@@ -405,17 +406,20 @@ abstract class AAM_Core_Object
      *
      * @param array $option
      *
-     * @return void
+     * @return object
      *
-     * @since 6.3.3 Changed the method to be public
-     * @since 6.1.0 Initial implementation of the method
+     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
+     * @since 6.3.3  Changed the method to be public
+     * @since 6.1.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.3.3
+     * @version 6.9.12
      */
-    public function setExplicitOption($option)
+    public function setExplicitOption(array $option)
     {
         $this->_explicitOption = $option;
+
+        return $this;
     }
 
     /**
