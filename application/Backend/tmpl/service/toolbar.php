@@ -1,9 +1,11 @@
 <?php
     /**
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
+     *               https://github.com/aamplugin/advanced-access-manager/issues/302
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/289
      * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.12
+     * @version 6.9.13
      * */
 ?>
 
@@ -26,65 +28,72 @@
             </div>
         </div>
 
+        <?php echo apply_filters('aam_toolbar_mode_panel_filter', '', AAM_Backend_Subject::getInstance()->getObject('toolbar')); ?>
+
         <div class="panel-group" id="toolbar-list" role="tablist" aria-multiselectable="true">
             <?php
             $first   = false;
-            $toolbar = $this->getToolbar();
-            $object  = AAM_Backend_Subject::getInstance()->getObject('toolbar');
+            $toolbar = AAM_Framework_Manager::admin_toolbar(array(
+                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+            ))->get_item_list();
 
             if (!empty($toolbar)) { ?>
-                <?php foreach ($toolbar as $i => $branch) { ?>
+                <?php foreach ($toolbar as $branch) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="toolbar-<?php echo $branch->id; ?>-heading">
+                        <div class="panel-heading" role="tab" id="toolbar-<?php echo $branch['id']; ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#toolbar-list" href="#toolbar-<?php echo $branch->id; ?>" aria-controls="toolbar-<?php echo $branch->id; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
-                                    <?php echo $this->normalizeTitle($branch); ?> <small class="aam-menu-capability"><?php echo str_replace(site_url(), '', $branch->href); ?></small>
+                                <a role="button" data-toggle="collapse" data-parent="#toolbar-list" href="#toolbar-<?php echo $branch['id']; ?>" aria-controls="toolbar-<?php echo $branch['id']; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                    <?php echo esc_js($branch['name']); ?> <small class="aam-menu-capability"><?php echo $branch['uri']; ?></small>
                                 </a>
-                                <?php if ($object->isHidden('toolbar-' . $branch->id)) { ?>
+                                <?php if ($branch['is_hidden']) { ?>
                                     <i class="aam-panel-title-icon icon-lock text-danger"></i>
                                 <?php } ?>
                             </h4>
                         </div>
 
-                        <div id="toolbar-<?php echo $branch->id; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="toolbar-<?php echo $branch->id; ?>-heading">
+                        <div id="toolbar-<?php echo $branch['id']; ?>" class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>" role="tabpanel" aria-labelledby="toolbar-<?php echo $branch['id']; ?>-heading">
                             <div class="panel-body">
                                 <div class="row aam-inner-tab">
                                     <div class="col-xs-12 text-center">
-                                        <small class="aam-menu-capability"><?php echo __('Item ID:', AAM_KEY); ?> <b><?php echo $branch->id; ?></b></small>
+                                        <small class="aam-menu-capability"><?php echo __('Item Slug:', AAM_KEY); ?> <b><?php echo $branch['slug']; ?></b></small>
                                     </div>
                                 </div>
+
                                 <hr class="aam-divider" />
-                                <?php if (!empty($branch->children)) { ?>
+
+                                <?php if (count($branch['children'])) { ?>
                                     <div class="row aam-inner-tab aam-menu-expended-list">
-                                        <?php echo ($object->isHidden('toolbar-' . $branch->id) ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
-                                        <?php foreach ($this->getAllChildren($branch) as $child) { ?>
+                                        <?php echo ($branch['is_hidden'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
+
+                                        <?php foreach ($branch['children'] as $child) { ?>
                                             <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                 <div class="aam-menu-details">
-                                                    <?php echo $this->normalizeTitle($child); ?>
-                                                    <small><a href="#toolbar-details-modal" data-toggle="modal" data-uri="<?php echo urldecode(str_replace(site_url(), '', $child->href)); ?>" data-id="<?php echo esc_js($child->id); ?>" data-name="<?php echo esc_js($this->normalizeTitle($child)); ?>" class="aam-toolbar-item"><?php echo __('more details', AAM_KEY); ?></a></small>
+                                                    <?php echo esc_js($child['name']); ?>
+                                                    <small><a href="#toolbar-details-modal" data-toggle="modal" data-uri="<?php echo $child['uri']; ?>" data-id="<?php echo esc_js($child['slug']); ?>" data-name="<?php echo esc_js($child['name']); ?>" class="aam-toolbar-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                                 </div>
 
-                                                <?php if ($object->isHidden($child->id)) { ?>
-                                                    <i class="aam-accordion-action icon-lock text-danger" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>"></i>
+                                                <?php if ($child['is_hidden']) { ?>
+                                                    <i class="aam-accordion-action icon-lock text-danger" id="toolbar-<?php echo $child['id']; ?>" data-toolbar="<?php echo $child['slug']; ?>"></i>
                                                 <?php } else { ?>
-                                                    <i class="aam-accordion-action icon-lock-open text-success" id="toolbar-<?php echo $child->id; ?>" data-toolbar="<?php echo $child->id; ?>"></i>
+                                                    <i class="aam-accordion-action icon-lock-open text-success" id="toolbar-<?php echo $child['id']; ?>" data-toolbar="<?php echo $child['slug']; ?>"></i>
                                                 <?php } ?>
 
-                                                <label for="toolbar-<?php echo $child->id; ?>" data-toggle="tooltip" title="<?php echo ($object->isHidden($child->id) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
+                                                <label for="toolbar-<?php echo $child['id']; ?>" data-toggle="tooltip" title="<?php echo ($child['is_hidden'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                             </div>
                                         <?php } ?>
                                     </div>
                                     <hr class="aam-divider" />
                                 <?php } ?>
-                                <div class="row<?php echo (!empty($branch->children) ? ' aam-margin-top-xs' : ''); ?>">
+
+                                <div class="row aam-margin-top-xs">
                                     <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                        <?php if ($object->isHidden('toolbar-' . $branch->id)) { ?>
-                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-toolbar" data-toolbar="toolbar-<?php echo $branch->id; ?>" data-target="#toolbar-<?php echo $branch->id; ?>">
+                                        <?php if ($branch['is_hidden']) { ?>
+                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo $branch['slug']; ?>" data-target="#toolbar-<?php echo $branch['id']; ?>">
                                                 <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } else { ?>
-                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-toolbar" data-toolbar="toolbar-<?php echo $branch->id; ?>" data-target="#toolbar-<?php echo $branch->id; ?>">
-                                                <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo $branch['slug']; ?>" data-target="#toolbar-<?php echo $branch['id']; ?>">
+                                                <i class="icon-lock"></i> <?php echo __('Hide Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } ?>
                                     </div>
@@ -92,6 +101,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="modal fade" id="toolbar-details-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -111,7 +121,7 @@
                                                 <td id="toolbar-item-uri"></td>
                                             </tr>
                                             <tr>
-                                                <th width="20%"><?php echo __('ID', AAM_KEY); ?></th>
+                                                <th width="20%"><?php echo __('Slug', AAM_KEY); ?></th>
                                                 <td id="toolbar-item-id"></td>
                                             </tr>
                                         </tbody>

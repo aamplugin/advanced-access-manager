@@ -10,12 +10,12 @@
 /**
  * Metaboxes & Widgets service
  *
- * @since 6.4.0 Made couple method protected.
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.13
  */
 class AAM_Service_Metabox
 {
@@ -60,61 +60,6 @@ class AAM_Service_Metabox
 
             $this->initializeHooks();
         }
-    }
-
-    /**
-     * Initialize Metaboxes & Widgets hooks
-     *
-     * @return void
-     *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.4.0
-     */
-    protected function initializeHooks()
-    {
-        if (is_admin()) {
-            // Manager WordPress metaboxes
-            add_action("in_admin_header", function () {
-                global $post;
-
-                if (AAM_Core_Request::get('init') === 'metabox') {
-                    //make sure that nobody is playing with screen options
-                    if (is_a($post, 'WP_Post')) {
-                        $id = $post->post_type;
-                    } else {
-                        $screen = get_current_screen();
-                        $id = ($screen ? $screen->id : '');
-                    }
-
-                    $model = new AAM_Backend_Feature_Main_Metabox;
-                    $model->initialize($id);
-                }
-            }, 999);
-
-            // Manage Navigation Menu page to support
-            add_filter('nav_menu_meta_box_object', function ($postType) {
-                $postType->_default_query['suppress_filters'] = false;
-
-                return $postType;
-            });
-
-            // Manager WordPress metaboxes - Classic Editor
-            add_action("in_admin_header", array($this, 'filterMetaboxes'), 999);
-
-            // Manage Dashboard widgets
-            add_action("widgets_admin_page", array($this, 'filterMetaboxes'), 999);
-        } else {
-            // Widget filters
-            add_filter('sidebars_widgets', array($this, 'filterWidgets'), 999);
-        }
-
-        // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        );
     }
 
     /**
@@ -187,6 +132,126 @@ class AAM_Service_Metabox
     }
 
     /**
+     * Filter frontend widgets
+     *
+     * @param array $widgets
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public function filterWidgets($widgets)
+    {
+        global $wp_registered_widgets;
+
+        $object = AAM::getUser()->getObject('metabox');
+
+        if (is_array($wp_registered_widgets)) {
+            foreach ($wp_registered_widgets as $id => $widget) {
+                $callback = $this->getWidgetCallback($widget);
+                if ($object->isHidden('widgets', $callback)) {
+                    unregister_widget($callback);
+                    // Remove it from registered widget global var!!
+                    // INFORM: Why Unregister Widget does not clear global var?
+                    unset($wp_registered_widgets[$id]);
+                }
+            }
+        }
+
+        return $widgets;
+    }
+
+    /**
+     * Get list of all cached components
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.13
+     */
+    public function getComponentsCache()
+    {
+        global $wp_post_types;
+
+        $response = get_transient(AAM_Backend_Feature_Main_Metabox::DB_CACHE_OPTION);
+
+        if (!is_array($response)) {
+            $response = array();
+        }
+
+        // Filter non-existing metaboxes
+        foreach (array_keys($response) as $id) {
+            if (
+                !in_array($id, array('dashboard', 'widgets'), true)
+                && empty($wp_post_types[$id])
+            ) {
+                unset($response[$id]);
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Initialize Metaboxes & Widgets hooks
+     *
+     * @return void
+     *
+     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0 Initial implementation of the method
+     *
+     * @access protected
+     * @version 6.4.0
+     */
+    protected function initializeHooks()
+    {
+        if (is_admin()) {
+            // Manager WordPress metaboxes
+            add_action("in_admin_header", function () {
+                global $post;
+
+                if (AAM_Core_Request::get('init') === 'metabox') {
+                    //make sure that nobody is playing with screen options
+                    if (is_a($post, 'WP_Post')) {
+                        $id = $post->post_type;
+                    } else {
+                        $screen = get_current_screen();
+                        $id = ($screen ? $screen->id : '');
+                    }
+
+                    $model = new AAM_Backend_Feature_Main_Metabox;
+                    $model->initialize($id);
+                }
+            }, 999);
+
+            // Manage Navigation Menu page to support
+            add_filter('nav_menu_meta_box_object', function ($postType) {
+                $postType->_default_query['suppress_filters'] = false;
+
+                return $postType;
+            });
+
+            // Manager WordPress metaboxes - Classic Editor
+            add_action("in_admin_header", array($this, 'filterMetaboxes'), 999);
+
+            // Manage Dashboard widgets
+            add_action("widgets_admin_page", array($this, 'filterMetaboxes'), 999);
+        } else {
+            // Widget filters
+            add_filter('sidebars_widgets', array($this, 'filterWidgets'), 999);
+        }
+
+        // Policy generation hook
+        add_filter(
+            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        );
+
+        // Register RESTful API endpoints
+        AAM_Core_Restful_ComponentService::bootstrap();
+    }
+
+    /**
      * Filter backend metaboxes and widgets
      *
      * @param string $screen
@@ -236,37 +301,6 @@ class AAM_Service_Metabox
                 unset($wp_registered_widgets[$id]);
             }
         }
-    }
-
-    /**
-     * Filter frontend widgets
-     *
-     * @param array $widgets
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function filterWidgets($widgets)
-    {
-        global $wp_registered_widgets;
-
-        $object = AAM::getUser()->getObject('metabox');
-
-        if (is_array($wp_registered_widgets)) {
-            foreach ($wp_registered_widgets as $id => $widget) {
-                $callback = $this->getWidgetCallback($widget);
-                if ($object->isHidden('widgets', $callback)) {
-                    unregister_widget($callback);
-                    // Remove it from registered widget global var!!
-                    // INFORM: Why Unregister Widget does not clear global var?
-                    unset($wp_registered_widgets[$id]);
-                }
-            }
-        }
-
-        return $widgets;
     }
 
     /**

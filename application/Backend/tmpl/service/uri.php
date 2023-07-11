@@ -1,21 +1,24 @@
 <?php
 /**
- * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/266
- * @since 6.0.0 Initial implementation of the template
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
+ * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
+ * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.9
+ * @version 6.9.13
  * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="uri-content">
-        <div class="row">
-            <div class="col-xs-12">
-                <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the website URL(s) for the [%s].', 'b'), $this->getSubject()->getName()); ?>
-                </p>
+        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+            <div class="row">
+                <div class="col-xs-12">
+                    <p class="aam-info">
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to an unlimited number of individual URLs. With the premium %sComplete Package%s, you can use the wildcard [*] denotation to manage access to a specific website section (e.g. [/members/*], [/premium*]) or make the entire website private. To learn more, refer to our official documentation page %shere%s.', 'strong', 'i', 'i'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/url" target="_blank">', '</a>'); ?>
+                    </p>
+                </div>
             </div>
-        </div>
+        <?php } ?>
 
         <div class="row">
             <div class="col-xs-12">
@@ -35,7 +38,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with Complete Package add-on)]', 'small'); ?></label>
+                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with premium Complete Package)]', 'small'); ?></label>
                             <input type="text" class="form-control form-clearable" id="uri-rule" placeholder="Enter valid URL" />
                         </div>
 

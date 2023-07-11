@@ -10,11 +10,12 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.13
  */
 class AAM_Framework_Service_Urls
 {
@@ -239,7 +240,9 @@ class AAM_Framework_Service_Urls
             throw new Exception('Failed to persist the rule');
         }
 
-        return $this->_prepare_rule($found['url'], $found['rule']);
+        $subject->flushCache();
+
+        return $this->get_rule_by_id($id, $inline_context);
     }
 
     /**
@@ -315,11 +318,12 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
      * @since 6.9.9  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.12
+     * @version 6.9.13
      */
     private function _validate_rule(array $rule)
     {
@@ -328,10 +332,14 @@ class AAM_Framework_Service_Urls
         $type = array_search($rule['type'], self::RULE_TYPE_ALIAS);
 
         // Parse and validate the incoming URL
-        $parsed = wp_parse_url($rule['url']);
-        $url    = wp_validate_redirect(
-            empty($parsed['path']) ? '/' : $parsed['path']
-        );
+        if ($rule['url'] === '*') {
+            $url = '*';
+        } else {
+            $parsed = wp_parse_url($rule['url']);
+            $url    = wp_validate_redirect(
+                empty($parsed['path']) ? '/' : $parsed['path']
+            );
+        }
 
         // Adding query params if provided
         if (isset($parsed['query'])) {

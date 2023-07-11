@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Toolbar manager
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
+ * @since 6.0.0 Initial implementation of the method
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.13
  */
 class AAM_Backend_Feature_Main_Toolbar
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -41,6 +42,22 @@ class AAM_Backend_Feature_Main_Toolbar
      * @version 6.0.0
      */
     const TEMPLATE = 'service/toolbar.php';
+
+    /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.13
+     */
+    public function __construct()
+    {
+        // Customize the user experience
+        add_filter('aam_toolbar_mode_panel_filter', function() {
+            return AAM_Backend_View::getInstance()->loadPartial('toolbar-mode');
+        });
+    }
 
     /**
      * Save toolbar settings
@@ -78,50 +95,6 @@ class AAM_Backend_Feature_Main_Toolbar
     public function getToolbar()
     {
         return AAM_Service_Toolbar::getInstance()->getToolbarCache();
-    }
-
-    /**
-     * Get list of child items
-     *
-     * @param object $branch
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function getAllChildren($branch)
-    {
-        $children = array();
-        $types    = array('container', 'group');
-
-        foreach ($branch->children as $child) {
-            if (empty($child->type) || !in_array($child->type, $types, true)) {
-                $children[] = $child;
-            }
-            if (!empty($child->children)) {
-                $children = array_merge($children, $this->getAllChildren($child));
-            }
-        }
-
-        return $children;
-    }
-
-    /**
-     * Normalize the item title
-     *
-     * @param object $node
-     *
-     * @return string
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function normalizeTitle($node)
-    {
-        $title = wp_strip_all_tags(!empty($node->title) ? $node->title : $node->id);
-
-        return ucwords(trim(preg_replace('/[\d]/', '', $title)));
     }
 
     /**

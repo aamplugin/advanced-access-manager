@@ -10,13 +10,14 @@
 /**
  * Menu object
  *
- * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
- * @since 6.2.2 Added new filter `aam_backend_menu_is_restricted_filter` so it can
- *              be integrated with access policy wildcard
- * @since 6.0.0 Initial implementation of the method
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
+ * @since 6.2.2  Added new filter `aam_backend_menu_is_restricted_filter` so it can
+ *               be integrated with access policy wildcard
+ * @since 6.0.0  Initial implementation of the method
  *
  * @package AAM
- * @version 6.5.0
+ * @version 6.9.13
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
@@ -106,21 +107,31 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
      *
      * @return string|null
      *
-     * @since 6.2.2 Made the method public
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
+     * @since 6.2.2  Made the method public
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @global array $submenu
-     * @version 6.2.2
+     * @version 6.9.13
      */
     public function getParentMenu($search)
     {
         global $submenu;
 
+        // This cover the scenario when the $submenu global is not initialized because
+        // we are working through RESTful API endpoints
+        if (empty($submenu)) {
+            $cache = AAM_Service_AdminMenu::getInstance()->getMenuCache();
+            $place = isset($cache['submenu']) ? $cache['submenu'] : array();
+        } else {
+            $place = $submenu;
+        }
+
         $result = null;
 
-        if (is_array($submenu)) {
-            foreach ($submenu as $parent => $subs) {
+        if (is_array($place)) {
+            foreach ($place as $parent => $subs) {
                 foreach ($subs as $sub) {
                     if ($sub[2] === $search) {
                         $result = $parent;

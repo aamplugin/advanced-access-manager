@@ -64,19 +64,6 @@ class AAM_Framework_Service_ApiRoutes
             }
         }
 
-        // if (is_array($options) && count($options)) {
-        //     foreach($options as $route => $is_restricted) {
-        //         array_push(
-        //             $response,
-        //             $this->_prepare_route(
-        //                 $route,
-        //                 $is_restricted,
-        //                 !array_key_exists($route, $explicit)
-        //             )
-        //         );
-        //     }
-        // }
-
         return $response;
     }
 
@@ -137,7 +124,9 @@ class AAM_Framework_Service_ApiRoutes
             throw new Exception('Failed to persist the route permission');
         }
 
-        return $this->_prepare_route($mask, $is_restricted);
+        $subject->flushCache();
+
+        return $this->get_route_by_id($id);
     }
 
     /**
@@ -189,7 +178,9 @@ class AAM_Framework_Service_ApiRoutes
             throw new Exception('Failed to persist the rule');
         }
 
-        return $this->_prepare_route($found['mask'], $found['restricted']);
+        $subject->flushCache();
+
+        return $this->get_route_by_id($id);
     }
 
     /**
@@ -232,21 +223,17 @@ class AAM_Framework_Service_ApiRoutes
      * @version 6.9.10
      */
     private function _prepare_route(
-        $route, $is_restricted = null, $is_inherited = false
+        $route, $is_restricted = false, $is_inherited = false
     ) {
-        $parts    = explode('|', $route);
-        $response = array(
-            'id'     => abs(crc32($parts[1].$parts[2])),
-            'route'  => $parts[1],
-            'method' => strtoupper($parts[2])
+        $parts = explode('|', $route);
+
+        return array(
+            'id'            => abs(crc32($parts[1].$parts[2])),
+            'route'         => $parts[1],
+            'method'        => strtoupper($parts[2]),
+            'is_restricted' => $is_restricted,
+            'is_inherited'  => $is_inherited
         );
-
-        if (is_bool($is_restricted)) { // If restriction explicitly defined
-            $response['is_restricted'] = $is_restricted;
-            $response['is_inherited']  = $is_inherited;
-        }
-
-        return $response;
     }
 
 }

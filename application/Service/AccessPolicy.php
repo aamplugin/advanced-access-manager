@@ -10,6 +10,8 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/294
+ *               https://github.com/aamplugin/advanced-access-manager/issues/299
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
  * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
  * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/225
@@ -25,7 +27,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.13
  */
 class AAM_Service_AccessPolicy
 {
@@ -143,11 +145,12 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
-     * @since 6.3.0 Enhanced per https://github.com/aamplugin/advanced-access-manager/issues/27
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/294
+     * @since 6.3.0  https://github.com/aamplugin/advanced-access-manager/issues/27
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.9.13
      */
     public function managePolicyContent($data)
     {
@@ -161,6 +164,9 @@ class AAM_Service_AccessPolicy
                     $content = $data['post_content'];
                 }
             }
+
+            // Removing any slashes
+            $content = htmlspecialchars_decode(stripslashes($content));
 
             // Reformat the policy content
             $json = json_decode($content);
@@ -677,8 +683,11 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/299
+     * @since 6.9.12 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.13
      */
     protected function initializeRedirect($option, $subject, $redirect_type)
     {
@@ -716,6 +725,8 @@ class AAM_Service_AccessPolicy
             } elseif (in_array($type, array('callback', 'trigger_callback'))) {
                 $parsed["{$redirect_type}.redirect.type"] = 'callback';
                 $parsed["{$redirect_type}.redirect.callback"] = $param['Callback'];
+            } elseif ($type === 'login') {
+                $parsed["{$redirect_type}.redirect.type"] = 'login';
             } else {
                 $parsed["{$redirect_type}.redirect.type"] = 'default';
             }

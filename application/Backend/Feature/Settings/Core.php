@@ -10,11 +10,12 @@
 /**
  * Backend core settings
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/270
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.13
  */
 class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
 {
@@ -38,11 +39,12 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
      * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/270
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.10
+     * @version 6.9.13
      */
     public static function getList()
     {
@@ -56,6 +58,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'title'       => __('Render Access Manager Metabox', AAM_KEY),
                 'description' => __('Render "Access Manager" metabox on all post, term or user edit pages.', AAM_KEY),
                 'value'       => AAM_Core_Config::get('ui.settings.renderAccessMetabox', false),
+            ),
+            'core.settings.tips' => array(
+                'title'       => __('Show UI Tooltips', AAM_KEY),
+                'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', AAM_KEY),
+                'value'       => AAM_Core_Config::get('core.settings.tips', true)
             ),
             'core.settings.multiSubject' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),

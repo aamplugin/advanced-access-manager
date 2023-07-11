@@ -1890,12 +1890,14 @@
                                         });
                                         $('.panel-title', target + '-heading').append(ind);
                                     } else {
-                                        $('.aam-lock', target).remove();
                                         _this.removeClass('btn-primary').addClass('btn-danger');
+
                                         _this.html(
                                             '<i class="icon-lock"></i>' + getAAM().__('Restrict Menu')
                                         );
                                         $('.panel-title .icon-lock', target + '-heading').remove();
+
+                                        location.reload();
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -1944,6 +1946,10 @@
                     $('#menu-reset').bind('click', function () {
                         getAAM().reset('Main_Menu.reset', $(this));
                     });
+
+                    $('[data-toggle="toggle"]', '#admin_menu-content').bootstrapToggle();
+
+                    getAAM().triggerHook('init-backend-menu');
                 }
             }
 
@@ -2030,12 +2036,15 @@
                                         });
                                         $('.panel-title', target + '-heading').append(ind);
                                     } else {
-                                        $('.aam-lock', target).remove();
                                         _this.removeClass('btn-primary').addClass('btn-danger');
+
                                         _this.html(
-                                            '<i class="icon-lock"></i>' + getAAM().__('Restrict Menu')
+                                            '<i class="icon-lock"></i>' + getAAM().__('Hide Menu')
                                         );
+
                                         $('.panel-title .icon-lock', target + '-heading').remove();
+
+                                        location.reload();
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -2083,6 +2092,10 @@
                             );
                         });
                     });
+
+                    $('[data-toggle="toggle"]', '#toolbar-content').bootstrapToggle();
+
+                    getAAM().triggerHook('init-admin-toolbar');
                 }
             }
 
@@ -2278,6 +2291,8 @@
                             );
                         });
                     });
+
+                    getAAM().triggerHook('init-metabox');
                 }
             }
 
@@ -5462,10 +5477,12 @@
         //help tooltip
         $('body').delegate('[data-toggle="tooltip"]', 'hover', function (event) {
             event.preventDefault();
+
             $(this).tooltip({
                 'placement': $(this).data('placement') || 'top',
                 'container': 'body'
             });
+
             $(this).tooltip('show');
         });
 
@@ -5680,6 +5697,26 @@
     }
 
     AAM.prototype.getLocal = getLocal;
+
+    /**
+     *
+     * @param {*} mergeWith
+     * @returns
+     */
+    AAM.prototype.prepareRequestSubjectData = function(mergeWith = {}) {
+       // Prepare the payload
+       const data = {
+           access_level: getAAM().getSubject().type
+       };
+
+       if (data.access_level === 'role') {
+           data.role_id = getAAM().getSubject().id;
+       } else if (data.access_level === 'user') {
+           data.user_id = getAAM().getSubject().id;
+       }
+
+       return Object.assign({}, mergeWith, data);
+   }
 
     /**
      *

@@ -10,12 +10,13 @@
 /**
  * Toolbar service
  *
- * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/223
- * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
+ * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.0
+ * @version 6.9.13
  */
 class AAM_Service_Toolbar
 {
@@ -28,7 +29,7 @@ class AAM_Service_Toolbar
      *
      * @version 6.0.0
      */
-    const DB_OPTION = 'aam_toolbar_cache';
+    const CACHE_DB_OPTION = 'aam_toolbar_cache';
 
     /**
      * AAM configuration setting that is associated with the service
@@ -54,9 +55,12 @@ class AAM_Service_Toolbar
                     AAM_Backend_Feature_Main_Toolbar::register();
                 });
 
-                //admin toolbar
-                if (AAM::isAAM()) {
-                    add_action('wp_after_admin_bar_render', array($this, 'cacheAdminBar'));
+                // Cache admin toolbar
+                if (is_super_admin() && AAM::isAAM()) {
+                    add_action(
+                        'wp_after_admin_bar_render',
+                        array($this, 'cache_admin_bar')
+                    );
                 }
             }
 
@@ -87,14 +91,15 @@ class AAM_Service_Toolbar
      *
      * @return void
      *
-     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/223
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
+     * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @global object $wp_admin_bar
-     * @version 6.9.0
+     * @version 6.9.13
      */
-    public function cacheAdminBar()
+    public function cache_admin_bar()
     {
         global $wp_admin_bar;
 
@@ -118,7 +123,12 @@ class AAM_Service_Toolbar
                         unset($cache[$i]);
                     }
                 }
-                AAM_Core_API::updateOption(self::DB_OPTION, $cache);
+
+                set_transient(
+                    self::CACHE_DB_OPTION,
+                    $this->_normalize_tree($cache),
+                    31536000
+                ); // cache for a year
             }
         }
 
@@ -130,12 +140,15 @@ class AAM_Service_Toolbar
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.13
      */
     public function getToolbarCache()
     {
-        return AAM_Core_API::getOption(self::DB_OPTION);
+        return get_transient(self::CACHE_DB_OPTION);
     }
 
     /**
@@ -143,7 +156,7 @@ class AAM_Service_Toolbar
      *
      * @return void
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
@@ -161,7 +174,7 @@ class AAM_Service_Toolbar
                     $nodes   = $wp_admin_bar->get_nodes();
 
                     foreach ((is_array($nodes) ? $nodes : array()) as $id => $node) {
-                        if ($toolbar->isHidden($id, true)) {
+                        if (!$node->group && $toolbar->isHidden($id, true)) {
                             if (!empty($node->parent)) { // update parent node with # link
                                 $parent = $wp_admin_bar->get_node($node->parent);
                                 if ($parent && ($parent->href === $node->href)) {
@@ -171,6 +184,7 @@ class AAM_Service_Toolbar
                                     ));
                                 }
                             }
+
                             $wp_admin_bar->remove_node($id);
                         }
                     }
@@ -184,9 +198,13 @@ class AAM_Service_Toolbar
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
 
+        // TODO - legacy and can be deleted in version 7.0.0
         add_action('aam_clear_settings_action', function() {
-            AAM_Core_API::deleteOption(self::DB_OPTION);
+            AAM_Core_API::deleteOption(self::CACHE_DB_OPTION);
         });
+
+        // Register RESTful API endpoints
+        AAM_Core_Restful_AdminToolbarService::bootstrap();
     }
 
     /**
@@ -214,6 +232,67 @@ class AAM_Service_Toolbar
         }
 
         return $policy;
+    }
+
+    /**
+     * Prepare the item branch
+     *
+     * @param object $branch
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.13
+     */
+    private function _normalize_tree($branch)
+    {
+        $response = array();
+
+        foreach (json_decode(json_encode($branch), true) as $branch) {
+            array_push($response, array(
+                'id'       => $branch['id'],
+                'href'     => $branch['href'],
+                'title'    => $branch['title'],
+                'children' => $this->_get_branch_children($branch)
+            ));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get list of child items
+     *
+     * @param object $branch
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.13
+     */
+    public function _get_branch_children($branch)
+    {
+        $children = array();
+
+        foreach ($branch['children'] as $child) {
+            if (empty($child['type'])
+            || !in_array($child['type'], array('container', 'group'), true)) {
+                $children[] = array(
+                    'id'    => $child['id'],
+                    'href'  => $child['href'],
+                    'title' => $child['title']
+                );
+            }
+
+            if (!empty($child['children'])) {
+                $children = array_merge(
+                    $children,
+                    $this->_get_branch_children($child)
+                );
+            }
+        }
+
+        return $children;
     }
 
 }

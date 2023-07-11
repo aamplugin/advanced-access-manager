@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.9.12
+ * Version: 6.9.13
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: advanced-access-manager
@@ -18,6 +18,7 @@
 /**
  * Main plugin's class
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
  * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/282
  * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
@@ -26,7 +27,7 @@
  * @package AAM
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  *
- * @version 6.9.12
+ * @version 6.9.13
  */
 class AAM
 {
@@ -126,11 +127,12 @@ class AAM
      *
      * @return AAM_Core_Subject
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.12
+     * @version 6.9.13
      */
     public function initializeUser($user = null)
     {
@@ -145,12 +147,14 @@ class AAM
 
         // Change current user
         if ($id) {
-            $user = (new AAM_Core_Subject_User($id))->initialize();
+            $user = new AAM_Core_Subject_User($id);
         } else {
             $user = new AAM_Core_Subject_Visitor();
         }
 
         $this->setUser($user);
+
+        $user->initialize();
 
         return $user;
     }
@@ -314,7 +318,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.12');
+    define('AAM_VERSION', '6.9.13');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

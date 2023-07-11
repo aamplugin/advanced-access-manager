@@ -1,19 +1,21 @@
 <?php
     /**
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
+     *               https://github.com/aamplugin/advanced-access-manager/issues/298
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
      * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.12
+     * @version 6.9.13
      * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="metabox-content">
-        <?php if (current_user_can('aam_page_help_tips')) { ?>
+        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage classic (not Gutenberg) metaboxes and widgets visibility for [%s].', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName()); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to WordPress metaboxes on post-edit screens or manage access to widgets on the backend dashboard screen and the frontend. This service does not define access controls to Gutenberg blocks. The premium %sComplete Package%s also allows defining default visibility for metaboxes and widgets for each screen.'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
@@ -36,59 +38,72 @@
         <?php
             global $wp_post_types;
 
-            $first       = false;
-            $object      = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
-            $metaboxList = $this->getMetaboxList();
+            $first      = false;
+            $components = AAM_Framework_Manager::components(array(
+                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+            ))->get_component_list();
+
+            // Group all the components by screen
+            $grouped = array();
+            foreach($components as $component) {
+                if (!isset($grouped[$component['screen_id']])) {
+                    $grouped[$component['screen_id']] = array();
+                }
+
+                array_push($grouped[$component['screen_id']], $component);
+            }
         ?>
 
-        <?php if (!empty($metaboxList)) { ?>
+        <?php if (!empty($components)) { ?>
             <div class="panel-group" id="metabox-list" role="tablist">
-                <?php foreach ($metaboxList as $screen => $metaboxes) { ?>
+                <?php foreach ($grouped as $screen_id => $components) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="group-<?php echo $screen; ?>-heading">
+                        <div class="panel-heading" role="tab" id="group-<?php echo $screen_id; ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo $screen; ?>" aria-controls="group-<?php echo $screen; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo $screen_id; ?>" aria-controls="group-<?php echo $screen_id; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
                                     <?php
-                                        switch ($screen) {
+                                        switch ($screen_id) {
                                             case 'dashboard':
                                                 echo __('Dashboard Widgets', AAM_KEY);
                                                 break;
 
-                                            case 'widgets':
+                                            case 'frontend':
                                                 echo AAM_Backend_View_Helper::preparePhrase('Frontend Widgets [(including Appearance->Widgets)]', 'small');
                                                 break;
 
                                             default:
-                                                echo $wp_post_types[$screen]->labels->name;
+                                                echo $wp_post_types[$screen_id]->labels->name;
                                                 break;
                                         }
                                     ?>
                                 </a>
                             </h4>
                         </div>
-                        <div id="group-<?php echo $screen; ?>" class="panel-collapse collapse<?php if (!$first) {
+                        <div id="group-<?php echo $screen_id; ?>" class="panel-collapse collapse<?php if (!$first) {
                                                                                                                 echo ' in';
                                                                                                                 $first = true;
-                                                                                                            } ?>" role="tabpanel" aria-labelledby="group-<?php echo $screen; ?>-heading">
+                                                                                                            } ?>" role="tabpanel" aria-labelledby="group-<?php echo $screen_id; ?>-heading">
                             <div class="panel-body">
                                 <div class="row">
-                                    <?php foreach ($metaboxes as $metabox) { ?>
+                                    <?php foreach ($components as $component) { ?>
                                         <div class="col-xs-12 col-md-6 aam-submenu-item">
                                             <div class="aam-menu-details">
-                                                <?php echo $metabox['title']; ?>
-                                                <small><a href="#metabox-details-modal" data-toggle="modal" data-title="<?php echo $metabox['title']; ?>" data-screen="<?php echo $screen; ?>" data-id="<?php echo strtolower($screen . '|' . $metabox['id']); ?>" class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?></a></small>
+                                                <?php echo esc_js($component['name']); ?>
+                                                <small><a href="#metabox-details-modal" data-toggle="modal" data-title="<?php echo esc_attr($component['name']); ?>" data-screen="<?php echo esc_attr($screen_id); ?>" data-id="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>" class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                             </div>
 
-                                            <?php if ($object->isHidden($screen, $metabox['id'])) { ?>
-                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo strtolower($screen . '|' . $metabox['id']); ?>"></i>
+                                            <?php if ($component['is_hidden']) { ?>
+                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo $screen_id . '-' . $component['slug']; ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
                                             <?php } else { ?>
-                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-metabox="<?php echo strtolower($screen . '|' . $metabox['id']); ?>"></i>
+                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo $screen_id; ?>-<?php echo $component['slug']; ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
                                             <?php } ?>
 
-                                            <label for="metabox-<?php echo $screen; ?>-<?php echo $metabox['id']; ?>" data-toggle="tooltip" title="<?php echo ($object->isHidden($screen, $metabox['id']) ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
+                                            <label for="metabox-<?php echo $screen_id . '-' . $component['slug']; ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
                                         </div>
                                     <?php } ?>
                                 </div>
+
+                                <?php echo apply_filters('aam_component_screen_mode_panel_filter', '', $screen_id, AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)); ?>
                             </div>
                         </div>
                     </div>

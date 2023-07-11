@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 4.7.0
 Requires PHP: 5.6.0
 Tested up to: 6.2.2
-Stable tag: 6.9.12
+Stable tag: 6.9.13
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,17 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.13 =
+* Fixed: User object does not initialize after login [https://github.com/aamplugin/advanced-access-manager/issues/300](https://github.com/aamplugin/advanced-access-manager/issues/300)
+* Fixed: Wildcard for URL Access malfunction [https://github.com/aamplugin/advanced-access-manager/issues/296](https://github.com/aamplugin/advanced-access-manager/issues/296)
+* Fixed: Restoring a previous Policy Revision adds backslashes (thank you @solaceten) [https://github.com/aamplugin/advanced-access-manager/issues/294](https://github.com/aamplugin/advanced-access-manager/issues/294)
+* Fixed: Incorrectly handled login redirect with access policy [https://github.com/aamplugin/advanced-access-manager/issues/299](https://github.com/aamplugin/advanced-access-manager/issues/299)
+* Changed: Move toolbar cache to transient & increase cache ttl [https://github.com/aamplugin/advanced-access-manager/issues/297](https://github.com/aamplugin/advanced-access-manager/issues/297)
+* Added New: Add additional helpful tips to the AAM UI [https://github.com/aamplugin/advanced-access-manager/issues/298](https://github.com/aamplugin/advanced-access-manager/issues/298)
+* Added New: Introduce Metaboxes & Widgets RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/301](https://github.com/aamplugin/advanced-access-manager/issues/301)
+* Added New: Introduce Backend Menu RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/293](https://github.com/aamplugin/advanced-access-manager/issues/293)
+* Added New: Introduce Admin Toolbar RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/302](https://github.com/aamplugin/advanced-access-manager/issues/302)
 
 = 6.9.12 =
 * Fixed: URL Access skips query params for new rules [https://github.com/aamplugin/advanced-access-manager/issues/283](https://github.com/aamplugin/advanced-access-manager/issues/283)

@@ -266,7 +266,7 @@ final class AAM_Core_API
      *
      * @return void
      *
-     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/48
+     * @since 6.3.1 https://github.com/aamplugin/advanced-access-manager/issues/48
      * @since 6.2.2 Refactored the way we iterate over the deleting list of options
      * @since 6.0.0 Initial implementation of the method
      *
@@ -282,7 +282,7 @@ final class AAM_Core_API
             AAM_Core_Config::DB_OPTION,
             AAM_Core_ConfigPress::DB_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
-            AAM_Service_Toolbar::DB_OPTION
+            AAM_Service_Toolbar::CACHE_DB_OPTION
         );
 
         foreach($options as $option) {

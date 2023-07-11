@@ -10,13 +10,14 @@
 /**
  * Admin Menu service
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.13
  */
 class AAM_Service_AdminMenu
 {
@@ -87,12 +88,13 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
-     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
-     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
+     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.5
+     * @version 6.9.13
      */
     public function initializeHooks()
     {
@@ -101,16 +103,14 @@ class AAM_Service_AdminMenu
             // does not have the ability to manage admin menu through AAM UI
             if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
                 add_filter('parent_file', array($this, 'filterMenu'), PHP_INT_MAX);
-            } elseif (AAM::isAAM()) {
-                // If we are on the AAM page, then cache the menu and submenu that will
-                // be displayed for managing on the Admin Menu tab
+            } elseif (is_super_admin() && AAM::isAAM()) {
                 add_filter('parent_file', function() {
                     global $menu, $submenu;
 
                     set_transient(self::CACHE_DB_OPTION, array(
-                        'menu'    => $this->_filterMenuItems($menu),
+                        'menu'    => $this->_filter_menu_items($menu),
                         'submenu' => $submenu
-                    ), 86400);
+                    ), 31536000); // Cache for a year
                 }, PHP_INT_MAX - 1);
             }
         }
@@ -129,6 +129,9 @@ class AAM_Service_AdminMenu
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
             add_action('admin_init', array($this, 'checkScreenAccess'));
         }
+
+        // Register RESTful API endpoints
+        AAM_Core_Restful_BackendMenuService::bootstrap();
 
         // Service fetch
         $this->registerService();
@@ -242,6 +245,59 @@ class AAM_Service_AdminMenu
     }
 
     /**
+     * Check screen direct access
+     *
+     * @return void
+     *
+     * @access public
+     * @global string $plugin_page
+     *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
+     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
+     * @since 6.0.0  Initial implementation of the method
+     *
+     * @version 6.9.13
+     */
+    public function checkScreenAccess()
+    {
+        global $plugin_page;
+
+        // Compile menu
+        $id = $plugin_page;
+
+        if (empty($id)) {
+            $id       = basename(AAM_Core_Request::server('SCRIPT_NAME'));
+            $taxonomy = AAM_Core_Request::get('taxonomy');
+            $postType = AAM_Core_Request::get('post_type');
+            $page     = AAM_Core_Request::get('page');
+            $params   = array();
+
+            if (!empty($taxonomy)) {
+                array_push($params, 'taxonomy=' . $taxonomy);
+            }
+
+            if (!empty($postType) && ($postType !== 'post')) {
+                array_push($params, 'post_type=' . $postType);
+            } elseif (!empty($page)) {
+                array_push($params, 'page=' . $page);
+            }
+
+            if (count($params)) {
+                $id .= '?' . implode('&', $params);
+            }
+        }
+
+        $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+
+        if ($object->isRestricted($id)) {
+            wp_die(
+                __('Sorry, you are not allowed to view this page.', AAM_KEY),
+                'aam_access_denied'
+            );
+        }
+    }
+
+    /**
      * Filter submenu
      *
      * @param array &$parent
@@ -303,76 +359,27 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
+     * @since 6.9.5  Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.5
+     * @version 6.9.13
      */
-    private function _filterMenuItems($items)
+    private function _filter_menu_items($items)
     {
         $response = array();
 
         if (is_array($items)) {
-            foreach($items as $item) {
-                array_push($response, array(
+            foreach($items as $i => $item) {
+                $response[$i] = array(
                     'id'   => $item[2],
                     'cap'  => $item[1],
                     'name' => $item[0]
-                ));
+                );
             }
         }
 
         return $response;
-    }
-
-    /**
-     * Check screen direct access
-     *
-     * @return void
-     *
-     * @access public
-     * @global string $plugin_page
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @version 6.9.10
-     */
-    public function checkScreenAccess()
-    {
-        global $plugin_page;
-
-        // Compile menu
-        $id = $plugin_page;
-
-        if (empty($id)) {
-            $id       = basename(AAM_Core_Request::server('SCRIPT_NAME'));
-            $taxonomy = AAM_Core_Request::get('taxonomy');
-            $postType = AAM_Core_Request::get('post_type');
-            $page     = AAM_Core_Request::get('page');
-            $params   = array();
-
-            if (!empty($taxonomy)) {
-                array_push($params, 'taxonomy=' . $taxonomy);
-            }
-
-            if (!empty($postType) && ($postType !== 'post')) {
-                array_push($params, 'post_type=' . $postType);
-            } elseif (!empty($page)) {
-                array_push($params, 'page=' . $page);
-            }
-
-            if (count($params)) {
-                $id = '?' . implode('&', $params);
-            }
-        }
-
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
-
-        if ($object->isRestricted($id)) {
-            wp_die(
-                __('Sorry, you are not allowed to view this page.', AAM_KEY),
-                'aam_access_denied'
-            );
-        }
     }
 
 }

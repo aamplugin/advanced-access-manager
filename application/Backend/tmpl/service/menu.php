@@ -1,24 +1,29 @@
 <?php
 /**
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
+ *               https://github.com/aamplugin/advanced-access-manager/issues/293
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/288
  * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/114
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.12
+ * @version 6.9.13
  * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE); ?>
+
     <div class="aam-feature" id="admin_menu-content">
-        <?php if (current_user_can('aam_page_help_tips')) { ?>
+        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend main menu for [%s]. Any menu that is lighter, indicates that [%s] does not have capability to access it. For more information check the %sBackend Menu%s page.', 'b', 'b', 'b'), AAM_Backend_Subject::getInstance()->getName(), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/plugin/advanced-access-manager/service/backend-menu" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the backend menu and submenu items. With the premium %sComplete Package%s, you can also enable the "restricted mode" to only whitelist allowed menu items. To learn more, refer to our official documentation page %shere%s.'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/backend-menu" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
         <?php } ?>
+
         <div class="row">
             <div class="col-xs-12">
                 <div class="aam-overwrite" id="aam-menu-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
@@ -28,35 +33,38 @@
             </div>
         </div>
 
+        <?php echo apply_filters('aam_backend_menu_mode_panel_filter', '', $object); ?>
+
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
-            $first  = false;
-            $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
-            $menuList = $this->getMenu();
+            $first = false;
+            $menu  = AAM_Framework_Manager::backend_menu(array(
+                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+            ))->get_menu_list();
 
-            if (!empty($menuList)) {
-                foreach ($menuList as $i => $menu) {
+            if (!empty($menu)) {
+                foreach ($menu as $menu) {
             ?>
                     <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_Subject::getInstance()->hasCapability($menu['capability']) ? 1 : '0.5'; ?>">
-                        <div class="panel-heading" role="tab" id="menu-<?php echo $i; ?>-heading">
+                        <div class="panel-heading" role="tab" id="menu-<?php echo $menu['id']; ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $i; ?>" aria-controls="menu-<?php echo $i; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
-                                    <?php echo $menu['name']; ?> <small class="aam-menu-capability"><?php echo $menu['capability']; ?></small>
+                                <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo $menu['id']; ?>" aria-controls="menu-<?php echo $menu['id']; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                    <?php echo esc_js($menu['name']); ?> <small class="aam-menu-capability"><?php echo esc_js($menu['capability']); ?></small>
                                 </a>
-                                <?php if ($menu['checked']) { ?>
+                                <?php if (!empty($menu['is_restricted'])) { ?>
                                     <i class="aam-panel-title-icon icon-lock text-danger"></i>
-                                <?php } elseif ($this->hasSubmenuChecked($menu['submenu'])) { ?>
+                                <?php } elseif (isset($menu['children']) && array_reduce($menu['children'], function($s, $i){ return $s + $i['is_restricted']; })) { ?>
                                     <i class="aam-panel-title-icon icon-attention-circled text-warning"></i>
                                 <?php } ?>
                             </h4>
                         </div>
 
-                        <div id="menu-<?php echo $i; ?>" class="panel-collapse collapse<?php if (!$first) {
+                        <div id="menu-<?php echo $menu['id']; ?>" class="panel-collapse collapse<?php if (!$first) {
                                                                                             echo ' in';
                                                                                             $first = true;
-                                                                                        } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $i; ?>-heading">
+                                                                                        } ?>" role="tabpanel" aria-labelledby="menu-<?php echo $menu['id']; ?>-heading">
                             <div class="panel-body">
-                                <?php if ($menu['id'] != 'menu-index.php') { ?>
+                                <?php if ($menu['slug'] != 'menu-index.php') { ?>
                                     <div class="row aam-inner-tab">
                                         <div class="col-xs-12 text-center">
                                             <small class="aam-menu-capability"><?php echo __('Menu URI:', AAM_KEY); ?> <b><?php echo urldecode($menu['uri']); ?></b></small>
@@ -64,29 +72,31 @@
                                     </div>
                                     <hr class="aam-divider" />
                                 <?php } ?>
-                                <?php if (!empty($menu['submenu'])) { ?>
+
+                                <?php if (!empty($menu['children'])) { ?>
                                     <div class="row aam-inner-tab aam-menu-expended-list">
-                                        <?php echo ($menu['checked'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
-                                        <?php foreach ($menu['submenu'] as $j => $submenu) { ?>
-                                            <?php if ($submenu['id'] == 'index.php') { ?>
+                                        <?php echo ($menu['is_restricted'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
+
+                                        <?php foreach ($menu['children'] as $child) { ?>
+                                            <?php if ($child['slug'] == 'index.php') { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                     <div class="aam-menu-details">
-                                                        <?php echo $submenu['name']; ?>
+                                                        <?php echo esc_js($child['name']); ?>
                                                     </div>
                                                     <a href="#dashboard-lockout-modal" data-toggle="modal"><i class="icon-help-circled"></i></a>
                                                 </div>
                                             <?php } else { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                     <div class="aam-menu-details">
-                                                        <?php echo $submenu['name']; ?>
-                                                        <small><a href="#menu-details-modal" data-toggle="modal" data-uri="<?php echo urldecode($submenu['uri']); ?>" data-cap="<?php echo $submenu['capability']; ?>" data-name="<?php echo $submenu['name']; ?>" data-id="<?php echo $submenu['id']; ?>" class="aam-menu-item"><?php echo __('more details', AAM_KEY); ?></a></small>
+                                                        <?php echo esc_js($child['name']); ?>
+                                                        <small><a href="#menu-details-modal" data-toggle="modal" data-uri="<?php echo esc_attr($child['uri']); ?>" data-cap="<?php echo esc_attr($child['capability']); ?>" data-name="<?php echo esc_attr($child['name']); ?>" data-id="<?php echo esc_attr($child['slug']); ?>" class="aam-menu-item"><?php echo __('more details', AAM_KEY); ?></a></small>
                                                     </div>
-                                                    <?php if ($submenu['checked']) { ?>
-                                                        <i class="aam-accordion-action icon-lock text-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"></i>
+                                                    <?php if ($child['is_restricted']) { ?>
+                                                        <i class="aam-accordion-action icon-lock text-danger" id="menu-item-<?php echo $child['id']; ?>" data-menu-id="<?php echo esc_attr($child['slug']); ?>"></i>
                                                     <?php } else { ?>
-                                                        <i class="aam-accordion-action icon-lock-open text-success" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo $submenu['id']; ?>"></i>
+                                                        <i class="aam-accordion-action icon-lock-open text-success" id="menu-item-<?php echo $child['id']; ?>" data-menu-id="<?php echo esc_attr($child['slug']); ?>"></i>
                                                     <?php } ?>
-                                                    <label for="menu-item-<?php echo $i . $j; ?>" data-toggle="tooltip" title="<?php echo ($object->isRestricted($submenu['id']) ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
+                                                    <label for="menu-item-<?php echo $child['id']; ?>" data-toggle="tooltip" title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
                                                 </div>
                                             <?php } ?>
                                         <?php } ?>
@@ -95,15 +105,15 @@
                                     <hr class="aam-divider" />
                                 <?php } ?>
 
-                                <?php if ($menu['id'] != 'menu-index.php') { ?>
-                                    <div class="row<?php echo (!empty($menu['submenu']) ? ' aam-margin-top-xs' : ''); ?>">
+                                <?php if ($menu['slug'] != 'menu-index.php') { ?>
+                                    <div class="row<?php echo (!empty($menu['children']) ? ' aam-margin-top-xs' : ''); ?>">
                                         <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                            <?php if ($menu['checked']) { ?>
-                                                <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                            <?php if ($menu['is_restricted']) { ?>
+                                                <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo esc_attr($menu['slug']); ?>" data-target="#menu-<?php echo $menu['id']; ?>">
                                                     <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                                 </a>
                                             <?php } else { ?>
-                                                <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo $menu['id']; ?>" data-target="#menu-<?php echo $i; ?>">
+                                                <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-menu" data-menu-id="<?php echo esc_attr($menu['slug']); ?>" data-target="#menu-<?php echo $menu['id']; ?>">
                                                     <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
                                                 </a>
                                             <?php } ?>

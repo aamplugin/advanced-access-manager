@@ -10,12 +10,13 @@
 /**
  * Backend metaboxes & widgets manager
  *
- * @since 6.0.0 Initial implementation of the class
- * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
+ * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.7.4  https://github.com/aamplugin/advanced-access-manager/issues/167
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.13
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -50,6 +51,22 @@ class AAM_Backend_Feature_Main_Metabox
      * @version 6.0.0
      */
     const TEMPLATE = 'service/metabox.php';
+
+    /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.13
+     */
+    public function __construct()
+    {
+        // Customize the user experience
+        add_filter('aam_component_screen_mode_panel_filter', function() {
+            return AAM_Backend_View::getInstance()->loadPartial('component-screen-mode');
+        });
+    }
 
     /**
      * Save metabox access settings
@@ -100,7 +117,7 @@ class AAM_Backend_Feature_Main_Metabox
     {
         global $wp_post_types;
 
-        AAM_Core_API::deleteOption(self::DB_CACHE_OPTION);
+        delete_transient(self::DB_CACHE_OPTION);
 
         $endpoints = array(add_query_arg(
             'init', 'metabox', admin_url('index.php')
@@ -139,7 +156,7 @@ class AAM_Backend_Feature_Main_Metabox
             $this->collectMetaboxes($post_type, $cache);
         }
 
-        AAM_Core_API::updateOption(self::DB_CACHE_OPTION, $cache);
+        set_transient(self::DB_CACHE_OPTION, $cache, 31536000); // cache for a year
     }
 
     /**
@@ -173,10 +190,13 @@ class AAM_Backend_Feature_Main_Metabox
             if (!is_null($callback)) { //exclude any junk
                 $cache['widgets'][$callback] = array(
                     'title' => wp_strip_all_tags($data['name']),
-                    'id'    => $callback
+                    'slug'  => $callback
                 );
             }
         }
+
+        // Removing duplicates
+        $cache['widgets'] = array_values($cache['widgets']);
 
         // Now collect Admin Dashboard Widgets
         $this->collectMetaboxes('dashboard', $cache);
@@ -208,13 +228,16 @@ class AAM_Backend_Feature_Main_Metabox
                     foreach ((array) $boxes as $data) {
                         if (trim($data['id'])) { //exclude any junk
                             $cache[$post_type][$data['id']] = array(
-                                'id'    => $data['id'],
+                                'slug'  => $data['id'],
                                 'title' => wp_strip_all_tags($data['title'])
                             );
                         }
                     }
                 }
             }
+
+            // Removing duplicates
+            $cache[$post_type] = array_values($cache[$post_type]);
         }
     }
 
@@ -230,7 +253,11 @@ class AAM_Backend_Feature_Main_Metabox
     {
         global $wp_post_types;
 
-        $cache = AAM_Core_API::getOption(self::DB_CACHE_OPTION, array());
+        $cache = get_transient(self::DB_CACHE_OPTION);
+
+        if (!is_array($cache)) {
+            $cache = array();
+        }
 
         // If visitor, return only frontend widgets
         if (AAM_Backend_Subject::getInstance()->isVisitor()) {
