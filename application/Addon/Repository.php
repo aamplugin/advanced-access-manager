@@ -10,21 +10,22 @@
 /**
  * Addon repository
  *
- * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/255
- * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
- * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
- * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/173
- * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/92
- * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/88
- * @since 6.4.1 https://github.com/aamplugin/advanced-access-manager/issues/81
- * @since 6.2.0 Bug fixing that is related to unwanted PHP notices
- * @since 6.0.5 Refactored the license managements. Fixed couple bugs with license
- *              information displaying
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
+ * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/255
+ * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
+ * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/237
+ * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/177
+ * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/173
+ * @since 6.4.3  https://github.com/aamplugin/advanced-access-manager/issues/92
+ * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/88
+ * @since 6.4.1  https://github.com/aamplugin/advanced-access-manager/issues/81
+ * @since 6.2.0  Bug fixing that is related to unwanted PHP notices
+ * @since 6.0.5  Refactored the license managements. Fixed couple bugs with license
+ *               information displaying
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.6
+ * @version 6.9.13
  */
 class AAM_Addon_Repository
 {
@@ -39,6 +40,15 @@ class AAM_Addon_Repository
      * @todo Remove in the end of 2023
      */
     const DB_OPTION = 'aam_addons';
+
+    /**
+     * The latest know premium release
+     *
+     * Note! This is the latest version at the time of AAM publishing
+     *
+     * @version 6.9.13
+     */
+    const LATEST_PREMIUM_VERSION = '6.0.4';
 
     /**
      * Constructor
@@ -60,15 +70,18 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
+     * @since 6.9.6  Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.6
+     * @version 6.9.13
      */
     public function getPremiumData()
     {
         // Determining if there is newer version
         $slug      = 'aam-complete-package';
         $version   = $this->getPluginVersion("{$slug}/bootstrap.php");
-        $hasUpdate = $this->hasPluginUpdate("{$slug}/bootstrap.php");
+        $hasUpdate = $this->hasPluginUpdate("{$slug}/bootstrap.php", $version);
 
         return array(
             'title'       => 'AAM Complete Package',
@@ -152,19 +165,30 @@ class AAM_Addon_Repository
      * Check if plugin has new version available
      *
      * @param string $id
+     * @param string $current_version
      *
      * @return boolean
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
+     * @since 6.0.5  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.5
+     * @version 6.9.13
      */
-    protected function hasPluginUpdate($id)
+    protected function hasPluginUpdate($id, $current_version)
     {
         $has_update = false;
         $plugins    = get_site_transient('update_plugins');
 
         if (isset($plugins->response) && is_array($plugins->response)) {
             $has_update = array_key_exists($id, $plugins->response);
+        }
+
+        // Also check if current version lower than known
+        if ($has_update === false) {
+            $has_update = version_compare(
+                $current_version, self::LATEST_PREMIUM_VERSION
+            ) === -1;
         }
 
         return $has_update;

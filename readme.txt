@@ -91,6 +91,8 @@ We take security and privacy very seriously, that is why there are several non-n
 * Added New: Introduce Metaboxes & Widgets RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/301](https://github.com/aamplugin/advanced-access-manager/issues/301)
 * Added New: Introduce Backend Menu RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/293](https://github.com/aamplugin/advanced-access-manager/issues/293)
 * Added New: Introduce Admin Toolbar RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/302](https://github.com/aamplugin/advanced-access-manager/issues/302)
+* Added New: Add notification about premium add-on update availability [https://github.com/aamplugin/advanced-access-manager/issues/303](https://github.com/aamplugin/advanced-access-manager/issues/303)
+* Added New: Introduce restricted mode for RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/304](https://github.com/aamplugin/advanced-access-manager/issues/304)
 
 = 6.9.12 =
 * Fixed: URL Access skips query params for new rules [https://github.com/aamplugin/advanced-access-manager/issues/283](https://github.com/aamplugin/advanced-access-manager/issues/283)

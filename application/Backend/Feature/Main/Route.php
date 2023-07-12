@@ -45,6 +45,22 @@ class AAM_Backend_Feature_Main_Route
     const TEMPLATE = 'service/route.php';
 
     /**
+     * Constructor
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.13
+     */
+    public function __construct()
+    {
+        // Customize the user experience
+        add_filter('aam_route_mode_panel_filter', function() {
+            return AAM_Backend_View::getInstance()->loadPartial('route-mode');
+        });
+    }
+
+    /**
      * Register API Routes service
      *
      * @return void

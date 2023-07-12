@@ -10,21 +10,22 @@
 /**
  * Backend manager
  *
- * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/262
- * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/260
- * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.8.4 https://github.com/aamplugin/advanced-access-manager/issues/212
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/179
- * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
- * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
- *              array of properties
- * @since 6.2.0 Added new property to the JS localization `blog_id`
- * @since 6.1.0 Fixed bug with HTML compression
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
+ * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/262
+ * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/260
+ * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
+ * @since 6.8.4  https://github.com/aamplugin/advanced-access-manager/issues/212
+ * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/179
+ * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/138
+ * @since 6.2.2  Added `manage_policies` and removed `blog_id` for the localized
+ *               array of properties
+ * @since 6.2.0  Added new property to the JS localization `blog_id`
+ * @since 6.1.0  Fixed bug with HTML compression
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.8
+ * @version 6.9.13
  */
 class AAM_Backend_Manager
 {
@@ -87,9 +88,12 @@ class AAM_Backend_Manager
 
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
-            // Also checking for any legacy add-ons presence. If are available, let
+            // Checking for any legacy add-ons presence. If are available, let
             // user know
             $this->checkForLegacyAddons();
+
+            // Checking for the new update availability
+            $this->checkForPremiumAddonUpdate();
         }
 
         if (AAM::api()->getConfig('core.settings.restful', true) === false) {
@@ -159,6 +163,25 @@ class AAM_Backend_Manager
                 __('The Role Hierarchy is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
                 '<a href="https://aamportal.com/blog/we-are-migrating">', '</a>'
             ));
+        }
+    }
+
+    /**
+     * Check if there is a new premium version available
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 6.9.13
+     */
+    protected function checkForPremiumAddonUpdate()
+    {
+        $premium = AAM_Addon_Repository::getInstance()->getPremiumData();
+
+        if (!is_null($premium['version']) && $premium['hasUpdate']) {
+            AAM_Core_Console::add(
+                __('The new version of premium Complete Package is available. Go to your license page to download the latest release.', AAM_KEY)
+            );
         }
     }
 

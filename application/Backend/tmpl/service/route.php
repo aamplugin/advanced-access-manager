@@ -11,6 +11,16 @@
     <div class="aam-feature" id="route-content">
         <?php $subject = AAM_Backend_Subject::getInstance(); ?>
 
+        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+            <div class="row">
+                <div class="col-xs-12">
+                    <p class="aam-info">
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the RESTful API endpoints. With the premium %sComplete Package%s, you can also enable the "restricted mode" to only whitelist allowed endpoints. To learn more, refer to our official documentation page %shere%s.'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/api-route" target="_blank">', '</a>'); ?>
+                    </p>
+                </div>
+            </div>
+        <?php } ?>
+
         <div class="row">
             <div class="col-xs-12">
                 <div class="aam-overwrite<?php echo ($this->isOverwritten() ? '' : ' hidden'); ?>" id="aam-route-overwrite">
@@ -19,6 +29,8 @@
                 </div>
             </div>
         </div>
+
+        <?php echo apply_filters('aam_route_mode_panel_filter', '', $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE)); ?>
 
         <table id="route-list" class="table table-striped table-bordered">
             <thead>

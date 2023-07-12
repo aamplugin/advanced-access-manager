@@ -10,8 +10,11 @@
 /**
  * RESTful API for the API route service
  *
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
+ * @since 6.9.10 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.13
  */
 class AAM_Core_Restful_ApiRouteService
 {
@@ -23,8 +26,11 @@ class AAM_Core_Restful_ApiRouteService
      *
      * @return void
      *
+     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.10
+     * @version 6.9.13
      */
     protected function __construct()
     {
@@ -91,6 +97,27 @@ class AAM_Core_Restful_ApiRouteService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array()
             ));
+
+            // Register additional endpoints with add-ons
+            $more = apply_filters('aam_api_route_filter', array(), array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'permission_callback' => array($this, 'check_permissions'),
+                'args' => array()
+            ));
+
+            if (is_array($more)) {
+                foreach($more as $endpoint => $params) {
+                    // Wrap the callback function to include the current subject
+                    $params['callback'] = function(WP_REST_Request $request) use ($params) {
+                        return call_user_func_array($params['callback'], array(
+                            $request,
+                            $this->_determine_subject($request)
+                        ));
+                    };
+
+                    $this->_register_route($endpoint, $params);
+                }
+            }
         });
     }
 

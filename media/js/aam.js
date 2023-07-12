@@ -1897,7 +1897,7 @@
                                         );
                                         $('.panel-title .icon-lock', target + '-heading').remove();
 
-                                        location.reload();
+                                        getAAM().fetchContent('main');
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -2044,7 +2044,7 @@
 
                                         $('.panel-title .icon-lock', target + '-heading').remove();
 
-                                        location.reload();
+                                        getAAM().fetchContent('main');
                                     }
                                 } else {
                                     _this.prop('checked', !status);
@@ -4105,6 +4105,10 @@
                             }
                         });
                     });
+
+                    $('[data-toggle="toggle"]', '#route-content').bootstrapToggle();
+
+                    getAAM().triggerHook('init-api-route');
                 }
             }
 
