@@ -10,8 +10,11 @@
 /**
  * Service context
  *
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/305
+ * @since 6.9.9  Initial implementation of the class
+ *
  * @package AAM
- * @since 6.9.9
+ * @since 6.9.14
  */
 class AAM_Framework_Model_ServiceContext implements ArrayAccess
 {
@@ -49,6 +52,7 @@ class AAM_Framework_Model_ServiceContext implements ArrayAccess
      * @access public
      * @since 6.9.9
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) {
         return isset($this->_container[$offset]);
     }
@@ -63,6 +67,7 @@ class AAM_Framework_Model_ServiceContext implements ArrayAccess
      * @access public
      * @since 6.9.9
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
         return $this->_container[$offset];
     }
@@ -78,6 +83,7 @@ class AAM_Framework_Model_ServiceContext implements ArrayAccess
      * @access public
      * @since 6.9.9
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value) {
         if (!is_string($offset)) {
             throw new InvalidArgumentException('The offset has to be a string');
@@ -96,6 +102,7 @@ class AAM_Framework_Model_ServiceContext implements ArrayAccess
      * @access public
      * @since 6.9.9
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset) {
         if ($this->offsetExists($offset)) {
             unset($this->_container[$offset]);

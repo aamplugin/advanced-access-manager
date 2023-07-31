@@ -10,6 +10,8 @@
 /**
  * Addon repository
  *
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/305
+ *               https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/255
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
@@ -25,7 +27,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.14
  */
 class AAM_Addon_Repository
 {
@@ -70,11 +72,12 @@ class AAM_Addon_Repository
      *
      * @return array
      *
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
      * @since 6.9.6  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.14
      */
     public function getPremiumData()
     {
@@ -89,7 +92,7 @@ class AAM_Addon_Repository
             'hasUpdate'   => $hasUpdate,
             'license'     => $this->getPluginLicense($slug),
             'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', AAM_KEY),
-            'url'         => 'https://aamportal.com/premium'
+            'url'         => 'https://aamportal.com/premium?ref=plugin'
         );
     }
 
@@ -169,11 +172,12 @@ class AAM_Addon_Repository
      *
      * @return boolean
      *
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/305
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
      * @since 6.0.5  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.13
+     * @version 6.9.14
      */
     protected function hasPluginUpdate($id, $current_version)
     {
@@ -185,7 +189,7 @@ class AAM_Addon_Repository
         }
 
         // Also check if current version lower than known
-        if ($has_update === false) {
+        if ($has_update === false && !empty($current_version)) {
             $has_update = version_compare(
                 $current_version, self::LATEST_PREMIUM_VERSION
             ) === -1;

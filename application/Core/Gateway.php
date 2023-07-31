@@ -236,13 +236,18 @@ final class AAM_Core_Gateway
      */
     public function mergeSettings($set1, $set2, $objectType, $preference = null)
     {
-        $merged   = array();
+        $merged = array();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
         if (is_null($preference)) {
+            $default_preference = $this->getConfig(
+                'core.settings.merge.preference',
+                'deny'
+            );
+
             $preference = $this->getConfig(
                 "core.settings.{$objectType}.merge.preference",
-                'deny'
+                $default_preference
             );
         }
 

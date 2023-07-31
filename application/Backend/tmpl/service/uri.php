@@ -1,10 +1,11 @@
 <?php
 /**
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.13
+ * @version 6.9.14
  * */
 ?>
 
@@ -14,7 +15,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to an unlimited number of individual URLs. With the premium %sComplete Package%s, you can use the wildcard [*] denotation to manage access to a specific website section (e.g. [/members/*], [/premium*]) or make the entire website private. To learn more, refer to our official documentation page %shere%s.', 'strong', 'i', 'i'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/url" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to an unlimited number of individual URLs. With the premium %sComplete Package%s, you can use the wildcard [*] denotation to manage access to a specific website section (e.g. [/members/*], [/premium*]) or make the entire website private. To learn more, refer to our official documentation page %shere%s.', 'strong', 'i', 'i'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/url?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>

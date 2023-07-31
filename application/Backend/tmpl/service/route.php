@@ -1,9 +1,10 @@
 <?php
 /**
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.10
+ * @version 6.9.14
  * */
 ?>
 
@@ -15,7 +16,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the RESTful API endpoints. With the premium %sComplete Package%s, you can also enable the "restricted mode" to only whitelist allowed endpoints. To learn more, refer to our official documentation page %shere%s.'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/api-route" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to the RESTful API endpoints. With the premium %sComplete Package%s, you can also enable the "restricted mode" to only whitelist allowed endpoints. To learn more, refer to our official documentation page %shere%s.'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/plugin/advanced-access-manager/service/api-route?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>

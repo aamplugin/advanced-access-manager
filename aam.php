@@ -3,9 +3,9 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.9.13
+ * Version: 6.9.14
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
- * Author URI: https://vasyltech.com
+ * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
  * Domain Path: /lang/
  *
@@ -318,7 +318,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.13');
+    define('AAM_VERSION', '6.9.14');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

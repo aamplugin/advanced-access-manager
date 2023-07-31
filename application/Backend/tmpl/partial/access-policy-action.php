@@ -1,9 +1,10 @@
 <?php
     /**
-     * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/79
-     * @since 6.3.0 Initial implementation of the template
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/79
+     * @since 6.3.0  Initial implementation of the template
      *
-     * @version 6.4.0
+     * @version 6.9.14
      * */
 ?>
 
@@ -14,7 +15,7 @@
             <li><a href="#" id="generate-access-policy"><?php echo __('Download as File', AAM_KEY); ?></a></li>
             <li><a href="#" id="create-access-policy"><?php echo __('Create New Policy', AAM_KEY); ?></a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="https://aamportal.com/advanced/access-policy/" target="_blank"><?php echo __('Learn More', AAM_KEY); ?></a></li>
+            <li><a href="https://aamportal.com/advanced/access-policy/?ref=plugin" target="_blank"><?php echo __('Learn More', AAM_KEY); ?></a></li>
         </ul>
     </div>
 <?php }

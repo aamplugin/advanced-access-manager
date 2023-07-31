@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.14
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php global $wpdb; ?>
@@ -15,7 +22,7 @@
                         <p class="text-larger"><?php echo __('AAM is thoroughly tested on the fresh installation of the latest WordPress and in the latest versions of Chrome, Safari, IE, and Firefox. If you have any issues, the most typical cause is a conflict with other plugins or themes.', AAM_KEY); ?></p>
                         <p class="text-larger"><?php echo __('If you are unsure where to start, please do not hesitate to contact us.', AAM_KEY); ?></p>
                         <p class="text-center">
-                            <a href="https://aamportal.com/support" class="btn btn-primary" target="_blank"><?php echo __('Check Our Support Page', AAM_KEY); ?></a><br/><br/>
+                            <a href="https://aamportal.com/support?ref=plugin" class="btn btn-primary" target="_blank"><?php echo __('Check Our Support Page', AAM_KEY); ?></a><br/><br/>
                         </p>
                     </div>
                 </div>

@@ -10,12 +10,13 @@
 /**
  * Access Denied Redirect service
  *
- * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
- *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/309
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+ *               https://github.com/aamplugin/advanced-access-manager/issues/76
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.14
  */
 class AAM_Service_DeniedRedirect
 {
@@ -119,12 +120,13 @@ class AAM_Service_DeniedRedirect
      *
      * @return void
      *
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
-     *              Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     *               https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.14
      */
     protected function initializeHooks()
     {
@@ -139,6 +141,9 @@ class AAM_Service_DeniedRedirect
         add_filter(
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 3
         );
+
+         // Register RESTful API endpoints
+         AAM_Core_Restful_AccessDeniedRedirectService::bootstrap();
 
         // Service fetch
         $this->registerService();

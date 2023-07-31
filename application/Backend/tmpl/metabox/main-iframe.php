@@ -1,14 +1,15 @@
 <?php
     /**
-     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
-     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.7.4 Improved the UI consistency
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/104
-     * @since 6.4.2 Styling notification metabox
-     * @since 6.2.0 Added support & import/export modals
-     * @since 6.0.0 Initial implementation of the template
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
+     * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
+     * @since 6.7.4  Improved the UI consistency
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/104
+     * @since 6.4.2  Styling notification metabox
+     * @since 6.2.0  Added support & import/export modals
+     * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.5
+     * @version 6.9.14
      * */
 
     if (defined('AAM_KEY')) {
@@ -81,7 +82,7 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamportal.com/support" target="_blank" title="Ask For Help">
+                                    <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Ask For Help">
                                         <i class="icon-chat"></i>
                                         <span><?php echo __('Support', AAM_KEY); ?></span>
                                     </a>
@@ -181,7 +182,7 @@
                                             <?php foreach ($licenses as $i => $licenseId) { ?>
                                                 <tr class="<?php echo ($i % 2 === 0 ? 'odd' : 'even'); ?>">
                                                     <td>
-                                                        <a href="https://aamportal.com/license/<?php echo esc_attr($licenseId); ?>" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
+                                                        <a href="https://aamportal.com/license/<?php echo esc_attr($licenseId); ?>?ref=plugin" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
                                                     </td>
                                                 </tr>
                                             <?php } ?>

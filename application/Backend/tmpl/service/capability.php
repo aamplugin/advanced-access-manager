@@ -1,10 +1,10 @@
 <?php
-    /**
-     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.9.2
-     * */
+/**
+ * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
+ * @since 6.0.0 Initial implementation of the template
+ *
+ * @version 6.9.2
+ * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>

@@ -1,18 +1,19 @@
 <?php
-    /**
-     * @since 6.3.0 Removed limitation to attach policy to Default
-     * @since 6.2.0 Enhanced the table with new functionality
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.3.0
-     * */
+/**
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+ * @since 6.3.0  Removed limitation to attach policy to Default
+ * @since 6.2.0  Enhanced the table with new functionality
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.14
+ * */
 ?>
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="policy-content">
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/advanced/access-policy/" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/advanced/access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
                 </p>
             </div>
         </div>

@@ -1,10 +1,11 @@
 <?php
     /**
-     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/252
-     * @since 6.8.0 https://github.com/aamplugin/advanced-access-manager/issues/195
-     * @since 6.0.0 Initial implementation of the templates
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
+     * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/252
+     * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
+     * @since 6.0.0  Initial implementation of the templates
      *
-     * @version 6.9.6
+     * @version 6.9.14
      *
      */
 ?>
@@ -35,8 +36,8 @@
             <div class="col-xs-12">
                 <div>
                     <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend-redirect" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
-                        <?php if (!$subject->isVisitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend-redirect" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
+                        <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
+                        <?php if (!$subject->isVisitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
                     </ul>
 
                     <?php $frontendType = $this->getOption('frontend.redirect.type', 'default'); ?>
@@ -45,39 +46,39 @@
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane active" id="frontend-redirect">
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-default" value="default" data-action="none" data-group="frontend-redirect"<?php echo ($frontendType == 'default' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-default" value="default" data-action="none" data-group="frontend"<?php echo ($frontendType == 'default' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-message" data-action="#frontend-message-action" value="message" data-group="frontend-redirect"<?php echo ($frontendType == 'message' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-message" data-action="#frontend-message-action" value="custom_message" data-group="frontend"<?php echo ($frontendType == 'message' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                             </div>
                             <?php if ($subject->isVisitor()) { ?>
                                 <div class="radio">
-                                    <input type="radio" name="frontend.redirect.type" id="frontend-redirect-login" value="login" data-action="none" data-group="frontend-redirect"<?php echo ($frontendType == 'login' ? ' checked' : ''); ?> />
+                                    <input type="radio" name="frontend.redirect.type" id="frontend-redirect-login" value="login_redirect" data-action="none" data-group="frontend"<?php echo ($frontendType == 'login' ? ' checked' : ''); ?> />
                                     <label for="frontend-redirect-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
                                 </div>
                             <?php } ?>
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-page" data-action="#frontend-page-action" value="page" data-group="frontend-redirect"<?php echo ($frontendType == 'page' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-page" data-action="#frontend-page-action" value="page_redirect" data-group="frontend"<?php echo ($frontendType == 'page' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing page [(select from the drop-down)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-url" data-action="#frontend-url-action" value="url" data-group="frontend-redirect"<?php echo ($frontendType == 'url' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-url" data-action="#frontend-url-action" value="url_redirect" data-group="frontend"<?php echo ($frontendType == 'url' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-callback" data-action="#frontend-callback-action" value="callback" data-group="frontend-redirect"<?php echo ($frontendType == 'callback' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-callback" data-action="#frontend-callback-action" value="trigger_callback" data-group="frontend"<?php echo ($frontendType == 'callback' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
-                            <div class="form-group aam-redirect-action frontend-redirect" id="frontend-message-action" style="display: <?php echo ($frontendType == 'message' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action frontend" id="frontend-message-action" style="display: <?php echo ($frontendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                                 <?php $redirect_message = $this->getOption('frontend.redirect.message') ?>
-                                <textarea class="form-control" name="frontend.redirect.message" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"><?php echo is_string($redirect_message) ? stripslashes($redirect_message) : ''; ?></textarea>
+                                <textarea class="form-control" name="frontend.redirect.message" data-group="frontend" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"><?php echo is_string($redirect_message) ? stripslashes($redirect_message) : ''; ?></textarea>
                             </div>
 
-                            <div class="form-group aam-redirect-action frontend-redirect" id="frontend-page-action" style="display: <?php echo ($frontendType == 'page' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action frontend" id="frontend-page-action" style="display: <?php echo ($frontendType == 'page' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
                                 <?php
                                     wp_dropdown_pages(array(
@@ -92,44 +93,44 @@
                                 ?>
                             </div>
 
-                            <div class="form-group aam-redirect-action frontend-redirect" id="frontend-url-action" style="display: <?php echo ($frontendType == 'url' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action frontend" id="frontend-url-action" style="display: <?php echo ($frontendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" name="frontend.redirect.url" placeholder="https://" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.url'))); ?>" />
+                                <input type="text" class="form-control" name="frontend.redirect.url" data-group="frontend" placeholder="https://" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.url'))); ?>" />
                             </div>
 
-                            <div class="form-group aam-redirect-action frontend-redirect" id="frontend-callback-action" style="display: <?php echo ($frontendType == 'callback' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action frontend" id="frontend-callback-action" style="display: <?php echo ($frontendType == 'callback' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="frontend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.callback'))); ?>" />
+                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" data-group="frontend" name="frontend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('frontend.redirect.callback'))); ?>" />
                             </div>
                         </div>
                         <div role="tabpanel" class="tab-pane" id="backend-redirect">
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-default" data-action="none" value="default" data-group="backend-redirect"<?php echo ($backendType == 'default' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-default" data-action="none" value="default" data-group="backend"<?php echo ($backendType == 'default' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-message" data-action="#backend-message" value="message" data-group="backend-redirect"<?php echo ($backendType == 'message' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-message" data-action="#backend-message" value="custom_message" data-group="backend"<?php echo ($backendType == 'message' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-page" data-action="#backend-page-action" value="page" data-group="backend-redirect"<?php echo ($backendType == 'page' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-page" data-action="#backend-page-action" value="page_redirect" data-group="backend"<?php echo ($backendType == 'page' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing frontend page [(select from the drop-down)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-url" data-action="#backend-url" value="url" data-group="backend-redirect"<?php echo ($backendType == 'url' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-url" data-action="#backend-url" value="url_redirect" data-group="backend"<?php echo ($backendType == 'url' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-callback" data-action="#backend-callback-action" value="callback" data-group="backend-redirect"<?php echo ($backendType == 'callback' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-callback" data-action="#backend-callback-action" value="trigger_callback" data-group="backend"<?php echo ($backendType == 'callback' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
-                            <div class="form-group aam-redirect-action backend-redirect" id="backend-message" style="display: <?php echo ($backendType == 'message' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action backend" id="backend-message" style="display: <?php echo ($backendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="backend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
-                                <textarea class="form-control" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>" name="backend.redirect.message"><?php echo $this->getOption('backend.redirect.message'); ?></textarea>
+                                <textarea class="form-control" rows="3" data-group="backend" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>" name="backend.redirect.message"><?php echo $this->getOption('backend.redirect.message'); ?></textarea>
                             </div>
 
-                            <div class="form-group aam-redirect-action backend-redirect" id="backend-page-action" style="display: <?php echo ($backendType == 'page' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action backend" id="backend-page-action" style="display: <?php echo ($backendType == 'page' ? 'block' : 'none'); ?>;">
                                 <label for="backend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
                                 <?php
                                     wp_dropdown_pages(array(
@@ -144,14 +145,14 @@
                                 ?>
                             </div>
 
-                            <div class="form-group aam-redirect-action backend-redirect" id="backend-url" style="display: <?php echo ($backendType == 'url' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action backend" id="backend-url" style="display: <?php echo ($backendType == 'url' ? 'block' : 'none'); ?>;">
                                 <label for="backend-url"><?php echo __('The URL', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="https://" name="backend.redirect.url" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.url'))); ?>" />
+                                <input type="text" class="form-control" data-group="backend" placeholder="https://" name="backend.redirect.url" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.url'))); ?>" />
                             </div>
 
-                            <div class="form-group aam-redirect-action backend-redirect" id="backend-callback-action" style="display: <?php echo ($backendType == 'callback' ? 'block' : 'none'); ?>;">
+                            <div class="form-group aam-redirect-action backend" id="backend-callback-action" style="display: <?php echo ($backendType == 'callback' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
-                                <input type="text" class="form-control" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="backend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.callback'))); ?>" />
+                                <input type="text" class="form-control" data-group="backend" placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>" name="backend.redirect.callback" value="<?php echo stripslashes(esc_js($this->getOption('backend.redirect.callback'))); ?>" />
                             </div>
                         </div>
                     </div>

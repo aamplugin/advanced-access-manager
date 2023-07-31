@@ -1,10 +1,11 @@
 <?php
     /**
-     * @since 6.5.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/107
-     * @since 6.2.0 Added "Hidden" modal for more granular access controls
-     * @since 6.0.0 Initial implementation of the template
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/107
+     * @since 6.2.0  Added "Hidden" modal for more granular access controls
+     * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.5.0
+     * @version 6.9.14
      * */
 ?>
 
@@ -19,7 +20,7 @@
 
     <?php if ($params->object->post_type === 'attachment') { ?>
         <div class="alert alert-warning aam-outer-bottom-xxs">
-            <?php echo sprintf(__('To fully protect your media items, refer to the %sAAM Protected Media Files%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/protected-media-files/" target="_blank">', '</a>');  ?>
+            <?php echo sprintf(__('To fully protect your media items, refer to the %sAAM Protected Media Files%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/protected-media-files/?ref=plugin" target="_blank">', '</a>');  ?>
         </div>
     <?php } ?>
 

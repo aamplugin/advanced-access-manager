@@ -1,12 +1,13 @@
 <?php
-    /**
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
-     *               https://github.com/aamplugin/advanced-access-manager/issues/298
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
-     * @since 6.0.0  Initial implementation of the template
-     *
-     * @version 6.9.13
-     * */
+/**
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+ * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
+ *               https://github.com/aamplugin/advanced-access-manager/issues/298
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.14
+ * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -15,7 +16,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to WordPress metaboxes on post-edit screens or manage access to widgets on the backend dashboard screen and the frontend. This service does not define access controls to Gutenberg blocks. The premium %sComplete Package%s also allows defining default visibility for metaboxes and widgets for each screen.'), '<a href="https://aamportal.com/premium" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to WordPress metaboxes on post-edit screens or manage access to widgets on the backend dashboard screen and the frontend. This service does not define access controls to Gutenberg blocks. The premium %sComplete Package%s also allows defining default visibility for metaboxes and widgets for each screen.'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>

@@ -1,13 +1,13 @@
 <?php
-    /**
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
-     * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
-     * @since 6.4.0  Allowing to define 404 for any user or role
-     * @since 6.0.0  Initial implementation of the templates
-     *
-     * @version 6.9.12
-     *
-     */
+/**
+ * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
+ * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
+ * @since 6.4.0  Allowing to define 404 for any user or role
+ * @since 6.0.0  Initial implementation of the templates
+ *
+ * @version 6.9.12
+ *
+ */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>

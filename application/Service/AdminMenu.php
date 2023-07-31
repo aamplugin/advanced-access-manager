@@ -10,6 +10,7 @@
 /**
  * Admin Menu service
  *
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.14
  */
 class AAM_Service_AdminMenu
 {
@@ -192,10 +193,13 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
      * @global array $menu
      * @global array $submenu
-     * @version 6.0.0
+     * @version 6.9.14
      */
     public function filterMenu($parent_file)
     {
@@ -204,10 +208,12 @@ class AAM_Service_AdminMenu
         $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
 
         foreach ($menu as $id => $item) {
-            if (!empty($submenu[$item[2]])) {
+            $menu_slug = $item[2];
+
+            if (!empty($submenu[$menu_slug])) {
                 // Cover the scenario when there are some dynamic submenus
                 $subs = $this->filterSubmenu(
-                    $item, ($object->isRestricted('menu-' . $item[2]))
+                    $item, ($object->isRestricted('menu-' . $menu_slug))
                 );
             } else {
                 $subs = array();
@@ -215,12 +221,11 @@ class AAM_Service_AdminMenu
 
             // Cover scenario like with Visual Composer where landing page
             // is defined dynamically
-            if ($object->isRestricted('menu-' . $item[2])) {
+            if ($object->isRestricted('menu-' . $menu_slug)) {
                 unset($menu[$id]);
-            } elseif ($object->isRestricted($item[2])) {
+            } elseif ($object->isRestricted($menu_slug)) {
                 if (count($subs)) {
-                    $menu[$id][2] = $subs[0][2];
-                    $submenu[$menu[$id][2]] = $subs;
+                    $submenu[$item[2]] = $subs;
                 } else {
                     unset($menu[$id]);
                 }
