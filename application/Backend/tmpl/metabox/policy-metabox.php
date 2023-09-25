@@ -42,7 +42,7 @@ if (defined('AAM_KEY')) { ?>
         <textarea id="aam-policy-editor" name="aam-policy" class="policy-editor" style="border: 1px solid #CCCCCC; width: 100%" rows="10"><?php echo $params->post->post_content; ?></textarea>
 
         <p class="aam-infobox">
-            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamportal.com/advanced/access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
+            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
         </p>
     </div>
 <?php }

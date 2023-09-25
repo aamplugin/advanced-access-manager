@@ -41,7 +41,7 @@ class AAM_Shortcode_Handler_LoginForm
      * @access public
      * @version 6.6.0
      */
-    public function __construct($args, $content = null)
+    public function __construct($args)
     {
         $this->args = array_merge(
             array('class' => '', 'redirect' => ''),

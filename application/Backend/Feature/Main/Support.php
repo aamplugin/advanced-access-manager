@@ -8,35 +8,35 @@
  */
 
 /**
- * AAM Welcome backend service
+ * AAM Support backend service
  *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.15
  */
-class AAM_Backend_Feature_Main_Welcome  extends AAM_Backend_Feature_Abstract
+class AAM_Backend_Feature_Main_Support extends AAM_Backend_Feature_Abstract
 {
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 6.9.15
      */
-    const TEMPLATE = 'service/welcome.php';
+    const TEMPLATE = 'service/support.php';
 
     /**
-     * Register welcome service
+     * Register support service
      *
      * @return void
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.15
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'welcome',
-            'position'   => 1,
-            'title'      => __('Welcome', AAM_KEY),
+            'uid'        => 'support',
+            'position'   => 2,
+            'title'      => __('Support', AAM_KEY),
             'type'       => 'main',
             'subjects'   => array(
                 AAM_Core_Subject_Default::UID,

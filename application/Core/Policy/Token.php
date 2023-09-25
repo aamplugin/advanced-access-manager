@@ -87,6 +87,8 @@ class AAM_Core_Policy_Token
     {
         foreach ($tokens as $token) {
             $val  = self::getTokenValue($token, $args);
+            $val  = is_null($val) ? '' : $val;
+
             $part = str_replace(
                 $token,
                 (is_scalar($val) || is_null($val) ? $val : json_encode($val)),

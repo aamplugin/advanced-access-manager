@@ -15,7 +15,7 @@
             <li><a href="#" id="generate-access-policy"><?php echo __('Download as File', AAM_KEY); ?></a></li>
             <li><a href="#" id="create-access-policy"><?php echo __('Create New Policy', AAM_KEY); ?></a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="https://aamportal.com/advanced/access-policy/?ref=plugin" target="_blank"><?php echo __('Learn More', AAM_KEY); ?></a></li>
+            <li><a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank"><?php echo __('Learn More', AAM_KEY); ?></a></li>
         </ul>
     </div>
 <?php }

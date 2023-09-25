@@ -13,7 +13,7 @@
             <tbody>
                 <tr class="aam-info">
                     <td class="text-left">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Premium Feature:] Operate the admin toolbar in a restricted access mode. When set to "Enabled," all current and future toolbar menu items are hidden by default unless explicitly allowed. %sLearn more%s.', 'strong'), '<a href="https://aamportal.com/plugin/premium-complete-package/backend-access/admin-toolbar-restricted-mode?ref=plugin" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Premium Feature:] Operate the admin toolbar in a restricted access mode. When set to "Enabled," all current and future toolbar menu items are hidden by default unless explicitly allowed. %sLearn more%s.', 'strong'), '<a href="https://aamportal.com/article/understanding-admin-toolbar-restricted-mode-feature?ref=plugin" target="_blank">', '</a>'); ?>
                     </td>
                     <td class="text-center">
                         <input data-toggle="toggle" type="checkbox" data-on="<i class='icon-lock'></i> <?php echo __('Enabled', AAM_KEY); ?>" data-off="<?php echo __('Disabled', AAM_KEY); ?>" data-size="small" data-onstyle="danger" disabled />

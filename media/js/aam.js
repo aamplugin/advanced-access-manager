@@ -5051,6 +5051,90 @@
             });
         })(jQuery);
 
+        /**
+         * Support tab
+         */
+         (function ($) {
+            const input = {
+                fullname: null,
+                email: null,
+                message: null
+            };
+
+            function Recalibrate() {
+                if (input.message && input.email) {
+                    $('#send-message-btn').removeAttr('disabled');
+                } else {
+                    $('#send-message-btn').attr('disabled', true);
+                }
+            }
+
+            getAAM().addHook('init', function() {
+                $('#support-message').on('keyup', function() {
+                    $('#message-countdown').text(700 - $(this).val().length);
+
+                    input.message = $(this).val().trim();
+
+                    Recalibrate();
+                });
+
+                $('#support-email').on('change', function() {
+                    input.email = $(this).val().trim();
+
+                    Recalibrate();
+                });
+
+                $('#support-fullname').on('change', function() {
+                    input.fullname = $(this).val().trim();
+                });
+
+                $('#send-message-btn').bind('click', () => {
+                    $.ajax(`${getLocal().rest_base}aam/v2/support`, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        dataType: 'json',
+                        data: input,
+                        beforeSend: function () {
+                            $('#send-message-btn').text(
+                                getAAM().__('Submitting...')
+                            ).attr('disabled', true);
+                        },
+                        success: function () {
+                            getAAM().notification(
+                                'success',
+                                'Message submitted successfully!'
+                            );
+
+                            input.message = null;
+                            $('#support-message').val('');
+
+                            Recalibrate();
+                        },
+                        error: function (err) {
+                            if (err.status === 400) {
+                                getAAM().notification(
+                                    'danger', err.responseJSON.message
+                                );
+                            } else {
+                                getAAM().notification(
+                                    'danger',
+                                    Object.values(err.responseJSON.errors).join('; ')
+                                );
+                            }
+                            $('#send-message-btn').removeAttr('disabled');
+                        },
+                        complete: function () {
+                            $('#send-message-btn').text(
+                                getAAM().__('Send the Message')
+                            );
+                        }
+                    });
+                });
+            });
+        })(jQuery);
+
         getAAM().fetchContent('main'); //fetch default AAM content
     }
 

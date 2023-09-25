@@ -410,10 +410,10 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamportal.com/advanced/access-policy/resource-action/backendmenu
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/backendmenu
      * @version 6.1.1
      */
-    protected function initializeMenu($option, AAM_Core_Object_Menu $object)
+    protected function initializeMenu($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $found   = $manager->getResources(AAM_Core_Policy_Resource::MENU);
@@ -438,7 +438,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamportal.com/advanced/access-policy/resource-action/toolbar
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/toolbar
      * @version 6.1.1
      */
     protected function initializeToolbar($option)
@@ -466,7 +466,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @see https://aamportal.com/advanced/access-policy/resource-action/metabox
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/metabox
      * @version 6.1.1
      */
     protected function initializeMetabox($option)
@@ -498,7 +498,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamportal.com/advanced/access-policy/resource-action/post
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/post
      * @version 6.1.1
      */
     protected function initializePost($option, AAM_Core_Object_Post $object)
@@ -582,7 +582,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamportal.com/advanced/access-policy/resource-action/uri
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/uri
      * @version 6.1.1
      */
     protected function initializeUri($option)
@@ -624,7 +624,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
-     * @see https://aamportal.com/advanced/access-policy/resource-action/route
+     * @see https://aamportal.com/reference/json-access-policy/resource-action/route
      * @version 6.1.1
      */
     protected function initializeRoute($option)
@@ -749,7 +749,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamportal.com/advanced/access-policy/resource-action/capability
+     * @link https://aamportal.com/reference/json-access-policy/resource-action/capability
      * @version 6.1.1
      */
     public function isCapabilityAllowed($allowed, $cap, $action)
@@ -772,8 +772,8 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamportal.com/advanced/access-policy/resource-action/capability
-     * @link https://aamportal.com/advanced/access-policy/resource-action/role
+     * @link https://aamportal.com/reference/json-access-policy/resource-action/capability
+     * @link https://aamportal.com/reference/json-access-policy/resource-action/role
      *
      * @version 6.3.1
      */
@@ -1062,7 +1062,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
-     * @link https://aamportal.com/advanced/access-policy/resource-action/plugin
+     * @link https://aamportal.com/reference/json-access-policy/resource-action/plugin
      * @version 6.1.0
      */
     public function isPluginActionAllowed($allowed, $action, $slug = null)

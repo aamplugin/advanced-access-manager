@@ -7,14 +7,18 @@
  * ======================================================================
  */
 
+ use Vectorface\Whip\Whip;
+
 /**
  * AAM shortcode handler for content visibility
  *
- * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/96
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
+ *               https://github.com/aamplugin/advanced-access-manager/issues/317
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/96
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.0
+ * @version 6.9.16
  */
 class AAM_Shortcode_Handler_Content
     implements AAM_Core_Contract_ShortcodeInterface
@@ -48,7 +52,6 @@ class AAM_Shortcode_Handler_Content
      *   "show"     => comma-separated list of role, caps, user IDs to show content
      *   "limit"    => comma-separated list of role, caps, user IDs to limit content
      *   "message"  => message to show if "limit" is defined
-     *   "callback" => callback function that returns message if "limit" is defined
      *
      * @param array  $args
      * @param string $content
@@ -69,11 +72,12 @@ class AAM_Shortcode_Handler_Content
      *
      * @return string
      *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/96
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/96
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.5.0
+     * @version 6.9.16
      */
     public function run()
     {
@@ -105,25 +109,21 @@ class AAM_Shortcode_Handler_Content
         $hide  = $this->getAccess('hide');
         $msg   = $this->getMessage();
 
-        if (!empty($this->args['callback'])) {
-            $content = call_user_func($this->args['callback'], $this);
-        } else {
+        $content = $this->content;
+
+        // #1. Check if content is restricted for current user
+        if (in_array('all', $hide, true) || $this->check($parts, $hide)) {
+            $content = '';
+        }
+
+        // #2. Check if content is limited for current user
+        if (in_array('all', $limit, true) || $this->check($parts, $limit)) {
+            $content = do_shortcode($msg);
+        }
+
+        // #3. Check if content is allowed for current user
+        if ($this->check($parts, $show)) {
             $content = $this->content;
-
-            // #1. Check if content is restricted for current user
-            if (in_array('all', $hide, true) || $this->check($parts, $hide)) {
-                $content = '';
-            }
-
-            // #2. Check if content is limited for current user
-            if (in_array('all', $limit, true) || $this->check($parts, $limit)) {
-                $content = do_shortcode($msg);
-            }
-
-            // #3. Check if content is allowed for current user
-            if ($this->check($parts, $show)) {
-                $content = $this->content;
-            }
         }
 
         return $content;
@@ -137,20 +137,24 @@ class AAM_Shortcode_Handler_Content
      *
      * @return boolean
      *
+     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/317
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.16
      */
     protected function check($subject, $conditions)
     {
         $match = false;
         $auth  = get_current_user_id();
+        $whip = new Whip();
 
         foreach ($conditions as $condition) {
             if (($condition === 'authenticated') && $auth) {
                 $match = true;
             } else if (preg_match('/^[\d*-]+\.[\d*-]+[\d\.*-]*[\d\.*-]*$/', $condition)) {
                 $match = $this->checkIP(
-                    $condition, AAM_Core_Request::server('REMOTE_ADDR')
+                    $condition, $whip->getValidIpAddress()
                 );
             } else {
                 $match = in_array($condition, $subject, true);
@@ -172,7 +176,7 @@ class AAM_Shortcode_Handler_Content
      *
      * @return boolean
      *
-     * @since 6.3.0 Fixed potential bug https://github.com/aamplugin/advanced-access-manager/issues/38
+     * @since 6.3.0 https://github.com/aamplugin/advanced-access-manager/issues/38
      * @since 6.0.0 Initial implementation of the method
      *
      * @access protected
@@ -224,12 +228,15 @@ class AAM_Shortcode_Handler_Content
      *
      * @return string|null
      *
+     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.16
      */
     public function getMessage()
     {
-        return isset($this->args['message']) ? $this->args['message'] : null;
+        return isset($this->args['message']) ? esc_js($this->args['message']) : null;
     }
 
 }

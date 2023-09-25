@@ -70,12 +70,12 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
             ),
             'core.settings.multiSubject' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),
-                'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),
+                'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),
                 'value'       => AAM_Core_Config::get('core.settings.multiSubject', false)
             ),
             'core.settings.merge.preference' => array(
                 'title'       => __('Default Access Settings Merging Preference', AAM_KEY),
-                'description' => sprintf(__('Default access settings merging preference when settings ambiguity detected. For more information refer to the %sHow to work with access controls ambiguity%s article.', AAM_KEY), '<a href="https://aamportal.com/question/aam/access-controls-ambiguity?ref=plugin" target="_blank">', '</a>'),
+                'description' => sprintf(__('Default access settings merging preference when settings ambiguity detected. For more information refer to the %sResolving access control ambiguity in WordPress%s article.', AAM_KEY), '<a href="https://aamportal.com/article/resolving-access-controls-ambiguity-in-wordpress?ref=plugin" target="_blank">', '</a>'),
                 'value'       => AAM_Core_Config::get('core.settings.merge.preference', 'deny') === 'allow',
                 'valueOn'     => 'allow',
                 'valueOff'    => 'deny',

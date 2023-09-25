@@ -10,12 +10,13 @@
 /**
  * Metaboxes & Widgets service
  *
+ * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/315
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.16
  */
 class AAM_Service_Metabox
 {
@@ -198,11 +199,12 @@ class AAM_Service_Metabox
      *
      * @return void
      *
-     * @since 6.4.0 Fixed https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/315
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.16
      */
     protected function initializeHooks()
     {
@@ -226,10 +228,12 @@ class AAM_Service_Metabox
             }, 999);
 
             // Manage Navigation Menu page to support
-            add_filter('nav_menu_meta_box_object', function ($postType) {
-                $postType->_default_query['suppress_filters'] = false;
+            add_filter('nav_menu_meta_box_object', function ($obj) {
+                if (is_object($obj)) {
+                    $obj->_default_query['suppress_filters'] = false;
+                }
 
-                return $postType;
+                return $obj;
             });
 
             // Manager WordPress metaboxes - Classic Editor

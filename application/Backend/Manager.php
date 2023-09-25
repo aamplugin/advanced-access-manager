@@ -372,8 +372,6 @@ class AAM_Backend_Manager
      *
      * @access public
      * @version 6.0.0
-     *
-     * @link https://aamportal.com/question/aam/manage-access-to-aam-for-other-users
      */
     public function adminMenu()
     {

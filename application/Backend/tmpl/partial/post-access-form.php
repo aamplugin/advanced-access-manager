@@ -20,7 +20,7 @@
 
     <?php if ($params->object->post_type === 'attachment') { ?>
         <div class="alert alert-warning aam-outer-bottom-xxs">
-            <?php echo sprintf(__('To fully protect your media items, refer to the %sAAM Protected Media Files%s page.', AAM_KEY), '<a href="https://aamportal.com/plugin/protected-media-files/?ref=plugin" target="_blank">', '</a>');  ?>
+            <?php echo sprintf(__('To fully protect your media items, refer to the %sAAM Protected Media Files%s page.', AAM_KEY), '<a href="https://aamportal.com/article/introduction-to-aam-protected-media-files-addon?ref=plugin" target="_blank">', '</a>');  ?>
         </div>
     <?php } ?>
 

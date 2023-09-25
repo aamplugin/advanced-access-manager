@@ -58,7 +58,7 @@ class AAM_Service_UserLevelFilter
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'          => __('User Level Filter', AAM_KEY),
-                    'description'    => __('Extend default WordPress core users and roles handling, and make sure that users with lower user level cannot see or manager users and roles with higher level.', AAM_KEY),
+                    'description'    => __('Enhance the built-in WordPress core user and role management system to ensure that users with lower user levels are restricted from viewing or managing users and roles with higher levels of authority.', AAM_KEY),
                     'setting'        => self::FEATURE_FLAG,
                     'defaultEnabled' => false
                 );
