@@ -10,13 +10,14 @@
 /**
  * Metaboxes & Widgets service
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/315
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.16
+ * @version 6.9.17
  */
 class AAM_Service_Metabox
 {
@@ -168,14 +169,19 @@ class AAM_Service_Metabox
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.17
      */
     public function getComponentsCache()
     {
         global $wp_post_types;
 
-        $response = get_transient(AAM_Backend_Feature_Main_Metabox::DB_CACHE_OPTION);
+        $response = AAM_Core_Cache::get(
+            AAM_Backend_Feature_Main_Metabox::DB_CACHE_OPTION
+        );
 
         if (!is_array($response)) {
             $response = array();

@@ -16,7 +16,7 @@
  * @package AAM
  * @version 6.9.16
  */
-class AAM_Shortcode_Handler_LoginRedirect
+class AAM_Service_Shortcode_Handler_LoginRedirect
     implements AAM_Core_Contract_ShortcodeInterface
 {
 

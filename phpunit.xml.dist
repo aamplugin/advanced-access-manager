@@ -20,12 +20,9 @@
     </testsuites>
     <php>
         <const name="AAM_UNITTEST_RESET_DB" value="1" />
-        <const name="AAM_UNITTEST_ADMIN_USER_ID" value="18" />
-        <const name="AAM_UNITTEST_MULTIROLE_USER_ID" value="5" />
-        <const name="AAM_UNITTEST_USERNAME" value="unittest-admin" />
-        <const name="AAM_UNITTEST_PASSWORD" value="nGXeOf#u@eF3Q6OF3qkQeTlR" />
-        <const name="AAM_UNITTEST_USER_MANAGER_A_USER_ID" value="16" />
-        <const name="AAM_UNITTEST_USER_MANAGER_B_USER_ID" value="17" />
+        <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
+        <const name="AAM_UNITTEST_ADMIN_USERNAME" value="admin" />
+        <const name="AAM_UNITTEST_ADMIN_PASSWORD" value="123456" />
         <ini name="display_errors" value="On" />
         <ini name="display_startup_errors" value="On" />
     </php>

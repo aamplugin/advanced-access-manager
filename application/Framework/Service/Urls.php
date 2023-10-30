@@ -10,12 +10,14 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
+ *               https://github.com/aamplugin/advanced-access-manager/issues/320
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.17
  */
 class AAM_Framework_Service_Urls
 {
@@ -47,6 +49,9 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access public
      * @version 6.9.9
      */
@@ -66,6 +71,7 @@ class AAM_Framework_Service_Urls
                     $this->_prepare_rule(
                         $url,
                         $settings,
+                        $subject,
                         !array_key_exists($url, $explicit)
                     )
                 );
@@ -109,7 +115,7 @@ class AAM_Framework_Service_Urls
             throw new UnderflowException('Rule does not exist');
         }
 
-        return $this->_prepare_rule($rule['url'], $rule['rule']);
+        return $this->_prepare_rule($rule['url'], $rule['rule'], $subject);
     }
 
     /**
@@ -120,6 +126,9 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access public
      * @version 6.9.9
      * @throws Exception If fails to persist the rule
@@ -129,16 +138,16 @@ class AAM_Framework_Service_Urls
         // Validating that incoming data is correct and normalize is for storage
         $result  = $this->_validate_rule($rule);
         $subject = $this->_get_subject($inline_context);
-
-        $success = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE)->store(
-            $result['url'], $result['rule']
-        );
+        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        $success = $object->store($result['url'], $result['rule']);
 
         if (!$success) {
             throw new Exception('Failed to persist the rule');
+        } else {
+            do_action('aam_url_access_rule_created_action', $object, $rule);
         }
 
-        return $this->_prepare_rule($result['url'], $result['rule']);
+        return $this->_prepare_rule($result['url'], $result['rule'], $subject);
     }
 
     /**
@@ -149,6 +158,9 @@ class AAM_Framework_Service_Urls
      * @param array $inline_context Runtime context
      *
      * @return array
+     *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
+     * @since 6.9.9  Initial implementation of the method
      *
      * @access public
      * @version 6.9.9
@@ -187,10 +199,12 @@ class AAM_Framework_Service_Urls
         }
 
         if (!$success) {
-            throw new Exception('Failed to persist the rule');
+            throw new Exception('Failed to update the rule');
+        } else {
+            do_action('aam_url_access_rule_updated_action', $id, $object, $rule);
         }
 
-        return $this->_prepare_rule($result['url'], $result['rule']);
+        return $this->_prepare_rule($result['url'], $result['rule'], $subject);
     }
 
     /**
@@ -275,16 +289,20 @@ class AAM_Framework_Service_Urls
     /**
      * Normalize and prepare the rule model
      *
-     * @param string $url
-     * @param array  $settings
-     * @param bool   $is_inherited
+     * @param string           $url
+     * @param array            $settings
+     * @param AAM_Core_Subject $subject
+     * @param bool             $is_inherited
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.9
+     * @version 6.9.17
      */
-    private function _prepare_rule($url, $settings, $is_inherited = false)
+    private function _prepare_rule($url, $settings, $subject, $is_inherited = false)
     {
         // Determine current rule type. If none set, deny by default
         $legacy_type = isset($settings['type']) ? $settings['type'] : 'default';
@@ -297,7 +315,7 @@ class AAM_Framework_Service_Urls
         );
 
         if ($response['type'] === 'custom_message') {
-            $response['message'] = esc_js($settings['action']);
+            $response['message'] = $settings['action'];
         } elseif ($response['type'] === 'page_redirect') {
             $response['redirect_page_id']  = intval($settings['action']);
             $response['http_redirect_code'] = $http_code;
@@ -308,7 +326,7 @@ class AAM_Framework_Service_Urls
             $response['callback'] = $settings['action'];
         }
 
-        return $response;
+        return apply_filters('aam_url_access_rule_filter', $response, $subject);
     }
 
     /**
@@ -318,12 +336,13 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
      * @since 6.9.9  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.13
+     * @version 6.9.17
      */
     private function _validate_rule(array $rule)
     {
@@ -351,7 +370,7 @@ class AAM_Framework_Service_Urls
         } elseif (empty($url)) {
             throw new InvalidArgumentException('The `url` is required');
         } elseif ($type === 'message') {
-            $message = esc_js($rule['message']);
+            $message = wp_kses_post($rule['message']);
 
             if (empty($message)) {
                 throw new InvalidArgumentException('The `message` is required');

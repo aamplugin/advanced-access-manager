@@ -10,6 +10,7 @@
 /**
  * API Route service
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/324
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
  * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
  * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.17
  */
 class AAM_Service_Route
 {
@@ -144,7 +145,7 @@ class AAM_Service_Route
         );
 
         // Register API manager is applicable
-        add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), 1, 3);
+        add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), PHP_INT_MAX, 3);
 
         // Policy generation hook
         add_filter(
@@ -198,28 +199,32 @@ class AAM_Service_Route
      *
      * @return WP_Error|null
      *
-     * @since 6.7.2 https://github.com/aamplugin/advanced-access-manager/issues/163
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/324
+     * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.7.2
+     * @version 6.9.17
      */
     public function authorizeRequest($response, $server, $request)
     {
-        $user    = AAM::getUser();
-        $object  = $user->getObject('route');
-        $matched = $request->get_route();
-        $method  = $request->get_method();
+        if (!is_wp_error($response)) {
+            $user    = AAM::getUser();
+            $object  = $user->getObject('route');
+            $matched = $request->get_route();
+            $method  = $request->get_method();
 
-        foreach (array_keys($server->get_routes()) as $route) {
-            if ($route === $matched || preg_match('#^' . preg_quote($route) . '$#i', $matched)) {
-                if ($object->isRestricted('restful', $route, $method)) {
-                    $response = new WP_Error(
-                        'rest_access_denied',
-                        __('Access Denied', AAM_KEY),
-                        array('status' => 401)
-                    );
-                    break;
+            foreach (array_keys($server->get_routes()) as $route) {
+                if ($route === $matched
+                        || preg_match('#^' . preg_quote($route) . '$#i', $matched)) {
+                    if ($object->isRestricted('restful', $route, $method)) {
+                        $response = new WP_Error(
+                            'rest_access_denied',
+                            __('Access Denied', AAM_KEY),
+                            array('status' => 401)
+                        );
+                        break;
+                    }
                 }
             }
         }

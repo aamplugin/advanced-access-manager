@@ -10,13 +10,14 @@
 /**
  * Toolbar service
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
  * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.17
  */
 class AAM_Service_Toolbar
 {
@@ -91,13 +92,14 @@ class AAM_Service_Toolbar
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
      * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @global object $wp_admin_bar
-     * @version 6.9.13
+     * @version 6.9.17
      */
     public function cache_admin_bar()
     {
@@ -124,7 +126,7 @@ class AAM_Service_Toolbar
                     }
                 }
 
-                set_transient(
+                AAM_Core_Cache::set(
                     self::CACHE_DB_OPTION,
                     $this->_normalize_tree($cache),
                     31536000
@@ -140,15 +142,16 @@ class AAM_Service_Toolbar
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.17
      */
     public function getToolbarCache()
     {
-        return get_transient(self::CACHE_DB_OPTION);
+        return AAM_Core_Cache::get(self::CACHE_DB_OPTION);
     }
 
     /**

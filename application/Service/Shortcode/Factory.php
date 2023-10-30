@@ -16,7 +16,7 @@
  * @package AAM
  * @version 6.6.0
  */
-class AAM_Shortcode_Factory
+class AAM_Service_Shortcode_Factory
 {
 
     /**
@@ -48,11 +48,11 @@ class AAM_Shortcode_Factory
         $cnt = strtolower(!empty($args['context']) ? $args['context'] : 'content');
 
         if ($cnt === 'content') {
-            $this->handler = new AAM_Shortcode_Handler_Content($args, $content);
+            $this->handler = new AAM_Service_Shortcode_Handler_Content($args, $content);
         } elseif ($cnt === 'loginredirect') {
-            $this->handler = new AAM_Shortcode_Handler_LoginRedirect($args, $content);
+            $this->handler = new AAM_Service_Shortcode_Handler_LoginRedirect($args, $content);
         } elseif ($cnt === 'loginform') {
-            $this->handler = new AAM_Shortcode_Handler_LoginForm($args);
+            $this->handler = new AAM_Service_Shortcode_Handler_LoginForm($args);
         } else {
             $this->handler = apply_filters(
                 'aam_shortcode_filter', null, $cnt, $args, $content

@@ -1,11 +1,12 @@
 <?php
 /**
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.14
+ * @version 6.9.17
  * */
 ?>
 
@@ -43,7 +44,7 @@
                             <input type="text" class="form-control form-clearable" id="uri-rule" placeholder="Enter valid URL" />
                         </div>
 
-                        <label><?php echo __('How to redirect user when match?', AAM_KEY); ?></label><br />
+                        <label><?php echo __('What should be done when a URL is matched?', AAM_KEY); ?></label><br />
 
                         <div class="radio">
                             <input type="radio" name="uri.access.type" id="uri-access-allow" value="allow" data-action="none" />
@@ -114,6 +115,10 @@
                             <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                             <input type="text" class="form-control form-clearable" placeholder="Enter valid callback" id="uri-access-trigger_callback-value" />
                         </div>
+
+                        <div id="url_additional_properties">
+                            <?php do_action('aam_url_access_rule_form_action'); ?>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" id="uri-save-btn"><?php echo __('Save', AAM_KEY); ?></button>
@@ -156,6 +161,7 @@
                             <th>Type Details</th>
                             <th>HTTP Code</th>
                             <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th>Additional Details</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

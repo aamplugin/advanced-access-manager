@@ -9,7 +9,8 @@
 
 namespace AAM\UnitTest\Core;
 
-use AAM_Core_Jwt_Manager,
+use AAM_Service_Jwt,
+    AAM_Core_Jwt_Manager,
     PHPUnit\Framework\TestCase;
 
 /**
@@ -57,10 +58,19 @@ class JwtManagerTest extends TestCase
      */
     public function testExpiredToken()
     {
-        $token   = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NjU0MDQzNjYsImlzcyI6Imh0dHA6Ly9kZXYud29yZHByZXNzIiwiZXhwIjoxNjY1NDA0MzY4LCJqdGkiOiI2MjhlNjM1Mi02ZTY0LTQ4YWEtYTRhOC00MTlkYzgwMDA1YzMiLCJ0ZXN0Ijp0cnVlfQ.FRYXcsBhJOTMj8PDjmge-pf-FSYkwY8OmqIbcS7vVIg';
         $manager = AAM_Core_Jwt_Manager::getInstance();
+        $service = AAM_Service_Jwt::getInstance();
 
-        $result = $manager->validate($token);
+        // Let's issue a new token, pause for a second and make sure it is expired
+        $res = $service->issueToken(
+            AAM_UNITTEST_ADMIN_USER_ID,
+            false,
+            new \DateTime('@' . (time() + 1), new \DateTimeZone('UTC'))
+        );
+
+        sleep(2);
+
+        $result = $manager->validate($res->token);
 
         $this->assertTrue(is_a($result, 'WP_Error'));
         $this->assertEquals($result->get_error_message(), 'Expired token');

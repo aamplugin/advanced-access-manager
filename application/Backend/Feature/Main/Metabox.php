@@ -10,13 +10,14 @@
 /**
  * Backend metaboxes & widgets manager
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
  * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.7.4  https://github.com/aamplugin/advanced-access-manager/issues/167
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.17
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -143,8 +144,11 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.17
      */
     public function initialize($post_type)
     {
@@ -156,7 +160,7 @@ class AAM_Backend_Feature_Main_Metabox
             $this->collectMetaboxes($post_type, $cache);
         }
 
-        set_transient(self::DB_CACHE_OPTION, $cache, 31536000); // cache for a year
+        AAM_Core_Cache::set(self::DB_CACHE_OPTION, $cache, 31536000); // 1 year
     }
 
     /**
@@ -246,14 +250,17 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.17
      */
     public function getMetaboxList()
     {
         global $wp_post_types;
 
-        $cache = get_transient(self::DB_CACHE_OPTION);
+        $cache = AAM_Core_Cache::get(self::DB_CACHE_OPTION);
 
         if (!is_array($cache)) {
             $cache = array();

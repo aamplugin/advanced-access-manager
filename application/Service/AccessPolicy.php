@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/294
  *               https://github.com/aamplugin/advanced-access-manager/issues/299
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
@@ -27,7 +28,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.17
  */
 class AAM_Service_AccessPolicy
 {
@@ -190,6 +191,7 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
      * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
      * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/225
@@ -204,7 +206,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.17
      */
     protected function initializeHooks()
     {
@@ -247,34 +249,7 @@ class AAM_Service_AccessPolicy
             $found   = $manager->getResources(AAM_Core_Policy_Resource::HOOK);
 
             foreach($found as $resource => $stm) {
-                $parts = explode(':', $resource);
-
-                if (isset($stm['Effect'])) {
-                    $hook     = trim($parts[0]);
-                    $priority = empty($parts[1]) ? 10 : $parts[1];
-
-                    if ($stm['Effect'] === 'deny') {
-                        $priority = apply_filters(
-                            'aam_hook_resource_priority', $priority
-                        );
-
-                        if (is_bool($priority) || is_numeric($priority)) {
-                            remove_all_filters($hook, $priority);
-                        }
-                    } elseif (in_array($stm['Effect'], array('apply', 'override'))) {
-                        add_filter($hook, function($response) use ($stm) {
-                            return isset($stm['Response']) ? $stm['Response'] : $response;
-                        }, intval($priority));
-                    } elseif ($stm['Effect'] === 'merge') {
-                        add_filter($hook, function($response) use ($stm) {
-                            $n = isset($stm['Response']) ? $stm['Response'] : array();
-                            $a = is_array($n) ? $n : array();
-                            $b = is_array($response) ? $response : array();
-
-                            return array_merge($b, $a);
-                        }, intval($priority));
-                    }
-                }
+                AAM_Service_AccessPolicy_HookResource::parse($resource, $stm);
             }
         });
 

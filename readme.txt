@@ -1,10 +1,10 @@
-=== Advanced Access Manager ===
+=== Advanced Access Manager - Restricted Content, Users & Roles, Enhanced Security and More ===
 Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
-Requires at least: 4.7.0
+Requires at least: 5.0.0
 Requires PHP: 5.6.0
-Tested up to: 6.3.1
-Stable tag: 6.9.16
+Tested up to: 6.3.2
+Stable tag: 6.9.17
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,16 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.17 =
+* Fixed: Fatal error: array_merge(): Argument #2 must be of type array, string given in .../LoginForm.php:46 [https://github.com/aamplugin/advanced-access-manager/issues/318](https://github.com/aamplugin/advanced-access-manager/issues/318)
+* Fixed: Custom HTML message is escaped [https://github.com/aamplugin/advanced-access-manager/issues/322](https://github.com/aamplugin/advanced-access-manager/issues/322)
+* Added New: Add the ability to add additional properties to URL Access form [https://github.com/aamplugin/advanced-access-manager/issues/320](https://github.com/aamplugin/advanced-access-manager/issues/320)
+* Added New: Enhance Access Policy Hook resource [https://github.com/aamplugin/advanced-access-manager/issues/323](https://github.com/aamplugin/advanced-access-manager/issues/323)
+* Changed: Move away from WP core transients [https://github.com/aamplugin/advanced-access-manager/issues/319](https://github.com/aamplugin/advanced-access-manager/issues/319)
+* Changed: Move xpath resolver to its own class [https://github.com/aamplugin/advanced-access-manager/issues/321](https://github.com/aamplugin/advanced-access-manager/issues/321)
+* Changed: Change the RESTful API rest_pre_dispatch filter priority [https://github.com/aamplugin/advanced-access-manager/issues/324](https://github.com/aamplugin/advanced-access-manager/issues/324)
+* Changed: Changed the minimum required WP version to 5.0.0 [https://github.com/aamplugin/advanced-access-manager/issues/325](https://github.com/aamplugin/advanced-access-manager/issues/325)
 
 = 6.9.16 =
 * Fixed: Error when trying to edit the menu [https://github.com/aamplugin/advanced-access-manager/issues/315](https://github.com/aamplugin/advanced-access-manager/issues/315)

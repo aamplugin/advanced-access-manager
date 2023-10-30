@@ -9,7 +9,7 @@
 
 namespace AAM\UnitTest\Service\SecureLogin;
 
-use AAM_Core_API,
+use AAM_Core_Cache,
     AAM_Core_Config,
     WP_Session_Tokens,
     PHPUnit\Framework\TestCase,
@@ -84,7 +84,7 @@ class SecureLoginTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = $ip;
 
         // Force to max out the number of attempts
-        set_transient('aam_failed_login_attempts_' . $ip, 50, time() + 10);
+        AAM_Core_Cache::set('failed_login_attempts_' . $ip, 50, time() + 10);
 
         // No need to generate Auth cookies
         add_filter('send_auth_cookies', '__return_false');
@@ -102,7 +102,7 @@ class SecureLoginTest extends TestCase
         $this->assertEquals('Exceeded maximum number for authentication attempts. Try again later.', $user->get_error_message());
 
         // Also make sure that attempts counter was increased
-        $this->assertEquals(51, get_transient('aam_failed_login_attempts_' . $ip));
+        $this->assertEquals(51, AAM_Core_Cache::get('failed_login_attempts_' . $ip));
 
         // Reset original state
         delete_transient('aam_failed_login_attempts_' . $ip);

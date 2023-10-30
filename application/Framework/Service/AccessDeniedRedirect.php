@@ -10,8 +10,11 @@
 /**
  * AAM service Access Denied Redirect manager
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
+ * @since 6.9.14 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.14
+ * @version 6.9.17
  */
 class AAM_Framework_Service_AccessDeniedRedirect
 {
@@ -213,8 +216,11 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return array
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
+     * @since 6.9.14 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.14
+     * @version 6.9.17
      */
     private function _validate_redirect(array $rule)
     {
@@ -265,7 +271,7 @@ class AAM_Framework_Service_AccessDeniedRedirect
             }
         } elseif ($type === 'message') {
             if (is_callable($rule['message'], true)) {
-                $normalized[$area . '.redirect.message'] = $rule['message'];
+                $normalized[$area . '.redirect.message'] = wp_kses_post($rule['message']);
             } else {
                 throw new InvalidArgumentException(
                     'The access denied `message` is required'

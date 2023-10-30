@@ -2,15 +2,15 @@
 
 /**
  * Plugin Name: Advanced Access Manager
- * Description: Collection of features to manage your WordPress website authentication, authorization and monitoring
- * Version: 6.9.16
+ * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
+ * Version: 6.9.17
  * Author: AAM <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
  * Domain Path: /lang/
  *
  * -------
- * LICENSE: This file is subject to the terms and conditions defined in
+ * LICENSE: Thisa file is subject to the terms and conditions defined in
  * file 'license.txt', which is part of Advanced Access Manager source package.
  *
  **/
@@ -18,6 +18,7 @@
 /**
  * Main plugin's class
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/325
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
  * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/282
@@ -27,7 +28,7 @@
  * @package AAM
  * @author AAM <support@aamplugin.com>
  *
- * @version 6.9.13
+ * @version 6.9.17
  */
 class AAM
 {
@@ -254,8 +255,11 @@ class AAM
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/325
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.17
      */
     public static function activate()
     {
@@ -264,8 +268,8 @@ class AAM
         //check PHP Version
         if (version_compare(PHP_VERSION, '5.6.40') === -1) {
             exit(__('PHP 5.6.40 or higher is required.', AAM_KEY));
-        } elseif (version_compare($wp_version, '4.7.0') === -1) {
-            exit(__('WP 4.7.0 or higher is required.', AAM_KEY));
+        } elseif (version_compare($wp_version, '5.0.0') === -1) {
+            exit(__('WP 5.0.0 or higher is required.', AAM_KEY));
         }
     }
 
@@ -318,7 +322,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.16');
+    define('AAM_VERSION', '6.9.17');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

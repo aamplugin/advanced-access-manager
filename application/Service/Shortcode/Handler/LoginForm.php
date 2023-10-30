@@ -10,10 +10,13 @@
 /**
  * AAM shortcode strategy for login form
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/318
+ * @since 6.6.0  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.6.0
+ * @version 6.6.17
  */
-class AAM_Shortcode_Handler_LoginForm
+class AAM_Service_Shortcode_Handler_LoginForm
     implements AAM_Core_Contract_ShortcodeInterface
 {
 
@@ -38,14 +41,17 @@ class AAM_Shortcode_Handler_LoginForm
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/318
+     * @since 6.6.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.6.0
+     * @version 6.6.17
      */
-    public function __construct($args)
+    public function __construct($args, $content = null)
     {
         $this->args = array_merge(
             array('class' => '', 'redirect' => ''),
-            $args
+            is_array($args) ? $args : array()
         );
     }
 

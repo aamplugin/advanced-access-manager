@@ -20,7 +20,7 @@
  * @package AAM
  * @version 6.9.16
  */
-class AAM_Shortcode_Handler_Content
+class AAM_Service_Shortcode_Handler_Content
     implements AAM_Core_Contract_ShortcodeInterface
 {
 

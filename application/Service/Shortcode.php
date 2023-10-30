@@ -72,12 +72,12 @@ class AAM_Service_Shortcode
     {
         if (!is_admin()) {
             add_shortcode('aam', function ($args, $content) {
-                $shortcode = new AAM_Shortcode_Factory($args, $content);
+                $shortcode = new AAM_Service_Shortcode_Factory($args, $content);
 
                 return $shortcode->process();
             });
             add_shortcode('aam-login', function($args, $content) {
-                $shortcode = new AAM_Shortcode_Handler_LoginForm($args, $content);
+                $shortcode = new AAM_Service_Shortcode_Handler_LoginForm($args, $content);
 
                 return $shortcode->run();
             });

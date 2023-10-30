@@ -10,6 +10,7 @@
 /**
  * Admin Menu service
  *
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.14
+ * @version 6.9.17
  */
 class AAM_Service_AdminMenu
 {
@@ -89,13 +90,14 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
      * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
      * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.13
+     * @version 6.9.17
      */
     public function initializeHooks()
     {
@@ -108,7 +110,7 @@ class AAM_Service_AdminMenu
                 add_filter('parent_file', function() {
                     global $menu, $submenu;
 
-                    set_transient(self::CACHE_DB_OPTION, array(
+                    AAM_Core_Cache::set(self::CACHE_DB_OPTION, array(
                         'menu'    => $this->_filter_menu_items($menu),
                         'submenu' => $submenu
                     ), 31536000); // Cache for a year
@@ -170,15 +172,16 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
-     * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/240
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.5
+     * @version 6.9.17
      */
     public function getMenuCache()
     {
-        $cache = get_transient(self::CACHE_DB_OPTION);
+        $cache = AAM_Core_Cache::get(self::CACHE_DB_OPTION);
 
         return is_array($cache) ? $cache : array();
     }

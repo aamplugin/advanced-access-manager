@@ -10,18 +10,19 @@
 /**
  * AAM core policy token evaluator
  *
- * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/235
- * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/205
- * @since 6.3.0 Fixed bug that was causing fatal error policies that have conditions
- *              defined for Capability & Role resources
- * @since 6.2.1 Added POLICY_META token
- * @since 6.2.0 Enhanced access policy with more tokens. DATETIME now returns time in
- *              UTC timezone
- * @since 6.1.0 Added support for the new token `AAM_CONFIG`
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/321
+ * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/235
+ * @since 6.8.3  https://github.com/aamplugin/advanced-access-manager/issues/205
+ * @since 6.3.0  Fixed bug that was causing fatal error policies that have conditions
+ *               defined for Capability & Role resources
+ * @since 6.2.1  Added POLICY_META token
+ * @since 6.2.0  Enhanced access policy with more tokens. DATETIME now returns time in
+ *               UTC timezone
+ * @since 6.1.0  Added support for the new token `AAM_CONFIG`
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.3
+ * @version 6.9.17
  */
 class AAM_Core_Policy_Token
 {
@@ -156,7 +157,9 @@ class AAM_Core_Policy_Token
                 $result = call_user_func_array($cb['func'], $cb['args']);
 
                 if (!empty($cb['xpath'])) {
-                    $response = self::_getValueByXPath($result, $cb['xpath']);
+                    $response = AAM_Core_Policy_Xpath::get_value_by_xpath(
+                        $result, $cb['xpath']
+                    );
                 } else {
                     $response = $result;
                 }
@@ -206,50 +209,6 @@ class AAM_Core_Policy_Token
         }
 
         return $response;
-    }
-
-    /**
-     * Get value by xpath
-     *
-     * This method supports multiple different path
-     *
-     * @param mixed  $obj
-     * @param string $xpath
-     *
-     * @return mixed
-     *
-     * @access private
-     * @version 6.8.3
-     */
-    private static function _getValueByXPath($obj, $xpath)
-    {
-        $value = $obj;
-        $path  = trim(
-            str_replace(
-                array('["', '[', '"]', ']', '..'), '.', $xpath
-            ),
-            ' .' // white space is important!
-        );
-
-        foreach(explode('.', $path) as $l) {
-            if (is_object($value)) {
-                if (isset($value->{$l})) {
-                    $value = $value->{$l};
-                } else {
-                    $value = null;
-                    break;
-                }
-            } else if (is_array($value)) {
-                if (array_key_exists($l, $value)) {
-                    $value = $value[$l];
-                } else {
-                    $value = null;
-                    break;
-                }
-            }
-        }
-
-        return $value;
     }
 
     /**
@@ -549,15 +508,16 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
-     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/216
-     * @since 6.3.0 Initial implementation of the method
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/321
+     * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/216
+     * @since 6.3.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.8.5
+     * @version 6.9.17
      */
     protected static function getGlobalVariable($var)
     {
-        return self::_getValueByXPath($GLOBALS, $var);
+        return AAM_Core_Policy_Xpath::get_value_by_xpath($GLOBALS, $var);
     }
 
     /**

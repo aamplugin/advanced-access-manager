@@ -10,18 +10,19 @@
 /**
  * AAM core API
  *
- * @since 6.9.5 https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/151
- * @since 6.6.4 https://github.com/aamplugin/advanced-access-manager/issues/142
- * @since 6.3.1 Fixed bug with setting clearing
- * @since 6.3.0 Optimized for Multisite setup
- * @since 6.2.2 Minor refactoring to the clearSettings method
- * @since 6.0.5 Fixed bug with getOption method where incorrect type could be
- *              returned
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+ * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
+ * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/151
+ * @since 6.6.4  https://github.com/aamplugin/advanced-access-manager/issues/142
+ * @since 6.3.1  Fixed bug with setting clearing
+ * @since 6.3.0  Optimized for Multisite setup
+ * @since 6.2.2  Minor refactoring to the clearSettings method
+ * @since 6.0.5  Fixed bug with getOption method where incorrect type could be
+ *               returned
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.5
+ * @version 6.9.17
  */
 final class AAM_Core_API
 {
@@ -266,12 +267,13 @@ final class AAM_Core_API
      *
      * @return void
      *
-     * @since 6.3.1 https://github.com/aamplugin/advanced-access-manager/issues/48
-     * @since 6.2.2 Refactored the way we iterate over the deleting list of options
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
+     * @since 6.3.1  https://github.com/aamplugin/advanced-access-manager/issues/48
+     * @since 6.2.2  Refactored the way we iterate over the deleting list of options
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.3.1
+     * @version 6.9.17
      */
     public static function clearSettings()
     {
@@ -280,6 +282,7 @@ final class AAM_Core_API
         $options = array(
             AAM_Core_AccessSettings::DB_OPTION,
             AAM_Core_Config::DB_OPTION,
+            AAM_Core_Cache::DB_OPTION,
             AAM_Core_ConfigPress::DB_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
             AAM_Service_Toolbar::CACHE_DB_OPTION

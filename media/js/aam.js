@@ -4102,7 +4102,7 @@
         })(jQuery);
 
         /**
-         * URI Interface
+         * URL Interface
          *
          * @param {jQuery} $
          *
@@ -4167,15 +4167,17 @@
                     $('#uri-save-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const uri    = $('#uri-rule').val();
-                        const type   = $('input[name="uri.access.type"]:checked').val();
-                        const code   = $('#uri-access-deny-redirect-code-value').val();
+                        const uri  = $('#uri-rule').val();
+                        const type = $('input[name="uri.access.type"]:checked').val();
+                        const code = $('#uri-access-deny-redirect-code-value').val();
+                        const add  = $('#url_additional_properties').find('select, textarea, input').serializeArray();
 
                         if (uri && type) {
                             // Preparing the payload
                             const payload = {
                                 url: uri,
-                                type: type
+                                type: type,
+                                additional: add
                             }
 
                             if (type === 'custom_message') {
@@ -4311,7 +4313,8 @@
                                         rule.type,
                                         action,
                                         rule.http_redirect_code || null,
-                                        actions.join(',')
+                                        actions.join(','),
+                                        rule.additional
                                     ]);
                                 });
 
@@ -4325,7 +4328,7 @@
                             infoFiltered: ''
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 3, 4] }
+                            { visible: false, targets: [0, 3, 4, 6] }
                         ],
                         initComplete: function () {
                             var create = $('<a/>', {
@@ -4355,6 +4358,11 @@
                                             'class': 'aam-row-action icon-pencil text-warning'
                                         }).bind('click', function () {
                                             editingRule = data;
+
+                                            getAAM().triggerHook(
+                                                'init-uri-edit-form',
+                                                data
+                                            );
 
                                             $('.form-clearable', '#uri-model').val('');
                                             $('.aam-uri-access-action').hide();
