@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Introduction/welcome service
  *
+ * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
+ * @since 6.0.0  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.18
  */
 class AAM_Service_Welcome
 {
@@ -31,8 +32,11 @@ class AAM_Service_Welcome
      *
      * @return void
      *
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.18
      */
     protected function __construct()
     {
@@ -56,6 +60,11 @@ class AAM_Service_Welcome
 
                 return $services;
             }, 1);
+        }
+
+        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            // Register RESTful API endpoints
+            AAM_Core_Restful_SupportService::bootstrap();
         }
     }
 

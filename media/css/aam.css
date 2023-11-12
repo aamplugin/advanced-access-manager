@@ -2109,3 +2109,119 @@ span.CodeMirror-selectedtext { background: none; }
 ul.tab li a:focus, .active {
     background-color: transparent;
 }
+
+.aam-wizard-section {
+  width: 75%;
+  margin: auto;
+}
+
+.aam-wizard-section .embedded-video {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+/* .aam-wizard-section .embedded-video h3 {
+  margin: 0;
+  padding: 10px 0 10px 5px;
+  background-color: #CCCCCC;
+} */
+
+.aam-onboarding-wizard {
+  position: relative;
+  overflow: hidden;
+  counter-reset: wizard;
+  list-style: none;
+  font-size: 1.25em;
+  margin: 4rem auto 2rem auto;
+  width: 75%;
+}
+
+.aam-onboarding-wizard > li {
+  position: relative;
+  float: left;
+  width: calc(100% / 3);
+  text-align: center;
+  color: #a94442;
+}
+
+.aam-onboarding-wizard .current ~ li {
+  color: #000000;
+}
+
+.aam-onboarding-wizard li:before {
+  counter-increment: wizard;
+  content: counter(wizard);
+  display: block;
+  color: #FFFFFF;
+  background-color: #a94442;
+  border: 2px solid #a94442;
+  text-align: center;
+  width: 2em;
+  height: 2em;
+  line-height: 1.75em;
+  border-radius: 2em;
+  position: relative;
+  left: 50%;
+  margin-bottom: 1em;
+  margin-left: -1em;
+  z-index: 1;
+}
+
+.aam-onboarding-wizard .current ~ li:before {
+  background-color: #000000;
+  color: #CCCCCC;
+  border-color: #111111;
+}
+
+.aam-onboarding-wizard li + li:after{
+  content: "";
+  display: block;
+  width: 100%;
+  background-color: #a94442;
+  height: 2px;
+  position: absolute;
+  left: -50%;
+  top: calc(2em / 2);
+  z-index: 0;
+}
+
+.aam-onboarding-wizard .current ~ li:after {
+  background-color: #555555;
+}
+
+.aam-my-4 {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
+.aam-mt-6 {
+  margin-top: 6rem;
+}
+
+.aam-mt-4 {
+  margin-top: 4rem;
+}
+
+.aam-mt-2 {
+  margin-top: 2rem;
+}
+
+.aam-mt-1 {
+  margin-top: 1rem;
+}
+
+.aam-common-use-cases {
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.material-img {
+  float: left;
+  margin: 0 12px 2px 0;
+  max-width: 65%;
+}

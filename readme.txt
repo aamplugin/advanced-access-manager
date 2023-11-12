@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 5.0.0
 Requires PHP: 5.6.0
-Tested up to: 6.3.2
-Stable tag: 6.9.17
+Tested up to: 6.4.1
+Stable tag: 6.9.18
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -12,7 +12,7 @@ All you need to manage access to WordPress websites on the frontend, backend and
 
 > Advanced Access Manager (aka AAM) is a powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
 
-https://www.youtube.com/watch?v=mj5Xa_Wc16Y
+https://www.youtube.com/watch?v=9oU6wjlSRM8
 
 = Few Quick Facts =
 
@@ -80,6 +80,13 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.18 =
+* Fixed: DataTables alert when URL Access service has at least one rule [https://github.com/aamplugin/advanced-access-manager/issues/330](https://github.com/aamplugin/advanced-access-manager/issues/330)
+* Fixed: AAM core caching override [https://github.com/aamplugin/advanced-access-manager/issues/329](https://github.com/aamplugin/advanced-access-manager/issues/329)
+* Fixed: PHP Deprecated: preg_replace(): Passing null to parameter [https://github.com/aamplugin/advanced-access-manager/issues/326](https://github.com/aamplugin/advanced-access-manager/issues/326)
+* Changed: Update core API to allow defining option autoload [https://github.com/aamplugin/advanced-access-manager/issues/328](https://github.com/aamplugin/advanced-access-manager/issues/328)
+* Changed: Update the "Welcome" service to include most common use-cases [https://github.com/aamplugin/advanced-access-manager/issues/327](https://github.com/aamplugin/advanced-access-manager/issues/327)
 
 = 6.9.17 =
 * Fixed: Fatal error: array_merge(): Argument #2 must be of type array, string given in .../LoginForm.php:46 [https://github.com/aamplugin/advanced-access-manager/issues/318](https://github.com/aamplugin/advanced-access-manager/issues/318)

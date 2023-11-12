@@ -98,7 +98,13 @@ class AAM_Service_Core
         // Add "Manage Access" to all sites if multisite network
         if (is_multisite()) {
             add_action('admin_bar_menu', function($wp_admin_bar) {
-                $blog_count = count($wp_admin_bar->user->blogs);
+                $blog_count = 0;
+
+                if (is_a($wp_admin_bar->user, 'stdClass')) {
+                    if (is_iterable($wp_admin_bar->user->blogs)) {
+                        $blog_count = count($wp_admin_bar->user->blogs);
+                    }
+                }
 
                 if ($blog_count > 0 || current_user_can('manage_network')) {
                     foreach((array) $wp_admin_bar->user->blogs as $blog) {
@@ -126,9 +132,6 @@ class AAM_Service_Core
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
         add_filter('map_meta_cap', array($this, 'mapMetaCaps'), 999, 4);
-
-        // Security. Make sure that we escaping all translation strings
-        add_filter('gettext', array($this, 'escapeTranslation'), 999, 3);
 
         // User expiration hook
         add_action('aam_set_user_expiration_action', function($settings) {
@@ -161,27 +164,6 @@ class AAM_Service_Core
         if (current_user_can('aam_manage_users')) {
             echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
         }
-    }
-
-    /**
-     * Eliminate XSS through translation file
-     *
-     * @param string $translation
-     * @param string $text
-     * @param string $domain
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function escapeTranslation($translation, $text, $domain)
-    {
-        if ($domain === AAM_KEY) {
-            $translation = esc_js($translation);
-        }
-
-        return $translation;
     }
 
     /**

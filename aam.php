@@ -3,14 +3,14 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 6.9.17
+ * Version: 6.9.18
  * Author: AAM <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
  * Domain Path: /lang/
  *
  * -------
- * LICENSE: Thisa file is subject to the terms and conditions defined in
+ * LICENSE: This file is subject to the terms and conditions defined in
  * file 'license.txt', which is part of Advanced Access Manager source package.
  *
  **/
@@ -322,7 +322,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.17');
+    define('AAM_VERSION', '6.9.18');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

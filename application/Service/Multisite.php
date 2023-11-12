@@ -10,14 +10,15 @@
 /**
  * Multisite service
  *
- * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/170
- * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
- * @since 6.3.0 Rewrote the way options are synced across the network
- * @since 6.2.2 Fixed the bug where reset settings was not synced across all sites
- * @since 6.2.0 Initial implementation of the class
+ * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/328
+ * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/170
+ * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/81
+ * @since 6.3.0  Rewrote the way options are synced across the network
+ * @since 6.2.2  Fixed the bug where reset settings was not synced across all sites
+ * @since 6.2.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.5
+ * @version 6.9.18
  */
 class AAM_Service_Multisite
 {
@@ -177,9 +178,14 @@ class AAM_Service_Multisite
      * @since 6.2.2 Refactored how the list of sites is fetched
      * @since 6.2.0 Initial implementation of the method
      *
-     * @access protected
      * @global WPDB $wpdb
-     * @version 6.2.2
+     *
+     * @access protected
+     *
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/328
+     * @since 6.2.2  Initial implementation of the method
+     *
+     * @version 6.9.18
      */
     protected function syncUpdatedOption($option, $value)
     {
@@ -190,6 +196,7 @@ class AAM_Service_Multisite
                 AAM_Core_API::updateOption(
                     str_replace('%s', $wpdb->get_blog_prefix($site->blog_id), $option),
                     $value,
+                    true,
                     $site->blog_id
                 );
             }

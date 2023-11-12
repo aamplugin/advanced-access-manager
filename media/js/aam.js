@@ -1076,15 +1076,39 @@
                                     break;
 
                                 case 'no-unlock':
-                                        if (getAAM().isUI('main')) {
-                                            $(container).append($('<i/>', {
-                                                'class': 'aam-row-action icon-lock text-muted'
-                                            }).attr({
-                                                'data-toggle': "tooltip",
-                                                'title': getAAM().__('Unlock user')
-                                            }));
-                                        }
-                                        break;
+                                    if (getAAM().isUI('main')) {
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-lock text-muted'
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Unlock user')
+                                        }));
+                                    }
+                                    break;
+
+                                // case 'protect':
+                                //     if (getAAM().isUI('main')) {
+                                //         $(container).append($('<i/>', {
+                                //             'class': 'aam-row-action icon-asterisk text-muted'
+                                //         }).bind('click', function () {
+                                //             protectUser(data[0], $(this));
+                                //         }).attr({
+                                //             'data-toggle': "tooltip",
+                                //             'title': getAAM().__('Protect user')
+                                //         }));
+                                //     }
+                                //     break;
+
+                                // case 'no-protect':
+                                //     if (getAAM().isUI('main')) {
+                                //         $(container).append($('<i/>', {
+                                //             'class': 'aam-row-action icon-asterisk text-success'
+                                //         }).attr({
+                                //             'data-toggle': "tooltip",
+                                //             'title': getAAM().__('Release user protection')
+                                //         }));
+                                //     }
+                                //     break;
 
                                 case 'attach':
                                     if (getAAM().isUI('principal')) {
@@ -1131,6 +1155,7 @@
                             'class': 'aam-row-action text-muted'
                         }).text('---'));
                     }
+
                     $('td:eq(1)', row).html(container);
                 }
             });
@@ -4314,7 +4339,7 @@
                                         action,
                                         rule.http_redirect_code || null,
                                         actions.join(','),
-                                        rule.additional
+                                        rule.additional || null
                                     ]);
                                 });
 

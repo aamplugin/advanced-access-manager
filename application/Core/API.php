@@ -10,6 +10,7 @@
 /**
  * AAM core API
  *
+ * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/328
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/151
@@ -22,7 +23,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.18
  */
 final class AAM_Core_API
 {
@@ -59,21 +60,24 @@ final class AAM_Core_API
     /**
      * Update option in the DB
      *
-     * @param string $option
-     * @param mixed  $data
-     * @param int    $blog_id
+     * @param string  $option
+     * @param mixed   $data
+     * @param boolean $autoload
+     * @param int     $blog_id
      *
      * @return bool
      *
-     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/151
-     * @since 6.3.0 Optimized for Multisite setup
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/328
+     * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/151
+     * @since 6.3.0  Optimized for Multisite setup
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.7.0
+     * @version 6.9.18
      */
-    public static function updateOption($option, $data, $blog_id = null)
-    {
+    public static function updateOption(
+        $option, $data, $autoload = true, $blog_id = null
+    ) {
         $old_value = self::getOption($option, null, $blog_id);
 
         if (maybe_serialize($old_value) !== maybe_serialize($data)) {
@@ -82,7 +86,7 @@ final class AAM_Core_API
                     ($blog_id ? $blog_id : get_current_blog_id()), $option, $data
                 );
             } else {
-                $result = update_option($option, $data);
+                $result = update_option($option, $data, $autoload);
             }
         } else {
             $result = true;

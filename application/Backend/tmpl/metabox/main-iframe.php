@@ -1,5 +1,6 @@
 <?php
     /**
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
      * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
      * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
      * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
@@ -9,7 +10,7 @@
      * @since 6.2.0  Added support & import/export modals
      * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.14
+     * @version 6.9.18
      * */
 
     if (defined('AAM_KEY')) {
@@ -82,9 +83,9 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Ask For Help">
-                                        <i class="icon-chat"></i>
-                                        <span><?php echo __('Support', AAM_KEY); ?></span>
+                                    <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Documentation">
+                                        <i class="icon-help-circled"></i>
+                                        <span><?php echo __('Docs', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
                             </div>

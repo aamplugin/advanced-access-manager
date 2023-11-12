@@ -10,8 +10,11 @@
 /**
  * AAM service for Backend Menu
  *
+ * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/326
+ * @since 6.9.13 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.18
  */
 class AAM_Framework_Service_BackendMenu
 {
@@ -294,15 +297,22 @@ class AAM_Framework_Service_BackendMenu
      *
      * @return string
      *
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/326
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.13
+     * @version 6.9.18
      */
     private function _filter_menu_name($name)
     {
-        $filtered = trim(wp_strip_all_tags(
-            preg_replace('@<(span)[^>]*?>.*?</\\1>@si', '', $name),
-            true
-        ));
+        if (is_string($name)) {
+            $filtered = trim(wp_strip_all_tags(
+                preg_replace('@<(span)[^>]*?>.*?</\\1>@si', '', $name),
+                true
+            ));
+        } else {
+            $filtered = '';
+        }
 
         return preg_replace('/([\d]+)$/', '', $filtered);
     }

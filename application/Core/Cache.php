@@ -13,8 +13,11 @@
  * AAM own caching solution to avoid using WP core transients. Some plugins disable
  * WP transients, so this is a work around.
  *
+ * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/329
+ * @since 6.9.17 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.18
  */
 class AAM_Core_Cache
 {
@@ -44,36 +47,6 @@ class AAM_Core_Cache
     private static $_cache = null;
 
     /**
-     * Load AAM cache
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.9.17
-     */
-    public static function bootstrap()
-    {
-        self::$_cache = array();
-        $cache        = AAM_Core_API::getOption(self::DB_OPTION, array());
-        $cleared      = false;
-
-        // Self-cleaning
-        if (is_array($cache)) {
-            foreach($cache as $key => $value) {
-                if ($value['ttl'] >= time()) {
-                    self::$_cache[$key] = $value;
-                } else {
-                    $cleared = true;
-                }
-            }
-        }
-
-        if ($cleared) {
-            AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache);
-        }
-    }
-
-    /**
      * Get cache value
      *
      * @param string $key
@@ -88,7 +61,7 @@ class AAM_Core_Cache
     {
         // Lazy bootstrap
         if (self::$_cache === null) {
-            self::bootstrap();
+            self::_bootstrap();
         }
 
         if (array_key_exists($key, self::$_cache)) {
@@ -107,11 +80,19 @@ class AAM_Core_Cache
      *
      * @return boolean
      *
+     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/329
+     * @since 6.9.17 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.17
+     * @version 6.9.18
      */
     public static function set($key, $value, $ttl = 86400)
     {
+        // Lazy bootstrap
+        if (self::$_cache === null) {
+            self::_bootstrap();
+        }
+
         self::$_cache[$key] = array(
             'value' => $value,
             'ttl'   => time() + $ttl
@@ -127,7 +108,7 @@ class AAM_Core_Cache
         }
 
         // Save cache to database
-        return AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache);
+        return AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
     }
 
     /**
@@ -143,6 +124,36 @@ class AAM_Core_Cache
         self::$_cache = array();
 
         AAM_Core_API::deleteOption(self::DB_OPTION);
+    }
+
+    /**
+     * Load AAM cache
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.17
+     */
+    private static function _bootstrap()
+    {
+        self::$_cache = array();
+        $cache        = AAM_Core_API::getOption(self::DB_OPTION, array());
+        $cleared      = false;
+
+        // Self-cleaning
+        if (is_array($cache)) {
+            foreach($cache as $key => $value) {
+                if ($value['ttl'] >= time()) {
+                    self::$_cache[$key] = $value;
+                } else {
+                    $cleared = true;
+                }
+            }
+        }
+
+        if ($cleared) {
+            AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
+        }
     }
 
 }
