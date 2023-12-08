@@ -12,13 +12,14 @@
 /**
  * AAM shortcode handler for content visibility
  *
+ * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/333
  * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
  *               https://github.com/aamplugin/advanced-access-manager/issues/317
  * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/96
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.16
+ * @version 6.9.19
  */
 class AAM_Service_Shortcode_Handler_Content
     implements AAM_Core_Contract_ShortcodeInterface
@@ -213,14 +214,17 @@ class AAM_Service_Shortcode_Handler_Content
      *
      * @return array
      *
+     * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/333
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.19
      */
     public function getAccess($type)
     {
         $access = (isset($this->args[$type]) ? $this->args[$type] : null);
 
-        return array_map('trim', explode(',', $access));
+        return is_string($access) ? array_map('trim', explode(',', $access)) : array();
     }
 
     /**

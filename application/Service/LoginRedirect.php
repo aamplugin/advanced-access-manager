@@ -12,13 +12,14 @@
  *
  * @package AAM
  *
+ * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
  * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
  * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/98
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0  Initial implementation of the class
  *
- * @version 6.9.12
+ * @version 6.9.19
  */
 class AAM_Service_LoginRedirect
 {
@@ -193,8 +194,11 @@ class AAM_Service_LoginRedirect
      *
      * @return string|null
      *
+     * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.19
      */
     protected function getUserRedirect(WP_User $user)
     {
@@ -211,7 +215,7 @@ class AAM_Service_LoginRedirect
                     break;
 
                 case 'url':
-                    $redirect = $settings['login.redirect.url'];
+                    $redirect = wp_validate_redirect($settings['login.redirect.url']);
                     break;
 
                 case 'callback':

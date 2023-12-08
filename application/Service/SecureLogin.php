@@ -12,6 +12,7 @@ use Vectorface\Whip\Whip;
 /**
  * Secure Login service
  *
+ * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/284
  *               https://github.com/aamplugin/advanced-access-manager/issues/244
@@ -27,7 +28,7 @@ use Vectorface\Whip\Whip;
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.19
  */
 class AAM_Service_SecureLogin
 {
@@ -238,14 +239,15 @@ class AAM_Service_SecureLogin
      *
      * @return WP_REST_Response
      *
-     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
-     * @since 6.4.2 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/91
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/16
-     * @since 6.1.0 Enriched error response with more details
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
+     * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
+     * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/91
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/16
+     * @since 6.1.0  Enriched error response with more details
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.6.2
+     * @version 6.9.19
      */
     public function authenticate(WP_REST_Request $request)
     {
@@ -264,9 +266,10 @@ class AAM_Service_SecureLogin
 
         try {
             if (!is_wp_error($user)) {
-                $result = apply_filters('aam_auth_response_filter', array(
+                $redirect = $request->get_param('redirect');
+                $result   = apply_filters('aam_auth_response_filter', array(
                     'user'     => $this->prepareUserData($user),
-                    'redirect' => $request->get_param('redirect')
+                    'redirect' => $redirect ? wp_validate_redirect($redirect) : null
                 ), $request, $user);
             } else {
                 $status = 403;

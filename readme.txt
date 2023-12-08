@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 5.0.0
 Requires PHP: 5.6.0
-Tested up to: 6.4.1
-Stable tag: 6.9.18
+Tested up to: 6.4.2
+Stable tag: 6.9.19
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,12 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.19 =
+* Fixed: Handling "Profile" submenu access [https://github.com/aamplugin/advanced-access-manager/issues/334](https://github.com/aamplugin/advanced-access-manager/issues/334)
+* Fixed: Passing null to parameter #2 ($string) of type string is deprecated in /../Content.php on line 223 [https://github.com/aamplugin/advanced-access-manager/issues/333](https://github.com/aamplugin/advanced-access-manager/issues/333)
+* Fixed: Undefined array key 2 in /../application/Core/Object/Menu.php on line 136 [](https://github.com/aamplugin/advanced-access-manager/issues/331https://github.com/aamplugin/advanced-access-manager/issues/331)
+* Changed: Improve Login Redirect Shortcode redirect [https://github.com/aamplugin/advanced-access-manager/issues/332](https://github.com/aamplugin/advanced-access-manager/issues/332)
 
 = 6.9.18 =
 * Fixed: DataTables alert when URL Access service has at least one rule [https://github.com/aamplugin/advanced-access-manager/issues/330](https://github.com/aamplugin/advanced-access-manager/issues/330)

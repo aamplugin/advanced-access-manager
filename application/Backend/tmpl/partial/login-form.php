@@ -1,4 +1,13 @@
-<?php if (defined('AAM_KEY')) { ?>
+<?php
+
+/**
+ * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.19
+ * */
+
+if (defined('AAM_KEY')) { ?>
     <?php if (!is_user_logged_in()) { ?>
         <div id="aam-login-error-<?php echo $params->id; ?>" style="display: none; margin-bottom: 15px; border-left: 4px solid #dc3232; padding: 6px;"></div>
 
@@ -25,7 +34,7 @@
 
             <p class="submit">
                 <input class="button button-primary button-large" id="aam-login-submit-<?php echo $params->id; ?>" value="<?php echo __('Log In', AAM_KEY); ?>" type="submit" />
-                <input id="aam-login-redirect-<?php echo $params->id; ?>" value="<?php echo $params->redirect; ?>" type="hidden" />
+                <input id="aam-login-redirect-<?php echo $params->id; ?>" value="<?php echo esc_js($params->redirect); ?>" type="hidden" />
             </p>
         </div>
 
