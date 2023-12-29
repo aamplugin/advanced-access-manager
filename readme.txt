@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 5.0.0
 Requires PHP: 5.6.0
 Tested up to: 6.4.2
-Stable tag: 6.9.19
+Stable tag: 6.9.20
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -80,6 +80,11 @@ We take security and privacy very seriously, that is why there are several non-n
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.20 =
+* Fixed: When deleting URL Access rule, the "Unexpected Application Error" is displayed [https://github.com/aamplugin/advanced-access-manager/issues/337](https://github.com/aamplugin/advanced-access-manager/issues/337)
+* Fixed: URL Access does not correctly handle multiple roles [https://github.com/aamplugin/advanced-access-manager/issues/336](https://github.com/aamplugin/advanced-access-manager/issues/336)
+* Changed: Add-ons page overhaul [https://github.com/aamplugin/advanced-access-manager/issues/335](https://github.com/aamplugin/advanced-access-manager/issues/335)
 
 = 6.9.19 =
 * Fixed: Handling "Profile" submenu access [https://github.com/aamplugin/advanced-access-manager/issues/334](https://github.com/aamplugin/advanced-access-manager/issues/334)

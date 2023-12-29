@@ -4195,14 +4195,20 @@
                         const uri  = $('#uri-rule').val();
                         const type = $('input[name="uri.access.type"]:checked').val();
                         const code = $('#uri-access-deny-redirect-code-value').val();
-                        const add  = $('#url_additional_properties').find('select, textarea, input').serializeArray();
+                        const add  = $('#url_metadata_properties').find('select, textarea, input').serializeArray();
 
                         if (uri && type) {
+                            const metadata = {};
+
+                            for(let i of add) {
+                                metadata[i.name] = i.value
+                            }
+
                             // Preparing the payload
                             const payload = {
                                 url: uri,
                                 type: type,
-                                additional: add
+                                metadata
                             }
 
                             if (type === 'custom_message') {
@@ -4235,10 +4241,13 @@
 
                             $.ajax(endpoint, {
                                 type: 'POST',
+                                contentType: 'application/json',
                                 dataType: 'json',
-                                data: getAAM().prepareRequestSubjectData(payload),
+                                data: JSON.stringify(
+                                    getAAM().prepareRequestSubjectData(payload)
+                                ),
                                 headers: {
-                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-WP-Nonce': getLocal().rest_nonce
                                 },
                                 beforeSend: function () {
                                     $('#uri-save-btn').text(
@@ -4339,7 +4348,7 @@
                                         action,
                                         rule.http_redirect_code || null,
                                         actions.join(','),
-                                        rule.additional || null
+                                        rule.metadata || null
                                     ]);
                                 });
 
@@ -4384,11 +4393,6 @@
                                         }).bind('click', function () {
                                             editingRule = data;
 
-                                            getAAM().triggerHook(
-                                                'init-uri-edit-form',
-                                                data
-                                            );
-
                                             $('.form-clearable', '#uri-model').val('');
                                             $('.aam-uri-access-action').hide();
                                             $('#uri-rule').val(data[1]);
@@ -4396,6 +4400,13 @@
                                             $('#uri-access-' + data[2] + '-value').val(data[3]);
                                             $('#uri-access-deny-redirect-code-value').val(data[4]);
                                             $('#uri-model').modal('show');
+
+                                            // If there are any additional metadata properties, load them
+                                            if (data[6]) {
+                                                for(let i in data[6]) {
+                                                    $(`#${i}`).val(data[6][i]);
+                                                }
+                                            }
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Edit Rule')
@@ -4470,6 +4481,8 @@
                             $('td:eq(1)', row).html(type);
                         }
                     });
+
+                    getAAM().triggerHook('init-uri-edit-form');
                 }
             }
 

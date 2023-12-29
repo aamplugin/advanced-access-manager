@@ -116,7 +116,7 @@
                             <input type="text" class="form-control form-clearable" placeholder="Enter valid callback" id="uri-access-trigger_callback-value" />
                         </div>
 
-                        <div id="url_additional_properties">
+                        <div id="url_metadata_properties">
                             <?php do_action('aam_url_access_rule_form_action'); ?>
                         </div>
                     </div>

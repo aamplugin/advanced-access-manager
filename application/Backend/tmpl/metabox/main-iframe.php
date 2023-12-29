@@ -77,9 +77,9 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_manage_addons')) { ?>
-                                    <a href="#" title="Add-ons" data-type="extensions" class="aam-area">
+                                    <a href="#" title="Premium" data-type="extensions" class="aam-area">
                                         <i class="icon-cubes"></i>
-                                        <span><?php echo __('Add-Ons', AAM_KEY); ?></span>
+                                        <span><?php echo __('Premium', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>

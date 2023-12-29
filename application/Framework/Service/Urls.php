@@ -10,6 +10,7 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  *               https://github.com/aamplugin/advanced-access-manager/issues/320
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
@@ -17,7 +18,7 @@
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.20
  */
 class AAM_Framework_Service_Urls
 {
@@ -215,8 +216,11 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.9
+     * @version 6.9.20
      * @throws UnderflowException If rule does not exist
      * @throws Exception If fails to persist a rule
      */
@@ -256,7 +260,7 @@ class AAM_Framework_Service_Urls
 
         $subject->flushCache();
 
-        return $this->get_rule_by_id($id, $inline_context);
+        return $this->_prepare_rule($found['url'], $found['rule'], $subject);
     }
 
     /**
@@ -324,6 +328,10 @@ class AAM_Framework_Service_Urls
             $response['http_redirect_code'] = $http_code;
         } elseif ($response['type'] === 'trigger_callback') {
             $response['callback'] = $settings['action'];
+        }
+
+        if (!empty($settings['metadata'])) {
+            $response['metadata'] = $settings['metadata'];
         }
 
         return apply_filters('aam_url_access_rule_filter', $response, $subject);
@@ -413,6 +421,10 @@ class AAM_Framework_Service_Urls
             if ($code >= 300 && $code < 400) {
                 $normalized['code'] = $code;
             }
+        }
+
+        if (!empty($rule['metadata'])) {
+            $normalized['metadata'] = $rule['metadata'];
         }
 
         return array(

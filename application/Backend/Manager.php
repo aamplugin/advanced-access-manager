@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
  * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/262
  * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/260
@@ -25,7 +26,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.20
  */
 class AAM_Backend_Manager
 {
@@ -38,6 +39,7 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
      * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
      * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/260
      * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
@@ -47,7 +49,7 @@ class AAM_Backend_Manager
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.14
+     * @version 6.9.20
      */
     protected function __construct()
     {
@@ -122,7 +124,39 @@ class AAM_Backend_Manager
                     );
                 }
             }
-        } );
+        });
+
+        add_filter(
+            'network_admin_plugin_action_links_advanced-access-manager/aam.php',
+            array($this, 'add_premium_link')
+        );
+        add_filter(
+            'plugin_action_links_advanced-access-manager/aam.php',
+            array($this, 'add_premium_link')
+        );
+    }
+
+    /**
+     * Add the premium link
+     *
+     * @param array $actions
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.20
+     */
+    public function add_premium_link($actions)
+    {
+        if (!defined('AAM_COMPLETE_PACKAGE_LICENSE')) {
+            $actions['premium'] = sprintf(
+                '<a href="%s" target="_blank">%s</a>',
+                'https://aamportal.com/premium',
+                __('Get Premium', AAM_KEY)
+            );
+        }
+
+        return $actions;
     }
 
     /**

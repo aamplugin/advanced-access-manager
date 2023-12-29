@@ -90,6 +90,12 @@ class AAM_Core_Restful_UrlService
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_callback($value, $request);
                         }
+                    ),
+                    'metadata' => array(
+                        'description' => __('Additional metadata values', AAM_KEY),
+                        'type'        => 'object',
+                        'required'    => false,
+                        'properties'  => array()
                     )
                 )
             ));
@@ -165,6 +171,12 @@ class AAM_Core_Restful_UrlService
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_callback($value, $request);
                         }
+                    ),
+                    'metadata' => array(
+                        'description' => __('Additional metadata values', AAM_KEY),
+                        'type'        => 'object',
+                        'required'    => false,
+                        'properties'  => array()
                     )
                 )
             ));

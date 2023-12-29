@@ -108,7 +108,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
             }
         }
 
-        return $match;
+        return apply_filters('aam_uri_match_result_filter', $match);
     }
 
     /**
@@ -166,32 +166,38 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     /**
      * Merge URI access settings
      *
-     * @param array $options
+     * @param array $target
      *
      * @return array
      *
+     * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/336
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.20
      */
-    public function mergeOption($options)
+    public function mergeOption($target)
     {
-        $merged = array();
-        $pref   = AAM::api()->getConfig('core.settings.uri.merge.preference', 'deny');
+        $merged  = array();
+        $current = $this->getOption();
 
-        foreach (array_merge($options, $this->getOption()) as $uri => $options) {
-            // If merging preference is "deny" and at least one of the access
-            // settings is checked, then final merged array will have it set
-            // to checked
-            if (!isset($merged[$uri])) {
-                $merged[$uri] = $options;
-            } else {
-                if (($pref === 'deny') && ($options['type'] !== 'allow')) {
-                    $merged[$uri] = $options;
-                    break;
-                } elseif ($pref === 'allow' && ($options['type'] === 'allow')) {
-                    $merged[$uri] = $options;
-                    break;
-                }
+        // Converting the two sets into true/false representation where false is
+        // when type === "allow" and everything else is true
+        $set1 = array_map(function($v) { return $v['type'] !== 'allow'; }, $target);
+        $set2 = array_map(function($v) { return $v['type'] !== 'allow'; }, $current);
+
+        $result = AAM_Core_Gateway::getInstance()->mergeSettings(
+            $set1, $set2, self::OBJECT_TYPE
+        );
+
+        // Covert back to the actual properties
+        foreach($result as $uri => $effect) {
+            if ($effect === false) { // Which means we are allowing
+                $merged[$uri] = array(
+                    'type' => 'allow'
+                );
+            } else { // Otherwise we are restricting access, however...
+                $merged[$uri] = isset($current[$uri]) ? $current[$uri] : $target[$uri];
             }
         }
 
@@ -211,17 +217,17 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
      */
     protected function normalizeOrder()
     {
-        $rules = $allowed = array();
+        $denied = $allowed = array();
 
         foreach ($this->getOption() as $uri => $rule) {
             if ($rule['type'] === 'allow') {
                 $allowed[$uri] = $rule;
             } else {
-                $rules[$uri] = $rule;
+                $denied[$uri] = $rule;
             }
         }
 
-        return array_merge($rules, $allowed);
+        return array_merge($denied, $allowed);
     }
 
 }
