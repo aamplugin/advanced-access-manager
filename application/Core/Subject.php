@@ -26,14 +26,15 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
- * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
- * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/152
- * @since 6.3.2 Added new hook `aam_initialized_{$type}_object_filter`
- * @since 6.1.0 Fixed bug with incorrectly managed internal cache
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
+ * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/249
+ * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/152
+ * @since 6.3.2  Added new hook `aam_initialized_{$type}_object_filter`
+ * @since 6.1.0  Fixed bug with incorrectly managed internal cache
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.6
+ * @version 6.9.21
  */
 abstract class AAM_Core_Subject
 {
@@ -351,11 +352,12 @@ abstract class AAM_Core_Subject
      *
      * @return array
      *
-     * @since 6.7.0 https://github.com/aamplugin/advanced-access-manager/issues/152
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
+     * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/152
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.7.0
+     * @version 6.9.21
      */
     protected function inheritFromParent(AAM_Core_Object $object)
     {
@@ -372,12 +374,19 @@ abstract class AAM_Core_Subject
 
             if ($multi && $subject->hasSiblings()) {
                 foreach ($subject->getSiblings() as $sibling) {
-                    $option = $sibling->getObject(
+                    $obj = $sibling->getObject(
                         $object::OBJECT_TYPE,
                         $object->getId()
-                    )->mergeOption(
-                        $option
                     );
+
+                    if (method_exists($obj, 'mergeAlignOption')) {
+                        $option = $obj->mergeAlignOption($subject->getObject(
+                            $object::OBJECT_TYPE,
+                            $object->getId()
+                        ));
+                    } else {
+                        $option = $obj->mergeOption($option);
+                    }
                 }
             }
 

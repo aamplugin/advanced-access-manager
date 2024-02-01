@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
  * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
@@ -11,7 +12,7 @@
  * @since 6.0.5  Fixed typo in the license expiration property. Enriched plugin' status display
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.20
+ * @version 6.9.21
  * */
 
  $perks = array(
@@ -65,15 +66,27 @@
         <div class="panel-group" id="premium-perks" role="tablist" aria-multiselectable="true">
             <?php foreach($perks as $i => $perk) { ?>
                 <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="menu-perk-<?php echo $i; ?>-heading">
+                    <div class="panel-heading" role="tab" id="menu-perk-<?php echo intval($i); ?>-heading">
                         <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#premium-perks" href="#menu-perk-<?php echo $i; ?>" aria-controls="menu-perk-<?php echo $i; ?>">
-                                <i class="icon-ok-circled text-success"></i> <?php echo esc_js($perk['title']); ?>
+                            <a
+                                role="button"
+                                data-toggle="collapse"
+                                data-parent="#premium-perks"
+                                href="#menu-perk-<?php echo intval($i); ?>"
+                                aria-controls="menu-perk-<?php echo intval($i); ?>"
+                            >
+                                <i class="icon-ok-circled text-success"></i>
+                                <?php echo esc_js($perk['title']); ?>
                             </a>
                         </h4>
                     </div>
 
-                    <div id="menu-perk-<?php echo $i; ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-perk-a-heading">
+                    <div
+                        id="menu-perk-<?php echo intval($i); ?>"
+                        class="panel-collapse collapse"
+                        role="tabpanel"
+                        aria-labelledby="menu-perk-a-heading"
+                    >
                         <div class="panel-body text-larger">
                             <?php echo esc_js($perk['description']); ?>
                         </div>

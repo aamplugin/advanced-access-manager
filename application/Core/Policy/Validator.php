@@ -12,14 +12,15 @@ use Composer\Semver\Semver;
 /**
  * AAM access policy validator
  *
- * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/267
- * @since 6.2.2 Bug fixing
- * @since 6.2.0 Allowing to define token in the dependencies array as well as
- *              enhanced with additional attributes
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+ * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/267
+ * @since 6.2.2  Bug fixing
+ * @since 6.2.0  Allowing to define token in the dependencies array as well as
+ *               enhanced with additional attributes
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.9
+ * @version 6.9.21
  */
 class AAM_Core_Policy_Validator
 {
@@ -154,12 +155,13 @@ class AAM_Core_Policy_Validator
      *
      * @return void
      *
-     * @since 6.2.2 Fixed bug with validation when plugin is not installed
-     * @since 6.2.0 Enhanced dependency with more attributes
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.2.2  Fixed bug with validation when plugin is not installed
+     * @since 6.2.0  Enhanced dependency with more attributes
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.2
+     * @version 6.9.21
      */
     protected function isValidDependency()
     {
@@ -186,10 +188,11 @@ class AAM_Core_Policy_Validator
                     // Prepare $app marker
                     if (!empty($url) && filter_var($url, FILTER_VALIDATE_URL)) {
                         $app = sprintf(
-                            '<a href="%s" target="_blank">' . $name . '</a>', $url
+                            '<a href="%s" target="_blank">' . esc_js($name) . '</a>',
+                            esc_attr($url)
                         );
                     } else {
-                        $app = $name;
+                        $app = esc_js($name);
                     }
 
                     if ($e->getCode() === self::INVALID_DEPENDENCY_VERSION) {

@@ -1,9 +1,10 @@
 <?php
     /**
-     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.0.0 Initial implementation of the template
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
+     * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.2
+     * @version 6.9.21
      * */
 
     if (defined('AAM_KEY')) {
@@ -26,9 +27,9 @@
 
     <!-- User specific attributes -->
     <input type="hidden" id="aam-subject-type" value="user" />
-    <input type="hidden" id="aam-subject-id" value="<?php echo $params->user->ID; ?>" />
+    <input type="hidden" id="aam-subject-id" value="<?php echo intval($params->user->ID); ?>" />
     <input type="hidden" id="aam-subject-name" value="<?php echo esc_js($params->user->display_name); ?>" />
-    <input type="hidden" id="aam-subject-level" value="<?php echo AAM_Core_API::maxLevel($params->user->allcaps); ?>" />
+    <input type="hidden" id="aam-subject-level" value="<?php echo esc_js(AAM_Core_API::maxLevel($params->user->allcaps)); ?>" />
 
     <?php echo static::loadTemplate(__DIR__ . '/iframe-footer.php'); ?>
 <?php }

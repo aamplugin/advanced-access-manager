@@ -10,6 +10,7 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/311
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/249
  * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/164
@@ -21,7 +22,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.14
+ * @version 6.9.21
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -264,12 +265,13 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
-     * @since 6.7.0 Added `$payload` argument
-     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
-     * @since 6.2.0 Initial implementation of the method
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.7.0  Added `$payload` argument
+     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/130
+     * @since 6.2.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.7.0
+     * @version 6.9.21
      */
     public function importSettings($payload = null)
     {
@@ -297,7 +299,8 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 
                         case 'roles':
                             AAM_Core_API::updateOption(
-                                AAM_Framework_Manager::roles()->role_key, $settings
+                                AAM_Framework_Manager::roles()->role_key,
+                                $this->_sanitizeRoles($settings)
                             );
                             break;
 
@@ -353,6 +356,62 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                 }
             }
         }
+    }
+
+    /**
+     * Sanitize list of roles
+     *
+     * @param array $roleset
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.21
+     */
+    private function _sanitizeRoles($roleset)
+    {
+        $response = array();
+
+        foreach($roleset as $id => $role) {
+            $key = sanitize_key($id);
+
+            $response[$key] = array(
+                'name'         => esc_js($role['name']),
+                'capabilities' => $this->_sanitizeCapabilities($role['capabilities'])
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Sanitize list of capabilities
+     *
+     * @param array $caps
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.21
+     */
+    private function _sanitizeCapabilities($caps)
+    {
+        $response = array();
+
+        foreach($caps as $cap => $effect) {
+            $key = sanitize_key($cap);
+            $val = false;
+
+            if (is_bool($effect)) {
+                $val = $effect;
+            } elseif (is_numeric($effect)) {
+                $val = intval($effect) !== 0;
+            }
+
+            $response[$key] = $val;
+        }
+
+        return $response;
     }
 
     /**

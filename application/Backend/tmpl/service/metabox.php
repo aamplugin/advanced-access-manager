@@ -1,12 +1,13 @@
 <?php
 /**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
  *               https://github.com/aamplugin/advanced-access-manager/issues/298
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.14
+ * @version 6.9.21
  * */
 ?>
 
@@ -59,9 +60,9 @@
             <div class="panel-group" id="metabox-list" role="tablist">
                 <?php foreach ($grouped as $screen_id => $components) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="group-<?php echo $screen_id; ?>-heading">
+                        <div class="panel-heading" role="tab" id="group-<?php echo esc_js($screen_id); ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo $screen_id; ?>" aria-controls="group-<?php echo $screen_id; ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo esc_js($screen_id); ?>" aria-controls="group-<?php echo esc_js($screen_id); ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
                                     <?php
                                         switch ($screen_id) {
                                             case 'dashboard':
@@ -80,10 +81,10 @@
                                 </a>
                             </h4>
                         </div>
-                        <div id="group-<?php echo $screen_id; ?>" class="panel-collapse collapse<?php if (!$first) {
+                        <div id="group-<?php echo esc_js($screen_id); ?>" class="panel-collapse collapse<?php if (!$first) {
                                                                                                                 echo ' in';
                                                                                                                 $first = true;
-                                                                                                            } ?>" role="tabpanel" aria-labelledby="group-<?php echo $screen_id; ?>-heading">
+                                                                                                            } ?>" role="tabpanel" aria-labelledby="group-<?php echo esc_js($screen_id); ?>-heading">
                             <div class="panel-body">
                                 <div class="row">
                                     <?php foreach ($components as $component) { ?>
@@ -94,12 +95,12 @@
                                             </div>
 
                                             <?php if ($component['is_hidden']) { ?>
-                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo $screen_id . '-' . $component['slug']; ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
+                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo esc_js($screen_id . '-' . $component['slug']); ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
                                             <?php } else { ?>
-                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo $screen_id; ?>-<?php echo $component['slug']; ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
+                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo esc_js($screen_id); ?>-<?php echo esc_js($component['slug']); ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
                                             <?php } ?>
 
-                                            <label for="metabox-<?php echo $screen_id . '-' . $component['slug']; ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
+                                            <label for="metabox-<?php echo esc_js($screen_id . '-' . $component['slug']); ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
                                         </div>
                                     <?php } ?>
                                 </div>

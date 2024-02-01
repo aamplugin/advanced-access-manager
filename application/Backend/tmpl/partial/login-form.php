@@ -1,40 +1,44 @@
 <?php
 
 /**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.19
+ * @version 6.9.21
  * */
 
 if (defined('AAM_KEY')) { ?>
     <?php if (!is_user_logged_in()) { ?>
-        <div id="aam-login-error-<?php echo $params->id; ?>" style="display: none; margin-bottom: 15px; border-left: 4px solid #dc3232; padding: 6px;"></div>
+        <div
+            id="aam-login-error-<?php echo esc_js($params->id); ?>"
+            style="display: none; margin-bottom: 15px; border-left: 4px solid #dc3232; padding: 6px;"
+        ></div>
 
-        <div id="login-form-<?php echo $params->id; ?>">
+        <div id="login-form-<?php echo esc_js($params->id); ?>">
             <p>
                 <label for="user_login"><?php echo __('Username or Email Address', AAM_KEY); ?><br>
-                    <input id="aam-login-username-<?php echo $params->id; ?>" class="input login-input" type="text" />
+                    <input id="aam-login-username-<?php echo esc_js($params->id); ?>" class="input login-input" type="text" />
                 </label>
             </p>
 
             <p>
                 <label for="user_pass"><?php echo __('Password', AAM_KEY); ?><br>
-                    <input id="aam-login-password-<?php echo $params->id; ?>" class="input login-input" type="password" />
+                    <input id="aam-login-password-<?php echo esc_js($params->id); ?>" class="input login-input" type="password" />
                 </label>
             </p>
 
             <?php do_action('login_form'); ?>
 
             <p class="forgetmenot">
-                <label for="aam-login-remember-<?php echo $params->id; ?>">
-                    <input id="aam-login-remember-<?php echo $params->id; ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', AAM_KEY); ?>
+                <label for="aam-login-remember-<?php echo esc_js($params->id); ?>">
+                    <input id="aam-login-remember-<?php echo esc_js($params->id); ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', AAM_KEY); ?>
                 </label>
             </p>
 
             <p class="submit">
-                <input class="button button-primary button-large" id="aam-login-submit-<?php echo $params->id; ?>" value="<?php echo __('Log In', AAM_KEY); ?>" type="submit" />
-                <input id="aam-login-redirect-<?php echo $params->id; ?>" value="<?php echo esc_js($params->redirect); ?>" type="hidden" />
+                <input class="button button-primary button-large" id="aam-login-submit-<?php echo esc_js($params->id); ?>" value="<?php echo __('Log In', AAM_KEY); ?>" type="submit" />
+                <input id="aam-login-redirect-<?php echo esc_js($params->id); ?>" value="<?php echo esc_js($params->redirect); ?>" type="hidden" />
             </p>
         </div>
 
@@ -50,9 +54,9 @@ if (defined('AAM_KEY')) { ?>
         </p>
         <script>
             (function() {
-                var c = document.getElementById("aam-login-submit-<?php echo $params->id; ?>"),
-                    b = document.getElementById("aam-login-username-<?php echo $params->id; ?>"),
-                    d = document.getElementById("aam-login-password-<?php echo $params->id; ?>");
+                var c = document.getElementById("aam-login-submit-<?php echo esc_js($params->id); ?>"),
+                    b = document.getElementById("aam-login-username-<?php echo esc_js($params->id); ?>"),
+                    d = document.getElementById("aam-login-password-<?php echo esc_js($params->id); ?>");
 
                 if (b) b.addEventListener("keyup", function(a) { 13 === a.which && c.click() });
                 if (d) d.addEventListener("keyup", function(a) { 13 === a.which && c.click() });
@@ -66,7 +70,7 @@ if (defined('AAM_KEY')) { ?>
                             var a = JSON.parse(this.responseText);
                             if (200 === this.status) a.redirect ? location.href = a.redirect : location.reload();
                             else {
-                                var b = document.getElementById("aam-login-error-<?php echo $params->id; ?>");
+                                var b = document.getElementById("aam-login-error-<?php echo esc_js($params->id); ?>");
                                 b.innerHTML = a.reason;
                                 b.style.display = "block"
                             }
@@ -76,10 +80,10 @@ if (defined('AAM_KEY')) { ?>
                     a.setRequestHeader("Content-Type", "application/json");
                     a.setRequestHeader("Accept", "application/json");
                     a.send(JSON.stringify({
-                        username: document.getElementById("aam-login-username-<?php echo $params->id; ?>").value,
-                        password: document.getElementById("aam-login-password-<?php echo $params->id; ?>").value,
-                        redirect: document.getElementById("aam-login-redirect-<?php echo $params->id; ?>").value,
-                        remember: document.getElementById("aam-login-remember-<?php echo $params->id; ?>").checked,
+                        username: document.getElementById("aam-login-username-<?php echo esc_js($params->id); ?>").value,
+                        password: document.getElementById("aam-login-password-<?php echo esc_js($params->id); ?>").value,
+                        redirect: document.getElementById("aam-login-redirect-<?php echo esc_js($params->id); ?>").value,
+                        remember: document.getElementById("aam-login-remember-<?php echo esc_js($params->id); ?>").checked,
                         returnAuthCookies: true
                     }))
                 })

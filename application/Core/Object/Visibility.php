@@ -10,12 +10,13 @@
 /**
  * Post visibility object
  *
- * @since 6.1.0 Refactored implementation to fix merging bugs and improve inheritance
- *              mechanism
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
+ * @since 6.1.0  Refactored implementation to fix merging bugs and improve inheritance
+ *               mechanism
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.9.21
  */
 class AAM_Core_Object_Visibility extends AAM_Core_Object
 {
@@ -193,6 +194,108 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
         }
 
         return $merged;
+    }
+
+    /**
+     * Align & Merge access controls
+     *
+     * This method makes sure that both data set have the same keys first and then
+     * merges them
+     *
+     * @param AAM_Core_Object $object
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.21
+     */
+    public function mergeAlignOption($object)
+    {
+        // Identifying all the keys that are missing in the $subject, however, present
+        // in $this and align settings
+        $incoming = $object->getOption();
+        $base     = $this->getOption();
+
+        $diff = array_diff(array_keys($incoming), array_keys($base));
+
+        if (count($diff)) {
+            foreach($diff as $key) {
+                $base[$key] = $this->getOptionByXpath($this, $key);
+            }
+        }
+
+        $diff = array_diff(array_keys($base), array_keys($incoming));
+
+        if (count($diff)) {
+            foreach($diff as $key) {
+                $incoming[$key] = $this->getOptionByXpath($object, $key);
+            }
+        }
+
+        $merged = array();
+
+        // Iterate over each unique key end merge settings accordingly
+        foreach(array_keys($incoming) as $key) {
+            $merged[$key] = AAM::api()->mergeSettings(
+                (isset($incoming[$key]) ? $incoming[$key] : array()),
+                (isset($base[$key]) ? $base[$key] : array()),
+                AAM_Core_Object_Post::OBJECT_TYPE
+            );
+        }
+
+        return $merged;
+    }
+
+    /**
+     * Get set of access controls by path
+     *
+     * @param AAM_Core_Object $object
+     * @param string          $xpath
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.9.21
+     */
+    protected function getOptionByXPath($object, $xpath)
+    {
+        static $invocations = 0;
+
+        $response = array();
+        $option   = 'core.settings.' . $object::OBJECT_TYPE . '.mergeAlign.limit';
+        $limit    = AAM::api()->getConfig($option, 50);
+
+        if ($invocations >= $limit) {
+            // First, let, parse the xpath and determine what object to fetch
+            $parts = explode('/', $xpath);
+
+            if ($parts[0] === 'post') {
+                $attr = explode('|', $parts[1]);
+
+                $response = $object->getSubject()->getObject(
+                    $attr[1], $attr[0]
+                )->getOption();
+            } else {
+                $response = apply_filters(
+                    'aam_visibility_get_object_by_key_filter',
+                    $response,
+                    $xpath,
+                    $object
+                );
+            }
+
+            $invocations++;
+        } else {
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                'There are potentially too many access controls explicitly defined' .
+                ' for Posts & Terms. Consider rethinking how you define access to ' .
+                'content as scale or increase the merge-align limit',
+                AAM_VERSION
+            );
+        }
+
+        return $response;
     }
 
 }

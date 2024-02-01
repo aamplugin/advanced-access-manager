@@ -10,8 +10,11 @@
 /**
  * RESTful API for the URL Access service
  *
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
+ * @since 6.9.9  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.9
+ * @version 6.9.21
  */
 class AAM_Core_Restful_UrlService
 {
@@ -23,8 +26,11 @@ class AAM_Core_Restful_UrlService
      *
      * @return void
      *
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
+     * @since 6.9.9  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.9
+     * @version 6.9.21
      */
     protected function __construct()
     {
@@ -72,7 +78,7 @@ class AAM_Core_Restful_UrlService
                     ),
                     'redirect_page_id' => array(
                         'description' => __('Existing page ID to redirect to', AAM_KEY),
-                        'type'        => 'string',
+                        'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_page_id($value, $request);
                         }

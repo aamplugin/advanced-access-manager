@@ -124,7 +124,15 @@
 
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="export-tab">
-                                                    <p class="alert alert-info"><?php echo __('Export AAM settings so they can be imported to a different location. To learn more about customizing exported data, refer to the "How Import/Export feature works" article.', AAM_KEY); ?></p>
+                                                    <p class="alert alert-info">
+                                                        <?php echo sprintf(
+                                                            __('Export AAM settings so they can be imported to a different location. To learn more about customizing exported data, refer to the %s"How to export/import AAM settings?"%s article.', AAM_KEY),
+                                                            '<a href="https://aamportal.com/question/how-to-export-import-aam-settings?ref=plugin" target="_blank">',
+                                                            '</a>'
+                                                            );
+                                                        ?>
+                                                    </p>
+
                                                     <div class="form-group aam-bordered aam-outer-top-xxs text-center">
                                                         <a href="#" id="export-settings" class="btn btn-primary"><?php echo __('Download Exported Settings', AAM_KEY); ?></a>
                                                     </div>

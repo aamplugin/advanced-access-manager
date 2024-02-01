@@ -1,9 +1,10 @@
 <?php
     /**
-     * @since 6.4.0 Added the ability to edit role's slug
-     * @since 6.0.0 Initial implementation of the template
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.4.0  Added the ability to edit role's slug
+     * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.4.0
+     * @version 6.9.21
      * */
 ?>
 
@@ -124,7 +125,7 @@
                             ?>
                             <select class="form-control" id="action-after-expiration">
                                 <?php foreach(apply_filters('aam_user_expiration_actions_filter', $expirationActions) as $key => $label) { ?>
-                                <option value="<?php echo $key; ?>"><?php echo $label; ?></option>
+                                <option value="<?php echo esc_attr($key); ?>"><?php echo esc_js($label); ?></option>
                                 <?php } ?>
                             </select>
                         </div>

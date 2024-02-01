@@ -10,11 +10,12 @@
 /**
  * ConfigPress layer
  *
- * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/160
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+ * @since 6.7.4  https://github.com/aamplugin/advanced-access-manager/issues/160
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.4
+ * @version 6.9.21
  */
 final class AAM_Core_ConfigPress
 {
@@ -43,8 +44,11 @@ final class AAM_Core_ConfigPress
      *
      * @return void
      *
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.21
      */
     protected function __construct()
     {
@@ -52,7 +56,7 @@ final class AAM_Core_ConfigPress
             $reader       = new AAM_Core_ConfigPress_Reader;
             $this->config = $reader->parseString($this->read());
         } catch (Exception $e) {
-            AAM_Core_Console::add($e->getMessage());
+            AAM_Core_Console::add(esc_js($e->getMessage()));
             $this->config = array();
         }
     }

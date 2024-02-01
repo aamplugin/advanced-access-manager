@@ -1,22 +1,23 @@
 <?php
-    /**
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/107
-     * @since 6.2.0  Added "Hidden" modal for more granular access controls
-     * @since 6.0.0  Initial implementation of the template
-     *
-     * @version 6.9.14
-     * */
+/**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/107
+ * @since 6.2.0  Added "Hidden" modal for more granular access controls
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.21
+ * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-overwrite<?php echo $params->object->isOverwritten() ? '' : ' hidden'; ?>" id="post-term-overwritten">
         <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-        <span><a href="#" id="content-reset" data-type="post" data-id="<?php echo $params->object->getId(); ?>" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+        <span><a href="#" id="content-reset" data-type="post" data-id="<?php echo esc_attr($params->object->getId()); ?>" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
     </div>
 
-    <input type="hidden" value="<?php echo $params->type; ?>" id="content-object-type" />
-    <input type="hidden" value="<?php echo $params->id; ?>" id="content-object-id" />
+    <input type="hidden" value="<?php echo esc_attr($params->type); ?>" id="content-object-type" />
+    <input type="hidden" value="<?php echo esc_attr($params->id); ?>" id="content-object-id" />
 
     <?php if ($params->object->post_type === 'attachment') { ?>
         <div class="alert alert-warning aam-outer-bottom-xxs">
@@ -30,11 +31,11 @@
                 <tr>
                     <?php $id = 'advanced-' . $option; ?>
                     <td width="90%">
-                        <strong class="aam-block aam-highlight text-uppercase"><?php echo $data['title']; ?></strong>
+                        <strong class="aam-block aam-highlight text-uppercase"><?php echo esc_js($data['title']); ?></strong>
                         <?php if (!empty($data['sub'])) { ?>
                             <small class="aam-small-highlighted">
-                                <?php echo $data['sub']; ?>: <b class="option-preview"><?php echo (isset($params->previews[$option]) ? $params->previews[$option] : '...') ?></b>
-                                <a href="#<?php echo $data['modal']; ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo $option; ?>" id="<?php echo $id; ?>">
+                                <?php echo esc_js($data['sub']); ?>: <b class="option-preview"><?php echo (isset($params->previews[$option]) ? esc_js($params->previews[$option]) : '...') ?></b>
+                                <a href="#<?php echo esc_attr($data['modal']); ?>" data-toggle="modal" class="advanced-post-option" data-ref="<?php echo esc_attr($option); ?>" id="<?php echo esc_attr($id); ?>">
                                     <?php echo __('change', AAM_KEY); ?>
                                 </a>
                             </small>
@@ -49,7 +50,7 @@
                     </td>
                     <td>
                         <div class="aam-row-actions">
-                            <i class="aam-row-action <?php echo ($params->object->is($option) ? 'text-danger icon-check' : 'text-muted icon-check-empty'); ?>" data-property="<?php echo $option; ?>" <?php echo (!empty($data['sub']) ? 'data-trigger="' . $id . '"' : ''); ?>></i>
+                            <i class="aam-row-action <?php echo ($params->object->is($option) ? 'text-danger icon-check' : 'text-muted icon-check-empty'); ?>" data-property="<?php echo esc_attr($option); ?>" <?php echo (!empty($data['sub']) ? 'data-trigger="' . esc_attr($id) . '"' : ''); ?>></i>
                         </div>
                     </td>
                 </tr>
@@ -121,7 +122,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label><?php echo __('Plain text or valid HTML', AAM_KEY); ?></label>
-                        <textarea class="form-control" placeholder="<?php echo __('Enter your teaser message...', AAM_KEY); ?>" rows="5" id="aam-teaser-message"><?php echo $params->object->get('teaser.message'); ?></textarea>
+                        <textarea class="form-control" placeholder="<?php echo __('Enter your teaser message...', AAM_KEY); ?>" rows="5" id="aam-teaser-message"><?php $t = $params->object->get('teaser.message'); echo esc_textarea(is_string($t) ? $t : ''); ?></textarea>
                         <span class="hint text-muted"><?php echo AAM_Backend_View_Helper::preparePhrase('Use [&#91;excerpt&#93;] shortcode to insert post excerpt to the teaser message.', 'strong'); ?></span>
                     </div>
                 </div>
@@ -143,7 +144,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label><?php echo __('Access Limit Threshold', AAM_KEY); ?></label>
-                        <input type="number" class="form-control" placeholder="<?php echo __('Enter digital number', AAM_KEY); ?>" id="aam-access-threshold" value="<?php echo $params->object->get('limited.threshold'); ?>" />
+                        <input type="number" class="form-control" placeholder="<?php echo __('Enter digital number', AAM_KEY); ?>" id="aam-access-threshold" value="<?php echo esc_attr($params->object->get('limited.threshold')); ?>" />
                     </div>
                     <?php if ($params->subject->isUser()) { ?>
                         <?php $counter   = intval(get_user_option(sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, $params->object->ID), $params->subject->getId())); ?>
@@ -209,7 +210,7 @@
 
                         <div class="form-group post-redirect-value" id="post-redirect-url-value-container" style="display: <?php echo ($type === 'url' ? 'block' : 'none'); ?>;">
                             <label><?php echo __('The URL', AAM_KEY); ?></label>
-                            <input type="text" class="form-control" id="post-redirect-url-value" placeholder="https://" value="<?php echo ($type === 'url' ? $params->object->get('redirected.destination') : null); ?>" />
+                            <input type="text" class="form-control" id="post-redirect-url-value" placeholder="https://" value="<?php echo ($type === 'url' ? esc_attr($params->object->get('redirected.destination')) : null); ?>" />
                         </div>
 
                         <div class="form-group post-redirect-value" id="post-redirect-callback-value-container" style="display: <?php echo ($type === 'callback' ? 'block' : 'none'); ?>;">
@@ -221,7 +222,7 @@
                             <label><?php echo __('HTTP Redirect Code', AAM_KEY); ?></label>
                             <select class="form-control" id="post-redirect-code-value">
                                 <?php foreach ($params->httpCodes as $code => $label) { ?>
-                                    <option value="<?php echo $code; ?>" <?php echo ((string) $code === $params->object->get('redirected.httpCode') ? 'selected' : ''); ?>><?php echo $label; ?></option>
+                                    <option value="<?php echo esc_attr($code); ?>" <?php echo ((string) $code === $params->object->get('redirected.httpCode') ? 'selected' : ''); ?>><?php echo esc_js($label); ?></option>
                                 <?php } ?>
                             </select>
                         </div>
@@ -246,7 +247,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label><?php echo __('Password', AAM_KEY); ?></label>
-                        <input type="text" class="form-control" placeholder="<?php echo __('Enter Password', AAM_KEY); ?>" id="aam-access-password" value="<?php echo $params->object->get('protected.password'); ?>" />
+                        <input type="text" class="form-control" placeholder="<?php echo __('Enter Password', AAM_KEY); ?>" id="aam-access-password" value="<?php echo esc_attr($params->object->get('protected.password')); ?>" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -268,7 +269,7 @@
                     <div class="form-group">
                         <div id="post-expiration-datapicker"></div>
                         <?php $ceased = $params->object->get('ceased.after'); ?>
-                        <input type="hidden" id="aam-expire-datetime" value="<?php echo ($ceased ? $ceased : strtotime('tomorrow')); ?>" />
+                        <input type="hidden" id="aam-expire-datetime" value="<?php echo esc_attr($ceased ? $ceased : strtotime('tomorrow')); ?>" />
                     </div>
                 </div>
                 <div class="modal-footer">

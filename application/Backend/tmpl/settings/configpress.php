@@ -1,10 +1,11 @@
 <?php
 /**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.8.4  https://github.com/aamplugin/advanced-access-manager/issues/212
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.14
+ * @version 6.9.21
  * */
 
 if (defined('AAM_KEY')) { ?>
@@ -22,6 +23,6 @@ if (defined('AAM_KEY')) { ?>
             class="configpress-editor"
             style="border: 1px solid #CCCCCC; width: 100%"
             rows="10"
-        ><?php echo AAM_Core_ConfigPress::getInstance()->read(); ?></textarea>
+        ><?php $c = AAM_Core_ConfigPress::getInstance()->read(); echo esc_textarea(is_string($c) ? $c : ''); ?></textarea>
     </div>
 <?php }

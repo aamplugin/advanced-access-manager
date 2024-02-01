@@ -12,11 +12,12 @@
  *
  * Parse configuration string
  *
- * @since 6.9.1 https://github.com/aamplugin/advanced-access-manager/issues/226
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+ * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/226
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.1
+ * @version 6.9.21
  */
 class AAM_Core_ConfigPress_Reader
 {
@@ -64,13 +65,16 @@ class AAM_Core_ConfigPress_Reader
      *
      * @return void
      *
+     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.21
      */
     public function parserError($error, $message = '')
     {
         AAM_Core_Console::add(
-            sprintf('Error parsing config string: %s', $message),
+            sprintf('Error parsing config string: %s', esc_js($message)),
             $error
         );
     }

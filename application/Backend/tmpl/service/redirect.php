@@ -1,13 +1,14 @@
 <?php
-    /**
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
-     * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/252
-     * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
-     * @since 6.0.0  Initial implementation of the templates
-     *
-     * @version 6.9.14
-     *
-     */
+/**
+ * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
+ * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
+ * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/252
+ * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
+ * @since 6.0.0  Initial implementation of the templates
+ *
+ * @version 6.9.21
+ *
+ */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -127,7 +128,7 @@
 
                             <div class="form-group aam-redirect-action backend" id="backend-message" style="display: <?php echo ($backendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="backend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
-                                <textarea class="form-control" rows="3" data-group="backend" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>" name="backend.redirect.message"><?php echo $this->getOption('backend.redirect.message'); ?></textarea>
+                                <textarea class="form-control" rows="3" data-group="backend" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>" name="backend.redirect.message"><?php $o = $this->getOption('backend.redirect.message'); echo esc_textarea(is_string($o) ? $o : ''); ?></textarea>
                             </div>
 
                             <div class="form-group aam-redirect-action backend" id="backend-page-action" style="display: <?php echo ($backendType == 'page' ? 'block' : 'none'); ?>;">
