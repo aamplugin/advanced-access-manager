@@ -372,7 +372,7 @@ class AAM_Backend_Manager
         $frame = $this->getFromQuery('aamframe');
 
         if ($frame) {
-            echo AAM_Backend_View::getInstance()->renderIFrame($frame);
+            AAM_Backend_View::getInstance()->renderIFrame($frame);
         }
     }
 

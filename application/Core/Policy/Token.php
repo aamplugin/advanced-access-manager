@@ -7,9 +7,12 @@
  * ======================================================================
  */
 
+use Vectorface\Whip\Whip;
+
 /**
  * AAM core policy token evaluator
  *
+ * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/338
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/321
  * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/235
  * @since 6.8.3  https://github.com/aamplugin/advanced-access-manager/issues/205
@@ -22,7 +25,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.22
  */
 class AAM_Core_Policy_Token
 {
@@ -218,6 +221,7 @@ class AAM_Core_Policy_Token
      *
      * @return mixed
      *
+     * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/338
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
      * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/235
      * @since 6.3.0  Fixed bug that caused "Fatal error: Allowed memory size of XXX
@@ -225,7 +229,7 @@ class AAM_Core_Policy_Token
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.22
      */
     protected static function getUserValue($prop)
     {
@@ -235,7 +239,8 @@ class AAM_Core_Policy_Token
         switch (strtolower($prop)) {
             case 'ip':
             case 'ipaddress':
-                $value = AAM_Core_Request::server('REMOTE_ADDR');
+                $whip  = new Whip();
+                $value = $whip->getValidIpAddress();
                 break;
 
             case 'authenticated':

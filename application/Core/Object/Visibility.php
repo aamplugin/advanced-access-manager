@@ -10,13 +10,14 @@
 /**
  * Post visibility object
  *
+ * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/345
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
  * @since 6.1.0  Refactored implementation to fix merging bugs and improve inheritance
  *               mechanism
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.21
+ * @version 6.9.22
  */
 class AAM_Core_Object_Visibility extends AAM_Core_Object
 {
@@ -254,8 +255,11 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/345
+     * @since 6.9.21 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.21
+     * @version 6.9.22
      */
     protected function getOptionByXPath($object, $xpath)
     {
@@ -265,7 +269,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
         $option   = 'core.settings.' . $object::OBJECT_TYPE . '.mergeAlign.limit';
         $limit    = AAM::api()->getConfig($option, 50);
 
-        if ($invocations >= $limit) {
+        if ($invocations < $limit) {
             // First, let, parse the xpath and determine what object to fetch
             $parts = explode('/', $xpath);
 

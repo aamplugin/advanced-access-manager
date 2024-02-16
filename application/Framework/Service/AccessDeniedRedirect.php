@@ -10,11 +10,12 @@
 /**
  * AAM service Access Denied Redirect manager
  *
+ * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  * @since 6.9.14 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.22
  */
 class AAM_Framework_Service_AccessDeniedRedirect
 {
@@ -27,10 +28,14 @@ class AAM_Framework_Service_AccessDeniedRedirect
      * To be a bit more verbose, we are renaming the legacy rule types to something
      * that is more intuitive
      *
-     * @version 6.9.14
+     * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
+     * @since 6.9.14 Initial implementation of the constant
+     *
+     * @version 6.9.22
      */
     const REDIRECT_TYPE_ALIAS = array(
         'default'  => 'default',
+        'login'    => 'login_redirect',
         'message'  => 'custom_message',
         'page'     => 'page_redirect',
         'url'      => 'url_redirect',

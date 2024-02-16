@@ -26,6 +26,7 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/344
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/249
  * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/152
@@ -34,7 +35,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.21
+ * @version 6.9.22
  */
 abstract class AAM_Core_Subject
 {
@@ -96,8 +97,11 @@ abstract class AAM_Core_Subject
      *
      * @return mixed
      *
+     * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/344
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.22
      */
     public function __call($name, $args)
     {
@@ -105,7 +109,7 @@ abstract class AAM_Core_Subject
         $principal = $this->getPrincipal();
 
         // Make sure that method is callable
-        if (method_exists($principal, $name)) {
+        if (is_object($principal) && method_exists($principal, $name)) {
             $response = call_user_func_array(array($principal, $name), $args);
         } else {
             _doing_it_wrong(

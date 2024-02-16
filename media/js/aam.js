@@ -3439,6 +3439,11 @@
          */
         (function ($) {
 
+            /**
+             *
+             * @param {*} payload
+             * @param {*} successCallback
+             */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
                     $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/403`, {
@@ -3482,7 +3487,7 @@
                             // provided
                             const type = $(this).val();
 
-                            if (type === 'default') {
+                            if (['default', 'login_redirect'].includes(type)) {
                                 save(getAAM().prepareRequestSubjectData({ area, type }), () => {
                                     $('#aam-redirect-overwrite').show();
                                 });
