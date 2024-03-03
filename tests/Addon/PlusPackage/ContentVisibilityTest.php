@@ -10,6 +10,7 @@
 namespace AAM\UnitTest\Addon\PlusPackage;
 
 use AAM,
+    AAM_Core_Config,
     AAM_Core_Object_Post,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
@@ -303,6 +304,222 @@ class ContentVisibilityTest extends TestCase
 
         $this->assertContains($post_a, $posts);
         $this->assertContains($post_b, $posts);
+    }
+
+    /**
+     * Covering the following scenario
+     *
+     * User has two roles. The default access controls to all posts for everyone is
+     * to hide posts. However, for one of the roles, we are allowing to see one post.
+     *
+     * The expected behavior is that the allowed post is actually not visible because
+     * the access settings merging preference is "deny"
+     *
+     * @return void
+     */
+    public function testMultiRoleScenarioA()
+    {
+        AAM_Core_Config::set('core.settings.multiSubject', true);
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Setting the default access controls to everybody to hide all posts
+        $default = AAM::api()->getDefault();
+        $object  = $default->getObject(Type::OBJECT_TYPE, 'post');
+
+        // Check if save returns positive result
+        $this->assertTrue($object->updateOptionItem('post/hidden', true)->save());
+
+        // Setting the first role to allow one specific post
+        $subscriber = AAM::api()->getRole('subscriber');
+        $post       = $subscriber->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+         // Check if save returns positive result
+         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+
+         // Reset all internal cache
+        $this->_resetSubjects();
+        ContentHooks::bootstrap()->resetCache();
+        \AAM_Core_Config::bootstrap();
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => -1,
+            'suppress_filters' => false
+        ));
+
+        $this->assertFalse(in_array(self::$post_id, $posts));
+
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * Covering the following scenario
+     *
+     * User has two roles. The default access controls to all posts for everyone is
+     * to hide posts. However, for one of the roles, we are allowing to see one post.
+     *
+     * The expected behavior is that the allowed post is visible because
+     * the access settings merging preference is "allow"
+     *
+     * @return void
+     */
+    public function testMultiRoleScenarioB()
+    {
+        AAM_Core_Config::set('core.settings.multiSubject', true);
+        AAM_Core_Config::set('core.settings.merge.preference', 'allow');
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Setting the default access controls to everybody to hide all posts
+        $default = AAM::api()->getDefault();
+        $object  = $default->getObject(Type::OBJECT_TYPE, 'post');
+
+        // Check if save returns positive result
+        $this->assertTrue($object->updateOptionItem('post/hidden', true)->save());
+
+        // Setting the first role to allow one specific post
+        $subscriber = AAM::api()->getRole('subscriber');
+        $post       = $subscriber->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        );
+
+         // Check if save returns positive result
+         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+
+         // Reset all internal cache
+        $this->_resetSubjects();
+        ContentHooks::bootstrap()->resetCache();
+        \AAM_Core_Config::bootstrap();
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => -1,
+            'suppress_filters' => false
+        ));
+
+        $this->assertContains(self::$post_id, $posts);
+
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * Covering the following scenario
+     *
+     * User has two roles. The default access controls for everyone in
+     * one specific category to hide posts. However, for one of the roles, we are
+     * allowing to see one post.
+     *
+     * The expected behavior is that the allowed post is actually hidden because
+     * the access settings merging preference is "deny"
+     *
+     * @return void
+     */
+    public function testMultiRoleScenarioC()
+    {
+        AAM_Core_Config::set('core.settings.multiSubject', true);
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Creating a testing category and post
+        // Setting up the necessary terms and posts
+        $category_x = wp_insert_term('Category X', 'category')['term_id'];
+        $post_x     = wp_insert_post(array(
+            'post_title'  => 'Post X',
+            'post_name'   => 'post-x',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms($post_x, $category_x, 'category');
+
+        // Setting the default access controls to everybody to hide all posts
+        $default = AAM::api()->getDefault();
+        $term    = $default->getObject(Term::OBJECT_TYPE, $category_x . '|category');
+        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+
+        // Setting the first role to allow one specific post
+        $subscriber = AAM::api()->getRole('subscriber');
+        $post       = $subscriber->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, $post_x
+        );
+
+         // Check if save returns positive result
+         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+
+         // Reset all internal cache
+        $this->_resetSubjects();
+        ContentHooks::bootstrap()->resetCache();
+        \AAM_Core_Config::bootstrap();
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => -1,
+            'suppress_filters' => false
+        ));
+
+        $this->assertFalse(in_array($post_x, $posts));
+
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
+    }
+
+    /**
+     * Covering the following scenario
+     *
+     * User has two roles. The default access controls for everyone in
+     * one specific category to hide posts. However, for one of the roles, we are
+     * allowing to see one post.
+     *
+     * The expected behavior is that the allowed post is visible because
+     * the access settings merging preference is "allow"
+     *
+     * @return void
+     */
+    public function testMultiRoleScenarioD()
+    {
+        AAM_Core_Config::set('core.settings.multiSubject', true);
+        AAM_Core_Config::set('core.settings.merge.preference', 'allow');
+        wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
+
+        // Creating a testing category and post
+        // Setting up the necessary terms and posts
+        $category_y = wp_insert_term('Category Y', 'category')['term_id'];
+        $post_y     = wp_insert_post(array(
+            'post_title'  => 'Post Y',
+            'post_name'   => 'post-y',
+            'post_status' => 'publish'
+        ));
+        wp_set_post_terms($post_y, $category_y, 'category');
+
+        // Setting the default access controls to everybody to hide all posts
+        $default = AAM::api()->getDefault();
+        $term    = $default->getObject(Term::OBJECT_TYPE, $category_y . '|category');
+        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+
+        // Setting the first role to allow one specific post
+        $subscriber = AAM::api()->getRole('subscriber');
+        $post       = $subscriber->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, $post_y
+        );
+
+         // Check if save returns positive result
+         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+
+         // Reset all internal cache
+        $this->_resetSubjects();
+        ContentHooks::bootstrap()->resetCache();
+        \AAM_Core_Config::bootstrap();
+
+        $posts = get_posts(array(
+            'post_type'        => 'post',
+            'fields'           => 'ids',
+            'numberposts'      => -1,
+            'suppress_filters' => false
+        ));
+
+        $this->assertContains($post_y, $posts);
+
+        wp_set_current_user(AAM_UNITTEST_ADMIN_USER_ID);
     }
 
 }

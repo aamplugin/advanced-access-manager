@@ -10,6 +10,7 @@
 /**
  * Post visibility object
  *
+ * @since 6.9.23 https://github.com/aamplugin/advanced-access-manager/issues/347
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/345
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
  * @since 6.1.0  Refactored implementation to fix merging bugs and improve inheritance
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.22
+ * @version 6.9.23
  */
 class AAM_Core_Object_Visibility extends AAM_Core_Object
 {
@@ -255,11 +256,12 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.9.23 https://github.com/aamplugin/advanced-access-manager/issues/347
      * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/345
      * @since 6.9.21 Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.22
+     * @version 6.9.23
      */
     protected function getOptionByXPath($object, $xpath)
     {
@@ -277,7 +279,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
                 $attr = explode('|', $parts[1]);
 
                 $response = $object->getSubject()->getObject(
-                    $attr[1], $attr[0]
+                    'post', $attr[0]
                 )->getOption();
             } else {
                 $response = apply_filters(

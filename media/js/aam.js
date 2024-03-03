@@ -296,20 +296,8 @@
                                         }).bind('click', function () {
                                             var title = $('td:eq(0) span', row).html();
 
-                                            // Reset all roles
-                                            $('#role-list').DataTable().rows().eq(0).each(function(i) {
-                                                $(
-                                                    'td:eq(0) span',
-                                                    $('#role-list').DataTable().row(i).node()
-                                                ).removeClass('aam-highlight');
-
-                                                $(
-                                                    '.icon-cog',
-                                                    $('#role-list').DataTable().row(i).node()
-                                                ).attr('class', 'aam-row-action icon-cog text-info');
-                                            });
-
                                             getAAM().setSubject('role', data[0], title, data[4]);
+
                                             $('td:eq(0) span', row).replaceWith(
                                                 '<span class="aam-highlight">' + title + '</span>'
                                             );
@@ -953,6 +941,7 @@
                                         if (!$(this).prop('disabled')) {
                                             $(this).prop('disabled', true);
                                             getAAM().setSubject('user', data[0], data[2], data[4]);
+
                                             $('td:eq(0) span', row).replaceWith(
                                                 '<strong class="aam-highlight">' + data[2] + '</strong>'
                                             );
@@ -5654,6 +5643,21 @@
 
         // Persist the subject in the local storage
         window.localStorage.setItem('aam-subject', JSON.stringify(this.subject));
+
+        // Reset all roles
+       if ($('#role-list').is('.dataTable')) {
+            $('#role-list').DataTable().rows().eq(0).each(function(i) {
+                $(
+                    'td:eq(0) span',
+                    $('#role-list').DataTable().row(i).node()
+                ).removeClass('aam-highlight');
+
+                $(
+                    '.icon-cog',
+                    $('#role-list').DataTable().row(i).node()
+                ).attr('class', 'aam-row-action icon-cog text-info');
+            });
+        }
 
         if (getAAM().isUI('main')) {
             // First set the type of the subject
