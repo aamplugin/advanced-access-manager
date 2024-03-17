@@ -511,7 +511,7 @@ class PolicyConditionTest extends TestCase
             array(array('Equals' => array('(*string)1' => '1')), true),
             array(array('Equals' => array('(*null)' => null)), true),
             array(array('Equals' => array('(*array)[2,3]' => array(2,3))), true),
-            array(array('Equals' => array('(*ip)192.168.1.1' => inet_pton('192.168.1.1'))), true)
+            array(array('Equals' => array('(*ip)192.168.1.1' => ip2long('192.168.1.1'))), true)
         );
     }
 

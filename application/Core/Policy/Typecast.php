@@ -68,7 +68,18 @@ class AAM_Core_Policy_Typecast
                 break;
 
             case 'ip':
-                $value = inet_pton($value);
+                if (strpos($value, '/') !== false) {
+                    $value = function($ip) use ($value) {
+                        list ($subnet, $mask) = explode('/', $value);
+                        $ipLong     = is_string($ip) ? ip2long($ip) : $ip;
+                        $subnetLong = ip2long($subnet);
+                        $maskLong   = -1 << (32 - $mask);
+
+                        return ($subnetLong & $maskLong) === ($ipLong & $maskLong);
+                    };
+                } else {
+                    $value = ip2long($value);
+                }
                 break;
 
             case 'int':

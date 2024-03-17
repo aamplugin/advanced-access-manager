@@ -46,7 +46,7 @@ if (defined('AAM_KEY')) { ?>
             class="policy-editor"
             style="border: 1px solid #CCCCCC; width: 100%"
             rows="10"
-        ><?php echo is_string($params->post->post_content) ? esc_textarea($params->post->post_content) : ''; ?></textarea>
+        ><?php echo is_string($params->post->post_content) ? esc_textarea(stripslashes($params->post->post_content)) : ''; ?></textarea>
 
         <p class="aam-infobox">
             <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank">', '</a>'); ?>

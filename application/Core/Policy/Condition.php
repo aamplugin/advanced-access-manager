@@ -103,16 +103,23 @@ class AAM_Core_Policy_Condition
         foreach ($this->prepareConditions($conditions, $args) as $cnd) {
             // Convert the right condition into the array of array to cover more
             // complex between conditions like [[0,8],[13,15]]
-            if (is_array($cnd['right'][0])) {
+            if (is_a($cnd['right'], 'Closure')) {
+                $right = array($cnd['right']);
+            } elseif (is_array($cnd['right'][0])) {
                 $right = $cnd['right'];
             } else {
                 $right = array($cnd['right']);
             }
-            foreach ($right as $subset) {
-                $min = (is_array($subset) ? array_shift($subset) : $subset);
-                $max = (is_array($subset) ? end($subset) : $subset);
 
-                $result = $result || ($cnd['left'] >= $min && $cnd['left'] <= $max);
+            foreach ($right as $subset) {
+                if (is_a($subset, 'Closure')) {
+                    $result = $result || $subset($cnd['left']);
+                } else {
+                    $min = (is_array($subset) ? array_shift($subset) : $subset);
+                    $max = (is_array($subset) ? end($subset) : $subset);
+
+                    $result = $result || ($cnd['left'] >= $min && $cnd['left'] <= $max);
+                }
             }
         }
 
@@ -278,8 +285,16 @@ class AAM_Core_Policy_Condition
                 $ci = count(array_intersect($cnd['left'], (array) $cnd['right']));
 
                 $res = $res || (($cl === $cr) && ($ci === $cl));
+            } elseif (is_a($cnd['right'], 'Closure')) {
+                $res = $res || $cnd['right']($cnd['left']);
             } else {
-                $res = $res || in_array($cnd['left'], (array) $cnd['right'], true);
+                foreach((array) $cnd['right'] as $right) {
+                    if (is_scalar($right)) {
+                        $res = $res || ($cnd['left'] === $right);
+                    } elseif (is_a($right, 'Closure')) {
+                        $res = $res || $right($cnd['left']);
+                    }
+                }
             }
         }
 
