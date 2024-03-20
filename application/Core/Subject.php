@@ -384,7 +384,7 @@ abstract class AAM_Core_Subject
                     );
 
                     if (method_exists($obj, 'mergeAlignOption')) {
-                        $option = $obj->mergeAlignOption($subject->getObject(
+                        $option = $obj->mergeAlignOption($option, $subject->getObject(
                             $object::OBJECT_TYPE,
                             $object->getId()
                         ));

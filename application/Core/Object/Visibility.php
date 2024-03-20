@@ -204,6 +204,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      * This method makes sure that both data set have the same keys first and then
      * merges them
      *
+     * @param array           $incoming
      * @param AAM_Core_Object $object
      *
      * @return array
@@ -211,12 +212,11 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      * @access public
      * @version 6.9.21
      */
-    public function mergeAlignOption($object)
+    public function mergeAlignOption($incoming, $object)
     {
         // Identifying all the keys that are missing in the $subject, however, present
         // in $this and align settings
-        $incoming = $object->getOption();
-        $base     = $this->getOption();
+        $base = $this->getOption();
 
         $diff = array_diff(array_keys($incoming), array_keys($base));
 
