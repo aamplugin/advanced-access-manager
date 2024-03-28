@@ -17,6 +17,9 @@
         <testsuite name="Addons">
             <directory suffix="Test.php">./tests/Addon</directory>
         </testsuite>
+        <testsuite name="AccessPolicy">
+            <directory suffix="Test.php">./tests/Service/AccessPolicy</directory>
+        </testsuite>
     </testsuites>
     <php>
         <const name="AAM_UNITTEST_RESET_DB" value="1" />

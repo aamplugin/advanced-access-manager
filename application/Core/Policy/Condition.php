@@ -10,13 +10,15 @@
 /**
  * AAM core policy condition evaluator
  *
- * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
- * @since 6.2.0 Added support for the (*date) type casting
- * @since 6.1.0 Improved type casting functionality
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/349
+ *               https://github.com/aamplugin/advanced-access-manager/issues/351
+ * @since 6.5.3  https://github.com/aamplugin/advanced-access-manager/issues/123
+ * @since 6.2.0  Added support for the (*date) type casting
+ * @since 6.1.0  Improved type casting functionality
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.5.3
+ * @version 6.9.24
  */
 class AAM_Core_Policy_Condition
 {
@@ -55,30 +57,42 @@ class AAM_Core_Policy_Condition
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.24
      */
     public function evaluate($conditions, $args = array())
     {
         $res = true;
 
-        foreach ($conditions as $type => $condition) {
+        // Determine if we have a logical operator defined
+        $operator = isset($conditions['Operator']) ? $conditions['Operator'] : 'AND';
+
+        foreach ($conditions as $type => $group) {
             $type = strtolower($type);
 
-            if (isset($this->map[$type])) {
-                $callback = array($this, $this->map[$type]);
+            if ($type === 'operator') {
+                continue;
+            } elseif (isset($this->map[$type])) {
+                $callback       = array($this, $this->map[$type]);
+                $group          = $this->prepareConditionGroup($group);
+                $group_operator = isset($group['Operator']) ? $group['Operator'] : 'OR';
 
-                // Since v5.9.2 - if specific condition type is array, then combine
-                // them with AND operation
-                if (isset($condition[0]) && is_array($condition[0])) {
-                    foreach ($condition as $set) {
-                        $res = $res && call_user_func($callback, $set, $args);
-                    }
-                } else {
-                    $res = $res && call_user_func($callback, $condition, $args);
-                }
+                $res = $this->compute(
+                    $res,
+                    call_user_func($callback, $group, $args, $group_operator),
+                    $operator
+                );
             } else {
-                $res = false;
+                $res = apply_filters(
+                    'aam_policy_condition_result_filter',
+                    false,
+                    $type,
+                    $this->prepareConditions($this->prepareConditionGroup($group), $args),
+                    $args
+                );
             }
         }
 
@@ -86,39 +100,85 @@ class AAM_Core_Policy_Condition
     }
 
     /**
+     * Prepare condition group
+     *
+     * @param array $group
+     *
+     * @return array
+     *
+     * @version 6.9.24
+     */
+    protected function prepareConditionGroup($group)
+    {
+        $response = array();
+
+        // Taking into consideration legacy format like
+        // {
+        //      "Equals": [
+        //           { "${USER.email}": "a" },
+        //           { "${USER.email}": "b" }
+        //      ]
+        // }
+        if (isset($group[0]) && is_array($group[0])) { // Array of arrays?
+            foreach($group as $subset) {
+                foreach($subset as $key => $value) {
+                    if (isset($response[$key])) {
+                        if (is_scalar($response[$key])) {
+                            $response[$key] = array($response[$key]);
+                        }
+                        array_push($response[$key], $value);
+                    } else {
+                        $response[$key] = $value;
+                    }
+                }
+            }
+        } else { // Otherwise assume a normal conditional group
+            $response = $group;
+        }
+
+        return $response;
+    }
+
+    /**
      * Evaluate group of BETWEEN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     *               https://github.com/aamplugin/advanced-access-manager/issues/349
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateBetweenConditions($conditions, $args)
+    protected function evaluateBetweenConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
-        foreach ($this->prepareConditions($conditions, $args) as $cnd) {
-            // Convert the right condition into the array of array to cover more
-            // complex between conditions like [[0,8],[13,15]]
-            if (is_a($cnd['right'], 'Closure')) {
-                $right = array($cnd['right']);
-            } elseif (is_array($cnd['right'][0])) {
-                $right = $cnd['right'];
+        foreach ($this->prepareConditions($conditions, $args) as $condition) {
+            if (isset($condition['right'][0]) && is_array($condition['right'][0])) {
+                $right = $condition['right'];
             } else {
-                $right = array($cnd['right']);
+                $right = array($condition['right']);
             }
 
             foreach ($right as $subset) {
                 if (is_a($subset, 'Closure')) {
-                    $result = $result || $subset($cnd['left']);
+                    $result = $this->compute(
+                        $result, $subset($condition['left']), $operator
+                    );
                 } else {
-                    $min = (is_array($subset) ? array_shift($subset) : $subset);
-                    $max = (is_array($subset) ? end($subset) : $subset);
+                    list($min, $max) = $subset;
 
-                    $result = $result || ($cnd['left'] >= $min && $cnd['left'] <= $max);
+                    $result = $this->compute(
+                        $result,
+                        ($condition['left'] >= $min && $condition['left'] <= $max),
+                        $operator
+                    );
                 }
             }
         }
@@ -131,20 +191,30 @@ class AAM_Core_Policy_Condition
      *
      * The values have to be identical
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateEqualsConditions($conditions, $args)
+    protected function evaluateEqualsConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] === $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] === $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -153,20 +223,30 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of NOT EQUALs conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateNotEqualsConditions($conditions, $args)
+    protected function evaluateNotEqualsConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] !== $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] !== $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -175,20 +255,30 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of GREATER THEN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateGreaterConditions($conditions, $args)
+    protected function evaluateGreaterConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] > $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] > $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -197,20 +287,30 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of LESS THEN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateLessConditions($conditions, $args)
+    protected function evaluateLessConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] < $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] < $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -219,20 +319,30 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of GREATER OR EQUALS THEN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateGreaterOrEqualsConditions($conditions, $args)
+    protected function evaluateGreaterOrEqualsConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] >= $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] >= $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -241,20 +351,30 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of LESS OR EQUALS THEN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateLessOrEqualsConditions($conditions, $args)
+    protected function evaluateLessOrEqualsConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || ($condition['left'] <= $condition['right']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    ($condition['left'] <= $right),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -263,81 +383,117 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of IN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
-     * @since 6.5.3 https://github.com/aamplugin/advanced-access-manager/issues/123
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     *               https://github.com/aamplugin/advanced-access-manager/issues/349
+     * @since 6.5.3  https://github.com/aamplugin/advanced-access-manager/issues/123
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.5.3
+     * @version 6.9.24
      */
-    protected function evaluateInConditions($conditions, $args)
+    protected function evaluateInConditions($conditions, $args, $operator)
     {
-        $res = false;
+        $result = null;
 
-        foreach ($this->prepareConditions($conditions, $args) as $cnd) {
-            if (is_array($cnd['left'])) {
-                $cl = count($cnd['left']);
-                $cr = count($cnd['right']);
-                $ci = count(array_intersect($cnd['left'], (array) $cnd['right']));
-
-                $res = $res || (($cl === $cr) && ($ci === $cl));
-            } elseif (is_a($cnd['right'], 'Closure')) {
-                $res = $res || $cnd['right']($cnd['left']);
+        foreach ($this->prepareConditions($conditions, $args) as $condition) {
+            // Transform the left and right operands, if necessary
+            if (is_a($condition['left'], 'Closure')) {
+                $left = $condition['left'](); // Left operand does not require any values to cb
             } else {
-                foreach((array) $cnd['right'] as $right) {
-                    if (is_scalar($right)) {
-                        $res = $res || ($cnd['left'] === $right);
-                    } elseif (is_a($right, 'Closure')) {
-                        $res = $res || $right($cnd['left']);
+                $left = $condition['left'];
+            }
+
+            if (isset($condition['right'][0]) && is_array($condition['right'][0])) {
+                $normalized_right = $condition['right'];
+            } else {
+                $normalized_right = array($condition['right']);
+            }
+
+            foreach ($normalized_right as $right) {
+                if (is_a($right, 'Closure')) {
+                    $right = $right($left); // Right operand accepts left operand
+                }
+
+                // If both operands are arrays, then this condition verifies that the
+                // left set of values is present in the right set of values
+                if (is_array($left) && is_array($right)) {
+                    $ci     = count(array_intersect($left, $right));
+                    $result = $this->compute($result, count($left) === $ci, $operator);
+                } elseif (is_scalar($left) && is_array($right)) {
+                    $set_result = null;
+
+                    foreach($right as $value) {
+                        if (is_scalar($value)) {
+                            $set_result = $set_result || ($left === $value);
+                        } elseif (is_a($value, 'Closure')) {
+                            $set_result = $set_result || $value($left);
+                        }
                     }
+
+                    $result = $this->compute($result, $set_result, $operator);
                 }
             }
         }
 
-        return $res;
+        return $result;
     }
 
     /**
      * Evaluate group of NOT IN conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateNotInConditions($conditions, $args)
+    protected function evaluateNotInConditions($conditions, $args, $operator)
     {
-        return !$this->evaluateInConditions($conditions, $args);
+        return !$this->evaluateInConditions($conditions, $args, $operator);
     }
 
     /**
      * Evaluate group of LIKE conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateLikeConditions($conditions, $args)
+    protected function evaluateLikeConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
-        foreach ($this->prepareConditions($conditions, $args) as $cnd) {
-            foreach ((array) $cnd['right'] as $el) {
+        foreach ($this->prepareConditions($conditions, $args) as $condition) {
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
                 $sub = str_replace(
-                    array('\*', '@'), array('.*', '\\@'), preg_quote($el)
+                    array('\*', '@'), array('.*', '\\@'), preg_quote($right)
                 );
-                $result = $result || preg_match('@^' . $sub . '$@', $cnd['left']);
+
+                $result = $this->compute(
+                    $result,
+                    preg_match('@^' . $sub . '$@', $condition['left']),
+                    $operator
+                );
             }
         }
 
@@ -347,36 +503,50 @@ class AAM_Core_Policy_Condition
     /**
      * Evaluate group of NOT LIKE conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateNotLikeConditions($conditions, $args)
+    protected function evaluateNotLikeConditions($conditions, $args, $operator)
     {
-        return !$this->evaluateLikeConditions($conditions, $args);
+        return !$this->evaluateLikeConditions($conditions, $args, $operator);
     }
 
     /**
      * Evaluate group of REGEX conditions
      *
-     * @param array $conditions
-     * @param array $args
+     * @param array  $conditions
+     * @param array  $args
+     * @param string $operator
      *
      * @return boolean
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
-    protected function evaluateRegexConditions($conditions, $args)
+    protected function evaluateRegexConditions($conditions, $args, $operator)
     {
-        $result = false;
+        $result = null;
 
         foreach ($this->prepareConditions($conditions, $args) as $condition) {
-            $result = $result || preg_match($condition['right'], $condition['left']);
+            foreach ($this->prepareRightOperand($condition['right']) as $right) {
+                $result = $this->compute(
+                    $result,
+                    preg_match($right, $condition['left']),
+                    $operator
+                );
+            }
         }
 
         return $result;
@@ -390,8 +560,11 @@ class AAM_Core_Policy_Condition
      *
      * @return array
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/351
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.24
      */
     protected function prepareConditions($conditions, $args)
     {
@@ -399,10 +572,12 @@ class AAM_Core_Policy_Condition
 
         if (is_array($conditions)) {
             foreach ($conditions as $left => $right) {
-                $result[] = array(
-                    'left'  => $this->parseExpression($left, $args),
-                    'right' => $this->parseExpression($right, $args)
-                );
+                if ($left !== 'Operator') {
+                    $result[] = array(
+                        'left'  => $this->parseExpression($left, $args),
+                        'right' => $this->parseExpression($right, $args)
+                    );
+                }
             }
         }
 
@@ -443,6 +618,57 @@ class AAM_Core_Policy_Condition
         }
 
         return $exp;
+    }
+
+     /**
+     * Compute the logical expression
+     *
+     * @param boolean $left
+     * @param boolean $right
+     * @param string  $operator
+     *
+     * @return boolean|null
+     *
+     * @access public
+     *
+     * @version 6.9.24
+     */
+    protected function compute($left, $right, $operator)
+    {
+        $upper  = strtoupper($operator);
+        $result = null;
+
+        // The first condition that checks for null is super important to ensure that
+        // we cover the first condition in chain
+        if ($left === null) {
+            $result = $right;
+        } elseif ($upper === 'AND') {
+            $result = $left && $right;
+        } elseif ($upper === 'OR') {
+            $result = $left || $right;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Prepare the right operand
+     *
+     * @param mixed $right
+     *
+     * @return array
+     *
+     * @version 6.9.24
+     */
+    protected function prepareRightOperand($right)
+    {
+        if (is_array($right)) { // Naming collision?
+            $response = $right;
+        } else {
+            $response = array($right);
+        }
+
+        return $response;
     }
 
 }

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/350
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
@@ -10,7 +11,7 @@
  * @since 6.1.1  Removing the backslashes before displaying the policy
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.21
+ * @version 6.9.24
  */
 if (defined('AAM_KEY')) { ?>
     <div>

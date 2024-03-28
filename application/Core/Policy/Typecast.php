@@ -57,8 +57,11 @@ class AAM_Core_Policy_Typecast
      *
      * @return mixed
      *
+     * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/349
+     * @since 6.2.1  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.2.1
+     * @version 6.9.24
      */
     private static function _typecast($value, $type)
     {
