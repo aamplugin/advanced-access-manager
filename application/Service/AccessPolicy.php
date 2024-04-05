@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/294
  *               https://github.com/aamplugin/advanced-access-manager/issues/299
@@ -28,7 +29,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.25
  */
 class AAM_Service_AccessPolicy
 {
@@ -191,6 +192,7 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
      * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
@@ -206,7 +208,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.17
+     * @version 6.9.25
      */
     protected function initializeHooks()
     {
@@ -244,14 +246,10 @@ class AAM_Service_AccessPolicy
             ));
         });
 
-        add_action('aam_services_loaded', function() {
-            $manager = AAM::api()->getAccessPolicyManager();
-            $found   = $manager->getResources(AAM_Core_Policy_Resource::HOOK);
-
-            foreach($found as $resource => $stm) {
-                AAM_Service_AccessPolicy_HookResource::parse($resource, $stm);
-            }
-        });
+        // Can register this only after user object is initialized
+        add_action('init', function() {
+            AAM_Service_AccessPolicy_HookController::bootstrap();
+        }, -10);
 
         // Hook into AAM core objects initialization
         add_filter('aam_menu_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);

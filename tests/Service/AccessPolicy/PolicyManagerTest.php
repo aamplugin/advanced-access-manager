@@ -60,7 +60,9 @@ class PolicyManagerTest extends TestCase
         $this->assertEquals($stub->getTree(), array(
             'Statement' => array(
                 'backendmenu:edit.php' => array(
-                    'Effect' => 'deny'
+                    array(
+                        'Effect' => 'deny'
+                    )
                 )
             ),
             'Param' => array()
@@ -82,7 +84,9 @@ class PolicyManagerTest extends TestCase
         $this->assertEquals($stub->getTree(), array(
             'Statement' => array(
                 'capability:switch_themes:aam:toggle' => array(
-                    'Effect' => 'deny'
+                    array(
+                        'Effect' => 'deny'
+                    )
                 )
             ),
             'Param' => array()
@@ -105,8 +109,10 @@ class PolicyManagerTest extends TestCase
             'Statement' => array(),
             'Param'     => array(
                 'option:unittest' => array(
-                    'Key'   => 'option:unittest',
-                    'Value' => 'unititest.me'
+                    array(
+                        'Key'   => 'option:unittest',
+                        'Value' => 'unititest.me'
+                    )
                 )
             )
         ));
@@ -170,28 +176,112 @@ class PolicyManagerTest extends TestCase
             'Statement' => array(),
             'Param' => array(
                 'param:a' => array(
-                    'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
-                    'Value' => true
+                    array(
+                        'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
+                        'Value' => true
+                    )
                 ),
                 'param:b' => array(
-                    'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
-                    'Value' => true
+                    array(
+                        'Key'   => 'param:%s => ${PHP_GLOBAL.unit_test}',
+                        'Value' => true
+                    )
                 )
             ),
         ));
     }
 
     /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function testGetParam()
+    {
+        $manager = $this->prepareManagerStub('{
+            "Param": {
+                "Key": "test",
+                "Value": "hello"
+            }
+        }', false);
+
+        $this->assertEquals("hello", $manager->getParam('test'));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function testGetEnforcedParam()
+    {
+        $manager = $this->prepareManagerStub('{
+            "Param": [
+                {
+                    "Key": "test",
+                    "Value": "hello"
+                },
+                {
+                    "Key": "test",
+                    "Enforce": true,
+                    "Value": "yes"
+                },
+                {
+                    "Key": "test",
+                    "Value": "no"
+                }
+            ]
+        }', false);
+
+        $this->assertEquals("yes", $manager->getParam('test'));
+    }
+
+    public function testIsAllowedFunction()
+    {
+        $manager = $this->prepareManagerStub('{
+            "Statement": {
+                "Effect": "deny",
+                "Resource": "Widget:hello-test"
+            }
+        }', false);
+
+        $this->assertFalse($manager->isAllowed('Widget:hello-test'));
+        $this->assertFalse($manager->isAllowed('widget:Hello-test'));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function testIsAllowedToFunction()
+    {
+        $manager = $this->prepareManagerStub('{
+            "Statement": {
+                "Effect": "deny",
+                "Resource": "Post:post:hello-world",
+                "Action": [
+                    "Edit"
+                ]
+            }
+        }', false);
+
+        $this->assertFalse($manager->isAllowedTo('post:post:hello-world', 'edit'));
+        $this->assertNull($manager->isAllowed('post:post:hello-world-b'));
+    }
+
+    /**
      * Prepare proper policy manager stub
      *
-     * @param string $policy_file
+     * @param string  $policy
+     * @param boolean $is_file
      *
      * @return object
      *
      * @access protected
      * @version 6.0.0
      */
-    protected function prepareManagerStub($policy_file)
+    protected function prepareManagerStub($policy, $is_file = true)
     {
         // Fake the assigned policy to the user
         $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
@@ -203,13 +293,15 @@ class PolicyManagerTest extends TestCase
             ->setMethods(array('fetchPolicies'))
             ->getMock();
 
+        if ($is_file === true) {
+            $policy = file_get_contents(__DIR__ . '/policies/' . $policy . '.json');
+        }
+
         // Configure the stub
         $stub->method('fetchPolicies')->willReturn(array(
             (object) array(
                 'ID'           => 1,
-                'post_content' => file_get_contents(
-                    __DIR__ . '/policies/' . $policy_file . '.json'
-                )
+                'post_content' => $policy
             )
         ));
 

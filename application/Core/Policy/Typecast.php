@@ -107,7 +107,7 @@ class AAM_Core_Policy_Typecast
                 break;
 
             case 'array':
-                $value = json_decode($value, true);
+                $value = is_string($value) ? json_decode($value, true) : (array) $value;
                 break;
 
             case 'null':
