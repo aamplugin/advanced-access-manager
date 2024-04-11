@@ -105,7 +105,6 @@ class SecureLoginTest extends TestCase
         $this->assertEquals(51, AAM_Core_Cache::get('failed_login_attempts_' . $ip));
 
         // Reset original state
-        delete_transient('aam_failed_login_attempts_' . $ip);
         unset($_SERVER['REMOTE_ADDR']);
     }
 

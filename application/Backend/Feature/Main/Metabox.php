@@ -10,6 +10,7 @@
 /**
  * Backend metaboxes & widgets manager
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/358
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
  * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.26
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -106,19 +107,20 @@ class AAM_Backend_Feature_Main_Metabox
      *
      * @return string
      *
-     * @since 6.0.3 Fixed the bug where post types that do not have Gutenberg enabled
-     *              are not shown on the Metaboxes & Widgets tab
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/358
+     * @since 6.0.3  Fixed the bug where post types that do not have Gutenberg enabled
+     *               are not shown on the Metaboxes & Widgets tab
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @global array $wp_post_types
-     * @version 6.0.3
+     * @version 6.9.26
      */
     public function prepareInitialization()
     {
         global $wp_post_types;
 
-        delete_transient(self::DB_CACHE_OPTION);
+        AAM_Core_Cache::set(self::DB_CACHE_OPTION, array(), 31536000);
 
         $endpoints = array(add_query_arg(
             'init', 'metabox', admin_url('index.php')

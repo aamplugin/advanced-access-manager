@@ -5,15 +5,16 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * AAM Core Migration class
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/357
+ * @since 6.0.0  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.26
  */
 final class AAM_Core_Migration
 {
@@ -52,20 +53,24 @@ final class AAM_Core_Migration
      *
      * @return array
      *
-     * @since 6.3.0 Optimized AAM_Core_API::getOption call
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/357
+     * @since 6.3.0  Optimized AAM_Core_API::getOption call
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.3.0
+     * @version 6.9.26
      */
     public static function getPending()
     {
         $completed = AAM_Core_API::getOption(self::DB_OPTION);
         $pending   = array();
+        $iterator  = self::getDirectoryIterator();
 
-        foreach (self::getDirectoryIterator() as $mg) {
-            if ($mg->isFile() && !in_array($mg->getFilename(), $completed, true)) {
-                $pending[]  = $mg->getPathname();
+        if (is_a($iterator, DirectoryIterator::class)) {
+            foreach ($iterator as $mg) {
+                if ($mg->isFile() && !in_array($mg->getFilename(), $completed, true)) {
+                    $pending[]  = $mg->getPathname();
+                }
             }
         }
 
@@ -176,12 +181,22 @@ final class AAM_Core_Migration
      *
      * @return DirectoryIterator
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/357
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.26
      */
     protected static function getDirectoryIterator()
     {
-        return new DirectoryIterator(dirname(__DIR__) . '/Migration');
+        $iterator = null;
+        $dirname  = dirname(__DIR__) . '/Migration';
+
+        if (file_exists($dirname)) {
+            $iterator = new DirectoryIterator($dirname);
+        }
+
+        return $iterator;
     }
 
 }
