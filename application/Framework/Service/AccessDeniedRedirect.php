@@ -10,12 +10,13 @@
 /**
  * AAM service Access Denied Redirect manager
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  * @since 6.9.14 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.22
+ * @version 6.9.26
  */
 class AAM_Framework_Service_AccessDeniedRedirect
 {
@@ -40,6 +41,34 @@ class AAM_Framework_Service_AccessDeniedRedirect
         'page'     => 'page_redirect',
         'url'      => 'url_redirect',
         'callback' => 'trigger_callback'
+    );
+
+    /**
+     * Array of allowed HTTP status codes
+     *
+     * @version 6.9.26
+     */
+    const HTTP_STATUS_CODES = array(
+        'default'          => array('4xx', '5xx'),
+        'custom_message'   => array('4xx', '5xx'),
+        'page_redirect'    => array('3xx'),
+        'url_redirect'     => array('3xx'),
+        'login_redirect'   => null,
+        'trigger_callback' => array('3xx', '4xx', '5xx')
+    );
+
+    /**
+     * Array of default HTTP status codes
+     *
+     * @version 6.9.26
+     */
+    const HTTP_DEFAULT_STATUS_CODES = array(
+        'default'          => 401,
+        'custom_message'   => 401,
+        'page_redirect'    => 307,
+        'url_redirect'     => 307,
+        'login_redirect'   => null,
+        'trigger_callback' => 401
     );
 
     /**
@@ -182,8 +211,11 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
+     * @since 6.9.14 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.14
+     * @version 6.9.26
      */
     private function _prepare_redirect($area, $settings, $is_inherited)
     {
@@ -206,7 +238,15 @@ class AAM_Framework_Service_AccessDeniedRedirect
         } elseif ($response['type'] === 'trigger_callback') {
             $response['callback'] = $settings['redirect.callback'];
         } elseif ($response['type'] === 'custom_message') {
-            $response['message'] = $settings['redirect.message'];
+            $response['message']     = $settings['redirect.message'];
+
+            if (isset($settings['redirect.message.code'])) {
+                $response['http_status_code'] = $settings['redirect.message.code'];
+            }
+        } elseif ($response['type'] === 'default') {
+            if (isset($settings['redirect.default.code'])) {
+                $response['http_status_code'] = $settings['redirect.default.code'];
+            }
         }
 
         $response['is_inherited'] = $is_inherited;
@@ -221,11 +261,12 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
      * @since 6.9.14 Initial implementation of the method
      *
      * @access private
-     * @version 6.9.17
+     * @version 6.9.26
      */
     private function _validate_redirect(array $rule)
     {
@@ -242,7 +283,6 @@ class AAM_Framework_Service_AccessDeniedRedirect
 
         $type       = array_search($rule['type'], self::REDIRECT_TYPE_ALIAS);
         $normalized[$area . '.redirect.type'] = $type;
-
 
         if (empty($type)) {
             throw new InvalidArgumentException('The `type` is required');
@@ -284,7 +324,60 @@ class AAM_Framework_Service_AccessDeniedRedirect
             }
         }
 
+        // If HTTP status code is defined, save it as well
+        if (!empty($rule['http_status_code'])) {
+            $normalized[$area . '.redirect.' . $type . '.code'] = $this->_validate_status_code(
+                $rule['http_status_code'], $rule['type']
+            );
+        }
+
         return $normalized;
+    }
+
+    /**
+     * Validate status code
+     *
+     * @param int    $code
+     * @param string $redirect_type
+     *
+     * @return int
+     * @throws InvalidArgumentException
+     * @access private
+     *
+     * @version 6.9.26
+     */
+    private function _validate_status_code($code, $redirect_type)
+    {
+        $allowed_codes = self::HTTP_STATUS_CODES[$redirect_type];
+        $code          = intval($code);
+
+        if (is_null($allowed_codes) && !empty($code)) {
+            throw new InvalidArgumentException(
+                "Redirect type {$redirect_type} does not accept status codes"
+            );
+        } elseif (is_array($allowed_codes)) {
+            $list = array();
+
+            foreach($allowed_codes as $range) {
+                $list = array_merge(
+                    $list,
+                    range(
+                        str_replace('xx', '00', $range),
+                        str_replace('xx', '99', $range)
+                    )
+                );
+            }
+
+            if (!in_array($code, $list, true)) {
+                $allowed = implode(', ', $allowed_codes);
+
+                throw new InvalidArgumentException(
+                    "For redirect type {$redirect_type} allowed status codes are {$allowed}"
+                );
+            }
+        }
+
+        return $code;
     }
 
     /**

@@ -445,7 +445,6 @@ class PolicyServiceIntegrationTest extends TestCase
         $this->assertEquals(array(
             'enabled'     => true,
             'type'        => 'url',
-            'httpCode'    => 307,
             'destination' => 'https://aamportal.com'
         ), $object->get('redirected'));
     }
@@ -471,7 +470,6 @@ class PolicyServiceIntegrationTest extends TestCase
         $this->assertEquals(array(
             'enabled'     => true,
             'type'        => 'callback',
-            'httpCode'    => 307,
             'destination' => 'AAM\Callback\Main::helloWorld'
         ), $object->get('redirected'));
     }
@@ -498,20 +496,17 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'message',
-            'action' => 'Access Is Denied',
-            'code'   => 307
+            'action' => 'Access Is Denied'
         ), $object->findMatch('/hello-world-2/'));
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => 2,
-            'code'   => 307
+            'action' => 2
         ), $object->findMatch('/hello-world-3/'));
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID,
-            'code'   => 307
+            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID
         ), $object->findMatch('/hello-world-4'));
 
         $this->assertEquals(array(
@@ -522,14 +517,12 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'callback',
-            'action' => 'AAM\\Callback\\Main::helloWorld',
-            'code'   => 307
+            'action' => 'AAM\\Callback\\Main::helloWorld'
         ), $object->findMatch('/hello-world-6'));
 
         $this->assertEquals(array(
             'type'   => 'login',
-            'action' => null,
-            'code'   => 401
+            'action' => null
         ), $object->findMatch('/hello-world-7/'));
     }
 
@@ -567,7 +560,9 @@ class PolicyServiceIntegrationTest extends TestCase
 
         $this->assertEquals($object->getOption(), array(
             'backend.redirect.type'  => 'default',
-            'frontend.redirect.type' => 'default'
+            'backend.redirect.default.code'  => 401,
+            'frontend.redirect.type' => 'default',
+            'frontend.redirect.default.code' => 401
         ));
     }
 
@@ -590,7 +585,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.type'     => 'message',
             'backend.redirect.message'  => 'Backend Access Denied',
             'frontend.redirect.type'    => 'message',
-            'frontend.redirect.message' => 'Frontend Access Denied',
+            'frontend.redirect.message' => 'Frontend Access Denied'
         ));
     }
 
@@ -613,7 +608,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.type'  => 'page',
             'backend.redirect.page'  => 2,
             'frontend.redirect.type' => 'page',
-            'frontend.redirect.page' => 2,
+            'frontend.redirect.page' => 2
         ));
     }
 
@@ -636,7 +631,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.type'  => 'page',
             'backend.redirect.page'  => self::$page_id,
             'frontend.redirect.type' => 'page',
-            'frontend.redirect.page' => self::$page_id,
+            'frontend.redirect.page' => self::$page_id
         ));
     }
 
@@ -659,7 +654,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.type'  => 'url',
             'backend.redirect.url'   => '/backend-page',
             'frontend.redirect.type' => 'url',
-            'frontend.redirect.url'  => '/frontend-page',
+            'frontend.redirect.url'  => '/frontend-page'
         ));
     }
 
@@ -702,7 +697,7 @@ class PolicyServiceIntegrationTest extends TestCase
             'backend.redirect.type'      => 'callback',
             'backend.redirect.callback'  => 'backend_redirect',
             'frontend.redirect.type'     => 'callback',
-            'frontend.redirect.callback' => 'frontend_redirect',
+            'frontend.redirect.callback' => 'frontend_redirect'
         ));
     }
 
@@ -722,7 +717,7 @@ class PolicyServiceIntegrationTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
 
         $this->assertEquals($object->getOption(), array(
-            'login.redirect.type' => 'default',
+            'login.redirect.type' => 'default'
         ));
     }
 
@@ -742,8 +737,8 @@ class PolicyServiceIntegrationTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_LoginRedirect::OBJECT_TYPE);
 
         $this->assertEquals($object->getOption(), array(
-            'login.redirect.type' => 'page',
-            'login.redirect.page' => 2
+            'login.redirect.type'     => 'page',
+            'login.redirect.page'     => 2
         ));
     }
 
@@ -826,7 +821,7 @@ class PolicyServiceIntegrationTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
 
         $this->assertEquals($object->getOption(), array(
-            'logout.redirect.type' => 'default',
+            'logout.redirect.type' => 'default'
         ));
     }
 
@@ -909,8 +904,8 @@ class PolicyServiceIntegrationTest extends TestCase
         $object = AAM::getUser()->getObject(AAM_Core_Object_LogoutRedirect::OBJECT_TYPE);
 
         $this->assertEquals($object->getOption(), array(
-            'logout.redirect.type'     => 'callback',
-            'logout.redirect.callback' => 'after_logout_redirect'
+            'logout.redirect.type'      => 'callback',
+            'logout.redirect.callback'  => 'after_logout_redirect'
         ));
     }
 
@@ -932,7 +927,7 @@ class PolicyServiceIntegrationTest extends TestCase
         );
 
         $this->assertEquals($object->getOption(), array(
-            '404.redirect.type' => 'default',
+            '404.redirect.type' => 'default'
         ));
     }
 

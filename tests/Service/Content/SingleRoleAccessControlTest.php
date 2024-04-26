@@ -231,13 +231,6 @@ class SingleRoleAccessControlTest extends TestCase
         $wp_query->is_single = true;
         $GLOBALS['post'] = get_post(self::$post_id);
 
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
-
         // Capture the WP Die message
         ob_start();
         do_action('wp');
@@ -249,8 +242,6 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         // Reset WP Query
-        remove_all_filters('wp_die_handler', PHP_INT_MAX);
-
         $wp_query->is_single = null;
         unset($GLOBALS['post']);
     }
@@ -321,6 +312,7 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => get_page_link(self::$page_id),
             'status' => 301
         ), $response->get_error_data());
@@ -364,6 +356,7 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => 'https://aamportal.com',
             'status' => 307
         ), $response->get_error_data());
@@ -408,6 +401,7 @@ class SingleRoleAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => Callback::REDIRECT_URL,
             'status' => 310
         ), $response->get_error_data());

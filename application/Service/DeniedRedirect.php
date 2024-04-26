@@ -10,13 +10,14 @@
 /**
  * Access Denied Redirect service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/309
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
  *               https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.14
+ * @version 6.9.26
  */
 class AAM_Service_DeniedRedirect
 {
@@ -120,13 +121,14 @@ class AAM_Service_DeniedRedirect
      *
      * @return void
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
      * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
      *               https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.14
+     * @version 6.9.26
      */
     protected function initializeHooks()
     {
@@ -135,7 +137,7 @@ class AAM_Service_DeniedRedirect
             $service->setDefaultHandler($handler);
 
             return array($service, 'processDie');
-        }, PHP_INT_MAX - 1);
+        }, PHP_INT_MAX);
 
         // Policy generation hook
         add_filter(
@@ -181,12 +183,12 @@ class AAM_Service_DeniedRedirect
                             $page = get_post($destination);
 
                             if (is_a($page, 'WP_Post')) {
-                                $value['Slug'] = $page->post_name;
+                                $value['PageSlug'] = $page->post_name;
                             } else{
-                                $value['Id'] = intval($destination);
+                                $value['PageId'] = intval($destination);
                             }
                         } elseif ($val  === 'url') {
-                            $value['URL'] = trim($destination);
+                            $value['Url'] = trim($destination);
                         } elseif ($val === 'callback') {
                             $value['Callback'] = trim($destination);
                         } elseif ($val === 'message') {
@@ -216,17 +218,21 @@ class AAM_Service_DeniedRedirect
      *
      * @return void
      *
-     * @since 6.4.0 Small refactoring to meet AAM coding standards
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
+     * @since 6.4.0  Small refactoring to meet AAM coding standards
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.9.26
      */
     public function processDie($message, $title = '', $args = array())
     {
-        if ($title === 'aam_access_denied') {
+        static $in = false;
+
+        if ($title === 'aam_access_denied' && !$in) { // Prevent loop
             $method = AAM_Core_Request::server('REQUEST_METHOD');
             $isApi  = (defined('REST_REQUEST') && REST_REQUEST);
+            $in     = true;
 
             if (($method !== 'POST') && !$isApi) {
                 $area   = (is_admin() ? 'backend' : 'frontend');
@@ -234,21 +240,33 @@ class AAM_Service_DeniedRedirect
                     AAM_Core_Object_Redirect::OBJECT_TYPE
                 );
 
-                $type   = $object->get("{$area}.redirect.type", 'default');
+                $type = $object->get("{$area}.redirect.type");
 
-                AAM_Core_Redirect::execute(
-                    $type,
-                    array(
-                        $type  => $object->get("{$area}.redirect.{$type}"),
-                        'args' => $args
-                    )
-                );
+                if (!empty($type)) {
+                    $code = $object->get("{$area}.redirect.{$type}.code");
+
+                    if (!empty($code)) {
+                        $args['response'] = $code;
+                    }
+
+                    AAM_Core_Redirect::execute(
+                        $type,
+                        array_merge($args, array(
+                            $type     => $object->get("{$area}.redirect.{$type}"),
+                            'status'  => $code
+                        ))
+                    );
+                } else {
+                    AAM_Core_Redirect::execute('default', $args);
+                }
             } else {
                 call_user_func($this->getDefaultHandler(), $message, '', $args);
             }
         } else {
             call_user_func($this->getDefaultHandler(), $message, $title, $args);
         }
+
+        $in = false;
 
         if (!empty($args['exit'])) {
             exit; // Halt the execution

@@ -78,12 +78,6 @@ class UriTest extends TestCase
 
         $this->assertTrue($result);
 
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
         $_SERVER['REQUEST_URI'] = '/hello-world';
 
         ob_start();
@@ -113,12 +107,6 @@ class UriTest extends TestCase
 
         $this->assertTrue($result);
 
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
         $_SERVER['REQUEST_URI'] = '/Hello-world';
 
         ob_start();
@@ -147,12 +135,6 @@ class UriTest extends TestCase
 
         $this->assertTrue($result);
 
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
         $_SERVER['REQUEST_URI'] = '/hello-world';
 
         ob_start();

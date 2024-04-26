@@ -10,14 +10,15 @@
 /**
  * Core AAM redirect handler
  *
- * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/214
- * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/94
- * @since 6.0.5 Fixed bug where URL redirect was incorrectly validating destination
- *              URL
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+ * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/214
+ * @since 6.4.3  https://github.com/aamplugin/advanced-access-manager/issues/94
+ * @since 6.0.5  Fixed bug where URL redirect was incorrectly validating destination
+ *               URL
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.8.5
+ * @version 6.9.26
  */
 class AAM_Core_Redirect
 {
@@ -71,16 +72,21 @@ class AAM_Core_Redirect
      *
      * @return void
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.26
      */
     public static function printMessage($meta)
     {
-        $title   = __('Access Denied', AAM_KEY);
+        $title   = !empty($meta['title']) ? $meta['title'] : __('Access Denied', AAM_KEY);
         $message = !empty($meta['message']) ? $meta['message'] : $title;
-        $args    = !empty($meta['args']) ? $meta['args'] : array();
 
-        wp_die($message, $title, $args);
+        wp_die($message, $title, array(
+            'exit'     => defined('AAM_UNITTEST_RUNNING') ? false : true,
+            'response' => isset($meta['status']) ? $meta['status'] : 401
+        ));
     }
 
     /**
@@ -115,19 +121,20 @@ class AAM_Core_Redirect
      *
      * @return void
      *
-     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/214
-     * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/94
-     * @since 6.1.1 Defining default redirect code `307` if none provided
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/214
+     * @since 6.4.3  https://github.com/aamplugin/advanced-access-manager/issues/94
+     * @since 6.1.1  Defining default redirect code `307` if none provided
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.8.5
+     * @version 6.9.26
      */
     public static function doPageRedirect($meta)
     {
         $current = AAM_Core_API::getCurrentPost();
         $dest    = isset($meta['page']) ? $meta['page'] : null;
-        $code    = !empty($meta['code']) ? $meta['code'] : 307;
+        $code    = !empty($meta['status']) ? $meta['status'] : 307;
 
         if (!empty($dest) && (empty($current) || ($current->ID !== intval($dest)))) {
             wp_safe_redirect(get_page_link($dest), $code);
@@ -147,19 +154,20 @@ class AAM_Core_Redirect
      *
      * @return void
      *
-     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/214
-     * @since 6.4.3 https://github.com/aamplugin/advanced-access-manager/issues/94
-     * @since 6.0.5 Fixed bug where destination URL was not properly checked against
-     *              current page URI
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/214
+     * @since 6.4.3  https://github.com/aamplugin/advanced-access-manager/issues/94
+     * @since 6.0.5  Fixed bug where destination URL was not properly checked against
+     *               current page URI
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.8.5
+     * @version 6.9.26
      */
     public static function doUrlRedirect($meta)
     {
         $dest = isset($meta['url']) ? $meta['url'] : null;
-        $code = !empty($meta['code']) ? $meta['code'] : 307;
+        $code = !empty($meta['status']) ? $meta['status'] : 307;
 
         if ($dest !== AAM_Core_Request::server('REQUEST_URI')) {
             wp_safe_redirect($dest, $code);

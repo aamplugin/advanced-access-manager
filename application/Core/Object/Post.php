@@ -196,6 +196,17 @@ class AAM_Core_Object_Post extends AAM_Core_Object
      */
     public function isAllowedTo($property)
     {
+        // Normalize some names to improve code verbosity
+        $lower_case = strtolower($property);
+
+        if (in_array($lower_case, array('read', 'access', 'view', 'see'))) {
+            $property = 'restricted';
+        } elseif ($lower_case === 'list') {
+            $property = 'hidden';
+        } else if (in_array($lower_case, array('list_to_others', 'list_others'))) {
+            $property = 'hidden_others';
+        }
+
         return !$this->is($property);
     }
 

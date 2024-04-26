@@ -88,20 +88,17 @@ class PolicyVisitorTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'message',
-            'action' => 'Access Is Denied',
-            'code'   => 307
+            'action' => 'Access Is Denied'
         ), $object->findMatch('/hello-world-2/'));
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => 2,
-            'code'   => 307
+            'action' => 2
         ), $object->findMatch('/hello-world-3/'));
 
         $this->assertEquals(array(
             'type'   => 'page',
-            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID,
-            'code'   => 307
+            'action' => get_page_by_path('policy-service-integration-page', OBJECT, 'page')->ID
         ), $object->findMatch('/hello-world-4'));
 
         $this->assertEquals(array(
@@ -112,14 +109,12 @@ class PolicyVisitorTest extends TestCase
 
         $this->assertEquals(array(
             'type'   => 'callback',
-            'action' => 'AAM\\Callback\\Main::helloWorld',
-            'code'   => 307
+            'action' => 'AAM\\Callback\\Main::helloWorld'
         ), $object->findMatch('/hello-world-6'));
 
         $this->assertEquals(array(
             'type'   => 'login',
-            'action' => null,
-            'code'   => 401
+            'action' => null
         ), $object->findMatch('/hello-world-7/'));
     }
 

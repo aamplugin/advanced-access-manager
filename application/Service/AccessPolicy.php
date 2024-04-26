@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/294
@@ -29,7 +30,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.25
+ * @version 6.9.26
  */
 class AAM_Service_AccessPolicy
 {
@@ -293,6 +294,10 @@ class AAM_Service_AccessPolicy
         // Enrich the RESTful API
         add_filter('aam_role_rest_field_filter', array($this, 'enrich_role_rest_output'), 1, 3);
 
+        add_action('aam_valid_jwt_token_detected_action', function($token, $claims) {
+            update_user_meta($claims->userId, 'aam_auth_token', $token);
+        }, 10, 2);
+
         // Service fetch
         $this->registerService();
     }
@@ -550,13 +555,15 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
-     * @since 6.1.1 Method becomes protected
-     * @since 6.1.0 Changed the way access policy manage is obtained
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.1.1  Method becomes protected
+     * @since 6.1.0  Changed the way access policy manage is obtained
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
      * @see https://aamportal.com/reference/json-access-policy/resource-action/uri
-     * @version 6.1.1
+     *
+     * @version 6.9.26
      */
     protected function initializeUri($option)
     {
@@ -573,7 +580,23 @@ class AAM_Service_AccessPolicy
                     'type' => 'allow'
                 );
             } elseif(isset($stm['Metadata']['Redirect'])) {
-                $option[$uri] = $this->convertUriAction($stm['Metadata']['Redirect']);
+                $props = $this->_processRedirectParams($stm['Metadata']['Redirect']);
+
+                if (!empty($props)) {
+                    $type = $props['type'];
+
+                    // TODO: Post redirect stores the redirect values in a different
+                    // format. Normalize it to be the same way as any other redirect
+                    $option[$uri] = array(
+                        'type' => $type,
+                        'action' => isset($props[$type]) ? $props[$type] : null
+                    );
+
+                    // No need to store the HTTP status code
+                    if (!is_null($props['code'])) {
+                        $option[$uri]['code'] = $props['code'];
+                    }
+                }
             } else {
                 $option[$uri] = array(
                     'type'   => 'default',
@@ -621,26 +644,40 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.4.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.26
      */
     protected function initializeAccessDeniedRedirect($option)
     {
         $manager = AAM::api()->getAccessPolicyManager();
         $parsed  = array();
-        $params  = $manager->getParams('redirect:on:access-denied:(.*)');
+
+        // Fetching both frontend & backend access denied redirect params
+        $params = $manager->getParams('redirect:on:access-denied:(.*)');
 
         foreach($params as $key => $param) {
-            $parts    = explode(':', $key);
-            $area     = array_pop($parts);
-            $value    = $this->convertRedirectAction($param['Value']);
-            $type     = (isset($value['type']) ? $value['type'] : 'default');
+            $parts = explode(':', $key);
+            $area  = array_pop($parts);
+            $props = $this->_processRedirectParams(
+                $param['Value'],
+                AAM_Framework_Service_AccessDeniedRedirect::HTTP_DEFAULT_STATUS_CODES
+            );
 
-            // Populate the object
+            // Convert the identified properties to the legacy AAM key/value pair
+            $type                            = $props['type'];
             $parsed["{$area}.redirect.type"] = $type;
 
-            if (!empty($value['destination'])) {
-                $parsed["{$area}.redirect.{$type}"] = $value['destination'];
+            if (!is_null($props['code'])) {
+                $parsed["{$area}.redirect.{$type}.code"] = $props['code'];
+            }
+
+            // The default type does not have any additional configurations, so
+            // make sure that we take this into account
+            if (isset($props[$type])) {
+                $parsed["{$area}.redirect.{$type}"] = $props[$type];
             }
         }
 
@@ -656,56 +693,96 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/299
      * @since 6.9.12 Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.13
+     * @version 6.9.26
      */
     protected function initializeRedirect($option, $subject, $redirect_type)
     {
-        $manager = AAM::api()->getAccessPolicyManager($subject);
-        $parsed  = array();
-        $param   = $manager->getParam("redirect:on:{$redirect_type}");
+        $manager     = AAM::api()->getAccessPolicyManager($subject);
+        $properties  = $this->_processRedirectParams(
+            $manager->getParam("redirect:on:{$redirect_type}")
+        );
 
-        if (!empty($param)) {
-            $type = isset($param['Type']) ? $param['Type'] : 'default';
+        // Convert the identified properties to the legacy AAM key/value pair
+        $parsed = array();
 
-            if (in_array($type, array('page', 'page_redirect'))) {
-                // Adding the redirect type
-                $parsed["{$redirect_type}.redirect.type"] = 'page';
-
-                if (isset($param['PageId'])) {
-                    $parsed["{$redirect_type}.redirect.page"] = intval($param['PageId']);
-                } elseif (isset($param['Id'])) { // legacy param
-                    $parsed["{$redirect_type}.redirect.page"] = intval($param['Id']);
-                } elseif (isset($param['Slug'])) {
-                    $page = get_page_by_path($param['Slug'], OBJECT);
-                    $parsed["{$redirect_type}.redirect.page"] = (is_a($page, 'WP_Post') ? $page->ID : 0);
-                } elseif (isset($param['PageSlug'])) {
-                    $page = get_page_by_path($param['PageSlug'], OBJECT);
-                    $parsed["{$redirect_type}.redirect.page"] = (is_a($page, 'WP_Post') ? $page->ID : 0);
-                }
-            } elseif (in_array($type, array('url', 'url_redirect'))) {
-                // Adding the redirect type
-                $parsed["{$redirect_type}.redirect.type"] = 'url';
-
-                if (isset($param['Url'])) {
-                    $parsed["{$redirect_type}.redirect.url"] = $param['Url'];
-                } elseif (isset($param['URL'])) { // legacy
-                    $parsed["{$redirect_type}.redirect.url"] = $param['URL'];
-                }
-            } elseif (in_array($type, array('callback', 'trigger_callback'))) {
-                $parsed["{$redirect_type}.redirect.type"] = 'callback';
-                $parsed["{$redirect_type}.redirect.callback"] = $param['Callback'];
-            } elseif ($type === 'login') {
-                $parsed["{$redirect_type}.redirect.type"] = 'login';
-            } else {
-                $parsed["{$redirect_type}.redirect.type"] = 'default';
+        foreach($properties as $key => $value) {
+            if (!is_null($value)) {
+                $parsed["{$redirect_type}.redirect.{$key}"] = $value;
             }
         }
 
         return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Convert policy redirect definition to AAM settings
+     *
+     * @param array $param
+     * @param array $default_status_codes
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.26
+     */
+    private function _processRedirectParams($param, $default_status_codes = array())
+    {
+        $response = array();
+
+        if (!empty($param)) {
+            $type        = isset($param['Type']) ? $param['Type'] : 'default';
+            $status_code = isset($default_status_codes[$type]) ? $default_status_codes[$type] : null;
+
+            if (in_array($type, array('page', 'page_redirect'))) {
+                // Adding the redirect type
+                $response['type'] = 'page';
+
+                if (isset($param['PageId'])) {
+                    $response['page'] = intval($param['PageId']);
+                } elseif (isset($param['Id'])) { // legacy param
+                    $response['page'] = intval($param['Id']);
+                } elseif (isset($param['Slug'])) {
+                    $page = get_page_by_path($param['Slug'], OBJECT);
+                    $response['page'] = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                } elseif (isset($param['PageSlug'])) {
+                    $page = get_page_by_path($param['PageSlug'], OBJECT);
+                    $response['page'] = (is_a($page, 'WP_Post') ? $page->ID : 0);
+                }
+            } elseif (in_array($type, array('url', 'url_redirect'))) {
+                // Adding the redirect type
+                $response['type'] = 'url';
+
+                if (isset($param['Url'])) {
+                    $response['url'] = $param['Url'];
+                } elseif (isset($param['URL'])) { // legacy
+                    $response['url'] = $param['URL'];
+                }
+            } elseif (in_array($type, array('callback', 'trigger_callback'))) {
+                $response['type']     = 'callback';
+                $response['callback'] = $param['Callback'];
+            } elseif (in_array($type, array('message', 'custom_message'))) {
+                $response['type']    = 'message';
+                $response['message'] = $param['Message'];
+                $default_status_code  = 401;
+            } elseif (in_array($type, array('login', 'login_redirect'), true)) {
+                $response['type'] = 'login';
+            } else {
+                $response['type'] = 'default';
+            }
+
+            if (isset($param['Code'])) {
+                $response['code'] = intval($param['Code']);
+            } else {
+                $response['code'] = $status_code;
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -874,12 +951,13 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
-     * @since 6.4.0 Added `aam_post_read_action_conversion_filter` to support
-     *              https://github.com/aamplugin/advanced-access-manager/issues/68
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.4.0  Added `aam_post_read_action_conversion_filter` to support
+     *               https://github.com/aamplugin/advanced-access-manager/issues/68
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.26
      */
     protected function convertedPostReadAction(&$options, $statement, $ns = '')
     {
@@ -906,9 +984,24 @@ class AAM_Service_AccessPolicy
 
             // Redirect options
             if(array_key_exists('Redirect', $metadata)) {
-                $redirect = $this->convertRedirectAction($metadata['Redirect']);
-                $redirect['enabled'] = $effect;
-                $options[$ns . 'redirected'] = $redirect;
+                $redirect = array();
+                $props    = $this->_processRedirectParams($metadata['Redirect'], 307);
+
+                // TODO: Post redirect stores the redirect values in a different
+                // format. Normalize it to be the same way as any other redirect
+                if (!empty($props)) {
+                    $type                    = $props['type'];
+                    $redirect['type']        = $type;
+                    $redirect['destination'] = isset($props[$type]) ? $props[$type] : null;
+                    $redirect['enabled']     = $effect;
+
+                    if (!is_null($props['code'])) {
+                        $redirect['httpCode'] = $props['code'];
+                    }
+
+                    // Set the converted access controls
+                    $options[$ns . 'redirected'] = $redirect;
+                }
             }
 
             // Limited option
@@ -925,101 +1018,6 @@ class AAM_Service_AccessPolicy
         } else { // Simply restrict access to read a post
             $options[$ns . 'restricted'] = $effect;
         }
-    }
-
-    /**
-     * Convert Redirect type of action
-     *
-     * @param array $metadata
-     *
-     * @return array
-     *
-     * @since 6.4.0 Added support for the "Custom Message" redirect type
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.4.0
-     */
-    protected function convertRedirectAction($metadata)
-    {
-        $response = array(
-            'type'     => $metadata['Type'],
-            'httpCode' => (int)(isset($metadata['Code']) ? $metadata['Code'] : 307)
-        );
-
-        $destination = null;
-
-        if ($metadata['Type'] === 'page') {
-            if (isset($metadata['Id'])) {
-                $destination = intval($metadata['Id']);
-            } elseif (isset($metadata['Slug'])) {
-                $page        = get_page_by_path($metadata['Slug'], OBJECT);
-                $destination = (is_a($page, 'WP_Post') ? $page->ID : 0);
-            }
-        } elseif ($metadata['Type'] === 'url') {
-            $destination = $metadata['URL'];
-        } elseif ($metadata['Type'] === 'callback') {
-            $destination = $metadata['Callback'];
-        } elseif ($metadata['Type'] === 'message') {
-            $destination = $metadata['Message'];
-        }
-
-        $response['destination'] = $destination;
-
-        return $response;
-    }
-
-    /**
-     * Convert URI metadata to the URI access option
-     *
-     * @param array $metadata
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function convertUriAction($metadata)
-    {
-        $type   = strtolower($metadata['Type']);
-        $code   = isset($metadata['Code']) ? $metadata['Code'] : 307;
-        $action = null;
-
-        switch($type) {
-            case 'page':
-                if (isset($metadata['Id'])) {
-                    $action = intval($metadata['Id']);
-                } elseif (isset($metadata['Slug'])) {
-                    $page   = get_page_by_path($metadata['Slug'], OBJECT, 'page');
-                    $action = (is_a($page, 'WP_Post') ? $page->ID : 0);
-                }
-                break;
-
-            case 'message':
-                $action = $metadata['Message'];
-                break;
-
-            case 'url':
-                $action = $metadata['URL'];
-                break;
-
-            case 'callback':
-                $action = $metadata['Callback'];
-                break;
-
-            case 'login':
-                $code = 401; //Unauthorized
-                break;
-
-            default:
-                break;
-        }
-
-        return array(
-            'type'   => $type,
-            'action' => $action,
-            'code'   => $code
-        );
     }
 
     /**

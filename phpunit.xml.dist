@@ -23,6 +23,7 @@
     </testsuites>
     <php>
         <const name="AAM_UNITTEST_RESET_DB" value="1" />
+        <const name="AAM_UNITTEST_RUNNING" value="1" />
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
         <const name="AAM_UNITTEST_ADMIN_USERNAME" value="admin" />
         <const name="AAM_UNITTEST_ADMIN_PASSWORD" value="123456" />

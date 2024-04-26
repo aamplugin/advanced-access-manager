@@ -3476,8 +3476,12 @@
                             // provided
                             const type = $(this).val();
 
+                            // If type is default or message, also capture the HTTP
+                            // status code
+                            const http_status_code = $(`#${area}-${type}-status-code`).val();
+
                             if (['default', 'login_redirect'].includes(type)) {
-                                save(getAAM().prepareRequestSubjectData({ area, type }), () => {
+                                save(getAAM().prepareRequestSubjectData({ area, type, http_status_code }), () => {
                                     $('#aam-redirect-overwrite').show();
                                 });
                             }
@@ -3512,7 +3516,15 @@
                             } else if (type === 'trigger_callback') {
                                 payload.callback = value;
                             } else if (type === 'custom_message') {
-                                payload.message = value;
+                                if ($(this).attr('name').indexOf('message.code') !== -1) {
+                                    payload.http_status_code = value;
+                                    payload.message     = $(`textarea[name="${area}.redirect.message"]`).val();
+                                } else {
+                                    payload.message     = value;
+                                    payload.http_status_code = $(`#${area}-message-status-code`).val()
+                                }
+                            } else if (type === 'default') {
+                                payload.http_status_code = value;
                             }
 
                             //save redirect type
@@ -4224,7 +4236,7 @@
                             }
 
                             if (code) {
-                                payload.http_redirect_code = parseInt(code, 10);
+                                payload.http_status_code = parseInt(code, 10);
                             }
 
                             let endpoint = `${getLocal().rest_base}aam/v2/service/url`;
@@ -4340,7 +4352,7 @@
                                         rule.url,
                                         rule.type,
                                         action,
-                                        rule.http_redirect_code || null,
+                                        rule.http_status_code || null,
                                         actions.join(','),
                                         rule.metadata || null
                                     ]);

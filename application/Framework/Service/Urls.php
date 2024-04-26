@@ -10,6 +10,7 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  *               https://github.com/aamplugin/advanced-access-manager/issues/320
@@ -18,7 +19,7 @@
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.20
+ * @version 6.9.26
  */
 class AAM_Framework_Service_Urls
 {
@@ -41,6 +42,36 @@ class AAM_Framework_Service_Urls
         'url'      => 'url_redirect',
         'callback' => 'trigger_callback',
         'login'    => 'login_redirect'
+    );
+
+    /**
+     * Array of allowed HTTP status codes
+     *
+     * @version 6.9.26
+     */
+    const HTTP_STATUS_CODES = array(
+        'allow'            => null,
+        'default'          => array('4xx', '5xx'),
+        'custom_message'   => array('4xx', '5xx'),
+        'page_redirect'    => array('3xx'),
+        'url_redirect'     => array('3xx'),
+        'login_redirect'   => null,
+        'trigger_callback' => array('3xx', '4xx', '5xx')
+    );
+
+    /**
+     * Array of default HTTP status codes
+     *
+     * @version 6.9.26
+     */
+    const HTTP_DEFAULT_STATUS_CODES = array(
+        'allow'            => null,
+        'default'          => 401,
+        'custom_message'   => 401,
+        'page_redirect'    => 307,
+        'url_redirect'     => 307,
+        'login_redirect'   => null,
+        'trigger_callback' => 401
     );
 
     /**
@@ -300,11 +331,12 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
      * @since 6.9.9  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.17
+     * @version 6.9.26
      */
     private function _prepare_rule($url, $settings, $subject, $is_inherited = false)
     {
@@ -321,11 +353,11 @@ class AAM_Framework_Service_Urls
         if ($response['type'] === 'custom_message') {
             $response['message'] = $settings['action'];
         } elseif ($response['type'] === 'page_redirect') {
-            $response['redirect_page_id']  = intval($settings['action']);
-            $response['http_redirect_code'] = $http_code;
+            $response['redirect_page_id'] = intval($settings['action']);
+            $response['http_status_code'] = $http_code;
         } elseif ($response['type'] === 'url_redirect') {
-            $response['redirect_url']       = $settings['action'];
-            $response['http_redirect_code'] = $http_code;
+            $response['redirect_url']     = $settings['action'];
+            $response['http_status_code'] = $http_code;
         } elseif ($response['type'] === 'trigger_callback') {
             $response['callback'] = $settings['action'];
         }
@@ -344,13 +376,14 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
      * @since 6.9.9  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.17
+     * @version 6.9.26
      */
     private function _validate_rule(array $rule)
     {
@@ -415,10 +448,10 @@ class AAM_Framework_Service_Urls
             }
         }
 
-        if (!empty($rule['http_redirect_code'])) {
-            $code = intval($rule['http_redirect_code']);
+        if (!empty($rule['http_status_code'])) {
+            $code = intval($rule['http_status_code']);
 
-            if ($code >= 300 && $code < 400) {
+            if ($code >= 300) {
                 $normalized['code'] = $code;
             }
         }

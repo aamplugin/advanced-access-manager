@@ -477,7 +477,7 @@ class PolicyServiceIntegrationTest extends TestCase
         wp_remove_object_terms(self::$post_id, self::$tag_a, 'post_tag');
     }
 
-     /**
+    /**
      * Prepare the environment
      *
      * Update Unit Test access policy with proper policy

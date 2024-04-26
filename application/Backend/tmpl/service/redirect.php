@@ -1,12 +1,13 @@
 <?php
 /**
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/252
  * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
  * @since 6.0.0  Initial implementation of the templates
  *
- * @version 6.9.21
+ * @version 6.9.26
  *
  */
 ?>
@@ -47,7 +48,7 @@
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane active" id="frontend-redirect">
                             <div class="radio">
-                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-default" value="default" data-action="none" data-group="frontend"<?php echo ($frontendType == 'default' ? ' checked' : ''); ?> />
+                                <input type="radio" name="frontend.redirect.type" id="frontend-redirect-default" value="default" data-action="#frontend-default-action" data-group="frontend"<?php echo ($frontendType == 'default' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
@@ -73,10 +74,34 @@
                                 <label for="frontend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
+                            <div class="form-group aam-redirect-action frontend" id="frontend-default-action" style="display: <?php echo ($frontendType == 'default' ? 'block' : 'none'); ?>;">
+                                <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <?php $redirect_default_code = $this->getOption('frontend.redirect.default.code'); ?>
+                                <select class="form-control form-clearable" id="frontend-default-status-code" data-group="frontend">
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
+                                    <option value="402"<?php echo $redirect_default_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
+                                    <option value="403"<?php echo $redirect_default_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                    <option value="404"<?php echo $redirect_default_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
+                                    <option value="500"<?php echo $redirect_default_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error', AAM_KEY); ?></option>
+                                </select>
+                            </div>
+
                             <div class="form-group aam-redirect-action frontend" id="frontend-message-action" style="display: <?php echo ($frontendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="frontend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                                 <?php $redirect_message = $this->getOption('frontend.redirect.message') ?>
                                 <textarea class="form-control" name="frontend.redirect.message" data-group="frontend" rows="3" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"><?php echo is_string($redirect_message) ? stripslashes($redirect_message) : ''; ?></textarea>
+
+                                <div class="aam-mt-1">
+                                    <label for="frontend-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                    <?php $redirect_message_code = $this->getOption('frontend.redirect.message.code'); ?>
+                                    <select class="form-control form-clearable" name="frontend.redirect.message.code" id="frontend-message-status-code" data-group="frontend">
+                                        <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
+                                        <option value="402"<?php echo $redirect_message_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
+                                        <option value="403"<?php echo $redirect_message_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                        <option value="404"<?php echo $redirect_message_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
+                                        <option value="500"<?php echo $redirect_message_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error', AAM_KEY); ?></option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="form-group aam-redirect-action frontend" id="frontend-page-action" style="display: <?php echo ($frontendType == 'page' ? 'block' : 'none'); ?>;">
@@ -106,7 +131,7 @@
                         </div>
                         <div role="tabpanel" class="tab-pane" id="backend-redirect">
                             <div class="radio">
-                                <input type="radio" name="backend.redirect.type" id="backend-redirect-default" data-action="none" value="default" data-group="backend"<?php echo ($backendType == 'default' ? ' checked' : ''); ?> />
+                                <input type="radio" name="backend.redirect.type" id="backend-redirect-default" data-action="#backend-default" value="default" data-group="backend"<?php echo ($backendType == 'default' ? ' checked' : ''); ?> />
                                 <label for="backend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                             </div>
                             <div class="radio">
@@ -126,9 +151,33 @@
                                 <label for="backend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                             </div>
 
+                            <div class="form-group aam-redirect-action backend" id="backend-default" style="display: <?php echo ($backendType == 'default' ? 'block' : 'none'); ?>;">
+                                <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <?php $redirect_default_code = $this->getOption('backend.redirect.default.code'); ?>
+                                <select class="form-control form-clearable" id="backend-default-status-code" data-group="frontend">
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
+                                    <option value="402"<?php echo $redirect_default_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
+                                    <option value="403"<?php echo $redirect_default_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                    <option value="404"<?php echo $redirect_default_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
+                                    <option value="500"<?php echo $redirect_default_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error', AAM_KEY); ?></option>
+                                </select>
+                            </div>
+
                             <div class="form-group aam-redirect-action backend" id="backend-message" style="display: <?php echo ($backendType == 'message' ? 'block' : 'none'); ?>;">
                                 <label for="backend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                                 <textarea class="form-control" rows="3" data-group="backend" placeholder="<?php echo __('Enter message...', AAM_KEY); ?>" name="backend.redirect.message"><?php $o = $this->getOption('backend.redirect.message'); echo esc_textarea(is_string($o) ? $o : ''); ?></textarea>
+
+                                <div class="aam-mt-1">
+                                    <label for="backend-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                    <?php $redirect_message_code = $this->getOption('backend.redirect.message.code'); ?>
+                                    <select class="form-control form-clearable" name="backend.redirect.message.code" id="backend-message-status-code" data-group="backend">
+                                        <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
+                                        <option value="402"<?php echo $redirect_message_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
+                                        <option value="403"<?php echo $redirect_message_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                        <option value="404"<?php echo $redirect_message_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
+                                        <option value="500"<?php echo $redirect_message_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error', AAM_KEY); ?></option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="form-group aam-redirect-action backend" id="backend-page-action" style="display: <?php echo ($backendType == 'page' ? 'block' : 'none'); ?>;">

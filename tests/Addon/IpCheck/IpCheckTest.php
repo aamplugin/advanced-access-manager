@@ -24,6 +24,7 @@ use AAM,
  */
 class IpCheckTest extends TestCase
 {
+
     use ResetTrait;
 
     /**
@@ -58,18 +59,11 @@ class IpCheckTest extends TestCase
      */
     public function testEntireWebsiteRestricted()
     {
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
-
         // Fake the IP address
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        AAM::api()->updateConfig('geoapi.test_ip', '3.77.207.0');
 
         $object = AAM::getUser()->getObject(IPCheckObject::OBJECT_TYPE);
-        $this->assertTrue($object->updateOptionItem('ip|127.0.0.1', true)->save());
+        $this->assertTrue($object->updateOptionItem('ip|3.77.207.0', true)->save());
 
         // Capture the WP Die message
         ob_start();
@@ -80,8 +74,7 @@ class IpCheckTest extends TestCase
         $this->assertStringContainsString('Access Denied', $content);
 
         // Reset WP Query
-        remove_all_filters('wp_die_handler', PHP_INT_MAX);
-        unset($_SERVER['REMOTE_ADDR']);
+        AAM::api()->deleteConfig('geoapi.test_ip');
     }
 
     /**
@@ -101,7 +94,7 @@ class IpCheckTest extends TestCase
         // Set restriction
         $this->assertTrue($object->updateOptionItem('selective', array(
             'rules' => array(
-                'ip|127.0.0.1' => true,
+                'ip|3.77.207.0' => true,
             ),
             'enabled' => true
         ))->save());
@@ -110,7 +103,7 @@ class IpCheckTest extends TestCase
         $this->_resetSubjects();
 
         // Verify that access is denied by IP address
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        AAM::api()->updateConfig('geoapi.test_ip', '3.77.207.0');
 
         $post = AAM::getUser()->getObject(
             AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
@@ -124,7 +117,7 @@ class IpCheckTest extends TestCase
         );
 
         // Reset original state
-        unset($_SERVER['REMOTE_ADDR']);
+        AAM::api()->deleteConfig('geoapi.test_ip');
     }
 
     /**

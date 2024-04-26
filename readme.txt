@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, membership, backend menu, user role, restricted content, security, jwt
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
-Tested up to: 6.5
-Stable tag: 6.9.25
+Tested up to: 6.5.2
+Stable tag: 6.9.26
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -84,6 +84,8 @@ We take security and privacy very seriously, that is why there are several non-n
 = 6.9.26 =
 * Fixed: Metaboxes & Widgets service appends list for each refresh [https://github.com/aamplugin/advanced-access-manager/issues/358](https://github.com/aamplugin/advanced-access-manager/issues/358)
 * Fixed: Fatal error: No such file or directory in /.../application/Core/Migration.php:184 [https://github.com/aamplugin/advanced-access-manager/issues/357](https://github.com/aamplugin/advanced-access-manager/issues/357)
+* New:   Add the ability to change HTTP status code for "Access Denied" message [https://github.com/aamplugin/advanced-access-manager/issues/359](https://github.com/aamplugin/advanced-access-manager/issues/359)
+* Changed: Revise all redirect functionality and standardize internal implementation [https://github.com/aamplugin/advanced-access-manager/issues/360](https://github.com/aamplugin/advanced-access-manager/issues/360)
 
 = 6.9.25 =
 * Fixed: Access Policy Param "Enforce" did not enforce [https://github.com/aamplugin/advanced-access-manager/issues/355](https://github.com/aamplugin/advanced-access-manager/issues/355)

@@ -337,7 +337,9 @@ class AAM_Core_Policy_Manager
             );
         }
 
-        if (is_array($res) && is_array($param['Value'])) {
+        if (is_null($param)) {
+            $res = null;
+        } elseif (is_array($res) && is_array($param['Value'])) {
             $res = array_replace_recursive($res, $param['Value']);
         } else {
             $res = $param['Value'];

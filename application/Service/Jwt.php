@@ -608,12 +608,17 @@ class AAM_Service_Jwt
             if ($token !== $item) {
                 $filtered[] = $item;
             } elseif (get_current_user_id() !== $userId) {
-                // Also delete user session if any is active. The downside here is
-                // that if user logged in with different token, he still is going to
-                // be logged out because AAM does not track the token that user used
-                // to login
-                $sessions = WP_Session_Tokens::get_instance($userId);
-                $sessions->destroy_all();
+                // Get the last JWT token that was used to authenticate user
+                $last_token = get_user_meta(
+                    get_current_user_id(), 'aam_auth_token', true
+                );
+
+                // Remove all user's sessions because we just revoked the token
+                // they used to authenticate
+                if ($last_token === $token) {
+                    $sessions = WP_Session_Tokens::get_instance($userId);
+                    $sessions->destroy_all();
+                }
             }
         }
 
@@ -674,6 +679,12 @@ class AAM_Service_Jwt
                             add_action('init', array($this, 'authenticateUser'), 1);
                         }
                     }
+
+                    do_action(
+                        'aam_valid_jwt_token_detected_action',
+                        $token->jwt,
+                        $result
+                    );
                 }
             }
         }
@@ -698,13 +709,27 @@ class AAM_Service_Jwt
      */
     public function getJwtClaim($value, $prop)
     {
-        $token = $this->extractToken();
+        $token   = $this->extractToken();
+        $from_db = false;
 
-        if ($token) {
-            $claims = $this->validate($token->jwt);
+        // If token is not found, try to fetch it from DB, but only if user is already
+        // authenticated
+        if (is_object($token)) {
+            $jwt = $token->jwt;
+        } elseif (is_user_logged_in()) {
+            $jwt     = get_user_meta(get_current_user_id(), 'aam_auth_token', true);
+            $from_db = true;
+        } else {
+            $jwt = null;
+        }
+
+        if ($jwt) {
+            $claims = $this->validate($jwt);
 
             if (!is_wp_error($claims)) {
                 $value = (property_exists($claims, $prop) ? $claims->$prop : null);
+            } elseif ($from_db) { // automatically purge invalid token
+                delete_user_meta(wp_get_current_user()->ID, 'aam_auth_token');
             }
         }
 

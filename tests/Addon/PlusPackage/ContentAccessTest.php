@@ -365,26 +365,15 @@ class ContentAccessTest extends TestCase
         $wp_query->is_category = true;
         $wp_query->queried_object = get_term(self::$term_id, 'category');
 
-        // Override the default handlers so we can suppress die exit
-        add_filter('wp_die_handler', function() {
-            return function($message, $title) {
-                _default_wp_die_handler($message, $title, array('exit' => false));
-            };
-        }, PHP_INT_MAX);
-
         // Capture the WP Die message
         ob_start();
         do_action('wp');
         $content = ob_get_contents();
         ob_end_clean();
 
-        $this->assertStringContainsString(
-            'Access denied to access this category', $content
-        );
+        $this->assertStringContainsString('Access Denied', $content);
 
         // Reset WP Query
-        remove_all_filters('wp_die_handler', PHP_INT_MAX);
-
         unset($wp_query->is_category);
         unset($wp_query->queried_object);
     }

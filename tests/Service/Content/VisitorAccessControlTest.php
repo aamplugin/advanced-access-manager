@@ -244,6 +244,7 @@ class VisitorAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => get_page_link(self::$page_id),
             'status' => 301
         ), $response->get_error_data());
@@ -287,6 +288,7 @@ class VisitorAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => 'https://aamportal.com',
             'status' => 307
         ), $response->get_error_data());
@@ -331,6 +333,7 @@ class VisitorAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => Callback::REDIRECT_URL,
             'status' => 310
         ), $response->get_error_data());
@@ -373,6 +376,7 @@ class VisitorAccessControlTest extends TestCase
         );
 
         $this->assertEquals(array(
+            'type'   => 'url',
             'url'    => wp_login_url() . '?reason=restricted',
             'status' => 301
         ), $response->get_error_data());

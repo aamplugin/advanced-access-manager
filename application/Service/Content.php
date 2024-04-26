@@ -10,22 +10,23 @@
 /**
  * Posts & Terms service
  *
- * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/268
- * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/264
- * @since 6.7.7 https://github.com/aamplugin/advanced-access-manager/issues/184
- * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
- * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
- * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.2.0 Enhanced HIDDEN option with more granular access controls
- * @since 6.1.0 Multiple bug fixed
- * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins
- * @since 6.0.2 Refactored the way access to posts is managed. No more pseudo caps
- *              aam|...
- * @since 6.0.1 Bug fixing
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+ * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
+ * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/264
+ * @since 6.7.7  https://github.com/aamplugin/advanced-access-manager/issues/184
+ * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/137
+ * @since 6.5.1  https://github.com/aamplugin/advanced-access-manager/issues/115
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+ * @since 6.2.0  Enhanced HIDDEN option with more granular access controls
+ * @since 6.1.0  Multiple bug fixed
+ * @since 6.0.4  Fixed incompatibility with some quite aggressive plugins
+ * @since 6.0.2  Refactored the way access to posts is managed. No more pseudo caps
+ *               aam|...
+ * @since 6.0.1  Bug fixing
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.9
+ * @version 6.9.26
  */
 class AAM_Service_Content
 {
@@ -337,13 +338,14 @@ class AAM_Service_Content
      *
      * @return array
      *
-     * @since 6.4.0 Moved this method from AAM_Core_Policy_Generator
-     * @since 6.3.0 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
-     * @since 6.2.2 Fixed bug that caused fatal error for PHP lower than 7.0.0
-     * @since 6.2.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.4.0  Moved this method from AAM_Core_Policy_Generator
+     * @since 6.3.0  Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
+     * @since 6.2.2  Fixed bug that caused fatal error for PHP lower than 7.0.0
+     * @since 6.2.0  Initial implementation of the method
      *
      * @access private
-     * @version 6.4.0
+     * @version 6.9.26
      */
     private function _convertToPostStatements($resource, $options)
     {
@@ -433,7 +435,7 @@ class AAM_Service_Content
                 case 'redirected':
                     $metadata = array(
                         'Type' => $settings['type'],
-                        'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : 307)
+                        'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : null)
                     );
 
                     if ($settings['type'] === 'page') {
@@ -442,6 +444,8 @@ class AAM_Service_Content
                         $metadata['URL'] = trim($settings['destination']);
                     } elseif ($settings['type'] === 'callback') {
                         $metadata['Callback'] = trim($settings['destination']);
+                    } elseif ($settings['type'] === 'message') {
+                        $metadata['Message'] = trim($settings['destination']);
                     }
 
                     $tree->statements[] = array(
@@ -694,7 +698,11 @@ class AAM_Service_Content
      *
      * @access public
      * @global WP_Query $wp_query
-     * @version 6.0.0
+     *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.0.0  Initial implementation of the method
+     *
+     * @version 6.9.26
      */
     public function wp()
     {
@@ -707,10 +715,12 @@ class AAM_Service_Content
                 $error = $this->isAuthorizedToReadPost($post);
 
                 if (is_wp_error($error)) {
+                    $data = $error->get_error_data();
+
                     if ($error->get_error_code() === 'post_access_redirected') {
-                        AAM_Core_Redirect::execute('url', $error->get_error_data());
+                        AAM_Core_Redirect::execute($data['type'], $data);
                     } elseif ($error->get_error_code() !== 'post_access_protected') {
-                        wp_die($error->get_error_message(), 'aam_access_denied');
+                        wp_die($error->get_error_message(), 'aam_access_denied', $data);
                     }
                 } else {
                     $this->incrementPostReadCounter($post);
@@ -1303,8 +1313,11 @@ class AAM_Service_Content
      *
      * @return boolean|WP_Error
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.26
      */
     public function checkPostExpiration(AAM_Core_Object_Post $post)
     {
@@ -1318,7 +1331,10 @@ class AAM_Service_Content
                 $result = new WP_Error(
                     'post_access_expired',
                     'User is unauthorized to access this post. Access Expired.',
-                    array('status' => 401)
+                    array(
+                        'status' => 401,
+                        'message' => 'User is unauthorized to access this post. Access Expired.'
+                    )
                 );
             }
         }
@@ -1336,17 +1352,26 @@ class AAM_Service_Content
      * @return boolean|WP_Error
      *
      * @access public
-     * @version 6.0.0
+     *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.0.0  Initial implementation of the method
+     *
+     * @version 6.9.26
      */
     public function checkPostReadAccess(AAM_Core_Object_Post $post)
     {
         $result = true;
 
         if ($post->is('restricted')) {
+            $data   = $post->get('restricted');
             $result = new WP_Error(
                 'post_access_restricted',
-                "User is unauthorized to access this post. Access denied.",
-                array('status' => 401)
+                'User is unauthorized to access this post. Access denied.',
+                array(
+                    'status' => isset($data['code']) ? $data['code'] : 401,
+                    'message' => 'User is unauthorized to access this post. Access denied.'
+
+                )
             );
         }
 
@@ -1364,11 +1389,12 @@ class AAM_Service_Content
      *
      * @return boolean|WP_Error
      *
-     * @since 6.2.0 Simplified implementation
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.2.0  Simplified implementation
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.26
      */
     public function checkPostLimitCounter(AAM_Core_Object_Post $post)
     {
@@ -1384,8 +1410,11 @@ class AAM_Service_Content
             if ($counter >= $limited['threshold']) {
                 $result = new WP_Error(
                     'post_access_exceeded_limit',
-                    "User exceeded allowed access number. Access denied.",
-                    array('status' => 401)
+                    'User exceeded allowed access number. Access denied.',
+                    array(
+                        'status' => 401,
+                        'message' => 'User exceeded allowed access number. Access denied.'
+                    )
                 );
             }
         }
@@ -1403,24 +1432,30 @@ class AAM_Service_Content
      *
      * @return boolean|WP_Error
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.26
      */
     public function checkPostRedirect(AAM_Core_Object_Post $post)
     {
         $result = true;
 
         if ($post->is('redirected')) {
-            $redirect  = $post->get('redirected');
-            $location  = null;
+            $redirect = $post->get('redirected');
+            $metadata = array(
+                'type'   => 'url',
+                'status' => isset($redirect['httpCode']) ? $redirect['httpCode'] : null
+            );
 
             switch ($redirect['type']) {
                 case 'page':
-                    $location = get_page_link($redirect['destination']);
+                    $metadata['url'] = get_page_link($redirect['destination']);
                     break;
 
                 case 'login':
-                    $location = add_query_arg(
+                    $metadata['url'] = add_query_arg(
                         'reason',
                         'restricted',
                         wp_login_url($this->getFromServer('REQUEST_URI'))
@@ -1428,12 +1463,22 @@ class AAM_Service_Content
                     break;
 
                 case 'url':
-                    $location = $redirect['destination'];
+                    $metadata['url'] = $redirect['destination'];
+                    break;
+
+                case 'message':
+                    $metadata['type']    = 'message';
+                    $metadata['message'] = $redirect['destination'];
+
+                    // This is to support the wp_die function execution
+                    $metadata['args'] = array('response' => $metadata['status']);
                     break;
 
                 case 'callback':
                     if (is_callable($redirect['destination'])) {
-                        $location = call_user_func($redirect['destination'], $post);
+                        $metadata['url'] = call_user_func(
+                            $redirect['destination'], $post
+                        );
                     } else {
                         _doing_it_wrong(
                             __CLASS__ . '::' . __METHOD__,
@@ -1444,16 +1489,14 @@ class AAM_Service_Content
                     break;
 
                 default:
+                    $metadata['type'] = 'default';
                     break;
             }
 
             $result = new WP_Error(
                 'post_access_redirected',
                 'Direct access is not allowed. Follow the provided redirect rule.',
-                array(
-                    'url'    => $location,
-                    'status' => $redirect['httpCode']
-                )
+                $metadata
             );
         }
 
@@ -1502,9 +1545,7 @@ class AAM_Service_Content
                 $result = new WP_Error(
                     'post_access_protected',
                     'The post is password protected. Invalid password provided.',
-                    array(
-                        'status' => 401
-                    )
+                    array('status' => 401)
                 );
             }
         }

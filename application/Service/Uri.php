@@ -10,6 +10,7 @@
 /**
  * URI access service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.15 https://github.com/aamplugin/advanced-access-manager/issues/314
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
@@ -19,7 +20,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.15
+ * @version 6.9.26
  */
 class AAM_Service_Uri
 {
@@ -128,6 +129,7 @@ class AAM_Service_Uri
      *
      * @return boolean
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.15 https://github.com/aamplugin/advanced-access-manager/issues/314
      * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
      * @since 6.3.0  https://github.com/aamplugin/advanced-access-manager/issues/18
@@ -135,7 +137,7 @@ class AAM_Service_Uri
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.15
+     * @version 6.9.26
      */
     public function authorizeUri($uri = null)
     {
@@ -158,7 +160,7 @@ class AAM_Service_Uri
                 $metadata = array();
 
                 if (!empty($match['code'])){
-                    $metadata['code'] = $match['code'];
+                    $metadata['status'] = $match['code'];
                 }
 
                 if (!empty($match['action'])){

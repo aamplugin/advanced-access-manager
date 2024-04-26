@@ -10,8 +10,11 @@
 /**
  * RESTful API for the Login Redirect service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+ * @since 6.9.12 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.26
  */
 class AAM_Core_Restful_LoginRedirectService
 {
@@ -23,8 +26,11 @@ class AAM_Core_Restful_LoginRedirectService
      *
      * @return void
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.9.12 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.26
      */
     protected function __construct()
     {
@@ -64,6 +70,13 @@ class AAM_Core_Restful_LoginRedirectService
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_url($value, $request);
+                        }
+                    ),
+                    'http_status_code' => array(
+                        'description' => __('HTTP Status Code', AAM_KEY),
+                        'type'        => 'number',
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_redirect_status_code($value, $request);
                         }
                     ),
                     'callback' => array(
@@ -281,6 +294,56 @@ class AAM_Core_Restful_LoginRedirectService
                 __('The callback is not valid PHP callback', AAM_KEY),
                 array('status'  => 400)
             );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Validate HTTP status code
+     *
+     * @param string          $value
+     * @param WP_REST_Request $request
+     *
+     * @return boolean|WP_Error
+     *
+     * @access private
+     * @version 6.9.26
+     */
+    private function _validate_redirect_status_code($value, $request)
+    {
+        $response    = true;
+        $rule_type   = $request->get_param('type');
+        $status_code = intval($value);
+
+        $allowed = AAM_Framework_Service_LoginRedirect::HTTP_STATUS_CODES[$rule_type];
+
+        if (is_null($allowed) && !empty($status_code)) {
+            throw new InvalidArgumentException(
+                "Redirect type {$rule_type} does not accept status codes"
+            );
+        } elseif (is_array($allowed)) {
+            $list = array();
+
+            foreach($allowed as $range) {
+                $list = array_merge(
+                    $list,
+                    range(
+                        str_replace('xx', '00', $range),
+                        str_replace('xx', '99', $range)
+                    )
+                );
+            }
+
+            if (!in_array($status_code, $list, true)) {
+                $allowed = implode(', ', $allowed);
+
+                $response = new WP_Error(
+                    'rest_invalid_param',
+                    "For redirect type {$rule_type} allowed status codes are {$allowed}",
+                    array('status'  => 400)
+                );
+            }
         }
 
         return $response;

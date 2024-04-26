@@ -10,6 +10,7 @@
 /**
  * Logout Redirect service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
  * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.26
  */
 class AAM_Service_LogoutRedirect
 {
@@ -83,6 +84,7 @@ class AAM_Service_LogoutRedirect
      *
      * @return void
      *
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
      * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
      * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
@@ -92,7 +94,7 @@ class AAM_Service_LogoutRedirect
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.26
      */
     protected function initializeHooks()
     {
@@ -112,9 +114,9 @@ class AAM_Service_LogoutRedirect
             }
 
             if ($type !== 'default') {
-                AAM_Core_Redirect::execute(
-                    $type, array($type => $this->redirect["logout.redirect.{$type}"])
-                );
+                AAM_Core_Redirect::execute($type, array(
+                    $type => $this->redirect["logout.redirect.{$type}"]
+                ));
             }
 
             // Halt the execution. Redirect should carry user away if this is not

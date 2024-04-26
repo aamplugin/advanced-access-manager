@@ -10,8 +10,11 @@
 /**
  * AAM service Login Redirect manager
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+ * @since 6.9.12 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.26
  */
 class AAM_Framework_Service_LoginRedirect
     extends AAM_Framework_Service_RedirectAbstract
@@ -25,6 +28,33 @@ class AAM_Framework_Service_LoginRedirect
      * @version 6.9.12
      */
     const REDIRECT_TYPE = 'login';
+
+    /**
+     * Redirect type aliases
+     *
+     * To be a bit more verbose, we are renaming the legacy rule types to something
+     * that is more intuitive
+     *
+     * @version 6.9.26
+     */
+    const REDIRECT_TYPE_ALIAS = array(
+        'default'  => 'default',
+        'page'     => 'page_redirect',
+        'url'      => 'url_redirect',
+        'callback' => 'trigger_callback'
+    );
+
+    /**
+     * Array of allowed HTTP status codes
+     *
+     * @version 6.9.26
+     */
+    const HTTP_STATUS_CODES = array(
+        'default'          => null,
+        'page_redirect'    => null,
+        'url_redirect'     => null,
+        'trigger_callback' => null
+    );
 
     /**
      * Get object

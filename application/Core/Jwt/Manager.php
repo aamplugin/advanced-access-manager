@@ -80,7 +80,7 @@ class AAM_Core_Jwt_Manager
      *
      * @param string $token
      *
-     * @return boolean
+     * @return object
      *
      * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/281
      * @since 6.9.0  Initial implementation of the method
@@ -140,7 +140,7 @@ class AAM_Core_Jwt_Manager
      * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/263
      * @since 6.9.0 Initial implementation of the method
      *
-     * @return string
+     * @return object
      * @version 6.9.8
      */
     public function encode($payload)

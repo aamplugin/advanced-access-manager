@@ -10,6 +10,7 @@
 /**
  * 404 redirect service
  *
+ * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
  * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/215
  * @since 6.4.0  Refactored to use 404 object instead of AAM config
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the service
  *
  * @package AAM
- * @version 6.9.12
+ * @version 6.9.26
  */
 class AAM_Service_NotFoundRedirect
 {
@@ -97,13 +98,14 @@ class AAM_Service_NotFoundRedirect
      *
      * @return void
      *
-     * @since 6.8.5 https://github.com/aamplugin/advanced-access-manager/issues/215
-     * @since 6.4.0 https://github.com/aamplugin/advanced-access-manager/issues/64
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
+     * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/215
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/64
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @global WP_Post $post
-     * @version 6.8.5
+     * @version 6.9.26
      */
     public function wp()
     {
@@ -120,10 +122,19 @@ class AAM_Service_NotFoundRedirect
                 $type = 'default';
             }
 
+            if (isset($options["404.redirect.code"])) {
+                $status = $options["404.redirect.code"];
+            } else {
+                $status = null;
+            }
+
             if ($type !== 'default') {
                 // Prepare the metadata
                 if (isset($options["404.redirect.{$type}"])) {
-                    $metadata = array($type => $options["404.redirect.{$type}"]);
+                    $metadata = array(
+                        $type    => $options["404.redirect.{$type}"],
+                        'status' => $status
+                    );
                 } else {
                     $metadata = array();
                 }

@@ -37,7 +37,9 @@
         } ?>
     <?php } else { ?>
         <div class="col-xs-12">
-            <p class="aam-notification text-larger text-center"><?php echo __('You are not allowed to manage any of the existing services.', AAM_KEY); ?></p>
+            <p class="aam-notification text-larger text-center">
+                <?php echo __('You are not allowed to manage any of the existing services.', AAM_KEY); ?>
+            </p>
         </div>
     <?php } ?>
 <?php }
