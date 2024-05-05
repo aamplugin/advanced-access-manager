@@ -222,7 +222,7 @@ class AAM_Service_Content
         add_filter('posts_clauses_request', array($this, 'filterPostQuery'), 10, 2);
 
         // Filter post content
-        add_filter('the_content', array($this, 'filterPostContent'), 999);
+        add_filter('the_content', array($this, 'filterPostContent'), PHP_INT_MAX);
 
         // Check if user has ability to perform certain task based on provided
         // capability and meta data

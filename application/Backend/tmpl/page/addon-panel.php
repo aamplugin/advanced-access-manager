@@ -17,10 +17,6 @@
 
  $perks = array(
     array(
-        'title' => __('30-day free trial', AAM_KEY),
-        'description' => __('Experience the power of our Premium Add-On risk-free with a 30-day free trial. Unleash the full potential of Advanced Access Manager and witness firsthand how it transforms your WordPress experience, giving you unparalleled control over user access and security.', AAM_KEY)
-    ),
-    array(
         'title' => __('60-day refund policy', AAM_KEY),
         'description' => __('Your satisfaction is our top priority. We are so confident in the value our Premium Add-On brings that we offer a 60-day refund policy. Try it, and if it does not meet your expectations, we will gladly refund your purchase—no questions asked.', AAM_KEY)
     ),
@@ -95,9 +91,11 @@
             <?php } ?>
         </div>
 
-        <p class="text-center">
-            <a href="https://aamportal.com/premium?ref=plugin" target="_blank" class="btn btn-danger"><?php echo __('Get Premium Addon', AAM_KEY); ?></a>
-        </p>
+        <?php if (!defined('AAM_COMPLETE_PACKAGE')) { ?>
+            <p class="text-center">
+                <a href="https://aamportal.com/premium?ref=plugin" target="_blank" class="btn btn-danger"><?php echo __('Get Premium Addon', AAM_KEY); ?></a>
+            </p>
+        <?php } ?>
 
         <div class="">
             <h3>FAQs</h3>

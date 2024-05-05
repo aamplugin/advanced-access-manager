@@ -196,15 +196,6 @@
                                                 </tr>
                                             <?php } ?>
                                         </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td>
-                                                    <p class="alert alert-info text-left">
-                                                        <strong>NOTE!</strong> <?php echo __('Any listed license above only indicates that you used it on this website to download premium AAM add-on(s). It does not mean that the AAM add-on is installed and active on your website. You can verify that the premium add-on is active on the Plugins page.', AAM_KEY); ?>
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 </div>
                             </div>

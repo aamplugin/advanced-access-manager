@@ -10,6 +10,7 @@
 /**
  * Toolbar service
  *
+ * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
  * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.27
  */
 class AAM_Service_Toolbar
 {
@@ -244,8 +245,11 @@ class AAM_Service_Toolbar
      *
      * @return array
      *
+     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.13
+     * @version 6.9.27
      */
     private function _normalize_tree($branch)
     {
@@ -255,7 +259,7 @@ class AAM_Service_Toolbar
             array_push($response, array(
                 'id'       => $branch['id'],
                 'href'     => $branch['href'],
-                'title'    => $branch['title'],
+                'title'    => base64_encode($branch['title']),
                 'children' => $this->_get_branch_children($branch)
             ));
         }
@@ -270,8 +274,11 @@ class AAM_Service_Toolbar
      *
      * @return array
      *
+     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.27
      */
     public function _get_branch_children($branch)
     {
@@ -283,7 +290,7 @@ class AAM_Service_Toolbar
                 $children[] = array(
                     'id'    => $child['id'],
                     'href'  => $child['href'],
-                    'title' => $child['title']
+                    'title' => base64_encode($child['title'])
                 );
             }
 

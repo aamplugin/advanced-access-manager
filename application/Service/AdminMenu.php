@@ -10,6 +10,7 @@
 /**
  * Admin Menu service
  *
+ * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
@@ -19,7 +20,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.27
  */
 class AAM_Service_AdminMenu
 {
@@ -90,6 +91,7 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
+     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
      * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
@@ -97,7 +99,7 @@ class AAM_Service_AdminMenu
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.17
+     * @version 6.9.27
      */
     public function initializeHooks()
     {
@@ -112,7 +114,7 @@ class AAM_Service_AdminMenu
 
                     AAM_Core_Cache::set(self::CACHE_DB_OPTION, array(
                         'menu'    => $this->_filter_menu_items($menu),
-                        'submenu' => $submenu
+                        'submenu' => $this->_filter_submenu_items($submenu)
                     ), 31536000); // Cache for a year
                 }, PHP_INT_MAX - 1);
             }
@@ -367,11 +369,12 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
      * @since 6.9.5  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.13
+     * @version 6.9.27
      */
     private function _filter_menu_items($items)
     {
@@ -382,8 +385,39 @@ class AAM_Service_AdminMenu
                 $response[$i] = array(
                     'id'   => $item[2],
                     'cap'  => $item[1],
-                    'name' => $item[0]
+                    'name' => base64_encode($item[0])
                 );
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Filter submenu item list
+     *
+     * @param array $items
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.27
+     */
+    private function _filter_submenu_items($items)
+    {
+        $response = array();
+
+        if (is_array($items)) {
+            foreach($items as $menu_id => $sub_level) {
+                $response[$menu_id] = array();
+
+                foreach($sub_level as $i => $sub_item) {
+                    $response[$menu_id][$i] = array(
+                        base64_encode($sub_item[0]),
+                        $sub_item[1],
+                        $sub_item[2]
+                    );
+                }
             }
         }
 

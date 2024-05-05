@@ -4,7 +4,7 @@ Tags: access control, membership, backend menu, user role, restricted content, s
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.5.2
-Stable tag: 6.9.26
+Stable tag: 6.9.27
 
 All you need to manage access to WordPress websites on the frontend, backend and API levels for any role, user or visitors.
 
@@ -81,6 +81,9 @@ We take security and privacy very seriously, that is why there are several non-n
 
 == Changelog ==
 
+= 6.9.27 =
+* Fixed: Backend Menu & Toolbar services do not show any items [https://github.com/aamplugin/advanced-access-manager/issues/362](https://github.com/aamplugin/advanced-access-manager/issues/362)
+* Added: Introduce Aarmie virtual assistant [https://github.com/aamplugin/advanced-access-manager/issues/361](https://github.com/aamplugin/advanced-access-manager/issues/361)
 = 6.9.26 =
 * Fixed: Metaboxes & Widgets service appends list for each refresh [https://github.com/aamplugin/advanced-access-manager/issues/358](https://github.com/aamplugin/advanced-access-manager/issues/358)
 * Fixed: Fatal error: No such file or directory in /.../application/Core/Migration.php:184 [https://github.com/aamplugin/advanced-access-manager/issues/357](https://github.com/aamplugin/advanced-access-manager/issues/357)

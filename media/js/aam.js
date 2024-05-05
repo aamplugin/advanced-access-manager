@@ -5856,7 +5856,7 @@
      * Initialize UI
      */
     $(document).ready(function () {
-        $.aam = aam = new AAM();
+        $.aam = aam = window['aam'] = new AAM();
         getAAM().initialize();
     });
 

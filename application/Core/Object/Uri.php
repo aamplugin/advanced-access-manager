@@ -186,7 +186,7 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
         $set1 = array_map(function($v) { return $v['type'] !== 'allow'; }, $target);
         $set2 = array_map(function($v) { return $v['type'] !== 'allow'; }, $current);
 
-        $result = AAM_Core_Gateway::getInstance()->mergeSettings(
+        $result = AAM::api()->mergeSettings(
             $set1, $set2, self::OBJECT_TYPE
         );
 

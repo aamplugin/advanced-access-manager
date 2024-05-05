@@ -9,7 +9,7 @@
 
 namespace AAM\UnitTest\Core;
 
-use AAM_Core_Gateway,
+use AAM,
     PHPUnit\Framework\TestCase;
 
 /**
@@ -32,7 +32,7 @@ class GatewayTest extends TestCase
      */
     public function testAccessOptionsMerging($set1, $set2, $preference, $expected)
     {
-        $gateway = AAM_Core_Gateway::getInstance();
+        $gateway = AAM::api();
 
         $this->assertSame(
             $gateway->mergeSettings($set1, $set2, null, $preference), $expected

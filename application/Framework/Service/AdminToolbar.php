@@ -10,8 +10,11 @@
 /**
  * AAM service for Admin Toolbar
  *
+ * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
+ * @since 6.9.13 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.27
  */
 class AAM_Framework_Service_AdminToolbar
 {
@@ -304,13 +307,16 @@ class AAM_Framework_Service_AdminToolbar
      *
      * @return string
      *
+     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.13
+     * @version 6.9.27
      */
     protected function _prepare_item_name($item)
     {
         $title = wp_strip_all_tags(
-            !empty($item['title']) ? $item['title'] : $item['id']
+            !empty($item['title']) ? base64_decode($item['title']) : $item['id']
         );
 
         return ucwords(trim(preg_replace('/[\d]/', '', $title)));
