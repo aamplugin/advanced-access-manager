@@ -8,7 +8,7 @@
  /**
   *
   */
-(function ($) {
+ (function ($) {
 
     /**
      * Local representation of AAM object

@@ -10,18 +10,19 @@
 /**
  * Backend posts & terms service UI
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/89
- *              https://github.com/aamplugin/advanced-access-manager/issues/108
- * @since 6.3.1 Fixed bug with incorrectly escaped passwords and teaser messages
- * @since 6.3.0 Fixed bug with PHP noticed that was triggered if password was not
- *              defined
- * @since 6.2.0 Added more granular control over the HIDDEN access option
- * @since 6.0.3 Allowed to manage access to ALL registered post types
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
+ * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
+ * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/89
+ *               https://github.com/aamplugin/advanced-access-manager/issues/108
+ * @since 6.3.1  Fixed bug with incorrectly escaped passwords and teaser messages
+ * @since 6.3.0  Fixed bug with PHP noticed that was triggered if password was not
+ *               defined
+ * @since 6.2.0  Added more granular control over the HIDDEN access option
+ * @since 6.0.3  Allowed to manage access to ALL registered post types
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.28
  */
 class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
 {
@@ -702,8 +703,11 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.28
      */
     protected function retrieveTaxonomyTerms($taxonomy)
     {
@@ -770,11 +774,12 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/108
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/108
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.5.0
+     * @version 6.9.28
      */
     protected function retrievePostTypeObjects($type)
     {
@@ -883,11 +888,12 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/108
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/108
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access private
-     * @version 6.5.0
+     * @version 6.9.28
      */
     private function _prepareTermRow($term, $type = null)
     {
@@ -1172,8 +1178,11 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.0.0
+     * @version 6.9.28
      */
     protected function retrievePostList($type, $search, $offset, $limit)
     {

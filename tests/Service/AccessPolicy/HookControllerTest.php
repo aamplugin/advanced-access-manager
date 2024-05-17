@@ -409,6 +409,32 @@ class HookControllerTest extends TestCase
      *
      * @return void
      */
+    public function testHookOverrideArrayOfFilters()
+    {
+        $this->preparePlayground('{
+            "Statement": {
+                "Effect": "override",
+                "Resource": "Hook:aam_test_filter:10",
+                "Response": [
+                    "&:filter($key != hello)",
+                    "&:filter($value > 5)"
+                ]
+            }
+        }');
+
+        $this->assertEquals(
+            ['c' => 10],
+            apply_filters('aam_test_filter', ['hello' => 1, 'a' => 2, 'b' => 5, 'c' => 10])
+        );
+
+        remove_all_filters('aam_test_filter');
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function testReplaceEffect()
     {
         $GLOBALS['test_replace'] = 0;
