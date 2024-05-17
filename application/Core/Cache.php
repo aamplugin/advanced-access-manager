@@ -13,11 +13,12 @@
  * AAM own caching solution to avoid using WP core transients. Some plugins disable
  * WP transients, so this is a work around.
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/366
  * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/329
  * @since 6.9.17 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.18
+ * @version 6.9.28
  */
 class AAM_Core_Cache
 {
@@ -105,6 +106,37 @@ class AAM_Core_Cache
 
         if (count(self::$_cache) > $capacity) {
             array_shift(self::$_cache);
+        }
+
+        // Save cache to database
+        return AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
+    }
+
+    /**
+     * Update cache value & ttl
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $ttl
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.9.28
+     */
+    public static function update($key, $value, $ttl = null)
+    {
+        // Lazy bootstrap
+        if (self::$_cache === null) {
+            self::_bootstrap();
+        }
+
+        if (array_key_exists($key, self::$_cache)) {
+            self::$_cache[$key]['value'] = $value;
+
+            if ($ttl !== null) {
+                self::$_cache[$key]['ttl'] = time() + $ttl;
+            }
         }
 
         // Save cache to database

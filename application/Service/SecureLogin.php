@@ -426,18 +426,18 @@ class AAM_Service_SecureLogin
         $attempts = AAM_Core_Cache::get($name);
 
         if ($attempts !== false) {
-            $timeout  = get_option("_transient_timeout_{$name}");
             $attempts = intval($attempts) + $counter;
+
+            AAM_Core_Cache::update($name, $attempts);
         } else {
-            $attempts = 1;
             $timeout  = strtotime(
                 $this->_getConfigOption(
                     'service.secure_login.time_window', '+20 minutes'
                 )
             );
-        }
 
-        AAM_Core_Cache::set($name, $attempts, $timeout - time());
+            AAM_Core_Cache::set($name, 1, $timeout - time());
+        }
     }
 
     /**

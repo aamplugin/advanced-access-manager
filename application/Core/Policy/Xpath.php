@@ -10,8 +10,11 @@
 /**
  * AAM core xpath evaluator
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/365
+ * @since 6.9.17 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.28
  */
 class AAM_Core_Policy_Xpath
 {
@@ -26,8 +29,11 @@ class AAM_Core_Policy_Xpath
      *
      * @return mixed
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/365
+     * @since 6.9.17 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.17
+     * @version 6.9.28
      */
     public static function get_value_by_xpath($obj, $xpath)
     {
@@ -41,8 +47,10 @@ class AAM_Core_Policy_Xpath
 
         foreach(explode('.', $path) as $l) {
             if (is_object($value)) {
-                if (isset($value->{$l})) {
+                if (property_exists($value, $l)) {
                     $value = $value->{$l};
+                } elseif (method_exists($value, $l)) {
+                    $value = $value->$l();
                 } else {
                     $value = null;
                     break;

@@ -10,6 +10,7 @@
 /**
  * Menu object
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/364
  * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/331
  *               https://github.com/aamplugin/advanced-access-manager/issues/334
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
@@ -19,7 +20,7 @@
  * @since 6.0.0  Initial implementation of the method
  *
  * @package AAM
- * @version 6.9.19
+ * @version 6.9.28
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
@@ -146,24 +147,32 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
      *
      * @return null|string
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/364
+     * @since 6.9.19 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.19
+     * @version 6.9.28
      */
     protected function findParentInArray($array, $search)
     {
         $result = null;
 
         if (is_array($array)) {
-            foreach ($array as $parent => $subs) {
-                foreach ($subs as $sub) {
-                    if (isset($sub[2]) && $sub[2] === $search) {
-                        $result = $parent;
+            // Covering scenario when the submenu is also a link to the parent branch
+            if (array_key_exists($search, $array)) {
+                $result = $search;
+            } else {
+                foreach ($array as $parent => $subs) {
+                    foreach ($subs as $sub) {
+                        if (isset($sub[2]) && $sub[2] === $search) {
+                            $result = $parent;
+                            break;
+                        }
+                    }
+
+                    if ($result !== null) {
                         break;
                     }
-                }
-
-                if ($result !== null) {
-                    break;
                 }
             }
         }

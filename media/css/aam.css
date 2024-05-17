@@ -5,7 +5,7 @@
  * ======================================================================
  */
 
-@font-face {
+ @font-face {
   font-family: 'fontello';
   src: url('../font/fontello.eot?99287648');
   src: url('../font/fontello.eot?99287648#iefix') format('embedded-opentype'),
@@ -2909,8 +2909,16 @@ ul.tab li a:focus,
   margin-top: 2rem;
 }
 
+.aam-ml-1 {
+  margin-left: 1rem;
+}
+
 .aam-mt-1 {
   margin-top: 1rem;
+}
+
+.aam-filtered-list {
+  width: 120px !important;
 }
 
 .aam-common-use-cases {

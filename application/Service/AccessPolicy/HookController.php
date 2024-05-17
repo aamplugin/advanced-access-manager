@@ -10,6 +10,9 @@
 /**
  * Access Policy Hook controller
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/367
+ * @since 6.9.25 Initial implementation of the class
+ *
  * @package AAM
  * @version 6.9.25
  */
@@ -19,9 +22,14 @@ class AAM_Service_AccessPolicy_HookController
     /**
      * Supported comparison operators in &:filter(...) expression
      *
-     * @version 6.9.25
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/367
+     * @since 6.9.25 Initial implementation of the class
+     *
+     * @version 6.9.28
      */
-    const SUPPORTED_COMP_OPS = array('==', '*=', '^=', '$=', '!=');
+    const SUPPORTED_COMP_OPS = array(
+        '==', '*=', '^=', '$=', '!=', '!in', 'in', '∉', '∈', '>', '<', '>=', '<='
+    );
 
     /**
      * Single instance of itself
@@ -231,13 +239,18 @@ class AAM_Service_AccessPolicy_HookController
      *
      * @return void
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/367
+     * @since 6.9.25 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.25
+     * @version 6.9.28
      */
     private function _override_return_value($value, $override)
     {
         if (is_string($override)) {
             $result = $this->_evaluate_string_expression($override, $value);
+        } else if (is_array($override)) {
+            $result = $this->_evaluate_possible_array_of_filters($override, $value);
         } else {
             $result = $override;
         }
@@ -253,19 +266,79 @@ class AAM_Service_AccessPolicy_HookController
      *
      * @return mixed
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/367
+     * @since 6.9.25 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.25
+     * @version 6.9.28
      */
     private function _evaluate_string_expression($expression, $input)
     {
         $response = $input;
+        $filter   = $this->_is_filter($expression);
 
-        // Evaluating if a string is &:filter(...)
-        if (preg_match('/^\&:filter\(([^)]+)\)$/i', $expression, $matches)) {
-            $response = $this->_process_filter_modifier($matches[1], $input);
+        if (is_string($filter)) {
+            $response = $this->_process_filter_modifier($filter, $input);
         }
 
         return $response;
+    }
+
+    /**
+     * Evaluate if response is an array of filters
+     *
+     * @param array $values
+     * @param mixed $input
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 6.9.28
+     */
+    private function _evaluate_possible_array_of_filters($values, $input)
+    {
+        $filters  = array();
+
+        foreach($values as $expression) {
+            $filter = $this->_is_filter($expression);
+
+            if (is_string($filter)) {
+                array_push($filters, $filter);
+            }
+        }
+
+        // If all the values in the array are filters, then run the chain of filters
+        if (count($values) === count($filters)) {
+            $response = $input;
+
+            foreach($filters as $filter) {
+                $response = $this->_process_filter_modifier($filter, $response);
+            }
+        } else {
+            $response = $values;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Determine if Hook's return value is filter
+     *
+     * @param string $expression
+     *
+     * @return string|boolean
+     *
+     * @access private
+     * @version 6.9.28
+     */
+    private function _is_filter($expression)
+    {
+        $matches = array();
+
+        // Evaluating if a string is &:filter(...)
+        $match = preg_match('/^\&:filter\(([^)]+)\)$/i', $expression, $matches);
+
+        return $match === 1 ? $matches[1] : false;
     }
 
     /**
@@ -276,8 +349,11 @@ class AAM_Service_AccessPolicy_HookController
      *
      * @return array
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/367
+     * @since 6.9.25 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.25
+     * @version 6.9.28
      */
     private function _process_filter_modifier($modifier, $input)
     {
@@ -286,13 +362,13 @@ class AAM_Service_AccessPolicy_HookController
         if (is_iterable($input)) {
             $ops = implode('|', array_map('preg_quote', self::SUPPORTED_COMP_OPS));
 
-            if (preg_match("/^(.*)({$ops})(.*)\$/i", $modifier, $matches)) {
+            if (preg_match("/^(.*)\s+({$ops})\s+(.*)\$/i", $modifier, $matches)) {
                 foreach($input as $key => $value) {
                     $source = trim($matches[1]) === '$key' ? $key : $value;
                     $a = AAM_Core_Policy_Xpath::get_value_by_xpath(
                         $source, str_replace(array('$key', '$value'), '', $matches[1])
                     );
-                    $b = trim($matches[3]," \t\"'");
+                    $b = trim($matches[3]," \t\"'[]");
 
                     $include = false;
 
@@ -306,6 +382,18 @@ class AAM_Service_AccessPolicy_HookController
                         $include = preg_match('/' . preg_quote($b) . '$/', $a) === 1;
                     } elseif ($matches[2] === '!=') { // Not Equals?
                         $include = $a != $b;
+                    } elseif ($matches[2] === '>') { // Greater Than?
+                        $include = $a > $b;
+                    } elseif ($matches[2] === '<') { // Less Than?
+                        $include = $a < $b;
+                    } elseif ($matches[2] === '>=') { // Greater or Equals to?
+                        $include = $a >= $b;
+                    } elseif ($matches[2] === '<=') { // Less of Equals to?
+                        $include = $a <= $b;
+                    } elseif (in_array($matches[2], array('!in', '∉'), true)) {
+                        $include = !in_array($a, explode(',', $b), true);
+                    } elseif (in_array($matches[2], array('in', '∈'), true)) {
+                        $include = in_array($a, explode(',', $b), true);
                     }
 
                     if ($include) {

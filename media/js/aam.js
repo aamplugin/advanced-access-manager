@@ -8,7 +8,7 @@
  /**
   *
   */
-(function ($) {
+ (function ($) {
 
     /**
      * Local representation of AAM object
@@ -3141,6 +3141,7 @@
                         ordering: true,
                         pagingType: 'simple',
                         processing: true,
+                        saveState: true,
                         serverSide: true,
                         ajax: {
                             url: getLocal().ajaxurl,
@@ -3153,6 +3154,7 @@
                                 data.subjectId = getAAM().getSubject().id;
                                 data.type = filter.type;
                                 data.typeId = filter.id;
+                                data.listMode = $('#post-list-filter').val()
                             }
                         },
                         columnDefs: [
@@ -3174,6 +3176,17 @@
                                     $(this).removeClass('highlight');
                                 }
                             });
+
+                            var filter = $('<select>').attr({
+                                'class': 'form-control input-sm aam-ml-1 aam-filtered-list',
+                                'id': 'post-list-filter'
+                            })
+                                .html('<option value="filtered">List Filtered</option><option value="all">List All</option>')
+                                .bind('change', function () {
+                                    $('#post-list').DataTable().ajax.reload();
+                                });
+
+                            $('#post-list_length').append(filter);
                         },
                         rowCallback: function (row, data) {
                             // Object type icon
