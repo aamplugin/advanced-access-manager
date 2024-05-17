@@ -5,15 +5,18 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
- * Backend feature that is customizable per subject
+ * User subject
  *
  * @package AAM
- * @version 6.0.0
+ *
+ * @version 7.0.0
  */
-interface AAM_Backend_Feature_ISubjectAware
-{ }
+class AAM_Framework_Level_User extends AAM_Framework_Level_Abstract
+{
+
+    const TYPE = 'user';
+
+}

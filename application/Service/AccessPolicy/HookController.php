@@ -21,7 +21,9 @@ class AAM_Service_AccessPolicy_HookController
      *
      * @version 6.9.25
      */
-    const SUPPORTED_COMP_OPS = array('==', '*=', '^=', '$=', '!=');
+    const SUPPORTED_COMP_OPS = array(
+        '==', '*=', '^=', '$=', '!=', '!in', 'in', '∉', '∈'
+    );
 
     /**
      * Single instance of itself
@@ -286,13 +288,13 @@ class AAM_Service_AccessPolicy_HookController
         if (is_iterable($input)) {
             $ops = implode('|', array_map('preg_quote', self::SUPPORTED_COMP_OPS));
 
-            if (preg_match("/^(.*)({$ops})(.*)\$/i", $modifier, $matches)) {
+            if (preg_match("/^(.*)\s+({$ops})\s+(.*)\$/i", $modifier, $matches)) {
                 foreach($input as $key => $value) {
                     $source = trim($matches[1]) === '$key' ? $key : $value;
                     $a = AAM_Core_Policy_Xpath::get_value_by_xpath(
                         $source, str_replace(array('$key', '$value'), '', $matches[1])
                     );
-                    $b = trim($matches[3]," \t\"'");
+                    $b = trim($matches[3]," \t\"'[]");
 
                     $include = false;
 
@@ -306,6 +308,10 @@ class AAM_Service_AccessPolicy_HookController
                         $include = preg_match('/' . preg_quote($b) . '$/', $a) === 1;
                     } elseif ($matches[2] === '!=') { // Not Equals?
                         $include = $a != $b;
+                    } elseif (in_array($matches[2], array('!in', '∉'), true)) {
+                        $include = !in_array($a, explode(',', $b), true);
+                    } elseif (in_array($matches[2], array('in', '∈'), true)) {
+                        $include = in_array($a, explode(',', $b), true);
                     }
 
                     if ($include) {

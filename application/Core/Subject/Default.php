@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -18,14 +16,30 @@
 class AAM_Core_Subject_Default extends AAM_Core_Subject
 {
 
-    use AAM_Core_Contract_SingletonTrait;
-
     /**
      * Subject UID: DEFAULT
      *
      * @version 6.0.0
      */
     const UID = 'default';
+
+    /**
+     * Single instance of itself
+     *
+     * @var AAM_Core_Subject_Default
+     *
+     * @access private
+     */
+    private static $_instance = null;
+
+    /**
+     * Constructor
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function __construct()
+    { }
 
     /**
      * @inheritDoc
@@ -56,6 +70,23 @@ class AAM_Core_Subject_Default extends AAM_Core_Subject
     public function getMaxLevel()
     {
         return AAM_Core_API::maxLevel(AAM_Core_API::getAllCapabilities());
+    }
+
+     /**
+     * Bootstrap the object
+     *
+     * @return AAM_Core_Subject_Default
+     *
+     * @access public
+     * @version 6.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
     }
 
 }

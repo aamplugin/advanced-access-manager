@@ -49,10 +49,10 @@ trait AAM_Core_Restful_ServiceTrait
                     'description' => __('Access level for the controls', AAM_KEY),
                     'type'        => 'string',
                     'enum'        => array(
-                        AAM_Core_Subject_Role::UID,
-                        AAM_Core_Subject_User::UID,
-                        AAM_Core_Subject_Visitor::UID,
-                        AAM_Core_Subject_Default::UID
+                        AAM_Framework_Type_AccessLevel::ROLE,
+                        AAM_Framework_Type_AccessLevel::USER,
+                        AAM_Framework_Type_AccessLevel::VISITOR,
+                        AAM_Framework_Type_AccessLevel::DEFAULT
                     )
                 ),
                 'role_id' => array(
@@ -96,13 +96,15 @@ trait AAM_Core_Restful_ServiceTrait
         $access_level = $request->get_param('access_level');
         $subject_id   = null;
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             $subject_id = $request->get_param('role_id');
-        } elseif ($access_level === AAM_Core_Subject_User::UID) {
+        } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
             $subject_id = $request->get_param('user_id');
         }
 
-        return AAM_Framework_Manager::subject()->get($access_level, $subject_id);
+        return AAM_Framework_Manager::access_levels()->get(
+            $access_level, $subject_id
+        );
     }
 
     /**
@@ -122,7 +124,7 @@ trait AAM_Core_Restful_ServiceTrait
         $access_level = $request->get_param('access_level');
         $is_empty     = !is_string($value) || strlen($value) === 0;
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             if ($is_empty) {
                 $response = new WP_Error(
                     'rest_invalid_param',
@@ -161,7 +163,7 @@ trait AAM_Core_Restful_ServiceTrait
         if (is_numeric($value)) {
             $access_level = $request->get_param('access_level');
 
-            if ($access_level !== AAM_Core_Subject_User::UID) {
+            if ($access_level !== AAM_Framework_Type_AccessLevel::USER) {
                 $response = new WP_Error(
                     'rest_invalid_param',
                     __('The user_id param works only with access_level=user', AAM_KEY),
@@ -190,7 +192,7 @@ trait AAM_Core_Restful_ServiceTrait
         $response = true;
 
         try {
-            AAM_Framework_Manager::roles()->get_role_by_slug($slug);
+            AAM_Framework_Manager::roles()->get_role($slug);
         } catch (UnderflowException $_) {
             $response = new WP_Error(
                 'rest_not_found',

@@ -41,8 +41,10 @@ class AAM_Core_Policy_Xpath
 
         foreach(explode('.', $path) as $l) {
             if (is_object($value)) {
-                if (isset($value->{$l})) {
+                if (property_exists($value, $l)) {
                     $value = $value->{$l};
+                } elseif (method_exists($value, $l)) {
+                    $value = $value->$l();
                 } else {
                     $value = null;
                     break;

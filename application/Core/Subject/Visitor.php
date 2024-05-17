@@ -32,7 +32,7 @@ class AAM_Core_Subject_Visitor extends AAM_Core_Subject
      */
     public function getParent()
     {
-        return AAM_Core_Subject_Default::getInstance();
+        return AAM_Core_Subject_Default::bootstrap();
     }
 
     /**

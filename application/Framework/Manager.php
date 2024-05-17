@@ -193,16 +193,16 @@ class AAM_Framework_Manager
     }
 
     /**
-     * Get the subject service
+     * Get the access levels service
      *
-     * @return AAM_Framework_Service_Subject
+     * @return AAM_Framework_Service_Level
      *
      * @access public
      * @version 6.9.9
      */
-    public static function subject()
+    public static function access_levels()
     {
-        return AAM_Framework_Service_Subject::bootstrap();
+        return AAM_Framework_Service_AccessLevels::bootstrap();
     }
 
 }

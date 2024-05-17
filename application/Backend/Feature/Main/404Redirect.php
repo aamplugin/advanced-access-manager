@@ -17,8 +17,7 @@
  * @package AAM
  * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_404Redirect
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_404Redirect extends AAM_Backend_Feature_Abstract
 {
 
     /**
@@ -77,12 +76,6 @@ class AAM_Backend_Feature_Main_404Redirect
             'title'      => __('404 Redirect', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Default::UID,
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID
-            ),
             'view'       => __CLASS__
         ));
     }

@@ -38,12 +38,6 @@ class AAM_Backend_Feature_Main_Welcome  extends AAM_Backend_Feature_Abstract
             'position'   => 1,
             'title'      => __('Welcome', AAM_KEY),
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Default::UID,
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID
-            ),
             'view'       => __CLASS__
         ));
     }

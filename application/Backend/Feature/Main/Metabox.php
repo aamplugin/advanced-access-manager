@@ -20,8 +20,7 @@
  * @package AAM
  * @version 6.9.26
  */
-class AAM_Backend_Feature_Main_Metabox
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -309,10 +308,10 @@ class AAM_Backend_Feature_Main_Metabox
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER,
+                AAM_Framework_Type_AccessLevel::VISITOR,
+                AAM_Framework_Type_AccessLevel::DEFAULT
             ),
             'view'        => __CLASS__
         ));

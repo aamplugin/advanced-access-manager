@@ -453,8 +453,8 @@ class AAM_Core_Restful_JwtService
     {
         return AAM_Framework_Manager::jwts(
             new AAM_Framework_Model_ServiceContext(array(
-                'subject' => AAM_Framework_Manager::subject()->get(
-                    AAM_Core_Subject_User::UID, $request->get_param('user_id')
+                'subject' => AAM_Framework_Manager::access_levels()->get(
+                    'user', $request->get_param('user_id')
                 )
             ))
         );

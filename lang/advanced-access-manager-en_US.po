@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Advanced Access Manager\n"
-"POT-Creation-Date: 2023-09-11 20:26-0400\n"
+"POT-Creation-Date: 2024-05-08 07:59-0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: AAMPlugin <support@aamplugin.com>\n"
@@ -10,18 +10,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;preparePhrase\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: aam.php:266
+#: aam.php:270
 msgid "PHP 5.6.40 or higher is required."
 msgstr ""
 
-#: aam.php:268
-msgid "WP 4.7.0 or higher is required."
+#: aam.php:272
+msgid "WP 5.0.0 or higher is required."
 msgstr ""
 
 #: application/Addon/Repository.php:94
@@ -32,7 +32,7 @@ msgid ""
 msgstr ""
 
 #: application/Backend/Feature/Main/404Redirect.php:77
-#: application/Service/NotFoundRedirect.php:56
+#: application/Service/NotFoundRedirect.php:57
 msgid "404 Redirect"
 msgstr ""
 
@@ -57,7 +57,7 @@ msgstr ""
 #: application/Backend/Feature/Main/Capability.php:345
 #: application/Backend/Feature/Main/Capability.php:368
 #: application/Backend/Feature/Main/Post.php:351
-#: application/Backend/tmpl/partial/post-access-form.php:83
+#: application/Backend/tmpl/partial/post-access-form.php:84
 msgid "Backend"
 msgstr ""
 
@@ -81,12 +81,12 @@ msgid "JWT Tokens"
 msgstr ""
 
 #: application/Backend/Feature/Main/LoginRedirect.php:75
-#: application/Service/LoginRedirect.php:57
+#: application/Service/LoginRedirect.php:58
 msgid "Login Redirect"
 msgstr ""
 
 #: application/Backend/Feature/Main/LogoutRedirect.php:75
-#: application/Service/LogoutRedirect.php:67
+#: application/Service/LogoutRedirect.php:68
 msgid "Logout Redirect"
 msgstr ""
 
@@ -94,8 +94,8 @@ msgstr ""
 msgid "Backend Menu"
 msgstr ""
 
-#: application/Backend/Feature/Main/Metabox.php:299
-#: application/Service/Metabox.php:44
+#: application/Backend/Feature/Main/Metabox.php:308
+#: application/Service/Metabox.php:46
 msgid "Metaboxes & Widgets"
 msgstr ""
 
@@ -104,14 +104,14 @@ msgid "(no title)"
 msgstr ""
 
 #: application/Backend/Feature/Main/Policy.php:485
-#: application/Backend/Feature/Settings/Manager.php:415
+#: application/Backend/Feature/Settings/Manager.php:474
 #, php-format
 msgid "Failed applying to %s"
 msgstr ""
 
 #: application/Backend/Feature/Main/Policy.php:526
-#: application/Service/AccessPolicy.php:89
-#: application/Service/AccessPolicy.php:216
+#: application/Service/AccessPolicy.php:92
+#: application/Service/AccessPolicy.php:221
 msgid "Access Policies"
 msgstr ""
 
@@ -120,22 +120,22 @@ msgid "307 - Temporary Redirect (Default)"
 msgstr ""
 
 #: application/Backend/Feature/Main/Post.php:270
-#: application/Backend/tmpl/service/uri.php:106
+#: application/Backend/tmpl/service/uri.php:107
 msgid "301 - Moved Permanently"
 msgstr ""
 
 #: application/Backend/Feature/Main/Post.php:271
-#: application/Backend/tmpl/service/uri.php:108
+#: application/Backend/tmpl/service/uri.php:109
 msgid "303 - See Other"
 msgstr ""
 
 #: application/Backend/Feature/Main/Post.php:348
-#: application/Backend/tmpl/partial/post-access-form.php:72
+#: application/Backend/tmpl/partial/post-access-form.php:73
 msgid "Frontend"
 msgstr ""
 
 #: application/Backend/Feature/Main/Post.php:354
-#: application/Backend/tmpl/partial/post-access-form.php:94
+#: application/Backend/tmpl/partial/post-access-form.php:95
 msgid "RESTful API"
 msgstr ""
 
@@ -163,23 +163,21 @@ msgid "Login page"
 msgstr ""
 
 #: application/Backend/Feature/Main/Post.php:1206
-#: application/Service/Content.php:127
+#: application/Service/Content.php:128
 msgid "Posts & Terms"
 msgstr ""
 
 #: application/Backend/Feature/Main/Redirect.php:73
-#: application/Service/DeniedRedirect.php:75
+#: application/Service/DeniedRedirect.php:76
 msgid "Access Denied Redirect"
 msgstr ""
 
 #: application/Backend/Feature/Main/Route.php:76
-#: application/Service/Route.php:66
+#: application/Service/Route.php:67
 msgid "API Routes"
 msgstr ""
 
 #: application/Backend/Feature/Main/Support.php:39
-#: application/Backend/tmpl/metabox/main-iframe.php:87
-#: application/Service/Support.php:50
 msgid "Support"
 msgstr ""
 
@@ -192,15 +190,15 @@ msgid "URL Access"
 msgstr ""
 
 #: application/Backend/Feature/Main/Welcome.php:39
-#: application/Service/Welcome.php:52
+#: application/Service/Welcome.php:56
 msgid "Welcome"
 msgstr ""
 
-#: application/Backend/Feature/Settings/ConfigPress.php:68
+#: application/Backend/Feature/Settings/ConfigPress.php:66
 msgid "ConfigPress"
 msgstr ""
 
-#: application/Backend/Feature/Settings/Content.php:61
+#: application/Backend/Feature/Settings/Content.php:59
 msgid "Content Settings"
 msgstr ""
 
@@ -253,8 +251,8 @@ msgstr ""
 #, php-format
 msgid ""
 "Default access settings merging preference when settings ambiguity detected. "
-"For more information refer to the %sHow to work with access controls "
-"ambiguity%s article."
+"For more information refer to the %sResolving access control ambiguity in "
+"WordPress%s article."
 msgstr ""
 
 #: application/Backend/Feature/Settings/Core.php:82
@@ -270,7 +268,7 @@ msgstr ""
 msgid "Core Settings"
 msgstr ""
 
-#: application/Backend/Feature/Settings/Manager.php:276
+#: application/Backend/Feature/Settings/Manager.php:278
 msgid "Invalid data"
 msgstr ""
 
@@ -318,44 +316,48 @@ msgstr ""
 #: application/Backend/Feature/Subject/User.php:252
 #: application/Backend/View/Localization.php:153
 #: application/Core/Restful/Role.php:787
-#: application/Core/Restful/ServiceTrait.php:261 media/js/aam.js:5651
+#: application/Core/Restful/ServiceTrait.php:261 media/js/aam.js:5718
 msgid "Unexpected application error"
 msgstr ""
 
-#: application/Backend/Manager.php:102
+#: application/Backend/Manager.php:104
 msgid ""
 "The RESTful API is disabled. This may affect the AAM UI. Enable it on the "
 "AAM Settings page."
 msgstr ""
 
-#: application/Backend/Manager.php:153
+#: application/Backend/Manager.php:155
+msgid "Get Premium"
+msgstr ""
+
+#: application/Backend/Manager.php:187
 #, php-format
 msgid ""
 "The Plus Package is deprecated as a stand-alone addon. Check the %sWe are "
 "migrating%s article for more information."
 msgstr ""
 
-#: application/Backend/Manager.php:160
+#: application/Backend/Manager.php:194
 #, php-format
 msgid ""
 "The IP Check is deprecated as a stand-alone addon. Check the %sWe are "
 "migrating%s article for more information."
 msgstr ""
 
-#: application/Backend/Manager.php:167
+#: application/Backend/Manager.php:201
 #, php-format
 msgid ""
 "The Role Hierarchy is deprecated as a stand-alone addon. Check the %sWe are "
 "migrating%s article for more information."
 msgstr ""
 
-#: application/Backend/Manager.php:187
+#: application/Backend/Manager.php:221
 msgid ""
 "The new version of premium Complete Package is available. Go to your license "
 "page to download the latest release."
 msgstr ""
 
-#: application/Backend/Manager.php:359
+#: application/Backend/Manager.php:393
 msgid "[Help us] to be more noticeable and submit your review"
 msgstr ""
 
@@ -363,19 +365,19 @@ msgstr ""
 msgid "You are not allowed to manage any users or roles"
 msgstr ""
 
-#: application/Backend/View/Localization.php:40 media/js/aam.js:2456
+#: application/Backend/View/Localization.php:40 media/js/aam.js:2470
 msgid "Search Capability"
 msgstr ""
 
-#: application/Backend/View/Localization.php:41 media/js/aam.js:2457
+#: application/Backend/View/Localization.php:41 media/js/aam.js:2471
 msgid "_TOTAL_ capability(s)"
 msgstr ""
 
-#: application/Backend/View/Localization.php:42 media/js/aam.js:559
-#: media/js/aam.js:632 media/js/aam.js:1203 media/js/aam.js:2610
-#: media/js/aam.js:2652 media/js/aam.js:2916 media/js/aam.js:2937
-#: media/js/aam.js:2956 media/js/aam.js:3027 media/js/aam.js:3049
-#: media/js/aam.js:3068 media/js/aam.js:4218
+#: application/Backend/View/Localization.php:42 media/js/aam.js:547
+#: media/js/aam.js:620 media/js/aam.js:1217 media/js/aam.js:2624
+#: media/js/aam.js:2666 media/js/aam.js:2930 media/js/aam.js:2951
+#: media/js/aam.js:2970 media/js/aam.js:3041 media/js/aam.js:3063
+#: media/js/aam.js:3082 media/js/aam.js:4260
 msgid "Saving..."
 msgstr ""
 
@@ -383,7 +385,7 @@ msgstr ""
 msgid "Execute Migration"
 msgstr ""
 
-#: application/Backend/View/Localization.php:44 media/js/aam.js:2618
+#: application/Backend/View/Localization.php:44 media/js/aam.js:2632
 msgid "Failed to add new capability"
 msgstr ""
 
@@ -391,37 +393,37 @@ msgstr ""
 msgid "Application error"
 msgstr ""
 
-#: application/Backend/View/Localization.php:46 media/js/aam.js:2626
+#: application/Backend/View/Localization.php:46 media/js/aam.js:2640
 msgid "Add Capability"
 msgstr ""
 
 #: application/Backend/View/Localization.php:47
-#: application/Backend/tmpl/service/capability.php:85 media/js/aam.js:2668
+#: application/Backend/tmpl/service/capability.php:85 media/js/aam.js:2682
 msgid "Update Capability"
 msgstr ""
 
 #: application/Backend/View/Localization.php:48
-#: application/Backend/tmpl/service/menu.php:114
-#: application/Backend/tmpl/service/toolbar.php:92 media/js/aam.js:1904
-#: media/js/aam.js:2049
+#: application/Backend/tmpl/service/menu.php:115
+#: application/Backend/tmpl/service/toolbar.php:93 media/js/aam.js:1918
+#: media/js/aam.js:2063
 msgid "Show Menu"
 msgstr ""
 
 #: application/Backend/View/Localization.php:49
-#: application/Backend/tmpl/service/menu.php:118 media/js/aam.js:1914
+#: application/Backend/tmpl/service/menu.php:119 media/js/aam.js:1928
 msgid "Restrict Menu"
 msgstr ""
 
-#: application/Backend/View/Localization.php:50 media/js/aam.js:2243
+#: application/Backend/View/Localization.php:50 media/js/aam.js:2257
 msgid "Failed to retrieve mataboxes"
 msgstr ""
 
-#: application/Backend/View/Localization.php:51 media/js/aam.js:3150
-#: media/js/aam.js:4022 media/js/aam.js:4323 media/js/aam.js:4553
+#: application/Backend/View/Localization.php:51 media/js/aam.js:3164
+#: media/js/aam.js:4053 media/js/aam.js:4366 media/js/aam.js:4605
 msgid "Search"
 msgstr ""
 
-#: application/Backend/View/Localization.php:52 media/js/aam.js:3151
+#: application/Backend/View/Localization.php:52 media/js/aam.js:3165
 msgid "_TOTAL_ object(s)"
 msgstr ""
 
@@ -430,7 +432,7 @@ msgid "Failed"
 msgstr ""
 
 #: application/Backend/View/Localization.php:54 media/js/aam.js:96
-#: media/js/aam.js:911 media/js/aam.js:5259
+#: media/js/aam.js:899 media/js/aam.js:5311
 msgid "Loading..."
 msgstr ""
 
@@ -451,11 +453,11 @@ msgid "_TOTAL_ role(s)"
 msgstr ""
 
 #: application/Backend/View/Localization.php:59
-#: application/Backend/tmpl/page/subject-panel-advanced.php:41
+#: application/Backend/tmpl/page/subject-panel-advanced.php:42
 #: application/Backend/tmpl/service/capability.php:39
 #: application/Backend/tmpl/service/capability.php:73
-#: application/Backend/tmpl/service/jwt.php:78 media/js/aam.js:1568
-#: media/js/aam.js:4334 media/js/aam.js:4568 media/js/aam.js:4670
+#: application/Backend/tmpl/service/jwt.php:78 media/js/aam.js:1582
+#: media/js/aam.js:4377 media/js/aam.js:4620 media/js/aam.js:4722
 msgid "Create"
 msgstr ""
 
@@ -477,30 +479,30 @@ msgid "Failed to update role"
 msgstr ""
 
 #: application/Backend/View/Localization.php:64
-#: application/Backend/tmpl/page/subject-panel-advanced.php:74
-#: application/Backend/tmpl/service/capability.php:99 media/js/aam.js:660
+#: application/Backend/tmpl/page/subject-panel-advanced.php:75
+#: application/Backend/tmpl/service/capability.php:99 media/js/aam.js:648
 msgid "Update"
 msgstr ""
 
 #: application/Backend/View/Localization.php:65
 #: application/Backend/tmpl/page/current-subject.php:37
-#: application/Backend/tmpl/page/subject-panel-advanced.php:143
-#: application/Backend/tmpl/partial/post-access-form.php:158
-#: media/js/aam.js:1250 media/js/aam.js:3010 media/js/aam.js:5048
+#: application/Backend/tmpl/page/subject-panel-advanced.php:144
+#: application/Backend/tmpl/partial/post-access-form.php:159
+#: media/js/aam.js:1264 media/js/aam.js:3024 media/js/aam.js:5100
 msgid "Reset"
 msgstr ""
 
-#: application/Backend/View/Localization.php:66 media/js/aam.js:1236
-#: media/js/aam.js:2898 media/js/aam.js:2990 media/js/aam.js:3520
-#: media/js/aam.js:3642 media/js/aam.js:3764 media/js/aam.js:3886
-#: media/js/aam.js:4080 media/js/aam.js:4153 media/js/aam.js:5034
-#: media/js/aam.js:5687
+#: application/Backend/View/Localization.php:66 media/js/aam.js:1250
+#: media/js/aam.js:2912 media/js/aam.js:3004 media/js/aam.js:3551
+#: media/js/aam.js:3673 media/js/aam.js:3795 media/js/aam.js:3917
+#: media/js/aam.js:4111 media/js/aam.js:4184 media/js/aam.js:5086
+#: media/js/aam.js:5754
 msgid "Resetting..."
 msgstr ""
 
-#: application/Backend/View/Localization.php:67 media/js/aam.js:681
-#: media/js/aam.js:1465 media/js/aam.js:2405 media/js/aam.js:4251
-#: media/js/aam.js:4687
+#: application/Backend/View/Localization.php:67 media/js/aam.js:669
+#: media/js/aam.js:1479 media/js/aam.js:2419 media/js/aam.js:4293
+#: media/js/aam.js:4739
 msgid "Deleting..."
 msgstr ""
 
@@ -509,33 +511,33 @@ msgid "Failed to delete role"
 msgstr ""
 
 #: application/Backend/View/Localization.php:69
-#: application/Backend/tmpl/page/subject-panel-advanced.php:86
+#: application/Backend/tmpl/page/subject-panel-advanced.php:87
 msgid "Delete Role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:70 media/js/aam.js:789
+#: application/Backend/View/Localization.php:70 media/js/aam.js:777
 msgid "Failed to lock user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:71 media/js/aam.js:878
+#: application/Backend/View/Localization.php:71 media/js/aam.js:866
 msgid "Search user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:72 media/js/aam.js:2999
+#: application/Backend/View/Localization.php:72 media/js/aam.js:3013
 msgid "Counter was reset successfully"
 msgstr ""
 
-#: application/Backend/View/Localization.php:73 media/js/aam.js:879
+#: application/Backend/View/Localization.php:73 media/js/aam.js:867
 msgid "_TOTAL_ user(s)"
 msgstr ""
 
-#: application/Backend/View/Localization.php:74 media/js/aam.js:894
+#: application/Backend/View/Localization.php:74 media/js/aam.js:882
 msgid "Create New User"
 msgstr ""
 
 #: application/Backend/View/Localization.php:75
-#: application/Backend/tmpl/page/subject-panel.php:45 media/js/aam.js:936
-#: media/js/aam.js:1699
+#: application/Backend/tmpl/page/subject-panel.php:45 media/js/aam.js:924
+#: media/js/aam.js:1713
 msgid "Role"
 msgstr ""
 
@@ -544,48 +546,48 @@ msgid "Message has been sent"
 msgstr ""
 
 #: application/Backend/View/Localization.php:77
-#: application/Backend/tmpl/metabox/main-iframe.php:128 media/js/aam.js:4938
+#: application/Backend/tmpl/metabox/main-iframe.php:137 media/js/aam.js:4990
 msgid "Download Exported Settings"
 msgstr ""
 
 #: application/Backend/View/Localization.php:78
-#: application/Core/Subject/Default.php:36 media/js/aam.js:1364
+#: application/Core/Subject/Default.php:50 media/js/aam.js:1378
 msgid "All Users, Roles and Visitor"
 msgstr ""
 
-#: application/Backend/View/Localization.php:79 media/js/aam.js:1335
-#: media/js/aam.js:1410 media/js/aam.js:5236
+#: application/Backend/View/Localization.php:79 media/js/aam.js:1349
+#: media/js/aam.js:1424 media/js/aam.js:5288
 msgid "Failed to apply policy changes"
 msgstr ""
 
 #: application/Backend/View/Localization.php:80
 #: application/Backend/tmpl/partial/visitor-principal-subject-tab.php:25
-#: media/js/aam.js:1329 media/js/aam.js:1338
+#: media/js/aam.js:1343 media/js/aam.js:1352
 msgid "Attach Policy To Visitors"
 msgstr ""
 
 #: application/Backend/View/Localization.php:81
 #: application/Backend/tmpl/partial/visitor-principal-subject-tab.php:23
-#: media/js/aam.js:1327 media/js/aam.js:1340
+#: media/js/aam.js:1341 media/js/aam.js:1354
 msgid "Detach Policy From Visitors"
 msgstr ""
 
-#: application/Backend/View/Localization.php:82 media/js/aam.js:832
+#: application/Backend/View/Localization.php:82 media/js/aam.js:820
 msgid "Generating URL..."
 msgstr ""
 
 #: application/Backend/View/Localization.php:83
-#: application/Core/Subject/Visitor.php:44 media/js/aam.js:1289
+#: application/Core/Subject/Visitor.php:44 media/js/aam.js:1303
 msgid "Anonymous"
 msgstr ""
 
-#: application/Backend/View/Localization.php:84 media/js/aam.js:1316
-#: media/js/aam.js:1391 media/js/aam.js:2263 media/js/aam.js:4850
-#: media/js/aam.js:4920
+#: application/Backend/View/Localization.php:84 media/js/aam.js:1330
+#: media/js/aam.js:1405 media/js/aam.js:2277 media/js/aam.js:4902
+#: media/js/aam.js:4972
 msgid "Processing..."
 msgstr ""
 
-#: application/Backend/View/Localization.php:85 media/js/aam.js:903
+#: application/Backend/View/Localization.php:85 media/js/aam.js:891
 msgid "Loading roles..."
 msgstr ""
 
@@ -593,7 +595,7 @@ msgstr ""
 msgid "Failed to generate JWT token"
 msgstr ""
 
-#: application/Backend/View/Localization.php:87 media/js/aam.js:2373
+#: application/Backend/View/Localization.php:87 media/js/aam.js:2387
 msgid "Failed to process request"
 msgstr ""
 
@@ -606,178 +608,178 @@ msgid "Current role"
 msgstr ""
 
 #: application/Backend/View/Localization.php:90
-#: application/Service/Core.php:114 media/js/aam.js:3338
+#: application/Service/Core.php:120 media/js/aam.js:3352
 msgid "Manage Access"
 msgstr ""
 
-#: application/Backend/View/Localization.php:91 media/js/aam.js:916
+#: application/Backend/View/Localization.php:91 media/js/aam.js:904
 msgid "Filter by role"
 msgstr ""
 
 #: application/Backend/View/Localization.php:92
-#: application/Backend/View/PostOptionList.php:90 media/js/aam.js:3350
+#: application/Backend/View/PostOptionList.php:90 media/js/aam.js:3364
 msgid "Edit"
 msgstr ""
 
 #: application/Backend/View/Localization.php:93
-#: application/Backend/tmpl/page/subject-panel-advanced.php:144
-#: application/Backend/tmpl/partial/post-access-form.php:107
-#: application/Backend/tmpl/partial/post-access-form.php:129
-#: application/Backend/tmpl/partial/post-access-form.php:159
-#: application/Backend/tmpl/partial/post-access-form.php:232
-#: application/Backend/tmpl/partial/post-access-form.php:253
-#: application/Backend/tmpl/partial/post-access-form.php:275
-#: application/Backend/tmpl/service/uri.php:119 media/js/aam.js:1217
-#: media/js/aam.js:4230
+#: application/Backend/tmpl/page/subject-panel-advanced.php:145
+#: application/Backend/tmpl/partial/post-access-form.php:108
+#: application/Backend/tmpl/partial/post-access-form.php:130
+#: application/Backend/tmpl/partial/post-access-form.php:160
+#: application/Backend/tmpl/partial/post-access-form.php:233
+#: application/Backend/tmpl/partial/post-access-form.php:254
+#: application/Backend/tmpl/partial/post-access-form.php:276
+#: application/Backend/tmpl/service/uri.php:124 media/js/aam.js:1231
+#: media/js/aam.js:4272
 msgid "Save"
 msgstr ""
 
-#: application/Backend/View/Localization.php:94 media/js/aam.js:346
+#: application/Backend/View/Localization.php:94 media/js/aam.js:334
 msgid "Manage role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:95 media/js/aam.js:376
+#: application/Backend/View/Localization.php:95 media/js/aam.js:364
 msgid "Edit role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:96 media/js/aam.js:429
-#: media/js/aam.js:699
+#: application/Backend/View/Localization.php:96 media/js/aam.js:417
+#: media/js/aam.js:687
 msgid "Delete role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:97 media/js/aam.js:400
+#: application/Backend/View/Localization.php:97 media/js/aam.js:388
 msgid "Clone role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:98 media/js/aam.js:987
+#: application/Backend/View/Localization.php:98 media/js/aam.js:976
 msgid "Manage user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:99 media/js/aam.js:1028
+#: application/Backend/View/Localization.php:99 media/js/aam.js:1017
 msgid "Edit user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:100 media/js/aam.js:784
-#: media/js/aam.js:785 media/js/aam.js:1049 media/js/aam.js:1060
+#: application/Backend/View/Localization.php:100 media/js/aam.js:772
+#: media/js/aam.js:773 media/js/aam.js:1038 media/js/aam.js:1049
 msgid "Lock user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:101 media/js/aam.js:778
-#: media/js/aam.js:779 media/js/aam.js:1073 media/js/aam.js:1084
+#: application/Backend/View/Localization.php:101 media/js/aam.js:766
+#: media/js/aam.js:767 media/js/aam.js:1062 media/js/aam.js:1073
 msgid "Unlock user"
 msgstr ""
 
-#: application/Backend/View/Localization.php:102 media/js/aam.js:2367
+#: application/Backend/View/Localization.php:102 media/js/aam.js:2381
 msgid "WordPress core does not allow to grant this capability"
 msgstr ""
 
 #: application/Backend/View/Localization.php:103
 #: application/Backend/tmpl/partial/default-principal-subject-tab.php:15
-#: media/js/aam.js:1402 media/js/aam.js:1415
+#: media/js/aam.js:1416 media/js/aam.js:1429
 msgid "Detach Policy From Everybody"
 msgstr ""
 
 #: application/Backend/View/Localization.php:104
 #: application/Backend/tmpl/partial/default-principal-subject-tab.php:17
-#: media/js/aam.js:1404 media/js/aam.js:1413
+#: media/js/aam.js:1418 media/js/aam.js:1427
 msgid "Attach Policy To Everybody"
 msgstr ""
 
-#: application/Backend/View/Localization.php:105 media/js/aam.js:1556
+#: application/Backend/View/Localization.php:105 media/js/aam.js:1570
 msgid "Search Policy"
 msgstr ""
 
-#: application/Backend/View/Localization.php:106 media/js/aam.js:1557
+#: application/Backend/View/Localization.php:106 media/js/aam.js:1571
 msgid "_TOTAL_ Policies"
 msgstr ""
 
-#: application/Backend/View/Localization.php:107 media/js/aam.js:1599
+#: application/Backend/View/Localization.php:107 media/js/aam.js:1613
 msgid "Apply Policy"
 msgstr ""
 
-#: application/Backend/View/Localization.php:108 media/js/aam.js:1619
+#: application/Backend/View/Localization.php:108 media/js/aam.js:1633
 msgid "Revoke Policy"
 msgstr ""
 
 #: application/Backend/View/Localization.php:109
-#: application/Service/AccessPolicy.php:217 media/js/aam.js:1636
+#: application/Service/AccessPolicy.php:222 media/js/aam.js:1650
 msgid "Edit Policy"
 msgstr ""
 
 #: application/Backend/View/Localization.php:110
-#: application/Backend/tmpl/service/menu.php:100
-#: application/Backend/tmpl/service/toolbar.php:81
+#: application/Backend/tmpl/service/menu.php:101
+#: application/Backend/tmpl/service/toolbar.php:82
 msgid "Uncheck to allow"
 msgstr ""
 
 #: application/Backend/View/Localization.php:111
-#: application/Backend/tmpl/service/menu.php:100
-#: application/Backend/tmpl/service/toolbar.php:81
+#: application/Backend/tmpl/service/menu.php:101
+#: application/Backend/tmpl/service/toolbar.php:82
 msgid "Check to restrict"
 msgstr ""
 
 #: application/Backend/View/Localization.php:112
-#: application/Backend/tmpl/service/metabox.php:102
+#: application/Backend/tmpl/service/metabox.php:103
 msgid "Uncheck to show"
 msgstr ""
 
 #: application/Backend/View/Localization.php:113
-#: application/Backend/tmpl/service/metabox.php:102
+#: application/Backend/tmpl/service/metabox.php:103
 msgid "Check to hide"
 msgstr ""
 
 #: application/Backend/View/Localization.php:114
-#: application/Backend/tmpl/service/metabox.php:140 media/js/aam.js:2266
+#: application/Backend/tmpl/service/metabox.php:141 media/js/aam.js:2280
 msgid "Initialize"
 msgstr ""
 
-#: application/Backend/View/Localization.php:115 media/js/aam.js:2459
+#: application/Backend/View/Localization.php:115 media/js/aam.js:2473
 msgid "No capabilities"
 msgstr ""
 
-#: application/Backend/View/Localization.php:116 media/js/aam.js:3172
+#: application/Backend/View/Localization.php:116 media/js/aam.js:3186
 msgid "Post Type"
 msgstr ""
 
-#: application/Backend/View/Localization.php:117 media/js/aam.js:3177
+#: application/Backend/View/Localization.php:117 media/js/aam.js:3191
 msgid "Hierarchical Taxonomy"
 msgstr ""
 
-#: application/Backend/View/Localization.php:118 media/js/aam.js:3182
+#: application/Backend/View/Localization.php:118 media/js/aam.js:3196
 msgid "Hierarchical Term"
 msgstr ""
 
-#: application/Backend/View/Localization.php:119 media/js/aam.js:3187
+#: application/Backend/View/Localization.php:119 media/js/aam.js:3201
 msgid "Tag Taxonomy"
 msgstr ""
 
-#: application/Backend/View/Localization.php:120 media/js/aam.js:3192
+#: application/Backend/View/Localization.php:120 media/js/aam.js:3206
 msgid "Tag"
 msgstr ""
 
-#: application/Backend/View/Localization.php:121 media/js/aam.js:3203
+#: application/Backend/View/Localization.php:121 media/js/aam.js:3217
 msgid "Customized Settings"
 msgstr ""
 
-#: application/Backend/View/Localization.php:122 media/js/aam.js:3273
-#: media/js/aam.js:3299
+#: application/Backend/View/Localization.php:122 media/js/aam.js:3287
+#: media/js/aam.js:3313
 msgid "Parent"
 msgstr ""
 
-#: application/Backend/View/Localization.php:123 media/js/aam.js:3324
+#: application/Backend/View/Localization.php:123 media/js/aam.js:3338
 msgid "Drill-Down"
 msgstr ""
 
-#: application/Backend/View/Localization.php:124 media/js/aam.js:4023
+#: application/Backend/View/Localization.php:124 media/js/aam.js:4054
 msgid "_TOTAL_ route(s)"
 msgstr ""
 
-#: application/Backend/View/Localization.php:125 media/js/aam.js:4025
+#: application/Backend/View/Localization.php:125 media/js/aam.js:4056
 msgid "No API endpoints found. You might have APIs disabled."
 msgstr ""
 
-#: application/Backend/View/Localization.php:126 media/js/aam.js:4026
-#: media/js/aam.js:4557 media/js/aam.js:4803
+#: application/Backend/View/Localization.php:126 media/js/aam.js:4057
+#: media/js/aam.js:4609 media/js/aam.js:4855
 msgid "Nothing to show"
 msgstr ""
 
@@ -789,31 +791,31 @@ msgstr ""
 msgid "Failed to delete URI rule"
 msgstr ""
 
-#: application/Backend/View/Localization.php:129 media/js/aam.js:4324
+#: application/Backend/View/Localization.php:129 media/js/aam.js:4367
 msgid "_TOTAL_ URI(s)"
 msgstr ""
 
-#: application/Backend/View/Localization.php:130 media/js/aam.js:4368
+#: application/Backend/View/Localization.php:130 media/js/aam.js:4418
 msgid "Edit Rule"
 msgstr ""
 
-#: application/Backend/View/Localization.php:131 media/js/aam.js:4389
+#: application/Backend/View/Localization.php:131 media/js/aam.js:4439
 msgid "Delete Rule"
 msgstr ""
 
-#: application/Backend/View/Localization.php:132 media/js/aam.js:4413
+#: application/Backend/View/Localization.php:132 media/js/aam.js:4463
 msgid "Denied"
 msgstr ""
 
-#: application/Backend/View/Localization.php:133 media/js/aam.js:4420
+#: application/Backend/View/Localization.php:133 media/js/aam.js:4470
 msgid "Redirected"
 msgstr ""
 
-#: application/Backend/View/Localization.php:134 media/js/aam.js:4425
+#: application/Backend/View/Localization.php:134 media/js/aam.js:4475
 msgid "Callback"
 msgstr ""
 
-#: application/Backend/View/Localization.php:135 media/js/aam.js:4430
+#: application/Backend/View/Localization.php:135 media/js/aam.js:4480
 msgid "Allowed"
 msgstr ""
 
@@ -821,31 +823,31 @@ msgstr ""
 msgid "Generating token..."
 msgstr ""
 
-#: application/Backend/View/Localization.php:137 media/js/aam.js:4554
+#: application/Backend/View/Localization.php:137 media/js/aam.js:4606
 msgid "_TOTAL_ token(s)"
 msgstr ""
 
-#: application/Backend/View/Localization.php:138 media/js/aam.js:4556
+#: application/Backend/View/Localization.php:138 media/js/aam.js:4608
 msgid "No JWT tokens have been generated."
 msgstr ""
 
-#: application/Backend/View/Localization.php:139 media/js/aam.js:4605
+#: application/Backend/View/Localization.php:139 media/js/aam.js:4657
 msgid "Delete Token"
 msgstr ""
 
-#: application/Backend/View/Localization.php:140 media/js/aam.js:4618
+#: application/Backend/View/Localization.php:140 media/js/aam.js:4670
 msgid "View Token"
 msgstr ""
 
-#: application/Backend/View/Localization.php:141 media/js/aam.js:4656
+#: application/Backend/View/Localization.php:141 media/js/aam.js:4708
 msgid "Creating..."
 msgstr ""
 
-#: application/Backend/View/Localization.php:142 media/js/aam.js:4800
+#: application/Backend/View/Localization.php:142 media/js/aam.js:4852
 msgid "Search Service"
 msgstr ""
 
-#: application/Backend/View/Localization.php:143 media/js/aam.js:4801
+#: application/Backend/View/Localization.php:143 media/js/aam.js:4853
 msgid "_TOTAL_ service(s)"
 msgstr ""
 
@@ -855,7 +857,7 @@ msgstr ""
 #: application/Backend/tmpl/partial/toolbar-mode.php:19
 #: application/Backend/tmpl/settings/content.php:26
 #: application/Backend/tmpl/settings/core.php:29
-#: application/Backend/tmpl/settings/security.php:24 media/js/aam.js:4813
+#: application/Backend/tmpl/settings/security.php:24 media/js/aam.js:4865
 msgid "Enabled"
 msgstr ""
 
@@ -864,52 +866,52 @@ msgstr ""
 #: application/Backend/tmpl/partial/route-mode.php:19
 #: application/Backend/tmpl/partial/toolbar-mode.php:19
 #: application/Backend/tmpl/settings/content.php:26
-#: application/Backend/tmpl/settings/security.php:24 media/js/aam.js:4813
+#: application/Backend/tmpl/settings/security.php:24 media/js/aam.js:4865
 msgid "Disabled"
 msgstr ""
 
-#: application/Backend/View/Localization.php:146 media/js/aam.js:4856
+#: application/Backend/View/Localization.php:146 media/js/aam.js:4908
 msgid "All settings has been cleared successfully"
 msgstr ""
 
 #: application/Backend/View/Localization.php:147
-#: application/Backend/tmpl/metabox/main-iframe.php:159
-#: application/Backend/tmpl/metabox/main-iframe.php:218 media/js/aam.js:4868
+#: application/Backend/tmpl/metabox/main-iframe.php:168
+#: application/Backend/tmpl/metabox/main-iframe.php:218 media/js/aam.js:4920
 msgid "Clear"
 msgstr ""
 
 #: application/Backend/View/Localization.php:148
-#: application/Backend/tmpl/page/subject-panel-advanced.php:35
-#: application/Backend/tmpl/page/subject-panel-advanced.php:135
-#: media/js/aam.js:5264
+#: application/Backend/tmpl/page/subject-panel-advanced.php:36
+#: application/Backend/tmpl/page/subject-panel-advanced.php:136
+#: media/js/aam.js:5316
 msgid "Select Role"
 msgstr ""
 
-#: application/Backend/View/Localization.php:149 media/js/aam.js:1746
+#: application/Backend/View/Localization.php:149 media/js/aam.js:1760
 msgid "Policy is not assigned to anybody"
 msgstr ""
 
-#: application/Backend/View/Localization.php:150 media/js/aam.js:5567
+#: application/Backend/View/Localization.php:150 media/js/aam.js:5619
 msgid "Data has been saved to clipboard"
 msgstr ""
 
-#: application/Backend/View/Localization.php:151 media/js/aam.js:5574
+#: application/Backend/View/Localization.php:151 media/js/aam.js:5626
 msgid "Failed to save data to clipboard"
 msgstr ""
 
-#: application/Backend/View/Localization.php:152 media/js/aam.js:5647
+#: application/Backend/View/Localization.php:152 media/js/aam.js:5714
 msgid "Operation completed successfully"
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:39
-#: application/Backend/tmpl/partial/post-access-form.php:78
-#: application/Backend/tmpl/partial/post-access-form.php:89
-#: application/Backend/tmpl/partial/post-access-form.php:100
+#: application/Backend/tmpl/partial/post-access-form.php:79
+#: application/Backend/tmpl/partial/post-access-form.php:90
+#: application/Backend/tmpl/partial/post-access-form.php:101
 msgid "Hidden"
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:40
-#: application/Backend/tmpl/partial/post-access-form.php:65
+#: application/Backend/tmpl/partial/post-access-form.php:66
 msgid "Hidden Areas"
 msgstr ""
 
@@ -930,7 +932,7 @@ msgid ""
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:50
-#: application/Backend/tmpl/partial/post-access-form.php:119
+#: application/Backend/tmpl/partial/post-access-form.php:120
 msgid "Teaser Message"
 msgstr ""
 
@@ -983,13 +985,13 @@ msgid ""
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:76
-#: application/Backend/tmpl/partial/post-access-form.php:244
+#: application/Backend/tmpl/partial/post-access-form.php:245
 msgid "Password Protected"
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:77
-#: application/Backend/tmpl/partial/login-form.php:13
-#: application/Backend/tmpl/partial/post-access-form.php:248
+#: application/Backend/tmpl/partial/login-form.php:26
+#: application/Backend/tmpl/partial/post-access-form.php:249
 msgid "Password"
 msgstr ""
 
@@ -1019,10 +1021,10 @@ msgid "Restrict access to edit the post."
 msgstr ""
 
 #: application/Backend/View/PostOptionList.php:95
-#: application/Backend/tmpl/page/subject-panel-advanced.php:92
+#: application/Backend/tmpl/page/subject-panel-advanced.php:93
 #: application/Backend/tmpl/service/jwt.php:130
-#: application/Backend/tmpl/service/uri.php:141 media/js/aam.js:4262
-#: media/js/aam.js:4697
+#: application/Backend/tmpl/service/uri.php:146 media/js/aam.js:4304
+#: media/js/aam.js:4749
 msgid "Delete"
 msgstr ""
 
@@ -1056,87 +1058,88 @@ msgstr ""
 msgid "Howdy, %username%"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:46
+#: application/Backend/tmpl/metabox/main-iframe.php:47
 msgid "Notifications"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:70
+#: application/Backend/tmpl/metabox/main-iframe.php:71
 msgid "Access"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:75
+#: application/Backend/tmpl/metabox/main-iframe.php:76
 msgid "Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:81
-msgid "Add-Ons"
+#: application/Backend/tmpl/metabox/main-iframe.php:82
+msgid "Premium"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:101
+#: application/Backend/tmpl/metabox/main-iframe.php:88
+msgid "Docs"
+msgstr ""
+
+#: application/Backend/tmpl/metabox/main-iframe.php:102
 msgid "Export/Import AAM Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:106
+#: application/Backend/tmpl/metabox/main-iframe.php:107
 msgid "Reset AAM Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:116
+#: application/Backend/tmpl/metabox/main-iframe.php:117
 msgid ""
 "Your browser does not support modern way to work with files. The Export/"
 "Import feature will not work properly. Consider to use the latest Chrome, "
 "Firefox or Safari browser instead."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:120
+#: application/Backend/tmpl/metabox/main-iframe.php:121
 msgid "Export"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:121
+#: application/Backend/tmpl/metabox/main-iframe.php:122
 msgid "Import"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:126
+#: application/Backend/tmpl/metabox/main-iframe.php:129
+#, php-format
 msgid ""
 "Export AAM settings so they can be imported to a different location. To "
-"learn more about customizing exported data, refer to the \"How Import/Export "
-"feature works\" article."
+"learn more about customizing exported data, refer to the %s\"How to export/"
+"import AAM settings?\"%s article."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:133
+#: application/Backend/tmpl/metabox/main-iframe.php:142
 msgid ""
 "Select a *.json file with valid AAM settings. All the current AAM settings "
 "will be lost and replaced with imported settings."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:142
-#: application/Backend/tmpl/metabox/main-iframe.php:152
+#: application/Backend/tmpl/metabox/main-iframe.php:151
+#: application/Backend/tmpl/metabox/main-iframe.php:161
 #: application/Backend/tmpl/metabox/main-iframe.php:209
-#: application/Backend/tmpl/page/addon-panel.php:96
-#: application/Backend/tmpl/page/addon-panel.php:105
-#: application/Backend/tmpl/page/addon-panel.php:115
-#: application/Backend/tmpl/page/addon-panel.php:128
 #: application/Backend/tmpl/page/current-subject.php:30
 #: application/Backend/tmpl/page/current-subject.php:38
-#: application/Backend/tmpl/page/subject-panel-advanced.php:15
-#: application/Backend/tmpl/page/subject-panel-advanced.php:42
-#: application/Backend/tmpl/page/subject-panel-advanced.php:52
-#: application/Backend/tmpl/page/subject-panel-advanced.php:75
-#: application/Backend/tmpl/page/subject-panel-advanced.php:85
-#: application/Backend/tmpl/page/subject-panel-advanced.php:93
-#: application/Backend/tmpl/page/subject-panel-advanced.php:103
-#: application/Backend/tmpl/page/subject-panel-advanced.php:145
-#: application/Backend/tmpl/partial/post-access-form.php:64
-#: application/Backend/tmpl/partial/post-access-form.php:108
-#: application/Backend/tmpl/partial/post-access-form.php:118
-#: application/Backend/tmpl/partial/post-access-form.php:130
-#: application/Backend/tmpl/partial/post-access-form.php:140
-#: application/Backend/tmpl/partial/post-access-form.php:160
-#: application/Backend/tmpl/partial/post-access-form.php:170
-#: application/Backend/tmpl/partial/post-access-form.php:233
-#: application/Backend/tmpl/partial/post-access-form.php:243
-#: application/Backend/tmpl/partial/post-access-form.php:254
-#: application/Backend/tmpl/partial/post-access-form.php:264
-#: application/Backend/tmpl/partial/post-access-form.php:276
+#: application/Backend/tmpl/page/subject-panel-advanced.php:16
+#: application/Backend/tmpl/page/subject-panel-advanced.php:43
+#: application/Backend/tmpl/page/subject-panel-advanced.php:53
+#: application/Backend/tmpl/page/subject-panel-advanced.php:76
+#: application/Backend/tmpl/page/subject-panel-advanced.php:86
+#: application/Backend/tmpl/page/subject-panel-advanced.php:94
+#: application/Backend/tmpl/page/subject-panel-advanced.php:104
+#: application/Backend/tmpl/page/subject-panel-advanced.php:146
+#: application/Backend/tmpl/partial/post-access-form.php:65
+#: application/Backend/tmpl/partial/post-access-form.php:109
+#: application/Backend/tmpl/partial/post-access-form.php:119
+#: application/Backend/tmpl/partial/post-access-form.php:131
+#: application/Backend/tmpl/partial/post-access-form.php:141
+#: application/Backend/tmpl/partial/post-access-form.php:161
+#: application/Backend/tmpl/partial/post-access-form.php:171
+#: application/Backend/tmpl/partial/post-access-form.php:234
+#: application/Backend/tmpl/partial/post-access-form.php:244
+#: application/Backend/tmpl/partial/post-access-form.php:255
+#: application/Backend/tmpl/partial/post-access-form.php:265
+#: application/Backend/tmpl/partial/post-access-form.php:277
 #: application/Backend/tmpl/service/capability.php:58
 #: application/Backend/tmpl/service/capability.php:74
 #: application/Backend/tmpl/service/capability.php:84
@@ -1149,49 +1152,41 @@ msgstr ""
 #: application/Backend/tmpl/service/jwt.php:113
 #: application/Backend/tmpl/service/jwt.php:123
 #: application/Backend/tmpl/service/jwt.php:131
-#: application/Backend/tmpl/service/menu.php:145
-#: application/Backend/tmpl/service/menu.php:165
-#: application/Backend/tmpl/service/menu.php:191
-#: application/Backend/tmpl/service/metabox.php:127
-#: application/Backend/tmpl/service/metabox.php:141
-#: application/Backend/tmpl/service/metabox.php:151
-#: application/Backend/tmpl/service/metabox.php:173
+#: application/Backend/tmpl/service/menu.php:146
+#: application/Backend/tmpl/service/menu.php:166
+#: application/Backend/tmpl/service/menu.php:192
+#: application/Backend/tmpl/service/metabox.php:128
+#: application/Backend/tmpl/service/metabox.php:142
+#: application/Backend/tmpl/service/metabox.php:152
+#: application/Backend/tmpl/service/metabox.php:174
 #: application/Backend/tmpl/service/policy.php:51
 #: application/Backend/tmpl/service/policy.php:59
 #: application/Backend/tmpl/service/policy.php:69
 #: application/Backend/tmpl/service/policy.php:99
-#: application/Backend/tmpl/service/toolbar.php:109
-#: application/Backend/tmpl/service/toolbar.php:131
-#: application/Backend/tmpl/service/uri.php:37
-#: application/Backend/tmpl/service/uri.php:120
-#: application/Backend/tmpl/service/uri.php:130
-#: application/Backend/tmpl/service/uri.php:142
+#: application/Backend/tmpl/service/toolbar.php:110
+#: application/Backend/tmpl/service/toolbar.php:132
+#: application/Backend/tmpl/service/uri.php:38
+#: application/Backend/tmpl/service/uri.php:125
+#: application/Backend/tmpl/service/uri.php:135
+#: application/Backend/tmpl/service/uri.php:147
 msgid "Close"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:153
+#: application/Backend/tmpl/metabox/main-iframe.php:162
 msgid "Clear all settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:156
+#: application/Backend/tmpl/metabox/main-iframe.php:165
 msgid "All AAM settings will be removed."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:160
+#: application/Backend/tmpl/metabox/main-iframe.php:169
 #: application/Backend/tmpl/metabox/main-iframe.php:219
 msgid "Cancel"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:178
+#: application/Backend/tmpl/metabox/main-iframe.php:187
 msgid "Registered Licenses"
-msgstr ""
-
-#: application/Backend/tmpl/metabox/main-iframe.php:194
-msgid ""
-"Any listed license above only indicates that you used it on this website to "
-"download premium AAM add-on(s). It does not mean that the AAM add-on is "
-"installed and active on your website. You can verify that the premium add-on "
-"is active on the Plugins page."
 msgstr ""
 
 #: application/Backend/tmpl/metabox/main-iframe.php:210
@@ -1204,65 +1199,111 @@ msgid ""
 "Please confirm this operation."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/policy-metabox.php:45
+#: application/Backend/tmpl/metabox/policy-metabox.php:53
 #, php-format
 msgid ""
 "To learn more about Access &amp; Security policy document, please check  "
 "[%sAccess &amp; Security Policy%s] page."
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:19
-msgid "License Key"
+#: application/Backend/tmpl/page/addon-panel.php:20
+msgid "60-day refund policy"
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:23
-msgid "Enter The License Key"
+#: application/Backend/tmpl/page/addon-panel.php:21
+msgid ""
+"Your satisfaction is our top priority. We are so confident in the value our "
+"Premium Add-On brings that we offer a 60-day refund policy. Try it, and if "
+"it does not meet your expectations, we will gladly refund your purchase—no "
+"questions asked."
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:27
-msgid "Download Addon"
+#: application/Backend/tmpl/page/addon-panel.php:24
+msgid "Prioritized support via email, Zoom, or Telegram"
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:35
-msgid "Premium"
+#: application/Backend/tmpl/page/addon-panel.php:25
+msgid ""
+"Gain peace of mind with our dedicated support team ready to assist you via "
+"email, Zoom, or Telegram. Whether you have questions, need guidance, or "
+"encounter any issues, our experts are here to ensure you make the most of "
+"Advanced Access Manager and keep your WordPress site running smoothly."
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:28
+msgid "Setup granular access to the WordPress backend area"
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:29
+msgid ""
+"Customize user permissions with precision, tailoring access to the WordPress "
+"backend area based on your unique requirements. From limiting dashboard "
+"access to specific roles to defining nuanced permissions, our Premium Add-On "
+"puts you in complete control, enhancing security and efficiency."
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:32
+msgid "Create a private WordPress website"
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:33
+msgid ""
+"Transform your WordPress site into a secure, private environment with ease. "
+"Our Premium Add-On empowers you to restrict access to selected users, "
+"creating an exclusive space for collaboration, development, or confidential "
+"content that remains hidden from unauthorized eyes."
 msgstr ""
 
 #: application/Backend/tmpl/page/addon-panel.php:36
-msgid "Free"
+msgid "The most sophisticated tools for restricted content"
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:54
-#: application/Backend/tmpl/page/addon-panel.php:72
-#: application/Backend/tmpl/page/addon-panel.php:83
-msgid "Read More"
-msgstr ""
-
-#: application/Backend/tmpl/page/addon-panel.php:97
-msgid "License Key Info"
-msgstr ""
-
-#: application/Backend/tmpl/page/addon-panel.php:101
+#: application/Backend/tmpl/page/addon-panel.php:37
 msgid ""
-"Insert license key that you received after the payment. It might take up to "
-"30 minutes to process the payment."
+"Elevate your content control with cutting-edge tools designed for restricted "
+"content. Manage who sees what, ensuring that sensitive information or "
+"premium content is accessible only to those with the right permissions, "
+"providing you with unmatched content security."
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:116
-msgid "Plugin Installation"
+#: application/Backend/tmpl/page/addon-panel.php:40
+msgid "Secure WordPress RESTful API"
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:120
+#: application/Backend/tmpl/page/addon-panel.php:41
 msgid ""
-"[NOTE!] There are still a couple steps that you need to do to install the "
-"plugin."
+"Safeguard your WordPress site with our secure RESTful API integration. Our "
+"Premium Add-On ensures that API access is protected, reducing the risk of "
+"unauthorized access and potential security threats, giving you peace of mind "
+"in an increasingly interconnected digital landscape."
 msgstr ""
 
-#: application/Backend/tmpl/page/addon-panel.php:124
-#, php-format
+#: application/Backend/tmpl/page/addon-panel.php:44
+msgid "IP & Geolocation access controls to the website"
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:45
 msgid ""
-"With AAM v6.0.0 or higher, all premium addons are [regular WordPress "
-"plugins] that you can upload by going to the %sPlugins%s page or extract "
-"downloaded ZIP archive to the [/wp-content/plugins] folder."
+"Enhance your website security by implementing IP and Geolocation access "
+"controls. With our Premium Add-On, you have the tools to restrict or grant "
+"access based on specific IP addresses or geographic locations, fortifying "
+"your website against unauthorized access attempts."
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:48
+msgid "Define multi-level access management with roles"
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:49
+msgid ""
+"Tailor access management to your organizational structure with multi-level "
+"roles. Our Premium Add-On enables you to define roles with precision, "
+"ensuring that each user has access only to the features and content relevant "
+"to their responsibilities, optimizing workflow efficiency and security."
+msgstr ""
+
+#: application/Backend/tmpl/page/addon-panel.php:96
+msgid "Get Premium Addon"
 msgstr ""
 
 #: application/Backend/tmpl/page/current-subject.php:19
@@ -1278,81 +1319,81 @@ msgstr ""
 msgid "You are about to reset all access settings for the %s. Please confirm."
 msgstr ""
 
-#: application/Backend/tmpl/page/main-panel.php:40
+#: application/Backend/tmpl/page/main-panel.php:41
 msgid "You are not allowed to manage any of the existing services."
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:16
+#: application/Backend/tmpl/page/subject-panel-advanced.php:17
 msgid "Create Role"
-msgstr ""
-
-#: application/Backend/tmpl/page/subject-panel-advanced.php:25
-#: application/Backend/tmpl/page/subject-panel-advanced.php:62
-msgid "Role Name"
 msgstr ""
 
 #: application/Backend/tmpl/page/subject-panel-advanced.php:26
 #: application/Backend/tmpl/page/subject-panel-advanced.php:63
+msgid "Role Name"
+msgstr ""
+
+#: application/Backend/tmpl/page/subject-panel-advanced.php:27
+#: application/Backend/tmpl/page/subject-panel-advanced.php:64
 msgid "Enter Role Name"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:29
-#: application/Backend/tmpl/page/subject-panel-advanced.php:66
+#: application/Backend/tmpl/page/subject-panel-advanced.php:30
+#: application/Backend/tmpl/page/subject-panel-advanced.php:67
 msgid "Role Slug"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:30
+#: application/Backend/tmpl/page/subject-panel-advanced.php:31
 msgid "Enter Role Slug"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:33
+#: application/Backend/tmpl/page/subject-panel-advanced.php:34
 msgid "Inherit Capabilities From"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:53
+#: application/Backend/tmpl/page/subject-panel-advanced.php:54
 msgid "Update Role"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:68
+#: application/Backend/tmpl/page/subject-panel-advanced.php:69
 msgid "Can be changed if no users are assigned to role"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:89
+#: application/Backend/tmpl/page/subject-panel-advanced.php:90
 #, php-format
 msgid "Are you sure that you want to delete the %s role?"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:104
+#: application/Backend/tmpl/page/subject-panel-advanced.php:105
 msgid "Manage User"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:107
+#: application/Backend/tmpl/page/subject-panel-advanced.php:108
 msgid ""
 "Define for how long user can access the website and what action needs to be "
 "taken after access expires."
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:116
+#: application/Backend/tmpl/page/subject-panel-advanced.php:117
 msgid "Action After Expiration"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:119
+#: application/Backend/tmpl/page/subject-panel-advanced.php:120
 msgid "Select Action"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:120
+#: application/Backend/tmpl/page/subject-panel-advanced.php:121
 msgid "Logout User"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:121
+#: application/Backend/tmpl/page/subject-panel-advanced.php:122
 msgid "Delete Account"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:122
+#: application/Backend/tmpl/page/subject-panel-advanced.php:123
 msgid "Change User Role"
 msgstr ""
 
-#: application/Backend/tmpl/page/subject-panel-advanced.php:133
+#: application/Backend/tmpl/page/subject-panel-advanced.php:134
 msgid "Change To Role"
 msgstr ""
 
@@ -1472,35 +1513,35 @@ msgid ""
 "WordPress theme to find out what causes the issue."
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:7
+#: application/Backend/tmpl/partial/login-form.php:20
 msgid "Username or Email Address"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:22
+#: application/Backend/tmpl/partial/login-form.php:35
 msgid "Remember Me"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:27
+#: application/Backend/tmpl/partial/login-form.php:40
 msgid "Log In"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:35
+#: application/Backend/tmpl/partial/login-form.php:48
 msgid "Register"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:40
+#: application/Backend/tmpl/partial/login-form.php:53
 msgid "Lost your password?"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:87
+#: application/Backend/tmpl/partial/login-form.php:100
 msgid "Dashboard"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:88
+#: application/Backend/tmpl/partial/login-form.php:101
 msgid "Edit My Profile"
 msgstr ""
 
-#: application/Backend/tmpl/partial/login-form.php:90
+#: application/Backend/tmpl/partial/login-form.php:103
 msgid "Log Out"
 msgstr ""
 
@@ -1510,188 +1551,188 @@ msgid ""
 "settings will be automatically synced across all the blogs in this network."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:14
+#: application/Backend/tmpl/partial/post-access-form.php:15
 #: application/Backend/tmpl/service/404redirect.php:18
 #: application/Backend/tmpl/service/login-redirect.php:16
 #: application/Backend/tmpl/service/logout-redirect.php:17
-#: application/Backend/tmpl/service/menu.php:31
-#: application/Backend/tmpl/service/metabox.php:33
-#: application/Backend/tmpl/service/redirect.php:29
-#: application/Backend/tmpl/service/toolbar.php:25
-#: application/Backend/tmpl/service/uri.php:27
+#: application/Backend/tmpl/service/menu.php:32
+#: application/Backend/tmpl/service/metabox.php:34
+#: application/Backend/tmpl/service/redirect.php:31
+#: application/Backend/tmpl/service/toolbar.php:26
+#: application/Backend/tmpl/service/uri.php:28
 msgid "Settings are customized"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:15
+#: application/Backend/tmpl/partial/post-access-form.php:16
 #: application/Backend/tmpl/service/404redirect.php:19
 #: application/Backend/tmpl/service/login-redirect.php:17
 #: application/Backend/tmpl/service/logout-redirect.php:18
-#: application/Backend/tmpl/service/menu.php:32
-#: application/Backend/tmpl/service/metabox.php:34
-#: application/Backend/tmpl/service/redirect.php:30
+#: application/Backend/tmpl/service/menu.php:33
+#: application/Backend/tmpl/service/metabox.php:35
+#: application/Backend/tmpl/service/redirect.php:32
 #: application/Backend/tmpl/service/route.php:29
-#: application/Backend/tmpl/service/toolbar.php:26
-#: application/Backend/tmpl/service/uri.php:28
+#: application/Backend/tmpl/service/toolbar.php:27
+#: application/Backend/tmpl/service/uri.php:29
 msgid "Reset to default"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:23
+#: application/Backend/tmpl/partial/post-access-form.php:24
 #, php-format
 msgid ""
 "To fully protect your media items, refer to the %sAAM Protected Media "
 "Files%s page."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:38
+#: application/Backend/tmpl/partial/post-access-form.php:39
 msgid "change"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:74
+#: application/Backend/tmpl/partial/post-access-form.php:75
 msgid "Hide post on the frontend site of the website"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:78
-#: application/Backend/tmpl/partial/post-access-form.php:89
-#: application/Backend/tmpl/partial/post-access-form.php:100
+#: application/Backend/tmpl/partial/post-access-form.php:79
+#: application/Backend/tmpl/partial/post-access-form.php:90
+#: application/Backend/tmpl/partial/post-access-form.php:101
 msgid "Visible"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:85
+#: application/Backend/tmpl/partial/post-access-form.php:86
 msgid "Hide post on the backend site of the website"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:96
+#: application/Backend/tmpl/partial/post-access-form.php:97
 msgid "Hide post in the RESTful API response"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:123
+#: application/Backend/tmpl/partial/post-access-form.php:124
 msgid "Plain text or valid HTML"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:124
+#: application/Backend/tmpl/partial/post-access-form.php:125
 msgid "Enter your teaser message..."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:125
+#: application/Backend/tmpl/partial/post-access-form.php:126
 msgid ""
 "Use [&#91;excerpt&#93;] shortcode to insert post excerpt to the teaser "
 "message."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:141
+#: application/Backend/tmpl/partial/post-access-form.php:142
 msgid "Define Access Limit"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:145
+#: application/Backend/tmpl/partial/post-access-form.php:146
 msgid "Access Limit Threshold"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:146
+#: application/Backend/tmpl/partial/post-access-form.php:147
 msgid "Enter digital number"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:153
+#: application/Backend/tmpl/partial/post-access-form.php:154
 #, php-format
 msgid "The user can access content [%d] times."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:171
+#: application/Backend/tmpl/partial/post-access-form.php:172
 msgid "Access Redirect"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:174
+#: application/Backend/tmpl/partial/post-access-form.php:175
 msgid ""
 "Use REDIRECT option only if you want to redirect user to a different "
 "location either temporary or permanently. Do not use it as a way to protect "
 "access to avoid inconsistent user experience."
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:179
+#: application/Backend/tmpl/partial/post-access-form.php:180
 #: application/Backend/tmpl/service/404redirect.php:34
 #: application/Backend/tmpl/service/logout-redirect.php:33
-#: application/Backend/tmpl/service/redirect.php:64
-#: application/Backend/tmpl/service/uri.php:68
+#: application/Backend/tmpl/service/redirect.php:66
+#: application/Backend/tmpl/service/uri.php:69
 msgid "Redirected to existing page [(select from the drop-down)]"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:183
+#: application/Backend/tmpl/partial/post-access-form.php:184
 #: application/Backend/tmpl/service/logout-redirect.php:37
 msgid "Redirected to the URL [(enter full URL starting from http or https)]"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:188
-#: application/Backend/tmpl/service/redirect.php:59
-#: application/Backend/tmpl/service/uri.php:63
+#: application/Backend/tmpl/partial/post-access-form.php:189
+#: application/Backend/tmpl/service/redirect.php:61
+#: application/Backend/tmpl/service/uri.php:64
 msgid ""
 "Redirect to the login page [(after login, user will be redirected back to "
 "the restricted page)]"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:193
+#: application/Backend/tmpl/partial/post-access-form.php:194
 #: application/Backend/tmpl/service/404redirect.php:42
 #: application/Backend/tmpl/service/logout-redirect.php:41
-#: application/Backend/tmpl/service/redirect.php:72
-#: application/Backend/tmpl/service/redirect.php:125
-#: application/Backend/tmpl/service/uri.php:76
+#: application/Backend/tmpl/service/redirect.php:74
+#: application/Backend/tmpl/service/redirect.php:151
+#: application/Backend/tmpl/service/uri.php:77
 #, php-format
 msgid "Trigger PHP callback function [(valid %sPHP callback%s is required)]"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:197
+#: application/Backend/tmpl/partial/post-access-form.php:198
 #: application/Backend/tmpl/service/404redirect.php:46
 #: application/Backend/tmpl/service/login-redirect.php:44
 #: application/Backend/tmpl/service/logout-redirect.php:45
-#: application/Backend/tmpl/service/redirect.php:82
-#: application/Backend/tmpl/service/redirect.php:134
-#: application/Backend/tmpl/service/uri.php:85
+#: application/Backend/tmpl/service/redirect.php:108
+#: application/Backend/tmpl/service/redirect.php:184
+#: application/Backend/tmpl/service/uri.php:86
 msgid "Existing Page"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:205
+#: application/Backend/tmpl/partial/post-access-form.php:206
 #: application/Backend/tmpl/service/404redirect.php:55
 #: application/Backend/tmpl/service/login-redirect.php:53
 #: application/Backend/tmpl/service/logout-redirect.php:54
-#: application/Backend/tmpl/service/redirect.php:91
-#: application/Backend/tmpl/service/redirect.php:143
-#: application/Backend/tmpl/service/uri.php:92
+#: application/Backend/tmpl/service/redirect.php:117
+#: application/Backend/tmpl/service/redirect.php:193
+#: application/Backend/tmpl/service/uri.php:93
 msgid "-- Select Page --"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:211
+#: application/Backend/tmpl/partial/post-access-form.php:212
 #: application/Backend/tmpl/service/404redirect.php:61
 #: application/Backend/tmpl/service/login-redirect.php:59
 #: application/Backend/tmpl/service/logout-redirect.php:60
-#: application/Backend/tmpl/service/redirect.php:97
-#: application/Backend/tmpl/service/redirect.php:149
+#: application/Backend/tmpl/service/redirect.php:123
+#: application/Backend/tmpl/service/redirect.php:199
 msgid "The URL"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:216
+#: application/Backend/tmpl/partial/post-access-form.php:217
 #: application/Backend/tmpl/service/404redirect.php:66
 #: application/Backend/tmpl/service/login-redirect.php:64
 #: application/Backend/tmpl/service/logout-redirect.php:65
-#: application/Backend/tmpl/service/redirect.php:102
-#: application/Backend/tmpl/service/redirect.php:154
-#: application/Backend/tmpl/service/uri.php:114
+#: application/Backend/tmpl/service/redirect.php:128
+#: application/Backend/tmpl/service/redirect.php:204
+#: application/Backend/tmpl/service/uri.php:115
 msgid "PHP Callback Function"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:217
-#: application/Backend/tmpl/service/redirect.php:103
-#: application/Backend/tmpl/service/redirect.php:155
+#: application/Backend/tmpl/partial/post-access-form.php:218
+#: application/Backend/tmpl/service/redirect.php:129
+#: application/Backend/tmpl/service/redirect.php:205
 msgid "Enter valid callback"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:221
-#: application/Backend/tmpl/service/uri.php:103
+#: application/Backend/tmpl/partial/post-access-form.php:222
+#: application/Backend/tmpl/service/uri.php:104
 msgid "HTTP Redirect Code"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:249
+#: application/Backend/tmpl/partial/post-access-form.php:250
 msgid "Enter Password"
 msgstr ""
 
-#: application/Backend/tmpl/partial/post-access-form.php:265
+#: application/Backend/tmpl/partial/post-access-form.php:266
 msgid "Expiration Date/Time"
 msgstr ""
 
@@ -1701,8 +1742,7 @@ msgid ""
 "You can manage access to any individual post or page for any role, user, or "
 "visitor. Consider getting the %s[Complete Package]%s premium add-on to have "
 "the ability to manage access to categories and custom taxonomies or to "
-"define the default access to all posts, pages, or custom post types. For "
-"more detail, refer to the %sPremium Complete Package%s page."
+"define the default access to all posts, pages, or custom post types."
 msgstr ""
 
 #: application/Backend/tmpl/partial/role-inheritance.php:7
@@ -1820,7 +1860,7 @@ msgstr ""
 #: application/Backend/tmpl/service/capability.php:47
 #: application/Backend/tmpl/service/capability.php:63
 #: application/Backend/tmpl/service/capability.php:89
-#: application/Backend/tmpl/service/menu.php:176
+#: application/Backend/tmpl/service/menu.php:177
 msgid "Capability"
 msgstr ""
 
@@ -1828,7 +1868,7 @@ msgstr ""
 #: application/Backend/tmpl/service/jwt.php:24
 #: application/Backend/tmpl/service/policy.php:37
 #: application/Backend/tmpl/service/post.php:22
-#: application/Backend/tmpl/service/uri.php:158
+#: application/Backend/tmpl/service/uri.php:163
 msgid "Actions"
 msgstr ""
 
@@ -1938,7 +1978,7 @@ msgstr ""
 msgid "Trigger a PHP callback function [(valid %sPHP callback%s is required)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:22
+#: application/Backend/tmpl/service/menu.php:23
 #, php-format
 msgid ""
 "Manage access to the backend menu and submenu items. With the premium "
@@ -1947,29 +1987,29 @@ msgid ""
 "documentation page %shere%s."
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:71
+#: application/Backend/tmpl/service/menu.php:72
 msgid "Menu URI:"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:79
-#: application/Backend/tmpl/service/toolbar.php:66 media/js/aam.js:1900
-#: media/js/aam.js:2045
+#: application/Backend/tmpl/service/menu.php:80
+#: application/Backend/tmpl/service/toolbar.php:67 media/js/aam.js:1914
+#: media/js/aam.js:2059
 msgid "The entire menu is restricted with all submenus"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:93
-#: application/Backend/tmpl/service/metabox.php:93
-#: application/Backend/tmpl/service/toolbar.php:72
+#: application/Backend/tmpl/service/menu.php:94
+#: application/Backend/tmpl/service/metabox.php:94
+#: application/Backend/tmpl/service/toolbar.php:73
 msgid "more details"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:124
+#: application/Backend/tmpl/service/menu.php:125
 msgid ""
 "The \"Dashboard\" menu cannot be restricted because it is the default page "
 "all users are redirected to after login."
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:134
+#: application/Backend/tmpl/service/menu.php:135
 msgid ""
 "Try to refresh the page. If that doesn't resolve the issue, it's possible "
 "that the current user may lack the necessary privileges to access any "
@@ -1979,15 +2019,15 @@ msgid ""
 "you're using one, look for the settings that allow you to re-enable them."
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:146
+#: application/Backend/tmpl/service/menu.php:147
 msgid "Dashboard Lockdown"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:150
+#: application/Backend/tmpl/service/menu.php:151
 msgid "You cannot restrict access to the Dashboard Home page."
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:151
+#: application/Backend/tmpl/service/menu.php:152
 #, php-format
 msgid ""
 "The [Dashboard Home] is the default page every user redirects to after "
@@ -1995,29 +2035,29 @@ msgid ""
 "down WordPress backend%s Q&A."
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:155
+#: application/Backend/tmpl/service/menu.php:156
 msgid "OK"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:166
+#: application/Backend/tmpl/service/menu.php:167
 msgid "Menu Details"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:172
-#: application/Backend/tmpl/service/toolbar.php:116
+#: application/Backend/tmpl/service/menu.php:173
+#: application/Backend/tmpl/service/toolbar.php:117
 msgid "Name"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:180
-#: application/Backend/tmpl/service/toolbar.php:120
+#: application/Backend/tmpl/service/menu.php:181
+#: application/Backend/tmpl/service/toolbar.php:121
 msgid "URI"
 msgstr ""
 
-#: application/Backend/tmpl/service/menu.php:184 media/js/aam.js:939
+#: application/Backend/tmpl/service/menu.php:185 media/js/aam.js:927
 msgid "ID"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:19
+#: application/Backend/tmpl/service/metabox.php:20
 #, php-format
 msgid ""
 "Manage access to WordPress metaboxes on post-edit screens or manage access "
@@ -2027,31 +2067,31 @@ msgid ""
 "for each screen."
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:26
+#: application/Backend/tmpl/service/metabox.php:27
 msgid "Refresh"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:27
+#: application/Backend/tmpl/service/metabox.php:28
 msgid "Init URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:68
+#: application/Backend/tmpl/service/metabox.php:69
 msgid "Dashboard Widgets"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:72
+#: application/Backend/tmpl/service/metabox.php:73
 msgid "Frontend Widgets [(including Appearance->Widgets)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:117
+#: application/Backend/tmpl/service/metabox.php:118
 msgid "The list is not initialized. Click Refresh button above."
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:128
+#: application/Backend/tmpl/service/metabox.php:129
 msgid "Initialize URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:132
+#: application/Backend/tmpl/service/metabox.php:133
 msgid ""
 "Some metaboxes are \"conditional\" and appear on the edit screen when "
 "certain conditions are met. For example metabox \"Comments\" appears only "
@@ -2060,29 +2100,29 @@ msgid ""
 "appears."
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:135
+#: application/Backend/tmpl/service/metabox.php:136
 msgid "Backend page URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:136
+#: application/Backend/tmpl/service/metabox.php:137
 msgid "Insert valid URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:152
+#: application/Backend/tmpl/service/metabox.php:153
 msgid "Metabox/Widget Details"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:158
+#: application/Backend/tmpl/service/metabox.php:159
 #: application/Backend/tmpl/service/policy.php:83
 #: application/Backend/tmpl/service/post.php:21
 msgid "Title"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:162
+#: application/Backend/tmpl/service/metabox.php:163
 msgid "Screen ID"
 msgstr ""
 
-#: application/Backend/tmpl/service/metabox.php:166
+#: application/Backend/tmpl/service/metabox.php:167
 msgid "Internal ID"
 msgstr ""
 
@@ -2102,12 +2142,12 @@ msgid "Reset To Default"
 msgstr ""
 
 #: application/Backend/tmpl/service/policy.php:36
-#: application/Service/AccessPolicy.php:218
+#: application/Service/AccessPolicy.php:223
 msgid "Policy"
 msgstr ""
 
 #: application/Backend/tmpl/service/policy.php:52
-#: application/Backend/tmpl/service/policy.php:58 media/js/aam.js:1660
+#: application/Backend/tmpl/service/policy.php:58 media/js/aam.js:1674
 msgid "Delete Policy"
 msgstr ""
 
@@ -2144,7 +2184,7 @@ msgstr ""
 msgid "Assignee(s)"
 msgstr ""
 
-#: application/Backend/tmpl/service/policy.php:98 media/js/aam.js:1684
+#: application/Backend/tmpl/service/policy.php:98 media/js/aam.js:1698
 msgid "Install"
 msgstr ""
 
@@ -2157,57 +2197,105 @@ msgstr ""
 msgid "Go Back"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:21
+#: application/Backend/tmpl/service/redirect.php:23
 msgid ""
 "Define the [default] redirect for all users, roles and visitors when access "
 "is denied to any restricted resources on your website."
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:25
+#: application/Backend/tmpl/service/redirect.php:27
 #, php-format
 msgid ""
 "Customize redirect for [%s] when access is denied to restricted resources "
 "like posts, categories, menus, etc."
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:39
+#: application/Backend/tmpl/service/redirect.php:41
 msgid "Frontend Redirect"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:40
+#: application/Backend/tmpl/service/redirect.php:42
 msgid "Backend Redirect"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:50
-#: application/Backend/tmpl/service/redirect.php:109
+#: application/Backend/tmpl/service/redirect.php:52
+#: application/Backend/tmpl/service/redirect.php:135
 msgid "Default [(\"Access Denied\" message)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:54
-#: application/Backend/tmpl/service/redirect.php:113
-#: application/Backend/tmpl/service/uri.php:58
+#: application/Backend/tmpl/service/redirect.php:56
+#: application/Backend/tmpl/service/redirect.php:139
+#: application/Backend/tmpl/service/uri.php:59
 msgid "Show customized message [(plain text or HTML)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:68
-#: application/Backend/tmpl/service/redirect.php:121
-#: application/Backend/tmpl/service/uri.php:72
+#: application/Backend/tmpl/service/redirect.php:70
+#: application/Backend/tmpl/service/redirect.php:147
+#: application/Backend/tmpl/service/uri.php:73
 msgid "Redirected to local URL [(enter valid URL starting from http or https)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:76
-#: application/Backend/tmpl/service/redirect.php:129
-#: application/Backend/tmpl/service/uri.php:80
+#: application/Backend/tmpl/service/redirect.php:78
+#: application/Backend/tmpl/service/redirect.php:95
+#: application/Backend/tmpl/service/redirect.php:155
+#: application/Backend/tmpl/service/redirect.php:171
+#: application/Core/Restful/AccessDeniedRedirectService.php:83
+#: application/Core/Restful/LoginRedirectService.php:76
+#: application/Core/Restful/LogoutRedirectService.php:76
+#: application/Core/Restful/NotFoundRedirectService.php:76
+#: application/Core/Restful/UrlService.php:71
+#: application/Core/Restful/UrlService.php:155
+msgid "HTTP Status Code"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:81
+#: application/Backend/tmpl/service/redirect.php:98
+#: application/Backend/tmpl/service/redirect.php:158
+#: application/Backend/tmpl/service/redirect.php:174
+msgid "HTTP Code (Default 401 - Unauthorized)"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:82
+#: application/Backend/tmpl/service/redirect.php:99
+#: application/Backend/tmpl/service/redirect.php:159
+#: application/Backend/tmpl/service/redirect.php:175
+msgid "402 - Payment Required"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:83
+#: application/Backend/tmpl/service/redirect.php:100
+#: application/Backend/tmpl/service/redirect.php:160
+#: application/Backend/tmpl/service/redirect.php:176
+msgid "403 - Forbidden"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:84
+#: application/Backend/tmpl/service/redirect.php:101
+#: application/Backend/tmpl/service/redirect.php:161
+#: application/Backend/tmpl/service/redirect.php:177
+msgid "404 - Not Found"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:85
+#: application/Backend/tmpl/service/redirect.php:102
+#: application/Backend/tmpl/service/redirect.php:162
+#: application/Backend/tmpl/service/redirect.php:178
+msgid "500 - Internal Server Error"
+msgstr ""
+
+#: application/Backend/tmpl/service/redirect.php:90
+#: application/Backend/tmpl/service/redirect.php:167
+#: application/Backend/tmpl/service/uri.php:81
 msgid "Customized Message"
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:78
-#: application/Backend/tmpl/service/redirect.php:130
-#: application/Backend/tmpl/service/uri.php:81
+#: application/Backend/tmpl/service/redirect.php:92
+#: application/Backend/tmpl/service/redirect.php:168
+#: application/Backend/tmpl/service/uri.php:82
 msgid "Enter message..."
 msgstr ""
 
-#: application/Backend/tmpl/service/redirect.php:117
+#: application/Backend/tmpl/service/redirect.php:143
 msgid "Redirected to existing frontend page [(select from the drop-down)]"
 msgstr ""
 
@@ -2232,18 +2320,7 @@ msgstr ""
 msgid "Route"
 msgstr ""
 
-#: application/Backend/tmpl/service/support.php:14
-msgid ""
-"When you encounter any questions or concerns, this is the place to be. We "
-"will follow-up with you vie email. Submit your support request here and let "
-"us help you to find the best possible solution."
-msgstr ""
-
-#: application/Backend/tmpl/service/support.php:39 media/js/aam.js:5130
-msgid "Send the Message"
-msgstr ""
-
-#: application/Backend/tmpl/service/toolbar.php:17
+#: application/Backend/tmpl/service/toolbar.php:18
 msgid ""
 "[Note!] Toolbar service does not restrict direct access to linked pages. It "
 "is used only to remove unnecessary items from the top toolbar. Use the "
@@ -2251,27 +2328,27 @@ msgid ""
 "it with capabilities."
 msgstr ""
 
-#: application/Backend/tmpl/service/toolbar.php:58
+#: application/Backend/tmpl/service/toolbar.php:59
 msgid "Item Slug:"
 msgstr ""
 
-#: application/Backend/tmpl/service/toolbar.php:96 media/js/aam.js:2060
+#: application/Backend/tmpl/service/toolbar.php:97 media/js/aam.js:2074
 msgid "Hide Menu"
 msgstr ""
 
-#: application/Backend/tmpl/service/toolbar.php:110
+#: application/Backend/tmpl/service/toolbar.php:111
 msgid "Item Details"
 msgstr ""
 
-#: application/Backend/tmpl/service/toolbar.php:124
+#: application/Backend/tmpl/service/toolbar.php:125
 msgid "Slug"
 msgstr ""
 
-#: application/Backend/tmpl/service/toolbar.php:141
+#: application/Backend/tmpl/service/toolbar.php:142
 msgid "The list of top admin bar items is not initialized. Reload the page."
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:18
+#: application/Backend/tmpl/service/uri.php:19
 #, php-format
 msgid ""
 "Manage access to an unlimited number of individual URLs. With the premium "
@@ -2281,94 +2358,138 @@ msgid ""
 "documentation page %shere%s."
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:38
+#: application/Backend/tmpl/service/uri.php:39
 msgid "URL Access Rule"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:42
+#: application/Backend/tmpl/service/uri.php:43
 msgid "Enter URL [(wildcard * is available with premium Complete Package)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:46
-msgid "How to redirect user when match?"
+#: application/Backend/tmpl/service/uri.php:47
+msgid "What should be done when a URL is matched?"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:50
+#: application/Backend/tmpl/service/uri.php:51
 msgid "Allow Access"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:54
+#: application/Backend/tmpl/service/uri.php:55
 msgid "Deny Access [(show \"Access Denied\" message)]"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:98
+#: application/Backend/tmpl/service/uri.php:99
 msgid "The Valid Redirect URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:105
+#: application/Backend/tmpl/service/uri.php:106
 msgid "HTTP Code (Default 307)"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:107
+#: application/Backend/tmpl/service/uri.php:108
 msgid "302 - Found"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:109
+#: application/Backend/tmpl/service/uri.php:110
 msgid "307 - Temporary Redirect"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:131
+#: application/Backend/tmpl/service/uri.php:136
 msgid "Delete URL Rule"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:136
+#: application/Backend/tmpl/service/uri.php:141
 msgid "You are about to delete the URL Rule. Please confirm!"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:154
+#: application/Backend/tmpl/service/uri.php:159
 msgid "URL"
 msgstr ""
 
-#: application/Backend/tmpl/service/uri.php:155
+#: application/Backend/tmpl/service/uri.php:160
 msgid "Type"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:20
 msgid ""
-"Thank you for using the Advanced Access Manager (aka AAM) plugin. With "
-"knowledge and experience in WordPress core, AAM becomes a powerful "
-"collection of services to manage access to all your website areas."
-msgstr ""
-
-#: application/Backend/tmpl/service/welcome.php:21
-#, php-format
-msgid ""
-"%sNote!%s Power comes with responsibility. AAM integrates with WordPress "
-"core, and any unintentional changes in roles and capabilities may affect you "
-"or your user experience. We recommend backup your database table %s%s%s "
-"before you start working with AAM. There is no need to back up your files. "
-"AAM does not modify any physical files on your server and never did."
-msgstr ""
-
-#: application/Backend/tmpl/service/welcome.php:22
-msgid ""
-"AAM is thoroughly tested on the fresh installation of the latest WordPress "
-"and in the latest versions of Chrome, Safari, IE, and Firefox. If you have "
-"any issues, the most typical cause is a conflict with other plugins or "
-"themes."
-msgstr ""
-
-#: application/Backend/tmpl/service/welcome.php:23
-msgid "If you are unsure where to start, please do not hesitate to contact us."
+"Here, we've outlined several typical scenarios where you can leverage AAM, "
+"along with some key features. If you require assistance, don't hesitate to "
+"reach out by filling out the contact form below. We'll get back to you as "
+"soon as possible."
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:25
-msgid "Check Our Support Page"
+msgid "Introduction"
 msgstr ""
 
-#: application/Backend/tmpl/settings/configpress.php:15
+#: application/Backend/tmpl/service/welcome.php:32
+msgid "Introduction to Advanced Access Manager (aka AAM)"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:49
+msgid "5 Most Common Use Cases"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:56
+msgid "Make My WordPress Website Private"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:75
+msgid "3 Simple Steps to Enhance your Website Security"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:94
+msgid "Manage Access to Admin Menu"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:113
+msgid "Protect Posts, Pages, CPTs, Terms & Taxonomies"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:132
+msgid "Manage Roles, Users & Capabilities"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:156
+msgid "Customize Editorial Team Permissions to Content"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:175
+msgid "Explore Enterprise-Level Access Management with JSON Policies"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:194
+msgid "Customize Widgets & Metaboxes Visibility"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:213
+msgid "Protect Media Library, Files & Static Pages"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:232
+msgid "Redefine Login, Logout, 404 and Access Denied Redirects"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:251
+msgid "Manage Passwordless Login and Temporary User Accounts"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:270
+msgid "Manage JWT Tokens and RESTful API Authentication"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:294
+msgid "Contact Us"
+msgstr ""
+
+#: application/Backend/tmpl/service/welcome.php:321 media/js/aam.js:5182
+msgid "Send the Message"
+msgstr ""
+
+#: application/Backend/tmpl/settings/configpress.php:16
 #, php-format
-msgid "For detail about AAM configurations, refer to the %sConfigPress%s page."
+msgid ""
+"For detail about AAM configurations, refer to the %sConfigPress%s section."
 msgstr ""
 
 #: application/Backend/tmpl/settings/content.php:31
@@ -2387,123 +2508,127 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: application/Backend/tmpl/widget/login-backend.php:12
+#: application/Backend/tmpl/user/multiple-roles.php:16
+msgid "User Roles"
+msgstr ""
+
+#: application/Backend/tmpl/widget/login-backend.php:13
 msgid "Login Title"
 msgstr ""
 
-#: application/Backend/tmpl/widget/login-backend.php:17
+#: application/Backend/tmpl/widget/login-backend.php:18
 msgid "Logged In Title"
 msgstr ""
 
-#: application/Core/Jwt/Issuer.php:86 application/Service/Jwt.php:889
+#: application/Core/Jwt/Issuer.php:86 application/Service/Jwt.php:914
 msgid "Token has been revoked"
 msgstr ""
 
-#: application/Core/Policy/Validator.php:125
+#: application/Core/Policy/Validator.php:126
 #: tests/Service/AccessPolicy/PolicyValidationTest.php:53
 msgid "The policy is not valid JSON object"
 msgstr ""
 
-#: application/Core/Policy/Validator.php:144
+#: application/Core/Policy/Validator.php:145
 #: tests/Service/AccessPolicy/PolicyValidationTest.php:36
 msgid "The policy document is empty"
 msgstr ""
 
-#: application/Core/Policy/Validator.php:196
+#: application/Core/Policy/Validator.php:199
 msgid "The {$app} is not active or does not satisfy minimum required version"
 msgstr ""
 
-#: application/Core/Policy/Validator.php:198
+#: application/Core/Policy/Validator.php:201
 msgid "The {$app} is required"
 msgstr ""
 
-#: application/Core/Redirect.php:79
+#: application/Core/Redirect.php:83
 #: application/Service/ExtendedCapabilities.php:115
-#: application/Service/Route.php:219
+#: application/Service/Route.php:223
 msgid "Access Denied"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:48
-#: application/Core/Restful/AccessDeniedRedirectService.php:63
-#: application/Core/Restful/AccessDeniedRedirectService.php:122
+#: application/Core/Restful/AccessDeniedRedirectService.php:54
+#: application/Core/Restful/AccessDeniedRedirectService.php:69
+#: application/Core/Restful/AccessDeniedRedirectService.php:135
 msgid "Access area (frontend or backend)"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:69
-#: application/Core/Restful/LoginRedirectService.php:48
-#: application/Core/Restful/LogoutRedirectService.php:48
-#: application/Core/Restful/NotFoundRedirectService.php:48
-#: application/Core/Restful/UrlService.php:55
-#: application/Core/Restful/UrlService.php:130
+#: application/Core/Restful/AccessDeniedRedirectService.php:75
+#: application/Core/Restful/LoginRedirectService.php:54
+#: application/Core/Restful/LogoutRedirectService.php:54
+#: application/Core/Restful/NotFoundRedirectService.php:54
+#: application/Core/Restful/UrlService.php:63
+#: application/Core/Restful/UrlService.php:147
 msgid "Rule type"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:77
-#: application/Core/Restful/LoginRedirectService.php:56
-#: application/Core/Restful/LogoutRedirectService.php:56
-#: application/Core/Restful/NotFoundRedirectService.php:56
-#: application/Core/Restful/UrlService.php:74
-#: application/Core/Restful/UrlService.php:149
+#: application/Core/Restful/AccessDeniedRedirectService.php:90
+#: application/Core/Restful/LoginRedirectService.php:62
+#: application/Core/Restful/LogoutRedirectService.php:62
+#: application/Core/Restful/NotFoundRedirectService.php:62
+#: application/Core/Restful/UrlService.php:85
+#: application/Core/Restful/UrlService.php:169
 msgid "Existing page ID to redirect to"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:84
-#: application/Core/Restful/LoginRedirectService.php:63
-#: application/Core/Restful/LogoutRedirectService.php:63
-#: application/Core/Restful/NotFoundRedirectService.php:63
-#: application/Core/Restful/UrlService.php:81
-#: application/Core/Restful/UrlService.php:156
+#: application/Core/Restful/AccessDeniedRedirectService.php:97
+#: application/Core/Restful/LoginRedirectService.php:69
+#: application/Core/Restful/LogoutRedirectService.php:69
+#: application/Core/Restful/NotFoundRedirectService.php:69
+#: application/Core/Restful/UrlService.php:92
+#: application/Core/Restful/UrlService.php:176
 msgid "Valid URL to redirect to"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:91
-#: application/Core/Restful/LoginRedirectService.php:70
-#: application/Core/Restful/LogoutRedirectService.php:70
-#: application/Core/Restful/NotFoundRedirectService.php:70
-#: application/Core/Restful/UrlService.php:88
-#: application/Core/Restful/UrlService.php:163
+#: application/Core/Restful/AccessDeniedRedirectService.php:104
+#: application/Core/Restful/LoginRedirectService.php:83
+#: application/Core/Restful/LogoutRedirectService.php:83
+#: application/Core/Restful/NotFoundRedirectService.php:83
+#: application/Core/Restful/UrlService.php:99
+#: application/Core/Restful/UrlService.php:183
 msgid "Custom callback function"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:98
-#: application/Core/Restful/UrlService.php:67
-#: application/Core/Restful/UrlService.php:142
+#: application/Core/Restful/AccessDeniedRedirectService.php:111
+#: application/Core/Restful/UrlService.php:78
+#: application/Core/Restful/UrlService.php:162
 msgid "Custom access denied message"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:242
-#: application/Core/Restful/LoginRedirectService.php:196
-#: application/Core/Restful/LogoutRedirectService.php:196
-#: application/Core/Restful/NotFoundRedirectService.php:196
-#: application/Core/Restful/UrlService.php:384
+#: application/Core/Restful/AccessDeniedRedirectService.php:255
+#: application/Core/Restful/LoginRedirectService.php:209
+#: application/Core/Restful/LogoutRedirectService.php:209
+#: application/Core/Restful/NotFoundRedirectService.php:209
+#: application/Core/Restful/UrlService.php:410
 msgid "The url is not a valid URL"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:271
-#: application/Core/Restful/LoginRedirectService.php:225
-#: application/Core/Restful/LogoutRedirectService.php:225
-#: application/Core/Restful/NotFoundRedirectService.php:225
-#: application/Core/Restful/UrlService.php:441
+#: application/Core/Restful/AccessDeniedRedirectService.php:284
+#: application/Core/Restful/LoginRedirectService.php:238
+#: application/Core/Restful/LogoutRedirectService.php:238
+#: application/Core/Restful/NotFoundRedirectService.php:238
+#: application/Core/Restful/UrlService.php:467
 msgid "The redirect_page_id refers to non-existing page"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:300
-#: application/Core/Restful/LoginRedirectService.php:254
-#: application/Core/Restful/LogoutRedirectService.php:254
-#: application/Core/Restful/NotFoundRedirectService.php:254
-#: application/Core/Restful/UrlService.php:470
+#: application/Core/Restful/AccessDeniedRedirectService.php:363
+#: application/Core/Restful/LoginRedirectService.php:267
+#: application/Core/Restful/LogoutRedirectService.php:267
+#: application/Core/Restful/NotFoundRedirectService.php:267
+#: application/Core/Restful/UrlService.php:496
 msgid "The redirect_url is not valid URL"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:327
-#: application/Core/Restful/LoginRedirectService.php:281
-#: application/Core/Restful/LogoutRedirectService.php:281
-#: application/Core/Restful/NotFoundRedirectService.php:281
-#: application/Core/Restful/UrlService.php:497
+#: application/Core/Restful/AccessDeniedRedirectService.php:390
+#: application/Core/Restful/LoginRedirectService.php:294
+#: application/Core/Restful/LogoutRedirectService.php:294
+#: application/Core/Restful/NotFoundRedirectService.php:294
+#: application/Core/Restful/UrlService.php:523
 msgid "The callback is not valid PHP callback"
 msgstr ""
 
-#: application/Core/Restful/AccessDeniedRedirectService.php:354
+#: application/Core/Restful/AccessDeniedRedirectService.php:417
 msgid "The custom message cannot be empty"
 msgstr ""
 
@@ -2535,6 +2660,14 @@ msgstr ""
 
 #: application/Core/Restful/BackendMenuService.php:67
 msgid "Either menu is restricted or not"
+msgstr ""
+
+#: application/Core/Restful/ChatbotService.php:40
+msgid "Conversation ID"
+msgstr ""
+
+#: application/Core/Restful/ChatbotService.php:46
+msgid "Last message user submitted"
 msgstr ""
 
 #: application/Core/Restful/ComponentService.php:40
@@ -2580,7 +2713,7 @@ msgid "Token unique ID"
 msgstr ""
 
 #: application/Core/Restful/JwtService.php:317
-#: application/Core/Restful/ServiceTrait.php:66 media/js/aam.js:1706
+#: application/Core/Restful/ServiceTrait.php:66 media/js/aam.js:1720
 msgid "User ID"
 msgstr ""
 
@@ -2695,69 +2828,69 @@ msgstr ""
 msgid "Support message"
 msgstr ""
 
-#: application/Core/Restful/UrlService.php:48
-#: application/Core/Restful/UrlService.php:123
+#: application/Core/Restful/UrlService.php:56
+#: application/Core/Restful/UrlService.php:140
 msgid "URL or URI for the rule"
 msgstr ""
 
-#: application/Core/Restful/UrlService.php:63
-#: application/Core/Restful/UrlService.php:138
-msgid "HTTP redirect code"
+#: application/Core/Restful/UrlService.php:106
+#: application/Core/Restful/UrlService.php:190
+msgid "Additional metadata values"
 msgstr ""
 
-#: application/Core/Restful/UrlService.php:104
-#: application/Core/Restful/UrlService.php:118
-#: application/Core/Restful/UrlService.php:179
+#: application/Core/Restful/UrlService.php:121
+#: application/Core/Restful/UrlService.php:135
+#: application/Core/Restful/UrlService.php:205
 msgid "URL unique ID"
 msgstr ""
 
-#: application/Core/Restful/UrlService.php:412
+#: application/Core/Restful/UrlService.php:438
 msgid "The custom_message cannot be empty or be unsafe"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:90
+#: application/Service/AccessPolicy.php:93
 msgid ""
 "Manage access to the website with well documented JSON access policies for "
 "any user, role or visitors. Keep the paper-trail of all the access changes "
 "with policy revisions."
 msgstr ""
 
-#: application/Service/AccessPolicy.php:120
+#: application/Service/AccessPolicy.php:123
 msgid "Access Policy Document"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:131
+#: application/Service/AccessPolicy.php:134
 msgid "Access Policy Assignee"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:214
+#: application/Service/AccessPolicy.php:219
 msgid "Access Policy"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:219
+#: application/Service/AccessPolicy.php:224
 msgid "Add New Policy"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:220
+#: application/Service/AccessPolicy.php:225
 msgid "New Policy"
 msgstr ""
 
-#: application/Service/AccessPolicy.php:222
+#: application/Service/AccessPolicy.php:227
 msgid "Access and security policy"
 msgstr ""
 
-#: application/Service/AdminMenu.php:73
+#: application/Service/AdminMenu.php:75
 msgid "Admin Menu"
 msgstr ""
 
-#: application/Service/AdminMenu.php:74
+#: application/Service/AdminMenu.php:76
 msgid ""
 "Manage access to the admin (backend) main menu for any role or individual "
 "user. The service removes restricted menu items and protects direct access "
 "to them."
 msgstr ""
 
-#: application/Service/AdminMenu.php:299
+#: application/Service/AdminMenu.php:304
 msgid "Sorry, you are not allowed to view this page."
 msgstr ""
 
@@ -2769,6 +2902,22 @@ msgid ""
 "user/role access management."
 msgstr ""
 
+#: application/Service/Chatbot.php:88
+#, php-format
+msgid ""
+"Our free tier limits conversations to around 1000 words and 3 per day. Keep "
+"questions brief. Consider our %spremium add-on%s, risk-free with a 60-day "
+"full refund guarantee."
+msgstr ""
+
+#: application/Service/Chatbot.php:99
+#, php-format
+msgid ""
+"Howdy, %s. I'm Aarmie, your virtual assistant. Trained on ~1500 Q&As and "
+"counting. Though I may not know everything and make mistakes, feel free to "
+"ask. If you're unsatisfied, leave your email for follow-up. %s"
+msgstr ""
+
 #: application/Service/Cli.php:44
 msgid "WP CLI"
 msgstr ""
@@ -2777,22 +2926,22 @@ msgstr ""
 msgid "Collection of WP CLI command that facilitate various AAM features."
 msgstr ""
 
-#: application/Service/Content.php:128
+#: application/Service/Content.php:129
 msgid ""
 "Manage access to your website content for any user, role or visitor. This "
 "include access to posts, pages, media attachment, custom post types, "
 "categories, tags, custom taxonomies and terms."
 msgstr ""
 
-#: application/Service/Content.php:173
+#: application/Service/Content.php:174
 msgid "Access Manager"
 msgstr ""
 
-#: application/Service/Content.php:255
+#: application/Service/Content.php:256
 msgid "You are not allowed to publish this content"
 msgstr ""
 
-#: application/Service/Content.php:928
+#: application/Service/Content.php:938
 msgid "[No teaser message provided]"
 msgstr ""
 
@@ -2800,7 +2949,7 @@ msgstr ""
 msgid "Manager Access"
 msgstr ""
 
-#: application/Service/DeniedRedirect.php:76
+#: application/Service/DeniedRedirect.php:77
 msgid ""
 "Manage the default access denied redirect when access gets denied for any "
 "protected website resource. The service hooks into the WordPress core wp_die "
@@ -2850,19 +2999,19 @@ msgstr ""
 msgid "Current user is not allowed to issue refreshable JWT token"
 msgstr ""
 
-#: application/Service/LoginRedirect.php:58
+#: application/Service/LoginRedirect.php:59
 msgid ""
 "Manage login redirect for any group of users or individual user when "
 "authentication is completed successfully."
 msgstr ""
 
-#: application/Service/LogoutRedirect.php:68
+#: application/Service/LogoutRedirect.php:69
 msgid ""
 "Manage logout redirect for any group of users or individual user after user "
 "logged out successfully."
 msgstr ""
 
-#: application/Service/Metabox.php:45
+#: application/Service/Metabox.php:47
 msgid ""
 "Manage visibility for the classic (not Gutenberg blocks) backend metaboxes, "
 "dashboard and frontend widgets for any role, user or visitors. The service "
@@ -2870,45 +3019,45 @@ msgid ""
 "data spoofing."
 msgstr ""
 
-#: application/Service/Multisite.php:62
+#: application/Service/Multisite.php:63
 msgid "Multisite Settings Sync"
 msgstr ""
 
-#: application/Service/Multisite.php:63
+#: application/Service/Multisite.php:64
 msgid ""
 "Automatically synchronize changes to the list of roles and capabilities as "
 "well as all access settings (if configured accordingly)."
 msgstr ""
 
-#: application/Service/NotFoundRedirect.php:57
+#: application/Service/NotFoundRedirect.php:58
 msgid ""
 "Manage frontend 404 (Not Found) redirect for any group of users or "
 "individual user."
 msgstr ""
 
-#: application/Service/Route.php:67
+#: application/Service/Route.php:68
 msgid ""
 "Manage access to any individual RESTful endpoint for any role, user or "
 "unauthenticated application request. The service works great with JWT "
 "service that authenticate requests with JWT Bearer token."
 msgstr ""
 
-#: application/Service/Route.php:101
+#: application/Service/Route.php:102
 msgid "XML-RPC WordPress API"
 msgstr ""
 
-#: application/Service/Route.php:102
+#: application/Service/Route.php:103
 #, php-format
 msgid ""
 "Remote procedure call (RPC) interface is used to manage WordPress website "
 "content and features. For more information check %sXML-RPC Support%s article."
 msgstr ""
 
-#: application/Service/Route.php:106
+#: application/Service/Route.php:107
 msgid "RESTful WordPress API"
 msgstr ""
 
-#: application/Service/Route.php:107
+#: application/Service/Route.php:108
 #, php-format
 msgid ""
 "[Note!] If disabled, the AAM UI may not function as expected. The RESTful "
@@ -2916,42 +3065,42 @@ msgid ""
 "detail, refer to %sREST API handbook%s."
 msgstr ""
 
-#: application/Service/Route.php:136
+#: application/Service/Route.php:137
 msgid "RESTful API is disabled"
 msgstr ""
 
-#: application/Service/SecureLogin.php:81
+#: application/Service/SecureLogin.php:83
 msgid "Secure Login"
 msgstr ""
 
-#: application/Service/SecureLogin.php:82
+#: application/Service/SecureLogin.php:84
 msgid ""
 "Enhance default WordPress authentication process with more secure login "
 "mechanism. The service registers frontend AJAX Login widget as well as "
 "additional endpoints for the RESTful API authentication."
 msgstr ""
 
-#: application/Service/SecureLogin.php:148
+#: application/Service/SecureLogin.php:150
 msgid "Block User Account"
 msgstr ""
 
-#: application/Service/SecureLogin.php:222
+#: application/Service/SecureLogin.php:224
 msgid "Valid username."
 msgstr ""
 
-#: application/Service/SecureLogin.php:226
+#: application/Service/SecureLogin.php:228
 msgid "Valid password."
 msgstr ""
 
-#: application/Service/SecureLogin.php:479
+#: application/Service/SecureLogin.php:490
 msgid "Exceeded maximum number for authentication attempts. Try again later."
 msgstr ""
 
-#: application/Service/SecureLogin.php:512
+#: application/Service/SecureLogin.php:523
 msgid "[ERROR]: User is locked. Contact website administrator."
 msgstr ""
 
-#: application/Service/SecureLogin.php:540
+#: application/Service/SecureLogin.php:551
 msgid "Access is restricted. Login to get access."
 msgstr ""
 
@@ -2965,28 +3114,26 @@ msgid ""
 "frontent content as well as some UI helpers."
 msgstr ""
 
-#: application/Service/Support.php:51
-msgid ""
-"Submit your support request from AAM page. AAM team will follow-up with the "
-"answer via email."
+#: application/Service/Shortcode/Handler/LoginRedirect.php:85
+msgid "Login to continue"
 msgstr ""
 
-#: application/Service/Toolbar.php:72
+#: application/Service/Toolbar.php:74
 msgid "Admin Toolbar"
 msgstr ""
 
-#: application/Service/Toolbar.php:73
+#: application/Service/Toolbar.php:75
 msgid ""
 "Manage access to the top admin toolbar items for any role or individual "
 "user. The service only removes restricted items but does not actually "
 "protect from direct access via link."
 msgstr ""
 
-#: application/Service/Uri.php:59
+#: application/Service/Uri.php:60
 msgid "URI Access"
 msgstr ""
 
-#: application/Service/Uri.php:60
+#: application/Service/Uri.php:61
 msgid ""
 "Manage direct access to the website URIs for any role or individual user. "
 "Define either explicit URI or wildcard (with Complete Package addon) as well "
@@ -3004,78 +3151,74 @@ msgid ""
 "managing users and roles with higher levels of authority."
 msgstr ""
 
-#: application/Service/Welcome.php:53
+#: application/Service/Welcome.php:57
 msgid ""
 "Introduction panel to the AAM functionality. This is just a simple tab that "
 "contains some introductory material to the AAM plugin and its capabilities."
 msgstr ""
 
-#: application/Shortcode/Handler/LoginRedirect.php:86
-msgid "Login to continue"
-msgstr ""
-
-#: media/js/aam.js:586
+#: media/js/aam.js:574
 msgid "Add role"
 msgstr ""
 
-#: media/js/aam.js:1695
+#: media/js/aam.js:1709
 msgid "Everybody"
 msgstr ""
 
-#: media/js/aam.js:1697
+#: media/js/aam.js:1711
 msgid "Visitors"
 msgstr ""
 
-#: media/js/aam.js:1704
+#: media/js/aam.js:1718
 msgid "Current User"
 msgstr ""
 
-#: media/js/aam.js:1759
+#: media/js/aam.js:1773
 msgid "Installing..."
 msgstr ""
 
-#: media/js/aam.js:1776
+#: media/js/aam.js:1790
 msgid "Access Policy was installed successfully"
 msgstr ""
 
-#: media/js/aam.js:3167
+#: media/js/aam.js:3181
 msgid "Post"
 msgstr ""
 
-#: media/js/aam.js:3233
+#: media/js/aam.js:3247
 msgid "post type"
 msgstr ""
 
-#: media/js/aam.js:3238 media/js/aam.js:3264 media/js/aam.js:3279
-#: media/js/aam.js:3290 media/js/aam.js:3305
+#: media/js/aam.js:3252 media/js/aam.js:3278 media/js/aam.js:3293
+#: media/js/aam.js:3304 media/js/aam.js:3319
 msgid "Slug:"
 msgstr ""
 
-#: media/js/aam.js:3260
+#: media/js/aam.js:3274
 msgid "taxonomy"
 msgstr ""
 
-#: media/js/aam.js:3277 media/js/aam.js:3288 media/js/aam.js:3303
+#: media/js/aam.js:3291 media/js/aam.js:3302 media/js/aam.js:3317
 msgid "ID:"
 msgstr ""
 
-#: media/js/aam.js:4377 media/js/aam.js:4398
+#: media/js/aam.js:4427 media/js/aam.js:4448
 msgid "Inherited"
 msgstr ""
 
-#: media/js/aam.js:4925
+#: media/js/aam.js:4977
 msgid "Settings has been exported successfully"
 msgstr ""
 
-#: media/js/aam.js:4971
+#: media/js/aam.js:5023
 msgid "Settings has been imported successfully"
 msgstr ""
 
-#: media/js/aam.js:4992
+#: media/js/aam.js:5044
 msgid "Invalid settings"
 msgstr ""
 
-#: media/js/aam.js:5101
+#: media/js/aam.js:5153
 msgid "Submitting..."
 msgstr ""
 
@@ -3085,8 +3228,4 @@ msgstr ""
 
 #: tests/Addon/PlusPackage/ContentAccessTest.php:184
 msgid "Just for testing purposes"
-msgstr ""
-
-#: tests/Service/Core/CoreServiceTest.php:35
-msgid "<script>alert(1);</script>"
 msgstr ""

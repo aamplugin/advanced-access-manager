@@ -23,8 +23,7 @@
  * @package AAM
  * @version 6.8.4
  */
-class AAM_Backend_Feature_Main_Policy
-extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -315,11 +314,11 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
         $generator = new AAM_Core_Policy_Generator($subject);
 
         // Prepare the policy name
-        if ($subject::UID === AAM_Core_Subject_User::UID) {
+        if ($subject::UID === AAM_Framework_Type_AccessLevel::USER) {
             $title = sprintf('Policy for %s user', $subject->display_name);
-        } elseif ($subject::UID === AAM_Core_Subject_Role::UID) {
+        } elseif ($subject::UID === AAM_Framework_Type_AccessLevel::ROLE) {
             $title = sprintf('Policy for %s role', $subject->getId());
-        } elseif ($subject::UID === AAM_Core_Subject_Visitor::UID) {
+        } elseif ($subject::UID === AAM_Framework_Type_AccessLevel::VISITOR) {
             $title = 'Policy for all visitors';
         } else {
             $title = 'Policy for everybody';
@@ -526,12 +525,6 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
             'title'      => __('Access Policies', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

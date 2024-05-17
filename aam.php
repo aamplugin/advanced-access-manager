@@ -105,7 +105,7 @@ class AAM
      */
     public static function api()
     {
-        return AAM_Core_Gateway::getInstance();
+        return AAM_Core_Gateway::bootstrap();
     }
 
     /**

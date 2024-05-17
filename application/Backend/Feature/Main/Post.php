@@ -23,8 +23,7 @@
  * @package AAM
  * @version 6.7.9
  */
-class AAM_Backend_Feature_Main_Post
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_ServiceTrait,
@@ -715,17 +714,19 @@ class AAM_Backend_Feature_Main_Post
             $this->getFromPost('length')
         );
 
+        $suppress_filter = $this->getFromPost('listMode') === 'all';
+
         $countFiltered = get_terms(array(
             'fields'          => 'count',
             'search'          => AAM_Core_Request::post('search.value'),
             'hide_empty'      => false,
-            'suppress_filter' => true,
+            'suppress_filter' => $suppress_filter,
             'taxonomy'        => $taxonomy
         ));
         $count = get_terms(array(
             'fields'          => 'count',
             'hide_empty'      => false,
-            'suppress_filter' => true,
+            'suppress_filter' => $suppress_filter,
             'taxonomy'        => $taxonomy
         ));
 
@@ -823,7 +824,7 @@ class AAM_Backend_Feature_Main_Post
                     'manage' . ($link ? ',edit' : ',no-edit'),
                     $parent,
                     $subject->getObject('post', $record->ID, true)->isOverwritten(),
-                    $record->post_name
+                    urldecode($record->post_name)
                 );
             } else { // this is a term
                 $response['data'][] = $this->_prepareTermRow($record, $type);
@@ -923,7 +924,7 @@ class AAM_Backend_Feature_Main_Post
             apply_filters(
                 'aam_term_settings_override_status_filter', false, $id, $this->getSubject()
             ),
-            $term->slug
+            urldecode($term->slug)
         );
     }
 
@@ -1176,11 +1177,12 @@ class AAM_Backend_Feature_Main_Post
      */
     protected function retrievePostList($type, $search, $offset, $limit)
     {
+
         return get_posts(array(
             'post_type'        => $type,
             'category'         => 0,
             's'                => $search,
-            'suppress_filters' => true,
+            'suppress_filters' => $this->getFromPost('listMode') === 'all',
             'offset'           => $offset,
             'numberposts'      => $limit,
             'orderby'          => 'title',
@@ -1206,12 +1208,6 @@ class AAM_Backend_Feature_Main_Post
             'title'      => __('Posts & Terms', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

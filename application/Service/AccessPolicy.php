@@ -260,7 +260,7 @@ class AAM_Service_AccessPolicy
         add_action('aam_visibility_object_init_action', function(AAM_Core_Object_Visibility $object) {
             $subject = $object->getSubject();
 
-            if ($subject::UID === AAM_Core_Subject_User::UID) {
+            if ($subject::UID === AAM_Framework_Type_AccessLevel::USER) {
                 $this->initializeVisibility($object);
             }
         });
@@ -322,7 +322,8 @@ class AAM_Service_AccessPolicy
     {
         $subject      = $object->getSubject();
         $lowest_level = array(
-            AAM_Core_Subject_User::UID, AAM_Core_Subject_Visitor::UID
+            AAM_Framework_Type_AccessLevel::USER,
+            AAM_Framework_Type_AccessLevel::VISITOR
         );
 
         if (in_array($subject::UID, $lowest_level, true)) {
@@ -1084,7 +1085,7 @@ class AAM_Service_AccessPolicy
      * Get the list of attached policies to role
      *
      * @param null                     $output
-     * @param AAM_Framework_Proxy_Role $id
+     * @param AAM_Framework_Proxy_Role $role
      * @param string                   $field
      *
      * @return array

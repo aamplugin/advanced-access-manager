@@ -65,7 +65,7 @@ class AAM_Framework_Service_Roles
     /**
      * Return list of roles
      *
-     * @return array Array of AAM_Framework_Proxy_Role
+     * @return array Array of AAM_Framework_Level_Role
      *
      * @access public
      * @version 6.9.6
@@ -73,13 +73,9 @@ class AAM_Framework_Service_Roles
     public function get_all_roles()
     {
         $response = array();
-        $roles    = $this->get_wp_roles();
 
-        foreach($roles->role_objects as $role) {
-            array_push($response, new AAM_Framework_Proxy_Role(
-                $roles->role_names[$role->name],
-                $role
-            ));
+        foreach($this->get_wp_roles()->role_objects as $role) {
+            array_push($response, $this->_prepare_subject($role));
         }
 
         return $response;
@@ -88,7 +84,7 @@ class AAM_Framework_Service_Roles
     /**
      * Get list of editable roles
      *
-     * @return array Array of AAM_Framework_Proxy_Role
+     * @return array Array of AAM_Framework_Level_Role
      *
      * @access public
      * @version 6.9.6
@@ -98,53 +94,93 @@ class AAM_Framework_Service_Roles
         $response = array();
         $roles    = $this->get_wp_roles();
 
-        if (function_exists('get_editable_roles')) {
-            $all = get_editable_roles();
-        } else {
-            $all = apply_filters('editable_roles', $roles->roles);
-        }
-
-        foreach(array_keys($all) as $slug) {
-            array_push($response, new AAM_Framework_Proxy_Role(
-                $roles->role_names[$slug],
-                $roles->get_role($slug)
-            ));
+        foreach($this->get_editable_role_slugs() as $slug) {
+            array_push($response, $this->_prepare_subject($roles->get_role($slug)));
         }
 
         return $response;
     }
 
     /**
-     * Get role by slug
+     * Check if role exists
      *
-     * @param string  $slug     Unique role slug (aka ID)
-     * @param boolean $editable optional Return role only if editable by current user
+     * @param string $slug
      *
-     * @return AAM_Framework_Proxy_Role|null
+     * @return boolean
      *
      * @access public
-     * @throws UnderflowException
-     * @version 6.9.6
+     * @version 7.0.0
      */
-    public function get_role_by_slug($slug, $editable = true)
+    public function exists($slug)
     {
-        if ($editable === true) {
-            $all = $this->get_editable_roles();
-        } else {
-            $all = $this->get_all_roles();
+        $roles = $this->get_wp_roles()->role_objects;
+        $match = array_filter($roles, function($role) use ($slug) {
+            return $role->name === $slug;
+        });
+
+        return $match > 0;
+    }
+
+    /**
+     * Get role either by slug or instance of WP_Role
+     *
+     * @param string|WP_Role $identifier
+     * @param boolean        $check_editable Verify that role is editable
+     *
+     * @return AAM_Framework_Level_Role
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_role($identifier, $check_editable = false)
+    {
+        if (is_string($identifier)) {
+            $role = $this->get_role_by_slug($identifier);
+        } elseif (is_a($identifier, 'WP_Role')) {
+            $role = $this->_prepare_subject($identifier);
         }
 
-        $match = array_filter($all, function($role) use ($slug) {
-            return $role->slug === $slug;
+        if (empty($role)) {
+            throw new InvalidArgumentException(
+                "Role '{$identifier->name}' does not exist"
+            );
+        } elseif ($check_editable
+            && !in_array($this->get_editable_role_slugs(), $role->slug, true)
+        ) {
+            throw new DomainException("Permission denied to {$role->name} role");
+        }
+
+        return $role;
+    }
+
+    /**
+     * Get role by slug
+     *
+     * @param string $slug Unique role slug (aka ID)
+     *
+     * @return AAM_Framework_Level_Role
+     *
+     * @since 7.0.0 Removed $editable attribute
+     * @since 6.9.6 Initial implementation of the method
+     *
+     * @access public
+     * @throws InvalidArgumentException
+     * @version 6.9.6
+     */
+    public function get_role_by_slug($slug)
+    {
+        $roles = $this->get_wp_roles()->role_objects;
+        $match = array_filter($roles, function($role) use ($slug) {
+            return $role->name === $slug;
         });
 
         if (count($match) === 0) {
-            throw new UnderflowException(
-                "Role '{$slug}' does not exist or is not editable"
+            throw new InvalidArgumentException(
+                "Role '{$slug}' does not exist"
             );
         }
 
-        return array_shift($match);
+        return $this->_prepare_subject(array_shift($match));
     }
 
     /**
@@ -162,7 +198,7 @@ class AAM_Framework_Service_Roles
      * @param string $slug         optional Role slug
      * @param array  $capabilities optional Array of capabilities
      *
-     * @return AAM_Framework_Proxy_Role
+     * @return AAM_Framework_Level_Role
      * @throws InvalidArgumentException
      *
      * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/275
@@ -213,8 +249,7 @@ class AAM_Framework_Service_Roles
             }, $capabilities));
 
             // Creating new role
-            $role = new AAM_Framework_Proxy_Role(
-                $name,
+            $role = $this->_prepare_subject(
                 $roles->add_role($slug, $name, array_fill_keys($caps, true))
             );
         } else {
@@ -225,9 +260,9 @@ class AAM_Framework_Service_Roles
     }
 
     /**
-     * Update role attributes
+     * Update role
      *
-     * @param AAM_Framework_Proxy_Role $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role $role
      *
      * @return boolean
      *
@@ -235,13 +270,15 @@ class AAM_Framework_Service_Roles
      * @throws DomainException
      * @version 6.9.6
      */
-    public function update_role(AAM_Framework_Proxy_Role $role)
+    public function update_role($role)
     {
         $roles = $this->get_wp_roles();
 
         // If role's slug changed, verify that there is no overlap with existing
         // roles and current role does not have any users assigned to it. Otherwise
         // reject update
+        // FYI! The $role->name eventually proxy to the WP_Role::name property that
+        // contains role's slug. Confusing, right?
         if ($role->slug !== $role->name) {
             // Making sure that user can change role's slug.
             if ($this->get_role_user_count($role) > 0) {
@@ -276,7 +313,8 @@ class AAM_Framework_Service_Roles
     /**
      * Delete existing role
      *
-     * @param AAM_Framework_Proxy_Role $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role|string $role
+     * @param boolean $check_editable
      *
      * @return boolean
      *
@@ -284,9 +322,13 @@ class AAM_Framework_Service_Roles
      * @throws DomainException
      * @version 6.9.6
      */
-    public function delete_role(AAM_Framework_Proxy_Role $role)
+    public function delete_role($role, $check_editable = false)
     {
         $roles = $this->get_wp_roles();
+
+        if (is_string($role)) {
+            $role = $this->get_role($role, $check_editable);
+        }
 
         // Verifying that role has not users assigned. Otherwise reject
         if ($this->get_role_user_count($role) > 0) {
@@ -301,14 +343,14 @@ class AAM_Framework_Service_Roles
     /**
      * Get approximate number of users assigned to role
      *
-     * @param AAM_Framework_Proxy_Role $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role $role
      *
      * @return int
      *
      * @access public
      * @version 6.9.6
      */
-    public function get_role_user_count(AAM_Framework_Proxy_Role $role)
+    public function get_role_user_count($role)
     {
         if (is_null($this->_user_index)) {
             $this->_user_index = count_users();
@@ -316,7 +358,7 @@ class AAM_Framework_Service_Roles
 
         $avail = $this->_user_index['avail_roles'];
 
-        return isset($avail[$role->name]) ? $avail[$role->name] : 0;
+        return isset($avail[$role->slug]) ? $avail[$role->slug] : 0;
     }
 
     /**
@@ -342,6 +384,25 @@ class AAM_Framework_Service_Roles
         }
 
         return $this->_wp_roles;
+    }
+
+    /**
+     * Get list of all editable role slugs
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_editable_role_slugs()
+    {
+        if (function_exists('get_editable_roles')) {
+            $slugs = get_editable_roles();
+        } else {
+            $slugs = apply_filters('editable_roles', $this->get_wp_roles()->roles);
+        }
+
+        return array_keys($slugs);
     }
 
     /**
@@ -399,6 +460,26 @@ class AAM_Framework_Service_Roles
         }
 
         return $response;
+    }
+
+    /**
+     * Prepare framework role subject
+     *
+     * @param WP_Role $role
+     *
+     * @return AAM_Framework_Level_Role
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_subject(WP_Role $role)
+    {
+        $roles = $this->get_wp_roles();
+
+        return new AAM_Framework_Level_Role(new AAM_Framework_Proxy_Role(
+            $roles->role_names[$role->name],
+            $role
+        ));
     }
 
     /**

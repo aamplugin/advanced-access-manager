@@ -51,7 +51,7 @@ class AAM_Backend_Subject
     {
         $subject = strtolower($this->getFromPost('subject'));
 
-        if ($subject) {
+        if ($subject) { // Legacy
             $this->initRequestedSubject($subject, $this->getFromPost('subjectId'));
         } else {
             $this->initDefaultSubject();
@@ -68,7 +68,7 @@ class AAM_Backend_Subject
      */
     public function isRole()
     {
-        return $this->getSubjectType() === AAM_Core_Subject_Role::UID;
+        return $this->getSubjectType() === AAM_Framework_Type_AccessLevel::ROLE;
     }
 
     /**
@@ -81,7 +81,7 @@ class AAM_Backend_Subject
      */
     public function isUser()
     {
-        return $this->getSubjectType() === AAM_Core_Subject_User::UID;
+        return $this->getSubjectType() === AAM_Framework_Type_AccessLevel::USER;
     }
 
     /**
@@ -94,7 +94,7 @@ class AAM_Backend_Subject
      */
     public function isVisitor()
     {
-        return $this->getSubjectType() === AAM_Core_Subject_Visitor::UID;
+        return $this->getSubjectType() === AAM_Framework_Type_AccessLevel::VISITOR;
     }
 
     /**
@@ -107,7 +107,7 @@ class AAM_Backend_Subject
      */
     public function isDefault()
     {
-        return $this->getSubjectType() === AAM_Core_Subject_Default::UID;
+        return $this->getSubjectType() === AAM_Framework_Type_AccessLevel::DEFAULT;
     }
 
     /**
@@ -122,7 +122,7 @@ class AAM_Backend_Subject
     {
         $subject = $this->getSubject();
 
-        return $subject::UID;
+        return $subject::TYPE;
     }
 
     /**
@@ -141,20 +141,21 @@ class AAM_Backend_Subject
      */
     protected function initRequestedSubject($type, $id)
     {
-        if ($type === AAM_Core_Subject_User::UID) {
-            $subject = AAM::api()->getUser(intval($id));
-        } elseif ($type === AAM_Core_Subject_Default::UID) {
-            $subject = AAM::api()->getDefault();
-        } elseif ($type === AAM_Core_Subject_Visitor::UID) {
-            $subject = AAM::api()->getVisitor();
+        if ($type === AAM_Framework_Type_AccessLevel::USER) {
+            $subject = AAM::api()->user(intval($id));
+        } elseif ($type === AAM_Framework_Type_AccessLevel::DEFAULT) {
+            $subject = AAM::api()->default();
+        } elseif ($type === AAM_Framework_Type_AccessLevel::VISITOR) {
+            $subject = AAM::api()->visitor();
         } else {
             // Covering scenario when changing between sites and they have mismatched
             // list of roles
-            if (AAM_Framework_Manager::roles()->is_role($id)) {
-                $subject = AAM::api()->getRole($id);
+            if (AAM_Framework_Manager::roles()->exists($id)) {
+                $subject = AAM::api()->role($id);
             } else {
-                $roles   = array_keys(get_editable_roles());
-                $subject = AAM::api()->getRole(array_pop($roles));
+                $subject = array_pop(
+                    AAM_Framework_Manager::roles()->get_editable_roles()
+                );
             }
         }
 
@@ -180,18 +181,14 @@ class AAM_Backend_Subject
     protected function initDefaultSubject()
     {
         if (current_user_can('aam_manage_roles')) {
-            $roles = array_keys(get_editable_roles());
-            $this->initRequestedSubject(
-                AAM_Core_Subject_Role::UID, array_pop($roles)
-            );
+            $roles = AAM::api()->roles()->get_editable_roles();
+            $this->setSubject(array_pop($roles));
         } elseif (current_user_can('aam_manage_users')) {
-            $this->initRequestedSubject(
-                AAM_Core_Subject_User::UID, get_current_user_id()
-            );
+            $this->setSubject(AAM::api()->user());
         } elseif (current_user_can('aam_manage_visitors')) {
-            $this->initRequestedSubject(AAM_Core_Subject_Visitor::UID, null);
+            $this->setSubject(AAM::api()->visitor());
         } elseif (current_user_can('aam_manage_default')) {
-            $this->initRequestedSubject(AAM_Core_Subject_Default::UID, null);
+            $this->setSubject(AAM::api()->default());
         } else {
             wp_die(__('You are not allowed to manage any users or roles', AAM_KEY));
         }
@@ -200,12 +197,12 @@ class AAM_Backend_Subject
     /**
      * Set AAM core subject
      *
-     * @param AAM_Core_Subject $subject
+     * @param AAM_Framework_Level_Abstract $subject
      *
      * @access protected
      * @version 6.0.0
      */
-    protected function setSubject(AAM_Core_Subject $subject)
+    protected function setSubject($subject)
     {
         $this->subject = $subject;
     }
@@ -254,7 +251,7 @@ class AAM_Backend_Subject
     /**
      * Get AAM core subject
      *
-     * @return AAM_Core_Subject
+     * @return AAM_Framework_Level_Abstract
      *
      * @access public
      * @version 6.0.0

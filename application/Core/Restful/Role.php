@@ -275,7 +275,7 @@ class AAM_Core_Restful_Role
 
         try {
             $response = new WP_REST_Response(($this->prepare_role_output(
-                AAM_Framework_Manager::roles()->get_role_by_slug(
+                AAM_Framework_Manager::roles()->get_role(
                     $request->get_param('slug')
                 ),
                 $this->_determine_additional_fields($request)
@@ -317,7 +317,7 @@ class AAM_Core_Restful_Role
             // If clone role is specified, verify that role exists and current user
             // can manage it
             if (is_string($clone_role) && strlen($clone_role) > 0) {
-                $cloning_role = $service->get_role_by_slug($clone_role);
+                $cloning_role = $service->get_role($clone_role);
 
                 $capabilities = array_merge(
                     $capabilities,
@@ -383,7 +383,7 @@ class AAM_Core_Restful_Role
         $service = AAM_Framework_Manager::roles();
 
         try {
-            $role = $service->get_role_by_slug($slug);
+            $role = $service->get_role($slug);
 
             // Setting new slug if provided
             if (!empty($new_slug)) {
@@ -446,7 +446,7 @@ class AAM_Core_Restful_Role
         $service = AAM_Framework_Manager::roles();
 
         try {
-            $role = $service->get_role_by_slug($request->get_param('slug'));
+            $role = $service->get_role($request->get_param('slug'));
 
             if ($service->delete_role($role)) {
                 $response->set_data($this->prepare_role_output(
@@ -470,8 +470,8 @@ class AAM_Core_Restful_Role
     /**
      * Clone access settings
      *
-     * @param AAM_Framework_Proxy_Role $role
-     * @param AAM_Framework_Proxy_Role $parent
+     * @param AAM_Framework_Level_Role $role
+     * @param AAM_Framework_Level_Role $parent
      *
      * @return boolean
      *
@@ -491,14 +491,14 @@ class AAM_Core_Restful_Role
     /**
      * Prepare role model for response
      *
-     * @param AAM_Framework_Proxy_Role $role
-     * @param array                    $fields
+     * @param AAM_Framework_Level_Role $role
+     * @param array                      $fields
      *
      * @return array
      * @version 6.9.6
      */
     protected function prepare_role_output(
-        AAM_Framework_Proxy_Role $role, $fields = array()
+        AAM_Framework_Level_Role $role, $fields = array()
     ) {
         $response = array(
             'slug' => $role->slug,
@@ -532,12 +532,12 @@ class AAM_Core_Restful_Role
     /**
      * Get list of actions user can perform upon role
      *
-     * @param AAM_Framework_Proxy_Role $role
+     * @param AAM_Framework_Level_Role $role
      *
      * @return array
      * @version 6.9.6
      */
-    protected function get_role_permissions(AAM_Framework_Proxy_Role $role)
+    protected function get_role_permissions(AAM_Framework_Level_Role $role)
     {
         $permissions = array('allow_manage');
         $user_count   = AAM_Framework_Manager::roles()->get_role_user_count($role);
@@ -662,7 +662,7 @@ class AAM_Core_Restful_Role
         $response = true;
 
         try {
-            AAM_Framework_Manager::roles()->get_role_by_slug($slug);
+            AAM_Framework_Manager::roles()->get_role($slug, true);
         } catch (UnderflowException $_) {
             $response = new WP_Error(
                 'rest_not_found',

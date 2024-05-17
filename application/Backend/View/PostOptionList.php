@@ -57,7 +57,7 @@ class AAM_Backend_View_PostOptionList
                 'title'       => __('Limited', AAM_KEY),
                 'sub'         => __('Access Limit', AAM_KEY),
                 'modal'       => 'modal-limited',
-                'exclude'     => array(AAM_Core_Subject_Visitor::UID, 'nav_menu_item'),
+                'exclude'     => array(AAM_Framework_Type_AccessLevel::VISITOR, 'nav_menu_item'),
                 'description' => __('Define how many times the post can be accessed. When the number of times exceeds the defined threshold, access will be denied and redirected based on the Access Denied Redirect rule.', AAM_KEY)
             ),
             'comment' => array(
@@ -88,17 +88,17 @@ class AAM_Backend_View_PostOptionList
             ),
             'edit' => array(
                 'title'       => __('Edit', AAM_KEY),
-                'exclude'     => array(AAM_Core_Subject_Visitor::UID, 'nav_menu_item'),
+                'exclude'     => array(AAM_Framework_Type_AccessLevel::VISITOR, 'nav_menu_item'),
                 'description' => __('Restrict access to edit the post.', AAM_KEY)
             ),
             'delete' => array(
                 'title'       => __('Delete', AAM_KEY),
-                'exclude'     => array(AAM_Core_Subject_Visitor::UID, 'nav_menu_item'),
+                'exclude'     => array(AAM_Framework_Type_AccessLevel::VISITOR, 'nav_menu_item'),
                 'description' => __('Restrict access to trash or permanently delete the post.', AAM_KEY)
             ),
             'publish' => array(
                 'title'       => __('Publish', AAM_KEY),
-                'exclude'     => array(AAM_Core_Subject_Visitor::UID, 'nav_menu_item'),
+                'exclude'     => array(AAM_Framework_Type_AccessLevel::VISITOR, 'nav_menu_item'),
                 'description' => __('Restrict the ability to publish the post. User will be allowed only to submit the post for review.', AAM_KEY)
             )
         );

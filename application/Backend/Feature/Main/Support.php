@@ -38,12 +38,6 @@ class AAM_Backend_Feature_Main_Support extends AAM_Backend_Feature_Abstract
             'position'   => 2,
             'title'      => __('Support', AAM_KEY),
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Default::UID,
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID
-            ),
             'view'       => __CLASS__
         ));
     }

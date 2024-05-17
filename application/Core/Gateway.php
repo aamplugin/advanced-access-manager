@@ -20,7 +20,222 @@
 final class AAM_Core_Gateway
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var AAM_Core_Gateway
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private static $_instance = null;
+
+    /**
+     * Gateway settings
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_settings = null;
+
+    /**
+     * Constructor
+     *
+     * @access protected
+     * @version 6.0.0
+     */
+    protected function __construct(array $settings = array())
+    {
+        $this->_settings = array_merge(array(
+            'mode' => 'production',
+        ), $settings);
+    }
+
+    /**
+     * Get user subject
+     *
+     * Retrieve the subject of a user by their ID, username, or email. Alternatively,
+     * you can provide the entire `WP_User` instance or no input at all. If no input
+     * is provided, the current user will be selected. If the user is not
+     * authenticated, the subject of the visitor will be returned.
+     *
+     * @param int|string|WP_User|null $identifier
+     *
+     * @return AAM_Framework_Level_User|AAM_Framework_Level_Visitor
+     * @throws Exception If cannot find user with provided identifier
+     * @version 7.0.0
+     */
+    public function user($identifier = null)
+    {
+        try {
+            $user = AAM_Framework_Manager::access_levels()->get(
+                AAM_Framework_Type_AccessLevel::USER, $identifier
+            );
+        } catch (Exception $error) {
+            $this->_handle_error(
+                $error->getMessage(), __CLASS__ . '::' . __METHOD__
+            );
+        }
+
+        return $user;
+    }
+
+    /**
+     * Return visitor subject
+     *
+     * Instantiate and return a new instance of visitor's subject.
+     *
+     * @return AAM_Framework_Level_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function visitor()
+    {
+        return AAM_Framework_Manager::access_levels()->get('visitor');
+    }
+
+    /**
+     * Alias for the visitor method
+     *
+     * @return AAM_Framework_Level_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function anonymous()
+    {
+        return $this->visitor();
+    }
+
+    /**
+     * Alias for the visitor method
+     *
+     * @return AAM_Framework_Level_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function guest()
+    {
+        return $this->visitor();
+    }
+
+    /**
+     * Get role subject by its slug
+     *
+     * @param string  $slub
+     *
+     * @return AAM_Framework_Level_Role
+     * @throws Exception
+     * @version 7.0.0
+     */
+    public function role($slug)
+    {
+        try {
+            $role = AAM_Framework_Manager::roles()->get_role($slug);
+        } catch (Exception $error) {
+            $this->_handle_error(
+                $error->getMessage(), __CLASS__ . '::' . __METHOD__
+            );
+        }
+
+        return $role;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return AAM_Framework_Service_Roles
+     */
+    public function roles()
+    {
+        return AAM_Framework_Manager::roles();
+    }
+
+    /**
+     * Get default subject
+     *
+     * The default subject represents access layer all roles, users and visitors
+     * inherit access controls from.
+     *
+     * @return AAM_Framework_Level_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function default()
+    {
+        return AAM_Framework_Manager::access_levels()->get('default');
+    }
+
+    /**
+     * Alias for the default method
+     *
+     * @return AAM_Framework_Level_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function all()
+    {
+        return $this->default();
+    }
+
+    /**
+     * Alias for the default method
+     *
+     * @return AAM_Framework_Level_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function anyone()
+    {
+        return $this->default();
+    }
+
+    /**
+     * Alias for the default method
+     *
+     * @return AAM_Framework_Level_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function everyone()
+    {
+        return $this->default();
+    }
+
+    /**
+     * Handle error
+     *
+     * The method will throw an exception if the API mode is not production. Otherwise
+     * it will log a warning through WordPress core `_doing_it_wrong` function.
+     *
+     * @param string $message
+     * @param string $method
+     * @param string $exception
+     *
+     * @return void
+     *
+     * @access private
+     * @throws Exception Will trigger exception if API mode is not "production"
+     * @version 7.0.0
+     */
+    private function _handle_error($message, $method, $exception = 'Exception')
+    {
+        if (in_array($this->_settings['mode'], array('prod', 'production'), true)) {
+            _doing_it_wrong($method, $message, AAM_VERSION);
+        } else {
+            throw new $exception($message);
+        }
+    }
+
+    // ********* DEPRECATED METHODS ********* //
 
     /**
      * Prevent from fatal errors
@@ -100,6 +315,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use `user` instead
      */
     public function getUser($id = null)
     {
@@ -122,6 +338,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use `role` instead
      */
     public function getRole($id)
     {
@@ -135,6 +352,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use `visitor` or `guest`, or `anonymous` instead
      */
     public function getVisitor()
     {
@@ -154,10 +372,11 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use `default` instead
      */
     public function getDefault()
     {
-        return AAM_Core_Subject_Default::getInstance();
+        return AAM_Core_Subject_Default::bootstrap();
     }
 
     /**
@@ -326,6 +545,23 @@ final class AAM_Core_Gateway
         }
 
         return $effect;
+    }
+
+    /**
+     * Bootstrap the API gateway objet
+     *
+     * @return AAM_Core_Gateway
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
     }
 
 }
