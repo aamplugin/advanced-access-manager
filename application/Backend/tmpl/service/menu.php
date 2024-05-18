@@ -13,7 +13,7 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE); ?>
+    <?php $object = AAM_Backend_AccessLevel::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE); ?>
 
     <div class="aam-feature" id="admin_menu-content">
         <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
@@ -41,13 +41,13 @@
             <?php
             $first = false;
             $menu  = AAM_Framework_Manager::backend_menu(array(
-                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+                'subject' => AAM_Backend_AccessLevel::getInstance()->getSubject()
             ))->get_menu_list();
 
             if (!empty($menu)) {
                 foreach ($menu as $menu) {
             ?>
-                    <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_Subject::getInstance()->hasCapability($menu['capability']) ? 1 : '0.5'; ?>">
+                    <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_AccessLevel::getInstance()->hasCapability($menu['capability']) ? 1 : '0.5'; ?>">
                         <div class="panel-heading" role="tab" id="menu-<?php echo esc_js($menu['id']); ?>-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo esc_js($menu['id']); ?>" aria-controls="menu-<?php echo esc_js($menu['id']); ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>

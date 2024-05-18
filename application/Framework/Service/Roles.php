@@ -65,7 +65,7 @@ class AAM_Framework_Service_Roles
     /**
      * Return list of roles
      *
-     * @return array Array of AAM_Framework_Level_Role
+     * @return array Array of AAM_Framework_AccessLevel_Role
      *
      * @access public
      * @version 6.9.6
@@ -75,7 +75,7 @@ class AAM_Framework_Service_Roles
         $response = array();
 
         foreach($this->get_wp_roles()->role_objects as $role) {
-            array_push($response, $this->_prepare_subject($role));
+            array_push($response, $this->_prepare($role));
         }
 
         return $response;
@@ -84,7 +84,7 @@ class AAM_Framework_Service_Roles
     /**
      * Get list of editable roles
      *
-     * @return array Array of AAM_Framework_Level_Role
+     * @return array Array of AAM_Framework_AccessLevel_Role
      *
      * @access public
      * @version 6.9.6
@@ -95,7 +95,7 @@ class AAM_Framework_Service_Roles
         $roles    = $this->get_wp_roles();
 
         foreach($this->get_editable_role_slugs() as $slug) {
-            array_push($response, $this->_prepare_subject($roles->get_role($slug)));
+            array_push($response, $this->_prepare($roles->get_role($slug)));
         }
 
         return $response;
@@ -127,7 +127,7 @@ class AAM_Framework_Service_Roles
      * @param string|WP_Role $identifier
      * @param boolean        $check_editable Verify that role is editable
      *
-     * @return AAM_Framework_Level_Role
+     * @return AAM_Framework_AccessLevel_Role
      *
      * @access public
      * @version 7.0.0
@@ -137,7 +137,7 @@ class AAM_Framework_Service_Roles
         if (is_string($identifier)) {
             $role = $this->get_role_by_slug($identifier);
         } elseif (is_a($identifier, 'WP_Role')) {
-            $role = $this->_prepare_subject($identifier);
+            $role = $this->_prepare($identifier);
         }
 
         if (empty($role)) {
@@ -158,7 +158,7 @@ class AAM_Framework_Service_Roles
      *
      * @param string $slug Unique role slug (aka ID)
      *
-     * @return AAM_Framework_Level_Role
+     * @return AAM_Framework_AccessLevel_Role
      *
      * @since 7.0.0 Removed $editable attribute
      * @since 6.9.6 Initial implementation of the method
@@ -180,7 +180,7 @@ class AAM_Framework_Service_Roles
             );
         }
 
-        return $this->_prepare_subject(array_shift($match));
+        return $this->_prepare(array_shift($match));
     }
 
     /**
@@ -198,7 +198,7 @@ class AAM_Framework_Service_Roles
      * @param string $slug         optional Role slug
      * @param array  $capabilities optional Array of capabilities
      *
-     * @return AAM_Framework_Level_Role
+     * @return AAM_Framework_AccessLevel_Role
      * @throws InvalidArgumentException
      *
      * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/275
@@ -249,7 +249,7 @@ class AAM_Framework_Service_Roles
             }, $capabilities));
 
             // Creating new role
-            $role = $this->_prepare_subject(
+            $role = $this->_prepare(
                 $roles->add_role($slug, $name, array_fill_keys($caps, true))
             );
         } else {
@@ -262,7 +262,7 @@ class AAM_Framework_Service_Roles
     /**
      * Update role
      *
-     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_AccessLevel_Role $role
      *
      * @return boolean
      *
@@ -313,7 +313,7 @@ class AAM_Framework_Service_Roles
     /**
      * Delete existing role
      *
-     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role|string $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_AccessLevel_Role|string $role
      * @param boolean $check_editable
      *
      * @return boolean
@@ -343,7 +343,7 @@ class AAM_Framework_Service_Roles
     /**
      * Get approximate number of users assigned to role
      *
-     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_Level_Role $role
+     * @param AAM_Framework_Proxy_Role|WP_Role|AAM_Framework_AccessLevel_Role $role
      *
      * @return int
      *
@@ -463,20 +463,20 @@ class AAM_Framework_Service_Roles
     }
 
     /**
-     * Prepare framework role subject
+     * Prepare framework role access level
      *
      * @param WP_Role $role
      *
-     * @return AAM_Framework_Level_Role
+     * @return AAM_Framework_AccessLevel_Role
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_subject(WP_Role $role)
+    private function _prepare(WP_Role $role)
     {
         $roles = $this->get_wp_roles();
 
-        return new AAM_Framework_Level_Role(new AAM_Framework_Proxy_Role(
+        return new AAM_Framework_AccessLevel_Role(new AAM_Framework_Proxy_Role(
             $roles->role_names[$role->name],
             $role
         ));

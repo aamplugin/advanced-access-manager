@@ -73,7 +73,7 @@ trait AAM_Framework_Service_BaseTrait
         }
 
         if (isset($context['subject'])
-            && is_a($context['subject'], AAM_Framework_Level_Abstract::class)) {
+            && is_a($context['subject'], AAM_Framework_AccessLevel_Abstract::class)) {
             $subject = $context['subject'];
         } elseif (empty($context['access_level'])) {
             throw new InvalidArgumentException('The access_level is required');

@@ -26,9 +26,20 @@ final class AAM_Core_Gateway
      * @var AAM_Core_Gateway
      *
      * @access private
-     * @version 7.0.0
+     * @version 6.9.28
      */
     private static $_instance = null;
+
+    /**
+     * Single instance of the current user
+     *
+     * @var AAM_Core_Subject
+     *
+     * @access private
+     * @version 6.9.28
+     * @deprecated 6.9.28
+     */
+    private $_current_user = null;
 
     /**
      * Gateway settings
@@ -36,7 +47,7 @@ final class AAM_Core_Gateway
      * @var array
      *
      * @access private
-     * @version 7.0.0
+     * @version 6.9.28
      */
     private $_settings = null;
 
@@ -63,9 +74,9 @@ final class AAM_Core_Gateway
      *
      * @param int|string|WP_User|null $identifier
      *
-     * @return AAM_Framework_Level_User|AAM_Framework_Level_Visitor
+     * @return AAM_Framework_AccessLevel_User|AAM_Framework_AccessLevel_Visitor
      * @throws Exception If cannot find user with provided identifier
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function user($identifier = null)
     {
@@ -87,10 +98,10 @@ final class AAM_Core_Gateway
      *
      * Instantiate and return a new instance of visitor's subject.
      *
-     * @return AAM_Framework_Level_Visitor
+     * @return AAM_Framework_AccessLevel_Visitor
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function visitor()
     {
@@ -100,10 +111,10 @@ final class AAM_Core_Gateway
     /**
      * Alias for the visitor method
      *
-     * @return AAM_Framework_Level_Visitor
+     * @return AAM_Framework_AccessLevel_Visitor
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function anonymous()
     {
@@ -113,10 +124,10 @@ final class AAM_Core_Gateway
     /**
      * Alias for the visitor method
      *
-     * @return AAM_Framework_Level_Visitor
+     * @return AAM_Framework_AccessLevel_Visitor
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function guest()
     {
@@ -128,14 +139,16 @@ final class AAM_Core_Gateway
      *
      * @param string  $slub
      *
-     * @return AAM_Framework_Level_Role
+     * @return AAM_Framework_AccessLevel_Role
      * @throws Exception
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function role($slug)
     {
         try {
-            $role = AAM_Framework_Manager::roles()->get_role($slug);
+            $role = AAM_Framework_Manager::access_levels()->get(
+                AAM_Framework_Type_AccessLevel::ROLE, $slug
+            );
         } catch (Exception $error) {
             $this->_handle_error(
                 $error->getMessage(), __CLASS__ . '::' . __METHOD__
@@ -161,10 +174,10 @@ final class AAM_Core_Gateway
      * The default subject represents access layer all roles, users and visitors
      * inherit access controls from.
      *
-     * @return AAM_Framework_Level_Default
+     * @return AAM_Framework_AccessLevel_Default
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function default()
     {
@@ -174,10 +187,10 @@ final class AAM_Core_Gateway
     /**
      * Alias for the default method
      *
-     * @return AAM_Framework_Level_Default
+     * @return AAM_Framework_AccessLevel_Default
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function all()
     {
@@ -187,10 +200,10 @@ final class AAM_Core_Gateway
     /**
      * Alias for the default method
      *
-     * @return AAM_Framework_Level_Default
+     * @return AAM_Framework_AccessLevel_Default
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function anyone()
     {
@@ -200,10 +213,10 @@ final class AAM_Core_Gateway
     /**
      * Alias for the default method
      *
-     * @return AAM_Framework_Level_Default
+     * @return AAM_Framework_AccessLevel_Default
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public function everyone()
     {
@@ -224,7 +237,7 @@ final class AAM_Core_Gateway
      *
      * @access private
      * @throws Exception Will trigger exception if API mode is not "production"
-     * @version 7.0.0
+     * @version 6.9.28
      */
     private function _handle_error($message, $method, $exception = 'Exception')
     {
@@ -315,15 +328,25 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
-     * @deprecated 7.0.0 Use `user` instead
+     * @deprecated 6.9.28 Use `user` instead
      */
     public function getUser($id = null)
     {
         if (!empty($id)) {
             $user = new AAM_Core_Subject_User($id);
             $user->initialize();
+        } elseif (is_null($this->_current_user)) {
+            $user_id = get_current_user_id();
+
+            if (is_numeric($user_id) && $user_id > 0) {
+                $user = new AAM_Core_Subject_User($user_id);
+            } else {
+                $user = new AAM_Core_Subject_Visitor();
+            }
+
+            $this->_current_user = $user;
         } else {
-            $user = AAM::getUser();
+            $user = $this->_current_user;
         }
 
         return $user;
@@ -338,7 +361,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
-     * @deprecated 7.0.0 Use `role` instead
+     * @deprecated 6.9.28 Use `role` instead
      */
     public function getRole($id)
     {
@@ -352,7 +375,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
-     * @deprecated 7.0.0 Use `visitor` or `guest`, or `anonymous` instead
+     * @deprecated 6.9.28 Use `visitor` or `guest`, or `anonymous` instead
      */
     public function getVisitor()
     {
@@ -372,7 +395,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
-     * @deprecated 7.0.0 Use `default` instead
+     * @deprecated 6.9.28 Use `default` instead
      */
     public function getDefault()
     {
@@ -553,7 +576,7 @@ final class AAM_Core_Gateway
      * @return AAM_Core_Gateway
      *
      * @access public
-     * @version 7.0.0
+     * @version 6.9.28
      */
     public static function bootstrap()
     {

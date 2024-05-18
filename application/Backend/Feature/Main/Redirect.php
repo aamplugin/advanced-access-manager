@@ -50,7 +50,7 @@ class AAM_Backend_Feature_Main_Redirect extends AAM_Backend_Feature_Abstract
      */
     public function getOption($option, $default = null)
     {
-        $object = AAM_Backend_Subject::getInstance()->getObject(self::OBJECT_TYPE);
+        $object = AAM_Backend_AccessLevel::getInstance()->getObject(self::OBJECT_TYPE);
         $value  = $object->get($option);
 
         return (!is_null($value) ? $value : $default);

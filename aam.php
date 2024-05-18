@@ -44,16 +44,6 @@ class AAM
     private static $_instance = null;
 
     /**
-     * User Subject
-     *
-     * @var AAM_Core_Subject_User|AAM_Core_Subject_Visitor
-     *
-     * @access private
-     * @version 6.0.0
-     */
-    private $_user = null;
-
-    /**
      * Initialize the AAM Object
      *
      * @return void
@@ -66,33 +56,15 @@ class AAM
      */
     protected function __construct()
     {
-        // Initialize current user
-        $this->initializeUser();
-
         // Make sure if user is changed dynamically, AAM adjusts accordingly
         add_action('set_current_user', function() {
-            $this->initializeUser();
+            AAM_Framework_Manager::access_levels()->reload_current_user();
         });
 
-        // The same with with after user login. WordPress core has bug with this
+        // The same, but after user login. WordPress core has bug with this
         add_action('wp_login', function($_, $user) {
-            $this->initializeUser($user);
+            AAM_Framework_Manager::access_levels()->set_current_user($user);
         }, 10, 2);
-    }
-
-    /**
-     * Set Current User
-     *
-     * @param AAM_Core_Subject $user
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function setUser(AAM_Core_Subject $user)
-    {
-        $this->_user = $user;
     }
 
     /**
@@ -111,53 +83,15 @@ class AAM
     /**
      * Get current user
      *
-     * @return AAM_Core_Subject
+     * @return AAM_Framework_AccessLevel_Abstract
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 6.9.28
      */
     public static function getUser()
     {
-        return self::getInstance()->_user;
-    }
-
-    /**
-     * Change current user
-     *
-     * This method is triggered if some process updates current user
-     *
-     * @return AAM_Core_Subject
-     *
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public function initializeUser($user = null)
-    {
-        global $current_user;
-
-        // Important! Do not use WP core function to avoid loop
-        if (is_a($user, 'WP_User')) {
-            $id = $user->ID;
-        } else {
-            $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
-        }
-
-        // Change current user
-        if ($id) {
-            $user = new AAM_Core_Subject_User($id);
-        } else {
-            $user = new AAM_Core_Subject_Visitor();
-        }
-
-        $this->setUser($user);
-
-        $user->initialize();
-
-        return $user;
+        return self::api()->getUser();
     }
 
     /**

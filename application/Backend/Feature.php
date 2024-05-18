@@ -44,7 +44,7 @@ class AAM_Backend_Feature
     public static function registerFeature($feature)
     {
         $response = false;
-        $subject  = AAM_Backend_Subject::getInstance();
+        $subject  = AAM_Backend_AccessLevel::getInstance();
 
         // Determine correct AAM UI capability
         if (empty($feature->capability)) {
@@ -137,7 +137,7 @@ class AAM_Backend_Feature
     public static function retrieveList($type)
     {
         $response = array();
-        $subject  = AAM_Backend_Subject::getInstance()->getSubjectType();
+        $subject  = AAM_Backend_AccessLevel::getInstance()->getSubjectType();
 
         foreach (self::$_features as $feature) {
             if (
@@ -201,7 +201,7 @@ class AAM_Backend_Feature
     protected static function initView($feature)
     {
         if (is_string($feature->view)) {
-            $feature->view = new $feature->view(AAM_Backend_Subject::getInstance());
+            $feature->view = new $feature->view(AAM_Backend_AccessLevel::getInstance());
         }
 
         return $feature;

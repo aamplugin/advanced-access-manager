@@ -134,6 +134,17 @@ class AAM_Service_Content
             }, 20);
         }
 
+        // Register new resource type
+        add_filter('aam_get_resource_filter', function($resource, $access_level, $type, $id) {
+            if ($type === AAM_Core_Object_Post::OBJECT_TYPE) {
+                $resource = new AAM_Core_Object_Post($access_level, $id);
+            } elseif ($type === AAM_Core_Object_Visibility::OBJECT_TYPE) {
+                $resource = new AAM_Core_Object_Visibility($access_level, $id);
+            }
+
+            return $resource;
+        }, 10, 4);
+
         if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
             $this->initializeHooks();
         }

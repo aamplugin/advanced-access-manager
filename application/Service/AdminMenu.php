@@ -81,6 +81,15 @@ class AAM_Service_AdminMenu
             }, 5);
         }
 
+        // Register new resource type
+        add_filter('aam_get_resource_filter', function($resource, $access_level, $type) {
+            if ($type === AAM_Core_Object_Menu::OBJECT_TYPE) {
+                $resource = new AAM_Core_Object_Menu($access_level);
+            }
+
+            return $resource;
+        }, 10, 3);
+
         if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
             $this->initializeHooks();
         }

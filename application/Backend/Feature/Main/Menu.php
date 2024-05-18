@@ -73,7 +73,7 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract
     {
         $status = $this->getFromPost('status');
 
-        $object = AAM_Backend_Subject::getInstance()->getObject(
+        $object = AAM_Backend_AccessLevel::getInstance()->getObject(
             self::OBJECT_TYPE, null, true
         );
 

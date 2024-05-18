@@ -82,6 +82,15 @@ class AAM_Service_DeniedRedirect
             }, 25);
         }
 
+        // Register new resource type
+        add_filter('aam_get_resource_filter', function($resource, $access_level, $type) {
+            if ($type === AAM_Core_Object_Redirect::OBJECT_TYPE) {
+                $resource = new AAM_Core_Object_Redirect($access_level);
+            }
+
+            return $resource;
+        }, 10, 3);
+
         // Hook that initialize the AAM UI part of the service
         if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
             $this->initializeHooks();

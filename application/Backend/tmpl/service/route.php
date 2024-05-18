@@ -10,7 +10,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="route-content">
-        <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+        <?php $subject = AAM_Backend_AccessLevel::getInstance(); ?>
 
         <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
             <div class="row">

@@ -164,47 +164,12 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
     }
 
     /**
-     * Merge visibility settings
-     *
-     * @param array $options
-     *
-     * @return array
-     *
-     * @since 6.1.0 Fixed bug with incorrectly merged settings for users with multiple
-     *              roles
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.1.0
-     */
-    public function mergeOption($options)
-    {
-        $these_options = $this->getOption();
-        $keys          = array_unique(array_merge(
-            array_keys($options), array_keys($this->getOption())
-        ));
-
-        $merged = array();
-
-        // Iterate over each unique key end merge settings accordingly
-        foreach($keys as $key) {
-            $merged[$key] = AAM::api()->mergeSettings(
-                (isset($options[$key]) ? $options[$key] : array()),
-                (isset($these_options[$key]) ? $these_options[$key] : array()),
-                AAM_Core_Object_Post::OBJECT_TYPE
-            );
-        }
-
-        return $merged;
-    }
-
-    /**
      * Align & Merge access controls
      *
      * This method makes sure that both data set have the same keys first and then
      * merges them
      *
-     * @param array           $incoming
+     * @param array           $options
      * @param AAM_Core_Object $object
      *
      * @return array
@@ -212,13 +177,16 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
      * @access public
      * @version 6.9.21
      */
-    public function mergeAlignOption($incoming, $object)
+    public function mergeOption($options)
     {
         // Identifying all the keys that are missing in the $subject, however, present
         // in $this and align settings
         $base = $this->getOption();
 
-        $diff = array_diff(array_keys($incoming), array_keys($base));
+        // Get the object we are merging settings with
+        $from_object = func_get_arg(1);
+
+        $diff = array_diff(array_keys($options), array_keys($base));
 
         if (count($diff)) {
             foreach($diff as $key) {
@@ -226,11 +194,11 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
             }
         }
 
-        $diff = array_diff(array_keys($base), array_keys($incoming));
+        $diff = array_diff(array_keys($base), array_keys($options));
 
         if (count($diff)) {
             foreach($diff as $key) {
-                $incoming[$key] = $this->getOptionByXpath($object, $key);
+                $incoming[$key] = $this->getOptionByXpath($from_object, $key);
             }
         }
 

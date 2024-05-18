@@ -55,7 +55,7 @@ class AAM_Backend_Feature_Subject_User
 
         foreach ($result->get_results() as $row) {
             $response['data'][] = $this->prepareRow(
-                AAM::api()->getUser($row->ID)
+                AAM::api()->user($row->ID)
             );
         }
 
@@ -108,19 +108,17 @@ class AAM_Backend_Feature_Subject_User
     /**
      * Prepare individual user row
      *
-     * @param AAM_Core_Subject_User $user
+     * @param AAM_Framework_AccessLevel_User $user
      *
      * @return array
      *
      * @access protected
      * @version 6.0.0
      */
-    protected function prepareRow(AAM_Core_Subject_User $user)
+    protected function prepareRow($user)
     {
         $attributes = array();
-        $expiration = get_user_option(
-            AAM_Core_Subject_User::EXPIRATION_OPTION, $user->ID
-        );
+        $expiration = get_user_option('aam_user_expiration', $user->ID);
 
         if (!empty($expiration)) {
             $expires = new DateTime(
@@ -172,14 +170,14 @@ class AAM_Backend_Feature_Subject_User
     /**
      * Prepare user row actions
      *
-     * @param AAM_Core_Subject_User $user
+     * @param AAM_Framework_AccessLevel_User $user
      *
      * @return array
      *
      * @access protected
      * @version 6.0.0
      */
-    protected function prepareRowActions(AAM_Core_Subject_User $user)
+    protected function prepareRowActions($user)
     {
         $allowed = $this->isAllowed($user);
         $actions = array();
@@ -322,7 +320,7 @@ class AAM_Backend_Feature_Subject_User
     /**
      * Check is current user is allowed to manage requested user
      *
-     * @param int|AAM_Core_Subject_User $user
+     * @param int|AAM_Framework_AccessLevel_User $user
      *
      * @return boolean
      *
@@ -332,7 +330,7 @@ class AAM_Backend_Feature_Subject_User
     protected function isAllowed($user)
     {
         if (is_numeric($user)) {
-            $user = AAM::api()->getUser($user);
+            $user = AAM::api()->user($user);
         }
 
         return apply_filters(

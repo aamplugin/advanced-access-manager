@@ -9,7 +9,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="jwt-content">
-        <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+        <?php $subject = AAM_Backend_AccessLevel::getInstance(); ?>
 
         <div class="row">
             <div class="col-xs-12">

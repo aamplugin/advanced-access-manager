@@ -78,10 +78,9 @@ class AAM_Service_Chatbot
      */
     private function _getChatbotConfig()
     {
-        $script = file_get_contents(AAM_BASEDIR . '/media/js/chatbot.config.js');
-        $img    = 'data:image/svg+xml;base64,' . base64_encode(
-            file_get_contents(AAM_BASEDIR . '/media/armadillo-chat.svg')
-        );
+        $script   = file_get_contents(AAM_BASEDIR . '/media/js/chatbot.config.js');
+        $logo_img = $this->_get_inline_img(AAM_BASEDIR . '/media/armadillo-chat.svg');
+        $lnch_img = $this->_get_inline_img(AAM_BASEDIR . '/media/chat-launch.svg');
 
         if (!defined('AAM_COMPLETE_PACKAGE_LICENSE')) {
             $free_note = '<br/><br/>' . sprintf(__(
@@ -93,18 +92,36 @@ class AAM_Service_Chatbot
         }
 
         return str_replace(
-            array('%greeting', '%logo_icon', '%rest_nonce', '%rest_base'),
+            array('%greeting', '%launcher_icon', '%logo_icon', '%rest_nonce', '%rest_base'),
             array(
                 sprintf(
                     esc_attr(__("Howdy, %s. I'm Aarmie, your virtual assistant. Trained on ~1500 Q&As and counting. Though I may not know everything and make mistakes, feel free to ask. If you're unsatisfied, leave your email for follow-up. %s", AAM_KEY)),
                     wp_get_current_user()->first_name,
                     $free_note
                 ),
-                $img,
+                $lnch_img,
+                $logo_img,
                 wp_create_nonce('wp_rest'),
                 esc_url_raw(rest_url())
             ),
             $script
+        );
+    }
+
+    /**
+     * Get inline image data
+     *
+     * @param string $filepath
+     *
+     * @return string
+     *
+     * @access private
+     * @version 6.9.28
+     */
+    private function _get_inline_img($filepath)
+    {
+        return 'data:image/svg+xml;base64,' . base64_encode(
+            file_get_contents($filepath)
         );
     }
 

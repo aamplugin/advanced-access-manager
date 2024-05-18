@@ -118,14 +118,14 @@ abstract class AAM_Backend_Feature_Abstract
     /**
      * Get currently managed subject
      *
-     * @return AAM_Backend_Subject
+     * @return AAM_Backend_AccessLevel
      *
      * @access public
      * @version 6.0.0
      */
     public function getSubject()
     {
-        return AAM_Backend_Subject::getInstance();
+        return AAM_Backend_AccessLevel::getInstance();
     }
 
     /**

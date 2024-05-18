@@ -5551,15 +5551,13 @@
             this.setSubject(
                 subject.type,
                 subject.id,
-                subject.name,
-                subject.level
+                subject.name
             );
         } else if (getLocal().subject.type) {
             this.setSubject(
                 getLocal().subject.type,
                 getLocal().subject.id,
-                getLocal().subject.name,
-                getLocal().subject.level
+                getLocal().subject.name
             );
         } else {
             $('#aam-subject-banner').addClass('hidden');
@@ -5692,13 +5690,6 @@
 
             // Second set the name of the subject
             $('.aam-current-subject').append($('<strong/>').text(name));
-
-            // Highlight screen if the same level
-            if (parseInt(level) >= getLocal().level || type === 'default') {
-                $('.aam-current-subject').addClass('danger');
-            } else {
-                $('.aam-current-subject').removeClass('danger');
-            }
         }
 
         this.triggerHook('setSubject');

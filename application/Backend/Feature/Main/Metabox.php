@@ -86,7 +86,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
         $items  = AAM_Core_Request::post('items', array());
         $status = $this->getFromPost('status', FILTER_VALIDATE_BOOLEAN);
 
-        $object = AAM_Backend_Subject::getInstance()->getObject(
+        $object = AAM_Backend_AccessLevel::getInstance()->getObject(
             self::OBJECT_TYPE, null, true
         );
 
@@ -268,7 +268,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
         }
 
         // If visitor, return only frontend widgets
-        if (AAM_Backend_Subject::getInstance()->isVisitor()) {
+        if (AAM_Backend_AccessLevel::getInstance()->isVisitor()) {
             if (!empty($cache['widgets'])) {
                 $response = array('widgets' => $cache['widgets']);
             } else {

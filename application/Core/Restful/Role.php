@@ -470,8 +470,8 @@ class AAM_Core_Restful_Role
     /**
      * Clone access settings
      *
-     * @param AAM_Framework_Level_Role $role
-     * @param AAM_Framework_Level_Role $parent
+     * @param AAM_Framework_AccessLevel_Role $role
+     * @param AAM_Framework_AccessLevel_Role $parent
      *
      * @return boolean
      *
@@ -491,14 +491,14 @@ class AAM_Core_Restful_Role
     /**
      * Prepare role model for response
      *
-     * @param AAM_Framework_Level_Role $role
+     * @param AAM_Framework_AccessLevel_Role $role
      * @param array                      $fields
      *
      * @return array
      * @version 6.9.6
      */
     protected function prepare_role_output(
-        AAM_Framework_Level_Role $role, $fields = array()
+        AAM_Framework_AccessLevel_Role $role, $fields = array()
     ) {
         $response = array(
             'slug' => $role->slug,
@@ -532,12 +532,12 @@ class AAM_Core_Restful_Role
     /**
      * Get list of actions user can perform upon role
      *
-     * @param AAM_Framework_Level_Role $role
+     * @param AAM_Framework_AccessLevel_Role $role
      *
      * @return array
      * @version 6.9.6
      */
-    protected function get_role_permissions(AAM_Framework_Level_Role $role)
+    protected function get_role_permissions(AAM_Framework_AccessLevel_Role $role)
     {
         $permissions = array('allow_manage');
         $user_count   = AAM_Framework_Manager::roles()->get_role_user_count($role);

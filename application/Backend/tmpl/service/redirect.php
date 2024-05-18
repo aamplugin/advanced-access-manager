@@ -13,7 +13,7 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+    <?php $subject = AAM_Backend_AccessLevel::getInstance(); ?>
 
     <div class="aam-feature" id="redirect-content">
         <div class="row">
@@ -24,7 +24,7 @@
                     </p>
                 <?php } else { ?>
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for [%s] when access is denied to restricted resources like posts, categories, menus, etc.', 'b'), AAM_Backend_Subject::getInstance()->getName()); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for [%s] when access is denied to restricted resources like posts, categories, menus, etc.', 'b'), AAM_Backend_AccessLevel::getInstance()->getName()); ?>
                     </p>
                 <?php } ?>
                 <div class="aam-overwrite" id="aam-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">

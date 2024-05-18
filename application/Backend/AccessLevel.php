@@ -20,7 +20,7 @@
  * @package AAM
  * @version 6.2.0
  */
-class AAM_Backend_Subject
+class AAM_Backend_AccessLevel
 {
 
     use AAM_Core_Contract_RequestTrait,
@@ -29,7 +29,7 @@ class AAM_Backend_Subject
     /**
      * Subject information
      *
-     * @var AAM_Core_Subject
+     * @var AAM_Framework_AccessLevel_Abstract
      *
      * @access protected
      * @version 6.0.0
@@ -126,12 +126,38 @@ class AAM_Backend_Subject
     }
 
     /**
+     * Get access level's name
+     *
+     * @return string
+     *
+     * @access public
+     * @version 6.9.28
+     */
+    public function getName()
+    {
+        $type = $this->getSubjectType();
+
+        if ($type === AAM_Framework_Type_AccessLevel::USER) {
+            $display  = $this->subject->display_name;
+            $response = $display ? $display : $this->subject->user_nicename;
+        } elseif ($type === AAM_Framework_Type_AccessLevel::VISITOR) {
+            $response = __('Anonymous', AAM_KEY);
+        } elseif ($type === AAM_Framework_Type_AccessLevel::ROLE) {
+            $response = translate_user_role($this->subject->display_name);
+        } elseif ($type === AAM_Framework_Type_AccessLevel::DEFAULT) {
+            $response = __('All Users, Roles and Visitor', AAM_KEY);
+        }
+
+        return $response;
+    }
+
+    /**
      * Initialize requested subject
      *
      * @param string $type
      * @param mixed  $id
      *
-     * @return AAM_Core_Subject
+     * @return AAM_Framework_AccessLevel_Abstract
      *
      * @since 6.2.0 Refactored to use AAM API to retrieve subject
      * @since 6.0.0 Initial implementation of the method
@@ -197,7 +223,7 @@ class AAM_Backend_Subject
     /**
      * Set AAM core subject
      *
-     * @param AAM_Framework_Level_Abstract $subject
+     * @param AAM_Framework_AccessLevel_Abstract $subject
      *
      * @access protected
      * @version 6.0.0
@@ -251,7 +277,7 @@ class AAM_Backend_Subject
     /**
      * Get AAM core subject
      *
-     * @return AAM_Framework_Level_Abstract
+     * @return AAM_Framework_AccessLevel_Abstract
      *
      * @access public
      * @version 6.0.0

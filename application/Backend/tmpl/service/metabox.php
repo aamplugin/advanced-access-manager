@@ -42,7 +42,7 @@
 
             $first      = false;
             $components = AAM_Framework_Manager::components(array(
-                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+                'subject' => AAM_Backend_AccessLevel::getInstance()->getSubject()
             ))->get_component_list();
 
             // Group all the components by screen
@@ -105,7 +105,7 @@
                                     <?php } ?>
                                 </div>
 
-                                <?php echo apply_filters('aam_component_screen_mode_panel_filter', '', $screen_id, AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)); ?>
+                                <?php echo apply_filters('aam_component_screen_mode_panel_filter', '', $screen_id, AAM_Backend_AccessLevel::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)); ?>
                             </div>
                         </div>
                     </div>

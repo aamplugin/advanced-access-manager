@@ -8,15 +8,26 @@
  */
 
 /**
- * User subject
+ * Default subject
  *
  * @package AAM
  *
- * @version 7.0.0
+ * @version 6.9.28
  */
-class AAM_Framework_Level_User extends AAM_Framework_Level_Abstract
+class AAM_Framework_AccessLevel_Default extends AAM_Framework_AccessLevel_Abstract
 {
 
-    const TYPE = 'user';
+    /**
+     * @inheritDoc
+     */
+    const TYPE = 'default';
+
+    /**
+     * @inheritDoc
+     */
+    public function get_parent()
+    {
+        return apply_filters('aam_get_parent_access_level_filter', null, $this);
+    }
 
 }

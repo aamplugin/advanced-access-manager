@@ -90,7 +90,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      */
     public function clearSubjectSettings()
     {
-        AAM_Backend_Subject::getInstance()->getSubject()->reset();
+        AAM_Backend_AccessLevel::getInstance()->getSubject()->reset();
 
         return wp_json_encode(array('status' => 'success'));
     }

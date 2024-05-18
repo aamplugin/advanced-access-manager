@@ -29,13 +29,13 @@
             </div>
         </div>
 
-        <?php echo apply_filters('aam_toolbar_mode_panel_filter', '', AAM_Backend_Subject::getInstance()->getObject('toolbar')); ?>
+        <?php echo apply_filters('aam_toolbar_mode_panel_filter', '', AAM_Backend_AccessLevel::getInstance()->getObject('toolbar')); ?>
 
         <div class="panel-group" id="toolbar-list" role="tablist" aria-multiselectable="true">
             <?php
             $first   = false;
             $toolbar = AAM_Framework_Manager::admin_toolbar(array(
-                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+                'subject' => AAM_Backend_AccessLevel::getInstance()->getSubject()
             ))->get_item_list();
 
             if (!empty($toolbar)) { ?>

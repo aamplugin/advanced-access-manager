@@ -37,7 +37,7 @@ class AAM_Backend_View
      */
     protected function __construct()
     {
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject = AAM_Backend_AccessLevel::getInstance();
 
         // Allow other plugins to register new AAM UI tabs/features
         do_action(
@@ -115,7 +115,7 @@ class AAM_Backend_View
 
         $action  = $this->getFromPost('sub_action');
         $parts   = explode('.', $action);
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject = AAM_Backend_AccessLevel::getInstance();
 
         if (count($parts) === 2) {
             $id = 'AAM_Backend_Feature_' . $parts[0];

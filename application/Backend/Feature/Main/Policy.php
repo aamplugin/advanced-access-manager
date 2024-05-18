@@ -127,8 +127,8 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
     /**
      * Render user actions
      *
-     * @param array                 $actions
-     * @param AAM_Core_Subject_User $user
+     * @param array                          $actions
+     * @param AAM_Framework_AccessLevel_User $user
      *
      * @return array
      *
@@ -138,9 +138,9 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
     public function renderUserActions($actions, $user)
     {
         if ($this->getFromPost('ui') === 'principal') {
-            $object =  $user->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
-            $policyId = $this->getFromPost('policyId', FILTER_VALIDATE_INT);
-            $actions = array($object->has($policyId) ? 'detach' : 'attach');
+            $resource  =  $user->get_resource(AAM_Framework_Type_Resource::POLICY);
+            $policy_id = $this->getFromPost('policyId', FILTER_VALIDATE_INT);
+            $actions   = array($resource->has($policy_id) ? 'detach' : 'attach');
         }
 
         return $actions;
@@ -240,7 +240,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     protected function preparePolicyActionList($record)
     {
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject = AAM_Backend_AccessLevel::getInstance();
 
         $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);
@@ -266,7 +266,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     public function save()
     {
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject = AAM_Backend_AccessLevel::getInstance();
 
         $id      = $this->getFromPost('id');
         $effect  = $this->getFromPost('effect', FILTER_VALIDATE_BOOLEAN);
@@ -310,7 +310,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     public function generate()
     {
-        $subject   = AAM_Backend_Subject::getInstance()->getSubject();
+        $subject   = AAM_Backend_AccessLevel::getInstance()->getSubject();
         $generator = new AAM_Core_Policy_Generator($subject);
 
         // Prepare the policy name
