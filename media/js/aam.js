@@ -4509,6 +4509,459 @@
         })(jQuery);
 
         /**
+         * User Manager Interface
+         *
+         * @param {jQuery} $
+         *
+         * @returns {void}
+         */
+         (function ($) {
+
+            /**
+             *
+             */
+            function initialize() {
+                const container = '#user-governance-content';
+
+                if ($(container).length) {
+                    GetRoles(function(roles) {
+                        $('#user-governance-role-targets').autocomplete({
+                            minLength: 3,
+                            source: (request, cb) => {
+                                const term = request.term
+                                    .split(',')
+                                    .map(v => $.trim(v))
+                                    .filter(v => v != '')
+                                    .pop();
+
+                                cb(roles.map(r => ({
+                                    label: r.name,
+                                    value: r.slug
+                                })).filter(r => (new RegExp('^' + term, 'i')).test(r.label)));
+                            },
+                            select: function(event, ui ) {
+                                event.preventDefault();
+                                const current = $('#user-governance-role-targets').val();
+                                const values  = current.split(',').map(v => $.trim(v));
+
+                                // Remove last value as it is something that was typed
+                                values.pop();
+
+                                values.push(ui.item.value);
+
+                                $('#user-governance-role-targets').val(values.join(', ') + ', ');
+                            }
+                        });
+                    });
+
+                    let resolved_users = [];
+                    let editing_rule   = null;
+
+                    $('#user-governance-user-targets').autocomplete({
+                        minLength: 3,
+                        source: (request, cb) => {
+                            const term = request.term
+                                .split(',')
+                                .map(v => $.trim(v))
+                                .filter(v => v != '')
+                                .pop();
+
+                            if (!resolved_users.includes(term)){
+                                $.ajax(`${getLocal().rest_base}wp/v2/users?context=edit&search=${term}`, {
+                                    type: 'GET',
+                                    contentType: 'application/json',
+                                    dataType: 'json',
+                                    headers: {
+                                        'X-WP-Nonce': getLocal().rest_nonce
+                                    },
+                                    success: function (response) {
+                                        cb(response.map(u => ({
+                                            label: u.name,
+                                            value: u.username
+                                        })));
+                                    },
+                                    error: function () {
+                                        getAAM().notification('danger');
+                                    },
+                                    complete: function () {
+                                    }
+                                });
+                            }
+                        },
+                        select: function(event, ui ) {
+                            event.preventDefault();
+                            const current = $('#user-governance-user-targets').val();
+                            const values  = current.split(',').map(v => $.trim(v));
+
+                            // Remove last value as it is something that was typed
+                            values.pop();
+
+                            values.push(ui.item.value);
+
+                            resolved_users = values;
+
+                            $('#user-governance-user-targets').val(values.join(', ') + ', ');
+                        }
+                    });
+
+                    $('#user-governance-rule-type').bind('change', function() {
+                        const type = $(this).val();
+
+                        // Hiding all the input values first
+                        $('.user-governance-targets').addClass('hidden');
+
+                        // Now, hiding all the controls
+                        $('.user-governance-control').addClass('hidden');
+
+                        // Show proper input field based on rule type
+                        $('.user-governance-targets').each(function() {
+                            if ($(this).data('rule-types').split(',').includes(type)) {
+                                $(this).removeClass('hidden');
+                            }
+                        });
+
+                        // Show proper controls based on rule type
+                        $('.user-governance-control').each(function() {
+                            if ($(this).data('rule-types').split(',').includes(type)) {
+                                $(this).removeClass('hidden');
+                            }
+                        });
+                    });
+
+                    $('[data-toggle="toggle"]', container).bootstrapToggle();
+
+                    //reset button
+                    $('#user-governance-reset').bind('click', function () {
+                        const _btn = $(this);
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/reset`, {
+                            type: 'POST',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            data: getAAM().prepareRequestSubjectData(),
+                            dataType: 'json',
+                            beforeSend: function () {
+                                var label = _btn.text();
+                                _btn.attr('data-original-label', label);
+                                _btn.text(getAAM().__('Resetting...'));
+                            },
+                            success: function () {
+                                getAAM().fetchContent('main');
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                _btn.text(_btn.attr('data-original-label'));
+                            }
+                        });
+                    });
+
+                    $('#user-governance-save-btn').bind('click', function (event) {
+                        event.preventDefault();
+
+                        // Collecting all the necessary information
+                        const data = {
+                            rule_type: $('#user-governance-rule-type').val(),
+                            permissions: []
+                        }
+
+                        let valid = data.rule_type ? true : false;
+
+                        $('.user-governance-control', '#user-governance-model').each(function() {
+                            if ($(this).data('rule-types').split(',').includes(data.rule_type)) {
+                                data.permissions.push({
+                                    permission: $('input[data-toggle="toggle"]', this).attr('name'),
+                                    effect: $('input[data-toggle="toggle"]', this).prop('checked') ? 'deny' : 'allow'
+                                });
+                            }
+                        });
+
+                        $('.user-governance-targets').each(function() {
+                            if ($(this).data('rule-types').split(',').includes(data.rule_type)) {
+                                const name = $('.form-control', this).attr('name');
+                                data[name] = $('.form-control', this).val().split(',')
+                                    .map(u => $.trim(u))
+                                    .filter(u => u);
+
+                                if (data[name].length === 0) {
+                                    valid = false;
+                                }
+                            }
+                        });
+
+                        if (valid) {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance`, {
+                                type: 'POST',
+                                contentType: 'application/json',
+                                dataType: 'json',
+                                data: JSON.stringify(
+                                    getAAM().prepareRequestSubjectData(data)
+                                ),
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce
+                                },
+                                beforeSend: function () {
+                                    $('#user-governance-save-btn').text(
+                                        getAAM().__('Saving...')
+                                    ).attr('disabled', true);
+                                },
+                                success: function () {
+                                    $('#user-governance-list').DataTable().ajax.reload();
+                                    $('#aam-user-governance-overwrite').show();
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+                                },
+                                complete: function () {
+                                    $('#user-governance-model').modal('hide');
+                                    $('#user-governance-save-btn').text(getAAM().__('Save')).attr('disabled', false);
+                                }
+                            });
+                        }
+                    });
+
+                    $('#user-governance-update-btn').bind('click', function (event) {
+                        event.preventDefault();
+
+                        // Collecting all the necessary information
+                        const data = editing_rule;
+
+                        // Reset permissions
+                        data.permissions = [];
+
+                        $('.user-governance-control').each(function() {
+                            if ($(this).data('rule-types').split(',').includes(data.rule_type)) {
+                                data.permissions.push({
+                                    permission: $('input[data-toggle="toggle"]', this).attr('name'),
+                                    effect: $('input[data-toggle="toggle"]', this).prop('checked') ? 'deny' : 'allow'
+                                });
+                            }
+                        });
+
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/${editing_rule.id}`, {
+                            type: 'POST',
+                            contentType: 'application/json',
+                            dataType: 'json',
+                            data: JSON.stringify(
+                                getAAM().prepareRequestSubjectData(data)
+                            ),
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            beforeSend: function () {
+                                $('#user-governance-update-btn').text(
+                                    getAAM().__('Updating...')
+                                ).attr('disabled', true);
+                            },
+                            success: function () {
+                                $('#user-governance-list').DataTable().ajax.reload();
+                                $('#aam-user-governance-overwrite').show();
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                $('#user-governance-edit-model').modal('hide');
+                                $('#user-governance-update-btn')
+                                    .text(getAAM().__('Update'))
+                                    .attr('disabled', false);
+                            }
+                        });
+                    });
+
+                    $('#user-governance-delete-btn').bind('click', function (event) {
+                        event.preventDefault();
+
+                        const id = $('#user-governance-delete-btn').attr('data-id');
+
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/${id}`, {
+                            type: 'POST',
+                            dataType: 'json',
+                            data: getAAM().prepareRequestSubjectData(),
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce,
+                                'X-HTTP-Method-Override': 'DELETE'
+                            },
+                            beforeSend: function () {
+                                $('#user-governance-delete-btn').text(
+                                    getAAM().__('Deleting...')
+                                ).attr('disabled', true);
+                            },
+                            success: function () {
+                                $('#user-governance-list').DataTable().ajax.reload();
+                            },
+                            error: function () {
+                                getAAM().notification('danger');
+                            },
+                            complete: function () {
+                                $('#user-governance-delete-model').modal('hide');
+                                $('#user-governance-delete-btn').text(getAAM().__('Delete')).attr('disabled', false);
+                            }
+                        });
+                    });
+
+                    $('#user-governance-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        dom: 'ftrip',
+                        pagingType: 'simple',
+                        processing: true,
+                        stateSave: true,
+                        serverSide: false,
+                        ajax: {
+                            url: `${getLocal().rest_base}aam/v2/service/user-governance`,
+                            type: 'GET',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            data: getAAM().prepareRequestSubjectData(),
+                            dataType: 'json',
+                            dataSrc: function (json) {
+                                // Transform the received data into DT format
+                                const data = [];
+
+                                $.each(json, (_, rule) => {
+                                    const actions = ['edit'];
+
+                                    if (rule.is_inherited) {
+                                        actions.push('no-delete');
+                                    } else {
+                                        actions.push('delete');
+                                    }
+
+                                    data.push([
+                                        rule.id,
+                                        rule.display_name,
+                                        rule,
+                                        actions.join(',')
+                                    ]);
+                                });
+
+                                return data;
+                            },
+                        },
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search'),
+                            info: getAAM().__('_TOTAL_ URI(s)'),
+                            infoFiltered: ''
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 2] }
+                        ],
+                        initComplete: function () {
+                            var create = $('<a/>', {
+                                'href': '#',
+                                'class': 'btn btn-primary'
+                            }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
+                                .bind('click', function () {
+                                    $('.form-clearable', '#user-governance-model').val('');
+                                    $('#user-governance-model').modal('show');
+
+                                    $('input[data-toggle="toggle"', '#user-governance-model').bootstrapToggle(
+                                        'off'
+                                    );
+
+                                    $('.user-governance-targets').addClass('hidden');
+                                    $('.user-governance-control').addClass('hidden');
+
+                                    editing_rule = null;
+                                });
+
+                            $('.dataTables_filter', '#user-governance-list_wrapper').append(create);
+                        },
+                        createdRow: function (row, data) {
+                            var actions = data[3].split(',');
+
+                            var container = $('<div/>', { 'class': 'aam-row-actions' });
+                            $.each(actions, function (i, action) {
+                                switch (action) {
+                                    case 'edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-warning'
+                                        }).bind('click', function () {
+                                            // Now, hiding all the controls
+                                            $('#user-governance-edit-model .user-governance-control').addClass('hidden');
+
+                                            // Show proper controls based on rule type
+                                            $('#user-governance-edit-model .user-governance-control').each(function() {
+                                                if ($(this).data('rule-types').split(',').includes(data[2].rule_type)) {
+                                                    $(this).removeClass('hidden');
+                                                }
+                                            });
+
+                                            // Show only controls that are applicable to the rule type
+                                            $.each(data[2].permissions, function(_, p) {
+                                                $('input[name="' + p.permission + '"]', '#user-governance-edit-model').bootstrapToggle(
+                                                    p.effect === 'deny' ? 'on': 'off'
+                                                );
+                                            });
+
+                                            editing_rule = data[2];
+
+                                            $('#user-governance-update-btn').attr('data-id', data[0]);
+                                            $('#user-governance-edit-model').modal('show');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Edit Rule')
+                                        }));
+                                        break;
+
+                                    case 'no-edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-pencil text-muted'
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Inherited')
+                                        }));
+                                        break;
+
+                                    case 'delete':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-trash-empty text-danger'
+                                        }).bind('click', function () {
+                                            $('#user-governance-delete-btn').attr('data-id', data[0]);
+                                            $('#user-governance-delete-model').modal('show');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Delete Rule')
+                                        }));
+                                        break;
+
+                                    case 'no-delete':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action icon-trash-empty text-muted'
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Inherited')
+                                        }));
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            });
+
+                            $('td:eq(1)', row).html(container);
+
+                            // Decorate the display row
+                            $('td:eq(0)', row).html(
+                                data[1] + '<sup>' + data[2].rule_type + '</sup>'
+                            )
+                        }
+                    });
+
+                    getAAM().triggerHook('init-user-governance-edit-form');
+                }
+            }
+
+            getAAM().addHook('init', initialize);
+        })(jQuery);
+
+        /**
          * JWT Interface
          *
          * @param {jQuery} $
@@ -5551,15 +6004,13 @@
             this.setSubject(
                 subject.type,
                 subject.id,
-                subject.name,
-                subject.level
+                subject.name
             );
         } else if (getLocal().subject.type) {
             this.setSubject(
                 getLocal().subject.type,
                 getLocal().subject.id,
-                getLocal().subject.name,
-                getLocal().subject.level
+                getLocal().subject.name
             );
         } else {
             $('#aam-subject-banner').addClass('hidden');
@@ -5692,13 +6143,6 @@
 
             // Second set the name of the subject
             $('.aam-current-subject').append($('<strong/>').text(name));
-
-            // Highlight screen if the same level
-            if (parseInt(level) >= getLocal().level || type === 'default') {
-                $('.aam-current-subject').addClass('danger');
-            } else {
-                $('.aam-current-subject').removeClass('danger');
-            }
         }
 
         this.triggerHook('setSubject');

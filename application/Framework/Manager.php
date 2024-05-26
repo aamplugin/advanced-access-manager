@@ -12,6 +12,7 @@
  *
  * @package AAM
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
  *               https://github.com/aamplugin/advanced-access-manager/issues/301
@@ -22,7 +23,7 @@
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.9.6  Initial implementation of the class
  *
- * @version 6.9.14
+ * @version 6.9.28
  */
 class AAM_Framework_Manager
 {
@@ -190,6 +191,21 @@ class AAM_Framework_Manager
         return AAM_Framework_Service_AccessDeniedRedirect::get_instance(
             $runtime_context
         );
+    }
+
+    /**
+     * Get the User Governance service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_UserGovernance
+     *
+     * @access public
+     * @version 6.9.28
+     */
+    public static function user_governance($runtime_context = null)
+    {
+        return AAM_Framework_Service_UserGovernance::get_instance($runtime_context);
     }
 
     /**

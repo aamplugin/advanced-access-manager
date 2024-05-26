@@ -251,7 +251,7 @@ final class AAM_Core_Gateway
             );
         }
 
-        // first get the complete list of unique keys
+        // First get the complete list of unique keys
         $keys = array_keys($set1);
         foreach (array_keys($set2) as $key) {
             if (!in_array($key, $keys, true)) {

@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 6.9.27
+ * Version: 6.9.28
  * Author: AAM <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager

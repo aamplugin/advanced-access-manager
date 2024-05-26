@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
@@ -30,7 +31,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.28
  */
 class AAM_Service_AccessPolicy
 {
@@ -193,6 +194,7 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
      * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
@@ -209,7 +211,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.25
+     * @version 6.9.28
      */
     protected function initializeHooks()
     {
@@ -272,6 +274,7 @@ class AAM_Service_AccessPolicy
         add_filter('aam_login_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_logout_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_404_redirect_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
+        add_filter('aam_user_governance_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
 
         // Allow third-party to hook into Post resource conversion
         add_filter('aam_post_resource_filter', array($this, 'convertPostStatement'), 10, 4);
@@ -310,13 +313,14 @@ class AAM_Service_AccessPolicy
      *
      * @return array
      *
-     * @since 6.4.0 Enhanced with redirects support
-     * @since 6.2.0 Fixed bug when access policy was not applied to visitors
-     * @since 6.1.1 Optimized policy implementation
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
+     * @since 6.4.0  Enhanced with redirects support
+     * @since 6.2.0  Fixed bug when access policy was not applied to visitors
+     * @since 6.1.1  Optimized policy implementation
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.4.0
+     * @version 6.9.28
      */
     public function applyAccessPolicyToObject($options, AAM_Core_Object $object)
     {
@@ -365,6 +369,10 @@ class AAM_Service_AccessPolicy
 
                 case AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE:
                     $options = $this->initializeRedirect($options, $subject, '404');
+                    break;
+
+                case AAM_Core_Object_UserGovernance::OBJECT_TYPE:
+                    $options = $this->initializeUserGovernance($options, $object);
                     break;
 
                 default:
@@ -609,6 +617,162 @@ class AAM_Service_AccessPolicy
     }
 
     /**
+     * Initialize the user governance rules
+     *
+     * @param array $option
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 6.9.28
+     */
+    protected function initializeUserGovernance($option)
+    {
+        // Covert any role or user_role rules
+        $parsed = $this->_convertUserGovernanceStatements(
+            AAM_Core_Policy_Resource::ROLE
+        );
+
+        // Convert role_level rules
+        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+            AAM_Core_Policy_Resource::ROLE_LEVEL
+        ));
+
+        // Convert user rules
+        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+            AAM_Core_Policy_Resource::USER
+        ));
+
+        // Convert user_level rules
+        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+            AAM_Core_Policy_Resource::USER_LEVEL
+        ));
+
+        return array_merge($option, $parsed); //First-class citizen
+    }
+
+    /**
+     * Convert statement to proper user governance settings
+     *
+     * @param string $resource_type
+     *
+     * @return array
+     *
+     * @access private
+     * @version 6.9.28
+     */
+    private function _convertUserGovernanceStatements($resource_type)
+    {
+        $manager  = AAM::api()->getAccessPolicyManager();
+        $response = array();
+
+        foreach($manager->getResources($resource_type) as $resource => $statement) {
+            $effect = strtolower($statement['Effect']) === 'allow' ? 'allow' : 'deny';
+            $parts  = explode(':', $resource);
+            $target = null;
+
+            if ($resource_type === AAM_Core_Policy_Resource::ROLE) {
+                if (isset($parts[1]) && $parts[1] === 'users') { // Targeting users
+                    $target     = "user_role|{$parts[0]}";
+                    $permission = $this->_convertUserGovernanceAction(
+                        isset($parts[2]) ? $parts[2] : null,
+                        'user'
+                    );
+                } else { // Targeting role or all roles with wildcard
+                    $target     = "role|{$parts[0]}";
+                    $permission = $this->_convertUserGovernanceAction(
+                        isset($parts[1]) ? $parts[1] : null,
+                        'role'
+                    );
+                }
+            } elseif ($resource_type === AAM_Core_Policy_Resource::ROLE_LEVEL) {
+                $target     = "role_level|{$parts[0]}";
+                $permission = $this->_convertUserGovernanceAction(
+                    isset($parts[1]) ? $parts[1] : null,
+                    'role'
+                );
+            } elseif ($resource_type === AAM_Core_Policy_Resource::USER) {
+                if (is_numeric($parts[0])) { // Get user by ID
+                    $user = get_user_by('id', $parts[0]);
+                } elseif (is_string($parts[0]) && $parts[0] !== '*') {
+                    if (strpos($parts[0], '@') > 0) { // Email?
+                        $user = get_user_by('email', $parts[0]);
+                    } else {
+                        $user = get_user_by('login', $parts[0]);
+                    }
+                }
+
+                if (isset($user) && is_a($user, 'WP_User')) {
+                    $user_login = $user->user_login;
+                } elseif ($parts[0] === '*') {
+                    $user_login = '*';
+                } else {
+                    $user_login = null;
+                }
+
+                $target     = "user|{$user_login}";
+                $permission = $this->_convertUserGovernanceAction(
+                    isset($parts[1]) ? $parts[1] : null,
+                    'user'
+                );
+            } elseif ($resource_type === AAM_Core_Policy_Resource::USER_LEVEL) {
+                $target     = "user_level|{$parts[0]}";
+                $permission = $this->_convertUserGovernanceAction(
+                    isset($parts[1]) ? $parts[1] : null,
+                    'user'
+                );
+            }
+
+            if ($target !== null) {
+                if (!isset($response[$target])) {
+                    $response[$target] = [];
+                }
+
+                $response[$target][$permission] = $effect;
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Convert action into setting
+     *
+     * @param array  $actions
+     * @param string $resource_type
+     *
+     * @return string
+     *
+     * @access private
+     * @version 6.9.28
+     */
+    private function _convertUserGovernanceAction($action, $resource_type)
+    {
+        $response = null;
+
+        // 'list_role',
+        // 'list_user',
+        // 'edit_user',
+        // 'delete_user',
+        // 'change_user_password',
+        // 'change_user_role'
+
+        $lowercase = strtolower($action);
+
+        if ($lowercase === 'list') {
+            $response = "list_{$resource_type}";
+        } elseif (in_array($lowercase, ['edit', 'delete'], true)) {
+            $response = "{$lowercase}_{$resource_type}";
+        } elseif ($lowercase === 'changepassword') {
+            $response = 'change_user_password';
+        } elseif (in_array($lowercase, ['promote','changerole'], true)) {
+            $response = 'change_user_role';
+        }
+
+        return $response;
+    }
+
+    /**
      * Initialize Route Object options
      *
      * @param array $option
@@ -817,15 +981,16 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
-     * @since 6.3.1 Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/45
-     * @since 6.1.0 Changed the way access policy manage is obtained
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
+     * @since 6.3.1  https://github.com/aamplugin/advanced-access-manager/issues/45
+     * @since 6.1.0  Changed the way access policy manage is obtained
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
      * @link https://aamportal.com/reference/json-access-policy/resource-action/capability
      * @link https://aamportal.com/reference/json-access-policy/resource-action/role
      *
-     * @version 6.3.1
+     * @version 6.9.28
      */
     public function initializeUser(AAM_Core_Subject_User $subject)
     {
@@ -837,13 +1002,41 @@ class AAM_Service_AccessPolicy
 
         if (count($roles)) {
             foreach($roles as $id => $statement) {
-                $effect = strtolower($statement['Effect']);
-                $exists = array_key_exists($id, $wp_user->caps);
+                // Only take into consideration Role resources that either do not
+                // have any actions OR have action "Promote"
+                $parts = explode(':', $id);
 
-                if ($effect === 'allow') { // Add new
-                    $wp_user->caps[$id] = true;
-                } elseif (($effect === 'deny') && $exists) { // Remove
-                    unset($wp_user->caps[$id]);
+                if (!isset($parts[1]) || $parts[1] === 'promote') {
+                    if (AAM_Core_API::getRoles()->is_role($parts[0])) {
+                        $effect = strtolower($statement['Effect']);
+
+                        if ($effect === 'allow') { // Add new
+                            $wp_user->caps[$parts[0]] = true;
+                        } elseif (($effect === 'deny')) { // Remove
+                            // Remove capability that represents a role
+                            $wp_user->caps = array_filter(
+                                $wp_user->caps,
+                                function($v, $k) use ($parts) {
+                                    return $parts[0] !== $k;
+                                }, ARRAY_FILTER_USE_BOTH
+                            );
+
+                            // Remove role itself
+                            $wp_user->roles = array_filter(
+                                $wp_user->caps,
+                                function($v) use ($parts) {
+                                    return $parts[0] !== $v;
+                                }
+                            );
+                        }
+                    } else {
+                        do_action(
+                            'aam_promote_user_with_role_resource_action',
+                            $parts[0],
+                            $statement,
+                            $wp_user
+                        );
+                    }
                 }
             }
 

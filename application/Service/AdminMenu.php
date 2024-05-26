@@ -10,6 +10,7 @@
 /**
  * Admin Menu service
  *
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
  * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
@@ -20,7 +21,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.27
+ * @version 6.9.28
  */
 class AAM_Service_AdminMenu
 {
@@ -369,12 +370,13 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
      * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
      * @since 6.9.5  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.27
+     * @version 6.9.28
      */
     private function _filter_menu_items($items)
     {
@@ -385,7 +387,9 @@ class AAM_Service_AdminMenu
                 $response[$i] = array(
                     'id'   => $item[2],
                     'cap'  => $item[1],
-                    'name' => base64_encode($item[0])
+                    'name' => base64_encode(
+                        is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
+                    )
                 );
             }
         }
@@ -400,8 +404,11 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
+     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
+     * @since 6.9.27 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.27
+     * @version 6.9.28
      */
     private function _filter_submenu_items($items)
     {
@@ -411,11 +418,13 @@ class AAM_Service_AdminMenu
             foreach($items as $menu_id => $sub_level) {
                 $response[$menu_id] = array();
 
-                foreach($sub_level as $i => $sub_item) {
+                foreach($sub_level as $i => $item) {
                     $response[$menu_id][$i] = array(
-                        base64_encode($sub_item[0]),
-                        $sub_item[1],
-                        $sub_item[2]
+                        base64_encode(
+                            is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
+                        ),
+                        $item[1],
+                        $item[2]
                     );
                 }
             }

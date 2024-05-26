@@ -167,7 +167,7 @@ class AAM_Service_ExtendedCapabilities
     /**
      * Check if user can change his/her own password
      *
-     * This method determines if password change fields are going to be dispalyed
+     * This method determines if password change fields are going to be displayed
      *
      * @param boolean $result
      * @param WP_User $user
