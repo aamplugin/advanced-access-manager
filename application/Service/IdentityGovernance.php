@@ -8,12 +8,12 @@
  */
 
 /**
- * User Governance service
+ * Users & Roles Governance service
  *
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Service_UserGovernance
+class AAM_Service_IdentityGovernance
 {
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
@@ -39,7 +39,7 @@ class AAM_Service_UserGovernance
             // Hook that initialize the AAM UI part of the service
             if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
                 add_action('aam_init_ui_action', function () {
-                    AAM_Backend_Feature_Main_UserGovernance::register();
+                    AAM_Backend_Feature_Main_IdentityGovernance::register();
                 });
             }
 
@@ -73,7 +73,7 @@ class AAM_Service_UserGovernance
     protected function initializeHooks()
     {
         // Register RESTful API endpoints
-        AAM_Core_Restful_UserGovernanceService::bootstrap();
+        AAM_Core_Restful_IdentityGovernanceService::bootstrap();
 
         add_action('init', function() {
             add_filter('editable_roles', array($this, 'filter_roles'));
@@ -187,7 +187,7 @@ class AAM_Service_UserGovernance
     public function can_list_role($role_slug)
     {
         $object = AAM::getUser()->getObject(
-            AAM_Core_Object_UserGovernance::OBJECT_TYPE
+            AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
         );
 
         // Get max user level
@@ -356,7 +356,7 @@ class AAM_Service_UserGovernance
 
         // Exclude any users and role that are not allowed to be listed
         $options = AAM::getUser()->getObject(
-            AAM_Core_Object_UserGovernance::OBJECT_TYPE
+            AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
         )->getOption();
 
         // Making sure that query var properties are properly initialized
@@ -416,7 +416,7 @@ class AAM_Service_UserGovernance
         if (!in_array('do_not_allow', $caps, true)) {
             $user   = get_user_by('id', $user_id);
             $object = AAM::getUser()->getObject(
-                AAM_Core_Object_UserGovernance::OBJECT_TYPE
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
             );
 
             if (is_a($user, 'WP_User')) {
@@ -447,5 +447,5 @@ class AAM_Service_UserGovernance
 }
 
 if (defined('AAM_KEY')) {
-    AAM_Service_UserGovernance::bootstrap();
+    AAM_Service_IdentityGovernance::bootstrap();
 }

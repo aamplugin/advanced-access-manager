@@ -8,12 +8,12 @@
  */
 
 /**
- * User Governance object
+ * Users & Roles Governance object
  *
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Core_Object_UserGovernance extends AAM_Core_Object
+class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
 {
 
     /**
@@ -21,7 +21,7 @@ class AAM_Core_Object_UserGovernance extends AAM_Core_Object
      *
      * @version 6.9.28
      */
-    const OBJECT_TYPE = 'userGovernance';
+    const OBJECT_TYPE = 'identityGovernance';
 
     /**
      * @inheritdoc

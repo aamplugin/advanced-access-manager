@@ -371,8 +371,8 @@ class AAM_Service_AccessPolicy
                     $options = $this->initializeRedirect($options, $subject, '404');
                     break;
 
-                case AAM_Core_Object_UserGovernance::OBJECT_TYPE:
-                    $options = $this->initializeUserGovernance($options, $object);
+                case AAM_Core_Object_IdentityGovernance::OBJECT_TYPE:
+                    $options = $this->initializeIdentityGovernance($options, $object);
                     break;
 
                 default:
@@ -626,25 +626,25 @@ class AAM_Service_AccessPolicy
      * @access protected
      * @version 6.9.28
      */
-    protected function initializeUserGovernance($option)
+    protected function initializeIdentityGovernance($option)
     {
         // Covert any role or user_role rules
-        $parsed = $this->_convertUserGovernanceStatements(
+        $parsed = $this->_convertIdentityGovernanceStatements(
             AAM_Core_Policy_Resource::ROLE
         );
 
         // Convert role_level rules
-        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+        $parsed = array_merge($parsed, $this->_convertIdentityGovernanceStatements(
             AAM_Core_Policy_Resource::ROLE_LEVEL
         ));
 
         // Convert user rules
-        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+        $parsed = array_merge($parsed, $this->_convertIdentityGovernanceStatements(
             AAM_Core_Policy_Resource::USER
         ));
 
         // Convert user_level rules
-        $parsed = array_merge($parsed, $this->_convertUserGovernanceStatements(
+        $parsed = array_merge($parsed, $this->_convertIdentityGovernanceStatements(
             AAM_Core_Policy_Resource::USER_LEVEL
         ));
 
@@ -661,7 +661,7 @@ class AAM_Service_AccessPolicy
      * @access private
      * @version 6.9.28
      */
-    private function _convertUserGovernanceStatements($resource_type)
+    private function _convertIdentityGovernanceStatements($resource_type)
     {
         $manager  = AAM::api()->getAccessPolicyManager();
         $response = array();
@@ -674,20 +674,20 @@ class AAM_Service_AccessPolicy
             if ($resource_type === AAM_Core_Policy_Resource::ROLE) {
                 if (isset($parts[1]) && $parts[1] === 'users') { // Targeting users
                     $target     = "user_role|{$parts[0]}";
-                    $permission = $this->_convertUserGovernanceAction(
+                    $permission = $this->_convertIdentityGovernanceAction(
                         isset($parts[2]) ? $parts[2] : null,
                         'user'
                     );
                 } else { // Targeting role or all roles with wildcard
                     $target     = "role|{$parts[0]}";
-                    $permission = $this->_convertUserGovernanceAction(
+                    $permission = $this->_convertIdentityGovernanceAction(
                         isset($parts[1]) ? $parts[1] : null,
                         'role'
                     );
                 }
             } elseif ($resource_type === AAM_Core_Policy_Resource::ROLE_LEVEL) {
                 $target     = "role_level|{$parts[0]}";
-                $permission = $this->_convertUserGovernanceAction(
+                $permission = $this->_convertIdentityGovernanceAction(
                     isset($parts[1]) ? $parts[1] : null,
                     'role'
                 );
@@ -711,13 +711,13 @@ class AAM_Service_AccessPolicy
                 }
 
                 $target     = "user|{$user_login}";
-                $permission = $this->_convertUserGovernanceAction(
+                $permission = $this->_convertIdentityGovernanceAction(
                     isset($parts[1]) ? $parts[1] : null,
                     'user'
                 );
             } elseif ($resource_type === AAM_Core_Policy_Resource::USER_LEVEL) {
                 $target     = "user_level|{$parts[0]}";
-                $permission = $this->_convertUserGovernanceAction(
+                $permission = $this->_convertIdentityGovernanceAction(
                     isset($parts[1]) ? $parts[1] : null,
                     'user'
                 );
@@ -746,7 +746,7 @@ class AAM_Service_AccessPolicy
      * @access private
      * @version 6.9.28
      */
-    private function _convertUserGovernanceAction($action, $resource_type)
+    private function _convertIdentityGovernanceAction($action, $resource_type)
     {
         $response = null;
 

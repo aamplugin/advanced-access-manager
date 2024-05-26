@@ -8,12 +8,12 @@
  */
 
 /**
- * User Governance service
+ * Users & Roles Governance service
  *
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Backend_Feature_Main_UserGovernance
+class AAM_Backend_Feature_Main_IdentityGovernance
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
 {
 
@@ -31,7 +31,7 @@ class AAM_Backend_Feature_Main_UserGovernance
      *
      * @version 6.9.28
      */
-    const OBJECT_TYPE = AAM_Core_Object_UserGovernance::OBJECT_TYPE;
+    const OBJECT_TYPE = AAM_Core_Object_IdentityGovernance::OBJECT_TYPE;
 
     /**
      * HTML template to render
@@ -52,10 +52,10 @@ class AAM_Backend_Feature_Main_UserGovernance
     {
         return apply_filters('aam_allowed_user_governance_rule_types_filter', array(
             'role'       => __('Roles', AAM_KEY),
-            'role_level' => __('Roles by highest level_n capabilities', AAM_KEY),
+            'role_level' => __('Roles by highest level_n capability', AAM_KEY),
             'user_role'  => __('Users that have certain role', AAM_KEY),
             'user'       => __('Users', AAM_KEY),
-            'user_level' => __('Users by highest level_n capabilities', AAM_KEY),
+            'user_level' => __('Users by highest level_n capability', AAM_KEY),
         ));
     }
 
@@ -92,7 +92,7 @@ class AAM_Backend_Feature_Main_UserGovernance
             'list_user' => [
                 'rule_types' => ['user_role', 'user', 'user_level'],
                 'hint'       => __('If denies, all users, that at least one selected role, will be not visible anywhere on the website for %s.', AAM_KEY),
-                'title'      => 'LIST USERS',
+                'title'      => 'LIST USER',
                 'disabled'   => false
             ],
             'edit_user' => [
@@ -135,7 +135,7 @@ class AAM_Backend_Feature_Main_UserGovernance
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'user-governance',
             'position'   => 60,
-            'title'      => __('User Governance', AAM_KEY),
+            'title'      => __('Users & Roles Governance', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(

@@ -82,8 +82,13 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 
 = 6.9.28 =
 * Fixed: Message: base64_encode(): Passing null to parameter #1 [https://github.com/aamplugin/advanced-access-manager/issues/370](https://github.com/aamplugin/advanced-access-manager/issues/370)
+* Fixed: Menu items that recycle the same ID are incorrectly handled [https://github.com/aamplugin/advanced-access-manager/issues/364](https://github.com/aamplugin/advanced-access-manager/issues/364)
+* Fixed: The login brute-force feature incorrectly counts hits [https://github.com/aamplugin/advanced-access-manager/issues/366](https://github.com/aamplugin/advanced-access-manager/issues/366)
 * Changed: Take into account multi-byte URLs [https://github.com/aamplugin/advanced-access-manager/issues/371](https://github.com/aamplugin/advanced-access-manager/issues/371)
 * Added: New "User Governance" feature [https://github.com/aamplugin/advanced-access-manager/issues/369](https://github.com/aamplugin/advanced-access-manager/issues/369)
+* Added: Allow the ability to chain method return value for Access Policy marker path [https://github.com/aamplugin/advanced-access-manager/issues/365](https://github.com/aamplugin/advanced-access-manager/issues/365)
+* Added: Add "in" and "not in" operand to the Hook filters [https://github.com/aamplugin/advanced-access-manager/issues/367](https://github.com/aamplugin/advanced-access-manager/issues/367)
+* Added: Allow the ability to turn off "Aarmie AI Chatbot" [https://github.com/aamplugin/advanced-access-manager/issues/368](https://github.com/aamplugin/advanced-access-manager/issues/368)
 * Deprecated: The "User Level Filters" [https://aamportal.com/article/demystifying-the-aam-user-level-filter-service](https://aamportal.com/article/demystifying-the-aam-user-level-filter-service)
 
 = 6.9.27 =

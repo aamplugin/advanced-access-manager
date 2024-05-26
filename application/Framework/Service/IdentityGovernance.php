@@ -8,12 +8,12 @@
  */
 
 /**
- * AAM service User Governance
+ * AAM service Users & Roles Governance
  *
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Framework_Service_UserGovernance
+class AAM_Framework_Service_IdentityGovernance
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -69,7 +69,7 @@ class AAM_Framework_Service_UserGovernance
     {
         $response = array();
         $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object   = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
 
         $options  = $object->getOption();
         $explicit = $object->getExplicitOption();
@@ -106,7 +106,7 @@ class AAM_Framework_Service_UserGovernance
     {
         // Validating that incoming data is correct and normalize is for storage
         $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object   = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
         $explicit = $object->getExplicitOption();
 
         // Find the rule that we are updating
@@ -149,7 +149,7 @@ class AAM_Framework_Service_UserGovernance
         // Validating that incoming data is correct and normalize is for storage
         $result  = $this->_validate_rule($rule);
         $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
         $success = $object->store($result['target'], $result['permissions']);
 
         if (!$success) {
@@ -178,7 +178,7 @@ class AAM_Framework_Service_UserGovernance
         // Validating that incoming data is correct and normalize is for storage
         $result  = $this->_validate_rule($rule);
         $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
 
         // Find the rule that we are updating
         $found = false;
@@ -227,7 +227,7 @@ class AAM_Framework_Service_UserGovernance
     public function delete_rule($id, $inline_context = null)
     {
         $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
 
         // Find the rule that we are updating
         $found = null;
@@ -279,7 +279,7 @@ class AAM_Framework_Service_UserGovernance
 
         // Reset the object
         $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_UserGovernance::OBJECT_TYPE);
+        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
 
         // Communicate about number of rules that were deleted
         $response['deleted_rules_count'] = count($object->getExplicitOption());

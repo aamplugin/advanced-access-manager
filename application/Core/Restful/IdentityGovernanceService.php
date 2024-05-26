@@ -8,12 +8,12 @@
  */
 
 /**
- * RESTful API for the User Governance service
+ * RESTful API for the Users & Roles Governance service
  *
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Core_Restful_UserGovernanceService
+class AAM_Core_Restful_IdentityGovernanceService
 {
 
     use AAM_Core_Restful_ServiceTrait;
@@ -31,7 +31,7 @@ class AAM_Core_Restful_UserGovernanceService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of rules
-            $this->_register_route('/user-governance', array(
+            $this->_register_route('/identity-governance', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule_list'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -39,7 +39,7 @@ class AAM_Core_Restful_UserGovernanceService
             ));
 
             // Create a new rule
-            $this->_register_route('/user-governance', array(
+            $this->_register_route('/identity-governance', array(
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => array($this, 'create_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -86,12 +86,12 @@ class AAM_Core_Restful_UserGovernanceService
                                 'permission' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_UserGovernance::PERMISSION_TYPES
+                                    'enum' => AAM_Framework_Service_IdentityGovernance::PERMISSION_TYPES
                                 ),
                                 'effect' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_UserGovernance::EFFECT_TYPES
+                                    'enum' => AAM_Framework_Service_IdentityGovernance::EFFECT_TYPES
                                 ),
                             )
                         )
@@ -100,7 +100,7 @@ class AAM_Core_Restful_UserGovernanceService
             ));
 
             // Get a rule
-            $this->_register_route('/user-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -114,7 +114,7 @@ class AAM_Core_Restful_UserGovernanceService
             ));
 
             // Update an existing rule
-            $this->_register_route('/user-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -163,12 +163,12 @@ class AAM_Core_Restful_UserGovernanceService
                                 'permission' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_UserGovernance::PERMISSION_TYPES
+                                    'enum' => AAM_Framework_Service_IdentityGovernance::PERMISSION_TYPES
                                 ),
                                 'effect' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_UserGovernance::EFFECT_TYPES
+                                    'enum' => AAM_Framework_Service_IdentityGovernance::EFFECT_TYPES
                                 ),
                             )
                         )
@@ -177,7 +177,7 @@ class AAM_Core_Restful_UserGovernanceService
             ));
 
             // Delete a rule
-            $this->_register_route('/user-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -191,7 +191,7 @@ class AAM_Core_Restful_UserGovernanceService
             ));
 
             // Reset all rules
-            $this->_register_route('/user-governance/reset', array(
+            $this->_register_route('/identity-governance/reset', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'reset_rules'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -212,7 +212,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function get_rule_list(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(
+        $service = AAM_Framework_Manager::identity_governance(
             new AAM_Framework_Model_ServiceContext(array(
                 'subject' => $this->_determine_subject($request)
             ))
@@ -239,7 +239,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function create_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(
+        $service = AAM_Framework_Manager::identity_governance(
             new AAM_Framework_Model_ServiceContext(array(
                 'subject' => $this->_determine_subject($request)
             ))
@@ -298,7 +298,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function get_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(array(
+        $service = AAM_Framework_Manager::identity_governance(array(
             'subject' => $this->_determine_subject($request)
         ));
 
@@ -325,7 +325,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function update_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(array(
+        $service = AAM_Framework_Manager::identity_governance(array(
             'subject' => $this->_determine_subject($request)
         ));
 
@@ -353,7 +353,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function delete_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(array(
+        $service = AAM_Framework_Manager::identity_governance(array(
             'subject' => $this->_determine_subject($request)
         ));
 
@@ -380,7 +380,7 @@ class AAM_Core_Restful_UserGovernanceService
      */
     public function reset_rules(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::user_governance(array(
+        $service = AAM_Framework_Manager::identity_governance(array(
             'subject' => $this->_determine_subject($request)
         ));
 
@@ -478,7 +478,7 @@ class AAM_Core_Restful_UserGovernanceService
         $response      = true;
         $allowed_types = apply_filters(
             'aam_allowed_user_governance_rule_types_filter',
-            AAM_Framework_Service_UserGovernance::RULE_TYPES,
+            AAM_Framework_Service_IdentityGovernance::RULE_TYPES,
             true
         );
 

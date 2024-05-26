@@ -198,14 +198,14 @@ class AAM_Framework_Manager
      *
      * @param array $runtime_context
      *
-     * @return AAM_Framework_Service_UserGovernance
+     * @return AAM_Framework_Service_IdentityGovernance
      *
      * @access public
      * @version 6.9.28
      */
-    public static function user_governance($runtime_context = null)
+    public static function identity_governance($runtime_context = null)
     {
-        return AAM_Framework_Service_UserGovernance::get_instance($runtime_context);
+        return AAM_Framework_Service_IdentityGovernance::get_instance($runtime_context);
     }
 
     /**

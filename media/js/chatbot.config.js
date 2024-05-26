@@ -15,7 +15,7 @@ window['TLDR_Chatbot_Config'] = {
             launcher: {
                 bgColor: '#704abf',
                 icons: {
-                    openImg: '%logo_icon'
+                    openImg: '%launcher'
                 }
             },
             processing: {
@@ -25,7 +25,7 @@ window['TLDR_Chatbot_Config'] = {
                 bgColor: '#704abf',
                 txtColor: '#DFDCFF',
                 icons: {
-                    logoImg: '%logo_icon'
+                    logoImg: '%aarmie'
                 }
             },
             input: {

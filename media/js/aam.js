@@ -4634,7 +4634,7 @@
                     $('#user-governance-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/reset`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance/reset`, {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -4692,7 +4692,7 @@
                         });
 
                         if (valid) {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance`, {
                                 type: 'POST',
                                 contentType: 'application/json',
                                 dataType: 'json',
@@ -4741,7 +4741,7 @@
                         });
 
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/${editing_rule.id}`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance/${editing_rule.id}`, {
                             type: 'POST',
                             contentType: 'application/json',
                             dataType: 'json',
@@ -4777,7 +4777,7 @@
 
                         const id = $('#user-governance-delete-btn').attr('data-id');
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/user-governance/${id}`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance/${id}`, {
                             type: 'POST',
                             dataType: 'json',
                             data: getAAM().prepareRequestSubjectData(),
@@ -4812,7 +4812,7 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}aam/v2/service/user-governance`,
+                            url: `${getLocal().rest_base}aam/v2/service/identity-governance`,
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce

@@ -10,7 +10,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Determine how [%s] can see and manager other users. With the premium %sadd-on%s, you have the ability to target all users at once. To learn more, refer to our official documentation page %shere%s.', 'strong', 'strong'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/managing-access-to-wordpress-website-urls?ref=plugin" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Determine how [%s] can see and manager other users. With the premium %sadd-on%s, you have the ability to target all users at once. To learn more, refer to our official documentation page %shere%s.', 'strong', 'strong'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/users-and-roles-governance?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
