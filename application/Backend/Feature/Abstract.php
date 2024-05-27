@@ -58,7 +58,9 @@ abstract class AAM_Backend_Feature_Abstract
         $param = $this->getFromPost('param');
         $value = $this->getSafeFromPost('value');
 
-        $object = $this->getSubject()->getObject(static::OBJECT_TYPE, null, true);
+        $object = $this->get_current_access_level()->get_resource(
+            static::OBJECT_TYPE, null, true
+        );
 
         $object->updateOptionItem($param, $value)->save();
 
@@ -75,7 +77,9 @@ abstract class AAM_Backend_Feature_Abstract
      */
     public function reset()
     {
-        $result = $this->getSubject()->getObject(static::OBJECT_TYPE)->reset();
+        $result = $this->get_current_access_level()->get_resource(
+            static::OBJECT_TYPE
+        )->reset();
 
         return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
@@ -92,7 +96,9 @@ abstract class AAM_Backend_Feature_Abstract
      */
     protected function isOverwritten()
     {
-        $object = $this->getSubject()->getObject(static::OBJECT_TYPE);
+        $object = $this->get_current_access_level()->get_resource(
+            static::OBJECT_TYPE
+        );
 
         return $object->isOverwritten();
     }
@@ -123,7 +129,7 @@ abstract class AAM_Backend_Feature_Abstract
      * @access public
      * @version 6.0.0
      */
-    public function getSubject()
+    public function get_current_access_level()
     {
         return AAM_Backend_AccessLevel::getInstance();
     }

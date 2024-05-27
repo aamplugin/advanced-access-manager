@@ -70,9 +70,9 @@ class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract
     {
         $status  = $this->getFromPost('status');
         $items   = $this->getFromPost('items', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-
-        $subject = AAM_Backend_AccessLevel::getInstance();
-        $object  = $subject->getObject(self::OBJECT_TYPE, null, true);
+        $object  = $this->get_current_access_level()->get_resource(
+            self::OBJECT_TYPE, null, true
+        );
 
         foreach ($items as $item) {
             $object->updateOptionItem($item, !empty($status));

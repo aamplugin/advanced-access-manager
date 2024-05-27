@@ -86,7 +86,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
         $items  = AAM_Core_Request::post('items', array());
         $status = $this->getFromPost('status', FILTER_VALIDATE_BOOLEAN);
 
-        $object = AAM_Backend_AccessLevel::getInstance()->getObject(
+        $object = $this->get_current_access_level()->get_resource(
             self::OBJECT_TYPE, null, true
         );
 

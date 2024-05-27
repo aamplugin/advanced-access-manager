@@ -54,7 +54,10 @@ class AAM_Backend_Feature_Main_404Redirect extends AAM_Backend_Feature_Abstract
      */
     public function getOption($name, $default = null)
     {
-        $object = $this->getSubject()->getObject(self::OBJECT_TYPE);
+        $object = $this->get_current_access_level()->get_resource(
+            self::OBJECT_TYPE
+        );
+
         $option = $object->getOption();
 
         return (!empty($option[$name]) ? $option[$name] : $default);

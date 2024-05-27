@@ -129,13 +129,13 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
      */
     public function getAccessForm($id, $type)
     {
-        $object = $this->getSubject()->getObject($type, $id);
+        $object = $this->get_current_access_level()->get_resource($type, $id);
         $view   = AAM_Backend_View::getInstance();
         $args   = array(
             'object'    => $object,
             'type'      => $type,
             'id'        => $id,
-            'subject'   => $this->getSubject(),
+            'subject'   => $this->get_current_access_level(),
             'httpCodes' => $this->getRedirectHttpCodes(),
             'previews'  => $this->preparePreviewValues(
                 apply_filters(
@@ -237,11 +237,11 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
     protected function getAccessOptionList($post_type)
     {
         $response    = array();
-        $excluded    = array($post_type, $this->getSubject()->getSubjectType());
+        $excluded    = array($post_type, $this->get_current_access_level()->getSubjectType());
         $option_list = apply_filters(
             'aam_post_access_options_filter',
             AAM_Backend_View_PostOptionList::get(),
-            $this->getSubject()
+            $this->get_current_access_level()
         );
 
         foreach($option_list as $key => $data) {
@@ -484,7 +484,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
         $param = $this->getFromPost('param');
         $value = $this->sanitizeOption($param, AAM_Core_Request::post('value'));
 
-        $object = $this->getSubject()->getObject($type, $id, true);
+        $object = $this->get_current_access_level()->get_resource($type, $id, true);
         $result = $object->updateOptionItem($param, $value)->save();
 
         return wp_json_encode(array(
@@ -507,12 +507,15 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
 
         if ($type === 'post') {
             $result = delete_user_option(
-                $this->getSubject()->getId(),
+                $this->get_current_access_level()->get_internal_id(),
                 sprintf(AAM_Service_Content::POST_COUNTER_DB_OPTION, $id)
             );
         } else {
             $result = apply_filters(
-                'aam_ajax_filter', false, $this->getSubject(), 'Main_Post.resetCounter'
+                'aam_ajax_filter',
+                false,
+                $this->get_current_access_level(),
+                'Main_Post.resetCounter'
             );
         }
 
@@ -533,7 +536,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
     {
         $type   = $this->getFromPost('type');
         $id     = $this->getFromPost('id');
-        $result = $this->getSubject()->getObject($type, $id)->reset();
+        $result = $this->get_current_access_level()->get_resource($type, $id)->reset();
 
         return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
@@ -589,8 +592,8 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
     {
         return apply_filters(
             'aam_posts_terms_manage_subject_filter',
-            !$this->getSubject()->isDefault(),
-            $this->getSubject()->getSubject()
+            !$this->get_current_access_level()->isDefault(),
+            $this->get_current_access_level()->getSubject()
         );
     }
 
@@ -630,7 +633,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
                         'aam_type_settings_override_status_filter',
                         false,
                         $type->name,
-                        $this->getSubject()
+                        $this->get_current_access_level()
                     ),
                     $type->name
                 );
@@ -646,7 +649,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
                         'aam_taxonomy_settings_override_status_filter',
                         false,
                         $type->name,
-                        $this->getSubject()
+                        $this->get_current_access_level()
                     ),
                     $type->name
                 );
@@ -784,7 +787,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
     protected function retrievePostTypeObjects($type)
     {
         $list      = $this->preparePostTermList($type);
-        $subject   = $this->getSubject();
+        $subject   = $this->get_current_access_level();
         $post_type = get_post_type_object($type);
         $response  = array(
             'data'            => array(),
@@ -909,7 +912,7 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
         $actions = apply_filters(
             'aam_term_row_actions',
             array('manage', ($link ? 'edit' : 'no-edit')),
-            $this->getSubject(),
+            $this->get_current_access_level(),
             $term,
             $type
         );
@@ -928,7 +931,10 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
             implode(',', $actions),
             $path,
             apply_filters(
-                'aam_term_settings_override_status_filter', false, $id, $this->getSubject()
+                'aam_term_settings_override_status_filter',
+                false,
+                $id,
+                $this->get_current_access_level()
             ),
             urldecode($term->slug)
         );

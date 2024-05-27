@@ -109,116 +109,88 @@ abstract class AAM_Framework_AccessLevel_Abstract
     public function get_resource(
         $resource_type, $resource_id = null, $skip_inheritance = false
     ) {
-        $suffix      = ($skip_inheritance ? '_direct' : '_full');
-        $internal_id = $resource_type . $resource_id . $suffix;
+        $resource  = null;
+        $suffix    = ($skip_inheritance ? '_direct' : '_full');
+        $cache_key = $resource_type . $resource_id . $suffix;
 
         // Is resource with specified internal ID already instantiated?
-        if (!isset($this->_resources[$internal_id])) {
-            $resource = apply_filters(
-                'aam_get_resource_filter',
-                null,
-                $this,
-                $resource_type,
-                $resource_id,
+        if (!isset($this->_resources[$cache_key])) {
+            $resource = $this->_init_resource(
+                $resource_type, $resource_id, $skip_inheritance
             );
 
-            // TODO: Remove in AAM 7.0.0
-            if (is_null($resource)) {
-                $resource = apply_filters(
-                    'aam_object_filter',
-                    null,
-                    $this,
-                    $resource_type,
-                    $resource_id,
-                    $skip_inheritance
-                );
-            }
-
             if (is_object($resource)) {
-                // Kick in the inheritance chain if needed
-                if ($skip_inheritance !== true) {
-                    $this->_inherit_from_parent($resource);
-                }
-
-                // TODO: Remove in AAM 7.0.0
-                $resource = apply_filters(
-                    "aam_initialized_{$resource_type}_object_filter",
+                do_action("aam_initialized_{$resource_type}_resource_action",
                     $resource
                 );
 
                 // Finally cache the instance of the resource
-                $this->_resources[$internal_id] = $resource;
+                $this->_resources[$cache_key] = $resource;
             }
         } else {
-            $resource = $this->_resources[$internal_id];
+            $resource = $this->_resources[$cache_key];
         }
 
         return $resource;
     }
 
     /**
-     * Inherit access settings for provided object from the parent subject(s)
+     * Initialize resource
+     *
+     * This method will trigger the inheritance mechanism unless $skip_inheritance
+     * is set to false
+     *
+     * @param string  $resource_type
+     * @param mixed   $resource_id
+     * @param boolean $skip_inheritance
+     *
+     * @return AAM_Framework_Resource_Abstract|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _init_resource(
+        $resource_type, $resource_id, $skip_inheritance
+    ) {
+        $resource = apply_filters(
+            'aam_get_resource_filter',
+            null,
+            $this,
+            $resource_type,
+            $resource_id,
+        );
+
+        if (is_object($resource)) {
+            // Kick in the inheritance chain if needed
+            if ($skip_inheritance !== true) {
+                $this->_inherit_from_parent($resource);
+            }
+        }
+
+        return $resource;
+    }
+
+    /**
+     * Inherit settings from parent access level (if any)
      *
      * @param AAM_Framework_Resource_Abstract $resource
      *
      * @return array
      *
      * @access protected
-     * @version 6.9.28
-     * @todo Replace with commented version after migration to Framework
+     * @version 7.0.0
      */
-    // private function _inherit_from_parent($resource)
-    // {
-    //     $parent = $this->get_parent();
-
-    //     if (is_object($parent)) {
-    //         $parent_resource = $parent->get_resource(
-    //             $resource::TYPE,
-    //             $resource->get_internal_id()
-    //         );
-
-    //         $settings = $parent_resource->get_settings();
-
-    //         // Merge access settings if multi-roles option is enabled
-    //         $multi_roles = AAM::api()->config()->get(
-    //             'core.settings.multiSubject', false
-    //         );
-
-    //         if ($multi_roles && $parent->has_siblings()) {
-    //             foreach ($parent->get_siblings() as $sibling) {
-    //                 $sibling_resource = $sibling->get_resource(
-    //                     $resource::TYPE,
-    //                     $resource->get_internal_id()
-    //                 );
-
-    //                 $settings = $sibling_resource->merge(
-    //                     $parent_resource->get_settings(), $parent_resource
-    //                 );
-    //             }
-    //         }
-
-    //         // Merge access settings while reading hierarchical chain
-    //         $settings = array_replace_recursive(
-    //             $settings, $resource->get_settings()
-    //         );
-
-    //         // Finally set the option for provided object
-    //         $resource->set_settings($settings);
-    //     }
-
-    //     return $resource->get_settings();
-    // }
     private function _inherit_from_parent($resource)
     {
         $parent = $this->get_parent();
 
         if (is_object($parent)) {
             $parent_resource = $parent->get_resource(
-                $resource::OBJECT_TYPE,
-                $resource->getId()
+                $resource::TYPE,
+                $resource->get_internal_id()
             );
 
-            $option = $parent_resource->getOption();
+            $settings = $parent_resource->get_settings();
 
             // Merge access settings if multi-roles option is enabled
             $mu_role_support = AAM::api()->getConfig(
@@ -228,23 +200,25 @@ abstract class AAM_Framework_AccessLevel_Abstract
 
             if ($mu_role_support && $parent->has_siblings()) {
                 foreach ($parent->get_siblings() as $sibling) {
-                    $obj = $sibling->get_resource(
-                        $resource::OBJECT_TYPE,
-                        $resource->getId()
+                    $sibling_resource = $sibling->get_resource(
+                        $resource::TYPE,
+                        $resource->get_internal_id()
                     );
 
-                    $option = $obj->mergeOption($option, $parent_resource);
+                    $settings = $sibling_resource->merge_settings(
+                        $settings, $parent_resource
+                    );
                 }
             }
 
             // Merge access settings while reading hierarchical chain
-            $option = array_replace_recursive($option, $resource->getOption());
+            $settings = array_replace_recursive($settings, $resource->get_settings());
 
             // Finally set the option for provided object
-            $resource->setOption($option);
+            $resource->set_settings($settings);
         }
 
-        return $resource->getOption();
+        return $resource->get_settings();
     }
 
     /**

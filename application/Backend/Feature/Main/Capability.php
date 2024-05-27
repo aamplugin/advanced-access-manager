@@ -88,11 +88,11 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
         $assign = $this->getFromPost('assignToMe', FILTER_VALIDATE_BOOLEAN);
 
         if ($cap && $this->isAllowedToToggle($cap)) {
-            $result = $this->getSubject()->addCapability($cap, $effect);
+            $result = $this->get_current_access_level()->add_cap($cap, $effect);
 
             // Add capability to current user if checkbox checked
             if ($result && $assign === true) {
-                AAM::getUser()->addCapability($cap);
+                AAM::api()->user()->add_cap($cap);
             }
         }
 
@@ -113,7 +113,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
     {
         $capability = $this->getFromPost('capability');
         $updated    = sanitize_text_field($this->getFromPost('updated'));
-        $subject    = $this->getSubject();
+        $subject    = $this->get_current_access_level();
 
         if ($this->isAllowedToEdit($capability) === false) {
             $response = array(
@@ -122,11 +122,11 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
             );
         } else {
             // First we need to get the current grant status for updating capability
-            $status = $subject->hasCapability($capability);
+            $status = $subject->has_cap($capability);
             // Remove updating capability
-            if ($subject->removeCapability($capability)) {
+            if ($subject->remove_cap($capability)) {
                 // Add new capability with the original grant status
-                $result = $subject->addCapability($updated, $status);
+                $result = $subject->add_cap($updated, $status);
             }
 
             $response = array('status' => (!empty($result) ? 'success' : 'failure'));
@@ -158,7 +158,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
             );
         } else {
             if ($subjectOnly === true) {
-                $this->getSubject()->removeCapability($capability);
+                $this->get_current_access_level()->remove_cap($capability);
             } else {
                 foreach (AAM_Framework_Manager::roles()->get_editable_roles() as $role) {
                     $role->remove_capability($capability, true);
@@ -189,7 +189,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
         $caps = AAM_Core_API::getAllCapabilities();
 
         // Add also subject specific capabilities
-        $caps = array_merge($caps, $this->getSubject()->getCapabilities());
+        $caps = array_merge($caps, $this->get_current_access_level()->get_caps());
 
         foreach (array_keys($caps) as $cap) {
             if (apply_filters('aam_cap_can_filter', true, $cap, 'list') !== false) {
@@ -198,7 +198,7 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
                     $this->getGroup($cap),
                     $cap,
                     $this->prepareActionList($cap),
-                    $this->getSubject()->hasCapability($cap)
+                    $this->get_current_access_level()->has_cap($cap)
                 );
             }
         }
@@ -222,9 +222,9 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
     protected function prepareActionList($cap)
     {
         $actions = array();
-        $subject = $this->getSubject();
+        $subject = $this->get_current_access_level();
 
-        $toggle  = ($subject->hasCapability($cap) ? 'checked' : 'unchecked');
+        $toggle  = ($subject->has_cap($cap) ? 'checked' : 'unchecked');
 
         if ($this->isAllowedToToggle($cap) === false) {
             $toggle = 'no-' . $toggle;
@@ -290,7 +290,9 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
         // Check if current subject contains the capability and if so, allow to
         // edit it
         if ($allowed) {
-            $allowed = array_key_exists($cap, $this->getSubject()->getCapabilities());
+            $allowed = array_key_exists(
+                $cap, $this->get_current_access_level()->get_caps()
+            );
         }
 
         return $allowed;
@@ -322,7 +324,9 @@ class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
         // Check if current subject contains the capability and if so, allow to
         // delete it
         if ($allowed) {
-            $allowed = array_key_exists($cap, $this->getSubject()->getCapabilities());
+            $allowed = array_key_exists(
+                $cap, $this->get_current_access_level()->get_caps()
+            );
         }
 
         return $allowed;

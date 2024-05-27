@@ -17,7 +17,7 @@
  * @package AAM
  * @version 6.9.10
  */
-class AAM_Core_Restful_Role
+class AAM_Core_Restful_RoleService
 {
 
     /**
@@ -28,7 +28,7 @@ class AAM_Core_Restful_Role
     /**
      * Single instance of itself
      *
-     * @var AAM_Core_Restful_Role
+     * @var AAM_Core_Restful_RoleService
      *
      * @access private
      * @static

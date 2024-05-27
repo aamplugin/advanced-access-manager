@@ -28,7 +28,7 @@ class AAM_Core_Restful
      */
     protected function __construct()
     {
-        AAM_Core_Restful_Role::bootstrap();
+        AAM_Core_Restful_RoleService::bootstrap();
     }
 
 }

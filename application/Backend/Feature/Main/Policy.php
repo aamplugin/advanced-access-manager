@@ -311,7 +311,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
     public function generate()
     {
         $subject   = AAM_Backend_AccessLevel::getInstance()->getSubject();
-        $generator = new AAM_Core_Policy_Generator($subject);
+        $generator = new AAM_Core_Policy_Generator($this->get_current_access_level());
 
         // Prepare the policy name
         if ($subject::UID === AAM_Framework_Type_AccessLevel::USER) {
