@@ -216,7 +216,8 @@ class AAM_Service_Route
 
             foreach (array_keys($server->get_routes()) as $route) {
                 if ($route === $matched
-                        || preg_match('#^' . preg_quote($route) . '$#i', $matched)) {
+                    || preg_match('#^' . $route . '$#i', $matched)
+                ) {
                     if ($object->isRestricted('restful', $route, $method)) {
                         $response = new WP_Error(
                             'rest_access_denied',
