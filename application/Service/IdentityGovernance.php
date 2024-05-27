@@ -10,8 +10,11 @@
 /**
  * Users & Roles Governance service
  *
+ * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+ * @since 6.9.28 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.28
+ * @version 6.9.29
  */
 class AAM_Service_IdentityGovernance
 {
@@ -23,21 +26,24 @@ class AAM_Service_IdentityGovernance
      *
      * @version 6.9.28
      */
-    const FEATURE_FLAG = 'core.service.user-governance.enabled';
+    const FEATURE_FLAG = 'core.service.identity-governance.enabled';
 
     /**
      * Constructor
      *
      * @return void
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.28
+     * @version 6.9.29
      */
     protected function __construct()
     {
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_IdentityGovernance::register();
                 });
@@ -48,16 +54,17 @@ class AAM_Service_IdentityGovernance
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('User Governance', AAM_KEY),
-                    'description' => __('Manager how other users and unauthenticated visitors can see and manage registered users on the site.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
+                    'title'          => __('Identity Governance', AAM_KEY),
+                    'description'    => __('Control how other users and unauthenticated visitors can view and manage the profiles of registered users on the site.', AAM_KEY),
+                    'setting'        => self::FEATURE_FLAG,
+                    'defaultEnabled' => false
                 );
 
                 return $services;
             }, 20);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
             $this->initializeHooks();
         }
     }
@@ -67,8 +74,11 @@ class AAM_Service_IdentityGovernance
      *
      * @return void
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.28
+     * @version 6.9.29
      */
     protected function initializeHooks()
     {
@@ -87,10 +97,12 @@ class AAM_Service_IdentityGovernance
         add_filter('map_meta_cap', array($this, 'map_meta_caps'), 999, 4);
 
         // Additionally tap into password management
-        add_filter('show_password_fields', array($this, 'can_change_password'), 10, 2);
-        add_filter('allow_password_reset', array($this, 'can_reset_password'), 10, 2);
-        add_action('check_passwords', array($this, 'can_update_password'), 10, 3);
-        add_filter('rest_pre_insert_user', array($this, 'can_update_restful_password'), 10, 2);
+        if (AAM_Core_API::capExists('aam_change_password')) {
+            add_filter('show_password_fields', array($this, 'can_change_password'), 10, 2);
+            add_filter('allow_password_reset', array($this, 'can_reset_password'), 10, 2);
+            add_action('check_passwords', array($this, 'can_update_password'), 10, 3);
+            add_filter('rest_pre_insert_user', array($this, 'can_update_restful_password'), 10, 2);
+        }
     }
 
     /**
@@ -260,16 +272,25 @@ class AAM_Service_IdentityGovernance
      *
      * @return void
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.28
+     * @version 6.9.29
      */
     public function can_update_password($login, &$password, &$password2)
     {
-        $user       = get_user_by('login', $login);
-        $is_profile = $user->ID === get_current_user_id();
+        $user = get_user_by('login', $login);
 
-        if (!$is_profile && !current_user_can('aam_change_password', $user->ID)) {
-            $password = $password2 = null;
+        // Take into consideration scenario when new user is being created
+        if (is_a($user, 'WP_User')) {
+            $is_profile = $user->ID === get_current_user_id();
+
+            if (!$is_profile
+                && !current_user_can('aam_change_password', $user->ID)
+            ) {
+                $password = $password2 = null;
+            }
         }
     }
 
@@ -281,19 +302,26 @@ class AAM_Service_IdentityGovernance
      *
      * @return object
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.28
+     * @version 6.9.29
      */
     public function can_update_restful_password($data, $request)
     {
-        $user       = get_user_by('id', $request['id']);
-        $is_profile = $user->ID === get_current_user_id();
+        $user = get_user_by('id', $request['id']);
 
-        if (!$is_profile
-            && !current_user_can('aam_change_password', $user->ID)
-            && property_exists($data, 'user_pass')
-        ) {
-            unset($data->user_pass);
+        // Take into consideration scenario when new user is being created
+        if (is_a($user, 'WP_User')) {
+            $is_profile = $user->ID === get_current_user_id();
+
+            if (!$is_profile
+                && !current_user_can('aam_change_password', $user->ID)
+                && property_exists($data, 'user_pass')
+            ) {
+                unset($data->user_pass);
+            }
         }
 
         return $data;
