@@ -12,10 +12,11 @@
  *
  * @package AAM
  *
- * @since 6.8.3 https://github.com/aamplugin/advanced-access-manager/issues/207
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
+ * @since 6.8.3  https://github.com/aamplugin/advanced-access-manager/issues/207
+ * @since 6.0.0  Initial implementation of the class
  *
- * @version 6.8.3
+ * @version 6.9.28
  */
 class AAM_Core_Policy_Resource
 {
@@ -96,5 +97,26 @@ class AAM_Core_Policy_Resource
      * @version 6.8.3
      */
     const HOOK = 'Hook';
+
+    /**
+     * WordPress user account resource
+     *
+     * @version 6.9.28
+     */
+    const USER = 'User';
+
+    /**
+     * WordPress user level resource
+     *
+     * @version 6.9.28
+     */
+    const USER_LEVEL = 'UserLevel';
+
+    /**
+     * WordPress role level resource
+     *
+     * @version 6.9.28
+     */
+    const ROLE_LEVEL = 'RoleLevel';
 
 }

@@ -40,8 +40,9 @@ function wp_redirect($location) {
     array_push($GLOBALS['UT_HTTP_HEADERS'], 'Location: ' . $location);
 }
 
-// Load the WordPress library.
+// Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
+require_once ABSPATH . '/wp-admin/includes/user.php';
 
 // Prepare the list of users
 global $wpdb;

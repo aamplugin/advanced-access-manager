@@ -478,6 +478,64 @@ class PolicyServiceIntegrationTest extends TestCase
     }
 
     /**
+     * Test if Role:* works as expected
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.28
+     */
+    public function testRoleListWildcard()
+    {
+        $roles = get_editable_roles();
+
+        $this->assertTrue(count($roles) > 0);
+
+        $this->preparePlayground('{
+            "Statement": {
+                "Effect": "deny",
+                "Resource": "Role:*",
+                "Action": "List"
+            }
+        }', false);
+
+        $roles = get_editable_roles();
+
+        $this->assertTrue(count($roles) === 0);
+    }
+
+    /**
+     * Test if User:* works as expected
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.28
+     */
+    public function testUserListWildcard()
+    {
+        $users = get_users(array(
+            'fields' => 'ID'
+        ));
+
+        $this->assertTrue(count($users) > 0);
+
+        $this->preparePlayground('{
+            "Statement": {
+                "Effect": "deny",
+                "Resource": "User:*",
+                "Action": "List"
+            }
+        }', false);
+
+        $users = get_users(array(
+            'fields' => 'ID'
+        ));
+
+        $this->assertTrue(count($users) === 0);
+    }
+
+    /**
      * Prepare the environment
      *
      * Update Unit Test access policy with proper policy
@@ -508,15 +566,15 @@ class PolicyServiceIntegrationTest extends TestCase
             array('ID' => self::$policy_id)
         );
 
-        //AAM_Core_AccessSettings::getInstance()->set('user.1.policy.291', true);
-
         $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+
         $this->assertTrue(
             $object->updateOptionItem(self::$policy_id, true)->save()
         );
 
         // Reset Access Policy Factory cache
         AAM_Core_Policy_Factory::reset();
+        $this->_resetSubjects();
     }
 
 }
