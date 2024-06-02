@@ -1,4 +1,11 @@
-<?php /** @version 6.0.0 */ ?>
+<?php
+/**
+ * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
+ * @since 6.0.0  Initial implementation of the template
+ *
+ * @version 6.9.29
+ * */
+?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="post-content">
@@ -7,21 +14,53 @@
         <?php } ?>
 
         <?php if ($this->isAllowedToManageCurrentSubject()) { ?>
-            <div class="aam-post-breadcrumb">
-                <a href="#" data-level="root"><i class="icon-home"></i> <?php echo __('Root', AAM_KEY); ?></a>
-            </div>
+            <div class="aam-post-breadcrumb"></div>
 
             <div class="aam-container">
-                <table id="post-list" class="table table-striped table-bordered">
+                <table id="type-list" class="table table-striped table-bordered hidden">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Link</th>
                             <th width="5%">&nbsp;</th>
                             <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
                             <th><?php echo __('Actions', AAM_KEY); ?></th>
-                            <th>Parent</th>
-                            <th>Overwritten</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <table id="taxonomy-list" class="table table-striped table-bordered hidden">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th width="5%">&nbsp;</th>
+                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
+                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <table id="post-list" class="table table-striped table-bordered hidden">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th width="5%">&nbsp;</th>
+                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
+                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <table id="term-list" class="table table-striped table-bordered hidden">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th width="5%">&nbsp;</th>
+                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
+                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th>Data</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

@@ -86,23 +86,31 @@ trait AAM_Core_Restful_ServiceTrait
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Core_Subject
+     * @return AAM_Core_Subject|null
      *
      * @access private
      * @since 6.9.10
      */
     private function _determine_subject(WP_REST_Request $request)
     {
+        $subject      = null;
         $access_level = $request->get_param('access_level');
-        $subject_id   = null;
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
-            $subject_id = $request->get_param('role_id');
-        } elseif ($access_level === AAM_Core_Subject_User::UID) {
-            $subject_id = $request->get_param('user_id');
+        if ($access_level) {
+            $subject_id   = null;
+
+            if ($access_level === AAM_Core_Subject_Role::UID) {
+                $subject_id = $request->get_param('role_id');
+            } elseif ($access_level === AAM_Core_Subject_User::UID) {
+                $subject_id = $request->get_param('user_id');
+            }
+
+            $subject = AAM_Framework_Manager::subject()->get(
+                $access_level, $subject_id
+            );
         }
 
-        return AAM_Framework_Manager::subject()->get($access_level, $subject_id);
+        return $subject;
     }
 
     /**

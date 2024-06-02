@@ -830,8 +830,19 @@ div.dataTables_filter label {
   margin-bottom: 0;
 }
 
-div.dataTables_wrapper div.dataTables_filter {
+#role-list_wrapper div.dataTables_filter,
+#user-list_wrapper div.dataTables_filter {
   text-align: left;
+}
+
+#user-list-filter {
+  height: 30px;
+  margin-left: 10px;
+}
+
+.dataTables_filter .btn-primary {
+  height: 30px;
+  line-height: 1.2;
 }
 
 #capability-list_wrapper div.dataTables_filter,
@@ -855,6 +866,7 @@ div.dataTables_filter a.btn {
 
 div.dataTables_wrapper div.dataTables_filter input {
   margin-left: 0;
+  height: 30px;
 }
 
 table.table-bordered.dataTable tbody th,
@@ -2924,7 +2936,7 @@ ul.tab li a:focus,
 }
 
 .aam-filtered-list {
-  width: 120px !important;
+  width: 150px !important;
 }
 
 .aam-common-use-cases {

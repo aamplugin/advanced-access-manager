@@ -184,23 +184,30 @@ class AAM_Backend_Manager
 
         if (array_key_exists('aam-plus-package/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
-                __('The Plus Package is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                __('The Plus Package was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
                 '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
             ));
         }
 
         if (array_key_exists('aam-ip-check/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
-                __('The IP Check is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                __('The IP Check was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
                 '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
             ));
         }
 
         if (array_key_exists('aam-role-hierarchy/bootstrap.php', $plugins)) {
             AAM_Core_Console::add(sprintf(
-                __('The Role Hierarchy is deprecated as a stand-alone addon. Check the %sWe are migrating%s article for more information.', AAM_KEY),
+                __('The Role Hierarchy was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
                 '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
             ));
+        }
+
+        if (defined('AAM_COMPLETE_PACKAGE')
+            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.3') === -1) {
+            AAM_Core_Console::add(
+                __('Upgrade the AAM premium add-on to version 6.1.3 or higher to ensure all features function correctly.', AAM_KEY),
+            );
         }
     }
 
@@ -250,6 +257,8 @@ class AAM_Backend_Manager
                 'url' => array(
                     'editUser'  => esc_url(admin_url('user-edit.php')),
                     'addUser'   => esc_url(admin_url('user-new.php')),
+                    'editPost'  => esc_url(admin_url('post.php')),
+                    'editTerm'  => esc_url(admin_url('term.php')),
                     'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
                 ),
                 'subject'   => array(

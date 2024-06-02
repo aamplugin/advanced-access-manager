@@ -10,6 +10,7 @@
 /**
  * Post visibility object
  *
+ * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
  * @since 6.9.23 https://github.com/aamplugin/advanced-access-manager/issues/347
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/345
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.23
+ * @version 6.9.29
  */
 class AAM_Core_Object_Visibility extends AAM_Core_Object
 {
@@ -164,56 +165,27 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
     }
 
     /**
-     * Merge visibility settings
-     *
-     * @param array $options
-     *
-     * @return array
-     *
-     * @since 6.1.0 Fixed bug with incorrectly merged settings for users with multiple
-     *              roles
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.1.0
-     */
-    public function mergeOption($options)
-    {
-        $these_options = $this->getOption();
-        $keys          = array_unique(array_merge(
-            array_keys($options), array_keys($this->getOption())
-        ));
-
-        $merged = array();
-
-        // Iterate over each unique key end merge settings accordingly
-        foreach($keys as $key) {
-            $merged[$key] = AAM::api()->mergeSettings(
-                (isset($options[$key]) ? $options[$key] : array()),
-                (isset($these_options[$key]) ? $these_options[$key] : array()),
-                AAM_Core_Object_Post::OBJECT_TYPE
-            );
-        }
-
-        return $merged;
-    }
-
-    /**
      * Align & Merge access controls
      *
      * This method makes sure that both data set have the same keys first and then
      * merges them
      *
-     * @param array           $incoming
-     * @param AAM_Core_Object $object
+     * @param array $incoming
      *
      * @return array
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
+     * @since 6.9.21 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.21
+     * @version 6.9.29
      */
-    public function mergeAlignOption($incoming, $object)
+    public function mergeOption($incoming)
     {
+        // The visibility object also passes the incoming object as the second
+        // argument
+        $object = func_get_arg(1);
+
         // Identifying all the keys that are missing in the $subject, however, present
         // in $this and align settings
         $base = $this->getOption();

@@ -108,6 +108,16 @@ abstract class AAM_Core_Object
     private $_overwritten = false;
 
     /**
+     * Inheritance information
+     *
+     * @var array
+     *
+     * @access private
+     * @version 6.9.29
+     */
+    private $_inheritance = null;
+
+    /**
      * Constructor
      *
      * @param AAM_Core_Subject $subject Requested subject
@@ -251,6 +261,34 @@ abstract class AAM_Core_Object
     public function getOption()
     {
         return $this->_option;
+    }
+
+    /**
+     * Set inheritance data
+     *
+     * @param array $inheritance
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.29
+     */
+    public function setInheritance(array $inheritance)
+    {
+        $this->_inheritance = $inheritance;
+    }
+
+    /**
+     * Get inheritance data
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.29
+     */
+    public function getInheritance()
+    {
+        return $this->_inheritance;
     }
 
     /**

@@ -10,6 +10,7 @@
 /**
  * Posts & Terms service
  *
+ * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/264
@@ -26,7 +27,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.29
  */
 class AAM_Service_Content
 {
@@ -189,15 +190,16 @@ class AAM_Service_Content
      *
      * @return void
      *
-     * @since 6.4.0 Enhanced https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.1.0 Fixed the bug where `do_not_allow` capability was mapped to the
-     *              list of post type capabilities
-     * @since 6.0.2 Removed invocation for the pseudo-cap mapping for post types
-     * @since 6.0.1 Fixed bug related to enabling commenting on all posts
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
+     * @since 6.1.0  Fixed the bug where `do_not_allow` capability was mapped to the
+     *               list of post type capabilities
+     * @since 6.0.2  Removed invocation for the pseudo-cap mapping for post types
+     * @since 6.0.1  Fixed bug related to enabling commenting on all posts
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.4.0
+     * @version 6.9.29
      */
     protected function initializeHooks()
     {
@@ -285,6 +287,9 @@ class AAM_Service_Content
                 $list, $this->_convertToPostStatements($res, $opts)
             );
         }, 10, 3);
+
+        // Register RESTful API
+        AAM_Core_Restful_ContentService::bootstrap();
 
         // Service fetch
         $this->registerService();

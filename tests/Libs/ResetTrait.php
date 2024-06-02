@@ -44,6 +44,11 @@ trait ResetTrait
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     private static function _setUpBeforeClass()
     {
     }

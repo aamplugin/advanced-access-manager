@@ -40,6 +40,9 @@ class PolicyUserRoleIntegrationTest extends TestCase
      */
     private static function _setUpBeforeClass()
     {
+        \AAM_Core_Config::set('core.service.identity-governance.enabled', true);
+        \AAM_Service_IdentityGovernance::bootstrap(true);
+
         // Setup a default policy placeholder
         self::$policy_id = wp_insert_post(array(
             'post_title'  => 'Unittest Policy Placeholder',

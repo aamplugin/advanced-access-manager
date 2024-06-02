@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-xs-12">
             <p class="aam-notification">
-                <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('You can manage access to any individual post or page for any role, user, or visitor. Consider getting the %s[Complete Package]%s premium add-on to have the ability to manage access to categories and custom taxonomies or to define the default access to all posts, pages, or custom post types.', 'b'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>'); ?>
+                <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to your posts, pages, custom post types, taxonomies, terms or even entire post types for any role, user, or visitor. To gain the full control, consider getting the %s[premium add-on]%s. To learn more, check our %s"About Posts & Terms service"%s article.', 'b'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/about-posts-and-terms-service?ref=plugin" target="_blank">', '</a>'); ?>
             </p>
         </div>
     </div>

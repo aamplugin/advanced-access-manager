@@ -80,6 +80,12 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 
 == Changelog ==
 
+= 6.9.29 =
+* Fixed: Warning: Attempt to read property "capabilities" on null in [https://github.com/aamplugin/advanced-access-manager/issues/374](https://github.com/aamplugin/advanced-access-manager/issues/374)
+* Fixed: Warning: Attempt to read property "ID" on bool in [https://github.com/aamplugin/advanced-access-manager/issues/373](https://github.com/aamplugin/advanced-access-manager/issues/373)
+* Fixed: Stripped query strings in new account "set password" links AND Disallowed password reset [https://github.com/aamplugin/advanced-access-manager/issues/372](https://github.com/aamplugin/advanced-access-manager/issues/372)
+* Changed: Move Posts & Terms service to RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/375](https://github.com/aamplugin/advanced-access-manager/issues/375)
+
 = 6.9.28 =
 * Fixed: Message: base64_encode(): Passing null to parameter #1 [https://github.com/aamplugin/advanced-access-manager/issues/370](https://github.com/aamplugin/advanced-access-manager/issues/370)
 * Fixed: Menu items that recycle the same ID are incorrectly handled [https://github.com/aamplugin/advanced-access-manager/issues/364](https://github.com/aamplugin/advanced-access-manager/issues/364)

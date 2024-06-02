@@ -2712,14 +2712,126 @@
         (function ($) {
 
             /**
-             * Table extra filter
-             *
-             * @type Object
+             * Breadcrumb
              */
-            var filter = {
-                type: null,
-                id:   null
-            };
+            let breadcrumb = [
+                {
+                    label: getAAM().__('Root'),
+                    level_type: null,
+                    level_id: null
+                },
+                {
+                    label: getAAM().__('Post Types'),
+                    level_type: 'type_list',
+                    level_id: null
+                }
+            ];
+
+            /**
+             *
+             * @returns
+             */
+            function CurrentLevel() {
+                return breadcrumb[breadcrumb.length - 1];
+            }
+
+            /**
+             *
+             */
+            function RenderBreadcrumb() {
+                // Resetting the breadcrumb
+                $('.aam-post-breadcrumb').empty();
+
+                $.each(breadcrumb, function(i, level) {
+                    if (level.level_type === null) { // Root, append home icon
+                        $('.aam-post-breadcrumb').append('<i class="icon-home"></i>');
+                    } else {
+                        $('.aam-post-breadcrumb').append('<i class="icon-angle-double-right"></i>');
+                    }
+
+                    if (i === breadcrumb.length - 1) { // last element
+                        $('.aam-post-breadcrumb').append(
+                            $('<span/>').text(level.label)
+                        );
+                    } else {
+                        $('.aam-post-breadcrumb').append(
+                            $('<a/>').attr({
+                                'href': '#',
+                                'data-type': level.level_type,
+                                'data-id': level.level_id,
+                                'data-level': i
+                            }).bind('click', function(event) {
+                                event.preventDefault();
+
+                                breadcrumb = breadcrumb.slice(
+                                    0, $(this).data('level') + 1
+                                );
+
+                                // Take into consideration the "Root" level click
+                                if (breadcrumb.length === 1) {
+                                    breadcrumb.push({
+                                        label: getAAM().__('Post Types'),
+                                        level_type: 'type_list',
+                                        level_id: null
+                                    });
+                                    $('.aam-type-taxonomy-filter').val('type_list');
+                                }
+
+                                $('.aam-access-form').removeClass('active');
+
+                                RenderBreadcrumb();
+                            }).text(level.label)
+                        );
+                    }
+                });
+
+                AdjustList();
+            }
+
+            /**
+             *
+             * @param {type} type
+             * @param {type} id
+             * @param {type} title
+             * @returns {undefined}
+             */
+            function AddToBreadcrumb(level_type, level_id, label, scope = null) {
+                // If the last breadcrumb item has the same level, replace it
+                const last = breadcrumb[breadcrumb.length - 1];
+
+                if (level_type === last.level_type) {
+                    breadcrumb.pop();
+                }
+
+                breadcrumb.push({
+                    label,
+                    level_type,
+                    level_id,
+                    scope
+                });
+
+                RenderBreadcrumb();
+            }
+
+            /**
+             *
+             * @param {*} level_type
+             * @param {*} level_id
+             * @param {*} label
+             */
+            function ReplaceInBreadcrumb(level_type, level_id, label) {
+                breadcrumb.pop();
+
+                AddToBreadcrumb(level_type, level_id, label);
+            }
+
+            /**
+             *
+             */
+            function NavigateBack() {
+                breadcrumb.pop();
+                RenderBreadcrumb();
+            }
 
             /**
              *
@@ -2772,13 +2884,7 @@
              * @param {*} btn
              * @param {*} callback
              */
-            function loadAccessForm(object, id, btn, callback) {
-                if ($.inArray(object, ['cat', 'tag']) !== -1) {
-                    object = 'term';
-                } else if ($.inArray(object, ['taxonomy-category', 'taxonomy-tag']) !== -1) {
-                    object = 'taxonomy';
-                }
-
+            function RenderAccessForm(level_type, level_id, btn, callback) {
                 //reset the form first
                 var container = $('.aam-access-form');
 
@@ -2793,8 +2899,8 @@
                         sub_action: 'renderContent',
                         partial: 'post-access-form',
                         _ajax_nonce: getLocal().nonce,
-                        type: object,
-                        id: id,
+                        type: level_type,
+                        id: level_id,
                         subject: getAAM().getSubject().type,
                         subjectId: getAAM().getSubject().id
                     },
@@ -2806,10 +2912,10 @@
                     },
                     success: function (response) {
                         $('#aam-access-form-container').html(response);
-                        $('#post-list_wrapper').addClass('aam-hidden');
+                        $('#post-content .dataTables_wrapper').addClass('hidden');
                         container.addClass('active');
 
-                        initializeAccessForm(object, id);
+                        InitializeAccessForm(level_type, level_id);
 
                         if (typeof callback === 'function') {
                             callback.call();
@@ -2830,26 +2936,10 @@
 
             /**
              *
-             * @param {type} type
-             * @param {type} id
-             * @param {type} title
-             * @returns {undefined}
-             */
-            function addBreadcrumbLevel(type, id, title) {
-                var level = $((type === 'type' ? '<a/>' : '<span/>')).attr({
-                    'href': '#',
-                    'data-level': type,
-                    'data-id': id
-                }).append($('<i/>', { 'class': 'icon-angle-double-right' })).append(title);
-                $('.aam-post-breadcrumb').append(level);
-            }
-
-            /**
-             *
              * @param {*} object
              * @param {*} id
              */
-            function initializeAccessForm(object, id) {
+            function InitializeAccessForm(object, id) {
                 // Initialize the checkbox events
                 $('.aam-row-action', '#aam-access-form-container').each(function () {
                     // Initialize each access property
@@ -2864,7 +2954,7 @@
                             object,
                             id,
                             function () {
-                                loadAccessForm(object, id, null, function() {
+                                RenderAccessForm(object, id, null, function() {
                                     // Trigger modal to collection additional data
                                     if (btn.data('trigger') && checked) {
                                         $('#' + btn.data('trigger')).trigger('click');
@@ -2914,7 +3004,7 @@
                         success: function (response) {
                             if (response.status === 'success') {
                                 $('#post-overwritten').addClass('hidden');
-                                loadAccessForm(type, id);
+                                RenderAccessForm(type, id);
                             }
                         },
                         complete: function () {
@@ -2941,7 +3031,7 @@
                         id,
                         function () {
                             $('#modal-hidden').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -2960,7 +3050,7 @@
                         id,
                         function () {
                             $('#modal-teaser').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -2979,7 +3069,7 @@
                         id,
                         function () {
                             $('#modal-limited').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -3013,7 +3103,7 @@
                                         getAAM().__('Counter was reset successfully')
                                     );
                                     $('#modal-limited').modal('hide');
-                                    loadAccessForm(object, id);
+                                    RenderAccessForm(object, id);
                                 }
                             },
                             error: function () {
@@ -3053,7 +3143,7 @@
                         id,
                         function () {
                             $('#modal-redirect').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -3072,7 +3162,7 @@
                         id,
                         function () {
                             $('#modal-password').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -3091,7 +3181,7 @@
                         id,
                         function () {
                             $('#modal-cease').modal('hide');
-                            loadAccessForm(object, id);
+                            RenderAccessForm(object, id);
                         }
                     );
                 });
@@ -3119,227 +3209,333 @@
             }
 
             getAAM().addHook('load-access-form', function(params) {
-                loadAccessForm(...params);
+                RenderAccessForm(...params);
             });
 
             getAAM().addHook('save-post-settings', function(params) {
                 save(...params);
             });
 
+            // Internal cache
+            const cache = {};
+
+            /**
+             *
+             * @param {*} cb
+             */
+            function FetchPostTypeList(cb) {
+                // Fetching the list of all registered post types.
+                $.ajax(`${getLocal().rest_base}aam/v2/service/content/types`, {
+                    type: 'GET',
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce
+                    },
+                    data: getAAM().prepareRequestSubjectData(),
+                    success: function (response) {
+                        const types = [];
+
+                        $.each(response.list, (_, item) => {
+                            types.push([
+                                item.slug,
+                                item.icon || (item.is_hierarchical ? 'dashicons-admin-page' : 'dashicons-media-default'),
+                                item.title,
+                                ['drilldown', 'manage'],
+                                item
+                            ]);
+                        });
+
+                        cb({
+                            data: types,
+                            recordsTotal: response.stats.total_count,
+                            recordsFiltered: response.stats.filtered_count
+                        });
+                    }
+                });
+            }
+
+            /**
+             *
+             * @param {*} cb
+             */
+            function FetchTaxonomyList(cb) {
+                // Fetching the list of all registered post types.
+                if (cache.taxonomy_list === undefined) {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/content/taxonomies`, {
+                        type: 'GET',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        data: getAAM().prepareRequestSubjectData(),
+                        success: function (response) {
+                            const taxonomies = [];
+
+                            $.each(response.list, (_, item) => {
+                                taxonomies.push([
+                                    item.slug,
+                                    item.is_hierarchical ? 'dashicons-category' : 'dashicons-tag',
+                                    item.title,
+                                    ['drilldown', 'manage'],
+                                    item
+                                ]);
+                            });
+
+                            cache.taxonomy_list = {
+                                data: taxonomies,
+                                recordsTotal: response.stats.total_count,
+                                recordsFiltered: response.stats.filtered_count
+                            };
+
+                            cb(cache.taxonomy_list);
+                        }
+                    });
+                } else {
+                    cb(cache.taxonomy_list);
+                }
+            }
+
+            /**
+             *
+             * @param {*} filters
+             * @param {*} cb
+             */
+            function FetchPostList(filters, cb) {
+                // Fetching the list of posts
+                $.ajax(`${getLocal().rest_base}aam/v2/service/content/posts`, {
+                    type: 'GET',
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce
+                    },
+                    data: getAAM().prepareRequestSubjectData({
+                        type: CurrentLevel().level_id,
+                        offset: filters.start,
+                        per_page: filters.length,
+                        search: filters.search.value
+                    }),
+                    success: function (response) {
+                        const result = {
+                            data: [],
+                            recordsTotal: 0,
+                            recordsFiltered: 0
+                        };
+
+                        if (response && response.list) {
+                            $.each(response.list, (_, item) => {
+                                result.data.push([
+                                    item.id,
+                                    item.icon || (item.is_hierarchical ? 'dashicons-admin-page' : 'dashicons-media-default'),
+                                    item.title,
+                                    ['edit', 'manage'],
+                                    item
+                                ]);
+                            });
+
+                            result.recordsTotal = response.stats.total_count;
+                            result.recordsFiltered = response.stats.filtered_count;
+                        }
+
+                        cb(result);
+                    }
+                });
+            }
+
+            /**
+             *
+             * @param {*} filters
+             * @param {*} cb
+             */
+            function FetchTermList(filters, cb) {
+                // Fetching the list of terms
+                $.ajax(`${getLocal().rest_base}aam/v2/service/content/terms`, {
+                    type: 'GET',
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce
+                    },
+                    data: getAAM().prepareRequestSubjectData({
+                        taxonomy: CurrentLevel().level_id,
+                        offset: filters.start,
+                        per_page: filters.length,
+                        search: filters.search.value,
+                        scope: CurrentLevel().scope
+                    }),
+                    success: function (response) {
+                        const result = {
+                            data: [],
+                            recordsTotal: 0,
+                            recordsFiltered: 0
+                        };
+
+                        $.each(response.list, (_, item) => {
+                            result.data.push([
+                                item.id,
+                                item.is_hierarchical ? 'dashicons-category' : 'dashicons-tag',
+                                item.title,
+                                ['edit', 'manage'],
+                                item
+                            ]);
+                        });
+
+                        result.recordsTotal = response.stats.total_count;
+                        result.recordsFiltered = response.stats.filtered_count;
+
+                        cb(result);
+                    }
+                });
+            }
+
             /**
              *
              */
-            function initialize() {
-                if ($('#post-content').length) {
-                    //reset filter to default
-                    filter.type = null;
-                    filter.id = null;
+            function AdjustList() {
+                const current = CurrentLevel();
 
-                    //initialize the role list table
-                    $('#post-list').DataTable({
+                if ([null, 'type_list'].includes(current.level_type)) {
+                    PrepareTypeListTable();
+                } else if (current.level_type === 'taxonomy_list') {
+                    PrepareTaxonomyListTable();
+                } else if (current.level_type === 'type_posts') {
+                    PreparePostListTable();
+                } else if (current.level_type === 'type_terms') {
+                    PrepareTermListTable(CurrentLevel().scope);
+                } else if (current.level_type === 'taxonomy_terms') {
+                    PrepareTermListTable()
+                }
+            }
+
+            function RenderTypeTaxonomySwitch(){
+                const current = CurrentLevel();
+                const options = [
+                    {
+                        value: 'type_list',
+                        label: getAAM().__('Post Types'),
+                        selected: [null, 'type_list'].includes(current.level_type)
+                    },
+                    {
+                        value: 'taxonomy_list',
+                        label: getAAM().__('Taxonomies'),
+                        selected: current.level_type === 'taxonomy_list'
+                    }
+                ];
+
+                return $('<select>').attr({
+                    'class': 'form-control input-sm aam-ml-1 aam-type-taxonomy-filter aam-filtered-list'
+                }).html(
+                    options.map(o => `'<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')
+                ).bind('change', function () {
+                    $(`.aam-type-taxonomy-filter option[value="${$(this).val()}"]`).prop(
+                        'selected', true
+                    );
+
+                    ReplaceInBreadcrumb(
+                        $(this).val(), null, $('option:selected', $(this)).text()
+                    );
+                });
+            }
+
+            function RenderPostTaxonomySwitch(filter_id) {
+                FetchTaxonomyList(function(response) {
+                    const current = CurrentLevel();
+                    const options = [
+                        {
+                            value: `type_posts:${current.level_id}`,
+                            label: getAAM().__('Only %s List').replace('%s', CurrentLevel().label),
+                            selected: current.level_type === 'type'
+                        }
+                    ];
+                    $.each(response.data.filter(t => t[4].post_types.includes(current.level_id)), function(_, item) {
+                        options.push({
+                            value: `type_terms:${current.level_id}:${item[0]}`,
+                            label: item[2],
+                            selected: current.level_type === 'taxonomy' && current.level_id === item[0]
+                        });
+                    });
+
+                    const filter_controller = $('<select>').attr({
+                        'class': 'form-control input-sm aam-ml-1 aam-post-taxonomy-filter aam-filtered-list'
+                    }).html(
+                        options.map(o => `'<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')
+                    ).bind('change', function () {
+                        const value                       = $(this).val();
+                        const [level_type, post_type, id] = $(this).val().split(':');
+
+                        AddToBreadcrumb(
+                            level_type,
+                            id,
+                            $(`.aam-post-taxonomy-filter option:selected`).text(),
+                            post_type
+                        );
+
+                        $(`.aam-post-taxonomy-filter option[value="${value}"]`).prop(
+                            'selected', true
+                        );
+                    });
+
+                    if ($('.aam-post-taxonomy-filter', filter_id).length) {
+                        $('.aam-post-taxonomy-filter', filter_id).replaceWith(filter_controller);
+                    } else {
+                        $(filter_id).append(filter_controller);
+                    }
+                });
+            }
+
+            function NavigateToAccessForm(level_type, level_id, level_label, btn) {
+                RenderAccessForm(level_type, level_id, btn, () => {
+                    // Update the breadcrumb
+                    AddToBreadcrumb(level_type, level_id, level_label);
+                });
+            }
+
+            function PrepareTypeListTable() {
+                $('#post-content .dataTables_wrapper').addClass('hidden');
+                $('#post-content .table').addClass('hidden');
+
+                if (!$('#type-list').hasClass('dataTable')) {
+                    $('#type-list').DataTable({
                         autoWidth: false,
-                        ordering: true,
+                        ordering: false,
                         pagingType: 'simple',
                         processing: true,
                         saveState: true,
-                        serverSide: true,
-                        ajax: {
-                            url: getLocal().ajaxurl,
-                            type: 'POST',
-                            data: function (data) {
-                                data.action = 'aam';
-                                data.sub_action = 'Main_Post.getTable';
-                                data._ajax_nonce = getLocal().nonce;
-                                data.subject = getAAM().getSubject().type;
-                                data.subjectId = getAAM().getSubject().id;
-                                data.type = filter.type;
-                                data.typeId = filter.id;
-                                data.listMode = $('#post-list-filter').val()
-                            }
+                        ajax: function(_, cb) {
+                            FetchPostTypeList(cb);
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 1, 5, 6, 7] },
-                            { orderable: false, targets: [0, 1, 2, 4, 5, 6] }
+                            { visible: false, targets: [0, 4] },
+                            { searchable: false, targets: [0, 1, 3, 4] }
                         ],
                         language: {
                             search: '_INPUT_',
                             searchPlaceholder: getAAM().__('Search'),
-                            info: getAAM().__('_TOTAL_ object(s)'),
+                            info: getAAM().__('_TOTAL_ type(s)'),
                             infoFiltered: '',
                             lengthMenu: '_MENU_'
                         },
                         initComplete: function () {
-                            $('#post-list_filter .form-control').bind('change', function () {
-                                if ($(this).val()) {
-                                    $(this).addClass('highlight');
-                                } else {
-                                    $(this).removeClass('highlight');
-                                }
-                            });
-
-                            var filter = $('<select>').attr({
-                                'class': 'form-control input-sm aam-ml-1 aam-filtered-list',
-                                'id': 'post-list-filter'
-                            })
-                                .html('<option value="filtered">List Filtered</option><option value="all">List All</option>')
-                                .bind('change', function () {
-                                    $('#post-list').DataTable().ajax.reload();
-                                });
-
-                            $('#post-list_length').append(filter);
+                            // Adding the root level controls
+                            $('#type-list_length').append(RenderTypeTaxonomySwitch());
                         },
-                        rowCallback: function (row, data) {
-                            // Object type icon
-                            var icon = 'icon-doc-text-inv';
-                            var tooltip = getAAM().__('Post');
+                        rowCallback: function(row, data) {
+                            let overwritten = '';
 
-                            switch (data[2]) {
-                                case 'type':
-                                    icon = 'icon-box';
-                                    tooltip = getAAM().__('Post Type');
-                                    break;
-
-                                case 'taxonomy-category':
-                                    icon = 'icon-folder';
-                                    tooltip = getAAM().__('Hierarchical Taxonomy');
-                                    break;
-
-                                case 'cat':
-                                    icon = 'icon-folder';
-                                    tooltip = getAAM().__('Hierarchical Term');
-                                    break;
-
-                                case 'taxonomy-tag':
-                                    icon = 'icon-tag';
-                                    tooltip = getAAM().__('Tag Taxonomy');
-                                    break;
-
-                                case 'tag':
-                                    icon = 'icon-tag';
-                                    tooltip = getAAM().__('Tag');
-                                    break;
-
-                                default:
-                                    break;
+                            if (data[4].inheritance && data[4].inheritance.is_overwritten) {
+                                overwritten = ' aam-access-overwritten';
                             }
 
-                            if (data[6]) {
-                                $('td:eq(0)', row).html($('<i/>', {
-                                    'class': icon + ' aam-access-overwritten',
-                                    'data-toggle': "tooltip",
-                                    'title': getAAM().__('Customized Settings')
-                                }));
-                            } else {
-                                $('td:eq(0)', row).html($('<i/>', {
-                                    'class': icon,
-                                    'data-toggle': "tooltip",
-                                    'title': tooltip
-                                }));
-                            }
+                            $('td:eq(0)', row).html(
+                                `<div class="dashicons-before ${data[1]}${overwritten}"></div>`
+                            );
 
-                            // Update the title to a link
-                            if (data[2] === 'type') {
+                            // Decorating the post type title & make it actionable
                                 $('td:eq(1)', row).html($('<a/>', {
-                                    href: '#'
-                                }).bind('click', function () {
-                                    //visual feedback - show loading icon
-                                    $('td:eq(0)', row).html(
-                                        '<i class="icon-spin4 animate-spin"></i>'
-                                    );
-                                    //set filter
-                                    filter.type = 'type';
-                                    filter.id = data[0];
+                                href: '#'
+                            }).bind('click', function () {
+                                AddToBreadcrumb('type_posts', data[0], data[2]);
+                            }).html(data[2]));
 
-                                    //finally reload the data
-                                    $('#post-list').DataTable().search('');
-                                    $('#post-list').DataTable().ajax.reload();
+                            $('td:eq(1)', row).append(`<sup>${data[0]}</sup>`);
 
-                                    //update the breadcrumb
-                                    addBreadcrumbLevel('type', data[0], data[3]);
-                                }).html(data[3]));
-                                $('td:eq(1)', row).append('<sup> ' + getAAM().__('post type') + '</sup>');
+                            const container = $('<div/>', { 'class': 'aam-row-actions' });
 
-                                // Add additional information about post type
-                                $('td:eq(1)', row).append(
-                                    $('<i class="aam-row-subtitle"></i>')
-                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
-                                    .append($('<strong/>').text(data[0]))
-                                );
-                            } else if ($.inArray(data[2], ['taxonomy-category', 'taxonomy-tag']) !== -1) {
-                                $('td:eq(1)', row).html($('<a/>', {
-                                    href: '#'
-                                }).bind('click', function () {
-                                    //visual feedback - show loading icon
-                                    $('td:eq(0)', row).html(
-                                        '<i class="icon-spin4 animate-spin"></i>'
-                                    );
-                                    //set filter
-                                    filter.type = 'taxonomy';
-                                    filter.id = data[0];
-
-                                    //finally reload the data
-                                    $('#post-list').DataTable().search('');
-                                    $('#post-list').DataTable().ajax.reload();
-
-                                    //update the breadcrumb
-                                    addBreadcrumbLevel('taxonomy', data[0], data[3]);
-                                }).html(data[3]));
-                                $('td:eq(1)', row).append('<sup> ' + getAAM().__('taxonomy') + '</sup>');
-
-                                $('td:eq(1)', row).append(
-                                    $('<i class="aam-row-subtitle"></i>')
-                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
-                                    .append($('<strong/>').text(data[0]))
-                                );
-                            } else if (data[2] === 'cat') {
-                                $('td:eq(1)', row).html($('<span/>').text(data[3]));
-
-                                let sub = $('<i class="aam-row-subtitle"></i>');
-
-                                if (data[5]) {
-                                    sub.append($('<span/>').text(getAAM().__('Parent') + ': '));
-                                    sub.append($('<strong/>').text(data[5] + '; '));
-                                }
-
-                                sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
-                                sub.append($('<strong/>').text(data[0].split('|')[0] + '; '));
-                                sub.append($('<span/>').text(getAAM().__('Slug:') + ' '));
-                                sub.append($('<strong/>').text(data[7]));
-
-                                $('td:eq(1)', row).append(sub);
-                            } else if (data[2] === 'tag') {
-                                $('td:eq(1)', row).html($('<span/>').text(data[3]));
-
-                                $('td:eq(1)', row).append(
-                                    $('<i class="aam-row-subtitle"></i>')
-                                    .append($('<span/>').text(getAAM().__('ID:') + ' '))
-                                    .append($('<strong/>').text(data[0].split('|')[0] + '; '))
-                                    .append($('<span/>').text(getAAM().__('Slug:') + ' '))
-                                    .append($('<strong/>').text(data[7]))
-                                );
-                            } else {
-                                $('td:eq(1)', row).html($('<span/>').text(data[3]));
-
-                                let sub = $('<i class="aam-row-subtitle"></i>');
-
-                                if (data[5]) {
-                                    sub.append($('<span/>').text(getAAM().__('Parent') + ': '));
-                                    sub.append($('<strong/>').text(data[5] + '; '));
-                                }
-
-                                sub.append($('<span/>').text(getAAM().__('ID:') + ' '));
-                                sub.append($('<strong/>').text(data[0] + '; '));
-                                sub.append($('<span/>').text(getAAM().__('Slug:') + ' '));
-                                sub.append($('<strong/>').text(data[7]));
-
-                                $('td:eq(1)', row).append(sub);
-                            }
-
-                            //update the actions
-                            var actions = data[4].split(',');
-
-                            var container = $('<div/>', { 'class': 'aam-row-actions' });
-                            $.each(actions, function (i, action) {
+                            $.each(data[3], function (_, action) {
                                 switch (action) {
                                     case 'drilldown':
                                         $(container).append($('<i/>', {
@@ -3357,9 +3553,197 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
-                                            loadAccessForm(data[2], data[0], $(this), function () {
-                                                addBreadcrumbLevel('edit', data[2], data[3]);
-                                            });
+                                            NavigateToAccessForm(
+                                                'type', data[0], data[2], $(this)
+                                            );
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Manage Access')
+                                        }));
+                                        $('.tooltip').remove();
+                                        break;
+
+                                    default:
+                                        getAAM().triggerHook('post-action', {
+                                            container: container,
+                                            action: action,
+                                            data: data
+                                        });
+                                        break;
+                                }
+                            });
+                            $('td:eq(2)', row).html(container);
+                        }
+                    });
+                }
+
+                $('#type-list_wrapper .table').removeClass('hidden');
+                $('#type-list_wrapper').removeClass('hidden');
+            }
+
+            function PrepareTaxonomyListTable() {
+                $('#post-content .dataTables_wrapper').addClass('hidden');
+                $('#post-content .table').addClass('hidden');
+
+                if (!$('#taxonomy-list').hasClass('dataTable')) {
+                    $('#taxonomy-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        pagingType: 'simple',
+                        processing: true,
+                        saveState: true,
+                        ajax: function(_, cb) {
+                            FetchTaxonomyList(cb);
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 4] },
+                            { searchable: false, targets: [0, 1, 3, 4] }
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search'),
+                            info: getAAM().__('_TOTAL_ taxonomy(s)'),
+                            infoFiltered: '',
+                            lengthMenu: '_MENU_'
+                        },
+                        initComplete: function () {
+                            // Adding the root level controls
+                            $('#taxonomy-list_length').append(RenderTypeTaxonomySwitch());
+                        },
+                        rowCallback: function(row, data) {
+                            let overwritten = '';
+
+                            if (data[4].inheritance && data[4].inheritance.is_overwritten) {
+                                overwritten = ' aam-access-overwritten';
+                            }
+
+                            $('td:eq(0)', row).html(
+                                `<div class="dashicons-before ${data[1]}${overwritten}"></div>`
+                            );
+
+                            // Decorating the post type title & make it actionable
+                                $('td:eq(1)', row).html($('<a/>', {
+                                href: '#'
+                            }).bind('click', function () {
+                                AddToBreadcrumb('taxonomy_terms', data[0], data[2]);
+                            }).html(data[2]));
+
+                            $('td:eq(1)', row).append(`<sup>${data[0]}</sup>`);
+
+                            const container = $('<div/>', { 'class': 'aam-row-actions' });
+
+                            $.each(data[3], function (_, action) {
+                                switch (action) {
+                                    case 'drilldown':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-success icon-level-down'
+                                        }).bind('click', function () {
+                                            $('td:eq(1) > a', row).trigger('click');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Drill-Down')
+                                        }));
+                                        $('.tooltip').remove();
+                                        break;
+
+                                    case 'manage':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-info icon-cog'
+                                        }).bind('click', function () {
+                                            NavigateToAccessForm(
+                                                'taxonomy', data[0], data[2], $(this)
+                                            );
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Manage Access')
+                                        }));
+                                        $('.tooltip').remove();
+                                        break;
+
+                                    default:
+                                        getAAM().triggerHook('post-action', {
+                                            container: container,
+                                            action: action,
+                                            data: data
+                                        });
+                                        break;
+                                }
+                            });
+                            $('td:eq(2)', row).html(container);
+                        }
+                    });
+                }
+
+                $('#taxonomy-list_wrapper .table').removeClass('hidden');
+                $('#taxonomy-list_wrapper').removeClass('hidden');
+            }
+
+            function PreparePostListTable() {
+                $('#post-content .dataTables_wrapper').addClass('hidden');
+                $('#post-content .table').addClass('hidden');
+
+                if (!$('#post-list').hasClass('dataTable')) {
+                    $('#post-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        processing: true,
+                        serverSide: true,
+                        saveState: true,
+                        ajax: function(filters, cb) {
+                            FetchPostList(filters, cb);
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 4] },
+                            { searchable: false, targets: [0, 1, 3, 4] }
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search'),
+                            info: getAAM().__('_TOTAL_ post(s)'),
+                            infoFiltered: '',
+                            lengthMenu: '_MENU_'
+                        },
+                        initComplete: function () {
+                            // Adding the root level controls
+                            RenderPostTaxonomySwitch('#post-list_length');
+                        },
+                        rowCallback: function(row, data) {
+                            let overwritten = '';
+
+                            if (data[4].inheritance && data[4].inheritance.is_overwritten) {
+                                overwritten = ' aam-access-overwritten';
+                            }
+
+                            $('td:eq(0)', row).html(
+                                `<div class="dashicons-before ${data[1]}${overwritten}"></div>`
+                            );
+
+                            // Decorating the post type title & make it actionable
+                                $('td:eq(1)', row).html($('<a/>', {
+                                href: '#'
+                            }).bind('click', function () {
+                                NavigateToAccessForm(
+                                    'post', data[0], data[2], $('.icon-cog', row)
+                                );
+                                RenderAccessForm('post', data[0], $('.icon-cog', row), () => {
+                                    // Update the breadcrumb
+                                    AddToBreadcrumb('post', data[0], data[2]);
+                                });
+                            }).html(data[2]));
+
+                            $('td:eq(1)', row).append(`<sup>ID: ${data[0]}</sup>`);
+
+                            const container = $('<div/>', { 'class': 'aam-row-actions' });
+
+                            $.each(data[3], function (_, action) {
+                                switch (action) {
+                                    case 'manage':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-info icon-cog'
+                                        }).bind('click', function () {
+                                            NavigateToAccessForm(
+                                                'post', data[0], data[2], $(this)
+                                            );
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Manage Access')
@@ -3371,7 +3755,10 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-warning icon-pencil'
                                         }).bind('click', function () {
-                                            window.open(data[1], '_blank');
+                                            window.open(
+                                                getLocal().url.editPost + `post=${data[0]}&action=edit`,
+                                                '_blank'
+                                            );
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Edit')
@@ -3396,35 +3783,145 @@
                             $('td:eq(2)', row).html(container);
                         }
                     });
-
-                    //initialize the breadcrumb
-                    $('.aam-post-breadcrumb').delegate('a', 'click', function () {
-                        filter.type = $(this).data('level');
-                        filter.id   = $(this).data('id');
-
-                        $('#post-list').DataTable().ajax.reload();
-                        $(this).nextAll().remove();
-                        $('.aam-slide-form').removeClass('active');
-                        $('#post-list_wrapper').removeClass('aam-hidden');
-                        $('#post-overwritten').addClass('hidden');
-                    });
-
-                    //go back button
-                    $('.aam-slide-form').delegate('.post-back', 'click', function () {
-                        $('.aam-slide-form').removeClass('active');
-                        $('#post-list_wrapper').removeClass('aam-hidden');
-                        $('.aam-post-breadcrumb span:last').remove();
-                        $('#post-term--overwritten').addClass('hidden');
-                    });
+                } else {
+                    // Reload list of posts
+                    $('#post-list').DataTable().ajax.reload();
+                    // Reload the list of taxonomies
+                    RenderPostTaxonomySwitch('#post-list_length');
                 }
 
-                if ($('#aam-access-form-container').is(':empty') === false) {
-                    if ($('#content-object-type').val()) {
-                        loadAccessForm(
-                            $('#content-object-type').val(),
-                            $('#content-object-id').val()
-                        );
-                    }
+                $('#post-list_wrapper .table').removeClass('hidden');
+                $('#post-list_wrapper').removeClass('hidden');
+            }
+
+            function PrepareTermListTable(scope = null) {
+                $('#post-content .dataTables_wrapper').addClass('hidden');
+                $('#post-content .table').addClass('hidden');
+
+                $('#term-list').attr('data-scope', scope);
+
+                if (!$('#term-list').hasClass('dataTable')) {
+                    $('#term-list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        pagingType: 'simple',
+                        processing: true,
+                        serverSide: true,
+                        saveState: true,
+                        ajax: function(filters, cb) {
+                            FetchTermList(filters, cb);
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 4] },
+                            { searchable: false, targets: [0, 1, 3, 4] }
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search'),
+                            info: getAAM().__('_TOTAL_ term(s)'),
+                            infoFiltered: '',
+                            lengthMenu: '_MENU_'
+                        },
+                        rowCallback: function(row, data) {
+                            let overwritten = '';
+
+                            if (data[4].inheritance && data[4].inheritance.is_overwritten) {
+                                overwritten = ' aam-access-overwritten';
+                            }
+
+                            $('td:eq(0)', row).html(
+                                `<div class="dashicons-before ${data[1]}${overwritten}"></div>`
+                            );
+
+                            // Decorating the term title & make it actionable
+                                $('td:eq(1)', row).html($('<a/>', {
+                                href: '#'
+                            }).bind('click', function () {
+                                const scope = $('#term-list').attr('data-scope');
+
+                                NavigateToAccessForm(
+                                    'term',
+                                    `${data[0]}|${data[4].taxonomy}${scope ? '|' + scope : ''}`,
+                                    data[2],
+                                    $('.icon-cog', row)
+                                );
+                            }).html(data[2]));
+
+                            $('td:eq(1)', row).append(`<sup>ID: ${data[0]}</sup>`);
+
+                            const container = $('<div/>', { 'class': 'aam-row-actions' });
+
+                            $.each(data[3], function (_, action) {
+                                switch (action) {
+                                    case 'manage':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-info icon-cog'
+                                        }).bind('click', function () {
+                                            const scope = $('#term-list').attr('data-scope');
+
+                                            NavigateToAccessForm(
+                                                'term',
+                                                `${data[0]}|${data[4].taxonomy}${scope ? '|' + scope : ''}`,
+                                                data[2],
+                                                $(this)
+                                            );
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Manage Access')
+                                        }));
+                                        $('.tooltip').remove();
+                                        break;
+
+                                    case 'edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-warning icon-pencil'
+                                        }).bind('click', function () {
+                                            const url = getLocal().url.editTerm + `?taxonomy=${data[4].taxonomy}&tag_ID=${data[0]}`;
+                                            window.open(url, '_blank');
+                                        }).attr({
+                                            'data-toggle': "tooltip",
+                                            'title': getAAM().__('Edit')
+                                        }));
+                                        break;
+
+                                    case 'no-edit':
+                                        $(container).append($('<i/>', {
+                                            'class': 'aam-row-action text-muted icon-pencil'
+                                        }));
+                                        break;
+
+                                    default:
+                                        getAAM().triggerHook('post-action', {
+                                            container: container,
+                                            action: action,
+                                            data: data
+                                        });
+                                        break;
+                                }
+                            });
+                            $('td:eq(2)', row).html(container);
+                        }
+                    });
+                } else {
+                    $('#term-list').DataTable().ajax.reload();
+                }
+
+                $('#term-list_wrapper .table').removeClass('hidden');
+                $('#term-list_wrapper').removeClass('hidden');
+            }
+
+            /**
+             *
+             */
+            function initialize() {
+                if ($('#post-content').length) {
+                    RenderBreadcrumb();
+
+                    // Go back button
+                    $('.aam-slide-form').delegate('.post-back', 'click', function () {
+                        $('.aam-slide-form').removeClass('active');
+                        NavigateBack();
+                    });
                 }
             }
 

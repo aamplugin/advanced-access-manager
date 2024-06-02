@@ -67,6 +67,8 @@ trait AAM_Core_Contract_ServiceTrait
         if (is_null(self::$instance) || $reload) {
             self::$instance = new self;
         }
+
+        return self::$instance;
     }
 
     /**
@@ -84,11 +86,7 @@ trait AAM_Core_Contract_ServiceTrait
      */
     public static function getInstance($reload = false)
     {
-        if (is_null(self::$instance) || $reload) {
-            self::bootstrap($reload);
-        }
-
-        return self::$instance;
+        return self::bootstrap($reload);
     }
 
 }

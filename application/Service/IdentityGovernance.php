@@ -10,7 +10,8 @@
 /**
  * Users & Roles Governance service
  *
- * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/372
+ * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/373
+ *               https://github.com/aamplugin/advanced-access-manager/issues/374
  * @since 6.9.28 Initial implementation of the class
  *
  * @package AAM
@@ -85,13 +86,11 @@ class AAM_Service_IdentityGovernance
         // Register RESTful API endpoints
         AAM_Core_Restful_IdentityGovernanceService::bootstrap();
 
-        add_action('init', function() {
-            add_filter('editable_roles', array($this, 'filter_roles'));
-            add_action('pre_get_users', array($this, 'filter_users'), 999);
-            add_filter('views_users', array($this, 'filter_users_in_view'));
-            // RESTful user querying
-            add_filter('rest_user_query', array($this, 'rest_user_query_args'));
-        }, 1);
+        add_filter('editable_roles', array($this, 'filter_roles'));
+        add_action('pre_get_users', array($this, 'filter_users'), 999);
+        add_filter('views_users', array($this, 'filter_users_in_view'));
+        // RESTful user querying
+        add_filter('rest_user_query', array($this, 'rest_user_query_args'));
 
         // Check if user has ability to perform certain task on other users
         add_filter('map_meta_cap', array($this, 'map_meta_caps'), 999, 4);
@@ -193,8 +192,11 @@ class AAM_Service_IdentityGovernance
      *
      * @return boolean
      *
+     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/374
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.28
+     * @version 6.9.29
      */
     public function can_list_role($role_slug)
     {
@@ -202,13 +204,15 @@ class AAM_Service_IdentityGovernance
             AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
         );
 
+        $max_level = 0;
+
         // Get max user level
-        if ($role_slug === '*'){
-            $max_level = 0;
-        } else {
-            $max_level = AAM_Core_API::maxLevel(
-                AAM_Core_API::getRoles()->get_role($role_slug)->capabilities
-            );
+        if ($role_slug !== '*'){
+            $role      = AAM_Core_API::getRoles()->get_role($role_slug);
+
+            if (is_a($role, 'WP_Role')) {
+                $max_level = AAM_Core_API::maxLevel($role->capabilities);
+            }
         }
 
         return $object->is_allowed_to('role', $role_slug, 'list_role') !== false
