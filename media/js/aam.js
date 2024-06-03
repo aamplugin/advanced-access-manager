@@ -3344,19 +3344,24 @@
              * @param {*} cb
              */
             function FetchTermList(filters, cb) {
+                const payload = {
+                    taxonomy: CurrentLevel().level_id,
+                    offset: filters.start,
+                    per_page: filters.length,
+                    search: filters.search.value
+                };
+
+                if (CurrentLevel().scope) {
+                    payload.scope = CurrentLevel().scope;
+                }
+
                 // Fetching the list of terms
                 $.ajax(`${getLocal().rest_base}aam/v2/service/content/terms`, {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
                     },
-                    data: getAAM().prepareRequestSubjectData({
-                        taxonomy: CurrentLevel().level_id,
-                        offset: filters.start,
-                        per_page: filters.length,
-                        search: filters.search.value,
-                        scope: CurrentLevel().scope
-                    }),
+                    data: getAAM().prepareRequestSubjectData(payload),
                     success: function (response) {
                         const result = {
                             data: [],
