@@ -217,7 +217,7 @@ class AAM_Service_Content
             add_filter('get_pages', array($this, 'filterPages'), 999);
 
             // Manage access to frontend posts & pages
-            add_action('wp', array($this, 'wp'), 999);
+            add_action('wp', array($this, 'wp'), PHP_INT_MAX);
         }
 
         // Control post visibility

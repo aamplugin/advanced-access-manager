@@ -10,8 +10,11 @@
 /**
  * Users & Roles Governance object
  *
+ * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/378
+ * @since 6.9.28 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.28
+ * @version 6.9.30
  */
 class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
 {
@@ -84,8 +87,11 @@ class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
      *
      * @return array
      *
+     * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/378
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.28
+     * @version 6.9.30
      */
     public function mergeOption($incoming)
     {
@@ -99,25 +105,18 @@ class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
             }
         }
 
-        $merged    = [];
-        $convertor = function($v) { return $v['effect'] !== 'allow'; };
+        $merged  = [];
+        $convert = function($v) { return $v !== 'allow'; };
 
         // Iterate over the array of all targets and merge settings
         foreach($targets as $target) {
-            // Converting the two sets into true/false representation where false is
-            // when type === "allow" and everything else is true
-            $set1 = array_map(
-                $convertor,
-                isset($incoming[$target]) ? $incoming[$target]['permissions'] : []
-            );
-            $set2 = array_map(
-                $convertor,
-                isset($current[$target]) ? $current[$target]['permissions'] : []
-            );
-
-            $merged[$target] = AAM::api()->mergeSettings(
-                $set1, $set2, self::OBJECT_TYPE
-            );
+            $merged[$target] = array_map(function($v) {
+                return $v === true ? 'deny' : 'allow';
+            }, AAM::api()->mergeSettings(
+                array_map($convert, isset($incoming[$target]) ? $incoming[$target] : []),
+                array_map($convert, isset($current[$target]) ? $current[$target] : []),
+                self::OBJECT_TYPE
+            ));
         }
 
         return $merged;

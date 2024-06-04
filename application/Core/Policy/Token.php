@@ -126,7 +126,7 @@ class AAM_Core_Policy_Token
             if ($parts[0] === 'ARGS') {
                 $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
             } else {
-                $value = call_user_func(self::$map[$parts[0]], $parts[1]);
+                $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
             }
         } elseif ($parts[0] === 'CALLBACK') {
             $value = self::evaluateCallback($parts[1], $args);
@@ -198,7 +198,7 @@ class AAM_Core_Policy_Token
                 if (preg_match('/^\'.*\'$/', $marker) === 1) { // This is literal string
                     array_push($values, trim($marker, '\''));
                 } elseif (strpos($marker, '.') !== false) { // Potentially another marker
-                    array_push($values, self::getTokenValue($marker, $args));
+                    array_push($values, self::getTokenValue('${' . $marker . '}', $args));
                 } else {
                     array_push($values, $marker);
                 }

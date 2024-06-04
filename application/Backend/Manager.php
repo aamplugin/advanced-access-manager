@@ -10,6 +10,7 @@
 /**
  * Backend manager
  *
+ * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/377
  * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
  * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/262
@@ -26,7 +27,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.20
+ * @version 6.9.30
  */
 class AAM_Backend_Manager
 {
@@ -164,11 +165,12 @@ class AAM_Backend_Manager
      *
      * @return void
      *
+     * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/377
      * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
      * @since 6.9.5  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.14
+     * @version 6.9.30
      */
     protected function checkForLegacyAddons()
     {
@@ -206,7 +208,7 @@ class AAM_Backend_Manager
         if (defined('AAM_COMPLETE_PACKAGE')
             && version_compare(AAM_COMPLETE_PACKAGE, '6.1.3') === -1) {
             AAM_Core_Console::add(
-                __('Upgrade the AAM premium add-on to version 6.1.3 or higher to ensure all features function correctly.', AAM_KEY),
+                __('Upgrade the AAM premium add-on to version 6.1.3 or higher to ensure all features function correctly.', AAM_KEY)
             );
         }
     }

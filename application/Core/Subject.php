@@ -26,6 +26,7 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/379
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/344
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/249
@@ -35,7 +36,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.22
+ * @version 6.9.30
  */
 abstract class AAM_Core_Subject
 {
@@ -356,12 +357,13 @@ abstract class AAM_Core_Subject
      *
      * @return array
      *
+     * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/379
      * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
      * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/152
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.21
+     * @version 6.9.30
      */
     protected function inheritFromParent(AAM_Core_Object $object)
     {
@@ -421,12 +423,16 @@ abstract class AAM_Core_Subject
 
             $inheritance['is_overwritten'] = !empty($object_options);
 
-            // Set inheritance info
-            $object->setInheritance($inheritance);
-
             // Finally set the option for provided object
             $object->setOption($option);
+        } else {
+            // Determine if settings are customized for specified object already
+            $object_options                = $object->getExplicitOption();
+            $inheritance['is_overwritten'] = !empty($object_options);
         }
+
+        // Set inheritance info
+        $object->setInheritance($inheritance);
 
         return $object->getOption();
     }

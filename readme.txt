@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.5.3
-Stable tag: 6.9.29
+Stable tag: 6.9.30
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,12 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.30 =
+* Fixed: The list of terms for any selected taxonomy is not listed [https://github.com/aamplugin/advanced-access-manager/issues/376](https://github.com/aamplugin/advanced-access-manager/issues/376)
+* Fixed: An error of type E_PARSE was caused in line 210 of the file /.../application/Backend/Manager.php [https://github.com/aamplugin/advanced-access-manager/issues/377](https://github.com/aamplugin/advanced-access-manager/issues/377)
+* Fixed: Incorrectly merging access controls for identity governance service with multirole support [https://github.com/aamplugin/advanced-access-manager/issues/378](https://github.com/aamplugin/advanced-access-manager/issues/378)
+* Fixed: Internal inheritance info incorrectly set for Default access level [https://github.com/aamplugin/advanced-access-manager/issues/379](https://github.com/aamplugin/advanced-access-manager/issues/379)
 
 = 6.9.29 =
 * Fixed: Warning: Attempt to read property "capabilities" on null in [https://github.com/aamplugin/advanced-access-manager/issues/374](https://github.com/aamplugin/advanced-access-manager/issues/374)
