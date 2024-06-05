@@ -3460,13 +3460,13 @@
                         options.map(o => `'<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')
                     ).bind('change', function () {
                         const value                       = $(this).val();
-                        const [level_type, post_type, id] = $(this).val().split(':');
+                        const [level_type, _, id] = $(this).val().split(':');
 
                         AddToBreadcrumb(
                             level_type,
                             id,
                             $(`.aam-post-taxonomy-filter option:selected`).text(),
-                            post_type
+                            'post'
                         );
 
                         $(`.aam-post-taxonomy-filter option[value="${value}"]`).prop(
