@@ -10,11 +10,12 @@
 /**
  * Users & Roles Governance object
  *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/378
  * @since 6.9.28 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.30
+ * @version 6.9.31
  */
 class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
 {
@@ -28,13 +29,17 @@ class AAM_Core_Object_IdentityGovernance extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.9.28
+     *
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.9.28 Initial implementation of the method
+     *
+     * @version 6.9.31
      */
     protected function initialize()
     {
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the options. For
         // example, this hooks is used by Access Policy service

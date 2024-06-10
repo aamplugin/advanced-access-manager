@@ -5,15 +5,17 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
  * Policy object
  *
  * @package AAM
- * @version 6.0.0
+ *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+ * @since 6.0.0  Initial implementation of the class
+ *
+ * @version 6.9.31
  */
 class AAM_Core_Object_Policy extends AAM_Core_Object
 {
@@ -31,13 +33,17 @@ class AAM_Core_Object_Policy extends AAM_Core_Object
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     *
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.0.0  Initial implementation of the method
+     *
+     * @version 6.9.31
      */
     protected function initialize()
     {
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         $this->setOption(is_array($option) ? $option : array());
     }

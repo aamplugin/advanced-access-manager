@@ -10,13 +10,14 @@
 /**
  * Post object
  *
- * @since 6.1.0 Removed support for the $suppressFilters flag
- * @since 6.0.1 Added new method isDefined that is used to determine if access option
- *              is defined
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+ * @since 6.1.0  Removed support for the $suppressFilters flag
+ * @since 6.0.1  Added new method isDefined that is used to determine if access option
+ *               is defined
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.1.0
+ * @version 6.9.31
  */
 class AAM_Core_Object_Post extends AAM_Core_Object
 {
@@ -95,10 +96,11 @@ class AAM_Core_Object_Post extends AAM_Core_Object
     /**
      * @inheritDoc
      *
-     * @since 6.1.0 Removed support for the $suppressFilters flag
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.1.0  Removed support for the $suppressFilters flag
+     * @since 6.0.0  Initial implementation of the method
      *
-     * @version 6.1.0
+     * @version 6.9.31
      */
     protected function initialize()
     {
@@ -108,7 +110,7 @@ class AAM_Core_Object_Post extends AAM_Core_Object
             self::OBJECT_TYPE, $this->ID . '|' . $this->post_type
         );
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the post access options
         // after initial setup. Typically is used by third party functionality and

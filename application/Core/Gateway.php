@@ -26,20 +26,28 @@ final class AAM_Core_Gateway
      * Prevent from fatal errors
      *
      * @param string $name
-     * @param array  $arguments
+     * @param array  $args
      *
      * @return void
      *
      * @access public
      * @version 6.0.0
      */
-    public function __call($name, $arguments)
+    public function __call($name, $args)
     {
-        _doing_it_wrong(
-            __CLASS__ . '::' . __METHOD__,
-            "The method {$name} is not defined in the AAM API",
-            AAM_VERSION
-        );
+        $result = null;
+
+        if (method_exists('AAM_Framework_Manager', $name)) {
+            $result = call_user_func_array("AAM_Framework_Manager::{$name}", $args);
+        } else {
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                "The method {$name} is not defined in the AAM API",
+                AAM_VERSION
+            );
+        }
+
+        return $result;
     }
 
     /**

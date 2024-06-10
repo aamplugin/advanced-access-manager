@@ -11,7 +11,11 @@
  * Abstract base for all services
  *
  * @package AAM
- * @version 6.9.10
+ *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
+ * @since 6.9.10 Initial implementation of the class
+ *
+ * @version 6.9.31
  */
 trait AAM_Framework_Service_BaseTrait
 {
@@ -26,6 +30,16 @@ trait AAM_Framework_Service_BaseTrait
      * @version 6.9.10
      */
     private static $_instance = null;
+
+    /**
+     * Collection of extended methods
+     *
+     * @var array
+     *
+     * @access private
+     * @version 6.9.31
+     */
+    private $_extended_methods = [];
 
     /**
      * The runtime context
@@ -44,10 +58,68 @@ trait AAM_Framework_Service_BaseTrait
      *
      * @return void
      *
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.10
+     * @version 6.9.31
      */
-    protected function __construct() {}
+    protected function __construct() {
+        // Extend the service instance with additional methods
+        $closures = apply_filters('aam_framework_service_closures_filter', [], $this);
+
+        if (is_array($closures)) {
+            foreach($closures as $name => $closure) {
+                $closures[$name] = $closure->bindTo($this, $this);
+            }
+
+            $this->_extended_methods = $closures;
+        }
+
+        if (method_exists($this, 'initialize_hooks')) {
+            $this->initialize_hooks();
+        };
+    }
+
+    /**
+     * Call any extended methods
+     *
+     * @param string $name
+     * @param array  $args
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 6.9.31
+     */
+    public function __call($name, $args)
+    {
+        if ($this->_extended_method_exists($name)) {
+                $response = call_user_func_array(
+                    $this->_extended_methods[$name], $args
+                );
+        } else {
+            throw new Exception("Method {$name} does not exist");
+        }
+
+        return $response;
+    }
+
+    /**
+     * Check if extended method exists
+     *
+     * @param string $name
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 6.9.31
+     */
+    private function _extended_method_exists($name)
+    {
+        return isset($this->_extended_methods[$name])
+            && is_callable($this->_extended_methods[$name]);
+    }
 
     /**
      * Get current subject

@@ -367,11 +367,9 @@ abstract class AAM_Core_Subject
      */
     protected function inheritFromParent(AAM_Core_Object $object)
     {
-        $parent      = $this->getParent();
-        $inheritance = [];
+        $parent = $this->getParent();
 
         if (is_a($parent, 'AAM_Core_Subject')) {
-            $from   = null;
             $option = $parent->getObject(
                 $object::OBJECT_TYPE,
                 $object->getId()
@@ -381,58 +379,24 @@ abstract class AAM_Core_Subject
             $multi = AAM::api()->getConfig('core.settings.multiSubject', false);
 
             if ($multi && $parent->hasSiblings()) {
-                $from = [];
-
                 foreach ($parent->getSiblings() as $sibling) {
                     $obj = $sibling->getObject(
                         $object::OBJECT_TYPE,
                         $object->getId()
                     );
 
-                    $sibling_options = $obj->getOption();
-
-                    if (!empty($sibling_options)) {
-                        array_push($from, [
-                            'type' => $sibling::UID,
-                            'id'   => $sibling->getId()
-                        ]);
-                    }
-
                     $option = $obj->mergeOption($option, $parent->getObject(
                         $object::OBJECT_TYPE,
                         $object->getId()
                     ));
                 }
-            } elseif (!empty($option)) {
-                $from = [
-                    'subject' => $parent::UID,
-                    'id'      => $parent->getId()
-                ];
             }
 
             // Merge access settings while reading hierarchical chain
-            $option = array_replace_recursive($option, $object->getOption());
-
-            // Set inheritance attributes
-            if (!empty($from)) {
-                $inheritance['inherited_from'] = $from;
-            }
-
-            // Determine if settings are customized for specified object already
-            $object_options = $object->getExplicitOption();
-
-            $inheritance['is_overwritten'] = !empty($object_options);
-
-            // Finally set the option for provided object
-            $object->setOption($option);
-        } else {
-            // Determine if settings are customized for specified object already
-            $object_options                = $object->getExplicitOption();
-            $inheritance['is_overwritten'] = !empty($object_options);
+            $object->setOption(
+                array_replace_recursive($option, $object->getOption())
+            );
         }
-
-        // Set inheritance info
-        $object->setInheritance($inheritance);
 
         return $object->getOption();
     }

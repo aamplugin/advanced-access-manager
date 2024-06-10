@@ -206,10 +206,11 @@ class AAM_Backend_Manager
         }
 
         if (defined('AAM_COMPLETE_PACKAGE')
-            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.3') === -1) {
-            AAM_Core_Console::add(
-                __('Upgrade the AAM premium add-on to version 6.1.3 or higher to ensure all features function correctly.', AAM_KEY)
-            );
+            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.5') === -1) {
+            AAM_Core_Console::add(sprintf(
+                __('Upgrade the AAM premium add-on to version 6.1.5 or higher to ensure all features function correctly. %sLearn more%s.', AAM_KEY),
+                '<a href="https://aamportal.com/question/update-premium-addon-warning?ref=plugin">', '</a>'
+            ));
         }
     }
 

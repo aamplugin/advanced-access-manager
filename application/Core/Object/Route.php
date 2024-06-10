@@ -10,6 +10,7 @@
 /**
  * API route object
  *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
  * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
  * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/56
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.31
  */
 class AAM_Core_Object_Route extends AAM_Core_Object
 {
@@ -32,17 +33,18 @@ class AAM_Core_Object_Route extends AAM_Core_Object
     /**
      * @inheritdoc
      *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
-     * @since 6.1.0 Fixed bug with incorrectly halted inheritance mechanism
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @since 6.1.0  Fixed bug with incorrectly halted inheritance mechanism
+     * @since 6.0.0  Initial implementation of the method
      *
-     * @version 6.5.0
+     * @version 6.9.31
      */
     protected function initialize()
     {
         $option = $this->getSubject()->readOption('route');
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the menu options. For
         // example, this hooks is used by Access Policy service

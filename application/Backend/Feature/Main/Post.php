@@ -10,6 +10,7 @@
 /**
  * Backend posts & terms service UI
  *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/384
  * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
  * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
@@ -23,7 +24,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.29
+ * @version 6.9.31
  */
 class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
 {
@@ -487,23 +488,6 @@ class AAM_Backend_Feature_Main_Post extends AAM_Backend_Feature_Abstract
         return wp_json_encode(array(
             'status'  => ($result ? 'success' : 'failure')
         ));
-    }
-
-    /**
-     * Reset the object access settings
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function reset()
-    {
-        $type   = $this->getFromPost('type');
-        $id     = $this->getFromPost('id');
-        $result = $this->getSubject()->getObject($type, $id)->reset();
-
-        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
 
     /**

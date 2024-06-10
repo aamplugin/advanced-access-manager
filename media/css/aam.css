@@ -835,6 +835,11 @@ div.dataTables_filter label {
   text-align: left;
 }
 
+.dataTables_wrapper .pagination > li >a,
+.dataTables_wrapper .pagination > li >span {
+  padding: 3px 6px;
+}
+
 #user-list-filter {
   height: 30px;
   margin-left: 10px;

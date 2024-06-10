@@ -10,6 +10,7 @@
 /**
  * Menu object
  *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/364
  * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/331
  *               https://github.com/aamplugin/advanced-access-manager/issues/334
@@ -20,7 +21,7 @@
  * @since 6.0.0  Initial implementation of the method
  *
  * @package AAM
- * @version 6.9.28
+ * @version 6.9.31
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
@@ -35,16 +36,17 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
     /**
      * @inheritdoc
      *
-     * @since 6.5.0 https://github.com/aamplugin/advanced-access-manager/issues/105
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
+     * @since 6.0.0  Initial implementation of the method
      *
-     * @version 6.5.0
+     * @version 6.9.31
      */
     protected function initialize()
     {
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the menu options. For
         // example, this hooks is used by Access Policy service

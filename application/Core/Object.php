@@ -264,21 +264,6 @@ abstract class AAM_Core_Object
     }
 
     /**
-     * Set inheritance data
-     *
-     * @param array $inheritance
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.9.29
-     */
-    public function setInheritance(array $inheritance)
-    {
-        $this->_inheritance = $inheritance;
-    }
-
-    /**
      * Get inheritance data
      *
      * @return array
@@ -288,7 +273,9 @@ abstract class AAM_Core_Object
      */
     public function getInheritance()
     {
-        return $this->_inheritance;
+        return [
+            'is_overwritten' => $this->isOverwritten()
+        ];
     }
 
     /**
@@ -386,6 +373,8 @@ abstract class AAM_Core_Object
      *
      * @access public
      * @version 6.1.0
+     * @deprecated 6.9.31
+     * @todo Remove in Jun 2025
      */
     public function determineOverwritten($option)
     {
@@ -470,7 +459,9 @@ abstract class AAM_Core_Object
      */
     public function isOverwritten()
     {
-        return $this->_overwritten;
+        $explicit = $this->getExplicitOption();
+
+        return !empty($explicit);
     }
 
     /**
@@ -487,11 +478,16 @@ abstract class AAM_Core_Object
      */
     public function save()
     {
-        return $this->getSubject()->updateOption(
+        $result = $this->getSubject()->updateOption(
             $this->getExplicitOption(),
             static::OBJECT_TYPE,
             $this->getId()
         );
+
+        // Reload the options
+        $this->initialize();
+
+        return $result;
     }
 
     /**
@@ -522,10 +518,17 @@ abstract class AAM_Core_Object
      */
     public function reset()
     {
-        return $this->getSubject()->deleteOption(
+        $this->setExplicitOption([]);
+
+        $result = $this->getSubject()->deleteOption(
             static::OBJECT_TYPE,
             $this->getId()
         );
+
+        // Reinitialize all the options
+        $this->initialize();
+
+        return $result;
     }
 
     /**

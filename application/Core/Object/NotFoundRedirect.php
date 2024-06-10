@@ -11,7 +11,11 @@
  * 404 (Not Found) redirect object
  *
  * @package AAM
- * @version 6.4.0
+ *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+ * @since 6.4.0  Initial implementation of the class
+ *
+ * @version 6.9.31
  */
 class AAM_Core_Object_NotFoundRedirect extends AAM_Core_Object
 {
@@ -25,7 +29,11 @@ class AAM_Core_Object_NotFoundRedirect extends AAM_Core_Object
 
     /**
      * @inheritdoc
-     * @version 6.4.0
+     *
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.4.0  Initial implementation of the method
+     *
+     * @version 6.9.31
      */
     protected function initialize()
     {
@@ -33,7 +41,7 @@ class AAM_Core_Object_NotFoundRedirect extends AAM_Core_Object
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
         // If options are defined, set the overwritten flag
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the redirect options. For
         // example, this hooks is used by Access Policy service

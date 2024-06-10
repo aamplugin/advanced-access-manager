@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
-Tested up to: 6.5.3
-Stable tag: 6.9.30
+Tested up to: 6.5.4
+Stable tag: 6.9.31
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,14 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.31 =
+* Fixed: Overwritten flag for content resources does not take into consideration scope [https://github.com/aamplugin/advanced-access-manager/issues/385](https://github.com/aamplugin/advanced-access-manager/issues/385)
+* Fixed: User expiration flag does not clear when resettings all AAM settings [https://github.com/aamplugin/advanced-access-manager/issues/382](https://github.com/aamplugin/advanced-access-manager/issues/382)
+* Added: Fully develop "Content" RESTful API endpoints [https://github.com/aamplugin/advanced-access-manager/issues/386](https://github.com/aamplugin/advanced-access-manager/issues/386)
+* Added: Give the ability to extend AAM Framework with additional methods [https://github.com/aamplugin/advanced-access-manager/issues/387](https://github.com/aamplugin/advanced-access-manager/issues/387)
+* Changed: Move "Posts & Terms" reset feature to RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/384](https://github.com/aamplugin/advanced-access-manager/issues/384)
+* Changed: Speed-up AAM PHP Framework [https://github.com/aamplugin/advanced-access-manager/issues/388](https://github.com/aamplugin/advanced-access-manager/issues/388)
 
 = 6.9.30 =
 * Fixed: The list of terms for any selected taxonomy is not listed [https://github.com/aamplugin/advanced-access-manager/issues/376](https://github.com/aamplugin/advanced-access-manager/issues/376)

@@ -10,12 +10,13 @@
 /**
  * Access denied redirect object
  *
- * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/61
- * @since 6.1.0 Fixed bug with incorrectly merged settings
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+ * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/61
+ * @since 6.1.0  Fixed bug with incorrectly merged settings
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.31
  */
 class AAM_Core_Object_Redirect extends AAM_Core_Object
 {
@@ -30,16 +31,17 @@ class AAM_Core_Object_Redirect extends AAM_Core_Object
     /**
      * @inheritdoc
      *
-     * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/61
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
+     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/61
+     * @since 6.0.0  Initial implementation of the method
      *
-     * @version 6.0.0
+     * @version 6.9.31
      */
     protected function initialize()
     {
         $option = $this->getSubject()->readOption(self::OBJECT_TYPE);
 
-        $this->determineOverwritten($option);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the redirect options. For
         // example, this hooks is used by Access Policy service

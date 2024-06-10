@@ -10,6 +10,7 @@
 /**
  * URI object
  *
+ * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/371
  * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
  * @since 6.3.0  Fixed bug where home page could not be protected
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.28
+ * @version 6.9.31
  */
 class AAM_Core_Object_Uri extends AAM_Core_Object
 {
@@ -32,12 +33,13 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
     /**
      * @inheritdoc
      *
+     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
      * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/371
      * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
      * @since 6.1.0  Fixed bug with incorrectly halted inheritance mechanism
      * @since 6.0.0  Initial implementation of the method
      *
-     * @version 6.9.28
+     * @version 6.9.31
      */
     protected function initialize()
     {
@@ -49,11 +51,13 @@ class AAM_Core_Object_Uri extends AAM_Core_Object
             $normalized[$this->_toLower($key)] = $val;
         }
 
-        $this->determineOverwritten($normalized);
+        $this->setExplicitOption($option);
 
         // Trigger custom functionality that may populate the menu options. For
         // example, this hooks is used by Access Policy service
-        $normalized = apply_filters('aam_uri_object_option_filter', $normalized, $this);
+        $normalized = apply_filters(
+            'aam_uri_object_option_filter', $normalized, $this
+        );
 
         $this->setOption(is_array($normalized) ? $normalized : array());
     }
