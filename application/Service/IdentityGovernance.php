@@ -89,6 +89,7 @@ class AAM_Service_IdentityGovernance
         add_filter('editable_roles', array($this, 'filter_roles'));
         add_action('pre_get_users', array($this, 'filter_users'), 999);
         add_filter('views_users', array($this, 'filter_users_in_view'));
+
         // RESTful user querying
         add_filter('rest_user_query', array($this, 'rest_user_query_args'));
 
@@ -366,6 +367,8 @@ class AAM_Service_IdentityGovernance
                 $caps = $this->_authorize_user_action(
                     'change_user_password', $id, $caps
                 );
+            } elseif ($cap === 'aam_list_user') {
+                $caps = $this->_authorize_user_action('list_user', $id, $caps);
             }
         }
 

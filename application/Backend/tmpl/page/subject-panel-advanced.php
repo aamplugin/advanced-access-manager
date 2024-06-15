@@ -1,10 +1,11 @@
 <?php
     /**
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
      * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
      * @since 6.4.0  Added the ability to edit role's slug
      * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.21
+     * @version 6.9.32
      * */
 ?>
 
@@ -120,7 +121,7 @@
                                     ''            => __('Select Action', AAM_KEY),
                                     'logout'      => __('Logout User', AAM_KEY),
                                     'delete'      => __('Delete Account', AAM_KEY),
-                                    'change-role' => __('Change User Role', AAM_KEY)
+                                    'change_role' => __('Change User Role', AAM_KEY)
                                 );
                             ?>
                             <select class="form-control" id="action-after-expiration">

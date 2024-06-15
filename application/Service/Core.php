@@ -10,6 +10,7 @@
 /**
  * AAM core service
  *
+ * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/265
@@ -43,6 +44,7 @@ class AAM_Service_Core
      *
      * @access protected
      *
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
      * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
      * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
      * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
@@ -56,7 +58,7 @@ class AAM_Service_Core
      * @since 6.0.0  Initial implementation of the method
      *
      * @return void
-     * @version 6.9.10
+     * @version 6.9.32
      */
     protected function __construct()
     {
@@ -71,8 +73,6 @@ class AAM_Service_Core
 
             // Hook that initialize the AAM UI part of the service
             add_action('aam_init_ui_action', function () {
-                AAM_Backend_Feature_Subject_User::register();
-
                 AAM_Backend_Feature_Settings_Service::register();
                 AAM_Backend_Feature_Settings_Core::register();
                 AAM_Backend_Feature_Settings_Content::register();

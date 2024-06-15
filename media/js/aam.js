@@ -736,45 +736,41 @@
             }
 
             /**
+             * Update user status
              *
-             * @param {type} id
-             * @param {type} btn
-             * @returns {undefined}
+             * @param {number} id
+             * @param {object} btn
+             *
+             * @returns {void}
              */
-            function blockUser(id, btn) {
-                var state = ($(btn).hasClass('icon-lock') ? 0 : 1);
+            function updateUserStatus(id, btn) {
+                const status = ($(btn).hasClass('icon-lock') ? 'active' : 'inactive');
 
-                $.ajax(getLocal().ajaxurl, {
+                $.ajax({
+                    url: `${getLocal().rest_base}aam/v2/user/${id}?fields=status`,
                     type: 'POST',
-                    dataType: 'json',
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce
+                    },
                     data: {
-                        action: 'aam',
-                        // TODO: Refactor and move this to the SecureLogin service
-                        sub_action: 'Service_SecureLogin.toggleUserStatus',
-                        _ajax_nonce: getLocal().nonce,
-                        subject: 'user',
-                        subjectId: id
+                        status
                     },
                     beforeSend: function () {
                         $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
                     },
                     success: function (response) {
-                        if (response.status === 'success') {
-                            if (state === 1) {
-                                $(btn).attr({
-                                    'class': 'aam-row-action icon-lock text-danger',
-                                    'title': getAAM().__('Unlock user'),
-                                    'data-original-title': getAAM().__('Unlock user')
-                                });
-                            } else {
-                                $(btn).attr({
-                                    'class': 'aam-row-action icon-lock-open text-warning',
-                                    'title': getAAM().__('Lock user'),
-                                    'data-original-title': getAAM().__('Lock user')
-                                });
-                            }
+                        if (response.status === 'inactive') {
+                            $(btn).attr({
+                                'class': 'aam-row-action icon-lock text-danger',
+                                'title': getAAM().__('Unlock user'),
+                                'data-original-title': getAAM().__('Unlock user')
+                            });
                         } else {
-                            getAAM().notification('danger', getAAM().__('Failed to lock user'));
+                            $(btn).attr({
+                                'class': 'aam-row-action icon-lock-open text-success',
+                                'title': getAAM().__('Lock user'),
+                                'data-original-title': getAAM().__('Lock user')
+                            });
                         }
                     },
                     error: function () {
@@ -794,7 +790,7 @@
 
                     const payload = {
                         user_id: $('#reset-user-expiration-btn').attr('data-user-id'),
-                        expires_at: (new Date($('#user-expires').val() * 1000)).toISOString(),
+                        expires_at: $('#user-expires').val(),
                     };
 
                     if (action) {
@@ -804,7 +800,7 @@
                             }
                         }
 
-                        if (action === 'change-role') {
+                        if (action === 'change_role') {
                             payload.additional_claims.trigger.meta = $('#expiration-change-role').val();
                         }
                     }
@@ -834,32 +830,94 @@
             //initialize the user list table
             $('#user-list').DataTable({
                 autoWidth: false,
-                ordering: true,
+                ordering: false,
                 dom: 'ftrip',
                 stateSave: true,
                 pagingType: 'simple',
                 serverSide: true,
                 processing: true,
-                ajax: {
-                    url: getLocal().ajaxurl,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: function (params) {
-                        params.action = 'aam';
-                        params.sub_action = 'Subject_User.getTable';
-                        params._ajax_nonce = getLocal().nonce;
-                        params.role = $('#user-list-filter').val();
-                        params.subject = getAAM().getSubject().type;
-                        params.subjectId = getAAM().getSubject().id;
-                        params.ui = getLocal().ui;
-                        params.policyId = $('#aam-policy-id').val();
+                ajax: function(filters, cb) {
+                    const fields = [
+                        'roles',
+                        'display_name',
+                        'permissions',
+                        'user_level',
+                        'expiration'
+                    ];
 
-                        return params;
+                    if(getAAM().isUI('principal')) {
+                        fields.push('policies');
                     }
+
+                    $.ajax({
+                        url: `${getLocal().rest_base}aam/v2/users`,
+                        type: 'GET',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        data: {
+                            search: filters.search.value,
+                            per_page: filters.length,
+                            offset: filters.start,
+                            fields: fields.join(','),
+                            role: $('#user-list-filter').val()
+                        },
+                        success: function (response) {
+                            const result = {
+                                data: [],
+                                recordsTotal: 0,
+                                recordsFiltered: 0
+                            };
+
+                            // Transform the received data into DT format
+                            const policyId = parseInt($('#aam-policy-id').val(), 10);
+
+                            $.each(response.list, (_, user) => {
+                                const actions = [];
+
+                                if (getLocal().ui === 'principal' && policyId) {
+                                    if (user.policies && user.policies.includes(policyId)) {
+                                        actions.push('detach');
+                                    } else {
+                                        actions.push('attach');
+                                    }
+                                } else {
+                                    if (user.permissions.includes('allow_manage')) {
+                                        actions.push('manage');
+                                    }
+
+                                    if (user.permissions.includes('allow_edit')) {
+                                        actions.push('edit');
+                                    } else {
+                                        actions.push('no-edit');
+                                    }
+
+                                    if (user.permissions.includes('allow_unlock')) {
+                                        actions.push('unlock');
+                                    } else if (user.permissions.includes('allow_lock')) {
+                                        actions.push('lock');
+                                    }
+                                }
+
+                                result.data.push([
+                                    user.id,
+                                    user.roles.join(', '),
+                                    user.display_name,
+                                    actions.join(','),
+                                    user.user_level,
+                                    user.expiration || null
+                                ]);
+                            });
+
+                            result.recordsTotal    = response.summary.total_count;
+                            result.recordsFiltered = response.summary.filtered_count;
+
+                            cb(result);
+                        }
+                    });
                 },
                 columnDefs: [
-                    { visible: false, targets: [0, 1, 4, 5] },
-                    { orderable: false, targets: [0, 1, 3, 4, 5] }
+                    { visible: false, targets: [0, 1, 4, 5] }
                 ],
                 language: {
                     search: '_INPUT_',
@@ -993,13 +1051,12 @@
 
                                             if (data[5]) {
                                                 $('#reset-user-expiration-btn').removeClass('hidden');
-                                                var settings = data[5].split('|');
-                                                $('#user-expires').val(settings[0]);
-                                                $('#action-after-expiration').val(settings[1]);
+                                                $('#user-expires').val(data[5].expires_at);
+                                                $('#action-after-expiration').val(data[5].trigger.type);
 
-                                                if (settings[1] === 'change-role') {
+                                                if (data[5].trigger.type === 'change_role') {
                                                     $('#expiration-change-role-holder').removeClass('hidden');
-                                                    getAAM().loadRoleList(settings[2]);
+                                                    getAAM().loadRoleList(data[5].trigger.to_role);
                                                 } else {
                                                     getAAM().loadRoleList();
                                                     $('#expiration-change-role-holder').addClass('hidden');
@@ -1032,7 +1089,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-lock-open text-success'
                                         }).bind('click', function () {
-                                            blockUser(data[0], $(this));
+                                            updateUserStatus(data[0], $(this));
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Lock user')
@@ -1056,7 +1113,7 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-lock text-danger'
                                         }).bind('click', function () {
-                                            blockUser(data[0], $(this));
+                                            updateUserStatus(data[0], $(this));
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Unlock user')
@@ -1150,7 +1207,7 @@
             });
 
             $('#action-after-expiration').bind('change', function () {
-                if ($(this).val() === 'change-role') {
+                if ($(this).val() === 'change_role') {
                     $('#expiration-change-role-holder').removeClass('hidden');
                 } else {
                     $('#expiration-change-role-holder').addClass('hidden');
@@ -1194,34 +1251,48 @@
             });
 
             $('#user-expiration-datapicker').on('dp.change', function (res) {
-                $('#user-expires').val(res.date.unix());
+                $('#user-expires').val(res.date.format());
             });
 
             //edit role button
             $('#edit-user-expiration-btn').bind('click', function () {
                 var _this = this;
 
-                $.ajax(getLocal().ajaxurl, {
+                // Get currently editing user ID
+                const id = $(_this).attr('data-user-id');
+
+                // Preparing the payload
+                const payload = {
+                    expires_at: $('#user-expires').val()
+                };
+
+                // Gathering expiration attributes
+                const expiration_trigger = $('#action-after-expiration').val() || 'logout';
+
+                if (expiration_trigger) {
+                    payload.trigger = {
+                        type: expiration_trigger
+                    };
+
+                    if (expiration_trigger === 'change_role') {
+                        payload.trigger.to_role = $('#expiration-change-role').val();
+                    }
+                }
+
+                $.ajax({
+                    url: `${getLocal().rest_base}aam/v2/user/${id}`,
                     type: 'POST',
-                    dataType: 'json',
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce
+                    },
                     data: {
-                        action: 'aam',
-                        sub_action: 'Subject_User.saveExpiration',
-                        _ajax_nonce: getLocal().nonce,
-                        user: $(_this).attr('data-user-id'),
-                        expires: $('#user-expires').val(),
-                        after: $('#action-after-expiration').val(),
-                        role: $('#expiration-change-role').val()
+                        expiration: payload
                     },
                     beforeSend: function () {
                         $(_this).text(getAAM().__('Saving...')).attr('disabled', true);
                     },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            $('#user-list').DataTable().ajax.reload();
-                        } else {
-                            getAAM().notification('danger', response.reason);
-                        }
+                    success: function () {
+                        $('#user-list').DataTable().ajax.reload();
                     },
                     error: function () {
                         getAAM().notification('danger');
@@ -1237,24 +1308,20 @@
             $('#reset-user-expiration-btn').bind('click', function () {
                 var _this = this;
 
-                $.ajax(getLocal().ajaxurl, {
+                const id = $(_this).attr('data-user-id');
+
+                $.ajax({
+                    url: `${getLocal().rest_base}aam/v2/user/${id}/settings`,
                     type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Subject_User.resetExpiration',
-                        _ajax_nonce: getLocal().nonce,
-                        user: $(_this).attr('data-user-id')
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce,
+                        'X-HTTP-Method-Override': 'DELETE'
                     },
                     beforeSend: function () {
                         $(_this).text(getAAM().__('Resetting...')).attr('disabled', true);
                     },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            $('#user-list').DataTable().ajax.reload();
-                        } else {
-                            getAAM().notification('danger', response.reason);
-                        }
+                    success: function () {
+                        $('#user-list').DataTable().ajax.reload();
                     },
                     error: function () {
                         getAAM().notification('danger');
@@ -4055,6 +4122,14 @@
 
                     // Adjust current list when switching between subjects or pages
                     AdjustList();
+                }
+
+                // Take into consideration the initial load of a AAM Metabox
+                const level_type = $('#content-object-type').val();
+                const level_id = $('#content-object-id').val();
+
+                if (level_type) {
+                    InitializeAccessForm(level_type, level_id);
                 }
             }
 

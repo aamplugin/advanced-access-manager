@@ -10,13 +10,14 @@
 /**
  * User subject
  *
+ * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
  * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/279
  * @since 6.2.2  Fixed bug with settings inheritance from the Default subject
  * @since 6.0.2  Enhanced stability of the code
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.11
+ * @version 6.9.32
  */
 class AAM_Core_Subject_User extends AAM_Core_Subject
 {
@@ -251,11 +252,12 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
      *
      * @return void
      *
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
      * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/279
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.11
+     * @version 6.9.32
      */
     public function validateStatus()
     {
@@ -267,6 +269,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
             // Trigger specified action
             switch ($status['action']) {
                 case 'change-role':
+                case 'change_role':
                     $this->set_role($status['meta']);
                     break;
 

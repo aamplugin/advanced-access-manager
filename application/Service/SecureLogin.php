@@ -136,22 +136,30 @@ class AAM_Service_SecureLogin
         add_action('wp_login_failed', array($this, 'trackFailedLoginAttempt'));
 
         // AAM UI controls
-        add_filter('aam_user_row_actions_filter', function($actions, $user) {
+        add_filter('aam_prepare_user_item_filter', function($user) {
+
             // Move this to the Secure Login Service
-            if (current_user_can('aam_toggle_users')) {
-                $status    = get_user_meta($user->ID, 'aam_user_status', true);
-                $actions[] = ($status === 'locked' ? 'unlock' : 'lock');
+            if (current_user_can('edit_user', $user['id'])
+                && current_user_can('aam_toggle_users')
+            ) {
+                array_push(
+                    $user['permissions'],
+                    $user['status'] === 'inactive' ? 'allow_unlock' : 'allow_lock'
+                );
             }
 
-            return $actions;
-        }, 10, 2);
-        add_filter('aam_ajax_filter', array($this, 'handleAjax'), 10, 3);
+            return $user;
+        });
         add_filter('aam_user_expiration_actions_filter', function($actions) {
             $actions['lock'] = __('Block User Account', AAM_KEY);
 
             return $actions;
         });
         add_action('aam_process_inactive_user_action', array($this, 'lockUser'), 10, 2);
+
+        add_action('aam_reset_user_action', function($user) {
+            delete_user_meta($user->ID, 'aam_user_status');
+        });
 
         // AAM Core integration
         add_action('aam_initialize_user_action', function(AAM_Core_Subject_User $user) {
@@ -558,33 +566,6 @@ class AAM_Service_SecureLogin
     }
 
     /**
-     * Handle AAM UI ajax calls
-     *
-     * @param mixed                 $response
-     * @param AAM_Core_Subject_User $user
-     * @param string                $action
-     *
-     * @return mixed
-     *
-     * @since 6.3.1 https://github.com/aamplugin/advanced-access-manager/issues/43
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.3.1
-     */
-    public function handleAjax($response, $user, $action)
-    {
-        if ($action === 'Service_SecureLogin.toggleUserStatus') {
-            $result   = $this->toggleUserStatus($user);
-            $response = wp_json_encode(
-                array('status' => ($result ? 'success' : 'failure'))
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Lock user
      *
      * This method is invoked when user is expired
@@ -606,40 +587,6 @@ class AAM_Service_SecureLogin
             $this->changeUserStatus($user->getPrincipal(), true);
             wp_logout();
         }
-    }
-
-    /**
-     * Toggle user status
-     *
-     * Either block or unblock user record
-     *
-     * @param AAM_Core_Subject_User $user
-     *
-     * @return void
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.9.10
-     */
-    protected function toggleUserStatus(AAM_Core_Subject_User $user)
-    {
-        $result = false;
-
-        if (current_user_can('aam_toggle_users') && current_user_can('edit_users')) {
-            if (apply_filters('aam_user_can_manage_level_filter', true, $user->getMaxLevel())) {
-                // User is not allowed to lock himself
-                if (intval($user->getId()) !== get_current_user_id()) {
-                    $status = get_user_meta($user->ID, 'aam_user_status', true);
-                    $result = $this->changeUserStatus(
-                        $user->getPrincipal(), $status !== 'locked'
-                    );
-                }
-            }
-        }
-
-        return $result;
     }
 
     /**

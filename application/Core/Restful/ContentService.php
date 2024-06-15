@@ -65,11 +65,6 @@ class AAM_Core_Restful_ContentService
                         'description' => __('Search string', AAM_KEY),
                         'type'        => 'string'
                     ),
-                    'page' => array(
-                        'description' => __('Pagination page number', AAM_KEY),
-                        'type'        => 'number',
-                        'default'     => 0
-                    ),
                     'offset' => array(
                         'description' => __('Pagination offset', AAM_KEY),
                         'type'        => 'number',
@@ -107,11 +102,6 @@ class AAM_Core_Restful_ContentService
                     'search' => array(
                         'description' => __('Search string', AAM_KEY),
                         'type'        => 'string'
-                    ),
-                    'page' => array(
-                        'description' => __('Pagination page number', AAM_KEY),
-                        'type'        => 'number',
-                        'default'     => 0
                     ),
                     'offset' => array(
                         'description' => __('Pagination offset', AAM_KEY),

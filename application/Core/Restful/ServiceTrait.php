@@ -176,7 +176,9 @@ trait AAM_Core_Restful_ServiceTrait
                     array('status'  => 400)
                 );
             } else { // Verifying that the user exists and is accessible
-                $response = $this->_validate_user_accessibility(intval($value));
+                $response = $this->_validate_user_accessibility(
+                    intval($value), $request->get_method()
+                );
             }
         }
 
@@ -216,20 +218,33 @@ trait AAM_Core_Restful_ServiceTrait
     /**
      * Validate user accessibility
      *
-     * @param int $user_id User ID
+     * @param int    $user_id     User ID
+     * @param string $http_method HTTP Method
      *
      * @return bool|WP_Error
      *
      * @access private
      * @version 6.9.10
      */
-    private function _validate_user_accessibility($user_id)
+    private function _validate_user_accessibility($user_id, $http_method)
     {
         $response = true;
 
+        // Legacy check if user is filtered out by "User Level Filter" service
+        // TODO: Remove when the "User Level Filter" service is gone
         $user = apply_filters('aam_get_user', get_user_by('id', $user_id));
 
-        if ($user === false || is_wp_error($user)) {
+        // Now, depending on the HTTP Method, do additional check
+        if ($http_method === WP_REST_Server::READABLE) {
+            $cap = 'aam_list_user';
+        } else {
+            $cap = 'edit_user';
+        }
+
+        if ($user === false
+            || is_wp_error($user)
+            || !current_user_can($cap, $user->ID)
+        ) {
             $response = new WP_Error(
                 'rest_not_found',
                 sprintf(

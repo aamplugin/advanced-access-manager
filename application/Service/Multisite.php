@@ -10,6 +10,7 @@
 /**
  * Multisite service
  *
+ * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
  * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/328
  * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/170
  * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/81
@@ -18,7 +19,7 @@
  * @since 6.2.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.18
+ * @version 6.9.32
  */
 class AAM_Service_Multisite
 {
@@ -49,27 +50,38 @@ class AAM_Service_Multisite
      *
      * @return void
      *
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
+     * @since 6.2.0  Initial implementation of the method
+     *
      * @access protected
-     * @version 6.2.0
+     * @version 6.9.32
      */
     protected function __construct()
     {
+        $enabled = AAM_Core_Config::get(self::FEATURE_FLAG, true) && is_multisite();
+
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
             // service. This is used to display information about service on the
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('Multisite Settings Sync', AAM_KEY),
-                    'description' => __('Automatically synchronize changes to the list of roles and capabilities as well as all access settings (if configured accordingly).', AAM_KEY),
+                    'title'       => __('Multisite Support', AAM_KEY),
+                    'description' => __('Additional features to support WordPress multisite setup', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
                 return $services;
             }, 20);
+
+            if ($enabled) {
+                add_action('aam_init_ui_action', function () {
+                    AAM_Backend_Feature_Settings_Multisite::register();
+                });
+            }
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true) && is_multisite()) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -79,14 +91,15 @@ class AAM_Service_Multisite
      *
      * @return void
      *
-     * @since 6.7.5 https://github.com/aamplugin/advanced-access-manager/issues/170
-     * @since 6.4.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/81
-     * @since 6.3.0 Optimized for Multisite setup
-     * @since 6.2.2 Hooks to the setting clearing and policy table list
-     * @since 6.2.0 Initial implementation of the method
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
+     * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/170
+     * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/81
+     * @since 6.3.0  Optimized for Multisite setup
+     * @since 6.2.2  Hooks to the setting clearing and policy table list
+     * @since 6.2.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.7.5
+     * @version 6.9.32
      */
     protected function initializeHooks()
     {
@@ -114,9 +127,13 @@ class AAM_Service_Multisite
                 }
             }, 10, 3);
 
-            add_action('aam_top_right_column_action', function() {
-                echo AAM_Backend_View::loadPartial('multisite-sync-notification');
-            });
+            if (AAM_Core_Config::get('multisite.settings.sync', true)) {
+                add_action('aam_top_right_column_action', function() {
+                    echo AAM_Backend_View::loadPartial(
+                        'multisite-sync-notification'
+                    );
+                });
+            }
 
             add_action('add_option', function($option, $value) {
                 if ($this->syncing === false) {
@@ -161,7 +178,19 @@ class AAM_Service_Multisite
         });
 
         add_action('wp', function() {
-            if (apply_filters('aam_allowed_site_filter', true) === false) {
+            $restricted = false;
+
+            // Check if the non-member access restriction is on
+            if (AAM_Core_Config::get('multisite.settings.nonmember', false)) {
+                $restricted = !is_user_member_of_blog();
+            }
+
+            // Additionally, check if any access policies defined that restrict
+            // current site
+            $restricted = apply_filters('aam_site_restricted_filter', $restricted);
+
+            // If user is restricted, deny access
+            if ($restricted) {
                 wp_die('Access Denied', 'aam_access_denied');
             }
         }, 999);

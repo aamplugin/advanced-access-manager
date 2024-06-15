@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
@@ -31,7 +32,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.28
+ * @version 6.9.32
  */
 class AAM_Service_AccessPolicy
 {
@@ -194,6 +195,7 @@ class AAM_Service_AccessPolicy
      *
      * @return void
      *
+     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
      * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
      * @since 6.9.25 https://github.com/aamplugin/advanced-access-manager/issues/354
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/323
@@ -211,7 +213,7 @@ class AAM_Service_AccessPolicy
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.28
+     * @version 6.9.32
      */
     protected function initializeHooks()
     {
@@ -288,14 +290,20 @@ class AAM_Service_AccessPolicy
         add_filter('all_plugins', array($this, 'filterPlugins'));
 
         // Multisite support
-        add_filter('aam_allowed_site_filter', function() {
-            $manager = AAM::api()->getAccessPolicyManager();
+        add_filter('aam_site_restricted_filter', function($response) {
+            if ($response === false) {
+                $manager  = AAM::api()->getAccessPolicyManager();
+                $response = $manager->isAllowed(
+                    'Site:' . get_current_blog_id()
+                ) === false;
+            }
 
-            return $manager->isAllowed('SITE:' . get_current_blog_id()) !== false;
+            return $response;
         });
 
         // Enrich the RESTful API
         add_filter('aam_role_rest_field_filter', array($this, 'enrich_role_rest_output'), 1, 3);
+        add_filter('aam_user_rest_field_filter', array($this, 'enrich_user_rest_output'), 1, 3);
 
         add_action('aam_valid_jwt_token_detected_action', function($token, $claims) {
             update_user_meta($claims->userId, 'aam_auth_token', $token);
@@ -1297,6 +1305,37 @@ class AAM_Service_AccessPolicy
             foreach($object->getOption() as $id => $effect) {
                 if (!empty($effect)) {
                     array_push($output, $id);
+                }
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * Get the list of attached policies to user
+     *
+     * @param array $output
+     * @param array $id
+     * @param array $fields
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.32
+     */
+    public function enrich_user_rest_output($output, $user, $fields)
+    {
+        if (in_array('policies', $fields, true)) {
+            $object = AAM::api()->getUser($user['id'])->getObject(
+                AAM_Core_Object_Policy::OBJECT_TYPE
+            );
+
+            $output['policies'] = [];
+
+            foreach($object->getOption() as $id => $effect) {
+                if (!empty($effect)) {
+                    array_push($output['policies'], $id);
                 }
             }
         }

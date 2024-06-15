@@ -161,10 +161,10 @@ class GeoPolicyTest extends TestCase
             ['country_name', 'United States'],
             ['country_code', 'US'],
             ['continent_code', 'NA'],
-            ['region_name', 'South Carolina'],
-            ['city', 'Marion'],
-            ['latitude', 34.156],
-            ['longitude', -79.3906],
+            ['region_name', 'North Carolina'],
+            ['city', 'Charlotte'],
+            ['latitude', 35.1712],
+            ['longitude', -80.7939],
         ];
     }
 

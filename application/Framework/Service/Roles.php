@@ -22,7 +22,7 @@ class AAM_Framework_Service_Roles
     /**
      * Single instance of itself
      *
-     * @var AAM_Framework_Service_Role
+     * @var AAM_Framework_Service_Roles
      *
      * @access private
      * @static
@@ -404,7 +404,7 @@ class AAM_Framework_Service_Roles
     /**
      * Bootstrap the role service
      *
-     * @return AAM_Framework_Service_Role
+     * @return AAM_Framework_Service_Roles
      *
      * @access public
      * @static
