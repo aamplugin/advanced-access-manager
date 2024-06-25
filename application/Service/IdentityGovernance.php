@@ -84,7 +84,7 @@ class AAM_Service_IdentityGovernance
     protected function initializeHooks()
     {
         // Register RESTful API endpoints
-        AAM_Core_Restful_IdentityGovernanceService::bootstrap();
+        AAM_Restful_IdentityGovernanceService::bootstrap();
 
         add_filter('editable_roles', array($this, 'filter_roles'));
         add_action('pre_get_users', array($this, 'filter_users'), 999);
@@ -97,12 +97,10 @@ class AAM_Service_IdentityGovernance
         add_filter('map_meta_cap', array($this, 'map_meta_caps'), 999, 4);
 
         // Additionally tap into password management
-        if (AAM_Core_API::capExists('aam_change_password')) {
-            add_filter('show_password_fields', array($this, 'can_change_password'), 10, 2);
-            add_filter('allow_password_reset', array($this, 'can_reset_password'), 10, 2);
-            add_action('check_passwords', array($this, 'can_update_password'), 10, 3);
-            add_filter('rest_pre_insert_user', array($this, 'can_update_restful_password'), 10, 2);
-        }
+        add_filter('show_password_fields', array($this, 'can_change_password'), 10, 2);
+        add_filter('allow_password_reset', array($this, 'can_reset_password'), 10, 2);
+        add_action('check_passwords', array($this, 'can_update_password'), 10, 3);
+        add_filter('rest_pre_insert_user', array($this, 'can_update_restful_password'), 10, 2);
     }
 
     /**
@@ -209,7 +207,7 @@ class AAM_Service_IdentityGovernance
 
         // Get max user level
         if ($role_slug !== '*'){
-            $role      = AAM_Core_API::getRoles()->get_role($role_slug);
+            $role = AAM_Core_API::getRoles()->get_role($role_slug);
 
             if (is_a($role, 'WP_Role')) {
                 $max_level = AAM_Core_API::maxLevel($role->capabilities);

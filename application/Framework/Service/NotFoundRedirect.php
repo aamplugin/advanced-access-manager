@@ -17,10 +17,10 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_NotFoundRedirect
-    extends AAM_Framework_Service_RedirectAbstract
 {
 
-    use AAM_Framework_Service_BaseTrait;
+    use AAM_Framework_Service_BaseTrait,
+        AAM_Framework_Service_RedirectTrait;
 
     /**
      * Redirect type
@@ -28,6 +28,13 @@ class AAM_Framework_Service_NotFoundRedirect
      * @version 6.9.12
      */
     const REDIRECT_TYPE = '404';
+
+    /**
+     * Object type
+     *
+     * @version 6.9.33
+     */
+    const OBJECT_TYPE = AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE;
 
     /**
      * Redirect type aliases
@@ -78,7 +85,7 @@ class AAM_Framework_Service_NotFoundRedirect
      *
      * @return AAM_Core_Object
      */
-    protected function get_object($inline_context)
+    private function _get_object($inline_context)
     {
         return $this->_get_subject($inline_context)->getObject(
             AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE

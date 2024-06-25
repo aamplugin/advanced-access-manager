@@ -15,11 +15,6 @@ use AAM_Service_Jwt,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
-// service.jwt.is_revocable
-// service.jwt.private_cert_passphrase
-// service.jwt.private_cert_path
-// service.jwt.public_cert_path
-
 /**
  * Jwt service tests
  *

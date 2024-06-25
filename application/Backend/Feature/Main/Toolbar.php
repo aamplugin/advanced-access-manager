@@ -10,11 +10,12 @@
 /**
  * Toolbar manager
  *
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
  * @since 6.0.0 Initial implementation of the method
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.33
  */
 class AAM_Backend_Feature_Main_Toolbar
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -60,31 +61,6 @@ class AAM_Backend_Feature_Main_Toolbar
     }
 
     /**
-     * Save toolbar settings
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function save()
-    {
-        $status  = $this->getFromPost('status');
-        $items   = $this->getFromPost('items', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
-
-        $subject = AAM_Backend_Subject::getInstance();
-        $object  = $subject->getObject(self::OBJECT_TYPE, null, true);
-
-        foreach ($items as $item) {
-            $object->updateOptionItem($item, !empty($status));
-        }
-
-        return wp_json_encode(
-            array('status' => ($object->save() ? 'success' : 'failure'))
-        );
-    }
-
-    /**
      * Get toolbar
      *
      * @return array
@@ -110,7 +86,7 @@ class AAM_Backend_Feature_Main_Toolbar
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'toolbar',
             'position'   => 6,
-            'title'      => __('Toolbar', AAM_KEY),
+            'title'      => __('Admin Toolbar', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'subjects'   => array(

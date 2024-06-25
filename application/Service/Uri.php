@@ -86,7 +86,7 @@ class AAM_Service_Uri
     protected function initializeHooks()
     {
         // Register RESTful API endpoints
-        AAM_Core_Restful_UrlService::bootstrap();
+        AAM_Restful_UrlService::bootstrap();
 
         // Authorize request
         add_action('init', array($this, 'authorizeUri'));

@@ -116,7 +116,7 @@ class AAM_Service_Route
         }
 
         // Register RESTful API endpoints
-        AAM_Core_Restful_ApiRouteService::bootstrap();
+        AAM_Restful_ApiRouteService::bootstrap();
 
         // Disable XML-RPC if needed
         add_filter('xmlrpc_enabled', function($enabled) {

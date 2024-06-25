@@ -13,10 +13,10 @@
  * @package AAM
  * @version 6.9.15
  */
-class AAM_Core_Restful_SupportService
+class AAM_Restful_SupportService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * The namespace for the collection of endpoints
@@ -26,7 +26,7 @@ class AAM_Core_Restful_SupportService
     /**
      * Single instance of itself
      *
-     * @var AAM_Core_Restful_SupportService
+     * @var AAM_Restful_SupportService
      *
      * @access private
      * @static
@@ -55,19 +55,19 @@ class AAM_Core_Restful_SupportService
                 },
                 'args' => array(
                     'fullname' => array(
-                        'description' => __('Customer name', AAM_KEY),
+                        'description' => 'Customer name',
                         'type'        => 'string',
                         'required'    => false
                     ),
                     'email' => array(
-                        'description' => __('Customer email', AAM_KEY),
+                        'description' => 'Customer email',
                         'type'        => 'string',
                         'validate_callback' => function($value) {
                             return $this->_validate_email($value);
                         }
                     ),
                     'message' => array(
-                        'description' => __('Support message', AAM_KEY),
+                        'description' => 'Support message',
                         'type'        => 'string',
                         'validate_callback' => function ($value) {
                             return $this->_validate_message($value);

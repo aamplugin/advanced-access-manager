@@ -89,28 +89,32 @@ class AAM_Framework_Service_Urls
      */
     public function get_rule_list($inline_context = null)
     {
-        $response = array();
-        $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        try {
+            $result  = array();
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->reloadObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
-        $options  = $object->getOption();
-        $explicit = $object->getExplicitOption();
+            $options  = $object->getOption();
+            $explicit = $object->getExplicitOption();
 
-        if (is_array($options) && count($options)) {
-            foreach($options as $url => $settings) {
-                array_push(
-                    $response,
-                    $this->_prepare_rule(
-                        $url,
-                        $settings,
-                        $subject,
-                        !array_key_exists($url, $explicit)
-                    )
-                );
+            if (is_array($options) && count($options)) {
+                foreach($options as $url => $settings) {
+                    array_push(
+                        $result,
+                        $this->_prepare_rule(
+                            $url,
+                            $settings,
+                            $subject,
+                            !array_key_exists($url, $explicit)
+                        )
+                    );
+                }
             }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -123,31 +127,37 @@ class AAM_Framework_Service_Urls
      *
      * @access public
      * @version 6.9.9
-     * @throws UnderflowException If rule does not exist
+     * @throws OutOfRangeException If rule does not exist
      */
     public function get_rule_by_id($id, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->reloadObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
-        // Find the rule that we are updating
-        $rule = false;
+            // Find the rule that we are updating
+            $rule = false;
 
-        foreach($object->getOption() as $url => $settings) {
-            if (abs(crc32($url)) === $id) {
-                $rule = array(
-                    'url'  => $url,
-                    'rule' => $settings
-                );
+            foreach($object->getOption() as $url => $settings) {
+                if (abs(crc32($url)) === $id) {
+                    $rule = array(
+                        'url'  => $url,
+                        'rule' => $settings
+                    );
+                }
             }
+
+            if ($rule === false) {
+                throw new OutOfRangeException('Rule does not exist');
+            }
+
+            $result = $this->_prepare_rule($rule['url'], $rule['rule'], $subject);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($rule === false) {
-            throw new UnderflowException('Rule does not exist');
-        }
-
-        return $this->_prepare_rule($rule['url'], $rule['rule'], $subject);
+        return $result;
     }
 
     /**
@@ -163,23 +173,32 @@ class AAM_Framework_Service_Urls
      *
      * @access public
      * @version 6.9.9
-     * @throws Exception If fails to persist the rule
+     * @throws RuntimeException If fails to persist the rule
      */
     public function create_rule(array $rule, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $result  = $this->_validate_rule($rule);
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
-        $success = $object->store($result['url'], $result['rule']);
+        try {
+            // Validating that incoming data is correct and normalize is for
+            // storage
+            $result  = $this->_validate_rule($rule);
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+            $success = $object->store($result['url'], $result['rule']);
 
-        if (!$success) {
-            throw new Exception('Failed to persist the rule');
-        } else {
+            if (!$success) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
             do_action('aam_url_access_rule_created_action', $object, $rule);
+
+            $result = $this->_prepare_rule(
+                $result['url'], $result['rule'], $subject
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->_prepare_rule($result['url'], $result['rule'], $subject);
+        return $result;
     }
 
     /**
@@ -196,47 +215,55 @@ class AAM_Framework_Service_Urls
      *
      * @access public
      * @version 6.9.9
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function update_rule($id, array $rule, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $result  = $this->_validate_rule($rule);
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $result  = $this->_validate_rule($rule);
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
-        // Find the rule that we are updating
-        $found = false;
+            // Find the rule that we are updating
+            $found = false;
 
-        // Note! Getting here all rules (even inherited) to ensure that user can
-        // override the inherited rule
-        $original_options = $object->getOption();
-        $new_options      = array();
+            // Note! Getting here all rules (even inherited) to ensure that user can
+            // override the inherited rule
+            $original_options = $object->getOption();
+            $new_options      = array();
 
-        foreach($original_options as $url => $settings) {
-            if (abs(crc32($url)) === $id) {
-                $found                       = true;
-                $new_options[$result['url']] = $result['rule'];
-            } else {
-                $new_options[$url] = $settings;
+            foreach($original_options as $url => $settings) {
+                if (abs(crc32($url)) === $id) {
+                    $found                       = true;
+                    $new_options[$result['url']] = $result['rule'];
+                } else {
+                    $new_options[$url] = $settings;
+                }
             }
-        }
 
-        if ($found) {
-            $object->setExplicitOption($new_options);
-            $success = $object->save();
-        } else {
-            throw new UnderflowException('Rule does not exist');
-        }
+            if ($found) {
+                $object->setExplicitOption($new_options);
+                $success = $object->save();
+            } else {
+                throw new OutOfRangeException('Rule does not exist');
+            }
 
-        if (!$success) {
-            throw new Exception('Failed to update the rule');
-        } else {
+            if (!$success) {
+                throw new RuntimeException('Failed to update the rule');
+            }
+
             do_action('aam_url_access_rule_updated_action', $id, $object, $rule);
+
+            $result = $this->_prepare_rule(
+                $result['url'], $result['rule'], $subject
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->_prepare_rule($result['url'], $result['rule'], $subject);
+        return $result;
     }
 
     /**
@@ -245,53 +272,54 @@ class AAM_Framework_Service_Urls
      * @param int   $id             Sudo-id for the rule
      * @param array $inline_context Runtime context
      *
-     * @return array
+     * @return boolean
      *
      * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
      * @since 6.9.9  Initial implementation of the method
      *
      * @access public
      * @version 6.9.20
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function delete_rule($id, $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
-        // Find the rule that we are updating
-        $found = null;
+            // Find the rule that we are updating
+            $found = null;
 
-        // Note! User can delete only explicitly set rule (overwritten rule)
-        $original_options = $object->getExplicitOption();
-        $new_options      = array();
+            // Note! User can delete only explicitly set rule (overwritten rule)
+            $original_options = $object->getExplicitOption();
+            $new_options      = array();
 
-        foreach($original_options as $url => $settings) {
-            if (abs(crc32($url)) === $id) {
-                $found = array(
-                    'url'  => $url,
-                    'rule' => $settings
-                );
-            } else {
-                $new_options[$url] = $settings;
+            foreach($original_options as $url => $settings) {
+                if (abs(crc32($url)) === $id) {
+                    $found = array(
+                        'url'  => $url,
+                        'rule' => $settings
+                    );
+                } else {
+                    $new_options[$url] = $settings;
+                }
             }
+
+            if ($found) {
+                $result = $object->setExplicitOption($new_options)->save();
+            } else {
+                throw new OutOfRangeException('Rule does not exist');
+            }
+
+            if (!$result) {
+                throw new RuntimeException('Failed to persist the rule');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found) {
-            $object->setExplicitOption($new_options);
-            $success = $object->save();
-        } else {
-            throw new UnderflowException('Rule does not exist');
-        }
-
-        if (!$success) {
-            throw new Exception('Failed to persist the rule');
-        }
-
-        $subject->flushCache();
-
-        return $this->_prepare_rule($found['url'], $found['rule'], $subject);
+        return $result;
     }
 
     /**
@@ -304,21 +332,23 @@ class AAM_Framework_Service_Urls
      * @access public
      * @version 6.9.9
      */
-    public function reset_rules($inline_context = null)
+    public function reset($inline_context = null)
     {
-        $response = array();
+        try {
+            // Reset the object
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
 
-        // Reset the object
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
+            if ($object->reset()) {
+                $result = $this->get_rule_list($inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
 
-        // Communicate about number of rules that were deleted
-        $response['deleted_rules_count'] = count($object->getExplicitOption());
-
-        // Reset
-        $response['success'] = $object->reset();
-
-        return $response;
+        return $result;
     }
 
     /**

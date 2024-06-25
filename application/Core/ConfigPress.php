@@ -57,6 +57,7 @@ final class AAM_Core_ConfigPress
             $this->config = $reader->parseString($this->read());
         } catch (Exception $e) {
             AAM_Core_Console::add(esc_js($e->getMessage()));
+
             $this->config = array();
         }
     }
@@ -116,7 +117,8 @@ final class AAM_Core_ConfigPress
             $value = $instance->config;
         } else {
             $chunks = explode('.', $option);
-            $value = $instance->config;
+            $value  = $instance->config;
+
             foreach ($chunks as $chunk) {
                 if (isset($value[$chunk])) {
                     $value = $value[$chunk];

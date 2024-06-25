@@ -10,13 +10,14 @@
 /**
  * Backend menu manager
  *
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
  * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
  * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.33
  */
 class AAM_Backend_Feature_Main_Menu
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -57,34 +58,6 @@ class AAM_Backend_Feature_Main_Menu
         add_filter('aam_backend_menu_mode_panel_filter', function() {
             return AAM_Backend_View::getInstance()->loadPartial('backend-menu-mode');
         });
-    }
-
-    /**
-     * Save menu settings
-     *
-     * @return string
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.7.9
-     */
-    public function save()
-    {
-        $status = $this->getFromPost('status');
-
-        $object = AAM_Backend_Subject::getInstance()->getObject(
-            self::OBJECT_TYPE, null, true
-        );
-
-        foreach (AAM_Core_Request::post('items', array()) as $item) {
-            $object->updateOptionItem($item, !empty($status));
-        }
-
-        $result = $object->save();
-
-        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
     }
 
     /**

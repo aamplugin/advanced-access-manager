@@ -67,27 +67,33 @@ class AAM_Framework_Service_IdentityGovernance
      */
     public function get_rule_list($inline_context = null)
     {
-        $response = array();
-        $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
+        try {
+            $result  = array();
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->reloadObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        $options  = $object->getOption();
-        $explicit = $object->getExplicitOption();
+            $options  = $object->getOption();
+            $explicit = $object->getExplicitOption();
 
-        if (is_array($options) && count($options)) {
-            foreach($options as $target => $permissions) {
-                array_push(
-                    $response,
-                    $this->_prepare_rule(
-                        $target,
-                        $permissions,
-                        !array_key_exists($target, $explicit)
-                    )
-                );
+            if (is_array($options) && count($options)) {
+                foreach($options as $target => $permissions) {
+                    array_push(
+                        $result,
+                        $this->_prepare_rule(
+                            $target,
+                            $permissions,
+                            !array_key_exists($target, $explicit)
+                        )
+                    );
+                }
             }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -104,32 +110,41 @@ class AAM_Framework_Service_IdentityGovernance
      */
     public function get_rule_by_id($id, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
-        $explicit = $object->getExplicitOption();
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $subject  = $this->_get_subject($inline_context);
+            $object   = $subject->reloadObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        // Find the rule that we are updating
-        $rule = false;
+            $explicit = $object->getExplicitOption();
 
-        foreach($object->getOption() as $target => $permissions) {
-            if (abs(crc32($target)) === $id) {
-                $rule = array(
-                    'target'      => $target,
-                    'permissions' => $permissions
-                );
+            // Find the rule that we are updating
+            $rule = false;
+
+            foreach($object->getOption() as $target => $permissions) {
+                if (abs(crc32($target)) === $id) {
+                    $rule = array(
+                        'target'      => $target,
+                        'permissions' => $permissions
+                    );
+                }
             }
+
+            if ($rule === false) {
+                throw new OutOfRangeException('Rule does not exist');
+            }
+
+            $result = $this->_prepare_rule(
+                $rule['target'],
+                $rule['permissions'],
+                !array_key_exists($rule['target'], $explicit)
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($rule === false) {
-            throw new UnderflowException('Rule does not exist');
-        }
-
-        return $this->_prepare_rule(
-            $rule['target'],
-            $rule['permissions'],
-            !array_key_exists($rule['target'], $explicit)
-        );
+        return $result;
     }
 
     /**
@@ -142,21 +157,30 @@ class AAM_Framework_Service_IdentityGovernance
      *
      * @access public
      * @version 6.9.28
-     * @throws Exception If fails to persist the rule
+     * @throws RuntimeException If fails to persist the rule
      */
     public function create_rule(array $rule, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $result  = $this->_validate_rule($rule);
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
-        $success = $object->store($result['target'], $result['permissions']);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $result  = $this->_validate_rule($rule);
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        if (!$success) {
-            throw new Exception('Failed to persist the rule');
+            $success = $object->store($result['target'], $result['permissions']);
+
+            if (!$success) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->_prepare_rule($result['target'], $result['permissions']);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->_prepare_rule($result['target'], $result['permissions']);
+        return $result;
     }
 
     /**
@@ -170,45 +194,53 @@ class AAM_Framework_Service_IdentityGovernance
      *
      * @access public
      * @version 6.9.28
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function update_rule($id, array $rule, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $result  = $this->_validate_rule($rule);
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $result  = $this->_validate_rule($rule);
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        // Find the rule that we are updating
-        $found = false;
+            // Find the rule that we are updating
+            $found = false;
 
-        // Note! Getting here all rules (even inherited) to ensure that user can
-        // override the inherited rule
-        $original_options = $object->getOption();
-        $new_options      = array();
+            // Note! Getting here all rules (even inherited) to ensure that user can
+            // override the inherited rule
+            $original_options = $object->getOption();
+            $new_options      = array();
 
-        foreach($original_options as $target => $permissions) {
-            if (abs(crc32($target)) === $id) {
-                $found                          = true;
-                $new_options[$result['target']] = $result['permissions'];
-            } else {
-                $new_options[$target] = $permissions;
+            foreach($original_options as $target => $permissions) {
+                if (abs(crc32($target)) === $id) {
+                    $found                          = true;
+                    $new_options[$result['target']] = $result['permissions'];
+                } else {
+                    $new_options[$target] = $permissions;
+                }
             }
+
+            if ($found) {
+                $object->setExplicitOption($new_options);
+                $success = $object->save();
+            } else {
+                throw new OutOfRangeException('Rule does not exist');
+            }
+
+            if (!$success) {
+                throw new RuntimeException('Failed to update the rule');
+            }
+
+            $result = $this->_prepare_rule($result['target'], $result['permissions']);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found) {
-            $object->setExplicitOption($new_options);
-            $success = $object->save();
-        } else {
-            throw new UnderflowException('Rule does not exist');
-        }
-
-        if (!$success) {
-            throw new Exception('Failed to update the rule');
-        }
-
-        return $this->_prepare_rule($result['target'], $result['permissions']);
+        return $result;
     }
 
     /**
@@ -221,46 +253,49 @@ class AAM_Framework_Service_IdentityGovernance
      *
      * @access public
      * @version 6.9.28
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function delete_rule($id, $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        // Find the rule that we are updating
-        $found = null;
+            // Find the rule that we are updating
+            $found = null;
 
-        // Note! User can delete only explicitly set rule (overwritten rule)
-        $original_options = $object->getExplicitOption();
-        $new_options      = array();
+            // Note! User can delete only explicitly set rule (overwritten rule)
+            $original_options = $object->getExplicitOption();
+            $new_options      = array();
 
-        foreach($original_options as $target => $permissions) {
-            if (abs(crc32($target)) === $id) {
-                $found = array(
-                    'target'      => $target,
-                    'permissions' => $permissions
-                );
-            } else {
-                $new_options[$target] = $permissions;
+            foreach($original_options as $target => $permissions) {
+                if (abs(crc32($target)) === $id) {
+                    $found = array(
+                        'target'      => $target,
+                        'permissions' => $permissions
+                    );
+                } else {
+                    $new_options[$target] = $permissions;
+                }
             }
+
+            if ($found) {
+                $result = $object->setExplicitOption($new_options)->save();
+            } else {
+                throw new OutOfRangeException('Rule does not exist');
+            }
+
+            if (!$result) {
+                throw new RuntimeException('Failed to persist the rule');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found) {
-            $object->setExplicitOption($new_options);
-            $success = $object->save();
-        } else {
-            throw new UnderflowException('Rule does not exist');
-        }
-
-        if (!$success) {
-            throw new Exception('Failed to persist the rule');
-        }
-
-        $subject->flushCache();
-
-        return $this->_prepare_rule($found['target'], $found['permissions']);
+        return $result;
     }
 
     /**
@@ -273,21 +308,25 @@ class AAM_Framework_Service_IdentityGovernance
      * @access public
      * @version 6.9.9
      */
-    public function reset_rules($inline_context = null)
+    public function reset($inline_context = null)
     {
-        $response = array();
+        try {
+            // Reset the object
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(
+                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
+            );
 
-        // Reset the object
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_IdentityGovernance::OBJECT_TYPE);
+            if ($object->reset()) {
+                $result = $this->get_rule_list($inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
 
-        // Communicate about number of rules that were deleted
-        $response['deleted_rules_count'] = count($object->getExplicitOption());
-
-        // Reset
-        $response['success'] = $object->reset();
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -358,7 +397,7 @@ class AAM_Framework_Service_IdentityGovernance
         );
 
         if (!in_array($rule_type, $allowed_types, true)) {
-            throw new DomainException(
+            throw new InvalidArgumentException(
                 'Invalid rule type. Allowed (' . implode(',', $allowed_types) . ')'
             );
         }
@@ -378,7 +417,7 @@ class AAM_Framework_Service_IdentityGovernance
             if (in_array($item['permission'], self::PERMISSION_TYPES, true)) {
                 $permission = $item['permission'];
             } else {
-                throw new DomainException(
+                throw new InvalidArgumentException(
                     "Permission type {$item['permission']} is invalid"
                 );
             }
@@ -386,7 +425,9 @@ class AAM_Framework_Service_IdentityGovernance
             if (in_array($item['effect'], self::EFFECT_TYPES, true)) {
                 $effect = $item['effect'];
             } else {
-                throw new DomainException("Effect {$item['effect']} is invalid");
+                throw new InvalidArgumentException(
+                    "Effect {$item['effect']} is invalid"
+                );
             }
 
             $permissions[$permission] = $effect;
@@ -423,7 +464,7 @@ class AAM_Framework_Service_IdentityGovernance
         if ($identifier === '*') {
             $response = $identifier;
         } elseif (!is_a($user, 'WP_User')) {
-            throw new DomainException(
+            throw new OutOfRangeException(
                 'Invalid user identifier or user does not exist'
             );
         } else {
@@ -448,7 +489,7 @@ class AAM_Framework_Service_IdentityGovernance
         $roles = AAM_Core_API::getRoles();
 
         if ($slug !== '*' && !$roles->is_role($slug)) {
-            throw new DomainException(
+            throw new OutOfRangeException(
                 'Invalid role identifier or role does not exist'
             );
         }
@@ -469,7 +510,7 @@ class AAM_Framework_Service_IdentityGovernance
     private function _validate_level($level)
     {
         if (!is_numeric($level)) {
-            throw new DomainException('Invalid user level identifier');
+            throw new InvalidArgumentException('Invalid user level identifier');
         }
 
         return intval($level);

@@ -34,42 +34,52 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @version 6.9.22
      */
-    const REDIRECT_TYPE_ALIAS = array(
+    const REDIRECT_TYPE_ALIAS = [
         'default'  => 'default',
         'login'    => 'login_redirect',
         'message'  => 'custom_message',
         'page'     => 'page_redirect',
         'url'      => 'url_redirect',
         'callback' => 'trigger_callback'
-    );
+    ];
 
     /**
      * Array of allowed HTTP status codes
      *
      * @version 6.9.26
      */
-    const HTTP_STATUS_CODES = array(
-        'default'          => array('4xx', '5xx'),
-        'custom_message'   => array('4xx', '5xx'),
-        'page_redirect'    => array('3xx'),
-        'url_redirect'     => array('3xx'),
+    const HTTP_STATUS_CODES = [
+        'default'          => [ '4xx', '5xx' ],
+        'custom_message'   => [ '4xx', '5xx' ],
+        'page_redirect'    => [ '3xx' ],
+        'url_redirect'     => [ '3xx' ],
         'login_redirect'   => null,
-        'trigger_callback' => array('3xx', '4xx', '5xx')
-    );
+        'trigger_callback' => [ '3xx', '4xx', '5xx' ]
+    ];
 
     /**
      * Array of default HTTP status codes
      *
      * @version 6.9.26
      */
-    const HTTP_DEFAULT_STATUS_CODES = array(
+    const HTTP_DEFAULT_STATUS_CODES = [
         'default'          => 401,
         'custom_message'   => 401,
         'page_redirect'    => 307,
         'url_redirect'     => 307,
         'login_redirect'   => null,
         'trigger_callback' => 401
-    );
+    ];
+
+    /**
+     * Allowed redirect areas
+     *
+     * @version 6.9.33
+     */
+    const ALLOWED_REDIRECT_AREAS = [
+        'frontend',
+        'backend'
+    ];
 
     /**
      * Get the access denied redirect
@@ -84,21 +94,26 @@ class AAM_Framework_Service_AccessDeniedRedirect
      */
     public function get_redirect($area = null, $inline_context = null)
     {
-        $object    = $this->get_object($inline_context);
-        $redirects = $this->_prepare_redirects(
-            $object->getOption(),
-            !$object->isOverwritten()
-        );
+        try {
+            $object = $this->_get_subject($inline_context)->reloadObject(
+                AAM_Core_Object_Redirect::OBJECT_TYPE
+            );
 
-        $response = array();
+            $redirects = $this->_prepare_redirects(
+                $object->getOption(),
+                !$object->isOverwritten()
+            );
 
-        if (!empty($area)) {
-            $response = isset($redirects[$area]) ? $redirects[$area] : array();
-        } else {
-            $response = array_values($redirects);
+            if (!empty($area)) {
+                $result = isset($redirects[$area]) ? $redirects[$area] : array();
+            } else {
+                $result = array_values($redirects);
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -111,27 +126,29 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @access public
      * @version 6.9.14
-     * @throws Exception If fails to persist the data
+     * @throws RuntimeException If fails to persist the data
      */
     public function set_redirect(array $redirect, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $data   = $this->_validate_redirect($redirect);
-        $object = $this->get_object($inline_context);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $data   = $this->_validate_redirect($redirect);
+            $object = $this->_get_subject($inline_context)->getObject(
+                AAM_Core_Object_Redirect::OBJECT_TYPE
+            );
 
-        // Merging explicit options
-        $new_option = array_merge($object->getExplicitOption(), $data);
+            // Merging explicit options
+            $new_option = array_merge($object->getExplicitOption(), $data);
+            $result     = $object->setExplicitOption($new_option)->save();
 
-        if (!$object->setExplicitOption($new_option)->save()) {
-            throw new Exception('Failed to persist the access denied redirect');
+            if (!$result) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        $area      = $redirect['area'];
-        $redirects = $this->_prepare_redirects(
-            $object->getExplicitOption(), false
-        );
-
-        return $redirects[$area];
+        return $result;
     }
 
     /**
@@ -145,27 +162,38 @@ class AAM_Framework_Service_AccessDeniedRedirect
      * @access public
      * @version 6.9.14
      */
-    public function reset_redirect($area = null, $inline_context = null)
+    public function reset($area = null, $inline_context = null)
     {
-        $response = false;
-        $object   = $this->get_object($inline_context);
+        try {
+            $object = $this->_get_subject($inline_context)->getObject(
+                AAM_Core_Object_Redirect::OBJECT_TYPE
+            );
 
-        if (empty($area)) {
-            $response = $object->reset();
-        } else {
-            $settings     = $object->getExplicitOption();
-            $new_settings = array();
+            if (empty($area)) {
+                $success = $object->reset();
+            } else {
+                $settings     = $object->getExplicitOption();
+                $new_settings = array();
 
-            foreach($settings as $k => $v) {
-                if (strpos($k, $area) !== 0) {
-                    $new_settings[$k] = $v;
+                foreach($settings as $k => $v) {
+                    if (strpos($k, $area) !== 0) {
+                        $new_settings[$k] = $v;
+                    }
                 }
+
+                $success = $object->setExplicitOption($new_settings)->save();
             }
 
-            $response = $object->setExplicitOption($new_settings)->save();
+            if ($success) {
+                $result = $this->get_redirect($area, $inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -275,7 +303,7 @@ class AAM_Framework_Service_AccessDeniedRedirect
         // Determine the area
         $area = isset($rule['area']) ? $rule['area'] : null;
 
-        if (!in_array($area, array('frontend', 'backend'), true)) {
+        if (!in_array($area, self::ALLOWED_REDIRECT_AREAS, true)) {
             throw new InvalidArgumentException(
                 'The `area` is not valid. It should be either frontend or backend'
             );
@@ -316,7 +344,9 @@ class AAM_Framework_Service_AccessDeniedRedirect
             }
         } elseif ($type === 'message') {
             if (is_callable($rule['message'], true)) {
-                $normalized[$area . '.redirect.message'] = wp_kses_post($rule['message']);
+                $normalized[$area . '.redirect.message'] = wp_kses_post(
+                    $rule['message']
+                );
             } else {
                 throw new InvalidArgumentException(
                     'The access denied `message` is required'
@@ -326,7 +356,7 @@ class AAM_Framework_Service_AccessDeniedRedirect
 
         // If HTTP status code is defined, save it as well
         if (!empty($rule['http_status_code'])) {
-            $normalized[$area . '.redirect.' . $type . '.code'] = $this->_validate_status_code(
+            $normalized["{$area}.redirect.{$type}.code"] = $this->_validate_status_code(
                 $rule['http_status_code'], $rule['type']
             );
         }
@@ -378,21 +408,6 @@ class AAM_Framework_Service_AccessDeniedRedirect
         }
 
         return $code;
-    }
-
-    /**
-     * Get object
-     *
-     * @param array $inline_context
-     *
-     * @return AAM_Core_Object
-     * @version 6.9.14
-     */
-    protected function get_object($inline_context)
-    {
-        return $this->_get_subject($inline_context)->getObject(
-            AAM_Core_Object_Redirect::OBJECT_TYPE
-        );
     }
 
 }

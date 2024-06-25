@@ -36,37 +36,41 @@ class AAM_Framework_Service_ApiRoutes
      */
     public function get_route_list($inline_context = null)
     {
-        $response = array();
-        $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+        try {
+            $result   = array();
+            $subject  = $this->_get_subject($inline_context);
+            $object   = $subject->reloadObject(AAM_Core_Object_Route::OBJECT_TYPE);
+            $explicit = $object->getExplicitOption();
 
-        $options  = $object->getOption();
-        $explicit = $object->getExplicitOption();
+            // Iterating over the list of all registered API routes and compile the
+            // list
+            foreach (rest_get_server()->get_routes() as $route => $handlers) {
+                $methods = array();
 
-        // Iterating over the list of all registered API routes and compile the
-        // list
-        foreach (rest_get_server()->get_routes() as $route => $handlers) {
-            $methods = array();
+                foreach ($handlers as $handler) {
+                    $methods = array_merge(
+                        $methods, array_keys($handler['methods'])
+                    );
+                }
 
-            foreach ($handlers as $handler) {
-                $methods = array_merge($methods, array_keys($handler['methods']));
+                foreach (array_unique($methods) as $method) {
+                    $mask = strtolower("restful|{$route}|{$method}");
+
+                    array_push(
+                        $result,
+                        $this->_prepare_route(
+                            $mask,
+                            $object->isRestricted('restful', $route, $method),
+                            !array_key_exists($mask, $explicit)
+                        )
+                    );
+                }
             }
-
-            foreach (array_unique($methods) as $method) {
-                $mask = strtolower("restful|{$route}|{$method}");
-
-                array_push(
-                    $response,
-                    $this->_prepare_route(
-                        $mask,
-                        $object->isRestricted('restful', $route, $method),
-                        !array_key_exists($mask, $explicit)
-                    )
-                );
-            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -79,23 +83,29 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @access public
      * @version 6.9.10
-     * @throws UnderflowException If rule does not exist
+     * @throws OutOfRangeException If rule does not exist
      */
     public function get_route_by_id($id, $inline_context = null)
     {
-        $found = false;
+        try {
+            $result = false;
 
-        foreach($this->get_route_list($inline_context) as $route) {
-            if ($route['id'] === $id) {
-                $found = $route;
+            foreach($this->get_route_list($inline_context) as $route) {
+                if ($route['id'] === $id) {
+                    $result = $route;
+                }
             }
+
+            if ($result === false) {
+                throw new OutOfRangeException(__(
+                    'Route does not exist', AAM_KEY
+                ));
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found === false) {
-            throw new UnderflowException('Route does not exist');
-        }
-
-        return $found;
+        return $result;
     }
 
     /**
@@ -109,26 +119,29 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @access public
      * @version 6.9.10
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws RuntimeException If fails to persist a rule
      */
     public function update_route_permission(
         $id, $is_restricted = true, $inline_context = null
     ) {
-        $route   = $this->get_route_by_id($id);
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
-        $mask    = strtolower("restful|{$route['route']}|{$route['method']}");
+        try {
+            $route   = $this->get_route_by_id($id);
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+            $mask    = strtolower("restful|{$route['route']}|{$route['method']}");
 
-        $object->store($mask, $is_restricted);
+            $object->store($mask, $is_restricted);
 
-        if ($object->store($mask, $is_restricted) === false) {
-            throw new Exception('Failed to persist the route permission');
+            if ($object->store($mask, $is_restricted) === false) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->get_route_by_id($id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        $subject->flushCache();
-
-        return $this->get_route_by_id($id);
+        return $result;
     }
 
     /**
@@ -141,48 +154,52 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @access public
      * @version 6.9.10
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function delete_route_permission($id, $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
 
-        // Find the rule that we are updating
-        $found = null;
+            // Find the rule that we are updating
+            $found = null;
 
-        // Note! User can delete only explicitly set rule (overwritten rule)
-        $original_options = $object->getExplicitOption();
-        $new_options      = array();
+            // Note! User can delete only explicitly set rule (overwritten rule)
+            $original_options = $object->getExplicitOption();
+            $new_options      = array();
 
-        foreach($original_options as $route => $is_restricted) {
-            $parts = explode('|', $route);
+            foreach($original_options as $route => $is_restricted) {
+                $parts = explode('|', $route);
 
-            if (abs(crc32($parts[1] . $parts[2])) === $id) {
-                $found = array(
-                    'mask'       => $route,
-                    'restricted' => $is_restricted
-                );
-            } else {
-                $new_options[$route] = $is_restricted;
+                if (abs(crc32($parts[1] . $parts[2])) === $id) {
+                    $found = array(
+                        'mask'       => $route,
+                        'restricted' => $is_restricted
+                    );
+                } else {
+                    $new_options[$route] = $is_restricted;
+                }
             }
+
+            if ($found) {
+                $object->setExplicitOption($new_options);
+                $success = $object->save();
+            } else {
+                throw new OutOfRangeException('Route does not exist');
+            }
+
+            if (!$success) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->get_route_by_id($id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found) {
-            $object->setExplicitOption($new_options);
-            $success = $object->save();
-        } else {
-            throw new UnderflowException('Route does not exist');
-        }
-
-        if (!$success) {
-            throw new Exception('Failed to persist the rule');
-        }
-
-        $subject->flushCache();
-
-        return $this->get_route_by_id($id);
+        return $result;
     }
 
     /**
@@ -195,46 +212,23 @@ class AAM_Framework_Service_ApiRoutes
      * @access public
      * @version 6.9.10
      */
-    public function reset_routes($inline_context = null)
+    public function reset($inline_context = null)
     {
-        $response = array();
+        try {
+            // Reset the object
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
 
-        // Reset the object
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+            if ($object->reset()) {
+                $result = $this->get_route_list($inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
 
-        // Communicate about number of rules that were deleted
-        $response['deleted_routes_count'] = count($object->getExplicitOption());
-
-        // Reset
-        $response['success'] = $object->reset();
-
-        return $response;
-    }
-
-    /**
-     * Call custom method registered by third-party
-     *
-     * @param string $name
-     * @param array  $args
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public function __call($name, $args)
-    {
-        // Assuming that the last argument is always the inline context
-        $context = array_pop($args);
-
-        return apply_filters(
-            "aam_api_route_service_{$name}",
-            null,
-            $args,
-            $this->_get_subject($context),
-            $this
-        );
+        return $result;
     }
 
     /**

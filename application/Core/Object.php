@@ -264,21 +264,6 @@ abstract class AAM_Core_Object
     }
 
     /**
-     * Get inheritance data
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.29
-     */
-    public function getInheritance()
-    {
-        return [
-            'is_overwritten' => $this->isOverwritten()
-        ];
-    }
-
-    /**
      * Get specific access property
      *
      * @param string $property

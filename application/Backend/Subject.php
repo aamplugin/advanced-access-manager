@@ -150,7 +150,7 @@ class AAM_Backend_Subject
         } else {
             // Covering scenario when changing between sites and they have mismatched
             // list of roles
-            if (AAM_Framework_Manager::roles()->is_role($id)) {
+            if (wp_roles()->is_role($id)) {
                 $subject = AAM::api()->getRole($id);
             } else {
                 $roles   = array_keys(get_editable_roles());

@@ -10,6 +10,7 @@
 /**
  * Backend metaboxes & widgets manager
  *
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/358
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.33
  */
 class AAM_Backend_Feature_Main_Metabox
     extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
@@ -68,36 +69,6 @@ class AAM_Backend_Feature_Main_Metabox
         add_filter('aam_component_screen_mode_panel_filter', function() {
             return AAM_Backend_View::getInstance()->loadPartial('component-screen-mode');
         });
-    }
-
-    /**
-     * Save metabox access settings
-     *
-     * @return string
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.7.4 https://github.com/aamplugin/advanced-access-manager/issues/167
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.7.9
-     */
-    public function save()
-    {
-        $items  = AAM_Core_Request::post('items', array());
-        $status = $this->getFromPost('status', FILTER_VALIDATE_BOOLEAN);
-
-        $object = AAM_Backend_Subject::getInstance()->getObject(
-            self::OBJECT_TYPE, null, true
-        );
-
-        foreach ($items as $item) {
-            $object->updateOptionItem($item, $status);
-        }
-
-        return wp_json_encode(
-            array('status' => ($object->save() ? 'success' : 'failure'))
-        );
     }
 
     /**

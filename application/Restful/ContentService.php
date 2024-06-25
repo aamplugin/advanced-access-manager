@@ -17,10 +17,10 @@
  *
  * @version 6.9.31
  */
-class AAM_Core_Restful_ContentService
+class AAM_Restful_ContentService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -37,17 +37,33 @@ class AAM_Core_Restful_ContentService
     {
         add_action('rest_api_init', function() {
             // Get list of all registered post types
-            $this->_register_route('/content/types', array(
+            $this->_register_route('/content/types', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_post_types'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'callback'            => [ $this, 'get_post_types' ],
+                'permission_callback' => [ $this, 'check_permissions' ],
+                'args'                => [
+                    'scope' => [
+                        'description' => 'Permissions scope',
+                        'type'        => 'string',
+                        'default'     => 'all',
+                        'enum'        => [ 'term', 'post', 'all' ]
+                    ]
+                ]
+            ]);
 
             // Get list of all registered taxonomies
             $this->_register_route('/content/taxonomies', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_taxonomies'),
-                'permission_callback' => array($this, 'check_permissions')
+                'permission_callback' => array($this, 'check_permissions'),
+                'args'                => [
+                    'scope' => [
+                        'description' => 'Permissions scope',
+                        'type'        => 'string',
+                        'default'     => 'all',
+                        'enum'        => [ 'term', 'post', 'all' ]
+                    ]
+                ]
             ));
 
             // Get list of posts for given post type
@@ -57,21 +73,21 @@ class AAM_Core_Restful_ContentService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'type' => array(
-                        'description' => __('Unique post type identifier', AAM_KEY),
+                        'description' => 'Unique post type identifier',
                         'type'        => 'string',
                         'required'    => true
                     ),
                     'search' => array(
-                        'description' => __('Search string', AAM_KEY),
+                        'description' => 'Search string',
                         'type'        => 'string'
                     ),
                     'offset' => array(
-                        'description' => __('Pagination offset', AAM_KEY),
+                        'description' => 'Pagination offset',
                         'type'        => 'number',
                         'default'     => 0
                     ),
                     'per_page' => array(
-                        'description' => __('Pagination limit per page', AAM_KEY),
+                        'description' => 'Pagination limit per page',
                         'type'        => 'number',
                         'default'     => 10
                     )
@@ -85,31 +101,31 @@ class AAM_Core_Restful_ContentService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'taxonomy' => array(
-                        'description' => __('Unique taxonomy identifier', AAM_KEY),
+                        'description' => 'Unique taxonomy identifier',
                         'type'        => 'string',
                         'required'    => true
                     ),
                     'scope' => array(
-                        'description' => __('Permissions scope', AAM_KEY),
+                        'description' => 'Permissions scope',
                         'type'        => 'string',
                         'default'     => 'all',
                         'enum'        => [ 'term', 'post', 'all' ]
                     ),
                     'post_type' => array(
-                        'description' => __('Scope for specific post type', AAM_KEY),
+                        'description' => 'Scope for specific post type',
                         'type'        => 'string'
                     ),
                     'search' => array(
-                        'description' => __('Search string', AAM_KEY),
+                        'description' => 'Search string',
                         'type'        => 'string'
                     ),
                     'offset' => array(
-                        'description' => __('Pagination offset', AAM_KEY),
+                        'description' => 'Pagination offset',
                         'type'        => 'number',
                         'default'     => 0
                     ),
                     'per_page' => array(
-                        'description' => __('Pagination limit per page', AAM_KEY),
+                        'description' => 'Pagination limit per page',
                         'type'        => 'number',
                         'default'     => 10
                     )
@@ -117,13 +133,13 @@ class AAM_Core_Restful_ContentService
             ));
 
             // Get post permissions
-            $this->_register_route('/content/post/(?<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_post'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Unique post identifier', AAM_KEY),
+                        'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -131,18 +147,18 @@ class AAM_Core_Restful_ContentService
             ));
 
             // Update permissions
-            $this->_register_route('/content/post/(?<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_post_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Unique post identifier', AAM_KEY),
+                        'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
                     ),
                     'permissions' => array(
-                        'description' => __('Collection of permissions', AAM_KEY),
+                        'description' => 'Collection of permissions',
                         'type'        => 'array',
                         'required'    => true,
                         'items'       => array(
@@ -165,13 +181,13 @@ class AAM_Core_Restful_ContentService
             ));
 
             // Delete all permissions
-            $this->_register_route('/content/post/(?<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Unique post identifier', AAM_KEY),
+                        'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -193,31 +209,30 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function get_post_types($request)
+    public function get_post_types(WP_REST_Request $request)
     {
-        $subject = $this->_determine_subject($request);
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $subject
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_post_types([
+                'include_all' => AAM::api()->getConfig(
+                    'core.service.content.manageAllPostTypes', false
+                ),
+                'scope'       => $request->get_param('scope')
+            ]);
 
-        $result = $service->get_post_types([
-            'include_all' => AAM::api()->getConfig(
-                'core.service.content.manageAllPostTypes', false
-            )
-        ]);
-
-        // Additionally, to support legacy setup, iterate over the list of taxonomies
-        // and enrich them
-        // TODO: Remove in January 2025
-        foreach($result['list'] as $i => $item) {
-            $result['list'][$i] = apply_filters(
-                'aam_rest_get_post_type_filter',
-                $item,
-                (object)['name' => $item['slug']],
-                $subject
-            );
+            // Additionally, to support legacy setup, iterate over the list of
+            // taxonomies and enrich them
+            // TODO: Remove in January 2025
+            foreach($result['list'] as $i => $item) {
+                $result['list'][$i] = apply_filters(
+                    'aam_rest_get_post_type_filter',
+                    $item,
+                    (object)['name' => $item['slug']],
+                    $service->access_level
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
         return rest_ensure_response($result);
@@ -236,31 +251,30 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function get_taxonomies($request)
+    public function get_taxonomies(WP_REST_Request $request)
     {
-        $subject = $this->_determine_subject($request);
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $subject
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_taxonomies([
+                'include_all' => AAM::api()->getConfig(
+                    'core.service.content.manageAllTaxonomies', false
+                ),
+                'scope'       => $request->get_param('scope')
+            ]);
 
-        $result = $service->get_taxonomies([
-            'include_all' => AAM::api()->getConfig(
-                'core.service.content.manageAllTaxonomies', false
-            )
-        ]);
-
-        // Additionally, to support legacy setup, iterate over the list of taxonomies
-        // and enrich them
-        // TODO: Remove in January 2025
-        foreach($result['list'] as $i => $item) {
-            $result['list'][$i] = apply_filters(
-                'aam_rest_get_taxonomy_filter',
-                $item,
-                (object)['name' => $item['slug']],
-                $subject
-            );
+            // Additionally, to support legacy setup, iterate over the list of
+            // taxonomies and enrich them
+            // TODO: Remove in January 2025
+            foreach($result['list'] as $i => $item) {
+                $result['list'][$i] = apply_filters(
+                    'aam_rest_get_taxonomy_filter',
+                    $item,
+                    (object)['name' => $item['slug']],
+                    $service->access_level
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
         return rest_ensure_response($result);
@@ -279,20 +293,21 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function get_posts($request)
+    public function get_posts(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $this->_determine_subject($request)
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_posts([
+                'numberposts'      => $request->get_param('per_page'),
+                'post_type'        => $request->get_param('type'),
+                's'                => $request->get_param('search'),
+                'offset'           => $request->get_param('offset')
+            ]);
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_posts([
-            'numberposts'      => $request->get_param('per_page'),
-            'post_type'        => $request->get_param('type'),
-            's'                => $request->get_param('search'),
-            'offset'           => $request->get_param('offset')
-        ]));
+        return rest_ensure_response($result);
     }
 
     /**
@@ -308,15 +323,16 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function get_post($request)
+    public function get_post(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $this->_determine_subject($request)
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_post($request->get_param('id'));
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_post($request->get_param('id')));
+        return rest_ensure_response($result);
     }
 
     /**
@@ -332,37 +348,34 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function get_terms($request)
+    public function get_terms(WP_REST_Request $request)
     {
-        $subject  = $this->_determine_subject($request);
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $subject
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_terms([
+                'number'     => $request->get_param('per_page'),
+                'taxonomy'   => $request->get_param('taxonomy'),
+                'hide_empty' => false,
+                'search'     => $request->get_param('search'),
+                'offset'     => $request->get_param('offset'),
+                'scope'      => $request->get_param('scope'),
+                'post_type'  => $request->get_param('post_type')
+            ]);
 
-        $result = $service->get_terms([
-            'number'           => $request->get_param('per_page'),
-            'taxonomy'         => $request->get_param('taxonomy'),
-            'suppress_filters' => false,
-            'hide_empty'       => false,
-            'search'           => $request->get_param('search'),
-            'offset'           => $request->get_param('offset'),
-            'scope'            => $request->get_param('scope'),
-            'post_type'        => $request->get_param('post_type')
-        ]);
-
-        // Additionally, to support legacy setup, iterate over the list of terms
-        // and enrich them
-        // TODO: Remove in January 2025
-        foreach($result['list'] as $i => $item) {
-            $result['list'][$i] = apply_filters(
-                'aam_rest_get_term_filter',
-                $item,
-                (object)['term_id' => $item['id'], 'taxonomy' => $item['taxonomy']],
-                $subject,
-                $request
-            );
+            // Additionally, to support legacy setup, iterate over the list of terms
+            // and enrich them
+            // TODO: Remove in January 2025
+            foreach($result['list'] as $i => $item) {
+                $result['list'][$i] = apply_filters(
+                    'aam_rest_get_term_filter',
+                    $item,
+                    (object)['term_id' => $item['id'], 'taxonomy' => $item['taxonomy']],
+                    $service->access_level,
+                    $request
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
         return rest_ensure_response($result);
@@ -381,20 +394,22 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function update_post_permissions($request)
+    public function update_post_permissions(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $this->_determine_subject($request)
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
 
-        $service->update_post_permissions(
-            $request->get_param('id'),
-            $request->get_param('permissions')
-        );
+            $service->update_post_permissions(
+                $request->get_param('id'),
+                $request->get_param('permissions')
+            );
 
-        return rest_ensure_response($service->get_post($request->get_param('id')));
+            $result = $service->get_post($request->get_param('id'));
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
     }
 
     /**
@@ -410,17 +425,16 @@ class AAM_Core_Restful_ContentService
      * @access public
      * @version 6.9.31
      */
-    public function delete_permissions($request)
+    public function delete_permissions(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::content(
-            new AAM_Framework_Model_ServiceContext([
-                'subject' => $this->_determine_subject($request)
-            ])
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->delete_post_permissions($request->get_param('id'));
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        $service->delete_post_permissions($request->get_param('id'));
-
-        return rest_ensure_response($service->get_post($request->get_param('id')));
+        return rest_ensure_response($result);
     }
 
     /**
@@ -435,6 +449,24 @@ class AAM_Core_Restful_ContentService
     {
         return current_user_can('aam_manager')
             && current_user_can('aam_manage_content');
+    }
+
+    /**
+     * Get service
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return AAM_Framework_Service_Content
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_service(WP_REST_Request $request)
+    {
+        return AAM_Framework_Manager::content([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

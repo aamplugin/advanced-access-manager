@@ -149,7 +149,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 
                 case 'roles':
                     $dataset['roles'] = AAM_Core_API::getOption(
-                        AAM_Framework_Manager::roles()->role_key
+                        wp_roles()->role_key
                     );
                     break;
 
@@ -299,7 +299,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 
                         case 'roles':
                             AAM_Core_API::updateOption(
-                                AAM_Framework_Manager::roles()->role_key,
+                                wp_roles()->role_key,
                                 $this->_sanitizeRoles($settings)
                             );
                             break;

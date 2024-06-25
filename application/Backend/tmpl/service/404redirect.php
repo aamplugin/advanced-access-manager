@@ -1,16 +1,19 @@
 <?php
 /**
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/292
  * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
  * @since 6.4.0  Allowing to define 404 for any user or role
  * @since 6.0.0  Initial implementation of the templates
  *
- * @version 6.9.12
+ * @version 6.9.33
  *
  */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+
     <div class="aam-feature" id="404redirect-content">
         <div class="row">
             <div class="col-xs-12">
@@ -37,6 +40,12 @@
                     <input type="radio" name="404.redirect.type" id="404redirect-url" data-action="#url-404redirect-action" value="url_redirect" <?php echo ($type === 'url' ? ' checked' : ''); ?> />
                     <label for="404redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to the local URL [(enter full URL starting from http or https)]', 'small'); ?></label>
                 </div>
+                <?php if ($subject->isVisitor()) { ?>
+                    <div class="radio">
+                        <input type="radio" name="404.redirect.type" id="404-redirect-login" value="login_redirect" data-action="none" <?php echo ($type === 'login' ? ' checked' : ''); ?> />
+                        <label for="404-redirect-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
+                    </div>
+                <?php } ?>
                 <div class="radio">
                     <input type="radio" name="404.redirect.type" id="404redirect-callback" data-action="#callback-404redirect-action" value="trigger_callback" <?php echo ($type === 'callback' ? ' checked' : ''); ?> />
                     <label for="404redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>

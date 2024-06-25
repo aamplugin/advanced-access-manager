@@ -83,7 +83,7 @@ class AAM_Service_Chatbot
             });
         }
 
-        AAM_Core_Restful_ChatbotService::bootstrap();
+        AAM_Restful_ChatbotService::bootstrap();
     }
 
     /**

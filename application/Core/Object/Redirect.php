@@ -43,9 +43,11 @@ class AAM_Core_Object_Redirect extends AAM_Core_Object
 
         $this->setExplicitOption($option);
 
-        // Trigger custom functionality that may populate the redirect options. For
-        // example, this hooks is used by Access Policy service
-        $option = apply_filters('aam_redirect_object_option_filter', $option, $this);
+        // Trigger custom functionality that may populate the redirect options.
+        // For example, this hooks is used by Access Policy service.
+        $option = apply_filters(
+            'aam_redirect_object_option_filter', $option, $this
+        );
 
         $this->setOption(is_array($option) ? $option : array());
     }

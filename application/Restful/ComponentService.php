@@ -8,15 +8,15 @@
  */
 
 /**
- * RESTful API for the Backend Menu service
+ * RESTful API for the Metaboxes & Widgets service
  *
  * @package AAM
  * @version 6.9.13
  */
-class AAM_Core_Restful_BackendMenuService
+class AAM_Restful_ComponentService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -30,93 +30,83 @@ class AAM_Core_Restful_BackendMenuService
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get the list of backend menus
-            $this->_register_route('/backend-menu', array(
+            // Get the list of all metaboxes & widgets grouped by screen
+            $this->_register_route('/components', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menus'),
+                'callback'            => array($this, 'get_components'),
                 'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'args' => array(
+                    'screen_id' => array(
+                        'description' => 'WordPress screen ID',
+                        'type'        => 'string'
+                    )
+                )
             ));
 
-            // Get a menu
-            $this->_register_route('/backend-menu/(?<id>[\d]+)', array(
+            // Get a metabox or widget
+            $this->_register_route('/component/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menu'),
+                'callback'            => array($this, 'get_component'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Backend menu unique ID', AAM_KEY),
+                        'description' => 'Metabox or widget unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
             ));
 
-            // Update a menu's permission
-            $this->_register_route('/backend-menu/(?<id>[\d]+)', array(
+            // Update a component's permission
+            $this->_register_route('/component/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_menu_permission'),
+                'callback'            => array($this, 'update_component_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Backend menu unique ID', AAM_KEY),
+                        'description' => 'Component unique ID',
                         'type'        => 'number',
                         'required'    => true
                     ),
-                    'is_restricted' => array(
-                        'description' => __('Either menu is restricted or not', AAM_KEY),
-                        'type'        => 'boolean'
+                    'is_hidden' => array(
+                        'description' => 'Either component is hidden or not',
+                        'type'        => 'boolean',
+                        'default'     => true
                     )
                 )
             ));
 
-            // Delete a menu's permission
-            $this->_register_route('/backend-menu/(?<id>[\d]+)', array(
+            // Delete a component's permission
+            $this->_register_route('/component/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_menu_permission'),
+                'callback'            => array($this, 'delete_component_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Backend menu unique ID', AAM_KEY),
+                        'description' => 'Component unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
             ));
 
-            // Reset all backend menu permissions
-            $this->_register_route('/backend-menu/reset', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'reset_menu_permissions'),
+            // Reset all or specific screen permissions
+            $this->_register_route('/components', array(
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'args' => array(
+                    'screen_id' => array(
+                        'description' => 'WordPress screen ID',
+                        'type'        => 'string'
+                    )
+                )
             ));
-
-            // Register additional endpoints with add-ons
-            $more = apply_filters('aam_backend_menu_api_filter', array(), array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
-            ));
-
-            if (is_array($more)) {
-                foreach($more as $endpoint => $params) {
-                    // Wrap the callback function to include the current subject
-                    $params['callback'] = function(WP_REST_Request $request) use ($params) {
-                        return call_user_func_array($params['callback'], array(
-                            $request,
-                            $this->_determine_subject($request)
-                        ));
-                    };
-
-                    $this->_register_route($endpoint, $params);
-                }
-            }
         });
     }
 
     /**
-     * Get the backend menu list
+     * Get a list of components grouped by screen
      *
      * @param WP_REST_Request $request
      *
@@ -125,15 +115,20 @@ class AAM_Core_Restful_BackendMenuService
      * @access public
      * @version 6.9.13
      */
-    public function get_menus(WP_REST_Request $request)
+    public function get_components(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_item_list($request->get_param('screen_id'));
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_menu_list());
+        return rest_ensure_response($result);
     }
 
     /**
-     * Get backend menu item
+     * Get a component by ID
      *
      * @param WP_REST_Request $request
      *
@@ -142,12 +137,11 @@ class AAM_Core_Restful_BackendMenuService
      * @access public
      * @version 6.9.13
      */
-    public function get_menu(WP_REST_Request $request)
+    public function get_component(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->get_menu_by_id(
+            $service = $this->_get_service($request);
+            $result  = $service->get_item_by_id(
                 intval($request->get_param('id'))
             );
         } catch (Exception $e) {
@@ -158,7 +152,7 @@ class AAM_Core_Restful_BackendMenuService
     }
 
     /**
-     * Update backend menu permission
+     * Update component permission
      *
      * @param WP_REST_Request $request
      *
@@ -167,14 +161,13 @@ class AAM_Core_Restful_BackendMenuService
      * @access public
      * @version 6.9.13
      */
-    public function update_menu_permission(WP_REST_Request $request)
+    public function update_component_permission(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->update_menu_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->update_component_permission(
                 intval($request->get_param('id')),
-                $request->get_param('is_restricted')
+                $request->get_param('is_hidden')
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -184,7 +177,7 @@ class AAM_Core_Restful_BackendMenuService
     }
 
     /**
-     * Delete menu permission
+     * Delete component permission
      *
      * @param WP_REST_Request $request
      *
@@ -193,16 +186,13 @@ class AAM_Core_Restful_BackendMenuService
      * @access public
      * @version 6.9.13
      */
-    public function delete_menu_permission(WP_REST_Request $request)
+    public function delete_component_permission(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->delete_menu_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->delete_component_permission(
                 intval($request->get_param('id'))
             );
-        } catch (UnderflowException $e) {
-            $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -220,12 +210,11 @@ class AAM_Core_Restful_BackendMenuService
      * @access public
      * @version 6.9.13
      */
-    public function reset_menu_permissions(WP_REST_Request $request)
+    public function reset_permissions(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->reset_permissions();
+            $service = $this->_get_service($request);
+            $result  = $service->reset($request->get_param('screen_id'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -244,7 +233,7 @@ class AAM_Core_Restful_BackendMenuService
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && current_user_can('aam_manage_admin_menu');
+            && current_user_can('aam_manage_metaboxes');
     }
 
     /**
@@ -252,18 +241,17 @@ class AAM_Core_Restful_BackendMenuService
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Framework_Service_BackendMenu
+     * @return AAM_Framework_Service_Components
      *
      * @access private
      * @version 6.9.13
      */
     private function _get_service($request)
     {
-        return AAM_Framework_Manager::backend_menu(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        return AAM_Framework_Manager::components([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

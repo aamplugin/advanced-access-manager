@@ -1,5 +1,6 @@
 <?php
 /**
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
@@ -7,7 +8,7 @@
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.21
+ * @version 6.9.33
  * */
 ?>
 
@@ -43,16 +44,18 @@
             $first      = false;
             $components = AAM_Framework_Manager::components(array(
                 'subject' => AAM_Backend_Subject::getInstance()->getSubject()
-            ))->get_component_list();
+            ))->get_item_list();
 
             // Group all the components by screen
             $grouped = array();
             foreach($components as $component) {
-                if (!isset($grouped[$component['screen_id']])) {
-                    $grouped[$component['screen_id']] = array();
+                $screen = $component['screen_id'];
+
+                if (!isset($grouped[$screen])) {
+                    $grouped[$screen] = array();
                 }
 
-                array_push($grouped[$component['screen_id']], $component);
+                array_push($grouped[$screen], $component);
             }
         ?>
 
@@ -81,31 +84,45 @@
                                 </a>
                             </h4>
                         </div>
-                        <div id="group-<?php echo esc_js($screen_id); ?>" class="panel-collapse collapse<?php if (!$first) {
-                                                                                                                echo ' in';
-                                                                                                                $first = true;
-                                                                                                            } ?>" role="tabpanel" aria-labelledby="group-<?php echo esc_js($screen_id); ?>-heading">
+                        <div
+                            id="group-<?php echo esc_js($screen_id); ?>"
+                            class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>"
+                            role="tabpanel"
+                            aria-labelledby="group-<?php echo esc_js($screen_id); ?>-heading"
+                        >
                             <div class="panel-body">
                                 <div class="row">
                                     <?php foreach ($components as $component) { ?>
                                         <div class="col-xs-12 col-md-6 aam-submenu-item">
                                             <div class="aam-menu-details">
                                                 <?php echo esc_js($component['name']); ?>
-                                                <small><a href="#metabox-details-modal" data-toggle="modal" data-title="<?php echo esc_attr($component['name']); ?>" data-screen="<?php echo esc_attr($screen_id); ?>" data-id="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>" class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?></a></small>
+                                                <small><a
+                                                    href="#metabox-details-modal"
+                                                    data-toggle="modal"
+                                                    data-title="<?php echo esc_attr($component['name']); ?>"
+                                                    data-screen="<?php echo esc_attr($screen_id); ?>"
+                                                    data-id="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"
+                                                    class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?>
+                                                </a></small>
                                             </div>
 
                                             <?php if ($component['is_hidden']) { ?>
-                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo esc_js($screen_id . '-' . $component['slug']); ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
+                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo esc_js($component['id']); ?>" data-metabox="<?php echo esc_attr($component['id']); ?>"></i>
                                             <?php } else { ?>
-                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo esc_js($screen_id); ?>-<?php echo esc_js($component['slug']); ?>" data-metabox="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"></i>
+                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo esc_js($component['id']); ?>" data-metabox="<?php echo esc_js($component['id']); ?>"></i>
                                             <?php } ?>
 
-                                            <label for="metabox-<?php echo esc_js($screen_id . '-' . $component['slug']); ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
+                                            <label for="metabox-<?php echo esc_js($component['id']); ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
                                         </div>
                                     <?php } ?>
                                 </div>
 
-                                <?php echo apply_filters('aam_component_screen_mode_panel_filter', '', $screen_id, AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)); ?>
+                                <?php echo apply_filters(
+                                    'aam_component_screen_mode_panel_filter',
+                                    '',
+                                    $screen_id,
+                                    AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE)
+                                ); ?>
                             </div>
                         </div>
                     </div>

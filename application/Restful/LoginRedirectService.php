@@ -16,10 +16,10 @@
  * @package AAM
  * @version 6.9.26
  */
-class AAM_Core_Restful_LoginRedirectService
+class AAM_Restful_LoginRedirectService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -40,8 +40,7 @@ class AAM_Core_Restful_LoginRedirectService
             $this->_register_route('/redirect/login', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_redirect'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Create a redirect rule
@@ -51,36 +50,36 @@ class AAM_Core_Restful_LoginRedirectService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'type' => array(
-                        'description' => __('Rule type', AAM_KEY),
+                        'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
                         'enum'        => array_values(
-                            AAM_Framework_Service_RedirectAbstract::REDIRECT_TYPE_ALIAS
+                            AAM_Framework_Service_LoginRedirect::REDIRECT_TYPE_ALIAS
                         )
                     ),
                     'redirect_page_id' => array(
-                        'description' => __('Existing page ID to redirect to', AAM_KEY),
+                        'description' => 'Existing page ID to redirect to',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_page_id($value, $request);
                         }
                     ),
                     'redirect_url' => array(
-                        'description' => __('Valid URL to redirect to', AAM_KEY),
+                        'description' => 'Valid URL to redirect to',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_url($value, $request);
                         }
                     ),
                     'http_status_code' => array(
-                        'description' => __('HTTP Status Code', AAM_KEY),
+                        'description' => 'HTTP Status Code',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_status_code($value, $request);
                         }
                     ),
                     'callback' => array(
-                        'description' => __('Custom callback function', AAM_KEY),
+                        'description' => 'Custom callback function',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_callback($value, $request);
@@ -93,8 +92,7 @@ class AAM_Core_Restful_LoginRedirectService
             $this->_register_route('/redirect/login', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_redirect'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
@@ -111,13 +109,14 @@ class AAM_Core_Restful_LoginRedirectService
      */
     public function get_redirect(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::login_redirect(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_redirect();
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_redirect());
+        return rest_ensure_response($result);
     }
 
     /**
@@ -132,14 +131,9 @@ class AAM_Core_Restful_LoginRedirectService
      */
     public function set_redirect(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::login_redirect(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
-
         try {
-            $result = $service->set_redirect($request->get_params());
+            $service = $this->_get_service($request);
+            $result  = $service->set_redirect($request->get_params());
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -159,19 +153,14 @@ class AAM_Core_Restful_LoginRedirectService
      */
     public function reset_redirect(WP_REST_Request $request)
     {
-        $response = array('success' => true);
-
-        $service = AAM_Framework_Manager::login_redirect(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $service->reset_redirect();
+            $service = $this->_get_service($request);
+            $result  = $service->reset();
         } catch (Exception $e) {
-            $response = $this->_prepare_error_response($e);
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($response);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -347,6 +336,24 @@ class AAM_Core_Restful_LoginRedirectService
         }
 
         return $response;
+    }
+
+    /**
+     * Get service
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return AAM_Framework_Service_LoginRedirect
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_service(WP_REST_Request $request)
+    {
+        return AAM_Framework_Manager::login_redirect([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

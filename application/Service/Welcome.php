@@ -64,7 +64,7 @@ class AAM_Service_Welcome
 
         if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
             // Register RESTful API endpoints
-            AAM_Core_Restful_SupportService::bootstrap();
+            AAM_Restful_SupportService::bootstrap();
         }
     }
 

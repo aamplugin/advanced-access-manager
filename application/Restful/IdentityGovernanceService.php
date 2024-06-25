@@ -13,10 +13,10 @@
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Core_Restful_IdentityGovernanceService
+class AAM_Restful_IdentityGovernanceService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -34,8 +34,7 @@ class AAM_Core_Restful_IdentityGovernanceService
             $this->_register_route('/identity-governance', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule_list'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Create a new rule
@@ -100,7 +99,7 @@ class AAM_Core_Restful_IdentityGovernanceService
             ));
 
             // Get a rule
-            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -114,7 +113,7 @@ class AAM_Core_Restful_IdentityGovernanceService
             ));
 
             // Update an existing rule
-            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -177,7 +176,7 @@ class AAM_Core_Restful_IdentityGovernanceService
             ));
 
             // Delete a rule
-            $this->_register_route('/identity-governance/(?<id>[\d]+)', array(
+            $this->_register_route('/identity-governance/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -191,11 +190,10 @@ class AAM_Core_Restful_IdentityGovernanceService
             ));
 
             // Reset all rules
-            $this->_register_route('/identity-governance/reset', array(
-                'methods'             => WP_REST_Server::EDITABLE,
+            $this->_register_route('/identity-governance', array(
+                'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_rules'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
@@ -212,19 +210,18 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function get_rule_list(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = [];
 
-        $rules = [];
-
-        foreach($service->get_rule_list() as $rule) {
-            array_push($rules, $this->_enrich_rule($rule));
+            foreach($service->get_rule_list() as $rule) {
+                array_push($result, $this->_enrich_rule($rule));
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($rules);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -239,22 +236,16 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function create_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
-
-        $results = array();
-
         try {
-            $data = $request->get_params();
+            $service = $this->_get_service($request);
+            $data    = $request->get_params();
+            $result  = array();
 
             // If rule type is "user" or "role", split incoming comma-separated list
             // of identifiers and create rule for each identifier individually
             if ($data['rule_type'] === 'user') {
                 foreach($data['user_list'] as $user) {
-                    array_push($results, $service->create_rule(array(
+                    array_push($result, $service->create_rule(array(
                         'rule_type'   => $data['rule_type'],
                         'user_login'  => $user,
                         'permissions' => $data['permissions']
@@ -262,7 +253,7 @@ class AAM_Core_Restful_IdentityGovernanceService
                 }
             } elseif (in_array($data['rule_type'], ['role', 'user_role'], true)) {
                 foreach($data['role_list'] as $role) {
-                    array_push($results, $service->create_rule(array(
+                    array_push($result, $service->create_rule(array(
                         'rule_type'   => $data['rule_type'],
                         'role_slug'    => $role,
                         'permissions' => $data['permissions']
@@ -270,20 +261,20 @@ class AAM_Core_Restful_IdentityGovernanceService
                 }
             } elseif (in_array($data['rule_type'], ['role_level', 'user_level'], true)) {
                 foreach($data['level_list'] as $level) {
-                    array_push($results, $service->create_rule(array(
+                    array_push($result, $service->create_rule(array(
                         'rule_type'   => $data['rule_type'],
                         'level'       => intval($level),
                         'permissions' => $data['permissions']
                     )));
                 }
             } else {
-                $results = $service->create_rule($data);
+                $result = $service->create_rule($data);
             }
         } catch (Exception $e) {
-            $results = $this->_prepare_error_response($e);
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($results);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -298,19 +289,16 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function get_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->get_rule_by_id(
+            $service = $this->_get_service($request);
+            $result  = $this->_enrich_rule($service->get_rule_by_id(
                 intval($request->get_param('id'))
-            );
+            ));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($this->_enrich_rule($result));
+        return rest_ensure_response($result);
     }
 
     /**
@@ -325,12 +313,9 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function update_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->update_rule(
+            $service = $this->_get_service($request);
+            $result  = $service->update_rule(
                 intval($request->get_param('id')),
                 $request->get_params()
             );
@@ -353,14 +338,11 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function delete_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->delete_rule(intval($request->get_param('id')));
-        } catch (UnderflowException $e) {
-            $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
+            $service = $this->_get_service($request);
+            $result  = [
+                'success' => $service->delete_rule(intval($request->get_param('id')))
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -380,12 +362,9 @@ class AAM_Core_Restful_IdentityGovernanceService
      */
     public function reset_rules(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::identity_governance(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->reset_rules();
+            $service = $this->_get_service($request);
+            $result  = $service->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -659,6 +638,24 @@ class AAM_Core_Restful_IdentityGovernanceService
         }
 
         return $response;
+    }
+
+    /**
+     * Get service
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return AAM_Framework_Service_IdentityGovernance
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_service(WP_REST_Request $request)
+    {
+        return AAM_Framework_Manager::identity_governance([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

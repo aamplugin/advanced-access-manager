@@ -132,7 +132,7 @@ class AAM_Service_LogoutRedirect
         );
 
         // Register RESTful API
-        AAM_Core_Restful_LogoutRedirectService::bootstrap();
+        AAM_Restful_LogoutRedirectService::bootstrap();
     }
 
     /**

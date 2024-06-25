@@ -16,10 +16,10 @@
  * @package AAM
  * @version 6.9.13
  */
-class AAM_Core_Restful_ApiRouteService
+class AAM_Restful_ApiRouteService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -37,21 +37,20 @@ class AAM_Core_Restful_ApiRouteService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of routes
-            $this->_register_route('/api-route', array(
+            $this->_register_route('/api-routes', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_routes'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Get a route
-            $this->_register_route('/api-route/(?<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_route'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('API route unique ID', AAM_KEY),
+                        'description' => 'API route unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -59,31 +58,32 @@ class AAM_Core_Restful_ApiRouteService
             ));
 
             // Update a route permission
-            $this->_register_route('/api-route/(?<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_route'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('API route unique ID', AAM_KEY),
+                        'description' => 'API route unique ID',
                         'type'        => 'number',
                         'required'    => true
                     ),
                     'is_restricted' => array(
-                        'description' => __('Either route is restricted or not', AAM_KEY),
-                        'type'        => 'boolean'
+                        'description' => 'Either route is restricted or not',
+                        'type'        => 'boolean',
+                        'default'     => true
                     )
                 )
             ));
 
             // Delete a route permission
-            $this->_register_route('/api-route/(?<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_route'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('API route unique ID', AAM_KEY),
+                        'description' => 'API route unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -91,33 +91,11 @@ class AAM_Core_Restful_ApiRouteService
             ));
 
             // Reset all routes' permissions
-            $this->_register_route('/api-route/reset', array(
-                'methods'             => WP_REST_Server::EDITABLE,
+            $this->_register_route('/api-routes', array(
+                'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_routes'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
-
-            // Register additional endpoints with add-ons
-            $more = apply_filters('aam_api_route_filter', array(), array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
-            ));
-
-            if (is_array($more)) {
-                foreach($more as $endpoint => $params) {
-                    // Wrap the callback function to include the current subject
-                    $params['callback'] = function(WP_REST_Request $request) use ($params) {
-                        return call_user_func_array($params['callback'], array(
-                            $request,
-                            $this->_determine_subject($request)
-                        ));
-                    };
-
-                    $this->_register_route($endpoint, $params);
-                }
-            }
         });
     }
 
@@ -133,9 +111,14 @@ class AAM_Core_Restful_ApiRouteService
      */
     public function get_routes(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_route_list();
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_route_list());
+        return rest_ensure_response($result);
     }
 
     /**
@@ -150,10 +133,9 @@ class AAM_Core_Restful_ApiRouteService
      */
     public function get_route(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->get_route_by_id(
+            $service = $this->_get_service($request);
+            $result  = $service->get_route_by_id(
                 intval($request->get_param('id'))
             );
         } catch (Exception $e) {
@@ -175,10 +157,9 @@ class AAM_Core_Restful_ApiRouteService
      */
     public function update_route(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->update_route_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->update_route_permission(
                 intval($request->get_param('id')),
                 $request->get_param('is_restricted')
             );
@@ -201,14 +182,11 @@ class AAM_Core_Restful_ApiRouteService
      */
     public function delete_route(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->delete_route_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->delete_route_permission(
                 intval($request->get_param('id'))
             );
-        } catch (UnderflowException $e) {
-            $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -228,10 +206,9 @@ class AAM_Core_Restful_ApiRouteService
      */
     public function reset_routes(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->reset_routes();
+            $service = $this->_get_service($request);
+            $result  = $service->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -266,11 +243,10 @@ class AAM_Core_Restful_ApiRouteService
      */
     private function _get_service($request)
     {
-        return AAM_Framework_Manager::api_routes(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        return AAM_Framework_Manager::api_routes([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

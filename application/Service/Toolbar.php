@@ -178,7 +178,7 @@ class AAM_Service_Toolbar
                     $nodes   = $wp_admin_bar->get_nodes();
 
                     foreach ((is_array($nodes) ? $nodes : array()) as $id => $node) {
-                        if (!$node->group && $toolbar->isHidden($id, true)) {
+                        if (!$node->group && $toolbar->isHidden($id)) {
                             if (!empty($node->parent)) { // update parent node with # link
                                 $parent = $wp_admin_bar->get_node($node->parent);
                                 if ($parent && ($parent->href === $node->href)) {
@@ -208,7 +208,7 @@ class AAM_Service_Toolbar
         });
 
         // Register RESTful API endpoints
-        AAM_Core_Restful_AdminToolbarService::bootstrap();
+        AAM_Restful_AdminToolbarService::bootstrap();
     }
 
     /**

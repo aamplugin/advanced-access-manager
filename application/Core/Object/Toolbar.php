@@ -10,6 +10,7 @@
 /**
  * Admin toolbar object
  *
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
  * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/105
@@ -18,7 +19,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.31
+ * @version 6.9.33
  */
 class AAM_Core_Object_Toolbar extends AAM_Core_Object
 {
@@ -68,31 +69,35 @@ class AAM_Core_Object_Toolbar extends AAM_Core_Object
      *
      * @return boolean
      *
+     * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
      * @since 6.2.2  Added `aam_toolbar_is_hidden_filter` filter
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.33
      */
-    public function isHidden($item, $both = false)
+    public function isHidden($item)
     {
         $options = $this->getOption();
         $item    = strtolower($item);
         $parent  = $this->getParentMenu($item);
 
-        // Step #1. Check if toolbar item is directly hidden
-        $direct = !empty($options[$item]);
-
-        // Step #2. Check if the branch itself is hidden
-        $branch = ($both && !empty($options['toolbar-' . $item]));
-
-        // Step #3. Check if entire branch is hidden
-        $parent = ($both && !empty($options['toolbar-' . $parent]));
+        // If there is a direct setting for given item, use it and ignore everything
+        // else
+        if (array_key_exists($item, $options)) {
+            $restricted = !empty($options[$item]);
+        } elseif (array_key_exists('toolbar-' . $item, $options)) {
+            $restricted = !empty($options['toolbar-' . $item]);
+        } elseif ($parent !== null) { // Get access controls from the parent
+            $restricted = $this->isHidden($parent);
+        } else {
+            $restricted = null;
+        }
 
         return apply_filters(
             'aam_toolbar_is_hidden_filter',
-            $direct || $branch || $parent,
+            $restricted,
             $item,
             $this
         );

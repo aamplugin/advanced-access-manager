@@ -103,11 +103,9 @@ class AAM_Service_Multisite
      */
     protected function initializeHooks()
     {
-        $roles = AAM_Framework_Manager::roles();
-
         if (is_main_site()) {
             // Any changes to the user_roles option should be replicated
-            add_action('update_option_' . $roles->role_key, function($old, $value) {
+            add_action('update_option_' . wp_roles()->role_key, function($old, $value) {
                 $this->syncUpdatedOption('%suser_roles', $value);
             }, 10, 2);
 

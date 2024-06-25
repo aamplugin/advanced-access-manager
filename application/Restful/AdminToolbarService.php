@@ -13,10 +13,10 @@
  * @package AAM
  * @version 6.9.13
  */
-class AAM_Core_Restful_AdminToolbarService
+class AAM_Restful_AdminToolbarService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -34,84 +34,62 @@ class AAM_Core_Restful_AdminToolbarService
             $this->_register_route('/admin-toolbar', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_menus'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Get a menu
-            $this->_register_route('/admin-toolbar/(?<id>[\d]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_menu'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Admin toolbar menu unique ID', AAM_KEY),
+                        'description' => 'Admin toolbar menu unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
             ));
 
-            // Update a menu's permission
-            $this->_register_route('/admin-toolbar/(?<id>[\d]+)', array(
+            // Set or update a menu's permission
+            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Admin toolbar menu unique ID', AAM_KEY),
+                        'description' => 'Admin toolbar menu unique ID',
                         'type'        => 'number',
                         'required'    => true
                     ),
                     'is_hidden' => array(
-                        'description' => __('Either menu is hidden or not', AAM_KEY),
-                        'type'        => 'boolean'
+                        'description' => 'Either menu is hidden or not',
+                        'type'        => 'boolean',
+                        'default'     => true
                     )
                 )
             ));
 
             // Delete a menu's permission
-            $this->_register_route('/admin-toolbar/(?<id>[\d]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Admin toolbar menu unique ID', AAM_KEY),
+                        'description' => 'Admin toolbar menu unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
             ));
 
-            // Reset all backend menu permissions
-            $this->_register_route('/admin-toolbar/reset', array(
-                'methods'             => WP_REST_Server::EDITABLE,
+            // Reset all admin toolbar permissions
+            $this->_register_route('/admin-toolbar', array(
+                'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
-
-            // Register additional endpoints with add-ons
-            $more = apply_filters('aam_admin_toolbar_api_filter', array(), array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
-            ));
-
-            if (is_array($more)) {
-                foreach($more as $endpoint => $params) {
-                    // Wrap the callback function to include the current subject
-                    $params['callback'] = function(WP_REST_Request $request) use ($params) {
-                        return call_user_func_array($params['callback'], array(
-                            $request,
-                            $this->_determine_subject($request)
-                        ));
-                    };
-
-                    $this->_register_route($endpoint, $params);
-                }
-            }
         });
     }
 
@@ -127,9 +105,14 @@ class AAM_Core_Restful_AdminToolbarService
      */
     public function get_menus(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_item_list();
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_item_list());
+        return rest_ensure_response($result);
     }
 
     /**
@@ -144,10 +127,9 @@ class AAM_Core_Restful_AdminToolbarService
      */
     public function get_menu(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->get_item_by_id(
+            $service = $this->_get_service($request);
+            $result  = $service->get_item_by_id(
                 intval($request->get_param('id'))
             );
         } catch (Exception $e) {
@@ -169,10 +151,9 @@ class AAM_Core_Restful_AdminToolbarService
      */
     public function update_item_permission(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->update_item_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->update_item_permission(
                 intval($request->get_param('id')),
                 $request->get_param('is_hidden')
             );
@@ -195,14 +176,11 @@ class AAM_Core_Restful_AdminToolbarService
      */
     public function delete_item_permission(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->delete_item_permission(
+            $service = $this->_get_service($request);
+            $result  = $service->delete_item_permission(
                 intval($request->get_param('id'))
             );
-        } catch (UnderflowException $e) {
-            $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -222,10 +200,9 @@ class AAM_Core_Restful_AdminToolbarService
      */
     public function reset_permissions(WP_REST_Request $request)
     {
-        $service = $this->_get_service($request);
-
         try {
-            $result = $service->reset_permissions();
+            $service = $this->_get_service($request);
+            $result  = $service->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -248,7 +225,7 @@ class AAM_Core_Restful_AdminToolbarService
     }
 
     /**
-     * Get JWT framework service
+     * Get Admin Toolbar framework service
      *
      * @param WP_REST_Request $request
      *
@@ -259,11 +236,10 @@ class AAM_Core_Restful_AdminToolbarService
      */
     private function _get_service($request)
     {
-        return AAM_Framework_Manager::admin_toolbar(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        return AAM_Framework_Manager::admin_toolbar([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

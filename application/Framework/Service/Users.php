@@ -16,26 +16,7 @@
 class AAM_Framework_Service_Users
 {
 
-    /**
-     * Single instance of itself
-     *
-     * @var AAM_Framework_Service_Users
-     *
-     * @access private
-     * @static
-     * @version 6.9.32
-     */
-    private static $_instance = null;
-
-    /**
-     * Instantiate the service
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.9.32
-     */
-    protected function __construct() {}
+    use AAM_Framework_Service_BaseTrait;
 
     /**
      * Return paginated list of user
@@ -45,38 +26,44 @@ class AAM_Framework_Service_Users
      * @access public
      * @version 6.9.32
      */
-    public function get_users(array $args = [])
+    public function get_user_list(array $args = [])
     {
-        $args = array_merge([
-            'blog_id'        => get_current_blog_id(),
-            'fields'         => 'all',
-            'number'         => 10,
-            'offset'         => 0,
-            'search'         => '',
-            'result_type'    => 'full',
-            'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
-            'orderby'        => 'display_name'
-        ], $args);
+        try {
+            $args = array_merge([
+                'blog_id'        => get_current_blog_id(),
+                'fields'         => 'all',
+                'number'         => 10,
+                'offset'         => 0,
+                'search'         => '',
+                'result_type'    => 'full',
+                'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
+                'orderby'        => 'display_name'
+            ], $args);
 
-        $query    = new WP_User_Query($args);
-        $response = [];
+            $query  = new WP_User_Query($args);
+            $result = [];
 
-        if ($args['result_type'] !== 'summary') {
-            $response['list'] = [];
+            if ($args['result_type'] !== 'summary') {
+                $result['list'] = [];
 
-            foreach ($query->get_results() as $user) {
-                array_push($response['list'], $this->_prepare_user($user));
+                foreach ($query->get_results() as $user) {
+                    array_push($result['list'], $this->_prepare_user(
+                        new AAM_Framework_Proxy_User($user))
+                    );
+                }
             }
+
+            if (in_array($args['result_type'], ['full', 'summary'], true)) {
+                $result['summary'] = [
+                    'total_count'    => count_users()['total_users'],
+                    'filtered_count' => $query->get_total()
+                ];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        if (in_array($args['result_type'], ['full', 'summary'], true)) {
-            $response['summary'] = [
-                'total_count'    => count_users()['total_users'],
-                'filtered_count' => $query->get_total()
-            ];
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -91,42 +78,37 @@ class AAM_Framework_Service_Users
      *
      * @access public
      * @version 6.9.32
-     * @throws Exception
+     * @throws OutOfRangeException
      */
     public function get_user($identifier, $return_proxy = true)
     {
-        if (is_numeric($identifier)) { // Get user by ID
-            $user = get_user_by('id', $identifier);
-        } elseif (is_string($identifier) && $identifier !== '*') {
-            if (strpos($identifier, '@') > 0) { // Email?
-                $user = get_user_by('email', $identifier);
+        try {
+            if (is_numeric($identifier)) { // Get user by ID
+                $user = get_user_by('id', $identifier);
+            } elseif (is_string($identifier) && $identifier !== '*') {
+                if (strpos($identifier, '@') > 0) { // Email?
+                    $user = get_user_by('email', $identifier);
+                } else {
+                    $user = get_user_by('login', $identifier);
+                }
             } else {
-                $user = get_user_by('login', $identifier);
+                $user = $identifier;
             }
-        } else {
-            $user = null;
+
+            if (!is_a($user, 'WP_User')) {
+                throw new OutOfRangeException(
+                    "User with identifier {$identifier} does not exist"
+                );
+            } else {
+                $user = new AAM_Framework_Proxy_User($user);
+            }
+
+            $result = $return_proxy ? $user : $this->_prepare_user($user);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        // Do additional validation to ensure that current user can manage this
-        // user.
-        // TODO: This is a legacy "User Level Filter" service and it can be removed
-        // down the road
-        $user = apply_filters('aam_get_user', $user);
-
-        if (is_wp_error($user)) {
-            throw new DomainException($user->get_error_message());
-        } elseif (!is_a($user, 'WP_User')) {
-            throw new Exception("User with identifier {$identifier} does not exist");
-        }
-
-        // Final check before returning user data
-        if (!current_user_can('aam_list_user', $user->ID)) {
-            throw new DomainException(
-                "User with identifier {$identifier} does not exist"
-            );
-        }
-
-        return $return_proxy ? $user : $this->_prepare_user($user);
+        return $result;
     }
 
     /**
@@ -141,43 +123,18 @@ class AAM_Framework_Service_Users
      * @access public
      * @version 6.9.32
      */
-    public function update_user($identifier, $data, $return_proxy = true)
+    public function update($identifier, $data, $return_proxy = true)
     {
-        $user = $this->get_user($identifier);
+        try {
+            $user = $this->get_user($identifier);
+            $user->update($data);
 
-        // Verifying the expiration date & trigger, if defined
-        if (isset($data['expires_at'])) {
-            $expiration = [
-                'expires' => DateTime::createFromFormat(
-                    DateTime::RFC3339, $data['expires_at']
-                )->getTimestamp()
-            ];
-
-            // Parse the trigger
-            if (is_array($data['trigger'])) {
-                $expiration['action'] = $data['trigger']['type'];
-            } else {
-                $expiration['action'] = $data['trigger'];
-            }
-
-            // Additionally, if trigger is change_role, capture the targeting role
-            if ($expiration['action'] === 'change_role') {
-                $expiration['meta'] = $data['trigger']['to_role'];
-            }
-
-            // Update the expiration attribute
-            update_user_option($user->ID, 'aam_user_expiration', $expiration);
+            $result = $return_proxy ? $user : $this->_prepare_user($user);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        if (isset($data['status'])) {
-            if ($data['status'] === AAM_Framework_Proxy_User::STATUS_INACTIVE) {
-                add_user_meta($user->ID, 'aam_user_status', 'locked');
-            } else {
-                delete_user_meta($user->ID, 'aam_user_status');
-            }
-        }
-
-        return $this->get_user($identifier, $return_proxy);
+        return $result;
     }
 
     /**
@@ -191,33 +148,72 @@ class AAM_Framework_Service_Users
      * @access public
      * @version 6.9.32
      */
-    public function reset_user($identifier, $return_proxy = true)
+    public function reset($identifier, $return_proxy = true)
     {
-        $user = $this->get_user($identifier);
+        try {
+            $user = $this->get_user($identifier);
 
-        delete_user_option($user->ID, 'aam_user_expiration');
+            $user->reset();
 
-        do_action('aam_reset_user_action', $user);
+            $result = $return_proxy ? $user : $this->_prepare_user($user);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $this->get_user($identifier, $return_proxy);
+        return $result;
+    }
+
+    /**
+     * Verify that user is active, not expired and simply can be logged in
+     *
+     * @param int|string|WP_User|AAM_Framework_Proxy_User $identifier
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function verify_user_state($identifier)
+    {
+        try {
+            $user = $this->get_user($identifier);
+
+            // Step #1. Verify that user is active
+            if (!$user->is_user_active()) {
+                throw new DomainException(__(
+                    '[ERROR]: User is inactive. Contact website administrator.',
+                    AAM_KEY
+                ));
+            }
+
+            // Step #2. Verify that user is not expired
+            if ($user->is_user_access_expired()) {
+                throw new DomainException(__(
+                    '[ERROR]: User access is expired. Contact website administrator.',
+                    AAM_KEY
+                ));
+            }
+
+            $result = $user;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
     }
 
     /**
      * Prepare user data
      *
-     * @param WP_User $wp_user
+     * @param AAM_Framework_Proxy_User $wp_user
      *
      * @return array
      *
      * @access private
      * @version 6.9.32
      */
-    private function _prepare_user(WP_User $wp_user)
+    private function _prepare_user(AAM_Framework_Proxy_User $user)
     {
-        // Take WordPress core user and convert it to AAM User Proxy so we can have
-        // more enhanced view on the user
-        $user = new AAM_Framework_Proxy_User($wp_user);
-
         $response = [
             'id'                    => $user->ID,
             'user_login'            => $user->user_login,
@@ -256,7 +252,7 @@ class AAM_Framework_Service_Users
     {
         $response = array();
 
-        $names = AAM_Framework_Manager::roles()->get_names();
+        $names = wp_roles()->get_names();
 
         if (is_array($roles)) {
             foreach ($roles as $role) {
@@ -267,24 +263,6 @@ class AAM_Framework_Service_Users
         }
 
         return $response;
-    }
-
-    /**
-     * Bootstrap the role service
-     *
-     * @return AAM_Framework_Service_Users
-     *
-     * @access public
-     * @static
-     * @version 6.9.32
-     */
-    public static function bootstrap()
-    {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
-        }
-
-        return self::$_instance;
     }
 
 }

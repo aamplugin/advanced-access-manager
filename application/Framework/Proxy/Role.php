@@ -44,6 +44,19 @@ class AAM_Framework_Proxy_Role
     private $_role;
 
     /**
+     * User index
+     *
+     * The value is generated with `count_users` core function and is static so
+     * it can be shared with all instances of the role proxy
+     *
+     * @var array
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private static $_user_index = null;
+
+    /**
      * Constructor
      *
      * @param string  $name Role display name
@@ -57,15 +70,93 @@ class AAM_Framework_Proxy_Role
     public function __construct($name, WP_Role $role)
     {
         $this->set_display_name($name);
-        $this->set_slug($role->name);
 
+        $this->_slug = $role->name;
         $this->_role = $role;
+    }
+
+    /**
+     * Update role
+     *
+     * @param array $attributes
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function update(array $attributes = [])
+    {
+        // Setting new slug if provided and it does not match the original slug
+        if (!empty($attributes['slug']) && $attributes['slug'] !== $this->_slug) {
+            // Keep the old slug. We'll use it later to place role in exactly the
+            // same spot on the list of roles
+            $old_slug = $this->_slug;
+
+            $this->set_slug(sanitize_key($attributes['slug']));
+        }
+
+        // Set new display name if provided
+        if (!empty($attributes['name'])) {
+            $this->set_display_name($attributes['name']);
+        }
+
+        // Adding the list of capabilities
+        if (isset($attributes['add_caps']) && is_array($attributes['add_caps'])) {
+            array_walk($attributes['add_caps'], function($cap) {
+                $this->add_capability($cap);
+            });
+        }
+
+        // Removing the list of capabilities
+        if (isset($attributes['remove_caps']) && is_array($attributes['remove_caps'])) {
+            array_walk($attributes['remove_caps'], function($cap) {
+                $this->remove_capability($cap);
+            });
+        }
+
+        $roles = wp_roles()->roles;
+
+        // If slug was updated, then replace the old role with new role and retain
+        // the position
+        if (!empty($old_slug)) {
+            // Taking exactly the same position in the list of roles
+            $new_list = array();
+
+            foreach($roles as $slug => $props) {
+                if ($slug === $old_slug) {
+                    $new_list[$this->_slug] = array(
+                        'name'         => $this->_display_name,
+                        'capabilities' => $this->capabilities
+                    );
+                } else {
+                    $new_list[$slug] = $props;
+                }
+            }
+
+            $roles = $new_list;
+        } else { // Otherwise only update the attributes like display name and caps
+            $roles[$this->_slug] = array(
+                'name'         => $this->_display_name,
+                'capabilities' => $this->capabilities
+            );
+        }
+
+        wp_roles()->roles = $roles;
+
+        update_option(wp_roles()->role_key, $roles);
+
+        // Always return true because the update_options may return false if you
+        // try to save the same attributes twice
+        return true;
     }
 
     /**
      * Set slug
      *
-     * The method also sanitizes the input value with `sanitize_key` core function
+     * The method also sanitizes the input value with `sanitize_key` core function.
+     * Additionally it prevents from changing slug if role has at least one user
+     * assigned to it.
      *
      * @param string $slug Unique role slug (aka ID)
      *
@@ -83,6 +174,14 @@ class AAM_Framework_Proxy_Role
     {
         if (!is_string($slug) || strlen($slug) === 0) {
             throw new InvalidArgumentException('Invalid slug');
+        } elseif ($this->user_count > 0) {
+            throw new LogicException(
+                'Cannot update slug for role with users'
+            );
+        } elseif (wp_roles()->is_role($slug)) {
+            throw new LogicException(
+                'There is already a role with the same slug'
+            );
         }
 
         $this->_slug = $slug;
@@ -234,6 +333,8 @@ class AAM_Framework_Proxy_Role
             $response = $this->{"_{$name}"};
         } elseif (property_exists($this->_role, $name)) {
             $response = $this->_role->{$name};
+        } elseif ($name === 'user_count') { // Lazy load this property
+            $response = $this->_get_user_count();
         } else {
             _doing_it_wrong(
                 static::class . '::' . $name,
@@ -267,6 +368,25 @@ class AAM_Framework_Proxy_Role
                 AAM_VERSION
             );
         }
+    }
+
+    /**
+     * Get user count for the current role
+     *
+     * @return int
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_user_count()
+    {
+        if (is_null(self::$_user_index)) {
+            self::$_user_index = count_users();
+        }
+
+        $avail = self::$_user_index['avail_roles'];
+
+        return isset($avail[$this->_slug]) ? $avail[$this->_slug] : 0;
     }
 
 }

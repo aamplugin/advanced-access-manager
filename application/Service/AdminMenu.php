@@ -137,7 +137,7 @@ class AAM_Service_AdminMenu
         }
 
         // Register RESTful API endpoints
-        AAM_Core_Restful_BackendMenuService::bootstrap();
+        AAM_Restful_BackendMenuService::bootstrap();
 
         // Service fetch
         $this->registerService();

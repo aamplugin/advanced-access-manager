@@ -62,7 +62,7 @@ class AAM_Framework_Proxy_User
      * @var WP_User
      * @version 6.9.32
      */
-    private $_user;
+    private $_wp_user;
 
     /**
      * User status
@@ -112,40 +112,153 @@ class AAM_Framework_Proxy_User
      */
     public function __construct(WP_User $user)
     {
-        $this->_user = $user;
+        $this->_wp_user = $user;
 
-        // Checking if there is any expiration defined for a user
-        $expiration = get_user_option('aam_user_expiration', $user->ID);
+        // Init user expiration state
+        $this->_init_user_expiration();
 
-        if (!empty($expiration)) {
-            $this->_expires_at = new DateTime(
-                '@' . $expiration['expires'], new DateTimeZone('UTC')
-            );
+        // Init user status
+        $this->_init_user_status();
+    }
 
-            // Determine trigger type and additional attributes for the trigger
-            // (if applicable)
-            $action = isset($expiration['action']) ? $expiration['action'] : 'lock';
-
-            $trigger = [
-                'type' => $action
+    /**
+     * Update user attributes
+     *
+     * @param array $data
+     *
+     * @return AAM_Framework_Proxy_User
+     *
+     * @access public
+     * @version 6.9.33
+     * @throws RuntimeException
+     */
+    public function update($data)
+    {
+        // Verifying the expiration date & trigger, if defined
+        if (isset($data['expiration'])) {
+            $expiration = [
+                'expires' => is_numeric($data['expiration']['expires_at']) ?
+                    $data['expiration']['expires_at']
+                    :
+                    DateTime::createFromFormat(
+                        DateTime::RFC3339, $data['expiration']['expires_at']
+                    )->getTimestamp()
             ];
 
-            // The "change-role" is a legacy setting
-            if (in_array($action, ['change-role', 'change_role'], true)) {
-                $trigger['to_role'] = $expiration['meta'];
+            // Parse the trigger
+            if (empty($data['expiration']['trigger'])) {
+                $expiration['action'] = 'logout';
+            } elseif (is_array($data['expiration']['trigger'])) {
+                $expiration['action'] = $data['expiration']['trigger']['type'];
+            } elseif (is_string($data['expiration']['trigger'])) {
+                $expiration['action'] = $data['expiration']['trigger'];
             }
 
-            $this->_expiration_trigger = $trigger;
+            // Additionally, if trigger is change_role, capture the targeting
+            // role
+            if ($expiration['action'] === 'change_role') {
+                $expiration['meta'] = $data['expiration']['trigger']['to_role'];
+            }
+
+            // Update the expiration attribute but do not check if it was saved
+            // successfully because if you are trying to save the same value, it will
+            // return false
+            update_user_option($this->ID, 'aam_user_expiration', $expiration);
+
+            // Reinitialize user expiration state
+            $this->_init_user_expiration();
         }
 
-        // Get user status
-        $status = get_user_meta($user->ID, 'aam_user_status', true);
+        if (isset($data['status'])) {
+            if ($data['status'] === self::STATUS_INACTIVE) {
+                add_user_meta($this->ID, 'aam_user_status', 'locked');
+            } else {
+                delete_user_meta($this->ID, 'aam_user_status');
+            }
 
-        if ($status === 'locked') {
-            $this->_status = self::STATUS_INACTIVE;
-        } else {
-            $this->_status = self::STATUS_ACTIVE;
+            // Reinitialize user's status
+            $this->_init_user_status();
         }
+
+        if (isset($data['add_caps'])) {
+            foreach($data['add_caps'] as $capability) {
+                $this->add_cap($capability);
+            }
+        }
+
+        if (isset($data['remove_caps'])) {
+            foreach($data['remove_caps'] as $capability) {
+                // Note! Yes, adding capability to ensure that user will not inherit
+                // this capability from their parent role(s)
+                $this->add_cap($capability, false);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Reset user attributes
+     *
+     * @param string|array|null $attributes
+     *
+     * @return void
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function reset($attributes = null)
+    {
+        if (is_null($attributes)) {
+            $attributes = ['expiration', 'status'];
+        } elseif (is_array($attributes)) {
+            $attributes = [$attributes];
+        }
+
+        // Reset user expiration
+        if (in_array('expiration', $attributes, true)) {
+            delete_user_option($this->ID, 'aam_user_expiration');
+            $this->_init_user_expiration();
+        }
+
+        // Reset user status
+        if (in_array('status', $attributes, true)) {
+            delete_user_meta($this->ID, 'aam_user_status');
+            $this->_init_user_status();
+        }
+    }
+
+    /**
+     * Check if user is active
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function is_user_active()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Check if user's access is expired
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function is_user_access_expired()
+    {
+        $result = false;
+
+        if ($this->expires_at !== null) {
+            $now    = new DateTime('now', new DateTimeZone('UTC'));
+            $result = $this->expires_at->getTimestamp() < $now->getTimestamp();
+        }
+
+        return $result;
     }
 
     /**
@@ -171,9 +284,9 @@ class AAM_Framework_Proxy_User
         }
 
         if ($save_immediately === true) {
-            $this->_user->add_cap($sanitized, true);
+            $this->_wp_user->add_cap($sanitized, true);
         } else {
-            $this->_user->caps[$sanitized] = true;
+            $this->_wp_user->caps[$sanitized] = true;
         }
     }
 
@@ -200,9 +313,9 @@ class AAM_Framework_Proxy_User
         }
 
         if ($save_immediately === true) {
-            $this->_user->remove_cap($sanitized);
-        } elseif (isset($this->_user->capabilities[$sanitized])) {
-            unset($this->_user->caps[$sanitized]);
+            $this->_wp_user->remove_cap($sanitized);
+        } elseif (isset($this->_wp_user->capabilities[$sanitized])) {
+            unset($this->_wp_user->caps[$sanitized]);
         }
     }
 
@@ -216,7 +329,7 @@ class AAM_Framework_Proxy_User
      */
     public function to_array()
     {
-        return $this->_user->data;
+        return $this->_wp_user->data;
     }
 
     /**
@@ -234,8 +347,10 @@ class AAM_Framework_Proxy_User
     {
         $response = null;
 
-        if (method_exists($this->_user, $name)) {
-            $response = call_user_func_array(array($this->_user, $name), $arguments);
+        if (method_exists($this->_wp_user, $name)) {
+            $response = call_user_func_array(
+                array($this->_wp_user, $name), $arguments
+            );
         } else {
             _doing_it_wrong(
                 static::class . '::' . $name,
@@ -264,7 +379,7 @@ class AAM_Framework_Proxy_User
         if (property_exists($this, "_{$name}")) {
             $response = $this->{"_{$name}"};
         } else {
-            $response = $this->_user->{$name};
+            $response = $this->_wp_user->{$name};
         }
 
         return $response;
@@ -283,7 +398,77 @@ class AAM_Framework_Proxy_User
      */
     public function __set($name, $value)
     {
-        $this->_user->{$name} = $value;
+        $this->_wp_user->{$name} = $value;
+    }
+
+    /**
+     * Get WordPress core user object
+     *
+     * @return WP_User
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function get_wp_user()
+    {
+        return $this->_wp_user;
+    }
+
+    /**
+     * Init user expiration state
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _init_user_expiration()
+    {
+        $expiration = get_user_option('aam_user_expiration', $this->ID);
+
+        if (!empty($expiration)) {
+            $this->_expires_at = new DateTime(
+                '@' . $expiration['expires'], new DateTimeZone('UTC')
+            );
+
+            // Determine trigger type and additional attributes for the trigger
+            // (if applicable)
+            $action = isset($expiration['action']) ? $expiration['action'] : 'lock';
+
+            $trigger = [
+                'type' => $action
+            ];
+
+            // The "change-role" is a legacy setting
+            if (in_array($action, ['change-role', 'change_role'], true)) {
+                $trigger['to_role'] = $expiration['meta'];
+            }
+
+            $this->_expiration_trigger = $trigger;
+        } else {
+            $this->_expires_at         = null;
+            $this->_expiration_trigger = null;
+        }
+    }
+
+    /**
+     * Initialize user's status
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _init_user_status()
+    {
+        // Get user status
+        $status = get_user_meta($this->ID, 'aam_user_status', true);
+
+        if ($status === 'locked') {
+            $this->_status = self::STATUS_INACTIVE;
+        } else {
+            $this->_status = self::STATUS_ACTIVE;
+        }
     }
 
 }

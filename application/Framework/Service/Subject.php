@@ -19,16 +19,7 @@
 class AAM_Framework_Service_Subject
 {
 
-    /**
-     * Single instance of itself
-     *
-     * @var AAM_Framework_Service_Subject
-     *
-     * @access private
-     * @static
-     * @version 6.9.9
-     */
-    private static $_instance = null;
+    use AAM_Framework_Service_BaseTrait;
 
     /**
      * Cached instantiated subjects
@@ -39,16 +30,6 @@ class AAM_Framework_Service_Subject
      * @version 6.9.31
      */
     private $_cache = [];
-
-    /**
-     * Instantiate the service
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.9.9
-     */
-    protected function __construct() {}
 
     /**
      * Determine subject based on access level and ID
@@ -66,35 +47,41 @@ class AAM_Framework_Service_Subject
      */
     public function get($access_level, $id = null, $reload = false)
     {
-        if ($access_level === AAM_Core_Subject_Role::UID) {
-            $cache_key = "role:{$id}";
+        try {
+            if ($access_level === AAM_Core_Subject_Role::UID) {
+                $cache_key = "role:{$id}";
 
-            if (!isset($this->_cache[$cache_key]) || $reload) {
-                $this->_cache[$cache_key] = $this->get_role($id);
-            }
-        } elseif ($access_level === AAM_Core_Subject_User::UID) {
-            $cache_key = "user:{$id}";
+                if (!isset($this->_cache[$cache_key]) || $reload) {
+                    $this->_cache[$cache_key] = $this->get_role($id);
+                }
+            } elseif ($access_level === AAM_Core_Subject_User::UID) {
+                $cache_key = "user:{$id}";
 
-            if (!isset($this->_cache[$cache_key]) || $reload) {
-                $this->_cache[$cache_key] = $this->get_user(intval($id));
-            }
-        } elseif ($access_level === AAM_Core_Subject_Visitor::UID) {
-            $cache_key = "visitor";
+                if (!isset($this->_cache[$cache_key]) || $reload) {
+                    $this->_cache[$cache_key] = $this->get_user(intval($id));
+                }
+            } elseif ($access_level === AAM_Core_Subject_Visitor::UID) {
+                $cache_key = "visitor";
 
-            if (!isset($this->_cache[$cache_key]) || $reload) {
-                $this->_cache[$cache_key] = $this->get_visitor();
-            }
-        } elseif ($access_level === AAM_Core_Subject_Default::UID) {
-            $cache_key = "default";
+                if (!isset($this->_cache[$cache_key]) || $reload) {
+                    $this->_cache[$cache_key] = $this->get_visitor();
+                }
+            } elseif ($access_level === AAM_Core_Subject_Default::UID) {
+                $cache_key = "default";
 
-            if (!isset($this->_cache[$cache_key]) || $reload) {
-                $this->_cache[$cache_key] = $this->get_default();
+                if (!isset($this->_cache[$cache_key]) || $reload) {
+                    $this->_cache[$cache_key] = $this->get_default();
+                }
+            } else {
+                throw new BadMethodCallException('Unsupported access_level');
             }
-        } else {
-            throw new InvalidArgumentException('Unsupported access_level');
+
+            $result = $this->_cache[$cache_key];
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        return $this->_cache[$cache_key];
+        return $result;
     }
 
     /**
@@ -109,7 +96,13 @@ class AAM_Framework_Service_Subject
      */
     public function get_role($id)
     {
-        return new AAM_Core_Subject_Role($id);
+        try {
+            $result = new AAM_Core_Subject_Role($id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
     }
 
     /**
@@ -124,10 +117,14 @@ class AAM_Framework_Service_Subject
      */
     public function get_user($id)
     {
-        $user = new AAM_Core_Subject_User($id);
-        $user->initialize();
+        try {
+            $result = new AAM_Core_Subject_User($id);
+            $result->initialize();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $user;
+        return $result;
     }
 
     /**
@@ -140,7 +137,13 @@ class AAM_Framework_Service_Subject
      */
     public function get_visitor()
     {
-        return new AAM_Core_Subject_Visitor();
+        try {
+            $result = new AAM_Core_Subject_Visitor();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
     }
 
     /**
@@ -153,25 +156,13 @@ class AAM_Framework_Service_Subject
      */
     public function get_default()
     {
-        return AAM_Core_Subject_Default::getInstance();
-    }
-
-    /**
-     * Bootstrap the role service
-     *
-     * @return AAM_Framework_Service_Subject
-     *
-     * @access public
-     * @static
-     * @version 6.9.9
-     */
-    public static function bootstrap()
-    {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
+        try {
+            $result = AAM_Core_Subject_Default::getInstance();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        return self::$_instance;
+        return $result;
     }
 
 }

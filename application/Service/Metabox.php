@@ -258,7 +258,7 @@ class AAM_Service_Metabox
         );
 
         // Register RESTful API endpoints
-        AAM_Core_Restful_ComponentService::bootstrap();
+        AAM_Restful_ComponentService::bootstrap();
     }
 
     /**

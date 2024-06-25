@@ -1,9 +1,10 @@
 <?php
 /**
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.9.2
+ * @version 6.9.33
  * */
 ?>
 
@@ -27,10 +28,6 @@
                     <i class="icon-filter"></i> <?php echo __('Filter', AAM_KEY); ?> <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" id="capability-groups" aria-labelledby="capability-filter">
-                    <?php foreach ($this->getGroupList() as $group) { ?>
-                        <li><a href="#"><?php echo esc_js($group); ?></a></li>
-                    <?php } ?>
-                    <li role="separator" class="divider"></li>
                     <li><a href="#" data-assigned="true"><?php echo __('All Assigned', AAM_KEY); ?></a></li>
                     <li><a href="#" data-unassigned="true"><?php echo __('All Unassigned', AAM_KEY); ?></a></li>
                     <li><a href="#" data-clear="true"><?php echo __('All Capabilities', AAM_KEY); ?></a></li>
@@ -43,9 +40,10 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th width="30%"><?php echo __('Category', AAM_KEY); ?></th>
-                    <th width="50%"><?php echo __('Capability', AAM_KEY); ?></th>
+                    <th width="80%"><?php echo __('Capability', AAM_KEY); ?></th>
                     <th><?php echo __('Actions', AAM_KEY); ?></th>
+                    <th>Is Granted</th>
+                    <th>Data</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -63,11 +61,6 @@
                             <label for="new-capability-name"><?php echo __('Capability', AAM_KEY); ?><span class="aam-asterix">*</span></label>
                             <input type="text" class="form-control" id="new-capability-name" placeholder="<?php echo __('Enter Capability', AAM_KEY); ?>" />
                         </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" id="assign-new-capability" value="1" /> <?php echo __('Also assign this capability to me', AAM_KEY); ?>
-                            </label>
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" id="add-capability-btn"><?php echo __('Create', AAM_KEY); ?></button>
@@ -77,7 +70,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="edit-capability-modal" tabindex="-1" role="dialog">
+        <div class="modal fade" id="update-capability-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-sm" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -87,16 +80,11 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="capability-id"><?php echo __('Capability', AAM_KEY); ?><span class="aam-asterix">*</span></label>
-                            <input type="text" class="form-control" id="capability-id" placeholder="<?php echo __('Enter Capability', AAM_KEY); ?>" />
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" id="update-capability" value="1" /> <?php echo __('Update this capability for me too', AAM_KEY); ?>
-                            </label>
+                            <input type="text" class="form-control" id="update-capability-slug" placeholder="<?php echo __('Enter Capability', AAM_KEY); ?>" />
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-warning" id="update-capability-btn"><?php echo __('Update', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-danger" id="update-capability-btn"><?php echo __('Update For All Roles', AAM_KEY); ?></button>
                         <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                     </div>
                 </div>
@@ -104,18 +92,20 @@
         </div>
 
         <div class="modal fade" id="delete-capability-modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-sm" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title"><?php echo __('Delete Capability', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
-                        <p class="text-center aam-confirm-message alert alert-danger" data-message="<?php echo __('You are about to delete the %s capability. Any functionality that depends on this capability will no longer be accessible by %n.', AAM_KEY); ?>"></p>
+                        <p
+                            class="text-center aam-confirm-message alert alert-danger"
+                            data-message="<?php echo __('You are about to delete the %s capability. Any functionality relying on this capability will no longer be accessible.', AAM_KEY); ?>"
+                        ></p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="delete-subject-cap-btn" data-message="<?php echo __('Delete For %n Only', AAM_KEY); ?>"></button>
-                        <button type="button" class="btn btn-danger" id="delete-all-roles-cap-btn"><?php echo __('Delete For All Roles', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-danger" id="delete-capability-btn"><?php echo __('Delete For All Roles', AAM_KEY); ?></button>
                         <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                     </div>
                 </div>

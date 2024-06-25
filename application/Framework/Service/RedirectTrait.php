@@ -8,7 +8,7 @@
  */
 
 /**
- * Abstract for redirect service
+ * Trait for redirect service
  *
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.12 Initial implementation of the method
@@ -16,43 +16,8 @@
  * @package AAM
  * @version 6.9.26
  */
-abstract class AAM_Framework_Service_RedirectAbstract
+trait AAM_Framework_Service_RedirectTrait
 {
-
-    /**
-     * Abstract redirect type
-     *
-     * This property should be overwritten by the child class
-     *
-     * @since 6.9.26
-     */
-    const REDIRECT_TYPE = '';
-
-    /**
-     * Redirect type aliases
-     *
-     * To be a bit more verbose, we are renaming the legacy rule types to something
-     * that is more intuitive
-     *
-     * @version 6.9.12
-     */
-    const REDIRECT_TYPE_ALIAS = array(
-        'default'  => 'default',
-        'page'     => 'page_redirect',
-        'url'      => 'url_redirect',
-        'callback' => 'trigger_callback',
-        'login'    => 'login_redirect',
-        'message'  => 'custom_message'
-    );
-
-    /**
-     * Allowed status codes
-     *
-     * This property should be overwritten by the child class
-     *
-     * @since 6.9.26
-     */
-    const HTTP_STATUS_CODES = array();
 
     /**
      * Get the login redirect
@@ -66,12 +31,18 @@ abstract class AAM_Framework_Service_RedirectAbstract
      */
     public function get_redirect($inline_context = null)
     {
-        $object = $this->get_object($inline_context);
+        try {
+            $object = $this->_get_object($inline_context);
 
-        return $this->_prepare_redirect(
-            $object->getOption(),
-            !$object->isOverwritten()
-        );
+            $result = $this->_prepare_redirect(
+                $object->getOption(),
+                !$object->isOverwritten()
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
     }
 
     /**
@@ -84,19 +55,25 @@ abstract class AAM_Framework_Service_RedirectAbstract
      *
      * @access public
      * @version 6.9.12
-     * @throws Exception If fails to persist the data
+     * @throws RuntimeException If fails to persist the data
      */
     public function set_redirect(array $redirect, $inline_context = null)
     {
-        // Validating that incoming data is correct and normalize is for storage
-        $data   = $this->_validate_redirect($redirect);
-        $object = $this->get_object($inline_context);
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $data   = $this->_validate_redirect($redirect);
+            $object = $this->_get_object($inline_context);
 
-        if (!$object->setExplicitOption($data)->save()) {
-            throw new Exception('Failed to persist the login redirect');
+            if (!$object->setExplicitOption($data)->save()) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->_prepare_redirect($object->getExplicitOption(), false);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->_prepare_redirect($object->getExplicitOption(), false);
+        return $result;
     }
 
     /**
@@ -109,19 +86,20 @@ abstract class AAM_Framework_Service_RedirectAbstract
      * @access public
      * @version 6.9.12
      */
-    public function reset_redirect($inline_context = null)
+    public function reset($inline_context = null)
     {
-        return $this->get_object($inline_context)->reset();
-    }
+        try {
+            if ($this->_get_object($inline_context)->reset()) {
+                $result = $this->get_redirect($inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
 
-    /**
-     * Get object
-     *
-     * @param array $inline_context
-     *
-     * @return AAM_Core_Object
-     */
-    abstract protected function get_object($inline_context);
+        return $result;
+    }
 
     /**
      * Normalize and prepare the redirect details
@@ -194,7 +172,11 @@ abstract class AAM_Framework_Service_RedirectAbstract
         if (empty($type)) {
             throw new InvalidArgumentException('The `type` is required');
         } elseif ($type === 'page') {
-            $page_id = intval($rule['redirect_page_id']);
+            if (isset($rule['redirect_page_id'])) {
+                $page_id = intval($rule['redirect_page_id']);
+            } else {
+                $page_id = 0;
+            }
 
             if ($page_id === 0) {
                 throw new InvalidArgumentException(
@@ -204,7 +186,11 @@ abstract class AAM_Framework_Service_RedirectAbstract
                 $normalized[static::REDIRECT_TYPE . '.redirect.page'] = $page_id;
             }
         } elseif ($type === 'url') {
-            $redirect_url = wp_validate_redirect($rule['redirect_url']);
+            if (isset($rule['redirect_url'])) {
+                $redirect_url = wp_validate_redirect($rule['redirect_url']);
+            } else {
+                $redirect_url = null;
+            }
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(
@@ -214,8 +200,10 @@ abstract class AAM_Framework_Service_RedirectAbstract
                 $normalized[static::REDIRECT_TYPE . '.redirect.url'] = $redirect_url;
             }
         } elseif ($type === 'callback') {
-            if (is_callable($rule['callback'], true)) {
-                $normalized[static::REDIRECT_TYPE . '.redirect.callback'] = $rule['callback'];
+            if (isset($rule['callback']) && is_callable($rule['callback'], true)) {
+                $normalized[
+                    static::REDIRECT_TYPE . '.redirect.callback'
+                ] = $rule['callback'];
             } else {
                 throw new InvalidArgumentException(
                     'The valid `callback` is required'
@@ -225,7 +213,9 @@ abstract class AAM_Framework_Service_RedirectAbstract
 
         // If HTTP status code is defined, save it as well
         if (!empty($rule['http_status_code'])) {
-            $normalized[static::REDIRECT_TYPE . '.redirect.' . $type . '.code'] = $this->_validate_status_code(
+            $normalized[
+                static::REDIRECT_TYPE . '.redirect.' . $type . '.code'
+            ] = $this->_validate_status_code(
                 $rule['http_status_code'], $rule['type']
             );
         }
@@ -271,12 +261,27 @@ abstract class AAM_Framework_Service_RedirectAbstract
                 $allowed = implode(', ', $allowed_codes);
 
                 throw new InvalidArgumentException(
-                    "For redirect type {$redirect_type} allowed status codes are {$allowed}"
+                    "For redirect type {$redirect_type} allowed codes are {$allowed}"
                 );
             }
         }
 
         return $code;
+    }
+
+    /**
+     * Get object
+     *
+     * @param array $inline_context
+     *
+     * @return AAM_Core_Object
+     * @version 6.9.33
+     */
+    private function _get_object($inline_context)
+    {
+        return $this->_get_subject($inline_context)->reloadObject(
+            static::OBJECT_TYPE
+        );
     }
 
 }

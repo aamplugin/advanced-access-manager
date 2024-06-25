@@ -17,10 +17,10 @@
  * @package AAM
  * @version 6.9.26
  */
-class AAM_Core_Restful_UrlService
+class AAM_Restful_UrlService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -39,28 +39,27 @@ class AAM_Core_Restful_UrlService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of rules
-            $this->_register_route('/url', array(
+            $this->_register_route('/urls', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule_list'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Create a new rule
-            $this->_register_route('/url', array(
+            $this->_register_route('/urls', array(
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => array($this, 'create_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'url' => array(
-                        'description' => __('URL or URI for the rule', AAM_KEY),
+                        'description' => 'URL or URI for the rule',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_url($value, $request);
                         }
                     ),
                     'type' => array(
-                        'description' => __('Rule type', AAM_KEY),
+                        'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
                         'enum'        => array_values(
@@ -68,57 +67,51 @@ class AAM_Core_Restful_UrlService
                         )
                     ),
                     'http_status_code' => array(
-                        'description' => __('HTTP Status Code', AAM_KEY),
+                        'description' => 'HTTP Status Code',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_status_code($value, $request);
                         }
                     ),
                     'message' => array(
-                        'description' => __('Custom access denied message', AAM_KEY),
+                        'description' => 'Custom access denied message',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_message($value, $request);
                         }
                     ),
                     'redirect_page_id' => array(
-                        'description' => __('Existing page ID to redirect to', AAM_KEY),
+                        'description' => 'Existing page ID to redirect to',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_page_id($value, $request);
                         }
                     ),
                     'redirect_url' => array(
-                        'description' => __('Valid URL to redirect to', AAM_KEY),
+                        'description' => 'Valid URL to redirect to',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_url($value, $request);
                         }
                     ),
                     'callback' => array(
-                        'description' => __('Custom callback function', AAM_KEY),
+                        'description' => 'Custom callback function',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_callback($value, $request);
                         }
-                    ),
-                    'metadata' => array(
-                        'description' => __('Additional metadata values', AAM_KEY),
-                        'type'        => 'object',
-                        'required'    => false,
-                        'properties'  => array()
                     )
                 )
             ));
 
             // Get a rule
-            $this->_register_route('/url/(?<id>[\d]+)', array(
+            $this->_register_route('/url/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('URL unique ID', AAM_KEY),
+                        'description' => 'URL unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -126,25 +119,25 @@ class AAM_Core_Restful_UrlService
             ));
 
             // Update an existing rule
-            $this->_register_route('/url/(?<id>[\d]+)', array(
+            $this->_register_route('/url/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('URL unique ID', AAM_KEY),
+                        'description' => 'URL unique ID',
                         'type'        => 'number',
                         'required'    => true
                     ),
                     'url' => array(
-                        'description' => __('URL or URI for the rule', AAM_KEY),
+                        'description' => 'URL or URI for the rule',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_url($value, $request);
                         }
                     ),
                     'type' => array(
-                        'description' => __('Rule type', AAM_KEY),
+                        'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
                         'enum'        => array_values(
@@ -152,57 +145,51 @@ class AAM_Core_Restful_UrlService
                         )
                     ),
                     'http_status_code' => array(
-                        'description' => __('HTTP Status Code', AAM_KEY),
+                        'description' => 'HTTP Status Code',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_status_code($value, $request);
                         }
                     ),
                     'message' => array(
-                        'description' => __('Custom access denied message', AAM_KEY),
+                        'description' => 'Custom access denied message',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_message($value, $request);
                         }
                     ),
                     'redirect_page_id' => array(
-                        'description' => __('Existing page ID to redirect to', AAM_KEY),
+                        'description' => 'Existing page ID to redirect to',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_page_id($value, $request);
                         }
                     ),
                     'redirect_url' => array(
-                        'description' => __('Valid URL to redirect to', AAM_KEY),
+                        'description' => 'Valid URL to redirect to',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_redirect_url($value, $request);
                         }
                     ),
                     'callback' => array(
-                        'description' => __('Custom callback function', AAM_KEY),
+                        'description' => 'Custom callback function',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_callback($value, $request);
                         }
-                    ),
-                    'metadata' => array(
-                        'description' => __('Additional metadata values', AAM_KEY),
-                        'type'        => 'object',
-                        'required'    => false,
-                        'properties'  => array()
                     )
                 )
             ));
 
             // Delete a rule
-            $this->_register_route('/url/(?<id>[\d]+)', array(
+            $this->_register_route('/url/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('URL unique ID', AAM_KEY),
+                        'description' => 'URL unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -210,11 +197,10 @@ class AAM_Core_Restful_UrlService
             ));
 
             // Reset all rules
-            $this->_register_route('/url/reset', array(
-                'methods'             => WP_REST_Server::EDITABLE,
+            $this->_register_route('/urls', array(
+                'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_rules'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array()
+                'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
@@ -231,13 +217,14 @@ class AAM_Core_Restful_UrlService
      */
     public function get_rule_list(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_rule_list();
+        } catch(Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
 
-        return rest_ensure_response($service->get_rule_list());
+        return rest_ensure_response($result);
     }
 
     /**
@@ -252,14 +239,9 @@ class AAM_Core_Restful_UrlService
      */
     public function create_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(
-            new AAM_Framework_Model_ServiceContext(array(
-                'subject' => $this->_determine_subject($request)
-            ))
-        );
-
         try {
-            $result = $service->create_rule($request->get_params());
+            $service = $this->_get_service($request);
+            $result  = $service->create_rule($request->get_params());
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -279,12 +261,9 @@ class AAM_Core_Restful_UrlService
      */
     public function get_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->get_rule_by_id(
+            $service = $this->_get_service($request);
+            $result  = $service->get_rule_by_id(
                 intval($request->get_param('id'))
             );
         } catch (Exception $e) {
@@ -306,12 +285,9 @@ class AAM_Core_Restful_UrlService
      */
     public function update_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->update_rule(
+            $service = $this->_get_service($request);
+            $result  = $service->update_rule(
                 intval($request->get_param('id')),
                 $request->get_params()
             );
@@ -334,14 +310,13 @@ class AAM_Core_Restful_UrlService
      */
     public function delete_rule(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->delete_rule(intval($request->get_param('id')));
-        } catch (UnderflowException $e) {
-            $result = $this->_prepare_error_response($e, 'rest_not_found', 404);
+            $service = $this->_get_service($request);
+            $result  = [
+                'success' => $service->delete_rule(
+                    intval($request->get_param('id'))
+                )
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -361,12 +336,9 @@ class AAM_Core_Restful_UrlService
      */
     public function reset_rules(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::urls(array(
-            'subject' => $this->_determine_subject($request)
-        ));
-
         try {
-            $result = $service->reset_rules();
+            $service = $this->_get_service($request);
+            $result  = $service->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -385,8 +357,8 @@ class AAM_Core_Restful_UrlService
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-                && (current_user_can('aam_manage_uri')
-                || current_user_can('aam_manage_url_access'));
+            && (current_user_can('aam_manage_uri')
+            || current_user_can('aam_manage_url_access'));
     }
 
     /**
@@ -576,6 +548,24 @@ class AAM_Core_Restful_UrlService
         }
 
         return $response;
+    }
+
+    /**
+     * Get service
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return AAM_Framework_Service_Urls
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_service(WP_REST_Request $request)
+    {
+        return AAM_Framework_Manager::urls([
+            'subject'        => $this->_determine_subject($request),
+            'error_handling' => 'exception'
+        ]);
     }
 
 }

@@ -228,9 +228,8 @@ class AAM_Service_UserLevelFilter
     protected function prepareExcludedRoleList()
     {
         $exclude = array();
-        $roles   = AAM_Framework_Manager::roles();
 
-        foreach ($roles->role_objects as $id => $role) {
+        foreach (wp_roles()->role_objects as $id => $role) {
             $roleMax = AAM_Core_API::maxLevel($role->capabilities);
 
             if (!$this->isUserLevelAllowed(true, $roleMax)) {
@@ -253,9 +252,7 @@ class AAM_Service_UserLevelFilter
      */
     public function filterViews($views)
     {
-        $roles = AAM_Framework_Manager::roles();
-
-        foreach ($roles->role_objects as $id => $role) {
+        foreach (wp_roles()->role_objects as $id => $role) {
             $roleMax = AAM_Core_API::maxLevel($role->capabilities);
             if (isset($views[$id]) && !$this->isUserLevelAllowed(true, $roleMax)) {
                 unset($views[$id]);

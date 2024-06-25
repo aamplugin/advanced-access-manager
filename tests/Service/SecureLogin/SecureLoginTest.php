@@ -132,7 +132,7 @@ class SecureLoginTest extends TestCase
         // Sign-in user first time
         $user = wp_signon($creds);
         $this->assertEquals('WP_Error', get_class($user));
-        $this->assertEquals('<strong>ERROR</strong>: User is locked. Contact website administrator.', $user->get_error_message());
+        $this->assertEquals('[ERROR]: User is inactive. Contact website administrator.', $user->get_error_message());
 
         // Restore user status
         delete_user_meta(AAM_UNITTEST_ADMIN_USER_ID, 'aam_user_status');

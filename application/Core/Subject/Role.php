@@ -76,9 +76,10 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
     protected function retrievePrincipal()
     {
         try {
-            $role = AAM_Framework_Manager::roles()->get_role_by_slug(
-                $this->getId(), false
-            );
+            $role = AAM_Framework_Manager::roles([
+                'error_handling' => 'exception'
+            ])->get_role($this->getId());
+
             $this->name = $role->display_name;
         } catch (Exception $_) {
             $role = null;
@@ -99,14 +100,8 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      */
     public function delete()
     {
-        $result = false;
-
-        try {
-            $role   = AAM_Framework_Manager::roles()->get_role_by_slug($this->getId());
-            $result = AAM_Framework_Manager::roles()->delete_role($role);
-        } catch (Exception $_) {
-            // Do nothing
-        }
+        $role   = AAM_Framework_Manager::roles()->get_role($this->getId());
+        $result = AAM_Framework_Manager::roles()->delete_role($role);
 
         return $result;
     }
@@ -137,15 +132,7 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
             $role->set_slug($slug);
         }
 
-        $result = false;
-
-        try {
-            $result = AAM_Framework_Manager::roles()->update_role($role);
-        } catch (Exception $_) {
-            // Do nothing
-        }
-
-        return $result;
+        return AAM_Framework_Manager::roles()->update_role($role);
     }
 
     /**

@@ -123,10 +123,6 @@ class AAM_Service_SecureLogin
         // Register custom RESTful API endpoint for login
         add_action('rest_api_init', array($this, 'registerRESTfulRoute'));
 
-        // User login control
-        add_filter('wp_authenticate_user', array($this, 'validateUserStatus'), 1, 2);
-        add_filter('aam_verify_user_filter', array($this, 'validateUserStatus'));
-
         // Redefine the wp-login.php header message
         add_filter('login_message', array($this, 'loginMessage'));
 
@@ -154,11 +150,6 @@ class AAM_Service_SecureLogin
             $actions['lock'] = __('Block User Account', AAM_KEY);
 
             return $actions;
-        });
-        add_action('aam_process_inactive_user_action', array($this, 'lockUser'), 10, 2);
-
-        add_action('aam_reset_user_action', function($user) {
-            delete_user_meta($user->ID, 'aam_user_status');
         });
 
         // AAM Core integration
@@ -504,41 +495,6 @@ class AAM_Service_SecureLogin
     }
 
     /**
-     * Validate user status
-     *
-     * Check if user is locked or not
-     *
-     * @param WP_Error $user
-     *
-     * @return WP_Error|WP_User
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public function validateUserStatus($user)
-    {
-        // Check if user is blocked
-        if (is_a($user, 'WP_User')) {
-            $status = get_user_meta($user->ID, 'aam_user_status', true);
-
-            if ($status === 'locked') {
-                $user = new WP_Error(
-                    405,
-                    AAM_Backend_View_Helper::preparePhrase(
-                        '[ERROR]: User is locked. Contact website administrator.',
-                        'strong'
-                    )
-                );
-            }
-        }
-
-        return $user;
-    }
-
-    /**
      * Customize login message
      *
      * @param string $message
@@ -563,57 +519,6 @@ class AAM_Service_SecureLogin
         }
 
         return $message;
-    }
-
-    /**
-     * Lock user
-     *
-     * This method is invoked when user is expired
-     *
-     * @param array                 $trigger
-     * @param AAM_Core_Subject_User $user
-     *
-     * @return void
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public function lockUser(array $trigger, AAM_Core_Subject_User $user)
-    {
-        if ($trigger['action'] === 'lock') {
-            $this->changeUserStatus($user->getPrincipal(), true);
-            wp_logout();
-        }
-    }
-
-    /**
-     * Change user status
-     *
-     * @param WP_User $user
-     * @param bool    $lock
-     *
-     * @return boolean
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.9.10
-     */
-    protected function changeUserStatus(WP_User $user, $lock)
-    {
-        if ($lock) {
-            add_user_meta($user->ID, 'aam_user_status', 'locked');
-        } else {
-            delete_user_meta($user->ID, 'aam_user_status');
-        }
-
-        clean_user_cache($user);
-
-        return true;
     }
 
     /**

@@ -31,58 +31,67 @@ class AAM_Framework_Service_Content
      */
     public function get_post_types(array $args = [], $inline_context = null)
     {
-        $args = array_merge([
-            'include_all' => false, // By default, only return manageable post types
-            'result_type' => 'full' // Return both list and summary
-        ], $args);
+        try {
+            $args = array_merge([
+                'include_all' => false,  // Only return manageable post types
+                'result_type' => 'full', // Return both list and summary,
+                'scope'       => 'all'   // Permission scopes to return all
+            ], $args);
 
-        // Preparing the list of
-        if (!empty($args['include_all'])) {
-            $filters = [];
-        } else {
-            $filters = [
-                'public'            => true,
-                'show_ui'           => true,
-                'show_in_menu'      => true,
-                'show_in_rest'      => true,
-                'show_in_nav_menus' => true,
-                'show_in_admin_bar' => true
-            ];
-        }
-
-        // Convert the list to models
-        $raw_list = get_post_types($filters, 'objects', 'or');
-        $subject  = $this->_get_subject($inline_context);
-
-        $response = [
-            'list'    => [],
-            'summary' => [
-                'total_count'    => count($raw_list),
-                'filtered_count' => count($raw_list)
-            ]
-        ];
-
-        foreach($raw_list as $post_type) {
-            if ($this->_extended_method_exists('get_post_type')) {
-                $item = $this->get_post_type($post_type, 'all', $inline_context);
+            // Preparing the list of
+            if (!empty($args['include_all'])) {
+                $filters = [];
             } else {
-                $item = $this->_prepare_post_type_item($post_type);
+                $filters = [
+                    'public'            => true,
+                    'show_ui'           => true,
+                    'show_in_menu'      => true,
+                    'show_in_rest'      => true,
+                    'show_in_nav_menus' => true,
+                    'show_in_admin_bar' => true
+                ];
             }
 
-            array_push(
-                $response['list'],
-                apply_filters('get_post_type_filter', $item, $post_type, $subject)
-            );
+            // Convert the list to models
+            $raw_list = get_post_types($filters, 'objects', 'or');
+            $subject  = $this->_get_subject($inline_context);
+
+            $result = [
+                'list'    => [],
+                'summary' => [
+                    'total_count'    => count($raw_list),
+                    'filtered_count' => count($raw_list)
+                ]
+            ];
+
+            foreach($raw_list as $post_type) {
+                if ($this->_extended_method_exists('get_post_type')) {
+                    $item = $this->get_post_type(
+                        $post_type, $args['scope'], $inline_context
+                    );
+                } else {
+                    $item = $this->_prepare_post_type_item($post_type);
+                }
+
+                array_push($result['list'], apply_filters(
+                    'get_post_type_filter',
+                    $item,
+                    $post_type,
+                    $subject
+                ));
+            }
+
+            // Determine what to return
+            if ($args['result_type'] === 'list') {
+                $result = $result['list'];
+            } elseif ($args['result_type'] === 'summary') {
+                $result = $result['summary'];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        // Determine what to return
-        if ($args['result_type'] === 'list') {
-            $response = $response['list'];
-        } elseif ($args['result_type'] === 'summary') {
-            $response = $response['summary'];
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -98,58 +107,65 @@ class AAM_Framework_Service_Content
      */
     public function get_taxonomies(array $args = [], $inline_context = null)
     {
-        $args = array_merge([
-            'include_all' => false, // By default, only return manageable taxonomies
-            'result_type' => 'full' // Return both list and summary
-        ], $args);
+        try {
+            $args = array_merge([
+                'include_all' => false,  // Only return manageable taxonomies
+                'result_type' => 'full', // Return both list and summary
+                'scope'       => 'all'   // Permission scopes to return all
+            ], $args);
 
-        // Preparing the list of
-        if (!empty($args['include_all'])) {
-            $filters = [];
-        } else {
-            $filters = [
-                'public'             => true,
-                'show_ui'            => true,
-                'show_in_rest'       => true,
-                'show_in_menu'       => true,
-                'show_in_quick_edit' => true,
-                'show_in_nav_menus'  => true,
-                'show_in_admin_bar'  => true
-            ];
-        }
-
-        // Convert the list to models
-        $raw_list = get_taxonomies($filters, 'objects', 'or');
-        $subject  = $this->_get_subject($inline_context);
-        $response = [
-            'list'    => [],
-            'summary' => [
-                'total_count'    => count($raw_list),
-                'filtered_count' => count($raw_list)
-            ]
-        ];
-
-        foreach($raw_list as $taxonomy) {
-            if ($this->_extended_method_exists('get_taxonomy')) {
-                $item = $this->get_taxonomy($taxonomy, 'all', $inline_context);
+            // Preparing the list of
+            if (!empty($args['include_all'])) {
+                $filters = [];
             } else {
-                $item = $this->_prepare_taxonomy_item($taxonomy);
+                $filters = [
+                    'public'             => true,
+                    'show_ui'            => true,
+                    'show_in_rest'       => true,
+                    'show_in_menu'       => true,
+                    'show_in_quick_edit' => true,
+                    'show_in_nav_menus'  => true,
+                    'show_in_admin_bar'  => true
+                ];
             }
 
-            array_push(
-                $response['list'],
-                apply_filters('get_taxonomy_filter', $item, $taxonomy, $subject)
-            );
+            // Convert the list to models
+            $raw_list = get_taxonomies($filters, 'objects', 'or');
+            $subject  = $this->_get_subject($inline_context);
+            $result   = [
+                'list'    => [],
+                'summary' => [
+                    'total_count'    => count($raw_list),
+                    'filtered_count' => count($raw_list)
+                ]
+            ];
+
+            foreach($raw_list as $taxonomy) {
+                if ($this->_extended_method_exists('get_taxonomy')) {
+                    $item = $this->get_taxonomy(
+                        $taxonomy, $args['scope'], $inline_context
+                    );
+                } else {
+                    $item = $this->_prepare_taxonomy_item($taxonomy);
+                }
+
+                array_push(
+                    $result['list'],
+                    apply_filters('get_taxonomy_filter', $item, $taxonomy, $subject)
+                );
+            }
+
+            // Determine what to return
+            if ($args['result_type'] === 'list') {
+                $result = $result['list'];
+            } elseif ($args['result_type'] === 'summary') {
+                $result = $result['summary'];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        // Determine what to return
-        if ($args['result_type'] === 'list') {
-            $response = $response['list'];
-        } elseif ($args['result_type'] === 'summary') {
-            $response = $response['summary'];
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -165,63 +181,67 @@ class AAM_Framework_Service_Content
      */
     public function get_posts(array $args = [], $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $args    = array_merge([
-            'numberposts'      => 10,   // By default, only top 10
-            'result_type'      => 'full', // Return both list and summary
-            'suppress_filters' => false,
-            'search_columns'   => ['post_title']
-        ], $args);
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $args    = array_merge([
+                'numberposts'      => 10,   // By default, only top 10
+                'result_type'      => 'full', // Return both list and summary
+                'suppress_filters' => true,
+                'search_columns'   => ['post_title']
+            ], $args);
 
-        // The minimum required attribute is post_type. If it is not defined, throw
-        // an error
-        if (empty($args['post_type']) || !is_string($args['post_type'])) {
-            throw new InvalidArgumentException(
-                'The post_type has to be a valid string'
-            );
-        }
-
-        // If result type is either "full" or "summary", gather additional info
-        if (in_array($args['result_type'], ['full', 'summary'], true)) {
-            // Prep some stats
-            $total_count = $this->_get_post_count($args['post_type']);
-
-            if ($args['s']) {
-                $filtered_count = $this->_get_post_count(
-                    $args['post_type'], $args['s']
+            // The minimum required attribute is post_type. If it is not defined,
+            // throw an error
+            if (empty($args['post_type']) || !is_string($args['post_type'])) {
+                throw new InvalidArgumentException(
+                    'The post_type has to be a valid string'
                 );
-            } else {
-                $filtered_count = $total_count;
             }
-        }
 
-        if ($args['result_type'] !== 'summary') {
-            $list = [];
+            // If result type is either "full" or "summary", gather additional info
+            if (in_array($args['result_type'], ['full', 'summary'], true)) {
+                // Prep some stats
+                $total_count = $this->_get_post_count($args['post_type']);
 
-            foreach(get_posts($args) as $post) {
-                array_push($list, $this->_prepare_post_item($post, $subject));
+                if ($args['s']) {
+                    $filtered_count = $this->_get_post_count(
+                        $args['post_type'], $args['s']
+                    );
+                } else {
+                    $filtered_count = $total_count;
+                }
             }
-        }
 
-        // Determine what to return
-        if ($args['result_type'] === 'list') {
-            $response = $list;
-        } elseif ($args['result_type'] === 'summary') {
-            $response = [
-                'total_count'    => $total_count,
-                'filtered_count' => $filtered_count
-            ];
-        } else {
-            $response = [
-                'list'    => $list,
-                'summary' => [
+            if ($args['result_type'] !== 'summary') {
+                $list = [];
+
+                foreach(get_posts($args) as $post) {
+                    array_push($list, $this->_prepare_post_item($post, $subject));
+                }
+            }
+
+            // Determine what to return
+            if ($args['result_type'] === 'list') {
+                $result = $list;
+            } elseif ($args['result_type'] === 'summary') {
+                $result = [
                     'total_count'    => $total_count,
                     'filtered_count' => $filtered_count
-                ]
-            ];
+                ];
+            } else {
+                $result = [
+                    'list'    => $list,
+                    'summary' => [
+                        'total_count'    => $total_count,
+                        'filtered_count' => $filtered_count
+                    ]
+                ];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -237,16 +257,24 @@ class AAM_Framework_Service_Content
      */
     public function get_post($post_id, $inline_context = null)
     {
-        $post = get_post($post_id);
+        try {
+            $post = get_post($post_id);
 
-        if (!is_a($post, 'WP_Post')) {
-            throw new DomainException("Post with ID {$post_id} does not exist");
+            if (!is_a($post, 'WP_Post')) {
+                throw new OutOfRangeException(
+                    "Post with ID {$post_id} does not exist"
+                );
+            }
+
+            $result = $this->_prepare_post_item(
+                get_post($post_id),
+                $this->_get_subject($inline_context)
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->_prepare_post_item(
-            get_post($post_id),
-            $this->_get_subject($inline_context)
-        );
+        return $result;
     }
 
     /**
@@ -262,78 +290,85 @@ class AAM_Framework_Service_Content
      */
     public function get_terms(array $args = [], $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $args    = array_merge([
-            'number'           => 10,     // By default, only top 10
-            'result_type'      => 'full', // Return both list and summary
-            'suppress_filters' => false,
-            'hide_empty'       => false,
-            'scope'            => 'all'
-        ], $args);
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $args    = array_merge([
+                'number'           => 10,     // By default, only top 10
+                'result_type'      => 'full', // Return both list and summary
+                'suppress_filters' => true,
+                'hide_empty'       => false,
+                'scope'            => 'all'
+            ], $args);
 
-        // The minimum required attribute is taxonomy. If it is not defined, throw
-        // an error
-        if (empty($args['taxonomy']) || !is_string($args['taxonomy'])) {
-            throw new InvalidArgumentException(
-                'The taxonomy has to be a valid string'
-            );
-        }
-
-        // If result type is either "full" or "summary", gather additional info
-        if (in_array($args['result_type'], ['full', 'summary'], true)) {
-            $total_count = get_terms([
-                'fields'     => 'count',
-                'hide_empty' => false,
-                'taxonomy'   => $args['taxonomy']
-            ]);
-
-            if ($args['search']) {
-                $filtered_count = get_terms([
-                    'fields'     => 'count',
-                    'hide_empty' => false,
-                    'search'     => $args['search'],
-                    'taxonomy'   => $args['taxonomy']
-                ]);
-            } else {
-                $filtered_count = $total_count;
-            }
-        }
-
-        if ($args['result_type'] !== 'summary') {
-            $list = [];
-
-            foreach(get_terms($args) as $term) {
-                if ($this->_extended_method_exists('get_term')) {
-                    $item = $this->get_term($term, $args, $inline_context);
-                } else {
-                    $item = $this->_prepare_term_item($term);
-                }
-
-                array_push(
-                    $list, apply_filters('get_term_filter', $item, $term, $subject)
+            // The minimum required attribute is taxonomy. If it is not defined,
+            // throw an error
+            if (empty($args['taxonomy']) || !is_string($args['taxonomy'])) {
+                throw new InvalidArgumentException(
+                    'The taxonomy has to be a valid string'
                 );
             }
-        }
 
-        // Determine what to return
-        if ($args['result_type'] === 'list') {
-            $response = $list;
-        } elseif ($args['result_type'] === 'summary') {
-            $response = [
-                'total_count'    => $total_count,
-                'filtered_count' => $filtered_count
-            ];
-        } else {
-            $response = [
-                'list'    => $list,
-                'summary' => [
+            // If result type is either "full" or "summary", gather additional info
+            if (in_array($args['result_type'], ['full', 'summary'], true)) {
+                $total_count = get_terms([
+                    'fields'     => 'count',
+                    'hide_empty' => false,
+                    'taxonomy'   => $args['taxonomy']
+                ]);
+
+                if ($args['search']) {
+                    $filtered_count = get_terms([
+                        'fields'     => 'count',
+                        'hide_empty' => false,
+                        'search'     => $args['search'],
+                        'taxonomy'   => $args['taxonomy']
+                    ]);
+                } else {
+                    $filtered_count = $total_count;
+                }
+            }
+
+            if ($args['result_type'] !== 'summary') {
+                $list = [];
+
+                foreach(get_terms($args) as $term) {
+                    if ($this->_extended_method_exists('get_term')) {
+                        $item = $this->get_term($term, $args, $inline_context);
+                    } else {
+                        $item = $this->_prepare_term_item($term);
+                    }
+
+                    array_push($list, apply_filters(
+                        'get_term_filter',
+                        $item,
+                        $term,
+                        $subject
+                    ));
+                }
+            }
+
+            // Determine what to return
+            if ($args['result_type'] === 'list') {
+                $result = $list;
+            } elseif ($args['result_type'] === 'summary') {
+                $result = [
                     'total_count'    => $total_count,
                     'filtered_count' => $filtered_count
-                ]
-            ];
+                ];
+            } else {
+                $result = [
+                    'list'    => $list,
+                    'summary' => [
+                        'total_count'    => $total_count,
+                        'filtered_count' => $filtered_count
+                    ]
+                ];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -351,27 +386,31 @@ class AAM_Framework_Service_Content
     public function update_post_permissions(
         $post_id, array $permissions = [], $inline_context = null
     ) {
-        $subject = $this->_get_subject($inline_context);
+        try {
+            $subject = $this->_get_subject($inline_context);
 
-        // Get list of all permissions and convert them back to AAM internal
-        // content settings
-        $options = [];
+            // Get list of all permissions and convert them back to AAM internal
+            // content settings
+            $options = [];
 
-        foreach($permissions as $permission) {
-            $converted = $this->_convert_permission_to_option($permission);
+            foreach($permissions as $permission) {
+                $converted = $this->_convert_permission_to_option($permission);
 
-            if (!is_null($converted)) {
-                $options = array_merge($options, $converted);
+                if (!is_null($converted)) {
+                    $options = array_merge($options, $converted);
+                }
             }
-        }
 
-        $post = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $post_id);
+            $post = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $post_id);
 
-        // Set new permissions
-        if (!empty($options)) {
-            $result = $post->setExplicitOption($options)->save();
-        } else {
-            $result = $this->delete_post_permissions($post_id, $inline_context);
+            // Set new permissions
+            if (!empty($options)) {
+                $result = $post->setExplicitOption($options)->save();
+            } else {
+                $result = $this->delete_post_permissions($post_id, $inline_context);
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
         return $result;
@@ -390,12 +429,22 @@ class AAM_Framework_Service_Content
      */
     public function delete_post_permissions($post_id, $inline_context = null)
     {
-        $subject = $this->_get_subject($inline_context);
-        $post    = $subject->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE, $post_id
-        );
+        try {
+            $subject = $this->_get_subject($inline_context);
+            $post    = $subject->getObject(
+                AAM_Core_Object_Post::OBJECT_TYPE, $post_id
+            );
 
-        return $post->reset();
+            if ($post->reset()) {
+                $result = $this->get_post($post_id, $inline_context);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
     }
 
     /**
@@ -470,12 +519,12 @@ class AAM_Framework_Service_Content
         }
 
         // Get permissions
-        $object = $subject->getObject('post', $post->ID);
+        $object = $subject->reloadObject('post', $post->ID);
 
         if (is_object($object)) {
             $item = array_merge($item, [
-                'permissions' => $this->_convert_to_permissions($object->getOption()),
-                'inheritance' => $object->getInheritance()
+                'permissions'  => $this->_convert_to_permissions($object->getOption()),
+                'is_inherited' => !$object->isOverwritten()
             ]);
         }
 
@@ -501,7 +550,7 @@ class AAM_Framework_Service_Content
         }
 
         if (!is_a($post_type_obj, 'WP_Post_Type')) {
-            throw new Exception("The post type {$post_type} is not valid");
+            throw new OutOfRangeException("The post type {$post_type} is not valid");
         }
 
         return [
@@ -531,7 +580,7 @@ class AAM_Framework_Service_Content
         }
 
         if (!is_a($taxonomy_obj, 'WP_Taxonomy')) {
-            throw new Exception("The taxonomy {$taxonomy} is not valid");
+            throw new OutOfRangeException("The taxonomy {$taxonomy} is not valid");
         }
 
         return [
@@ -561,7 +610,7 @@ class AAM_Framework_Service_Content
         }
 
         if (!is_a($term_obj, 'WP_Term')) {
-            throw new Exception("The term {$term} is not valid");
+            throw new OutOfRangeException("The term {$term} is not valid");
         }
 
         // Get post type to add additional information about post

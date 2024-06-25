@@ -289,7 +289,7 @@ class AAM_Service_Content
         }, 10, 3);
 
         // Register RESTful API
-        AAM_Core_Restful_ContentService::bootstrap();
+        AAM_Restful_ContentService::bootstrap();
 
         // Service fetch
         $this->registerService();

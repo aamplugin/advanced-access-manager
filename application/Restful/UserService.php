@@ -13,10 +13,10 @@
  * @package AAM
  * @version 6.9.32
  */
-class AAM_Core_Restful_UserService
+class AAM_Restful_UserService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * The namespace for the collection of endpoints
@@ -38,13 +38,10 @@ class AAM_Core_Restful_UserService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of users
-            $this->_register_route('/users', array(
+            $this->_register_route('/service/users', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_user_list'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_manage_users');
-                },
+                'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -75,13 +72,10 @@ class AAM_Core_Restful_UserService
             ));
 
             // Get a specific user
-            $this->_register_route('/user/(?<id>[\d]+)', array(
+            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_user'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_manage_users');
-                },
+                'permission_callback' => [ $this, 'check_permissions' ],
                 'args' => array(
                     'id'   => array(
                         'description' => 'Unique user id',
@@ -103,13 +97,10 @@ class AAM_Core_Restful_UserService
             ));
 
             // Update existing user
-            $this->_register_route('/user/(?<id>[\d]+)', array(
+            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_user'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_edit_users');
-                },
+                'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => array(
                     'id'   => array(
                         'description' => 'Unique user id',
@@ -159,6 +150,20 @@ class AAM_Core_Restful_UserService
                             ]
                         ]
                     ),
+                    'add_capabilities' => array(
+                        'description' => 'List of capabilities to assign',
+                        'type'        => 'array',
+                        'items'       => array(
+                            'type'    => 'string'
+                        )
+                    ),
+                    'remove_capabilities' => array(
+                        'description' => 'List of capabilities to remove',
+                        'type'        => 'array',
+                        'items'       => array(
+                            'type'    => 'string'
+                        ),
+                    ),
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
@@ -170,13 +175,10 @@ class AAM_Core_Restful_UserService
             ));
 
             // Reset existing user settings
-            $this->_register_route('/user/(?<id>[\d]+)/settings', array(
+            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_user'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_edit_users');
-                },
+                'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => array(
                     'id'   => array(
                         'description' => 'Unique user id',
@@ -209,38 +211,40 @@ class AAM_Core_Restful_UserService
      */
     public function get_user_list(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::users(
-            new AAM_Framework_Model_ServiceContext()
-        );
+        try {
+            $service = $this->_get_service();
 
-        // Prepare the list of filters
-        $filters = [
-            'number'   => $request->get_param('per_page'),
-            'search'   => $request->get_param('search'),
-            'offset'   => $request->get_param('offset')
-        ];
+            // Prepare the list of filters
+            $filters = [
+                'number'   => $request->get_param('per_page'),
+                'search'   => $request->get_param('search'),
+                'offset'   => $request->get_param('offset')
+            ];
 
-        $role_filter = $request->get_param('role');
+            $role_filter = $request->get_param('role');
 
-        if (!empty($role_filter)) {
-            $filters['role__in'] = $role_filter;
+            if (!empty($role_filter)) {
+                $filters['role__in'] = $role_filter;
+            }
+
+            // Modify the search, if not empty
+            if (!empty($filters['search'])) {
+                $filters['search'] .= '*';
+            }
+
+            // Iterate over the list of all users and enrich it with additional
+            // attributes
+            $result = $service->get_user_list($filters);
+            $fields   = $this->_determine_additional_fields($request);
+
+            foreach($result['list'] as &$user) {
+                $user = $this->_prepare_user_item($user, $fields);
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
-        // Modify the search, if not empty
-        if (!empty($filters['search'])) {
-            $filters['search'] .= '*';
-        }
-
-        // Iterate over the list of all users and enrich it with additional
-        // attributes
-        $response = $service->get_users($filters);
-        $fields   = $this->_determine_additional_fields($request);
-
-        foreach($response['list'] as &$user) {
-            $user = $this->_prepare_user_item($user, $fields);
-        }
-
-        return rest_ensure_response($response);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -253,30 +257,17 @@ class AAM_Core_Restful_UserService
      */
     public function get_user(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::users(
-            new AAM_Framework_Model_ServiceContext()
-        );
-
         try {
-            $response = $this->_prepare_user_item(
+            $service = $this->_get_service();
+            $result  = $this->_prepare_user_item(
                 $service->get_user($request->get_param('id'), false),
                 $this->_determine_additional_fields($request)
             );
-        } catch (DomainException $e) {
-            $response = new WP_Error(
-                'rest_not_found',
-                $e->getMessage(),
-                array('status'  => 404)
-            );
         } catch (Exception $e) {
-            $response = new WP_Error(
-                'rest_invalid_param',
-                $e->getMessage(),
-                array('status'  => 400)
-            );
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($response);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -289,44 +280,39 @@ class AAM_Core_Restful_UserService
      */
     public function update_user(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::users(
-            new AAM_Framework_Model_ServiceContext()
-        );
-
-        $expiration = $request->get_param('expiration');
-        $status     = $request->get_param('status');
-
-        $data = [];
-
-        if (!empty($expiration)) {
-            $data['expires_at'] = $expiration['expires_at'];
-            $data['trigger']    = $expiration['trigger'];
-        }
-
-        if (!empty($status)) {
-            $data['status'] = $status;
-        }
-
         try {
-            $response = $this->_prepare_user_item(
-                $service->update_user($request->get_param('id'), $data, false),
+            $service     = $this->_get_service();
+            $expiration  = $request->get_param('expiration');
+            $status      = $request->get_param('status');
+            $add_caps    = $request->get_param('add_capabilities');
+            $remove_caps = $request->get_param('remove_capabilities');
+            $data        = [];
+
+            if (!empty($expiration)) {
+                $data['expiration'] = $expiration;
+            }
+
+            if (!empty($status)) {
+                $data['status'] = $status;
+            }
+
+            if (!empty($add_caps)) {
+                $data['add_caps'] = $add_caps;
+            }
+
+            if (!empty($remove_caps)) {
+                $data['remove_caps'] = $remove_caps;
+            }
+
+            $result = $this->_prepare_user_item(
+                $service->update($request->get_param('id'), $data, false),
                 $this->_determine_additional_fields($request)
             );
-        } catch (DomainException $e) {
-            $response = new WP_Error(
-                'rest_not_found',
-                $e->getMessage(),
-                array('status'  => 404)
-            );
         } catch (Exception $e) {
-            $response = new WP_Error(
-                'rest_invalid_param',
-                $e->getMessage(),
-                array('status'  => 400)
-            );
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($response);
+        return rest_ensure_response($result);
     }
 
     /**
@@ -339,30 +325,31 @@ class AAM_Core_Restful_UserService
      */
     public function reset_user(WP_REST_Request $request)
     {
-        $service = AAM_Framework_Manager::users(
-            new AAM_Framework_Model_ServiceContext()
-        );
-
         try {
-            $response = $this->_prepare_user_item(
-                $service->reset_user($request->get_param('id'), false),
+            $service = $this->_get_service();
+            $result  = $this->_prepare_user_item(
+                $service->reset($request->get_param('id'), false),
                 $this->_determine_additional_fields($request)
             );
-        } catch (DomainException $e) {
-            $response = new WP_Error(
-                'rest_not_found',
-                $e->getMessage(),
-                array('status'  => 404)
-            );
         } catch (Exception $e) {
-            $response = new WP_Error(
-                'rest_invalid_param',
-                $e->getMessage(),
-                array('status'  => 400)
-            );
+            $result = $this->_prepare_error_response($e);
         }
 
-        return rest_ensure_response($response);
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Check if current user has access to the service
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function check_permissions()
+    {
+        return current_user_can('aam_manager')
+            && current_user_can('aam_manage_users');
     }
 
     /**
@@ -485,6 +472,19 @@ class AAM_Core_Restful_UserService
                 'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
             )
         );
+    }
+
+    /**
+     * Get service
+     *
+     * @return AAM_Framework_Service_Users
+     *
+     * @access private
+     * @version 6.9.33
+     */
+    private function _get_service()
+    {
+        return AAM_Framework_Manager::users();
     }
 
 }

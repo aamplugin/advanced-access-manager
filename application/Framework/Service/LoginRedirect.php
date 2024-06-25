@@ -17,10 +17,10 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_LoginRedirect
-    extends AAM_Framework_Service_RedirectAbstract
 {
 
-    use AAM_Framework_Service_BaseTrait;
+    use AAM_Framework_Service_BaseTrait,
+        AAM_Framework_Service_RedirectTrait;
 
     /**
      * Redirect type
@@ -30,10 +30,17 @@ class AAM_Framework_Service_LoginRedirect
     const REDIRECT_TYPE = 'login';
 
     /**
+     * Object type
+     *
+     * @version 6.9.33
+     */
+    const OBJECT_TYPE = AAM_Core_Object_LoginRedirect::OBJECT_TYPE;
+
+    /**
      * Redirect type aliases
      *
-     * To be a bit more verbose, we are renaming the legacy rule types to something
-     * that is more intuitive
+     * To be a bit more verbose, we are renaming the legacy rule types to
+     * something that is more intuitive
      *
      * @version 6.9.26
      */
@@ -55,19 +62,5 @@ class AAM_Framework_Service_LoginRedirect
         'url_redirect'     => null,
         'trigger_callback' => null
     );
-
-    /**
-     * Get object
-     *
-     * @param array $inline_context
-     *
-     * @return AAM_Core_Object
-     */
-    protected function get_object($inline_context)
-    {
-        return $this->_get_subject($inline_context)->getObject(
-            AAM_Core_Object_LoginRedirect::OBJECT_TYPE
-        );
-    }
 
 }

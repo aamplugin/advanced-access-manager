@@ -28,32 +28,38 @@ class AAM_Framework_Service_Components
      * @access public
      * @version 6.9.13
      */
-    public function get_component_list($screen = null, $inline_context = null)
+    public function get_item_list($screen_id = null, $inline_context = null)
     {
-        $response = array();
-        $subject  = $this->_get_subject($inline_context);
-        $object   = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+        try {
+            $result  = array();
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
 
-        // Getting the menu cache so we can build the list
-        $cache = AAM_Service_Metabox::getInstance()->getComponentsCache();
+            // Getting the menu cache so we can build the list
+            $cache = AAM_Service_Metabox::getInstance()->getComponentsCache();
 
-        if (!empty($cache) && is_array($cache)) {
-            foreach($cache as $screen_id => $components) {
-                foreach($components as $component) {
-                    array_push($response, $this->_prepare_component(
-                        $component, $screen_id, $object
-                    ));
+            if (!empty($cache) && is_array($cache)) {
+                foreach($cache as $id => $components) {
+                    foreach($components as $component) {
+                        array_push($result, $this->_prepare_component(
+                            $component, $id, $object
+                        ));
+                    }
                 }
             }
+
+            if (!empty($screen_id)) {
+                $result = array_values(
+                    array_filter($result, function($c) use ($screen_id) {
+                        return $c['screen_id'] === $screen_id;
+                    })
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if (!empty($screen)) {
-            $response = array_filter($response, function($c) use ($screen) {
-                return $c['screen_id'] === $screen;
-            });
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -66,24 +72,28 @@ class AAM_Framework_Service_Components
      *
      * @access public
      * @version 6.9.13
-     * @throws UnderflowException If menu does not exist
+     * @throws OutOfRangeException If menu does not exist
      */
-    public function get_component_by_id($id, $inline_context = null)
+    public function get_item_by_id($id, $inline_context = null)
     {
-        $found = false;
+        try {
+            $result = false;
 
-        foreach($this->get_component_list($inline_context) as $component) {
-            if ($component['id'] === $id) {
-                $found = $component;
-                break;
+            foreach($this->get_item_list($inline_context) as $component) {
+                if ($component['id'] === $id) {
+                    $result = $component;
+                    break;
+                }
             }
+
+            if ($result === false) {
+                throw new OutOfRangeException('Component does not exist');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if ($found === false) {
-            throw new UnderflowException('Component does not exist');
-        }
-
-        return $found;
+        return $result;
     }
 
     /**
@@ -97,23 +107,28 @@ class AAM_Framework_Service_Components
      *
      * @access public
      * @version 6.9.13
-     * @throws UnderflowException If menu item does not exist
-     * @throws Exception If fails to persist changes
+     * @throws RuntimeException If fails to persist changes
      */
     public function update_component_permission(
         $id, $is_hidden = true, $inline_context = null
     ) {
-        $component = $this->get_component_by_id($id);
-        $subject   = $this->_get_subject($inline_context);
-        $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
-        $screen_id = $this->_convert_screen_id($component['screen_id']);
-        $internal  = $screen_id . '|' . $component['slug'];
+        try {
+            $component = $this->get_item_by_id($id);
+            $subject   = $this->_get_subject($inline_context);
+            $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            $screen_id = $this->_convert_screen_id($component['screen_id']);
+            $internal  = $screen_id . '|' . $component['slug'];
 
-        if ($object->store($internal, $is_hidden) === false) {
-            throw new Exception('Failed to persist permissions');
+            if ($object->store($internal, $is_hidden) === false) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->get_item_by_id($id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        return $this->get_component_by_id($id);
+        return $result;
     }
 
     /**
@@ -126,17 +141,16 @@ class AAM_Framework_Service_Components
      *
      * @access public
      * @version 6.9.13
-     * @throws UnderflowException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @throws OutOfRangeException If rule does not exist
+     * @throws RuntimeException If fails to persist a rule
      */
     public function delete_component_permission($id, $inline_context = null)
     {
-        $subject   = $this->_get_subject($inline_context);
-        $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
-        $component = $this->get_component_by_id($id);
+        try {
+            $subject   = $this->_get_subject($inline_context);
+            $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            $component = $this->get_item_by_id($id);
 
-        // Note! User can delete only explicitly set rule (overwritten rule)
-        if ($component['is_inherited'] === false) {
             $explicit  = $object->getExplicitOption();
             $screen_id = $this->_convert_screen_id($component['screen_id']);
             $internal  = strtolower($screen_id. '|' . $component['slug']);
@@ -144,76 +158,69 @@ class AAM_Framework_Service_Components
             if (isset($explicit[$internal])) {
                 unset($explicit[$internal]); // Delete the setting
 
-                $object->setExplicitOption($explicit);
-                $success = $object->save();
-
-                $subject->flushCache();
+                $success = $object->setExplicitOption($explicit)->save();
             } else {
-                throw new UnderflowException(
-                    'Settings for the component do not exist'
-                );
+                $success = true;
             }
-        } else {
-            $success = true;
+
+            if (!$success) {
+                throw new RuntimeException('Failed to persist the settings');
+            }
+
+            $result = $this->get_item_by_id($id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
         }
 
-        if (!$success) {
-            throw new Exception('Failed to persist the settings');
-        }
-
-        return $this->get_component_by_id($id);
+        return $result;
     }
 
     /**
      * Reset all permissions
      *
-     * @param array $inline_context Runtime context
+     * @param string $screen_id
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 6.9.13
      */
-    public function reset_permissions($inline_context = null)
+    public function reset($screen_id = null, $inline_context = null)
     {
-        $response = array();
+        try {
+            // Reset the object
+            $subject = $this->_get_subject($inline_context);
+            $object  = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
 
-        // Reset the object
-        $subject = $this->_get_subject($inline_context);
-        $object  = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            if (empty($screen_id)) {
+                $status = $object->reset();
+            } else {
+                $id          = $this->_convert_screen_id($screen_id);
+                $new_options = [];
 
-        // Communicate about number of permissions that were deleted
-        $response['deleted_permissions_count'] = count($object->getExplicitOption());
+                // Filter out all the components that belong to specified screen
+                foreach($object->getExplicitOption() as $key => $data) {
+                    $parts = explode('|', $key);
 
-        // Reset
-        $response['success'] = $object->reset();
+                    if ($parts[0] !== $id) {
+                        $new_options[$key] = $data;
+                    }
+                }
 
-        return $response;
-    }
+                $status = $object->setExplicitOption($new_options)->save();
+            }
 
-    /**
-     * Call custom method registered by third-party
-     *
-     * @param string $name
-     * @param array  $args
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public function __call($name, $args)
-    {
-        // Assuming that the last argument is always the inline context
-        $context = array_pop($args);
+            if ($status){
+                $result = $this->get_item_list($screen_id);
+            } else {
+                throw new RuntimeException('Failed to reset settings');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
 
-        return apply_filters(
-            "aam_component_service_{$name}",
-            null,
-            $args,
-            $this->_get_subject($context),
-            $this
-        );
+        return $result;
     }
 
     /**

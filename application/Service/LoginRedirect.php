@@ -102,7 +102,7 @@ class AAM_Service_LoginRedirect
         );
 
         // Register RESTful API
-        AAM_Core_Restful_LoginRedirectService::bootstrap();
+        AAM_Restful_LoginRedirectService::bootstrap();
     }
 
     /**

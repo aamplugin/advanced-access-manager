@@ -13,10 +13,10 @@
  * @package AAM
  * @version 6.9.27
  */
-class AAM_Core_Restful_ChatbotService
+class AAM_Restful_ChatbotService
 {
 
-    use AAM_Core_Restful_ServiceTrait;
+    use AAM_Restful_ServiceTrait;
 
     /**
      * Constructor
@@ -37,13 +37,13 @@ class AAM_Core_Restful_ChatbotService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => __('Conversation ID', AAM_KEY),
+                        'description' => 'Conversation ID',
                         'type'        => 'string',
                         'pattern'     => '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
                         'required'    => true
                     ),
                     'message' => array(
-                        'description' => __('Last message user submitted', AAM_KEY),
+                        'description' => 'Last message user submitted',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -64,48 +64,43 @@ class AAM_Core_Restful_ChatbotService
      */
     public function post_messages(WP_REST_Request $request)
     {
-        $id      = $request->get_param('id');
-        $message = trim($request->get_param('message'));
+        try {
+            $id      = $request->get_param('id');
+            $message = trim($request->get_param('message'));
 
-        if (defined('AAM_COMPLETE_PACKAGE_LICENSE')) {
-            $license = AAM_COMPLETE_PACKAGE_LICENSE;
-        }
+            if (defined('AAM_COMPLETE_PACKAGE_LICENSE')) {
+                $license = AAM_COMPLETE_PACKAGE_LICENSE;
+            }
 
-        // Prepare and execute the remote request
-        $raw = wp_remote_post(
-            AAM_Core_Server::getEndpoint() . '/conversation/' . $id,
-            array(
-                'body'    => json_encode(array( 'message' => $message)),
-                'timeout' => 25,
-                'headers' => array(
-                    'Content-Type'      => 'application/json',
-                    'Accept'            => 'application/json',
-                    'x-aam-license-key' => $license
+            // Prepare and execute the remote request
+            $raw = wp_remote_post(
+                AAM_Core_Server::getEndpoint() . '/conversation/' . $id,
+                array(
+                    'body'    => json_encode(array( 'message' => $message)),
+                    'timeout' => 25,
+                    'headers' => array(
+                        'Content-Type'      => 'application/json',
+                        'Accept'            => 'application/json',
+                        'x-aam-license-key' => $license
+                    )
                 )
-            )
-        );
-
-        // Making sure that we are getting successful response
-        if (is_wp_error($raw)) {
-            $response = rest_ensure_response(array(
-                'error' => $raw->get_error_message()
-            ));
-
-            $response->set_status(500);
-        } elseif (intval(wp_remote_retrieve_response_code($raw)) === 200) {
-            $response = rest_ensure_response(
-                json_decode(wp_remote_retrieve_body($raw))
             );
-        } else {
-            $json     = json_decode(wp_remote_retrieve_body($raw));
-            $response = rest_ensure_response(array(
-                'error' => $json->message
-            ));
 
-            $response->set_status(400);
+            // Making sure that we are getting successful response
+            if (is_wp_error($raw)) {
+                throw new Exception($raw->get_error_message());
+            } elseif (intval(wp_remote_retrieve_response_code($raw)) === 200) {
+                $result = json_decode(wp_remote_retrieve_body($raw));
+            } else {
+                $json = json_decode(wp_remote_retrieve_body($raw));
+
+                throw new InvalidArgumentException($json->message);
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
         }
 
-        return $response;
+        return rest_ensure_response($result);
     }
 
     /**

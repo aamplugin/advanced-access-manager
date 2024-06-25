@@ -26,6 +26,7 @@
  * Subject principal is underlying WordPress core user or role. Not all Subjects have
  * principals (e.g. Visitor or Default).
  *
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/379
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/344
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/342
@@ -36,7 +37,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.30
+ * @version 6.9.33
  */
 abstract class AAM_Core_Subject
 {
@@ -348,6 +349,32 @@ abstract class AAM_Core_Subject
         }
 
         return $object;
+    }
+
+    /**
+     * Reload the entire object
+     *
+     * This will trigger the inheritance mechanism again
+     *
+     * @param string  $type
+     * @param mixed   $id
+     * @param boolean $skipInheritance
+     *
+     * @return AAM_Core_Object
+     *
+     * @access public
+     * @version 6.9.33
+     */
+    public function reloadObject($type, $id = null, $skipInheritance = false)
+    {
+        $suffix = ($skipInheritance ? '_direct' : '_full');
+
+        // Check if there is an object with specified ID and if so, purge it
+        if (isset($this->_objects[$type . $id . $suffix])) {
+            unset($this->_objects[$type . $id . $suffix]);
+        }
+
+        return $this->getObject($type, $id, $skipInheritance);
     }
 
     /**

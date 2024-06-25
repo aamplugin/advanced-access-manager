@@ -1,12 +1,13 @@
 <?php
 /**
+ * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
  *               https://github.com/aamplugin/advanced-access-manager/issues/302
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/289
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.21
+ * @version 6.9.33
  * */
 ?>
 
@@ -70,13 +71,22 @@
                                             <div class="col-xs-12 col-md-6 aam-submenu-item">
                                                 <div class="aam-menu-details">
                                                     <?php echo esc_js($child['name']); ?>
-                                                    <small><a href="#toolbar-details-modal" data-toggle="modal" data-uri="<?php echo esc_attr($child['uri']); ?>" data-id="<?php echo esc_attr($child['slug']); ?>" data-name="<?php echo esc_attr($child['name']); ?>" class="aam-toolbar-item"><?php echo __('more details', AAM_KEY); ?></a></small>
+                                                    <small>
+                                                        <a
+                                                            href="#toolbar-details-modal"
+                                                            data-toggle="modal"
+                                                            data-uri="<?php echo esc_attr($child['uri']); ?>"
+                                                            data-id="<?php echo esc_attr($child['id']); ?>"
+                                                            data-name="<?php echo esc_attr($child['name']); ?>"
+                                                            class="aam-toolbar-item"
+                                                        ><?php echo __('more details', AAM_KEY); ?></a>
+                                                    </small>
                                                 </div>
 
                                                 <?php if ($child['is_hidden']) { ?>
-                                                    <i class="aam-accordion-action icon-lock text-danger" id="toolbar-<?php echo esc_js($child['id']); ?>" data-toolbar="<?php echo esc_attr($child['slug']); ?>"></i>
+                                                    <i class="aam-accordion-action icon-lock text-danger" id="toolbar-<?php echo esc_js($child['id']); ?>" data-toolbar="<?php echo esc_attr($child['id']); ?>"></i>
                                                 <?php } else { ?>
-                                                    <i class="aam-accordion-action icon-lock-open text-success" id="toolbar-<?php echo esc_js($child['id']); ?>" data-toolbar="<?php echo esc_attr($child['slug']); ?>"></i>
+                                                    <i class="aam-accordion-action icon-lock-open text-success" id="toolbar-<?php echo esc_js($child['id']); ?>" data-toolbar="<?php echo esc_attr($child['id']); ?>"></i>
                                                 <?php } ?>
 
                                                 <label for="toolbar-<?php echo esc_js($child['id']); ?>" data-toggle="tooltip" title="<?php echo ($child['is_hidden'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"></label>
@@ -89,11 +99,11 @@
                                 <div class="row aam-margin-top-xs">
                                     <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
                                         <?php if ($branch['is_hidden']) { ?>
-                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo esc_attr($branch['slug']); ?>" data-target="#toolbar-<?php echo esc_js($branch['id']); ?>">
+                                            <a href="#" class="btn btn-primary btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo esc_attr($branch['id']); ?>" data-target="#toolbar-<?php echo esc_js($branch['id']); ?>">
                                                 <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } else { ?>
-                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo esc_attr($branch['slug']); ?>" data-target="#toolbar-<?php echo esc_js($branch['id']); ?>">
+                                            <a href="#" class="btn btn-danger btn-sm btn-block aam-restrict-toolbar" data-toolbar="<?php echo esc_attr($branch['id']); ?>" data-target="#toolbar-<?php echo esc_js($branch['id']); ?>">
                                                 <i class="icon-lock"></i> <?php echo __('Hide Menu', AAM_KEY); ?>
                                             </a>
                                         <?php } ?>

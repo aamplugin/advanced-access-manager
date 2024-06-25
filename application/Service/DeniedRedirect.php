@@ -144,8 +144,8 @@ class AAM_Service_DeniedRedirect
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 3
         );
 
-         // Register RESTful API endpoints
-         AAM_Core_Restful_AccessDeniedRedirectService::bootstrap();
+        // Register RESTful API endpoints
+        AAM_Restful_AccessDeniedRedirectService::bootstrap();
 
         // Service fetch
         $this->registerService();
