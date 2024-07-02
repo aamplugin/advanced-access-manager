@@ -52,6 +52,19 @@ class AAM_Service_SecureLogin
     const FEATURE_FLAG = 'core.service.secure-login.enabled';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.secure-login.enabled'             => true,
+        'service.secureLogin.feature.singleSession'     => false,
+        'service.secureLogin.feature.bruteForceLockout' => false,
+        'service.secure_login.time_window'              => '+20 minutes',
+        'service.secure_login.login_attempts'           => 8
+    ];
+
+    /**
      * Config options aliases
      *
      * The option names changed, but to stay backward compatible, we need to support
@@ -74,6 +87,16 @@ class AAM_Service_SecureLogin
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
             // service. This is used to display information about service on the
@@ -89,14 +112,14 @@ class AAM_Service_SecureLogin
             }, 1);
 
             // Register additional tab for the Settings
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Settings_Security::register();
                 }, 1);
             }
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -377,7 +400,9 @@ class AAM_Service_SecureLogin
     public function manageAuthCookie($cookie, $user_id, $expiration, $scheme, $token)
     {
         // Remove all other sessions if single session feature is enabled
-        if (AAM_Core_Config::get('service.secureLogin.feature.singleSession', false)) {
+        if (AAM_Framework_Manager::configs()->get_config(
+            'service.secureLogin.feature.singleSession'
+        )) {
             $sessions = WP_Session_Tokens::get_instance($user_id);
 
             if (count($sessions->get_all()) > 1) {
@@ -401,7 +426,9 @@ class AAM_Service_SecureLogin
     public function trackFailedLoginAttempt()
     {
         // Track failed attempts only if Brute Force Lockout is enabled
-        if (AAM_Core_Config::get('service.secureLogin.feature.bruteForceLockout', false)) {
+        if (AAM_Framework_Manager::configs()->get_config(
+            'service.secureLogin.feature.bruteForceLockout'
+        )) {
             $this->updateLoginAttemptsTransient(1);
         }
     }
@@ -477,7 +504,9 @@ class AAM_Service_SecureLogin
     public function enhanceAuthentication($response)
     {
         // Brute Force Lockout
-        if (AAM_Core_Config::get('service.secureLogin.feature.bruteForceLockout', false)) {
+        if (AAM_Framework_Manager::configs()->get_config(
+            'service.secureLogin.feature.bruteForceLockout'
+        )) {
             $attempts  = AAM_Core_Cache::get($this->_getLoginAttemptKeyName());
             $threshold = $this->_getConfigOption(
                 'service.secure_login.login_attempts', 8
@@ -537,10 +566,12 @@ class AAM_Service_SecureLogin
      */
     private function _getConfigOption($option, $default = null)
     {
-        $value = AAM_Core_Config::get($option);
+        $value = AAM_Framework_Manager::configs()->get_config($option);
 
         if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
+            $value = AAM_Framework_Manager::configs()->get_config(
+                self::OPTION_ALIAS[$option]
+            );
         }
 
         return is_null($value) ? $default : $value;

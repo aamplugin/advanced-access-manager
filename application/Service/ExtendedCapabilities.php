@@ -42,6 +42,14 @@ class AAM_Service_ExtendedCapabilities
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = true;
+            }
+
+            return $result;
+        }, 10, 2);
+
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
             // service. This is used to display information about service on the
@@ -57,8 +65,7 @@ class AAM_Service_ExtendedCapabilities
             }, 1);
         }
 
-        // Hook that initialize the AAM UI part of the service
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }

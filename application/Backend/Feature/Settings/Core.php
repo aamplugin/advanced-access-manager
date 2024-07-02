@@ -10,6 +10,7 @@
 /**
  * Backend core settings
  *
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  *               https://github.com/aamplugin/advanced-access-manager/issues/311
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
@@ -17,7 +18,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.14
+ * @version 6.9.34
  */
 class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
 {
@@ -41,6 +42,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
+     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
      * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
      *               https://github.com/aamplugin/advanced-access-manager/issues/311
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
@@ -48,35 +50,36 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.14
+     * @version 6.9.34
      */
     public static function getList()
     {
+        $service  = AAM_Framework_Manager::configs();
         $settings = array(
             'core.settings.editCapabilities' => array(
                 'title'       => __('Edit/Delete Capabilities', AAM_KEY),
                 'description' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
-                'value'       => AAM_Core_Config::get('core.settings.editCapabilities', true)
+                'value'       => $service->get_config('core.settings.editCapabilities')
             ),
             'ui.settings.renderAccessMetabox' => array(
                 'title'       => __('Render Access Manager Metabox', AAM_KEY),
                 'description' => __('Render "Access Manager" metabox on all post, term or user edit pages.', AAM_KEY),
-                'value'       => AAM_Core_Config::get('ui.settings.renderAccessMetabox', false),
+                'value'       => $service->get_config('ui.settings.renderAccessMetabox'),
             ),
             'core.settings.tips' => array(
                 'title'       => __('Show UI Tooltips', AAM_KEY),
                 'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', AAM_KEY),
-                'value'       => AAM_Core_Config::get('core.settings.tips', true)
+                'value'       => $service->get_config('core.settings.tips')
             ),
             'core.settings.multiSubject' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),
                 'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),
-                'value'       => AAM_Core_Config::get('core.settings.multiSubject', false)
+                'value'       => $service->get_config('core.settings.multiSubject')
             ),
             'core.settings.merge.preference' => array(
                 'title'       => __('Default Access Settings Merging Preference', AAM_KEY),
                 'description' => sprintf(__('Default access settings merging preference when settings ambiguity detected. For more information refer to the %sResolving access control ambiguity in WordPress%s article.', AAM_KEY), '<a href="https://aamportal.com/article/resolving-access-controls-ambiguity-in-wordpress?ref=plugin" target="_blank">', '</a>'),
-                'value'       => AAM_Core_Config::get('core.settings.merge.preference', 'deny') === 'allow',
+                'value'       => $service->get_config('core.settings.merge.preference') === 'allow',
                 'valueOn'     => 'allow',
                 'valueOff'    => 'deny',
                 'optionOn'    => __('Allow', AAM_KEY),

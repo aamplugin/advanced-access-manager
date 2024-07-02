@@ -41,6 +41,19 @@ class AAM_Service_Core
     const PLUGIN_CHECK_URI = 'api.wordpress.org/plugins/update-check';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.settings.tips'              => true,
+        'core.settings.multiSubject'      => false,
+        'ui.settings.renderAccessMetabox' => false,
+        'core.settings.merge.preference'  => 'deny',
+        'core.export.groups'              => [ 'settings', 'config', 'roles' ]
+    ];
+
+    /**
      * Constructor
      *
      * @access protected
@@ -63,9 +76,17 @@ class AAM_Service_Core
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
         if (is_admin()) {
-            $metaboxEnabled = AAM_Core_Config::get(
-                'ui.settings.renderAccessMetabox', false
+            $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
+                'ui.settings.renderAccessMetabox'
             );
 
             if ($metaboxEnabled && current_user_can('aam_manager')) {
@@ -199,7 +220,7 @@ class AAM_Service_Core
                 is_string($capability) && (strpos($capability, 'aam_') === 0)
                 && !AAM_Core_API::capExists($capability)
             ) {
-                $caps[$i] = AAM_Core_Config::get(
+                $caps[$i] = AAM_Framework_Manager::configs()->get_config(
                     'page.capability',
                     'administrator'
                 );
@@ -297,7 +318,9 @@ class AAM_Service_Core
 
                         wp_delete_user(
                             $user->ID,
-                            AAM_Core_Config::get('core.reasign.ownership.user')
+                            AAM_Framework_Manager::configs()->get_config(
+                                'core.reasign.ownership.user'
+                            )
                         );
                         break;
 

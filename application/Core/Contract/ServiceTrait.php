@@ -41,7 +41,7 @@ trait AAM_Core_Contract_ServiceTrait
     protected function registerService()
     {
         add_filter('aam_get_service_filter', function($service, $alias) {
-            if (empty($service) && ($alias === self::SERVICE_ALIAS)) {
+            if (empty($service) && ($alias === static::SERVICE_ALIAS)) {
                 $service = $this;
             }
 

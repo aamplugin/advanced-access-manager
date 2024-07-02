@@ -10,11 +10,12 @@
 /**
  * AAM services
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
- * @since 6.0.0 Initial implementation of the method
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+ * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/193
+ * @since 6.0.0  Initial implementation of the method
  *
  * @package AAM
- * @version 6.7.9
+ * @version 6.9.34
  */
 class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
 {
@@ -38,22 +39,21 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
      *
      * @return array
      *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+     * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/193
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.7.9
+     * @version 6.9.34
      */
     public static function getList()
     {
         $response = apply_filters('aam_service_list_filter', array());
+        $service  = AAM_Framework_Manager::configs();
 
         // Get each service status
-        foreach ($response as &$service) {
-            $service['status'] = AAM_Core_Config::get(
-                $service['setting'],
-                isset($service['defaultEnabled']) ? $service['defaultEnabled'] : true
-            );
+        foreach ($response as &$item) {
+            $item['status'] = $service->get_config($item['setting']);
         }
 
         return $response;

@@ -11,7 +11,7 @@ namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
     AAM_Core_Object_Uri,
-    AAM_Core_AccessSettings,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -139,10 +139,12 @@ class PolicyVisitorTest extends TestCase
             __DIR__ . '/policies/' . $policy_file . '.json'
         )), array('ID' => self::$policy_id));
 
-        $settings = AAM_Core_AccessSettings::getInstance();
-        $settings->set(sprintf(
-            'visitor.policy.%d', self::$policy_id
-        ), true);
+        $settings = AAM_Framework_Manager::settings([
+            'access_level' => 'visitor'
+        ]);
+        $settings->set_setting('policy', [
+            self::$policy_id => true
+        ]);
 
         // Resetting all settings as $wpdb->update already initializes it with
         // settings

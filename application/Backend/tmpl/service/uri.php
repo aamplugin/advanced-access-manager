@@ -1,18 +1,19 @@
 <?php
 /**
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
  * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.17
+ * @version 6.9.34
  * */
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="uri-content">
-        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

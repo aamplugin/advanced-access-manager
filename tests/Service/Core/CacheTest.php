@@ -11,7 +11,7 @@ namespace AAM\UnitTest\Service\Core;
 
 use AAM_Core_API,
     AAM_Core_Cache,
-    AAM_Core_Config,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -64,7 +64,9 @@ class CacheTest extends TestCase
      */
     public function testCacheOverflow()
     {
-        AAM_Core_Config::set('core.settings.cache.capability', 2);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.cache.capability', 2
+        );
 
         AAM_Core_Cache::set('test-1', 1);
         AAM_Core_Cache::set('test-2', 2);
@@ -75,7 +77,9 @@ class CacheTest extends TestCase
 
         $this->assertFalse(AAM_Core_Cache::get('test-1', false));
 
-        AAM_Core_Config::delete('core.settings.cache.capability');
+        AAM_Framework_Manager::configs()->reset_config(
+            'core.settings.cache.capability'
+        );
         AAM_Core_Cache::reset();
     }
 

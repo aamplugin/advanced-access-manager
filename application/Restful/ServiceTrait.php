@@ -64,48 +64,51 @@ trait AAM_Restful_ServiceTrait
      * The method also applies the `aam_rest_route_args_filter` filter that allows
      * other processes to change the router definition
      *
-     * @param string $route
-     * @param array  $args
+     * @param string  $route
+     * @param array   $args
+     * @param boolean $access_level_aware
      *
      * @return void
      *
      * @access private
      * @version 6.9.10
      */
-    private function _register_route($route, $args)
+    private function _register_route($route, $args, $access_level_aware = true)
     {
-        // Add the common arguments to all routes
-        $args = array_merge_recursive(array(
-            'args' => array(
-                'access_level' => array(
-                    'description' => 'Access level for the controls',
-                    'type'        => 'string',
-                    'enum'        => array(
-                        AAM_Core_Subject_Role::UID,
-                        AAM_Core_Subject_User::UID,
-                        AAM_Core_Subject_Visitor::UID,
-                        AAM_Core_Subject_Default::UID
+        // Add the common arguments to all routes if needed
+        if ($access_level_aware) {
+            $args = array_merge_recursive(array(
+                'args' => array(
+                    'access_level' => array(
+                        'description' => 'Access level for the controls',
+                        'type'        => 'string',
+                        'enum'        => array(
+                            AAM_Core_Subject_Role::UID,
+                            AAM_Core_Subject_User::UID,
+                            AAM_Core_Subject_Visitor::UID,
+                            AAM_Core_Subject_Default::UID
+                        ),
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_access_level($value, $request);
+                        }
                     ),
-                    'validate_callback' => function ($value, $request) {
-                        return $this->_validate_access_level($value, $request);
-                    }
-                ),
-                'role_id' => array(
-                    'description'       => 'Role ID (aka slug)',
-                    'type'              => 'string',
-                    'validate_callback' => function ($value, $request) {
-                        return $this->_validate_role_id($value, $request);
-                    }
-                ),
-                'user_id' => array(
-                    'description'       => 'User ID',
-                    'type'              => 'integer',
-                    'validate_callback' => function ($value, $request) {
-                        return $this->_validate_user_id($value, $request);
-                    }
+                    'role_id' => array(
+                        'description'       => 'Role ID (aka slug)',
+                        'type'              => 'string',
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_role_id($value, $request);
+                        }
+                    ),
+                    'user_id' => array(
+                        'description'       => 'User ID',
+                        'type'              => 'integer',
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_user_id($value, $request);
+                        }
+                    )
                 )
-            )
-        ), $args);
+            ), $args);
+        }
 
         register_rest_route(
             'aam/v2/service',

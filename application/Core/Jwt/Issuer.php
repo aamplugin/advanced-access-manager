@@ -54,12 +54,13 @@ class AAM_Core_Jwt_Issuer
 
         try {
             $headers = $this->extractTokenHeaders($token);
+            $service = AAM_Framework_Manager::configs();
 
             if (strpos($headers->alg, 'RS') === 0) {
-                $path = AAM_Core_Config::get('authentication.jwt.publicKeyPath');
+                $path = $service->get_config('authentication.jwt.publicKeyPath');
                 $key = (is_readable($path) ? file_get_contents($path) : null);
             } else {
-                $key = AAM_Core_Config::get(
+                $key = $service->get_config(
                     'authentication.jwt.secret', SECURE_AUTH_KEY
                 );
             }
@@ -130,7 +131,9 @@ class AAM_Core_Jwt_Issuer
         if (!empty($expires)) {
             $time = $expires;
         } else {
-            $ttl = AAM_Core_Config::get('authentication.jwt.expires', '+24 hours');
+            $ttl = AAM_Framework_Manager::configs()->get_config(
+                'authentication.jwt.expires', '+24 hours'
+            );
 
             if (is_numeric($ttl)) {
                 $ttl = "+{$ttl} seconds";
@@ -233,20 +236,21 @@ class AAM_Core_Jwt_Issuer
      */
     protected function getJWTSigningAttributes()
     {
-        $alg = strtoupper(
-            AAM_Core_Config::get('authentication.jwt.algorithm', 'HS256')
+        $service = AAM_Framework_Manager::configs();
+        $alg     = strtoupper(
+            $service->get_config('authentication.jwt.algorithm', 'HS256')
         );
 
         if (strpos($alg, 'RS') === 0) {
-            $path       = AAM_Core_Config::get('authentication.jwt.privateKeyPath');
+            $path       = $service->get_config('authentication.jwt.privateKeyPath');
             $key        = (is_readable($path) ? file_get_contents($path) : null);
-            $passphrase = AAM_Core_Config::get('authentication.jwt.passphrase', false);
+            $passphrase = $service->get_config('authentication.jwt.passphrase', false);
 
             if($passphrase && extension_loaded('openssl')) {
                 $key = openssl_pkey_get_private($key, $passphrase);
             }
         } else {
-            $key = AAM_Core_Config::get('authentication.jwt.secret', SECURE_AUTH_KEY);
+            $key = $service->get_config('authentication.jwt.secret', SECURE_AUTH_KEY);
         }
 
         return (object) array(

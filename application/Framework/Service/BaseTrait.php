@@ -74,7 +74,8 @@ trait AAM_Framework_Service_BaseTrait
      * @access protected
      * @version 6.9.31
      */
-    protected function __construct() {
+    protected function __construct()
+    {
         // Extend the service instance with additional methods
         $closures = apply_filters(
             'aam_framework_service_closures_filter', [], $this
@@ -160,12 +161,14 @@ trait AAM_Framework_Service_BaseTrait
      */
     private function _get_subject($inline_context = null)
     {
+        $result = null;
+
         // Determine if the access level and subject ID are either part of the
         // inline arguments or runtime context when service is requested through the
         // framework service manager
-        if ($inline_context) {
+        if (is_array($inline_context)) {
             $context = $inline_context;
-        } elseif ($this->_runtime_context) {
+        } elseif (is_array($this->_runtime_context)) {
             $context = $this->_runtime_context;
         } else {
             throw new BadMethodCallException('No context provided');
@@ -173,20 +176,18 @@ trait AAM_Framework_Service_BaseTrait
 
         if (isset($context['subject'])
             && is_a($context['subject'], AAM_Core_Subject::class)) {
-            $subject = $context['subject'];
-        } elseif (empty($context['access_level'])) {
-            throw new InvalidArgumentException('The access_level is required');
-        } else {
-            $subject = AAM_Framework_Manager::subject()->get(
+            $result = $context['subject'];
+        } elseif (!empty($context['access_level'])) {
+            $result = AAM_Framework_Manager::subject()->get(
                 $context['access_level'],
                 isset($context['subject_id']) ? $context['subject_id'] : null
             );
         }
 
         // Persist the current access level so it can be assessed as property
-        $this->_access_level = $subject;
+        $this->_access_level = $result;
 
-        return $subject;
+        return $result;
     }
 
     /**

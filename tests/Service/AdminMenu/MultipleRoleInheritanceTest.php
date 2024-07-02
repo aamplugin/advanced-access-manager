@@ -10,11 +10,10 @@
 namespace AAM\UnitTest\Service\AdminMenu;
 
 use AAM,
-    AAM_Core_Config,
     AAM_Core_Object_Menu,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\MultiRoleOptionInterface;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test AAM access settings inheritance mechanism for multiple roles per user for
@@ -25,7 +24,7 @@ use AAM,
  * @package AAM\UnitTest
  * @version 6.0.0
  */
-class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInterface
+class MultipleRoleInheritanceTest extends TestCase
 {
     use ResetTrait;
 
@@ -34,18 +33,13 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     private static function _setUpBeforeClass()
     {
-        if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
-            // Enable Multiple Role Support
-            AAM_Core_Config::set('core.settings.multiSubject', true);
-        }
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
 
         // Set current User. Emulate that this is admin login
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
-
-        // Override AAM current user
-        AAM::getInstance()->setUser(
-            new \AAM_Core_Subject_User(AAM_UNITTEST_MULTIROLE_USER_ID)
-        );
     }
 
     /**
@@ -73,6 +67,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceMergeFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -81,16 +80,16 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
-        $object = $role->getObject(AAM_Core_Object_Menu::OBJECT_TYPE, null, true);
-        $this->assertTrue($object->updateOptionItem('index.php?id=0', true)->save());
+        $object = $role->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+        $this->assertTrue($object->store('index.php?id=0', true));
 
         foreach($role->getSiblings() as $i => $sibling) {
             // Save access settings for each role and make sure they are saved property
             // Check if save returns positive result
-            $this->assertTrue(
-                $sibling->getObject(AAM_Core_Object_Menu::OBJECT_TYPE, null, true)->updateOptionItem(
+            $this->assertTrue($sibling->getObject(
+                AAM_Core_Object_Menu::OBJECT_TYPE)->store(
                     'index.php?id=' . ($i + 1), ($i % 2 ? true : false)
-                )->save()
+                )
             );
         }
 
@@ -103,6 +102,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         //  index.php?id=1 => false
         // )
         $option = $user->getObject(AAM_Core_Object_Menu::OBJECT_TYPE)->getOption();
+
         $this->assertSame(
             array('index.php?id=0' => true, 'index.php?id=1' => false), $option
         );
@@ -118,6 +118,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceDenyPrecedenceFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -150,9 +155,7 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         //  index.php => true
         // )
         $option = $user->getObject(AAM_Core_Object_Menu::OBJECT_TYPE)->getOption();
-        $this->assertSame(
-            array('index.php' => true), $option
-        );
+        $this->assertSame(array('index.php' => true), $option);
     }
 
     /**
@@ -164,6 +167,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceAllowPrecedenceFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -182,15 +190,15 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
             // Save access settings for each role and make sure they are saved property
             // Check if save returns positive result
             $this->assertTrue(
-                $sibling->getObject(AAM_Core_Object_Menu::OBJECT_TYPE, null, true)->updateOptionItem(
+                $sibling->getObject(AAM_Core_Object_Menu::OBJECT_TYPE)->store(
                     'index.php', false
-                )->save()
+                )
             );
         }
 
         // Override the default "deny" precedence
-        AAM_Core_Config::set(
-            sprintf('core.settings.%s.merge.preference', AAM_Core_Object_Menu::OBJECT_TYPE),
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.menu.merge.preference',
             'allow'
         );
 
@@ -217,6 +225,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceAllowPrecedenceFromUserWithMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
 
         // Set explicit setting for individual user

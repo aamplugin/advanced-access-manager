@@ -1,10 +1,11 @@
 <?php
 /**
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.14
+ * @version 6.9.34
  * */
 ?>
 
@@ -12,7 +13,7 @@
     <div class="aam-feature" id="route-content">
         <?php $subject = AAM_Backend_Subject::getInstance(); ?>
 
-        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

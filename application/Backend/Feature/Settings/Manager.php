@@ -10,6 +10,7 @@
 /**
  * Backend Settings area abstract manager
  *
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/311
  * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/249
@@ -22,7 +23,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.21
+ * @version 6.9.34
  */
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
@@ -37,78 +38,20 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
     const ACCESS_CAPABILITY = 'aam_manage_settings';
 
     /**
-     * Save the option
-     *
-     * @return string
-     *
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/311
-     * @since 6.3.0  Making sure that boolean value is stored
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.14
-     */
-    public function save()
-    {
-        $param = $this->getFromPost('param');
-        $value = $this->getFromPost('value');
-
-        if (in_array($value, array("true", "false"))) {
-            $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-        }
-
-        AAM_Core_Config::set($param, $value);
-
-        return wp_json_encode(array('status' => 'success'));
-    }
-
-    /**
-     * Clear all AAM settings
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function clearSettings()
-    {
-        AAM_Core_API::clearSettings();
-
-        return wp_json_encode(array('status' => 'success'));
-    }
-
-    /**
-     * Reset access settings for specific subject
-     *
-     * @return void
-     *
-     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
-     * @since 6.5.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.6
-     */
-    public function clearSubjectSettings()
-    {
-        AAM_Backend_Subject::getInstance()->getSubject()->reset();
-
-        return wp_json_encode(array('status' => 'success'));
-    }
-
-    /**
      * Export AAM settings as JSON
      *
      * @param boolean $raw
      *
      * @return string
      *
-     * @since 6.7.0 Added `$raw` argument
-     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/130
-     * @since 6.3.0 Optimized AAM_Core_API::getOption call
-     * @since 6.2.0 Initial implementation of the method
+     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+     * @since 6.7.0  Added `$raw` argument
+     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/130
+     * @since 6.3.0  Optimized AAM_Core_API::getOption call
+     * @since 6.2.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.7.0
+     * @version 6.9.34
      */
     public function exportSettings($raw = false)
     {
@@ -119,9 +62,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             'dataset'   => array()
         );
 
-        $groups = AAM::api()->getConfig(
-            'core.export.groups', array('settings', 'config', 'roles')
-        );
+        $groups = AAM::api()->configs()->get_config('core.export.groups');
 
         if (is_string($groups)) {
             $groups = array_map('trim', explode(',', $groups));
@@ -133,18 +74,15 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             switch($group) {
                 case 'settings':
                     $this->_prepareSettings(
-                        AAM_Core_API::getOption(
-                        AAM_Core_AccessSettings::DB_OPTION, array()
-                    ), $dataset);
+                        AAM_Framework_Manager::settings()->get_settings(),
+                        $dataset
+                    );
                     break;
 
                 case 'config':
-                    $dataset['config'] = AAM_Core_API::getOption(
-                        AAM_Core_Config::DB_OPTION, array()
-                    );
-                    $dataset['configpress'] = AAM_Core_API::getOption(
-                        AAM_Core_ConfigPress::DB_OPTION, array()
-                    );
+                    $configs                = AAM_Framework_Manager::configs();
+                    $dataset['config']      = $configs->get_configs();
+                    $dataset['configpress'] = $configs->get_configpress();
                     break;
 
                 case 'roles':
@@ -265,13 +203,14 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      *
      * @return string
      *
+     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
      * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
      * @since 6.7.0  Added `$payload` argument
      * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/130
      * @since 6.2.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.9.21
+     * @version 6.9.34
      */
     public function importSettings($payload = null)
     {
@@ -286,15 +225,19 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                 foreach($payload['dataset'] as $group => $settings) {
                     switch($group) {
                         case 'settings':
-                            AAM_Core_AccessSettings::getInstance()->replace($settings);
+                            AAM_Framework_Manager::settings()->set_settings(
+                                $settings
+                            );
                             break;
 
                         case 'config':
-                            AAM_Core_Config::replace($settings);
+                            AAM_Framework_Manager::configs()->set_configs($settings);
                             break;
 
                         case 'configpress':
-                            AAM_Core_ConfigPress::getInstance()->save($settings);
+                            AAM_Framework_Manager::configs()->set_configpress(
+                                $settings
+                            );
                             break;
 
                         case 'roles':

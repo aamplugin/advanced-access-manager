@@ -58,7 +58,7 @@ class AAM_Backend_Manager
         add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
 
         // Alter user edit screen with support for multiple roles
-        if (AAM::api()->getConfig('core.settings.multiSubject', false)) {
+        if (AAM::api()->configs()->get_config('core.settings.multiSubject')) {
             add_action('edit_user_profile', array($this, 'editUserProfilePage'));
             add_action('user_new_form', array($this, 'addNewUserPage'));
 
@@ -100,7 +100,7 @@ class AAM_Backend_Manager
             $this->checkForPremiumAddonUpdate();
         }
 
-        if (AAM::api()->getConfig('core.settings.restful', true) === false) {
+        if (AAM::api()->configs()->get_config('core.settings.restful', true) === false) {
             AAM_Core_Console::add(
                 __('The RESTful API is disabled. This may affect the AAM UI. Enable it on the AAM Settings page.', AAM_KEY)
             );
@@ -329,7 +329,7 @@ class AAM_Backend_Manager
      *
      * @return void
      *
-     * @since 6.6.2 Fixed https://github.com/aamplugin/advanced-access-manager/issues/138
+     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/138
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
@@ -339,7 +339,9 @@ class AAM_Backend_Manager
     {
         $user = get_user_by('ID', $id);
 
-        $is_multirole = AAM::api()->getConfig('core.settings.multiSubject', false);
+        $is_multirole = AAM::api()->configs()->get_config(
+            'core.settings.multiSubject'
+        );
 
         if ($is_multirole && current_user_can('promote_user', $id)) {
             $roles = filter_input(

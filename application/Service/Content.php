@@ -51,6 +51,17 @@ class AAM_Service_Content
     const FEATURE_FLAG = 'core.service.content.enabled';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.content.enabled'             => true,
+        'core.service.content.manageAllPostTypes'  => false,
+        'core.service.content.manageAllTaxonomies' => false
+    ];
+
+    /**
      * Post view counter
      *
      * @version 6.0.0
@@ -87,16 +98,26 @@ class AAM_Service_Content
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Post::register();
                 });
 
                 // Check if Access Manager metabox feature is enabled
-                $metaboxEnabled = AAM_Core_Config::get(
-                    'ui.settings.renderAccessMetabox', false
+                $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
+                    'ui.settings.renderAccessMetabox'
                 );
 
                 if ($metaboxEnabled && current_user_can('aam_manage_content')) {
@@ -135,7 +156,7 @@ class AAM_Service_Content
             }, 20);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -658,7 +679,9 @@ class AAM_Service_Content
      */
     public function checkPassExpiration($expire)
     {
-        $overwrite = AAM_Core_Config::get('feature.post.password.expires', null);
+        $overwrite = AAM_Framework_Manager::configs()->get_config(
+            'feature.post.password.expires', null
+        );
 
         if (!is_null($overwrite)) {
             $expire = ($overwrite ? time() + strtotime($overwrite) : 0);

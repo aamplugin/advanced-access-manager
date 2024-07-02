@@ -420,12 +420,18 @@ class AAM_Restful_RoleService
      */
     private function _clone_settings($role, $parent)
     {
-        $settings = AAM_Core_AccessSettings::getInstance();
+        $service = AAM_Framework_Manager::settings([
+            'access_level' => AAM_Framework_Type_AccessLevel::ROLE,
+            'subject_id'   => $role->slug
+        ]);
+
+        $cloned = $service->get_settings([
+            'access_level' => AAM_Framework_Type_AccessLevel::ROLE,
+            'subject_id'   => $parent->slug
+        ]);
 
         // Clone the settings
-        $settings->set("role.{$role->slug}", $settings->get("role.{$parent->slug}"));
-
-        return $settings->save();
+        return $service->set_settings($cloned);
     }
 
     /**

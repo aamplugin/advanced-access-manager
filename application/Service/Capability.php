@@ -25,6 +25,16 @@ class AAM_Service_Capability
     const FEATURE_FLAG = 'core.service.capability.enabled';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.capability.enabled' => true,
+        'core.settings.editCapabilities'  => true
+    ];
+
+    /**
      * List of capabilities with their descriptions
      *
      * @var array
@@ -44,9 +54,19 @@ class AAM_Service_Capability
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Capability::register();
                 });
@@ -66,7 +86,7 @@ class AAM_Service_Capability
             }, 15);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }

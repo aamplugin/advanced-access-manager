@@ -241,7 +241,7 @@ class AAM_Core_Object_Visibility extends AAM_Core_Object
 
         $response = array();
         $option   = 'core.settings.' . $object::OBJECT_TYPE . '.mergeAlign.limit';
-        $limit    = AAM::api()->getConfig($option, 50);
+        $limit    = AAM::api()->configs()->get_config($option, 50);
 
         if ($invocations < $limit) {
             // First, let, parse the xpath and determine what object to fetch

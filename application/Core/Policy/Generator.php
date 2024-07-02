@@ -62,10 +62,9 @@ class AAM_Core_Policy_Generator
         $this->subject = $subject;
 
         // Read all direct access settings for provided subject
-        $xpath  = $subject::UID;
-        $xpath .= ($subject->getId() ? '.' . $subject->getId() : '');
-
-        $this->settings = AAM_Core_AccessSettings::getInstance()->get($xpath);
+        $this->settings = AAM_Framework_Manager::settings([
+            'subject' => $subject
+        ])->get_settings();
     }
 
     /**

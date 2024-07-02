@@ -75,6 +75,21 @@ class AAM_Service_Jwt
     );
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.jwt.enabled'     => true,
+        'service.jwt.registry_size'    => 10,
+        'service.jwt.bearer'           => 'header,query_param,post_param,cookie',
+        'service.jwt.header_name'      => 'HTTP_AUTHENTICATION',
+        'service.jwt.cookie_name'      => 'aam_jwt_token',
+        'service.jwt.post_param_name'  => 'aam-jwt',
+        'service.jwt.query_param_name' => 'aam-jwt'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -84,9 +99,19 @@ class AAM_Service_Jwt
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Jwt::register();
                 });
@@ -106,8 +131,7 @@ class AAM_Service_Jwt
             }, 20);
         }
 
-        // Hook that initialize the AAM UI part of the service
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -941,10 +965,12 @@ class AAM_Service_Jwt
      */
     private function _getConfigOption($option, $default = null)
     {
-        $value = AAM_Core_Config::get($option);
+        $value = AAM_Framework_Manager::configs()->get_config($option);
 
         if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM_Core_Config::get(self::OPTION_ALIAS[$option]);
+            $value = AAM_Framework_Manager::configs()->get_config(
+                self::OPTION_ALIAS[$option]
+            );
         }
 
         return is_null($value) ? $default : $value;

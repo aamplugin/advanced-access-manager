@@ -10,8 +10,8 @@
 namespace AAM\UnitTest\Service\SecureLogin;
 
 use AAM_Core_Cache,
-    AAM_Core_Config,
     WP_Session_Tokens,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -36,7 +36,9 @@ class SecureLoginTest extends TestCase
     public function testOneSessionPerUser()
     {
         // Enable "One Session Per User" feature
-        AAM_Core_Config::set('service.secureLogin.feature.singleSession', true);
+        AAM_Framework_Manager::configs()->set_config(
+            'service.secureLogin.feature.singleSession', true
+        );
 
         // No need to generate Auth cookies
         add_filter('send_auth_cookies', '__return_false');
@@ -77,7 +79,9 @@ class SecureLoginTest extends TestCase
     public function testBruteForceLockout()
     {
         // Enable "Brute Force Lockout" feature
-        AAM_Core_Config::set('service.secureLogin.feature.bruteForceLockout', true);
+        AAM_Framework_Manager::configs()->set_config(
+            'service.secureLogin.feature.bruteForceLockout', true
+        );
 
         // Force dummy user IP
         $ip                     = '127.0.0.1';

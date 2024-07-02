@@ -286,10 +286,10 @@ final class AAM_Core_API
         global $wpdb;
 
         $options = array(
-            AAM_Core_AccessSettings::DB_OPTION,
-            AAM_Core_Config::DB_OPTION,
+            AAM_Framework_Service_Settings::DB_OPTION,
+            AAM_Framework_Service_Configs::DB_OPTION,
             AAM_Core_Cache::DB_OPTION,
-            AAM_Core_ConfigPress::DB_OPTION,
+            AAM_Framework_Service_Configs::DB_CONFIGPRESS_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
             AAM_Service_Toolbar::CACHE_DB_OPTION
         );

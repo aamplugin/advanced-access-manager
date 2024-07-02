@@ -10,8 +10,11 @@
 /**
  * Backend ConfigPress tab
  *
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+ * @since 6.0.0  Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 6.9.34
  */
 class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstract
 {
@@ -31,24 +34,6 @@ class AAM_Backend_Feature_Settings_ConfigPress extends AAM_Backend_Feature_Abstr
      * @version 6.0.0
      */
     const TEMPLATE = 'settings/configpress.php';
-
-    /**
-     * Save config
-     *
-     * @return boolean
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    public function save()
-    {
-        $config = $this->getFromPost('config');
-
-        // Normalize ConfigPress settings
-        $data = str_replace(array('“', '”'), '"', $config);
-
-        return AAM_Core_ConfigPress::getInstance()->save($data);
-    }
 
     /**
      * Register service UI

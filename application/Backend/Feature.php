@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -179,10 +177,11 @@ class AAM_Backend_Feature
      */
     protected static function isVisible($options)
     {
-        $count = 0;
+        $count   = 0;
+        $service = AAM_Framework_Manager::configs();
 
         foreach (explode(',', $options) as $option) {
-            $count += AAM_Core_Config::get($option, true);
+            $count += $service->get_config($option, true);
         }
 
         return ($count > 0);

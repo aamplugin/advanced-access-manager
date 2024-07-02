@@ -10,8 +10,8 @@
 namespace AAM\UnitTest\Service\Jwt;
 
 use AAM_Service_Jwt,
-    AAM_Core_Config,
     AAM_Core_Jwt_Manager,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -38,7 +38,7 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'header');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'header');
 
         // Emulate token set
         $_SERVER['HTTP_AUTHORIZATION'] = $issued->token;
@@ -65,8 +65,8 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'header');
-        AAM_Core_Config::set('service.jwt.header_name', 'X-JWT');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'header');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.header_name', 'X-JWT');
 
         // Emulate token set
         $_SERVER['X-JWT'] = $issued->token;
@@ -93,7 +93,7 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'query_param');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'query_param');
 
         // Emulate token set
         $_GET['aam-jwt'] = $issued->token;
@@ -120,8 +120,8 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'query_param');
-        AAM_Core_Config::set('service.jwt.query_param_name', 'jwt');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'query_param');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.query_param_name', 'jwt');
 
         // Emulate token set
         $_GET['jwt'] = $issued->token;
@@ -148,7 +148,7 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'post_param');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'post_param');
 
         // Emulate token set
         $_POST['aam-jwt'] = $issued->token;
@@ -175,8 +175,8 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'post_param');
-        AAM_Core_Config::set('service.jwt.post_param_name', 'jwt');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'post_param');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.post_param_name', 'jwt');
 
         // Emulate token set
         $_POST['jwt'] = $issued->token;
@@ -203,7 +203,7 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only header
-        AAM_Core_Config::set('service.jwt.bearer', 'cookie');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'cookie');
 
         // Emulate token set
         $_COOKIE['aam_jwt_token'] = $issued->token;
@@ -230,8 +230,8 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only cookie
-        AAM_Core_Config::set('service.jwt.bearer', 'cookie');
-        AAM_Core_Config::set('service.jwt.cookie_name', 'jwt_cookie');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'cookie');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.cookie_name', 'jwt_cookie');
 
         // Emulate token set
         $_COOKIE['jwt_cookie'] = $issued->token;
@@ -258,8 +258,8 @@ class JwtRestApiTest extends TestCase
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
         // Only cookie
-        AAM_Core_Config::set('service.jwt.bearer', 'header,cookie');
-        AAM_Core_Config::set('service.jwt.cookie_name', 'jwt_test_cookie');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.bearer', 'header,cookie');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.cookie_name', 'jwt_test_cookie');
 
         // Emulate token set
         $_COOKIE['jwt_test_cookie'] = $issued->token;
@@ -313,7 +313,7 @@ class JwtRestApiTest extends TestCase
      */
     public function testTokenRegistryOverflow()
     {
-        AAM_Core_Config::set('service.jwt.registry_size', 1);
+        AAM_Framework_Manager::configs()->set_config('service.jwt.registry_size', 1);
 
         // Reset cache
         wp_cache_flush();
@@ -387,7 +387,7 @@ class JwtRestApiTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Set custom expiration as string
-        AAM_Core_Config::set('service.jwt.expires_in', '1 hour');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.expires_in', '1 hour');
 
         $issued = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
@@ -405,7 +405,7 @@ class JwtRestApiTest extends TestCase
         $service = AAM_Service_Jwt::getInstance();
 
         // Set custom expiration as string
-        AAM_Core_Config::set('service.jwt.expires_in', 20);
+        AAM_Framework_Manager::configs()->set_config('service.jwt.expires_in', 20);
 
         $issued = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
 
@@ -420,7 +420,7 @@ class JwtRestApiTest extends TestCase
      */
     public function testTokenCustomSigningAlg()
     {
-        AAM_Core_Config::set('service.jwt.signing_algorithm', 'HS512');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.signing_algorithm', 'HS512');
 
         $service = AAM_Service_Jwt::getInstance();
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);
@@ -440,7 +440,7 @@ class JwtRestApiTest extends TestCase
      */
     public function testTokenCustomSigningSecret()
     {
-        AAM_Core_Config::set('service.jwt.signing_secret', '123');
+        AAM_Framework_Manager::configs()->set_config('service.jwt.signing_secret', '123');
 
         $service = AAM_Service_Jwt::getInstance();
         $issued  = $service->issueToken(AAM_UNITTEST_ADMIN_USER_ID);

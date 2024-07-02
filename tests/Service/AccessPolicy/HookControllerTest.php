@@ -9,7 +9,7 @@
 
 namespace AAM\UnitTest\Service\AccessPolicy;
 
-use AAM_Core_AccessSettings,
+use AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM_Service_AccessPolicy_HookController;
@@ -484,10 +484,13 @@ class HookControllerTest extends TestCase
         \AAM_Core_Policy_Factory::reset();
         $this->_resetSubjects();
 
-        $settings = AAM_Core_AccessSettings::getInstance();
-        $settings->set(sprintf(
-            'visitor.policy.%d', self::$policy_id
-        ), true);
+        $settings = AAM_Framework_Manager::settings([
+            'access_level' => 'visitor'
+        ]);
+
+        $settings->set_setting('policy', [
+            self::$policy_id => true
+        ]);
 
         // Reset the Hook Controller
         AAM_Service_AccessPolicy_HookController::bootstrap(true);

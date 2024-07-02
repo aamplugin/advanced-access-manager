@@ -10,8 +10,11 @@
 /**
  * Multisite settings
  *
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+ * @since 6.9.32 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.32
+ * @version 6.9.34
  */
 class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstract
 {
@@ -35,21 +38,25 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
      *
      * @return array
      *
+     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
+     * @since 6.9.32 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.32
+     * @version 6.9.34
      */
     public static function getList()
     {
+        $service  = AAM_Framework_Manager::configs();
         $settings = array(
             'multisite.settings.sync' => array(
                 'title'       => __('Unified Multisite Configuration Sync', AAM_KEY),
                 'description' => __('Effortlessly synchronize role and capability lists, along with all access settings (when configured)', AAM_KEY),
-                'value'       => AAM_Core_Config::get('multisite.settings.sync', true)
+                'value'       => $service->get_config('multisite.settings.sync')
             ),
             'multisite.settings.nonmember' => array(
                 'title'       => __('Non-Member Access Restriction', AAM_KEY),
                 'description' => __('Limit subsite access to only members within the WordPress multisite network', AAM_KEY),
-                'value'       => AAM_Core_Config::get('multisite.settings.nonmember', false)
+                'value'       => $service->get_config('multisite.settings.nonmember')
             )
         );
 

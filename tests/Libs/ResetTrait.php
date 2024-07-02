@@ -11,8 +11,7 @@ namespace AAM\UnitTest\Libs;
 
 use AAM,
     AAM_Core_API,
-    AAM_Core_Config,
-    AAM_Core_AccessSettings,
+    AAM_Framework_Manager,
     AAM_Core_Policy_Factory;
 
 /**
@@ -108,21 +107,16 @@ trait ResetTrait
         AAM_Core_API::clearSettings();
 
         // Reset Access Settings repository
-        AAM_Core_AccessSettings::getInstance()->reset();
+        AAM_Framework_Manager::settings()->reset();
 
         // Also clear all the internal caching
         $this->_resetSubjects();
-
-        if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
-            // Enable Multiple Role Support
-            AAM_Core_Config::set('core.settings.multiSubject', true);
-        }
 
         // Clear WP core cache
         wp_cache_flush();
 
         // Reset internal AAM config cache
-        AAM_Core_Config::bootstrap();
+        AAM_Framework_Manager::configs()->reset();
 
         // Reset Access Policy Factory cache
         AAM_Core_Policy_Factory::reset();
@@ -154,6 +148,7 @@ trait ResetTrait
             // Take in consideration that a subject can have multiple parent subjects
             // when "Multiple Roles Support" is enabled
             $subject->flushCache();
+
             if ($subject->hasSiblings()) {
                 $siblings = $subject->getSiblings();
                 array_walk($siblings, function($sibling) {

@@ -34,6 +34,18 @@ class AAM_Service_Multisite
     const FEATURE_FLAG = 'core.service.multisite.enabled';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.multisite.enabled' => true,
+        'multisite.settings.sync'        => true,
+        'multisite.settings.nonmember'   => false,
+        'multisite.sync.exclude.blogs'   => []
+    ];
+
+    /**
      * Syncing flag
      *
      * Preventing from any unexpected loops
@@ -58,7 +70,16 @@ class AAM_Service_Multisite
      */
     protected function __construct()
     {
-        $enabled = AAM_Core_Config::get(self::FEATURE_FLAG, true) && is_multisite();
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -74,14 +95,14 @@ class AAM_Service_Multisite
                 return $services;
             }, 20);
 
-            if ($enabled) {
+            if ($enabled && is_multisite()) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Settings_Multisite::register();
                 });
             }
         }
 
-        if ($enabled) {
+        if ($enabled && is_multisite()) {
             $this->initializeHooks();
         }
     }
@@ -113,9 +134,9 @@ class AAM_Service_Multisite
                 if ($this->syncing === false) {
                     $this->syncing = true;
                     $list = array(
-                        AAM_Core_Config::DB_OPTION,
-                        AAM_Core_ConfigPress::DB_OPTION,
-                        AAM_Core_AccessSettings::DB_OPTION
+                        AAM_Framework_Service_Configs::DB_OPTION,
+                        AAM_Framework_Service_Configs::DB_CONFIGPRESS_OPTION,
+                        AAM_Framework_Service_Settings::DB_OPTION
                     );
 
                     if (in_array($option, $list, true)) {
@@ -125,7 +146,9 @@ class AAM_Service_Multisite
                 }
             }, 10, 3);
 
-            if (AAM_Core_Config::get('multisite.settings.sync', true)) {
+            if (AAM_Framework_Manager::configs()->get_config(
+                'multisite.settings.sync'
+            )) {
                 add_action('aam_top_right_column_action', function() {
                     echo AAM_Backend_View::loadPartial(
                         'multisite-sync-notification'
@@ -137,9 +160,9 @@ class AAM_Service_Multisite
                 if ($this->syncing === false) {
                     $this->syncing = true;
                     $list = array(
-                        AAM_Core_Config::DB_OPTION,
-                        AAM_Core_ConfigPress::DB_OPTION,
-                        AAM_Core_AccessSettings::DB_OPTION
+                        AAM_Framework_Service_Configs::DB_OPTION,
+                        AAM_Framework_Service_Configs::DB_CONFIGPRESS_OPTION,
+                        AAM_Framework_Service_Settings::DB_OPTION
                     );
 
                     if (in_array($option, $list, true)) {
@@ -179,7 +202,9 @@ class AAM_Service_Multisite
             $restricted = false;
 
             // Check if the non-member access restriction is on
-            if (AAM_Core_Config::get('multisite.settings.nonmember', false)) {
+            if (AAM_Framework_Manager::configs()->get_config(
+                'multisite.settings.nonmember'
+            )) {
                 $restricted = !is_user_member_of_blog();
             }
 
@@ -286,7 +311,9 @@ class AAM_Service_Multisite
     protected function getExcludedBlogs()
     {
         $excluded = array();
-        $config   = AAM::api()->getConfig('multisite.sync.exclude.blogs', array());
+        $config   = AAM::api()->configs()->get_config(
+            'multisite.sync.exclude.blogs'
+        );
 
         if (is_string($config)) {
             $excluded = explode(',', $config);
@@ -312,7 +339,7 @@ class AAM_Service_Multisite
     protected function isSyncDisabled($blog_id)
     {
         $config = AAM_Core_API::getOption(
-            AAM_Core_Config::DB_OPTION, array(), $blog_id
+            AAM_Framework_Service_Configs::DB_OPTION, array(), $blog_id
         );
 
         return isset($config[self::FEATURE_FLAG])

@@ -51,23 +51,30 @@ class AAM_Service_UserLevelFilter
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = false;
+            }
+
+            return $result;
+        }, 10, 2);
+
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
             // service. This is used to display information about service on the
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'          => __('User Level Filter', AAM_KEY),
-                    'description'    => __('Enhance the built-in WordPress core user and role management system to ensure that users with lower user levels are restricted from viewing or managing users and roles with higher levels of authority.', AAM_KEY),
-                    'setting'        => self::FEATURE_FLAG,
-                    'defaultEnabled' => false
+                    'title'       => __('User Level Filter', AAM_KEY),
+                    'description' => __('Enhance the built-in WordPress core user and role management system to ensure that users with lower user levels are restricted from viewing or managing users and roles with higher levels of authority.', AAM_KEY),
+                    'setting'     => self::FEATURE_FLAG
                 );
 
                 return $services;
             }, 1);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
+        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }

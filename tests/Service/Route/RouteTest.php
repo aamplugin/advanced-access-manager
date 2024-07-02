@@ -11,7 +11,7 @@ namespace AAM\UnitTest\Service\Route;
 
 use AAM,
     WP_REST_Request,
-    AAM_Core_Config,
+    AAM_Framework_Manager,
     AAM_Core_Object_Route,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
@@ -36,7 +36,7 @@ class RouteTest extends TestCase
      */
     public function testDisabledXMLRPC()
     {
-        AAM_Core_Config::set('core.settings.xmlrpc', false);
+        AAM_Framework_Manager::configs()->set_config('core.settings.xmlrpc', false);
 
         $this->assertFalse(apply_filters('xmlrpc_enabled', true));
     }
@@ -51,7 +51,7 @@ class RouteTest extends TestCase
      */
     public function testDisabledRESTfulAPI()
     {
-        AAM_Core_Config::set('core.settings.restful', false);
+        AAM_Framework_Manager::configs()->set_config('core.settings.restful', false);
 
         $error = apply_filters('rest_authentication_errors', null);
 

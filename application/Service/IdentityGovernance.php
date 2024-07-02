@@ -42,9 +42,19 @@ class AAM_Service_IdentityGovernance
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = false;
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_IdentityGovernance::register();
                 });
@@ -55,17 +65,16 @@ class AAM_Service_IdentityGovernance
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'          => __('Identity Governance', AAM_KEY),
-                    'description'    => __('Control how other users and unauthenticated visitors can view and manage the profiles of registered users on the site.', AAM_KEY),
-                    'setting'        => self::FEATURE_FLAG,
-                    'defaultEnabled' => false
+                    'title'       => __('Identity Governance', AAM_KEY),
+                    'description' => __('Control how other users and unauthenticated visitors can view and manage the profiles of registered users on the site.', AAM_KEY),
+                    'setting'     => self::FEATURE_FLAG
                 );
 
                 return $services;
             }, 20);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, false)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }

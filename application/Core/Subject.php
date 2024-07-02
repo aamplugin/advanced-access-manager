@@ -403,7 +403,7 @@ abstract class AAM_Core_Subject
             )->getOption();
 
             // Merge access settings if multi-roles option is enabled
-            $multi = AAM::api()->getConfig('core.settings.multiSubject', false);
+            $multi = AAM::api()->configs()->get_config('core.settings.multiSubject');
 
             if ($multi && $parent->hasSiblings()) {
                 foreach ($parent->getSiblings() as $sibling) {
@@ -454,9 +454,9 @@ abstract class AAM_Core_Subject
      */
     public function updateOption($value, $object, $id = null)
     {
-        return AAM_Core_AccessSettings::getInstance()->set(
-            $this->getOptionName($object, $id), $value
-        )->save();
+        return AAM_Framework_Manager::settings([
+            'subject' => $this
+        ])->set_setting($this->getOptionName($object, $id), $value);
     }
 
     /**
@@ -472,9 +472,9 @@ abstract class AAM_Core_Subject
      */
     public function readOption($object, $id = null)
     {
-        return AAM_Core_AccessSettings::getInstance()->get(
-            $this->getOptionName($object, $id)
-        );
+        return AAM_Framework_Manager::settings([
+            'subject' => $this
+        ])->get_setting($this->getOptionName($object, $id), []);
     }
 
     /**
@@ -490,9 +490,9 @@ abstract class AAM_Core_Subject
      */
     public function deleteOption($object, $id = null)
     {
-        return AAM_Core_AccessSettings::getInstance()->delete(
-            $this->getOptionName($object, $id)
-        )->save();
+        return AAM_Framework_Manager::settings([
+            'subject' => $this
+        ])->delete_setting($this->getOptionName($object, $id));
     }
 
     /**
@@ -508,12 +508,7 @@ abstract class AAM_Core_Subject
      */
     public function getOptionName($object, $id)
     {
-        $subjectId = $this->getId();
-
-        $name  = static::UID . ($subjectId ? ".{$subjectId}" : '') . '.';
-        $name .= $object . ($id ? ".{$id}" : '');
-
-        return $name;
+        return $object . ($id ? ".{$id}" : '');
     }
 
     /**
@@ -541,13 +536,9 @@ abstract class AAM_Core_Subject
      */
     public function reset()
     {
-        $id = static::UID;
-
-        if ($this->getId() !== null) {
-            $id .= '.' . $this->getId();
-        }
-
-        return AAM_Core_AccessSettings::getInstance()->delete($id)->save();
+        return AAM_Framework_Manager::settings([
+            'subject' => $this
+        ])->reset();
     }
 
 }

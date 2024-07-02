@@ -40,6 +40,14 @@ class AAM_Service_Metabox
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = true;
+            }
+
+            return $result;
+        }, 10, 2);
+
         if (is_admin()) {
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
@@ -52,7 +60,7 @@ class AAM_Service_Metabox
             }, 30);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
             if (is_admin()) {
                 // Hook that initialize the AAM UI part of the service
                 add_action('aam_init_ui_action', function () {

@@ -40,9 +40,19 @@ class AAM_Service_Welcome
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = true;
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Welcome::register();
                 }, 1);
@@ -62,8 +72,7 @@ class AAM_Service_Welcome
             }, 1);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
-            // Register RESTful API endpoints
+        if ($enabled) {
             AAM_Restful_SupportService::bootstrap();
         }
     }

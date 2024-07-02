@@ -183,7 +183,9 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
             if ($base) {
                 $this->_parent = new AAM_Core_Subject_Role($base);
 
-                $multi = AAM::api()->getConfig('core.settings.multiSubject', false);
+                $multi = AAM::api()->configs()->get_config(
+                    'core.settings.multiSubject'
+                );
 
                 if ($multi && count($roles)) {
                     $siblings = array();

@@ -11,7 +11,9 @@ namespace AAM\UnitTest\Service;
 
 use AAM,
     WP_User_Query,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
+    AAM_Service_UserLevelFilter,
     AAM\UnitTest\Libs\ResetTrait;
 
 /**
@@ -32,8 +34,11 @@ class UserLevelFilterTest extends TestCase
         // Set current User. Emulate that this is admin login
         wp_set_current_user(AAM_UNITTEST_USER_EDITOR_USER_ID);
 
-        \AAM_Core_Config::set('core.service.user-level-filter.enabled', true);
-        $instance = \AAM_Service_UserLevelFilter::getInstance(true);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.service.user-level-filter.enabled', true
+        );
+
+        $instance = AAM_Service_UserLevelFilter::getInstance(true);
 
         add_filter('editable_roles', array($instance, 'filterRoles'));
         add_action('pre_get_users', array($instance, 'filterUserQuery'), 999);

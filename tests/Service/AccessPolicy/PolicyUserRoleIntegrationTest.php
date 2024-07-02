@@ -10,9 +10,10 @@
 namespace AAM\UnitTest\Service\AccessPolicy;
 
 use AAM,
-    AAM_Core_AccessSettings,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait;
+    AAM\UnitTest\Libs\ResetTrait,
+    AAM_Service_IdentityGovernance;
 
 
 /**
@@ -40,8 +41,11 @@ class PolicyUserRoleIntegrationTest extends TestCase
      */
     private static function _setUpBeforeClass()
     {
-        \AAM_Core_Config::set('core.service.identity-governance.enabled', true);
-        \AAM_Service_IdentityGovernance::bootstrap(true);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.service.identity-governance.enabled', true
+        );
+
+        AAM_Service_IdentityGovernance::bootstrap(true);
 
         // Setup a default policy placeholder
         self::$policy_id = wp_insert_post(array(
@@ -477,10 +481,13 @@ class PolicyUserRoleIntegrationTest extends TestCase
             array('ID' => self::$policy_id)
         );
 
-        $settings = AAM_Core_AccessSettings::getInstance();
-        $settings->set(sprintf(
-            'user.%d.policy.%d', $user, self::$policy_id
-        ), true);
+        $settings = AAM_Framework_Manager::settings([
+            'access_level' => 'user',
+            'subject_id'   => $user
+        ]);
+        $settings->set_setting('policy', [
+            self::$policy_id => true
+        ]);
 
         // Resetting all settings as $wpdb->update already initializes it with
         // settings

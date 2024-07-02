@@ -10,7 +10,7 @@
 namespace AAM\UnitTest\Addon\PlusPackage;
 
 use AAM,
-    AAM_Core_Config,
+    AAM_Framework_Manager,
     AAM\AddOn\PlusPackage\Main,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
@@ -62,7 +62,9 @@ class DefaultTermTest extends TestCase
             'post_status' => 'publish'
         ));
 
-        AAM_Core_Config::set('core.settings.mediaCategory', true);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.mediaCategory', true
+        );
         Main::bootstrap()->registerTaxonomies();
 
         $media_term          = wp_insert_term('Media Category', 'media_category');
@@ -241,7 +243,9 @@ class DefaultTermTest extends TestCase
     public function testAttachmentUpdateCategoryAssignment()
     {
         // Enable media category
-        $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
+        $this->assertTrue(AAM_Framework_Manager::configs()->set_config(
+            'core.settings.mediaCategory', true
+        ));
 
         // Get original post terms
         $terms = wp_get_object_terms(self::$media_id, 'media_category', array(
@@ -288,7 +292,9 @@ class DefaultTermTest extends TestCase
     public function testAttachmentUpdateMultipleCategoriesAssignment()
     {
         // Enable media category
-        $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
+        $this->assertTrue(AAM_Framework_Manager::configs()->set_config(
+            'core.settings.mediaCategory', true
+        ));
 
         // Get original post terms
         $terms = wp_get_object_terms(self::$media_id, 'media_category', array(
@@ -339,7 +345,10 @@ class DefaultTermTest extends TestCase
     public function testAttachmentAddCategoryAssignment()
     {
         // Enable media category
-        $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
+        $this->assertTrue(AAM_Framework_Manager::configs()->set_config(
+            'core.settings.mediaCategory', true
+        ));
+
         Main::bootstrap()->registerTaxonomies();
 
         // Set the default category
@@ -379,7 +388,10 @@ class DefaultTermTest extends TestCase
     public function testAttachmentAddMultipleCategoriesAssignment()
     {
         // Enable media category
-        $this->assertTrue(AAM_Core_Config::set('core.settings.mediaCategory', true));
+        $this->assertTrue(AAM_Framework_Manager::configs()->set_config(
+            'core.settings.mediaCategory', true
+        ));
+
         Main::bootstrap()->registerTaxonomies();
 
         // Set the default category

@@ -72,9 +72,19 @@ class AAM_Service_AccessPolicy
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if ($key === self::FEATURE_FLAG && is_null($result)) {
+                $result = true;
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Policy::register();
                 }, 40);
@@ -92,7 +102,7 @@ class AAM_Service_AccessPolicy
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Access Policies', AAM_KEY),
-                    'description' => __('Manage access to the website with well documented JSON access policies for any user, role or visitors. Keep the paper-trail of all the access changes with policy revisions.', AAM_KEY),
+                    'description' => __('Control website access using thoroughly documented JSON policies for users, roles, and visitors. Maintain a detailed record of all access changes and policy revisions.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -100,7 +110,7 @@ class AAM_Service_AccessPolicy
             }, 40);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -229,11 +239,12 @@ class AAM_Service_AccessPolicy
                     'new_item'      => __('New Policy', AAM_KEY)
                 ),
                 'description'  => __('Access and security policy', AAM_KEY),
-                'public'       => false,
-                'show_ui'      => true,
-                'show_in_menu' => false,
+                'public'              => false,
+                'show_ui'             => true,
+                'show_in_rest'        => true,
+                'show_in_menu'        => false,
                 'exclude_from_search' => true,
-                'publicly_queryable' => false,
+                'publicly_queryable'  => false,
                 'hierarchical' => false,
                 'supports'     => array(
                     'title', 'excerpt', 'revisions', 'custom-fields'

@@ -406,7 +406,10 @@ class AAM_Restful_CapabilityService
         $result = [];
 
         $slug   = $output['slug'];
-        $manage = AAM_Core_Config::get('core.settings.editCapabilities', true);
+        $manage = AAM_Framework_Manager::configs()->get_config(
+            'core.settings.editCapabilities', true
+        );
+
         $update = apply_filters('aam_cap_can_filter', true, $slug, 'update');
         $delete = apply_filters('aam_cap_can_filter', true, $slug, 'delete');
         $toggle = apply_filters('aam_cap_can_filter', true, $slug, 'toggle');

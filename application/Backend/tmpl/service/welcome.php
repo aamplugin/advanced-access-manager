@@ -1,10 +1,11 @@
 <?php
 /**
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.18
+ * @version 6.9.34
  * */
 ?>
 
@@ -14,7 +15,7 @@
     <div class="aam-feature" id="welcome-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
                     <div class="row">
                         <div class="col-xs-12">
                             <p class="aam-info"><?php echo __("Here, we've outlined several typical scenarios where you can leverage AAM, along with some key features. If you require assistance, don't hesitate to reach out by filling out the contact form below. We'll get back to you as soon as possible.", AAM_KEY); ?></p>

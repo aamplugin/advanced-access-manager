@@ -10,8 +10,8 @@
 namespace AAM\UnitTest\Addon\PlusPackage;
 
 use AAM,
-    AAM_Core_Config,
     AAM_Core_Object_Post,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM\AddOn\PlusPackage\Object\Term,
@@ -43,6 +43,7 @@ class ContentVisibilityTest extends TestCase
 
         $term          = wp_insert_term('Uncategorized', 'category');
         self::$term_id = $term['term_id'];
+
         // Setup a default post
         self::$post_id = wp_insert_post(array(
             'post_title'  => 'Plus Package',
@@ -273,7 +274,9 @@ class ContentVisibilityTest extends TestCase
         wp_set_post_terms($post_b, [$category_b, $category_a], 'category');
 
         // Enabling multi-role & term merging preference to true
-        \AAM_Core_Config::set('core.settings.term.merge.preference', 'allow');
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.term.merge.preference', 'allow'
+        );
 
         $default = AAM::api()->getDefault();
 
@@ -293,7 +296,6 @@ class ContentVisibilityTest extends TestCase
         // Reset all internal cache
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
-        \AAM_Core_Config::bootstrap();
 
         $posts = get_posts(array(
             'post_type'        => 'post',
@@ -319,7 +321,10 @@ class ContentVisibilityTest extends TestCase
      */
     public function testMultiRoleScenarioA()
     {
-        AAM_Core_Config::set('core.settings.multiSubject', true);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Setting the default access controls to everybody to hide all posts
@@ -327,7 +332,7 @@ class ContentVisibilityTest extends TestCase
         $object  = $default->getObject(Type::OBJECT_TYPE, 'post');
 
         // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('post/hidden', true)->save());
+        $this->assertTrue($object->store('post/hidden', true));
 
         // Setting the first role to allow one specific post
         $subscriber = AAM::api()->getRole('subscriber');
@@ -335,13 +340,12 @@ class ContentVisibilityTest extends TestCase
             AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
         );
 
-         // Check if save returns positive result
-         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+        // Check if save returns positive result
+        $this->assertTrue($post->store('hidden', false));
 
          // Reset all internal cache
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
-        \AAM_Core_Config::bootstrap();
 
         $posts = get_posts(array(
             'post_type'        => 'post',
@@ -368,8 +372,11 @@ class ContentVisibilityTest extends TestCase
      */
     public function testMultiRoleScenarioB()
     {
-        AAM_Core_Config::set('core.settings.multiSubject', true);
-        AAM_Core_Config::set('core.settings.merge.preference', 'allow');
+        $configs = AAM_Framework_Manager::configs();
+
+        $configs->set_config('core.settings.multiSubject', true);
+        $configs->set_config('core.settings.merge.preference', 'allow');
+
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Setting the default access controls to everybody to hide all posts
@@ -377,7 +384,7 @@ class ContentVisibilityTest extends TestCase
         $object  = $default->getObject(Type::OBJECT_TYPE, 'post');
 
         // Check if save returns positive result
-        $this->assertTrue($object->updateOptionItem('post/hidden', true)->save());
+        $this->assertTrue($object->store('post/hidden', true));
 
         // Setting the first role to allow one specific post
         $subscriber = AAM::api()->getRole('subscriber');
@@ -386,12 +393,11 @@ class ContentVisibilityTest extends TestCase
         );
 
          // Check if save returns positive result
-         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+         $this->assertTrue($post->store('hidden', false));
 
          // Reset all internal cache
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
-        \AAM_Core_Config::bootstrap();
 
         $posts = get_posts(array(
             'post_type'        => 'post',
@@ -419,7 +425,10 @@ class ContentVisibilityTest extends TestCase
      */
     public function testMultiRoleScenarioC()
     {
-        AAM_Core_Config::set('core.settings.multiSubject', true);
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Creating a testing category and post
@@ -435,7 +444,7 @@ class ContentVisibilityTest extends TestCase
         // Setting the default access controls to everybody to hide all posts
         $default = AAM::api()->getDefault();
         $term    = $default->getObject(Term::OBJECT_TYPE, $category_x . '|category');
-        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+        $this->assertTrue($term->store('post/hidden', true));
 
         // Setting the first role to allow one specific post
         $subscriber = AAM::api()->getRole('subscriber');
@@ -443,13 +452,12 @@ class ContentVisibilityTest extends TestCase
             AAM_Core_Object_Post::OBJECT_TYPE, $post_x
         );
 
-         // Check if save returns positive result
-         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+        // Check if save returns positive result
+        $this->assertTrue($post->store('hidden', false));
 
          // Reset all internal cache
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
-        \AAM_Core_Config::bootstrap();
 
         $posts = get_posts(array(
             'post_type'        => 'post',
@@ -477,8 +485,10 @@ class ContentVisibilityTest extends TestCase
      */
     public function testMultiRoleScenarioD()
     {
-        AAM_Core_Config::set('core.settings.multiSubject', true);
-        AAM_Core_Config::set('core.settings.merge.preference', 'allow');
+        $configs = AAM_Framework_Manager::configs();
+
+        $configs->set_config('core.settings.multiSubject', true);
+        $configs->set_config('core.settings.merge.preference', 'allow');
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 
         // Creating a testing category and post
@@ -494,7 +504,7 @@ class ContentVisibilityTest extends TestCase
         // Setting the default access controls to everybody to hide all posts
         $default = AAM::api()->getDefault();
         $term    = $default->getObject(Term::OBJECT_TYPE, $category_y . '|category');
-        $this->assertTrue($term->updateOptionItem('post/hidden', true)->save());
+        $this->assertTrue($term->store('post/hidden', true));
 
         // Setting the first role to allow one specific post
         $subscriber = AAM::api()->getRole('subscriber');
@@ -503,12 +513,11 @@ class ContentVisibilityTest extends TestCase
         );
 
          // Check if save returns positive result
-         $this->assertTrue($post->updateOptionItem('hidden', false)->save());
+         $this->assertTrue($post->store('hidden', false));
 
          // Reset all internal cache
         $this->_resetSubjects();
         ContentHooks::bootstrap()->resetCache();
-        \AAM_Core_Config::bootstrap();
 
         $posts = get_posts(array(
             'post_type'        => 'post',

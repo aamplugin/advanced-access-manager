@@ -108,16 +108,6 @@ abstract class AAM_Core_Object
     private $_overwritten = false;
 
     /**
-     * Inheritance information
-     *
-     * @var array
-     *
-     * @access private
-     * @version 6.9.29
-     */
-    private $_inheritance = null;
-
-    /**
      * Constructor
      *
      * @param AAM_Core_Subject $subject Requested subject

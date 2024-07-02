@@ -214,8 +214,8 @@ class AAM_Restful_ContentService
         try {
             $service = $this->_get_service($request);
             $result  = $service->get_post_types([
-                'include_all' => AAM::api()->getConfig(
-                    'core.service.content.manageAllPostTypes', false
+                'include_all' => AAM::api()->configs()->get_config(
+                    'core.service.content.manageAllPostTypes'
                 ),
                 'scope'       => $request->get_param('scope')
             ]);
@@ -256,8 +256,8 @@ class AAM_Restful_ContentService
         try {
             $service = $this->_get_service($request);
             $result  = $service->get_taxonomies([
-                'include_all' => AAM::api()->getConfig(
-                    'core.service.content.manageAllTaxonomies', false
+                'include_all' => AAM::api()->configs()->get_config(
+                    'core.service.content.manageAllTaxonomies'
                 ),
                 'scope'       => $request->get_param('scope')
             ]);

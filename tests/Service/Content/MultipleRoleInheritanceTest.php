@@ -10,11 +10,10 @@
 namespace AAM\UnitTest\Service\Content;
 
 use AAM,
-    AAM_Core_Config,
     AAM_Core_Object_Post,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
-    AAM\UnitTest\Libs\ResetTrait,
-    AAM\UnitTest\Libs\MultiRoleOptionInterface;
+    AAM\UnitTest\Libs\ResetTrait;
 
 /**
  * Test AAM access settings inheritance mechanism for multiple roles per user for
@@ -23,7 +22,7 @@ use AAM,
  * @package AAM\UnitTest
  * @version 6.0.0
  */
-class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInterface
+class MultipleRoleInheritanceTest extends TestCase
 {
     use ResetTrait;
 
@@ -42,18 +41,13 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     private static function _setUpBeforeClass()
     {
-        if (is_subclass_of(self::class, 'AAM\UnitTest\Libs\MultiRoleOptionInterface')) {
-            // Enable Multiple Role Support
-            AAM_Core_Config::set('core.settings.multiSubject', true);
-        }
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
 
         // Set current User. Emulate that this is admin login
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
-
-        // Override AAM current user
-        AAM::getInstance()->setUser(
-            new \AAM_Core_Subject_User(AAM_UNITTEST_MULTIROLE_USER_ID)
-        );
 
         // Setup a default post
         self::$post_id = wp_insert_post(array(
@@ -88,6 +82,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceMergeFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -96,23 +95,25 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
-        $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
+        $this->assertTrue($role->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->store(
                 'limited',
                 array(
                     'enabled'   => true,
                     'threshold' => 1
                 )
-            )->save()
+            )
         );
 
         // Set the access settings for the next Sibling
         $sibling = $role->getSiblings()[0];
 
-        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
+        $sibling->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true
+        )->store(
             'hidden',
             false
-        )->save();
+        );
 
         // Reset internal AAM cache
         $this->_resetSubjects();
@@ -149,6 +150,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceDenyPreferenceFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -157,19 +163,21 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
-        $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
+        $this->assertTrue($role->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->store(
                 'hidden', true
-            )->save()
+            )
         );
 
         // Set the access settings for the next Sibling
         $sibling = $role->getSiblings()[0];
 
-        $sibling->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
+        $sibling->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true
+        )->store(
             'hidden',
             false
-        )->save();
+        );
 
         // Reset internal AAM cache
         $this->_resetSubjects();
@@ -196,6 +204,11 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
      */
     public function testInheritanceAllowPreferenceFromMultipleRoles()
     {
+        // Enable multi-role support
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.multiSubject', true
+        );
+
         $user = AAM::getUser();
         $role = $user->getParent();
 
@@ -204,15 +217,14 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
 
         // Save access settings for the base role and iterate over each sibling and
         // add additional settings
-        $this->assertTrue(
-            $role->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true)->updateOptionItem(
-                'limited', array('enabled' => true, 'threshold' => 10)
-            )->save()
+        $this->assertTrue($role->getObject(
+                AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id, true
+            )->store('limited', array('enabled' => true, 'threshold' => 10))
         );
 
         // Override the default "deny" precedence
-        AAM_Core_Config::set(
-            sprintf('core.settings.%s.merge.preference', AAM_Core_Object_Post::OBJECT_TYPE),
+        AAM_Framework_Manager::configs()->set_config(
+            'core.settings.post.merge.preference',
             'allow'
         );
 
@@ -226,8 +238,14 @@ class MultipleRoleInheritanceTest extends TestCase implements MultiRoleOptionInt
         //    threshold => 10
         //  )
         // )
-        $option = $user->getObject(AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id)->getOption();
-        $this->assertSame(array('limited' => array('enabled' => false, 'threshold' => 10)), $option);
+        $option = $user->getObject(
+            AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
+        )->getOption();
+
+        $this->assertSame(
+            array('limited' => array('enabled' => false, 'threshold' => 10)),
+            $option
+        );
     }
 
 }

@@ -1534,37 +1534,37 @@
              * @param {Int}  id
              */
             function deletePolicy(id, btn) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Policy.delete',
-                        _ajax_nonce: getLocal().nonce,
-                        id: id
-                    },
-                    beforeSend: function () {
-                        $(btn).attr('data-original', $(btn).text());
-                        $(btn).text(getAAM().__('Deleting...')).attr('disabled', true);
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
+                getAAM().queueRequest(function () {
+                    $.ajax(`${getLocal().rest_base}wp/v2/aam_policy/${id}`, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'DELETE'
+                        },
+                        dataType: 'json',
+                        data: {
+                            force: true
+                        },
+                        beforeSend: function () {
+                            $(btn).attr('data-original', $(btn).text());
+                            $(btn).text(getAAM().__('Deleting...')).attr(
+                                'disabled', true
+                            );
+                        },
+                        success: function () {
                             $('#policy-list').DataTable().ajax.reload();
-                        } else {
-                            getAAM().notification(
-                                'danger'
+                        },
+                        error: function () {
+                            getAAM().notification('danger');
+                        },
+                        complete: function () {
+                            $('#delete-policy-modal').modal('hide');
+
+                            $(btn).text($(btn).attr('data-original')).attr(
+                                'disabled', false
                             );
                         }
-                    },
-                    error: function () {
-                        getAAM().notification('danger');
-                    },
-                    complete: function () {
-                        $('#delete-policy-modal').modal('hide');
-                        $(btn).text($(btn).attr('data-original')).attr(
-                            'disabled', false
-                        );
-                    }
+                    });
                 });
             }
 
@@ -6069,15 +6069,15 @@
              */
             function save(param, value) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getLocal().ajaxurl, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/configs`, {
                         type: 'POST',
                         dataType: 'json',
                         data: {
-                            action: 'aam',
-                            sub_action: 'Settings_Manager.save',
-                            _ajax_nonce: getLocal().nonce,
-                            param: param,
-                            value: value
+                            key: param,
+                            value
+                        },
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
                         },
                         error: function () {
                             getAAM().notification('danger');
@@ -6119,7 +6119,7 @@
                             );
 
                             // Build toggler
-                            var checked = (parseInt(data.status) === 1 ? 'checked' : '');
+                            var checked = data.status ? 'checked' : '';
                             var toggler = '<input data-toggle="toggle" name="' + data.setting + '" id="utility-' + data.setting + '" ' + checked + ' type="checkbox" data-on="' + getAAM().__('Enabled') + '" data-off="' + getAAM().__('Disabled') + '" data-size="small" />';
 
                             $('td:eq(1)', row).html(toggler);
@@ -6147,37 +6147,48 @@
                     });
 
                     $('#clear-settings').bind('click', function () {
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Settings_Manager.clearSettings',
-                                _ajax_nonce: getLocal().nonce,
-                            },
-                            beforeSend: function () {
-                                $('#clear-settings').prop('disabled', true);
-                                $('#clear-settings').text(getAAM().__('Processing...'));
-                            },
-                            success: function (response) {
-                                if (response.status === 'success') {
-                                    getAAM().notification(
-                                        'success',
-                                        getAAM().__('All settings has been cleared successfully')
-                                    );
-                                    location.reload();
-                                } else {
-                                    getAAM().notification('danger', response.reason);
+                        $('#clear-settings').prop('disabled', true);
+                        $('#clear-settings').text(getAAM().__('Processing...'));
+
+                        getAAM().queueRequest(function () {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/configs`, {
+                                type: 'POST',
+                                dataType: 'json',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-HTTP-Method-Override': 'DELETE'
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+                                },
+                                complete: function () {
+                                    $('#clear-settings').prop('disabled', false);
+                                    $('#clear-settings').text(getAAM().__('Clear'));
+                                    $('#clear-settings-modal').modal('hide');
                                 }
-                            },
-                            error: function () {
-                                getAAM().notification('danger');
-                            },
-                            complete: function () {
-                                $('#clear-settings').prop('disabled', false);
-                                $('#clear-settings').text(getAAM().__('Clear'));
-                                $('#clear-settings-modal').modal('hide');
-                            }
+                            });
+                        });
+
+                        getAAM().queueRequest(function () {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/settings`, {
+                                type: 'POST',
+                                dataType: 'json',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-HTTP-Method-Override': 'DELETE'
+                                },
+                                success: () => {
+                                    location.reload();
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+                                },
+                                complete: function () {
+                                    $('#clear-settings').prop('disabled', false);
+                                    $('#clear-settings').text(getAAM().__('Clear'));
+                                    $('#clear-settings-modal').modal('hide');
+                                }
+                            });
                         });
                     });
                 }
@@ -6194,18 +6205,20 @@
                     );
 
                     editor.on("blur", function () {
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Settings_ConfigPress.save',
-                                _ajax_nonce: getLocal().nonce,
-                                config: editor.getValue()
-                            },
-                            error: function () {
-                                getAAM().notification('danger');
-                            }
+                        getAAM().queueRequest(function () {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/configpress`, {
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    ini: editor.getValue()
+                                },
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+                                }
+                            });
                         });
                     });
                 }
@@ -6330,33 +6343,29 @@
             $('#reset-subject-btn').bind('click', function() {
                 const _this = $(this);
 
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Settings_Manager.clearSubjectSettings',
-                        _ajax_nonce: getLocal().nonce,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id
-                    },
-                    beforeSend: function () {
-                        _this.text(getAAM().__('Resetting...')).prop('disabled', true);
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
+                getAAM().queueRequest(function () {
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/settings`, {
+                        type: 'POST',
+                        dataType: 'json',
+                        data: getAAM().prepareRequestSubjectData(),
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'DELETE'
+                        },
+                        beforeSend: function () {
+                            _this.text(getAAM().__('Resetting...')).prop('disabled', true);
+                        },
+                        success: function () {
                             getAAM().fetchContent('main');
                             $('#reset-subject-modal').modal('hide');
-                        } else {
-                            getAAM().notification('danger', response.reason);
+                    },
+                        error: function () {
+                            getAAM().notification('danger');
+                        },
+                        complete: function () {
+                            _this.text(getAAM().__('Reset')).prop('disabled', false);
                         }
-                    },
-                    error: function () {
-                        getAAM().notification('danger');
-                    },
-                    complete: function () {
-                        _this.text(getAAM().__('Reset')).prop('disabled', false);
-                    }
+                    });
                 });
             });
         })(jQuery);

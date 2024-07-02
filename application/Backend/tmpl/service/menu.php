@@ -1,5 +1,6 @@
 <?php
 /**
+ * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
  * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
  * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
@@ -9,7 +10,7 @@
  * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/114
  * @since 6.0.0  Initial implementation of the template
  *
- * @version 6.9.33
+ * @version 6.9.34
  * */
 ?>
 
@@ -17,7 +18,7 @@
     <?php $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE); ?>
 
     <div class="aam-feature" id="admin_menu-content">
-        <?php if (AAM_Core_Config::get('core.settings.tips', true)) { ?>
+        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

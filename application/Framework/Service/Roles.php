@@ -227,7 +227,7 @@ class AAM_Framework_Service_Roles
                 }
 
                 if ($roles->is_role($slug)) {
-                    throw new LogicException("Role '{$slug}' already exists");
+                    throw new LogicException("Role {$slug} already exists");
                 }
 
                 // Sanitize the list of capabilities and make sure that the list
@@ -268,7 +268,6 @@ class AAM_Framework_Service_Roles
      * @return AAM_Framework_Proxy_Role
      *
      * @access public
-     * @throws LogicException
      * @version 6.9.6
      */
     public function update_role(

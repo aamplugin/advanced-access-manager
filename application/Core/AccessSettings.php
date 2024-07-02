@@ -16,6 +16,7 @@
  *
  * @package AAM
  * @version 6.3.0
+ * @deprecated 6.9.34 Will be removed in March 2025
  */
 class AAM_Core_AccessSettings
 {

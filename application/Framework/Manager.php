@@ -306,6 +306,51 @@ class AAM_Framework_Manager
     }
 
     /**
+     * Get the configuration service
+     *
+     * @return AAM_Framework_Service_Configs
+     *
+     * @access public
+     * @version 6.9.34
+     */
+    public static function configs(array $runtime_context = [])
+    {
+        return AAM_Framework_Service_Configs::get_instance(array_merge(
+            self::$_default_context, $runtime_context
+        ));
+    }
+
+    /**
+     * Get the settings service
+     *
+     * @return AAM_Framework_Service_Settings
+     *
+     * @access public
+     * @version 6.9.34
+     */
+    public static function settings(array $runtime_context = [])
+    {
+        return AAM_Framework_Service_Settings::get_instance(array_merge(
+            self::$_default_context, $runtime_context
+        ));
+    }
+
+    /**
+     * Get the subject service
+     *
+     * @return AAM_Framework_Service_AccessLevel
+     *
+     * @access public
+     * @version 6.9.34
+     */
+    public static function access_levels(array $runtime_context = [])
+    {
+        return AAM_Framework_Service_AccessLevel::get_instance(array_merge(
+            self::$_default_context, $runtime_context
+        ));
+    }
+
+    /**
      * Setup the framework manager
      *
      * @param array $default_context

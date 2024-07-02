@@ -60,9 +60,14 @@ abstract class AAM_Backend_Feature_Abstract
 
         $object = $this->getSubject()->getObject(static::OBJECT_TYPE, null, true);
 
-        $object->updateOptionItem($param, $value)->save();
+        if ($object) {
+            $object->updateOptionItem($param, $value)->save();
+            $status = 'success';
+        } else {
+            $status = 'failure';
+        }
 
-        return wp_json_encode(array('status' => 'success'));
+        return wp_json_encode(array('status' => $status));
     }
 
     /**

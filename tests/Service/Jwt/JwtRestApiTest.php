@@ -12,7 +12,6 @@ namespace AAM\UnitTest\Service\Jwt;
 use DateTime,
     AAM_Service_Jwt,
     WP_REST_Request,
-    AAM_Core_Config,
     AAM_Core_Jwt_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;

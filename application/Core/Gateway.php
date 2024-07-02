@@ -60,10 +60,11 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->get_config instead
      */
     public function getConfig($option, $default = null)
     {
-        return AAM_Core_Config::get($option, $default);
+        return AAM_Framework_Manager::configs()->get_config($option, $default);
     }
 
     /**
@@ -76,10 +77,11 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->set_config instead
      */
     public function updateConfig($option, $value)
     {
-        return AAM_Core_Config::set($option, $value);
+        return AAM_Framework_Manager::configs()->set_config($option, $value);
     }
 
     /**
@@ -91,10 +93,11 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->reset_config instead
      */
     public function deleteConfig($option)
     {
-        return AAM_Core_Config::delete($option);
+        return AAM_Framework_Manager::configs()->reset_config($option);
     }
 
     /**
@@ -203,7 +206,9 @@ final class AAM_Core_Gateway
             $subject = AAM::getUser();
         }
 
-        if (AAM_Core_Config::get(AAM_Service_AccessPolicy::FEATURE_FLAG, true)) {
+        if (AAM_Framework_Manager::configs()->get_config(
+            AAM_Service_AccessPolicy::FEATURE_FLAG, true
+        )) {
             $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
         } else {
             $manager = null;
@@ -248,12 +253,11 @@ final class AAM_Core_Gateway
 
         // If preference is not explicitly defined, fetch it from the AAM configs
         if (is_null($preference)) {
-            $default_preference = $this->getConfig(
-                'core.settings.merge.preference',
-                'deny'
+            $default_preference = $this->configs()->get_config(
+                'core.settings.merge.preference'
             );
 
-            $preference = $this->getConfig(
+            $preference = $this->configs()->get_config(
                 "core.settings.{$objectType}.merge.preference",
                 $default_preference
             );

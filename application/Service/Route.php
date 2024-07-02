@@ -42,6 +42,17 @@ class AAM_Service_Route
     const FEATURE_FLAG = 'core.service.route.enabled';
 
     /**
+     * Default configurations
+     *
+     * @version 6.9.34
+     */
+    const DEFAULT_CONFIG = [
+        'core.service.route.enabled' => true,
+        'core.settings.xmlrpc'       => true,
+        'core.settings.restful'      => true
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -51,9 +62,19 @@ class AAM_Service_Route
      */
     protected function __construct()
     {
+        add_filter('aam_get_config_filter', function($result, $key) {
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
+            }
+
+            return $result;
+        }, 10, 2);
+
+        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+            if ($enabled) {
                 add_action('aam_init_ui_action', function () {
                     AAM_Backend_Feature_Main_Route::register();
                 });
@@ -73,7 +94,7 @@ class AAM_Service_Route
             }, 45);
         }
 
-        if (AAM_Core_Config::get(self::FEATURE_FLAG, true)) {
+        if ($enabled) {
             $this->initializeHooks();
         }
     }
@@ -97,16 +118,17 @@ class AAM_Service_Route
         if (is_admin()) {
             add_filter('aam_settings_list_filter', function ($settings, $type) {
                 if ($type === 'core') {
+                    $service  = AAM_Framework_Manager::configs();
                     $settings = array_merge($settings, array(
                         'core.settings.xmlrpc' => array(
                             'title'       => __('XML-RPC WordPress API', AAM_KEY),
                             'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Remote procedure call (RPC) interface is used to manage WordPress website content and features. For more information check %sXML-RPC Support%s article.', 'b'), '<a href="https://codex.wordpress.org/XML-RPC_Support">', '</a>'),
-                            'value'       => AAM_Core_Config::get('core.settings.xmlrpc', true)
+                            'value'       => $service->get_config('core.settings.xmlrpc')
                         ),
                         'core.settings.restful' => array(
                             'title'       => __('RESTful WordPress API', AAM_KEY),
                             'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('[Note!] If disabled, the AAM UI may not function as expected. The RESTful interface is used to manage WordPress website content and features. For detail, refer to %sREST API handbook%s.', 'b'), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
-                            'value'       => AAM_Core_Config::get('core.settings.restful', true)
+                            'value'       => $service->get_config('core.settings.restful')
                         )
                     ));
                 }
@@ -120,7 +142,9 @@ class AAM_Service_Route
 
         // Disable XML-RPC if needed
         add_filter('xmlrpc_enabled', function($enabled) {
-            if (AAM_Core_Config::get('core.settings.xmlrpc', true) === false) {
+            if (AAM_Framework_Manager::configs()->get_config(
+                'core.settings.xmlrpc') === false
+            ) {
                 $enabled = false;
             }
 
@@ -131,7 +155,10 @@ class AAM_Service_Route
         add_filter(
             'rest_authentication_errors',
             function ($response) {
-                if (!is_wp_error($response) && !AAM_Core_Config::get('core.settings.restful', true)) {
+                if (!is_wp_error($response)
+                    && !AAM_Framework_Manager::configs()->get_config(
+                            'core.settings.restful'
+                )) {
                     $response = new WP_Error(
                         'rest_access_disabled',
                         __('RESTful API is disabled', AAM_KEY),
