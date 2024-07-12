@@ -10,11 +10,12 @@
 /**
  * AAM service role manage
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/275
  * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.35
  */
 class AAM_Framework_Service_Roles
 {
@@ -153,8 +154,11 @@ class AAM_Framework_Service_Roles
      *
      * @return boolean
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
+     * @since 6.9.33 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.33
+     * @version 6.9.35
      */
     public function is_editable_role($slug, array $inline_context = [])
     {
@@ -167,7 +171,10 @@ class AAM_Framework_Service_Roles
                 $editable_roles = apply_filters('editable_roles', $roles->roles);
             }
 
-            $result = in_array($slug, array_keys($editable_roles), true);
+            // Making sure that all role slugs are string. It is possible that some
+            // role names are just numbers
+            $slugs  = array_map('trim', array_keys($editable_roles));
+            $result = in_array($slug, $slugs, true);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

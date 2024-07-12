@@ -10,11 +10,12 @@
 /**
  * Role subject
  *
- * @since 6.4.0 Added the ability to change role's slug
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
+ * @since 6.4.0  Added the ability to change role's slug
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.4.0
+ * @version 6.9.35
  */
 class AAM_Core_Subject_Role extends AAM_Core_Subject
 {
@@ -53,13 +54,16 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      *
      * @return void
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.35
      */
     public function __construct($id)
     {
         // Set subject Id
-        $this->setId($id);
+        $this->setId((string) $id);
 
         // Retrieve underlining WP core principal
         $this->setPrincipal($this->retrievePrincipal());

@@ -10,11 +10,12 @@
 /**
  * AAM WP_Role proxy
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
  * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.35
  */
 class AAM_Framework_Proxy_Role
 {
@@ -64,14 +65,18 @@ class AAM_Framework_Proxy_Role
      *
      * @return void
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
+     * @since 6.9.6  Initial implementation of the method
+     *
      * @access public
-     * @since 6.9.6
+     * @since 6.9.35
      */
     public function __construct($name, WP_Role $role)
     {
         $this->set_display_name($name);
 
-        $this->_slug = $role->name;
+        // Covering the scenario when role name is just a number
+        $this->_slug = (string) $role->name;
         $this->_role = $role;
     }
 
@@ -109,7 +114,9 @@ class AAM_Framework_Proxy_Role
         }
 
         // Removing the list of capabilities
-        if (isset($attributes['remove_caps']) && is_array($attributes['remove_caps'])) {
+        if (isset($attributes['remove_caps'])
+            && is_array($attributes['remove_caps'])
+        ) {
             array_walk($attributes['remove_caps'], function($cap) {
                 $this->remove_capability($cap);
             });

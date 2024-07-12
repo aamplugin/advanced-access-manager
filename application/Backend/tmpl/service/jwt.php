@@ -100,7 +100,7 @@
 
                         <hr/>
 
-                        <div class="form-group">
+                        <div class="form-group" id="jwt-passwordless-url-container">
                             <label for="view-jwt-url" class="aam-block">
                                 <?php echo __('Passwordless Login URL (with JWT token)', AAM_KEY); ?>
                                 <a href="#" class="aam-copy-clipboard" data-clipboard-target="#view-jwt-url"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>

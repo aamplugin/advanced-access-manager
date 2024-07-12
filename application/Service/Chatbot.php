@@ -10,8 +10,11 @@
 /**
  * AAM chatbot
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/402
+ * @since 6.9.27 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.27
+ * @version 6.9.35
  */
 class AAM_Service_Chatbot
 {
@@ -29,14 +32,17 @@ class AAM_Service_Chatbot
      *
      * @return void
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/402
+     * @since 6.9.27 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.27
+     * @version 6.9.35
      */
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
             if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
+                $result = false;
             }
 
             return $result;

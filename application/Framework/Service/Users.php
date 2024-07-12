@@ -10,8 +10,11 @@
 /**
  * AAM service user manager
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+ * @since 6.9.32 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.32
+ * @version 6.9.35
  */
 class AAM_Framework_Service_Users
 {
@@ -145,8 +148,11 @@ class AAM_Framework_Service_Users
      *
      * @return array|AAM_Framework_Proxy_User
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.32 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.32
+     * @version 6.9.35
      */
     public function reset($identifier, $return_proxy = true)
     {

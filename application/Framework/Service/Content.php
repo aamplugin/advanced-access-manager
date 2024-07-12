@@ -10,8 +10,12 @@
 /**
  * Content service
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/399
+ *               https://github.com/aamplugin/advanced-access-manager/issues/401
+ * @since 6.9.31 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.31
+ * @version 6.9.35
  */
 class AAM_Framework_Service_Content
 {
@@ -176,8 +180,11 @@ class AAM_Framework_Service_Content
      *
      * @return array
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/399
+     * @since 6.9.31 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.31
+     * @version 6.9.35
      */
     public function get_posts(array $args = [], $inline_context = null)
     {
@@ -187,6 +194,7 @@ class AAM_Framework_Service_Content
                 'numberposts'      => 10,   // By default, only top 10
                 'result_type'      => 'full', // Return both list and summary
                 'suppress_filters' => true,
+                'post_status'      => 'any',
                 'search_columns'   => ['post_title']
             ], $args);
 
@@ -424,8 +432,11 @@ class AAM_Framework_Service_Content
      *
      * @return boolean
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.31 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.31
+     * @version 6.9.35
      */
     public function delete_post_permissions($post_id, $inline_context = null)
     {
@@ -435,11 +446,10 @@ class AAM_Framework_Service_Content
                 AAM_Core_Object_Post::OBJECT_TYPE, $post_id
             );
 
-            if ($post->reset()) {
-                $result = $this->get_post($post_id, $inline_context);
-            } else {
-                throw new RuntimeException('Failed to reset settings');
-            }
+            // Reset post permissions
+            $post->reset();
+
+            $result = $this->get_post($post_id, $inline_context);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

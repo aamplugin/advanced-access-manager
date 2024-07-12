@@ -10,13 +10,14 @@
 /**
  * AAM service Access Denied Redirect manager
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  * @since 6.9.14 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.35
  */
 class AAM_Framework_Service_AccessDeniedRedirect
 {
@@ -159,8 +160,11 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return boolean
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.14 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.14
+     * @version 6.9.35
      */
     public function reset($area = null, $inline_context = null)
     {
@@ -169,8 +173,10 @@ class AAM_Framework_Service_AccessDeniedRedirect
                 AAM_Core_Object_Redirect::OBJECT_TYPE
             );
 
+            $success = true;
+
             if (empty($area)) {
-                $success = $object->reset();
+                $object->reset();
             } else {
                 $settings     = $object->getExplicitOption();
                 $new_settings = array();

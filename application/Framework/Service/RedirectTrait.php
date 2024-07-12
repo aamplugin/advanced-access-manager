@@ -10,11 +10,12 @@
 /**
  * Trait for redirect service
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.12 Initial implementation of the method
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.35
  */
 trait AAM_Framework_Service_RedirectTrait
 {
@@ -83,17 +84,19 @@ trait AAM_Framework_Service_RedirectTrait
      *
      * @return boolean
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.12 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.12
+     * @version 6.9.35
      */
     public function reset($inline_context = null)
     {
         try {
-            if ($this->_get_object($inline_context)->reset()) {
-                $result = $this->get_redirect($inline_context);
-            } else {
-                throw new RuntimeException('Failed to reset settings');
-            }
+            // Reset settings to default
+            $this->_get_object($inline_context)->reset();
+
+            $result = $this->get_redirect($inline_context);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

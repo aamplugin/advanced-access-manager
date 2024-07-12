@@ -10,12 +10,13 @@
 /**
  * AAM service for Backend Menu
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
  * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/326
  * @since 6.9.13 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.27
+ * @version 6.9.35
  */
 class AAM_Framework_Service_BackendMenu
 {
@@ -196,8 +197,11 @@ class AAM_Framework_Service_BackendMenu
      *
      * @return array
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.35
      */
     public function reset($inline_context = null)
     {
@@ -206,11 +210,10 @@ class AAM_Framework_Service_BackendMenu
             $subject = $this->_get_subject($inline_context);
             $object  = $subject->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
 
-            if ($object->reset()) {
-                $result = $this->get_item_list($inline_context);
-            } else {
-                throw new RuntimeException('Failed to reset settings');
-            }
+            // Reset settings to default
+            $object->reset();
+
+            $result = $this->get_item_list($inline_context);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

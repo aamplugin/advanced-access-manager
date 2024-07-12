@@ -3739,7 +3739,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_inherited === false) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -3848,7 +3848,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_inherited === false) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -5848,7 +5848,7 @@
                                     data.push([
                                         token.id,
                                         token.token,
-                                        token.signed_url,
+                                        token.signed_url || '',
                                         token.is_valid,
                                         details,
                                         'view,delete'
@@ -5921,7 +5921,14 @@
                                             'class': 'aam-row-action icon-eye text-success'
                                         }).bind('click', function () {
                                             $('#view-jwt-token').val(data[1]);
-                                            $('#view-jwt-url').val(data[2]);
+
+                                            if (data[2] !== '') {
+                                                $('#view-jwt-url').val(data[2]);
+                                                $('#jwt-passwordless-url-container').removeClass('hidden');
+                                            } else {
+                                                $('#jwt-passwordless-url-container').addClass('hidden');
+                                            }
+
                                             $('#view-jwt-modal').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",

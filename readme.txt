@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.5.4
-Stable tag: 6.9.34
+Stable tag: 6.9.35
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,16 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.35 =
+* Fixed: PHP Fatal error: Uncaught Error: Call to undefined function switch_to_user_locale [https://github.com/aamplugin/advanced-access-manager/issues/398](https://github.com/aamplugin/advanced-access-manager/issues/398)
+* Fixed: The Posts & Terms inheritance indicator is shown incorrectly [https://github.com/aamplugin/advanced-access-manager/issues/403](https://github.com/aamplugin/advanced-access-manager/issues/403)
+* Fixed: Not all posts are listed on the Posts & Terms tab [https://github.com/aamplugin/advanced-access-manager/issues/399](https://github.com/aamplugin/advanced-access-manager/issues/399)
+* Fixed: Role with only numeric numbers is not properly handled [https://github.com/aamplugin/advanced-access-manager/issues/400](https://github.com/aamplugin/advanced-access-manager/issues/400)
+* Fixed: DataTables warning: table id=jwt-list - Requested unknown parameter '2' for row 0 [https://github.com/aamplugin/advanced-access-manager/issues/404](https://github.com/aamplugin/advanced-access-manager/issues/404)
+* Fixed: Reset to default does not work properly in UI [https://github.com/aamplugin/advanced-access-manager/issues/401](https://github.com/aamplugin/advanced-access-manager/issues/401)
+* Changed: By default, turn off the AI assistant [https://github.com/aamplugin/advanced-access-manager/issues/402](https://github.com/aamplugin/advanced-access-manager/issues/402)
+* Added: Develop a shortcode that renders list of posts [https://github.com/aamplugin/advanced-access-manager/issues/405](https://github.com/aamplugin/advanced-access-manager/issues/405)
 
 = 6.9.34 =
 * Changed: Move AAM settings management to framework [https://github.com/aamplugin/advanced-access-manager/issues/396](https://github.com/aamplugin/advanced-access-manager/issues/396)
