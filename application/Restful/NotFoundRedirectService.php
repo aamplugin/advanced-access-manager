@@ -52,10 +52,7 @@ class AAM_Restful_NotFoundRedirectService
                     'type' => array(
                         'description' => 'Rule type',
                         'type'        => 'string',
-                        'required'    => true,
-                        'enum'        => array_values(
-                            AAM_Framework_Service_NotFoundRedirect::REDIRECT_TYPE_ALIAS
-                        )
+                        'required'    => true
                     ),
                     'redirect_page_id' => array(
                         'description' => 'Existing page ID to redirect to',
@@ -351,7 +348,7 @@ class AAM_Restful_NotFoundRedirectService
     private function _get_service(WP_REST_Request $request)
     {
         return AAM_Framework_Manager::not_found_redirect([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

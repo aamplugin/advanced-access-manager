@@ -416,7 +416,7 @@ class AAM_Restful_AccessDeniedRedirectService
     private function _get_service($request)
     {
         return AAM_Framework_Manager::access_denied_redirect([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

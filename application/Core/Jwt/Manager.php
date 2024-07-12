@@ -166,7 +166,7 @@ class AAM_Core_Jwt_Manager
             'aam_jwt_claims_filter',
             array_merge(
                 array(
-                    "iat" => time(),
+                    'iat' => time(),
                     'iss' => get_site_url(),
                     'exp' => $time->getTimestamp(),
                     'jti' => $this->generateUuid()

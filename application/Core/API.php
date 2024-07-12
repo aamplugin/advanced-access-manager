@@ -329,6 +329,7 @@ final class AAM_Core_API
      * @global WP_Query $wp_query
      * @global WP_Post  $post
      * @version 6.0.0
+     * @todo - Ideally remove the entire method
      */
     public static function getCurrentPost()
     {
@@ -365,8 +366,8 @@ final class AAM_Core_API
         }
 
         if (is_a($res, 'WP_Post')) {
-            $result = AAM::getUser()->getObject(
-                AAM_Core_Object_Post::OBJECT_TYPE, $res->ID
+            $result = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::POST, $res->ID
             );
         } else {
             $result = null;

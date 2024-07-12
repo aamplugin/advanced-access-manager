@@ -15,6 +15,7 @@
  *
  * @package AAM
  * @version 6.9.13
+ * @deprecated 7.0.0 Use AAM_Framework_AccessLevel_Visitor instead
  */
 class AAM_Core_Subject_Visitor extends AAM_Core_Subject
 {

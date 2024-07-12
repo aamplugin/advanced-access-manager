@@ -37,10 +37,13 @@ class AAM_Framework_Service_ApiRoutes
     public function get_route_list($inline_context = null)
     {
         try {
-            $result   = array();
-            $subject  = $this->_get_subject($inline_context);
-            $object   = $subject->reloadObject(AAM_Core_Object_Route::OBJECT_TYPE);
-            $explicit = $object->getExplicitOption();
+            $result        = [];
+            $access_level  = $this->_get_access_level($inline_context);
+            $resource      = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE, null, true
+            );
+
+            $settings = $resource->get_explicit_settings();
 
             // Iterating over the list of all registered API routes and compile the
             // list
@@ -60,8 +63,8 @@ class AAM_Framework_Service_ApiRoutes
                         $result,
                         $this->_prepare_route(
                             $mask,
-                            $object->isRestricted('restful', $route, $method),
-                            !array_key_exists($mask, $explicit)
+                            $resource->is_restricted($route, $method),
+                            !array_key_exists($mask, $settings)
                         )
                     );
                 }
@@ -125,14 +128,15 @@ class AAM_Framework_Service_ApiRoutes
         $id, $is_restricted = true, $inline_context = null
     ) {
         try {
-            $route   = $this->get_route_by_id($id);
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
-            $mask    = strtolower("restful|{$route['route']}|{$route['method']}");
+            $route        = $this->get_route_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
+            );
 
-            $object->store($mask, $is_restricted);
+            $mask = strtolower("restful|{$route['route']}|{$route['method']}");
 
-            if ($object->store($mask, $is_restricted) === false) {
+            if (!$resource->set_explicit_setting($mask, $is_restricted)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -160,32 +164,32 @@ class AAM_Framework_Service_ApiRoutes
     public function delete_route_permission($id, $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource  = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
+            );
 
             // Find the rule that we are updating
             $found = null;
 
             // Note! User can delete only explicitly set rule (overwritten rule)
-            $original_options = $object->getExplicitOption();
-            $new_options      = array();
+            $settings = [];
 
-            foreach($original_options as $route => $is_restricted) {
+            foreach($resource->get_explicit_settings() as $route => $effect) {
                 $parts = explode('|', $route);
 
                 if (abs(crc32($parts[1] . $parts[2])) === $id) {
                     $found = array(
                         'mask'       => $route,
-                        'restricted' => $is_restricted
+                        'restricted' => $effect
                     );
                 } else {
-                    $new_options[$route] = $is_restricted;
+                    $settings[$route] = $effect;
                 }
             }
 
             if ($found) {
-                $object->setExplicitOption($new_options);
-                $success = $object->save();
+                $success = $resource->set_explicit_settings($settings);
             } else {
                 throw new OutOfRangeException('Route does not exist');
             }
@@ -215,11 +219,12 @@ class AAM_Framework_Service_ApiRoutes
     public function reset($inline_context = null)
     {
         try {
-            // Reset the object
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
+            );
 
-            if ($object->reset()) {
+            if ($resource->reset()) {
                 $result = $this->get_route_list($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');

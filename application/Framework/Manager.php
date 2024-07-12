@@ -276,21 +276,6 @@ class AAM_Framework_Manager
     }
 
     /**
-     * Get the subject service
-     *
-     * @return AAM_Framework_Service_Subject
-     *
-     * @access public
-     * @version 6.9.9
-     */
-    public static function subject(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Subject::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
      * Get the capabilities service
      *
      * @return AAM_Framework_Service_Capabilities
@@ -338,14 +323,14 @@ class AAM_Framework_Manager
     /**
      * Get the subject service
      *
-     * @return AAM_Framework_Service_AccessLevel
+     * @return AAM_Framework_Service_AccessLevels
      *
      * @access public
      * @version 6.9.34
      */
     public static function access_levels(array $runtime_context = [])
     {
-        return AAM_Framework_Service_AccessLevel::get_instance(array_merge(
+        return AAM_Framework_Service_AccessLevels::get_instance(array_merge(
             self::$_default_context, $runtime_context
         ));
     }

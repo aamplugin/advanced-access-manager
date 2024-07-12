@@ -19,7 +19,7 @@
  * @package AAM
  * @version 6.9.26
  */
-class AAM_Service_DeniedRedirect
+class AAM_Service_AccessDeniedRedirect
 {
 
     use AAM_Core_Contract_ServiceTrait;
@@ -38,7 +38,7 @@ class AAM_Service_DeniedRedirect
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.denied-redirect.enabled';
+    const FEATURE_FLAG = 'service.access_denied_redirect.enabled';
 
     /**
      * Default wp_die handler
@@ -142,7 +142,7 @@ class AAM_Service_DeniedRedirect
     protected function initializeHooks()
     {
         add_filter('wp_die_handler', function($handler) {
-            $service = AAM_Service_DeniedRedirect::getInstance();
+            $service = AAM_Service_AccessDeniedRedirect::getInstance();
             $service->setDefaultHandler($handler);
 
             return array($service, 'processDie');
@@ -174,7 +174,7 @@ class AAM_Service_DeniedRedirect
      */
     public function generatePolicy($policy, $resource_type, $options)
     {
-        if ($resource_type === AAM_Core_Object_Redirect::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT) {
             if (!empty($options)) {
                 $params = array();
 
@@ -244,15 +244,15 @@ class AAM_Service_DeniedRedirect
             $in     = true;
 
             if (($method !== 'POST') && !$isApi) {
-                $area   = (is_admin() ? 'backend' : 'frontend');
-                $object = AAM::getUser()->getObject(
-                    AAM_Core_Object_Redirect::OBJECT_TYPE
+                $area     = (is_admin() ? 'backend' : 'frontend');
+                $resource = AAM::api()->user()->get_resource(
+                    AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
                 );
 
-                $type = $object->get("{$area}.redirect.type");
+                $type = $resource->get_setting("{$area}.redirect.type");
 
                 if (!empty($type)) {
-                    $code = $object->get("{$area}.redirect.{$type}.code");
+                    $code = $resource->get_setting("{$area}.redirect.{$type}.code");
 
                     if (!empty($code)) {
                         $args['response'] = $code;
@@ -261,7 +261,9 @@ class AAM_Service_DeniedRedirect
                     AAM_Core_Redirect::execute(
                         $type,
                         array_merge($args, array(
-                            $type     => $object->get("{$area}.redirect.{$type}"),
+                            $type     => $resource->get_setting(
+                                "{$area}.redirect.{$type}"
+                            ),
                             'status'  => $code
                         ))
                     );
@@ -282,8 +284,4 @@ class AAM_Service_DeniedRedirect
         }
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_DeniedRedirect::bootstrap();
 }

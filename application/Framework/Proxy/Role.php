@@ -16,7 +16,7 @@
  * @package AAM
  * @version 6.9.10
  */
-class AAM_Framework_Proxy_Role
+class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 {
 
     /**

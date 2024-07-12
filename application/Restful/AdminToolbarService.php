@@ -237,7 +237,7 @@ class AAM_Restful_AdminToolbarService
     private function _get_service($request)
     {
         return AAM_Framework_Manager::admin_toolbar([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

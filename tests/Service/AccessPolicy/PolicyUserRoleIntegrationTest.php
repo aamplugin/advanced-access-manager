@@ -482,8 +482,8 @@ class PolicyUserRoleIntegrationTest extends TestCase
         );
 
         $settings = AAM_Framework_Manager::settings([
-            'access_level' => 'user',
-            'subject_id'   => $user
+            'access_level_type' => 'user',
+            'access_level_id'   => $user
         ]);
         $settings->set_setting('policy', [
             self::$policy_id => true

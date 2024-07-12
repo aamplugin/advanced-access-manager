@@ -122,27 +122,27 @@ class AAM_Service_NotFoundRedirect
         global $wp_query;
 
         if ($wp_query->is_404) { // Handle 404 redirect
-            $options = AAM::getUser()->getObject(
-                AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
-            )->getOption();
+            $settings = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT
+            )->get_settings();
 
-            if (isset($options['404.redirect.type'])) {
-                $type = $options['404.redirect.type'];
+            if (isset($settings['404.redirect.type'])) {
+                $type = $settings['404.redirect.type'];
             } else {
                 $type = 'default';
             }
 
-            if (isset($options["404.redirect.code"])) {
-                $status = $options["404.redirect.code"];
+            if (isset($settings["404.redirect.code"])) {
+                $status = $settings["404.redirect.code"];
             } else {
                 $status = null;
             }
 
             if ($type !== 'default') {
                 // Prepare the metadata
-                if (isset($options["404.redirect.{$type}"])) {
+                if (isset($settings["404.redirect.{$type}"])) {
                     $metadata = array(
-                        $type    => $options["404.redirect.{$type}"],
+                        $type    => $settings["404.redirect.{$type}"],
                         'status' => $status
                     );
                 } else {

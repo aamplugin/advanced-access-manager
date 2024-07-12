@@ -236,8 +236,10 @@ class AAM_Service_Route
     public function authorizeRequest($response, $server, $request)
     {
         if (!is_wp_error($response)) {
-            $user    = AAM::getUser();
-            $object  = $user->getObject('route');
+            $resource  = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
+            );
+
             $matched = $request->get_route();
             $method  = $request->get_method();
 
@@ -245,7 +247,7 @@ class AAM_Service_Route
                 if ($route === $matched
                     || preg_match('#^' . $route . '$#i', $matched)
                 ) {
-                    if ($object->isRestricted('restful', $route, $method)) {
+                    if ($resource->is_restricted($route, $method)) {
                         $response = new WP_Error(
                             'rest_access_denied',
                             __('Access Denied', AAM_KEY),

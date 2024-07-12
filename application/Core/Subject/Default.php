@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -14,6 +12,7 @@
  *
  * @package AAM
  * @version 6.0.0
+ * @deprecated 7.0.0 Use AAM_Framework_AccessLevel_Default instead
  */
 class AAM_Core_Subject_Default extends AAM_Core_Subject
 {

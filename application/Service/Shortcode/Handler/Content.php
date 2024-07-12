@@ -94,7 +94,7 @@ class AAM_Service_Shortcode_Handler_Content
                 }
             }
 
-            if (AAM::api()->configs()->get_config('core.settings.multiSubject')) {
+            if (AAM::api()->configs()->get_config('core.settings.multi_access_levels')) {
                 $parts = array_merge(array((string) AAM::getUser()->ID), $roles);
             } else {
                 $parts = array((string) AAM::getUser()->ID, array_shift($roles));

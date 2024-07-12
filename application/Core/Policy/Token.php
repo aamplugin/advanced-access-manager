@@ -306,7 +306,7 @@ class AAM_Core_Policy_Token
     {
         $post = AAM_Core_API::getCurrentPost();
 
-        return is_a($post, 'AAM_Core_Object_Post') ? $post->{$option_name} : null;
+        return is_object($post) ? $post->{$option_name} : null;
     }
 
     /**

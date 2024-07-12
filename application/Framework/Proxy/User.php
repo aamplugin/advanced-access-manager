@@ -13,7 +13,7 @@
  * @package AAM
  * @version 6.9.32
  */
-class AAM_Framework_Proxy_User
+class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
 {
 
     /**

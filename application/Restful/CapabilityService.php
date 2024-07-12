@@ -354,7 +354,7 @@ class AAM_Restful_CapabilityService
     private function _get_service(WP_REST_Request $request)
     {
         return AAM_Framework_Manager::capabilities([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }
@@ -422,9 +422,12 @@ class AAM_Restful_CapabilityService
         if ($manage && $delete !== false) {
             // Additional validation
             if ($request->get_param('user_id')) {
-                $user_caps = AAM_Framework_Manager::subject([
+                $user_caps = AAM_Framework_Manager::access_levels([
                     'error_handling' => 'exception'
-                ])->get('user', $request->get_param('user_id'))->caps;
+                ])->get(
+                    AAM_Framework_Type_AccessLevel::USER,
+                    $request->get_param('user_id')
+                )->caps;
 
                 if (array_key_exists($slug, $user_caps)) {
                     array_push($result, 'allow_delete');

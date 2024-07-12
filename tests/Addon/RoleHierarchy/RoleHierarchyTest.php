@@ -11,6 +11,7 @@ namespace AAM\UnitTest\Addon\RoleHierarchy;
 
 use AAM,
     AAM_Core_Object_Menu,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait;
 
@@ -59,7 +60,9 @@ class RoleHierarchyTest extends TestCase
         $this->assertTrue($object->updateOptionItem('edit.php', true)->save());
 
         // Fake the fact that Subscriber has a parent role Contributor
-        AAM::api()->updateConfig('system.role.subscriber.parent', 'contributor');
+        AAM_Framework_Manager::configs()->set_config(
+            'system.role.subscriber.parent', 'contributor'
+        );
 
         // Reset all internal cache
         $this->_resetSubjects();

@@ -208,10 +208,7 @@ class AAM_Service_IdentityGovernance
      */
     public function can_list_role($role_slug)
     {
-        $object = AAM::getUser()->getObject(
-            AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
-        );
-
+        $resource  = $this->_get_resource();
         $max_level = 0;
 
         // Get max user level
@@ -223,8 +220,11 @@ class AAM_Service_IdentityGovernance
             }
         }
 
-        return $object->is_allowed_to('role', $role_slug, 'list_role') !== false
-            && $object->is_allowed_to('role_level', $max_level, 'list_role') !== false;
+        // Evaluate rules
+        $role_allowed  = $resource->is_role_allowed_to($role_slug, 'list_role');
+        $level_allowed = $resource->is_role_level_allowed_to($max_level, 'list_role');
+
+        return $role_allowed !== false && $level_allowed !== false;
     }
 
     /**
@@ -397,16 +397,14 @@ class AAM_Service_IdentityGovernance
         $response = [];
 
         // Exclude any users and role that are not allowed to be listed
-        $options = AAM::getUser()->getObject(
-            AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
-        )->getOption();
+        $settings = $this->_get_resource()->get_settings();
 
         // Making sure that query var properties are properly initialized
         $role__not_in  = [];
         $login__not_in = [];
         $target_levels = [];
 
-        foreach($options as $target => $permissions) {
+        foreach($settings as $target => $permissions) {
             $rule_type = explode('|', $target);
 
             if (isset($permissions['list_user'])
@@ -456,25 +454,33 @@ class AAM_Service_IdentityGovernance
     {
         // If do not allow is declared, there is no need to do anything else
         if (!in_array('do_not_allow', $caps, true)) {
-            $user   = get_user_by('id', $user_id);
-            $object = AAM::getUser()->getObject(
-                AAM_Core_Object_IdentityGovernance::OBJECT_TYPE
-            );
+            $user     = get_user_by('id', $user_id);
+            $resource = $this->_get_resource();
 
             if (is_a($user, 'WP_User')) {
-                $checks = array(
-                    ['user', $user->user_login, $action],
-                    ['user_level', $user->user_level, $action]
-                );
+                $checks = [
+                    [ 'is_user_allowed_to', [ $user->user_login, $action ] ],
+                    [ 'is_user_level_allowed_to', [ $user->user_level, $action ] ]
+                ];
 
                 if (is_array($user->roles)) {
                     foreach($user->roles as $role) {
-                        array_push($checks, ['user_role', $role, $action]);
+                        array_push(
+                            $checks,
+                            [ 'is_user_role_allowed_to', [ $role, $action ] ]
+                        );
                     }
                 }
 
-                foreach($checks as $args) {
-                    if (call_user_func_array([$object, 'is_allowed_to'], $args) === false) {
+                foreach($checks as $check) {
+                    $allowed = call_user_func_array(
+                        [ $resource, $check[0] ],
+                        $check[1]
+                    );
+
+                    // Important to check for explicit boolean false because it may
+                    // return null if no rules defined
+                    if ($allowed === false) {
                         $caps[] = 'do_not_allow';
 
                         break; // no need to check further
@@ -484,6 +490,21 @@ class AAM_Service_IdentityGovernance
         }
 
         return $caps;
+    }
+
+    /**
+     * Get current user identity governance resource
+     *
+     * @return AAM_Framework_Resource_IdentityGovernance
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        return AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::IDENTITY_GOVERNANCE
+        );
     }
 
 }

@@ -12,11 +12,11 @@
     <div class="visitor-message">
         <span class="aam-bordered"><?php echo __('Attach current access &amp; security policy to visitors (any user that is not authenticated)', AAM_KEY); ?>.</span>
         <?php
-            $hasPolicy = AAM::api()->getVisitor()->getObject(
-                AAM_Core_Object_Policy::OBJECT_TYPE
-            )->has($params->policyId);
+            $hasPolicy = AAM::api()->visitor()->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_POLICY
+            )->get_setting($params->policyId);
 
-            $btnStatus = $hasPolicy ? 'detach' : 'attach';
+            $btnStatus = $hasPolicy === true ? 'detach' : 'attach';
         ?>
 
         <?php if ($hasPolicy) { ?>

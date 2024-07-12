@@ -19,48 +19,123 @@
 class AAM_Framework_Service_LoginRedirect
 {
 
-    use AAM_Framework_Service_BaseTrait,
-        AAM_Framework_Service_RedirectTrait;
+    use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Redirect type
+     * Get the login redirect
      *
-     * @version 6.9.12
+     * @param array $inline_context Context
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE = 'login';
+    public function get_redirect($inline_context = null)
+    {
+        try {
+            $resource = $this->_get_resource($inline_context, true);
+            $result   = $this->_prepare_redirect(
+                $resource->get_settings(),
+                !$resource->is_overwritten()
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
 
     /**
-     * Object type
+     * Set the login redirect
      *
-     * @version 6.9.33
+     * @param array $redirect       Redirect settings
+     * @param array $inline_context Runtime context
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
      */
-    const OBJECT_TYPE = AAM_Core_Object_LoginRedirect::OBJECT_TYPE;
+    public function set_redirect(array $redirect, $inline_context = null)
+    {
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $resource = $this->_get_resource($inline_context);
+            $settings = $resource->convert_to_redirect($redirect);
+
+            if (!$resource->set_explicit_settings($settings)) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->_prepare_redirect(
+                $resource->get_explicit_settings(), false
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
 
     /**
-     * Redirect type aliases
+     * Reset the redirect rule
      *
-     * To be a bit more verbose, we are renaming the legacy rule types to
-     * something that is more intuitive
+     * @param array $inline_context Runtime context
      *
-     * @version 6.9.26
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE_ALIAS = array(
-        'default'  => 'default',
-        'page'     => 'page_redirect',
-        'url'      => 'url_redirect',
-        'callback' => 'trigger_callback'
-    );
+    public function reset($inline_context = null)
+    {
+        try {
+            $this->_get_resource($inline_context)->reset();
+
+            $result = $this->get_redirect($inline_context);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
 
     /**
-     * Array of allowed HTTP status codes
+     * Normalize and prepare the redirect details
      *
-     * @version 6.9.26
+     * @param array $settings
+     * @param bool  $is_inherited
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
      */
-    const HTTP_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => null,
-        'url_redirect'     => null,
-        'trigger_callback' => null
-    );
+    private function _prepare_redirect($settings, $is_inherited = false)
+    {
+        return array_merge(
+            [ 'type' => 'default' ],
+            $settings,
+            [ 'is_inherited' => $is_inherited ]
+        );
+    }
+
+    /**
+     * Get resource
+     *
+     * @param array $inline_context
+     *
+     * @return AAM_Framework_Resource_LoginRedirect
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource($inline_context, $reload = false)
+    {
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Type_Resource::LOGIN_REDIRECT, null, $reload
+        );
+    }
 
 }

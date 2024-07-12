@@ -12,9 +12,10 @@ namespace AAM\UnitTest\Addon\IpCheck;
 use AAM,
     AAM_Core_Object_Post,
     AAM_Core_Policy_Token,
-    AAM_Core_Object_Policy,
+    AAM_Framework_Manager,
     AAM_Core_Policy_Factory,
     PHPUnit\Framework\TestCase,
+    AAM_Framework_Type_Resource,
     AAM\UnitTest\Libs\ResetTrait,
     PHPUnit\Framework\Attributes\DataProvider;
 
@@ -35,9 +36,11 @@ class GeoPolicyTest extends TestCase
      */
     private static function _setUpBeforeClass()
     {
+        $configs = AAM_Framework_Manager::configs();
+
         // Define a dummy IP2Address adapter
-        AAM::api()->updateConfig('geoapi.adapter', 'unittest');
-        AAM::api()->updateConfig('core.service.geo-lookup.enabled', true);
+        $configs->set_config('geoapi.adapter', 'unittest');
+        $configs->set_config('core.service.geo-lookup.enabled', true);
 
         add_filter('aam_ipcheck_adapter_filter', function($adapter, $name) {
             if ($name === 'unittest') {
@@ -76,7 +79,7 @@ class GeoPolicyTest extends TestCase
      */
     public function testAccessDeniedToPostByCountry()
     {
-        AAM::api()->updateConfig('geoapi.test_ip', '98.26.4.6');
+        AAM_Framework_Manager::configs()->set_config('geoapi.test_ip', '98.26.4.6');
 
         $this->preparePlayground('{
             "Statement": {
@@ -105,7 +108,7 @@ class GeoPolicyTest extends TestCase
      */
     public function testAccessAllowedToPostByCountry()
     {
-        AAM::api()->updateConfig('geoapi.test_ip', '109.177.0.0');
+        AAM_Framework_Manager::configs()->set_config('geoapi.test_ip', '109.177.0.0');
 
         $this->preparePlayground('{
             "Statement": {
@@ -138,9 +141,9 @@ class GeoPolicyTest extends TestCase
      */
     public function testInformationRetrieval($property, $expected)
     {
-        AAM::api()->updateConfig('geoapi.test_ip', '98.26.4.6');
-        AAM::api()->updateConfig('geoapi.adapter', 'unittest');
-        AAM::api()->updateConfig('core.service.geo-lookup.enabled', true);
+        AAM_Framework_Manager::configs()->set_config('geoapi.test_ip', '98.26.4.6');
+        AAM_Framework_Manager::configs()->set_config('geoapi.adapter', 'unittest');
+        AAM_Framework_Manager::configs()->set_config('core.service.geo-lookup.enabled', true);
 
         $token = '${GEO.' . $property . '}';
 
@@ -190,9 +193,12 @@ class GeoPolicyTest extends TestCase
             array('ID' => self::$policy_id)
         );
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::ACCESS_POLICY
+        );
+
         $this->assertTrue(
-            $object->updateOptionItem(self::$policy_id, true)->save()
+            $resource->set_explicit_setting(self::$policy_id, true)
         );
 
         // Reset Access Policy Factory cache

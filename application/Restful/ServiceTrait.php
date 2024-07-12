@@ -82,12 +82,12 @@ trait AAM_Restful_ServiceTrait
                     'access_level' => array(
                         'description' => 'Access level for the controls',
                         'type'        => 'string',
-                        'enum'        => array(
-                            AAM_Core_Subject_Role::UID,
-                            AAM_Core_Subject_User::UID,
-                            AAM_Core_Subject_Visitor::UID,
-                            AAM_Core_Subject_Default::UID
-                        ),
+                        'enum'        => [
+                            AAM_Framework_Type_AccessLevel::ROLE,
+                            AAM_Framework_Type_AccessLevel::USER,
+                            AAM_Framework_Type_AccessLevel::VISITOR,
+                            AAM_Framework_Type_AccessLevel::DEFAULT
+                        ],
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_access_level($value, $request);
                         }
@@ -124,31 +124,31 @@ trait AAM_Restful_ServiceTrait
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Core_Subject|null
+     * @return AAM_Framework_AccessLevel_Interface|null
      *
      * @access private
      * @since 6.9.10
      */
-    private function _determine_subject(WP_REST_Request $request)
+    private function _determine_access_level(WP_REST_Request $request)
     {
-        $subject      = null;
+        $result       = null;
         $access_level = $request->get_param('access_level');
 
         if ($access_level) {
-            $subject_id   = null;
+            $access_level_id = null;
 
-            if ($access_level === AAM_Core_Subject_Role::UID) {
-                $subject_id = $request->get_param('role_id');
-            } elseif ($access_level === AAM_Core_Subject_User::UID) {
-                $subject_id = $request->get_param('user_id');
+            if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
+                $access_level_id = $request->get_param('role_id');
+            } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
+                $access_level_id = $request->get_param('user_id');
             }
 
-            $subject = AAM_Framework_Manager::subject()->get(
-                $access_level, $subject_id
+            $result = AAM_Framework_Manager::access_levels()->get(
+                $access_level, $access_level_id
             );
         }
 
-        return $subject;
+        return $result;
     }
 
     /**
@@ -166,7 +166,7 @@ trait AAM_Restful_ServiceTrait
     {
         $response = true;
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             $role_id = $request->get_param('role_id');
 
             if (empty($role_id)) {
@@ -176,7 +176,7 @@ trait AAM_Restful_ServiceTrait
                     array('status'  => 400)
                 );
             }
-        } elseif ($access_level === AAM_Core_Subject_User::UID) {
+        } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
             $user_id = $request->get_param('user_id');
 
             if (empty($user_id)) {
@@ -207,7 +207,7 @@ trait AAM_Restful_ServiceTrait
         $response     = true;
         $access_level = $request->get_param('access_level');
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             // Verifying that the role exists and is accessible
             $response = $this->_validate_role_accessibility($value);
         }
@@ -233,7 +233,7 @@ trait AAM_Restful_ServiceTrait
         if (is_numeric($value)) {
             $access_level = $request->get_param('access_level');
 
-            if ($access_level === AAM_Core_Subject_User::UID) {
+            if ($access_level === AAM_Framework_Type_AccessLevel::USER) {
                 // Verifying that the user exists and is accessible
                 $response = $this->_validate_user_accessibility(
                     intval($value), $request->get_method()

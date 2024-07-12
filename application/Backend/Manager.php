@@ -58,7 +58,7 @@ class AAM_Backend_Manager
         add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
 
         // Alter user edit screen with support for multiple roles
-        if (AAM::api()->configs()->get_config('core.settings.multiSubject')) {
+        if (AAM::api()->configs()->get_config('core.settings.multi_access_levels')) {
             add_action('edit_user_profile', array($this, 'editUserProfilePage'));
             add_action('user_new_form', array($this, 'addNewUserPage'));
 
@@ -206,9 +206,9 @@ class AAM_Backend_Manager
         }
 
         if (defined('AAM_COMPLETE_PACKAGE')
-            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.6') === -1) {
+            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.7') === -1) {
             AAM_Core_Console::add(sprintf(
-                __('Upgrade the AAM premium add-on to version 6.1.6 or higher to ensure all features function correctly. %sLearn more%s.', AAM_KEY),
+                __('Upgrade the AAM premium add-on to version 6.1.7 or higher to ensure all features function correctly. %sLearn more%s.', AAM_KEY),
                 '<a href="https://aamportal.com/question/update-premium-addon-warning?ref=plugin">', '</a>'
             ));
         }
@@ -340,7 +340,7 @@ class AAM_Backend_Manager
         $user = get_user_by('ID', $id);
 
         $is_multirole = AAM::api()->configs()->get_config(
-            'core.settings.multiSubject'
+            'core.settings.multi_access_levels'
         );
 
         if ($is_multirole && current_user_can('promote_user', $id)) {

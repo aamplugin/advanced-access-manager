@@ -31,9 +31,11 @@ class AAM_Framework_Service_Components
     public function get_item_list($screen_id = null, $inline_context = null)
     {
         try {
-            $result  = array();
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            $result       = [];
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::COMPONENT
+            );
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Service_Metabox::getInstance()->getComponentsCache();
@@ -42,7 +44,7 @@ class AAM_Framework_Service_Components
                 foreach($cache as $id => $components) {
                     foreach($components as $component) {
                         array_push($result, $this->_prepare_component(
-                            $component, $id, $object
+                            $component, $id, $resource
                         ));
                     }
                 }
@@ -113,13 +115,16 @@ class AAM_Framework_Service_Components
         $id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $component = $this->get_item_by_id($id);
-            $subject   = $this->_get_subject($inline_context);
-            $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            $component    = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::COMPONENT
+            );
+
             $screen_id = $this->_convert_screen_id($component['screen_id']);
             $internal  = $screen_id . '|' . $component['slug'];
 
-            if ($object->store($internal, $is_hidden) === false) {
+            if (!$resource->set_explicit_setting($internal, $is_hidden)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -147,18 +152,20 @@ class AAM_Framework_Service_Components
     public function delete_component_permission($id, $inline_context = null)
     {
         try {
-            $subject   = $this->_get_subject($inline_context);
-            $object    = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
-            $component = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::COMPONENT
+            );
 
-            $explicit  = $object->getExplicitOption();
+            $component = $this->get_item_by_id($id);
+            $explicit  = $resource->get_explicit_settings();
             $screen_id = $this->_convert_screen_id($component['screen_id']);
             $internal  = strtolower($screen_id. '|' . $component['slug']);
 
             if (isset($explicit[$internal])) {
                 unset($explicit[$internal]); // Delete the setting
 
-                $success = $object->setExplicitOption($explicit)->save();
+                $success = $resource->set_explicit_settings($explicit);
             } else {
                 $success = true;
             }
@@ -189,18 +196,19 @@ class AAM_Framework_Service_Components
     public function reset($screen_id = null, $inline_context = null)
     {
         try {
-            // Reset the object
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Metabox::OBJECT_TYPE);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::COMPONENT
+            );
 
             if (empty($screen_id)) {
-                $status = $object->reset();
+                $status = $resource->reset();
             } else {
                 $id          = $this->_convert_screen_id($screen_id);
                 $new_options = [];
 
                 // Filter out all the components that belong to specified screen
-                foreach($object->getExplicitOption() as $key => $data) {
+                foreach($resource->get_explicit_settings() as $key => $data) {
                     $parts = explode('|', $key);
 
                     if ($parts[0] !== $id) {
@@ -208,7 +216,7 @@ class AAM_Framework_Service_Components
                     }
                 }
 
-                $status = $object->setExplicitOption($new_options)->save();
+                $status = $resource->set_explicit_settings($new_options);
             }
 
             if ($status){
@@ -226,18 +234,18 @@ class AAM_Framework_Service_Components
     /**
      * Normalize and prepare the component model
      *
-     * @param array                   $component
-     * @param string                  $screen_id
-     * @param AAM_Core_Object_Metabox $object
+     * @param array                            $component
+     * @param string                           $screen_id
+     * @param AAM_Framework_Resource_Component $resource
      *
      * @return array
      *
      * @access private
      * @version 6.9.13
      */
-    private function _prepare_component($component, $screen_id, $object)
+    private function _prepare_component($component, $screen_id, $resource)
     {
-        $explicit = $object->getExplicitOption();
+        $explicit = $resource->get_explicit_settings();
         $internal = strtolower($screen_id . '|' . $component['slug']);
 
         $response = array(
@@ -245,7 +253,7 @@ class AAM_Framework_Service_Components
             'slug'         => strtolower($component['slug']),
             'screen_id'    => $this->_convert_screen_id($screen_id),
             'name'         => $this->_prepare_component_name($component),
-            'is_hidden'    => $object->isHidden($screen_id, $component['slug']),
+            'is_hidden'    => $resource->is_hidden($screen_id, $component['slug']),
             'is_inherited' => !array_key_exists($internal, $explicit)
         );
 

@@ -366,7 +366,8 @@ class AAM_Service_AccessPolicy
                     $options = $this->initializePost($options, $object);
                     break;
 
-                case AAM_Core_Object_Uri::OBJECT_TYPE:
+                case 'uri':
+                case AAM_Framework_Type_Resource::URL:
                     $options = $this->initializeUri($options, $object);
                     break;
 
@@ -374,7 +375,7 @@ class AAM_Service_AccessPolicy
                     $options = $this->initializeRoute($options, $object);
                     break;
 
-                case AAM_Core_Object_Redirect::OBJECT_TYPE:
+                case AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT:
                     $options = $this->initializeAccessDeniedRedirect($options);
                     break;
 
@@ -1307,13 +1308,13 @@ class AAM_Service_AccessPolicy
     public function enrich_role_rest_output($output, $role, $field)
     {
         if ($field === 'applied_policy_ids') {
-            $object = AAM::api()->getRole($role->slug)->getObject(
-                AAM_Core_Object_Policy::OBJECT_TYPE
+            $resource = AAM::api()->role($role->slug)->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_POLICY
             );
 
             $output = array();
 
-            foreach($object->getOption() as $id => $effect) {
+            foreach($resource->get_settings() as $id => $effect) {
                 if (!empty($effect)) {
                     array_push($output, $id);
                 }
@@ -1338,13 +1339,13 @@ class AAM_Service_AccessPolicy
     public function enrich_user_rest_output($output, $user, $fields)
     {
         if (in_array('policies', $fields, true)) {
-            $object = AAM::api()->getUser($user['id'])->getObject(
-                AAM_Core_Object_Policy::OBJECT_TYPE
+            $resource = AAM::api()->user($user['id'])->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_POLICY
             );
 
             $output['policies'] = [];
 
-            foreach($object->getOption() as $id => $effect) {
+            foreach($resource->get_settings() as $id => $effect) {
                 if (!empty($effect)) {
                     array_push($output['policies'], $id);
                 }

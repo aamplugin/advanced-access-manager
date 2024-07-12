@@ -77,8 +77,8 @@ class SettingServiceTest extends TestCase
     public function testSetAccessLevelSettings()
     {
         $service  = AAM_Framework_Manager::settings([
-            'access_level' => 'role',
-            'subject_id'   => 'subscriber'
+            'access_level_type' => 'role',
+            'access_level_id'   => 'subscriber'
         ]);
 
         $settings = [
@@ -133,8 +133,8 @@ class SettingServiceTest extends TestCase
                 'test' => true
             ]
         ], [
-            'access_level' => 'user',
-            'subject_id'   => 2
+            'access_level_type' => 'user',
+            'access_level_id'   => 2
         ]);
 
         $this->assertEquals(
@@ -173,8 +173,8 @@ class SettingServiceTest extends TestCase
         $service  = AAM_Framework_Manager::settings();
 
         $service->set_setting('post.2', [ 'hidden' => true ], [
-            'access_level' => 'role',
-            'subject_id'   => 'subscriber'
+            'access_level_type' => 'role',
+            'access_level_id'   => 'subscriber'
         ]);
 
         $this->assertEquals(

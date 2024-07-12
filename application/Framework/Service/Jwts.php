@@ -32,7 +32,7 @@ class AAM_Framework_Service_Jwts
     {
         try {
             $result = [];
-            $user   = $this->_get_subject($inline_context);
+            $user   = $this->_get_access_level($inline_context);
             $tokens = AAM_Service_Jwt::getInstance()->getTokenRegistry($user->ID);
 
             foreach($tokens as $token) {
@@ -93,17 +93,17 @@ class AAM_Framework_Service_Jwts
     public function create_token(array $claims, $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
+            $user = $this->_get_access_level($inline_context);
 
             // Adding user ID to the list of claims
-            $claims['userId'] = $subject->ID;
+            $claims['userId'] = $user->ID;
 
             // Generating token
             $token = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
 
             // Register token
             $result = AAM_Service_Jwt::getInstance()->registerToken(
-                $subject->ID, $token->token
+                $user->ID, $token->token
             );
 
             if (!$result) {
@@ -135,7 +135,7 @@ class AAM_Framework_Service_Jwts
         try {
             // Find the token that we are deleting
             $found = $this->get_token_by_id($id, $inline_context);
-            $user  = $this->_get_subject($inline_context);
+            $user  = $this->_get_access_level($inline_context);
 
             // Revoking the token
             $result = AAM_Service_Jwt::getInstance()->revokeUserToken(
@@ -165,7 +165,7 @@ class AAM_Framework_Service_Jwts
     public function reset($inline_context = null)
     {
         try {
-            $user = $this->_get_subject($inline_context);
+            $user = $this->_get_access_level($inline_context);
 
             // Reset
             if (!AAM_Service_Jwt::getInstance()->resetTokenRegistry($user->ID)) {

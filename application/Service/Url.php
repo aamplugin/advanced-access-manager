@@ -22,7 +22,7 @@
  * @package AAM
  * @version 6.9.26
  */
-class AAM_Service_Uri
+class AAM_Service_Url
 {
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
@@ -32,7 +32,7 @@ class AAM_Service_Uri
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.uri.enabled';
+    const FEATURE_FLAG = 'service.uri.enabled';
 
     /**
      * Constructor
@@ -67,8 +67,8 @@ class AAM_Service_Uri
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('URI Access', AAM_KEY),
-                    'description' => __('Manage direct access to the website URIs for any role or individual user. Define either explicit URI or wildcard (with Complete Package addon) as well as how to manage user request (allow, deny, redirect, etc.).', AAM_KEY),
+                    'title'       => __('URL Access', AAM_KEY),
+                    'description' => __('Manage direct access to website URLs for any role or individual user. Define specific URLs or use wildcards (with the premium add-on). Control user requests by setting rules to allow, deny, or redirect access.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -77,7 +77,7 @@ class AAM_Service_Uri
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -93,18 +93,65 @@ class AAM_Service_Uri
      * @access protected
      * @version 6.9.9
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         // Register RESTful API endpoints
         AAM_Restful_UrlService::bootstrap();
 
         // Authorize request
-        add_action('init', array($this, 'authorizeUri'));
+        add_action('init', function() {
+            $this->authorize();
+        });
 
         // Policy generation hook
         add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+            'aam_generated_policy_filter',
+            function ($policy, $type, $settings, $gen) {
+                return $this->generate_policy($policy, $type, $settings, $gen);
+            },
+            10,
+            4
         );
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::URL
+                ) {
+                    $resource = new AAM_Framework_Resource_Url(
+                        $access_level, $resource_id
+                    );
+                }
+
+                return $resource;
+            }, 10, 4
+        );
+    }
+
+    /**
+     * Authorize access to given URL
+     *
+     * This is the façade method that works with URL Resource to determine if access
+     * is denied to the given URL and if so - redirect user accordingly.
+     *
+     * @param string $url
+     * @param array  $inline_context
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    protected function authorize()
+    {
+        $resource = AAM::api()->user()->url($this->getFromServer('REQUEST_URI'));
+        $redirect = $resource->get_redirect();
+
+        if (!empty($redirect)) {
+            AAM_Framework_Utility::do_redirect($redirect);
+        }
     }
 
     /**
@@ -117,16 +164,16 @@ class AAM_Service_Uri
      *
      * @return array
      *
-     * @access public
+     * @access protected
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
+    protected function generate_policy($policy, $resource_type, $options, $generator)
     {
-        if ($resource_type === AAM_Core_Object_Uri::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Type_Resource::URL) {
             if (!empty($options)) {
                 $policy['Statement'] = array_merge(
                     $policy['Statement'],
-                    $generator->generateBasicStatements($options, 'URI')
+                    $generator->generateBasicStatements($options, 'URL')
                 );
             }
         }
@@ -134,58 +181,4 @@ class AAM_Service_Uri
         return $policy;
     }
 
-    /**
-     * Authorize access to current URI
-     *
-     * @return boolean
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.9.15 https://github.com/aamplugin/advanced-access-manager/issues/314
-     * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
-     * @since 6.3.0  https://github.com/aamplugin/advanced-access-manager/issues/18
-     * @since 6.1.0  The method return boolean `true` if no matches found
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.26
-     */
-    public function authorizeUri($uri = null)
-    {
-        // Preparing the list of requested locations that we'll check against the
-        // set list of URL access rules
-        $raw    = $uri ? $uri : $this->getFromServer('REQUEST_URI');
-        $psd    = wp_parse_url($raw);
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Uri::OBJECT_TYPE);
-        $params = array();
-
-        if (isset($psd['query'])) {
-            parse_str($psd['query'], $params);
-        }
-
-        if (isset($psd['path'])) {
-            $match = $object->findMatch($psd['path'], $params);
-
-            if (!empty($match) && ($match['type'] !== 'allow')) {
-                // Prepare the metadata for the redirect
-                $metadata = array();
-
-                if (!empty($match['code'])){
-                    $metadata['status'] = $match['code'];
-                }
-
-                if (!empty($match['action'])){
-                    $metadata[$match['type']] = $match['action'];
-                }
-
-                AAM_Core_Redirect::execute($match['type'], $metadata, true);
-            }
-        }
-
-        return true;
-    }
-
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Uri::bootstrap();
 }

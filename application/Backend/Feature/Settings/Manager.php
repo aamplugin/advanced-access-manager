@@ -393,35 +393,35 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      * Apply policy to provided subject
      *
      * @param string  $s
-     * @param int     $policyId
+     * @param int     $policy_id
      * @param boolean $effect
      *
      * @return string|null
      *
      * @access protected
      */
-    private function _applyPolicyToSubject($s, $policyId, $effect = true)
+    private function _applyPolicyToSubject($s, $policy_id, $effect = true)
     {
         $error = null;
 
         if ($s === 'visitor') {
-            $subject = AAM::api()->getVisitor();
+            $access_level = AAM::api()->visitor();
         } elseif ($s === 'default') {
-            $subject = AAM::api()->getDefault();
+            $access_level = AAM::api()->default();
         } elseif (strpos($s, 'role:') === 0) {
-            $subject = AAM::api()->getRole(substr($s, 5));
+            $access_level = AAM::api()->role(substr($s, 5));
         } elseif (strpos($s, 'user:') === 0) {
-            $uid     = substr($s, 5);
-            $subject = AAM::api()->getUser(($uid === 'current') ? null : $uid);
+            $uid          = substr($s, 5);
+            $access_level = AAM::api()->user(($uid === 'current') ? null : $uid);
         } else {
             $error   = sprintf(__('Failed applying to %s', AAM_KEY), $s);
-            $subject = null;
+            $access_level = null;
         }
 
-        if ($subject !== null) {
-            $subject->getObject(
-                AAM_Core_Object_Policy::OBJECT_TYPE, null, true
-            )->updateOptionItem($policyId, $effect)->save();
+        if ($access_level !== null) {
+            $access_level->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_POLICY
+            )->set_explicit_setting($policy_id, $effect);
         }
 
         return $error;

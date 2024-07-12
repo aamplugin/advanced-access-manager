@@ -18,6 +18,7 @@
  *
  * @package AAM
  * @version 6.9.33
+ * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_Component
  */
 class AAM_Core_Object_Metabox extends AAM_Core_Object
 {

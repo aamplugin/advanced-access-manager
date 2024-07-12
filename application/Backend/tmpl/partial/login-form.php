@@ -68,15 +68,16 @@ if (defined('AAM_KEY')) { ?>
                         if (4 === this.readyState) {
                             c.disabled = !1;
                             var a = JSON.parse(this.responseText);
-                            if (200 === this.status) a.redirect ? location.href = a.redirect : location.reload();
-                            else {
+                            if (200 === this.status) {
+                                a.redirect_to ? location.href = a.redirect_to : location.reload();
+                            } else {
                                 var b = document.getElementById("aam-login-error-<?php echo esc_js($params->id); ?>");
                                 b.innerHTML = a.reason;
                                 b.style.display = "block"
                             }
                         }
                     });
-                    a.open("POST", "<?php echo get_rest_url(null, 'aam/v2/authenticate'); ?>");
+                    a.open("POST", "<?php echo get_rest_url(null, 'aam/v2/service/authenticate'); ?>");
                     a.setRequestHeader("Content-Type", "application/json");
                     a.setRequestHeader("Accept", "application/json");
                     a.send(JSON.stringify({
@@ -84,7 +85,8 @@ if (defined('AAM_KEY')) { ?>
                         password: document.getElementById("aam-login-password-<?php echo esc_js($params->id); ?>").value,
                         redirect: document.getElementById("aam-login-redirect-<?php echo esc_js($params->id); ?>").value,
                         remember: document.getElementById("aam-login-remember-<?php echo esc_js($params->id); ?>").checked,
-                        returnAuthCookies: true
+                        return_auth_cookies: true,
+                        return_login_redirect: true
                     }))
                 })
             })();

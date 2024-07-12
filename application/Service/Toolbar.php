@@ -184,11 +184,14 @@ class AAM_Service_Toolbar
                 function () {
                     global $wp_admin_bar;
 
-                    $toolbar = AAM::getUser()->getObject('toolbar');
-                    $nodes   = $wp_admin_bar->get_nodes();
+                    $resource = AAM::api()->user()->get_resource(
+                        AAM_Framework_Type_Resource::TOOLBAR
+                    );
+
+                    $nodes = $wp_admin_bar->get_nodes();
 
                     foreach ((is_array($nodes) ? $nodes : array()) as $id => $node) {
-                        if (!$node->group && $toolbar->isHidden($id)) {
+                        if (!$node->group && $resource->is_hidden($id)) {
                             if (!empty($node->parent)) { // update parent node with # link
                                 $parent = $wp_admin_bar->get_node($node->parent);
                                 if ($parent && ($parent->href === $node->href)) {

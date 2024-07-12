@@ -30,17 +30,19 @@ class AAM_Service_LogoutRedirect
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.logout-redirect.enabled';
+    const FEATURE_FLAG = 'service.logout-redirect.enabled';
 
     /**
      * Contains the redirect instructions for just logged out user
      *
+     * This property is used to capture logging out user's redirect
+     *
      * @var array
      *
      * @access protected
-     * @since 6.0.5
+     * @since 7.0.0
      */
-    protected $redirect = null;
+    private $_last_user_redirect = null;
 
     /**
      * Constructor
@@ -76,7 +78,7 @@ class AAM_Service_LogoutRedirect
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Logout Redirect', AAM_KEY),
-                    'description' => __('Manage logout redirect for any group of users or individual user after user logged out successfully.', AAM_KEY),
+                    'description' => __('Manage the logout redirect for any group of users or individual users after they have successfully logged out.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -85,7 +87,7 @@ class AAM_Service_LogoutRedirect
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -106,39 +108,49 @@ class AAM_Service_LogoutRedirect
      * @access protected
      * @version 6.9.26
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         // Capture currently logging out user settings
         add_action('clear_auth_cookie', function() {
-            $this->redirect = AAM::getUser()->getObject(
-                AAM_Core_Object_LogoutRedirect::OBJECT_TYPE
-            )->getOption();
+            $redirect = AAM::api()->user()->logout_redirect()->get_redirect();
+
+            if (empty($redirect) || $redirect['type'] === 'default') {
+                $this->_last_user_redirect = [
+                    'type'         => 'url_redirect',
+                    'redirect_url' => '/'
+                ];
+            } else {
+                $this->_last_user_redirect = $redirect;
+            }
         });
 
         // Fired after the user has been logged out successfully
         add_action('wp_logout', function() {
-            // Determining redirect type
-            $type = 'default';
-            if (!empty($this->redirect['logout.redirect.type'])) {
-                $type = $this->redirect['logout.redirect.type'];
-            }
-
-            if ($type !== 'default') {
-                AAM_Core_Redirect::execute($type, array(
-                    $type => $this->redirect["logout.redirect.{$type}"]
-                ));
-            }
-
-            // Halt the execution. Redirect should carry user away if this is not
-            // a CLI execution (e.g. Unit Test)
-            if (php_sapi_name() !== 'cli' && $type !== 'default') {
-                exit;
-            }
+            AAM_Framework_Utility::do_redirect($this->_last_user_redirect);
         }, PHP_INT_MAX);
 
         // Policy generation hook
         add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+            'aam_generated_policy_filter',
+            [ $this, 'generate_policy' ],
+            10,
+            4
+        );
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT
+                ) {
+                    $resource = new AAM_Framework_Resource_LogoutRedirect(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
         );
 
         // Register RESTful API
@@ -158,9 +170,9 @@ class AAM_Service_LogoutRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
+    public function generate_policy($policy, $resource_type, $options, $generator)
     {
-        if ($resource_type === AAM_Core_Object_LogoutRedirect::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT) {
             if (!empty($options)) {
                 $policy['Param'] = array_merge(
                     $policy['Param'],
@@ -172,8 +184,4 @@ class AAM_Service_LogoutRedirect
         return $policy;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_LogoutRedirect::bootstrap();
 }

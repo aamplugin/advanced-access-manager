@@ -18,6 +18,7 @@
  *
  * @package AAM
  * @version 6.9.32
+ * @deprecated 7.0.0 Use AAM_Framework_AccessLevel_User instead
  */
 class AAM_Core_Subject_User extends AAM_Core_Subject
 {
@@ -184,7 +185,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
                 $this->_parent = new AAM_Core_Subject_Role($base);
 
                 $multi = AAM::api()->configs()->get_config(
-                    'core.settings.multiSubject'
+                    'core.settings.multi_access_levels'
                 );
 
                 if ($multi && count($roles)) {

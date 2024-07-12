@@ -62,16 +62,11 @@ class AAM_Restful_UrlService
                         'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => array_values(
-                            AAM_Framework_Service_Urls::RULE_TYPE_ALIAS
-                        )
+                        'enum'        => AAM_Framework_Resource_Url::ALLOWED_RULE_TYPES
                     ),
                     'http_status_code' => array(
                         'description' => 'HTTP Status Code',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_status_code($value, $request);
-                        }
+                        'type'        => 'number'
                     ),
                     'message' => array(
                         'description' => 'Custom access denied message',
@@ -140,16 +135,11 @@ class AAM_Restful_UrlService
                         'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => array_values(
-                            AAM_Framework_Service_Urls::RULE_TYPE_ALIAS
-                        )
+                        'enum'        => AAM_Framework_Resource_Url::ALLOWED_RULE_TYPES
                     ),
                     'http_status_code' => array(
                         'description' => 'HTTP Status Code',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_status_code($value, $request);
-                        }
+                        'type'        => 'number'
                     ),
                     'message' => array(
                         'description' => 'Custom access denied message',
@@ -162,7 +152,9 @@ class AAM_Restful_UrlService
                         'description' => 'Existing page ID to redirect to',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_page_id($value, $request);
+                            return $this->_validate_redirect_page_id(
+                                $value, $request
+                            );
                         }
                     ),
                     'redirect_url' => array(
@@ -489,62 +481,14 @@ class AAM_Restful_UrlService
         $response  = true;
         $rule_type = $request->get_param('type');
 
-        if ($rule_type === 'trigger_callback' && is_callable($value, true) === false) {
+        if ($rule_type === 'trigger_callback'
+            && is_callable($value, true) === false
+        ) {
             $response = new WP_Error(
                 'rest_invalid_param',
                 __('The callback is not valid PHP callback', AAM_KEY),
                 array('status'  => 400)
             );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Validate HTTP status code
-     *
-     * @param string          $value
-     * @param WP_REST_Request $request
-     *
-     * @return boolean|WP_Error
-     *
-     * @access private
-     * @version 6.9.26
-     */
-    private function _validate_redirect_status_code($value, $request)
-    {
-        $response    = true;
-        $rule_type   = $request->get_param('type');
-        $status_code = intval($value);
-
-        $allowed = AAM_Framework_Service_Urls::HTTP_STATUS_CODES[$rule_type];
-
-        if (is_null($allowed) && !empty($status_code)) {
-            throw new InvalidArgumentException(
-                "Redirect type {$rule_type} does not accept status codes"
-            );
-        } elseif (is_array($allowed)) {
-            $list = array();
-
-            foreach($allowed as $range) {
-                $list = array_merge(
-                    $list,
-                    range(
-                        str_replace('xx', '00', $range),
-                        str_replace('xx', '99', $range)
-                    )
-                );
-            }
-
-            if (!in_array($status_code, $list, true)) {
-                $allowed = implode(', ', $allowed);
-
-                $response = new WP_Error(
-                    'rest_invalid_param',
-                    "For redirect type {$rule_type} allowed status codes are {$allowed}",
-                    array('status'  => 400)
-                );
-            }
         }
 
         return $response;
@@ -563,7 +507,7 @@ class AAM_Restful_UrlService
     private function _get_service(WP_REST_Request $request)
     {
         return AAM_Framework_Manager::urls([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

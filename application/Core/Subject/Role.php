@@ -15,6 +15,7 @@
  *
  * @package AAM
  * @version 6.4.0
+ * @deprecated 7.0.0 Use AAM_Framework_AccessLevel_Role instead
  */
 class AAM_Core_Subject_Role extends AAM_Core_Subject
 {

@@ -421,13 +421,13 @@ class AAM_Restful_RoleService
     private function _clone_settings($role, $parent)
     {
         $service = AAM_Framework_Manager::settings([
-            'access_level' => AAM_Framework_Type_AccessLevel::ROLE,
-            'subject_id'   => $role->slug
+            'access_level_type' => AAM_Framework_Type_AccessLevel::ROLE,
+            'access_level_id'   => $role->slug
         ]);
 
         $cloned = $service->get_settings([
-            'access_level' => AAM_Framework_Type_AccessLevel::ROLE,
-            'subject_id'   => $parent->slug
+            'access_level_type' => AAM_Framework_Type_AccessLevel::ROLE,
+            'access_level_id'   => $parent->slug
         ]);
 
         // Clone the settings

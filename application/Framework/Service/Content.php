@@ -53,8 +53,8 @@ class AAM_Framework_Service_Content
             }
 
             // Convert the list to models
-            $raw_list = get_post_types($filters, 'objects', 'or');
-            $subject  = $this->_get_subject($inline_context);
+            $raw_list     = get_post_types($filters, 'objects', 'or');
+            $access_level = $this->_get_access_level($inline_context);
 
             $result = [
                 'list'    => [],
@@ -74,10 +74,10 @@ class AAM_Framework_Service_Content
                 }
 
                 array_push($result['list'], apply_filters(
-                    'get_post_type_filter',
+                    'aam_get_post_type_filter',
                     $item,
                     $post_type,
-                    $subject
+                    $access_level
                 ));
             }
 
@@ -130,9 +130,10 @@ class AAM_Framework_Service_Content
             }
 
             // Convert the list to models
-            $raw_list = get_taxonomies($filters, 'objects', 'or');
-            $subject  = $this->_get_subject($inline_context);
-            $result   = [
+            $raw_list     = get_taxonomies($filters, 'objects', 'or');
+            $access_level = $this->_get_access_level($inline_context);
+
+            $result = [
                 'list'    => [],
                 'summary' => [
                     'total_count'    => count($raw_list),
@@ -149,10 +150,12 @@ class AAM_Framework_Service_Content
                     $item = $this->_prepare_taxonomy_item($taxonomy);
                 }
 
-                array_push(
-                    $result['list'],
-                    apply_filters('get_taxonomy_filter', $item, $taxonomy, $subject)
-                );
+                array_push($result['list'], apply_filters(
+                    'aam_get_taxonomy_filter',
+                    $item,
+                    $taxonomy,
+                    $access_level
+                ));
             }
 
             // Determine what to return
@@ -182,8 +185,8 @@ class AAM_Framework_Service_Content
     public function get_posts(array $args = [], $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $args    = array_merge([
+            $access_level = $this->_get_access_level($inline_context);
+            $args         = array_merge([
                 'numberposts'      => 10,   // By default, only top 10
                 'result_type'      => 'full', // Return both list and summary
                 'suppress_filters' => true,
@@ -216,7 +219,9 @@ class AAM_Framework_Service_Content
                 $list = [];
 
                 foreach(get_posts($args) as $post) {
-                    array_push($list, $this->_prepare_post_item($post, $subject));
+                    array_push(
+                        $list, $this->_prepare_post_item($post, $access_level)
+                    );
                 }
             }
 
@@ -268,7 +273,7 @@ class AAM_Framework_Service_Content
 
             $result = $this->_prepare_post_item(
                 get_post($post_id),
-                $this->_get_subject($inline_context)
+                $this->_get_access_level($inline_context)
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -291,8 +296,8 @@ class AAM_Framework_Service_Content
     public function get_terms(array $args = [], $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $args    = array_merge([
+            $access_level = $this->_get_access_level($inline_context);
+            $args         = array_merge([
                 'number'           => 10,     // By default, only top 10
                 'result_type'      => 'full', // Return both list and summary
                 'suppress_filters' => true,
@@ -342,7 +347,7 @@ class AAM_Framework_Service_Content
                         'get_term_filter',
                         $item,
                         $term,
-                        $subject
+                        $access_level
                     ));
                 }
             }
@@ -387,27 +392,31 @@ class AAM_Framework_Service_Content
         $post_id, array $permissions = [], $inline_context = null
     ) {
         try {
-            $subject = $this->_get_subject($inline_context);
+            $access_level = $this->_get_access_level($inline_context);
 
             // Get list of all permissions and convert them back to AAM internal
             // content settings
-            $options = [];
+            $settings = [];
 
             foreach($permissions as $permission) {
                 $converted = $this->_convert_permission_to_option($permission);
 
                 if (!is_null($converted)) {
-                    $options = array_merge($options, $converted);
+                    $settings = array_merge($settings, $converted);
                 }
             }
 
-            $post = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $post_id);
+            $post = $access_level->get_resource(
+                AAM_Framework_Type_Resource::POST, $post_id
+            );
 
             // Set new permissions
-            if (!empty($options)) {
-                $result = $post->setExplicitOption($options)->save();
+            if (!empty($settings)) {
+                $result = $post->set_explicit_settings($settings);
             } else {
-                $result = $this->delete_post_permissions($post_id, $inline_context);
+                $result = $this->delete_post_permissions(
+                    $post_id, $inline_context
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -430,9 +439,9 @@ class AAM_Framework_Service_Content
     public function delete_post_permissions($post_id, $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $post    = $subject->getObject(
-                AAM_Core_Object_Post::OBJECT_TYPE, $post_id
+            $access_level = $this->_get_access_level($inline_context);
+            $post         = $access_level->get_resource(
+                AAM_Framework_Type_Resource::POST, $post_id
             );
 
             if ($post->reset()) {
@@ -493,15 +502,15 @@ class AAM_Framework_Service_Content
     /**
      * Prepare post model
      *
-     * @param WP_Post          $post
-     * @param AAM_Core_Subject $subject
+     * @param WP_Post                             $post
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      *
      * @access private
      * @version 6.9.29
      */
-    private function _prepare_post_item($post, $subject)
+    private function _prepare_post_item($post, $access_level)
     {
         // Get post type to add additional information about post
         $post_type = get_post_type_object($post->post_type);
@@ -519,16 +528,18 @@ class AAM_Framework_Service_Content
         }
 
         // Get permissions
-        $object = $subject->reloadObject('post', $post->ID);
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::POST, $post->ID, true
+        );
 
-        if (is_object($object)) {
-            $item = array_merge($item, [
-                'permissions'  => $this->_convert_to_permissions($object->getOption()),
-                'is_inherited' => !$object->isOverwritten()
-            ]);
-        }
+        $item = array_merge($item, [
+            'permissions'  => $this->_convert_to_permissions(
+                $resource->get_settings()
+            ),
+            'is_inherited' => !$resource->is_overwritten()
+        ]);
 
-        return apply_filters('aam_get_post_filter', $item, $post, $subject);
+        return apply_filters('aam_get_post_filter', $item, $post, $access_level);
     }
 
     /**

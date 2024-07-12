@@ -35,10 +35,10 @@ class AAM_Framework_Service_BackendMenu
     public function get_item_list($inline_context = null)
     {
         try {
-            $result  = array();
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->reloadObject(
-                AAM_Core_Object_Menu::OBJECT_TYPE
+            $result       = [];
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::BACKEND_MENU, null, true
             );
 
             // Getting the menu cache so we can build the list
@@ -51,7 +51,7 @@ class AAM_Framework_Service_BackendMenu
                     }
 
                     array_push($result, $this->_prepare_menu(
-                        $item, $object, true
+                        $item, $resource, true
                     ));
                 }
             }
@@ -118,11 +118,13 @@ class AAM_Framework_Service_BackendMenu
         $id, $is_restricted = true, $inline_context = null
     ) {
         try {
-            $result  = $this->get_item_by_id($id);
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+            $result       = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::BACKEND_MENU
+            );
 
-            if ($object->store($result['slug'], $is_restricted) === false) {
+            if (!$resource->set_explicit_setting($result['slug'], $is_restricted)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -150,26 +152,28 @@ class AAM_Framework_Service_BackendMenu
     public function delete_item_permission($id, $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
-            $menu    = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::BACKEND_MENU
+            );
+
+            $menu = $this->get_item_by_id($id);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
             if ($menu['is_inherited'] === false) {
                 $found       = false;
                 $new_options = array();
 
-                foreach($object->getExplicitOption() as $slug => $is_restricted) {
+                foreach($resource->get_explicit_settings() as $slug => $effect) {
                     if ($slug === $menu['slug']) {
                         $found = true;
                     } else {
-                        $new_options[$slug] = $is_restricted;
+                        $new_options[$slug] = $effect;
                     }
                 }
 
                 if ($found) {
-                    $object->setExplicitOption($new_options);
-                    $success = $object->save();
+                    $success = $resource->set_explicit_settings($new_options);
                 } else {
                     throw new OutOfRangeException('Menu item does not exist');
                 }
@@ -202,11 +206,12 @@ class AAM_Framework_Service_BackendMenu
     public function reset($inline_context = null)
     {
         try {
-            // Reset the object
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::BACKEND_MENU
+            );
 
-            if ($object->reset()) {
+            if ($resource->reset()) {
                 $result = $this->get_item_list($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');
@@ -221,21 +226,21 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Normalize and prepare the menu item model
      *
-     * @param array                $menu_item
-     * @param AAM_Core_Object_Menu $object,
-     * @param bool                 $is_top_level
+     * @param array                              $menu_item
+     * @param AAM_Framework_Resource_BackendMenu $resource,
+     * @param bool                               $is_top_level
      *
      * @return array
      *
      * @access private
      * @version 6.9.13
      */
-    private function _prepare_menu($menu_item, $object, $is_top_level = false) {
+    private function _prepare_menu($menu_item, $resource, $is_top_level = false) {
         // Add menu- prefix to define that this is the top level menu.
         // WordPress by default gives the same menu id to the first
         // submenu
         $slug     = ($is_top_level ? 'menu-' : '') . $menu_item['id'];
-        $explicit = $object->getExplicitOption();
+        $explicit = $resource->get_explicit_settings();
 
         $response = array(
             'id'            => abs(crc32($slug)),
@@ -243,7 +248,7 @@ class AAM_Framework_Service_BackendMenu
             'uri'           => $this->_prepare_admin_uri($menu_item['id']),
             'name'          => $this->_filter_menu_name($menu_item['name']),
             'capability'    => $menu_item['cap'],
-            'is_restricted' => $object->isRestricted($slug),
+            'is_restricted' => $resource->is_restricted($slug),
             'is_inherited'  => !array_key_exists($slug, $explicit)
         );
 
@@ -253,7 +258,7 @@ class AAM_Framework_Service_BackendMenu
             $response['children'] = $this->_get_submenu(
                 $menu_item['id'],
                 $cache['submenu'],
-                $object
+                $resource
             );
         }
 
@@ -313,16 +318,16 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Prepare filtered submenu
      *
-     * @param string               $menu
-     * @param array                $submenu,
-     * @param AAM_Core_Object_Menu $object
+     * @param string                             $menu
+     * @param array                              $submenu,
+     * @param AAM_Framework_Resource_BackendMenu $resource
      *
      * @return array
      *
      * @access private
      * @version 6.9.13
      */
-    private function _get_submenu($menu, $submenu, $object)
+    private function _get_submenu($menu, $submenu, $resource)
     {
         $response = array();
 
@@ -332,7 +337,7 @@ class AAM_Framework_Service_BackendMenu
                     'name' => $item[0],
                     'id'   => $this->_normalize_menu_id($item[2]),
                     'cap'  => $item[1]
-                ), $object));
+                ), $resource));
             }
         }
 

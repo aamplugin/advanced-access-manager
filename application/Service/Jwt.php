@@ -190,8 +190,12 @@ class AAM_Service_Jwt
 
             return $args;
         });
+
         add_filter(
-            'aam_auth_response_filter', array($this, 'prepareLoginResponse'), 10, 3
+            'aam_rest_authenticated_user_data_filter',
+            [ $this, 'prepare_login_response' ],
+            10,
+            3
         );
 
         // WP Core current user definition
@@ -464,34 +468,23 @@ class AAM_Service_Jwt
      * @access public
      * @version 6.9.8
      */
-    public function prepareLoginResponse(
-        array $response, WP_REST_Request $request, $user
-    ) {
-        if ($request->get_param('issueJWT') === true) {
-            $refreshable = $request->get_param('refreshableJWT');
+    public function prepare_login_response($response, $request, $user)
+    {
+        $issue_jwt             = $request->get_param('issue_jwt');
+        $issue_refreshable_jwt = $request->get_param('issue_refreshable_jwt');
 
-            if ($refreshable) {
-                $refreshable = user_can($user->ID, 'aam_issue_refreshable_jwt');
-
-                if ($refreshable === false) {
-                    throw new Exception(
-                        __('Current user is not allowed to issue refreshable JWT token', AAM_KEY),
-                        400
+        if (is_array($response) && ($issue_jwt || $issue_refreshable_jwt)) {
+            if ($issue_refreshable_jwt) {
+                if (current_user_can('aam_issue_refreshable_jwt')) {
+                    throw new DomainException(
+                        'Current user is not allowed to issue refreshable JWT token'
                     );
                 }
             }
 
-            // Include also roles
-            if ($request->get_param('includeRoles') === true) {
-                add_filter('aam_jwt_claims_filter', function($claims) {
-                    $user = get_user_by('ID', $claims['userId']);
-                    $claims['roles'] = $user->roles;
-
-                    return $claims;
-                });
-            }
-
-            $token_result = $this->issueToken($user->ID, null, null, $refreshable);
+            $token_result = $this->issueToken(
+                $user->ID, null, null, $issue_refreshable_jwt
+            );
 
             $response['jwt'] = array(
                 'token'         => $token_result->token,
@@ -976,8 +969,4 @@ class AAM_Service_Jwt
         return is_null($value) ? $default : $value;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Jwt::bootstrap();
 }

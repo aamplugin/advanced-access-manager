@@ -47,7 +47,7 @@ class AAM_Service_Core
      */
     const DEFAULT_CONFIG = [
         'core.settings.tips'              => true,
-        'core.settings.multiSubject'      => false,
+        'core.settings.multi_access_levels'  => false,
         'ui.settings.renderAccessMetabox' => false,
         'core.settings.merge.preference'  => 'deny',
         'core.export.groups'              => [ 'settings', 'config', 'roles' ]
@@ -395,8 +395,4 @@ class AAM_Service_Core
         return $caps;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Core::bootstrap();
 }

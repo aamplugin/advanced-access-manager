@@ -8,22 +8,29 @@
  */
 
 /**
- * User subject
+ * User access level
  *
  * @package AAM
  *
  * @version 6.9.34
  */
-class AAM_Framework_AccessLevel_User extends AAM_Framework_AccessLevel_Abstract
+class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interface
 {
+
+    use AAM_Framework_AccessLevel_BaseTrait;
+
+    /**
+     * @inheritDoc
+     */
+    const TYPE = AAM_Framework_Type_AccessLevel::USER;
 
     /**
      * Get parent access level
      *
-     * @return AAM_Framework_AccessLevel_Abstract
+     * @return AAM_Framework_AccessLevel_Interface
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function get_parent()
     {
@@ -34,7 +41,7 @@ class AAM_Framework_AccessLevel_User extends AAM_Framework_AccessLevel_Abstract
         // role no longer exists.
         // Note! AAM does not allow deleting roles if there is at least one user
         // assigned. However, it can be delete through other plugin or custom code
-        if (AAM_Framework_Manager::roles()->get_wp_roles()->is_role($primary_role)) {
+        if (wp_roles()->is_role($primary_role)) {
             $parent = AAM_Framework_Manager::access_levels()->get(
                 AAM_Framework_Type_AccessLevel::ROLE, $primary_role
             );
@@ -42,7 +49,7 @@ class AAM_Framework_AccessLevel_User extends AAM_Framework_AccessLevel_Abstract
             // If multi-role support is enabled & there are multiple roles assigned
             // to user, then fetch them all
             $mu_role_support = AAM::api()->configs()->get_config(
-                'core.settings.multiSubject'
+                'core.settings.multi_access_levels'
             );
 
             if ($mu_role_support && count($roles)) {

@@ -12,6 +12,7 @@ namespace AAM\UnitTest\Addon\IpCheck;
 use AAM,
     AAM_Service_Content,
     AAM_Core_Object_Post,
+    AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
     AAM\UnitTest\Libs\ResetTrait,
     AAM\AddOn\IPCheck\Object\IPCheck as IPCheckObject;
@@ -60,7 +61,7 @@ class IpCheckTest extends TestCase
     public function testEntireWebsiteRestricted()
     {
         // Fake the IP address
-        AAM::api()->updateConfig('geoapi.test_ip', '3.77.207.0');
+        AAM_Framework_Manager::configs()->set_config('geoapi.test_ip', '3.77.207.0');
 
         $object = AAM::getUser()->getObject(IPCheckObject::OBJECT_TYPE);
         $this->assertTrue($object->updateOptionItem('ip|3.77.207.0', true)->save());
@@ -74,7 +75,7 @@ class IpCheckTest extends TestCase
         $this->assertStringContainsString('Access Denied', $content);
 
         // Reset WP Query
-        AAM::api()->deleteConfig('geoapi.test_ip');
+        AAM_Framework_Manager::configs()->reset_config('geoapi.test_ip');
     }
 
     /**
@@ -103,7 +104,7 @@ class IpCheckTest extends TestCase
         $this->_resetSubjects();
 
         // Verify that access is denied by IP address
-        AAM::api()->updateConfig('geoapi.test_ip', '3.77.207.0');
+        AAM_Framework_Manager::configs()->set_config('geoapi.test_ip', '3.77.207.0');
 
         $post = AAM::getUser()->getObject(
             AAM_Core_Object_Post::OBJECT_TYPE, self::$post_id
@@ -117,7 +118,7 @@ class IpCheckTest extends TestCase
         );
 
         // Reset original state
-        AAM::api()->deleteConfig('geoapi.test_ip');
+        AAM_Framework_Manager::configs()->reset_config('geoapi.test_ip');
     }
 
     /**

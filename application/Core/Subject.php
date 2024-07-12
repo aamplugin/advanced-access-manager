@@ -38,6 +38,7 @@
  *
  * @package AAM
  * @version 6.9.33
+ * @deprecated 7.0.0 Use AAM_Framework_AccessLevel_Interface instead
  */
 abstract class AAM_Core_Subject
 {
@@ -403,7 +404,9 @@ abstract class AAM_Core_Subject
             )->getOption();
 
             // Merge access settings if multi-roles option is enabled
-            $multi = AAM::api()->configs()->get_config('core.settings.multiSubject');
+            $multi = AAM::api()->configs()->get_config(
+                'core.settings.multi_access_levels'
+            );
 
             if ($multi && $parent->hasSiblings()) {
                 foreach ($parent->getSiblings() as $sibling) {

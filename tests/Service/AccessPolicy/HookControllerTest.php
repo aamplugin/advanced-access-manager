@@ -485,7 +485,7 @@ class HookControllerTest extends TestCase
         $this->_resetSubjects();
 
         $settings = AAM_Framework_Manager::settings([
-            'access_level' => 'visitor'
+            'access_level_type' => 'visitor'
         ]);
 
         $settings->set_setting('policy', [

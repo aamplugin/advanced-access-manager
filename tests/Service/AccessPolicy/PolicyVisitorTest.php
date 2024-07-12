@@ -140,7 +140,7 @@ class PolicyVisitorTest extends TestCase
         )), array('ID' => self::$policy_id));
 
         $settings = AAM_Framework_Manager::settings([
-            'access_level' => 'visitor'
+            'access_level_type' => 'visitor'
         ]);
         $settings->set_setting('policy', [
             self::$policy_id => true

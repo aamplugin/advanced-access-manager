@@ -154,16 +154,16 @@ trait AAM_Framework_Service_BaseTrait
      *
      * @param mixed $inline_context Runtime context
      *
-     * @return AAM_Core_Subject
+     * @return AAM_Framework_AccessLevel_Interface
      *
      * @access private
      * @version 6.9.33
      */
-    private function _get_subject($inline_context = null)
+    private function _get_access_level($inline_context = null)
     {
         $result = null;
 
-        // Determine if the access level and subject ID are either part of the
+        // Determine if the access level is part of the
         // inline arguments or runtime context when service is requested through the
         // framework service manager
         if (is_array($inline_context)) {
@@ -174,13 +174,12 @@ trait AAM_Framework_Service_BaseTrait
             throw new BadMethodCallException('No context provided');
         }
 
-        if (isset($context['subject'])
-            && is_a($context['subject'], AAM_Core_Subject::class)) {
-            $result = $context['subject'];
-        } elseif (!empty($context['access_level'])) {
-            $result = AAM_Framework_Manager::subject()->get(
-                $context['access_level'],
-                isset($context['subject_id']) ? $context['subject_id'] : null
+        if (isset($context['access_level'])) {
+            $result = $context['access_level'];
+        } elseif (!empty($context['access_level_type'])) {
+            $result = AAM_Framework_Manager::access_levels()->get(
+                $context['access_level_type'],
+                isset($context['access_level_id']) ? $context['access_level_id'] : null
             );
         }
 

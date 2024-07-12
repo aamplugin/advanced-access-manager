@@ -462,12 +462,12 @@ class AAM_Restful_JwtService
      */
     private function _get_service($request)
     {
-        $subject = AAM_Framework_Manager::subject()->get(
-            AAM_Core_Subject_User::UID, $request->get_param('user_id')
+        $access_level = AAM_Framework_Manager::access_levels()->get(
+            AAM_Framework_Type_AccessLevel::USER, $request->get_param('user_id')
         );
 
         return AAM_Framework_Manager::jwts([
-            'subject'        => $subject,
+            'access_level'   => $access_level,
             'error_handling' => 'exception'
         ]);
     }

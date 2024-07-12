@@ -322,7 +322,7 @@ class ContentVisibilityTest extends TestCase
     public function testMultiRoleScenarioA()
     {
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
@@ -374,7 +374,7 @@ class ContentVisibilityTest extends TestCase
     {
         $configs = AAM_Framework_Manager::configs();
 
-        $configs->set_config('core.settings.multiSubject', true);
+        $configs->set_config('core.settings.multi_access_levels', true);
         $configs->set_config('core.settings.merge.preference', 'allow');
 
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
@@ -426,7 +426,7 @@ class ContentVisibilityTest extends TestCase
     public function testMultiRoleScenarioC()
     {
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
@@ -487,7 +487,7 @@ class ContentVisibilityTest extends TestCase
     {
         $configs = AAM_Framework_Manager::configs();
 
-        $configs->set_config('core.settings.multiSubject', true);
+        $configs->set_config('core.settings.multi_access_levels', true);
         $configs->set_config('core.settings.merge.preference', 'allow');
         wp_set_current_user(AAM_UNITTEST_MULTIROLE_USER_ID);
 

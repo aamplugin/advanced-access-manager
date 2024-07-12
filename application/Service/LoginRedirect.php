@@ -30,7 +30,17 @@ class AAM_Service_LoginRedirect
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.login-redirect.enabled';
+    const FEATURE_FLAG = 'service.login_redirect.enabled';
+
+    /**
+     * Default configurations
+     *
+     * @version 7.0.0
+     */
+    const DEFAULT_CONFIG = [
+        'service.login_redirect.enabled'              => true,
+        'service.login_redirect.suppress_redirect_to' => false
+    ];
 
     /**
      * Constructor
@@ -43,8 +53,8 @@ class AAM_Service_LoginRedirect
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
+            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+                $result = self::DEFAULT_CONFIG[$key];
             }
 
             return $result;
@@ -66,7 +76,7 @@ class AAM_Service_LoginRedirect
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Login Redirect', AAM_KEY),
-                    'description' => __('Manage login redirect for any group of users or individual user when authentication is completed successfully.', AAM_KEY),
+                    'description' => __('Handle login redirects for any user group or individual user upon successful authentication.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -75,7 +85,7 @@ class AAM_Service_LoginRedirect
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -92,22 +102,38 @@ class AAM_Service_LoginRedirect
      * @access protected
      * @version 6.9.12
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         // AAM Secure Login hooking
         add_filter(
-            'aam_auth_response_filter',
-            array($this, 'prepareLoginResponse'),
+            'aam_rest_authenticated_user_data_filter',
+            array($this, 'prepare_login_response'),
             10,
             3
         );
 
         // WP Core login redirect hook
-        add_filter('login_redirect', array($this, 'getLoginRedirect'), 10, 3);
+        add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
 
         // Policy generation hook
         add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+            'aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4
+        );
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT
+                ) {
+                    $resource = new AAM_Framework_Resource_LoginRedirect(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
         );
 
         // Register RESTful API
@@ -127,9 +153,9 @@ class AAM_Service_LoginRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
+    public function generate_policy($policy, $resource_type, $options, $generator)
     {
-        if ($resource_type === AAM_Core_Object_LoginRedirect::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT) {
             if (!empty($options)) {
                 $policy['Param'] = array_merge(
                     $policy['Param'],
@@ -160,10 +186,10 @@ class AAM_Service_LoginRedirect
      * @see AAM_Service_SecureLogin::authenticate
      * @version 6.6.2
      */
-    public function prepareLoginResponse($response, $request, $user)
+    public function prepare_login_response($response, $request, $user)
     {
-        if (empty($response['redirect']) || ($response['redirect'] === admin_url())) {
-            $response['redirect'] = $this->getUserRedirect($user);
+        if (is_array($response) && $request->get_param('return_login_redirect')) {
+            $response['redirect_to'] = $this->get_user_redirect_url($user);
         }
 
         return $response;
@@ -184,13 +210,17 @@ class AAM_Service_LoginRedirect
      * @access public
      * @version 6.5.0
      */
-    public function getLoginRedirect($redirect, $requested, $user)
+    public function get_login_redirect($redirect, $requested, $user)
     {
+        // Determine if we want to suppress redirect_to URL
+        $suppress = AAM_Framework_Manager::configs()->get_config(
+            'service.login_redirect.suppress_redirect_to'
+        );
+
         if (is_a($user, 'WP_User')
-                && in_array($requested, array('', admin_url()), true)
+                && (in_array($requested, array('', admin_url()), true) || $suppress)
         ) {
-            $requested = $this->getUserRedirect($user);
-            $redirect  = (!empty($requested) ? $requested : $redirect);
+            $redirect = $this->get_user_redirect_url($user);
         }
 
         return $redirect;
@@ -209,40 +239,18 @@ class AAM_Service_LoginRedirect
      * @access protected
      * @version 6.9.19
      */
-    protected function getUserRedirect(WP_User $user)
+    protected function get_user_redirect_url($user)
     {
-        $redirect = null;
+        $redirect = AAM::api()->user($user->ID)->login_redirect()->get_redirect();
 
-        $settings = AAM::api()->getUser($user->ID)->getObject(
-            AAM_Core_Object_LoginRedirect::OBJECT_TYPE
-        )->getOption();
-
-        if (!empty($settings)) {
-            switch ($settings['login.redirect.type']) {
-                case 'page':
-                    $redirect = get_page_link($settings['login.redirect.page']);
-                    break;
-
-                case 'url':
-                    $redirect = wp_validate_redirect($settings['login.redirect.url']);
-                    break;
-
-                case 'callback':
-                    if (is_callable($settings['login.redirect.callback'])) {
-                        $redirect = call_user_func($settings['login.redirect.callback']);
-                    }
-                    break;
-
-                default:
-                    break;
-            }
+        if (empty($redirect) || $redirect['type'] === 'default') {
+            $redirect = [
+                'type'         => 'url_redirect',
+                'redirect_url' => admin_url()
+            ];
         }
 
-        return $redirect;
+        return AAM_Framework_Utility::to_redirect_url($redirect);
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_LoginRedirect::bootstrap();
 }

@@ -20,7 +20,23 @@
 final class AAM_Core_Gateway
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var AAM_Core_Gateway
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private static $_instance = null;
+
+    /**
+     * Constructor
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function __construct() { }
 
     /**
      * Prevent from fatal errors
@@ -51,6 +67,146 @@ final class AAM_Core_Gateway
     }
 
     /**
+     * Get user by their's identifier
+     *
+     * If no identifier provided, the current user will be return. If user is not
+     * authenticated, the visitor access level will be returned.
+     *
+     * @param string|int|WP_User|null $identifier
+     *
+     * @return AAM_Framework_AccessLevel_User|AAM_Framework_AccessLevel_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function user($identifier = null)
+    {
+        $service = AAM_Framework_Manager::access_levels();
+
+        if (is_null($identifier)) {
+            $result = AAM::current_user();
+        } else {
+            $result = $service->get(
+                AAM_Framework_Type_AccessLevel::USER, $identifier
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get role access level
+     *
+     * @param string $role_slug
+     *
+     * @return AAM_Framework_AccessLevel_Role
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function role($role_slug)
+    {
+        return AAM_Framework_Manager::access_levels()->get(
+            AAM_Framework_Type_AccessLevel::ROLE, $role_slug
+        );
+    }
+
+    /**
+     * Get visitor access level
+     *
+     * @return AAM_Framework_AccessLevel_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function visitor()
+    {
+        return AAM_Framework_Manager::access_levels()->get(
+            AAM_Framework_Type_AccessLevel::VISITOR
+        );
+    }
+
+    /**
+     * Get visitor access level
+     *
+     * @return AAM_Framework_AccessLevel_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function anonymous()
+    {
+        return $this->visitor();
+    }
+
+    /**
+     * Get visitor access level
+     *
+     * @return AAM_Framework_AccessLevel_Visitor
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function guest()
+    {
+        return $this->visitor();
+    }
+
+    /**
+     * Get default access level
+     *
+     * @return AAM_Framework_AccessLevel_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function default()
+    {
+        return AAM_Framework_Manager::access_levels()->get(
+            AAM_Framework_Type_AccessLevel::DEFAULT
+        );
+    }
+
+    /**
+     * Get default access level
+     *
+     * @return AAM_Framework_AccessLevel_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function all()
+    {
+        return $this->default();
+    }
+
+    /**
+     * Get default access level
+     *
+     * @return AAM_Framework_AccessLevel_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function everyone()
+    {
+        return $this->default();
+    }
+
+    /**
+     * Get default access level
+     *
+     * @return AAM_Framework_AccessLevel_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function anyone()
+    {
+        return $this->default();
+    }
+
+    /**
      * Get AAM configuration option
      *
      * @param string $option
@@ -61,6 +217,7 @@ final class AAM_Core_Gateway
      * @access public
      * @version 6.0.0
      * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->get_config instead
+     * @todo Remove in July, 2025
      */
     public function getConfig($option, $default = null)
     {
@@ -78,6 +235,7 @@ final class AAM_Core_Gateway
      * @access public
      * @version 6.0.0
      * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->set_config instead
+     * @todo Remove in July, 2025
      */
     public function updateConfig($option, $value)
     {
@@ -94,6 +252,7 @@ final class AAM_Core_Gateway
      * @access public
      * @version 6.0.0
      * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->reset_config instead
+     * @todo Remove in July, 2025
      */
     public function deleteConfig($option)
     {
@@ -111,6 +270,8 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use AAM::api()->user() instead
+     * @todo Remove in July, 2025
      */
     public function getUser($id = null)
     {
@@ -133,6 +294,8 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use AAM::api()->role() instead
+     * @todo Remove in July, 2025
      */
     public function getRole($id)
     {
@@ -146,6 +309,8 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use AAM::api()->visitor() instead
+     * @todo Remove in July, 2025
      */
     public function getVisitor()
     {
@@ -165,6 +330,8 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Use AAM::api()->default() instead
+     * @todo Remove in July, 2025
      */
     public function getDefault()
     {
@@ -246,6 +413,8 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Moved to resource abstract
+     * @todo Remove in July 2025
      */
     public function mergeSettings($set1, $set2, $objectType, $preference = null)
     {
@@ -328,6 +497,8 @@ final class AAM_Core_Gateway
      *
      * @access protected
      * @version 6.0.0
+     * @deprecated 7.0.0
+     * @todo Remove in July 2025
      */
     protected function computeAccessOptionEffect($opts, $key)
     {
@@ -338,6 +509,36 @@ final class AAM_Core_Gateway
         }
 
         return $effect;
+    }
+
+    /**
+     * Bootstrap the object
+     *
+     * @return AAM_Core_Gateway
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Core_Gateway
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function getInstance()
+    {
+        return self::bootstrap();
     }
 
 }

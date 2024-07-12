@@ -253,12 +253,14 @@ class AAM_Service_Content
 
         // Get control over commenting stuff
         add_filter('comments_open', function ($open, $id) {
-            $object = AAM::getUser()->getObject('post', $id);
+            $resource = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::POST, $id
+            );
 
             // If Leave Comments option is defined then override the default status.
             // Otherwise keep it as-is
-            if ($object->isDefined('comment')) {
-                $open = $object->isAllowedTo('comment');
+            if ($resource->get_setting('comment') !== null) {
+                $open = $resource->is_allowed_to('comment');
             }
 
             return $open;
@@ -331,7 +333,7 @@ class AAM_Service_Content
      */
     public function generatePolicy($policy, $resource_type, $options, $generator)
     {
-        if ($resource_type === AAM_Core_Object_Post::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Type_Resource::POST) {
             if (!empty($options)) {
                 $statements = array();
 
@@ -609,13 +611,13 @@ class AAM_Service_Content
      */
     public function authPostAccess($response, $post, $request)
     {
-        $object = AAM::getUser()->getObject(
-            AAM_Core_Object_Post::OBJECT_TYPE,
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::POST,
             $post->ID
         );
 
         $auth = $this->isAuthorizedToReadPost(
-            $object,
+            $resource,
             (isset($request['_password']) ? $request['_password'] : null)
         );
 
@@ -633,7 +635,7 @@ class AAM_Service_Content
                 $response->set_headers(array('Location' => $data['url']));
             }
         } else {
-            $this->incrementPostReadCounter($object);
+            $this->incrementPostReadCounter($resource);
         }
 
         return $response;
@@ -657,9 +659,9 @@ class AAM_Service_Content
     {
         // Honor the manually set password on the post
         if (($result === false) && is_a($post, 'WP_Post')) {
-            $check = $this->checkPostPassword(
-                AAM::getUser()->getObject('post', $post->ID)
-            );
+            $check = $this->checkPostPassword(AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::POST, $post->ID
+            ));
 
             $result = is_wp_error($check);
         }
@@ -708,8 +710,11 @@ class AAM_Service_Content
         if (is_array($pages)) {
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'), true)) {
-                    $object = AAM::getUser()->getObject('post', $page->object_id);
-                    if ($this->_isHidden($object->getOption())) {
+                    $resource = AAM::api()->user()->get_resource(
+                        AAM_Framework_Type_Resource::POST, $page->object_id
+                    );
+
+                    if ($this->_isHidden($resource->get_settings())) {
                         unset($pages[$i]);
                     }
                 }
@@ -739,7 +744,7 @@ class AAM_Service_Content
         if ($wp_query->is_single || $wp_query->is_page) {
             $post = AAM_Core_API::getCurrentPost();
 
-            if (is_a($post, 'AAM_Core_Object_Post')) {
+            if (is_a($post, AAM_Framework_Resource_Post::class)) {
                 $error = $this->isAuthorizedToReadPost($post);
 
                 if (is_wp_error($error)) {
@@ -780,8 +785,11 @@ class AAM_Service_Content
                     continue;
                 }
 
-                $object = AAM::getUser()->getObject('post', $post->ID);
-                if ($this->_isHidden($object->getOption())) {
+                $resource = AAM::api()->user()->get_resource(
+                    AAM_Framework_Type_Resource::POST, $post->ID
+                );
+
+                if ($this->_isHidden($resource->get_settings())) {
                     unset($pages[$i]);
                 }
             }
@@ -814,11 +822,13 @@ class AAM_Service_Content
         if (!$wp_query->is_singular && !$executing) {
             $executing = true;
 
-            $object = AAM::getUser()->getObject(
-                AAM_Core_Object_Visibility::OBJECT_TYPE
+            $resource = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::CONTENT_VISIBILITY
             );
 
-            $query = $this->preparePostQuery($object->getSegment('post'), $wp_query);
+            $query = $this->preparePostQuery(
+                $resource->get_setting('post'), $wp_query
+            );
 
             $clauses['where'] .= apply_filters(
                 'aam_content_visibility_where_clause_filter',
@@ -957,8 +967,8 @@ class AAM_Service_Content
     {
         $post = AAM_Core_API::getCurrentPost();
 
-        if (is_a($post, 'AAM_Core_Object_Post') && $post->has('teaser')) {
-            $teaser = $post->get('teaser');
+        if (is_object($post) && $post->has('teaser')) {
+            $teaser = $post->get_setting('teaser');
 
             if (!empty($teaser['message'])) {
                 $message = $teaser['message'];
@@ -1153,10 +1163,10 @@ class AAM_Service_Content
      */
     public function isAuthorizedToPublishPost($post)
     {
-        return AAM::getUser()->getObject(
-            'post',
+        return AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::POST,
             (is_a($post, 'WP_Post') ? $post->ID : $post)
-        )->isAllowedTo('publish');
+        )->is_allowed_to('publish');
     }
 
     /**
@@ -1193,13 +1203,14 @@ class AAM_Service_Content
      */
     public function isAuthorizedToEditPost($post)
     {
-        $object  = AAM::getUser()->getObject(
-            'post',
+        $resource  = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::POST,
             (is_a($post, 'WP_Post') ? $post->ID : $post)
         );
-        $isDraft = $object->post_status === 'auto-draft';
 
-        return $isDraft || $object->isAllowedTo('edit');
+        $is_draft = $resource->post_status === 'auto-draft';
+
+        return $is_draft || $resource->is_allowed_to('edit');
     }
 
     /**
@@ -1234,27 +1245,31 @@ class AAM_Service_Content
      */
     public function isAuthorizedToDeletePost($post)
     {
-        return AAM::getUser()->getObject(
-            'post',
+        return AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::POST,
             (is_a($post, 'WP_Post') ? $post->ID : $post)
-        )->isAllowedTo('delete');
+        )->is_allowed_to('delete');
     }
 
     /**
      * Mutate capability meta map based on ability to edit/update the post
      *
-     * @param array       $caps
-     * @param WP_Post|int $post
-     * @param string      $password
+     * @param array  $caps
+     * @param int    $post_id
+     * @param string $password
      *
      * @return array
      *
      * @access protected
      * @version 6.0.0
      */
-    protected function mapReadPostCaps($caps, $post, $password = null)
+    protected function mapReadPostCaps($caps, $post_id, $password = null)
     {
-        if ($this->isAuthorizedToReadPost($post, $password) !== true) {
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::POST, $post_id
+        );
+
+        if ($this->isAuthorizedToReadPost($resource, $password) !== true) {
             $caps[] = 'do_not_allow';
         }
 
@@ -1264,7 +1279,7 @@ class AAM_Service_Content
     /**
      * Increment user view counter is tracking is defined
      *
-     * @param AAM_Core_Object_Post $post
+     * @param AAM_Framework_Resource_Post $post
      *
      * @return void
      *
@@ -1285,25 +1300,16 @@ class AAM_Service_Content
      *
      * If post requires, password, also path this as the second optional parameter
      *
-     * @param mixed  $post
-     * @param string $password
+     * @param AAM_Framework_Resource_Post $resource
+     * @param string                      $password
      *
      * @return boolean|WP_Error
      *
      * @access public
      * @version 6.0.0
      */
-    public function isAuthorizedToReadPost($post, $password = null)
+    public function isAuthorizedToReadPost($resource, $password = null)
     {
-        if (is_a($post, 'AAM_Core_Object_Post')) {
-            $object = $post;
-        } else {
-            $object = AAM::getUser()->getObject(
-                'post',
-                (is_a($post, 'WP_Post') ? $post->ID : $post)
-            );
-        }
-
         // Prepare the pipeline of steps that AAM core will perform to check post's
         // accessibility
         $pipeline = apply_filters('aam_post_read_access_pipeline_filter', array(
@@ -1322,7 +1328,7 @@ class AAM_Service_Content
         // Execute the collection of steps and stop when first restriction captured
         $result = true;
         foreach ($pipeline as $callback) {
-            $result = call_user_func($callback, $object, $password);
+            $result = call_user_func($callback, $resource, $password);
 
             if (is_wp_error($result)) {
                 break;
@@ -1337,7 +1343,7 @@ class AAM_Service_Content
      *
      * If access is expired, return WP_Error object with the reason
      *
-     * @param AAM_Core_Object_Post $post
+     * @param AAM_Framework_Resource_Post $post
      *
      * @return boolean|WP_Error
      *
@@ -1347,12 +1353,12 @@ class AAM_Service_Content
      * @access public
      * @version 6.9.26
      */
-    public function checkPostExpiration(AAM_Core_Object_Post $post)
+    public function checkPostExpiration(AAM_Framework_Resource_Post $post)
     {
         $result = true;
 
         if ($post->is('ceased')) {
-            $ceased = $post->get('ceased');
+            $ceased = $post->get_setting('ceased');
             $now    = (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
 
             if ($ceased['after'] <= $now) {
@@ -1375,7 +1381,7 @@ class AAM_Service_Content
      *
      * If access is explicitly restricted, return WP_Error object with the reason
      *
-     * @param AAM_Core_Object_Post $post
+     * @param AAM_Framework_Resource_Post $post
      *
      * @return boolean|WP_Error
      *
@@ -1386,12 +1392,12 @@ class AAM_Service_Content
      *
      * @version 6.9.26
      */
-    public function checkPostReadAccess(AAM_Core_Object_Post $post)
+    public function checkPostReadAccess(AAM_Framework_Resource_Post $post)
     {
         $result = true;
 
         if ($post->is('restricted')) {
-            $data   = $post->get('restricted');
+            $data   = $post->get_setting('restricted');
             $result = new WP_Error(
                 'post_access_restricted',
                 'User is unauthorized to access this post. Access denied.',
@@ -1413,7 +1419,7 @@ class AAM_Service_Content
      * access option enabled. The WP_Error object will be returned if access counter
      * exceeded maximum allowed threshold.
      *
-     * @param AAM_Core_Object_Post $post
+     * @param AAM_Framework_Resource_Post $post
      *
      * @return boolean|WP_Error
      *
@@ -1424,13 +1430,13 @@ class AAM_Service_Content
      * @access public
      * @version 6.9.26
      */
-    public function checkPostLimitCounter(AAM_Core_Object_Post $post)
+    public function checkPostLimitCounter(AAM_Framework_Resource_Post $post)
     {
         $result = true;
 
         // Check current access counter only for authenticated users
         if (is_user_logged_in() && $post->is('limited')) {
-            $limited = $post->get('limited');
+            $limited = $post->get_setting('limited');
 
             $option  = sprintf(self::POST_COUNTER_DB_OPTION, $post->ID);
             $counter = intval(get_user_option($option, get_current_user_id()));
@@ -1456,7 +1462,7 @@ class AAM_Service_Content
      * Do not allow direct access to the post and return WP_Error object with details
      * for the location where user has to be redirected.
      *
-     * @param AAM_Core_Object_Post $post
+     * @param AAM_Framework_Resource_Post $post
      *
      * @return boolean|WP_Error
      *
@@ -1466,12 +1472,12 @@ class AAM_Service_Content
      * @access public
      * @version 6.9.26
      */
-    public function checkPostRedirect(AAM_Core_Object_Post $post)
+    public function checkPostRedirect(AAM_Framework_Resource_Post $post)
     {
         $result = true;
 
         if ($post->is('redirected')) {
-            $redirect = $post->get('redirected');
+            $redirect = $post->get_setting('redirected');
             $metadata = array(
                 'type'   => 'url',
                 'status' => isset($redirect['httpCode']) ? $redirect['httpCode'] : null
@@ -1537,21 +1543,22 @@ class AAM_Service_Content
      * If post has password set, return WP_Error so the application can do further
      * authorization process.
      *
-     * @param AAM_Core_Object_Post $post
-     * @param string               $password
+     * @param AAM_Framework_Resource_Post $post
+     * @param string                      $password
      *
      * @return boolean|WP_Error
      *
      * @access public
      * @version 6.0.0
      */
-    public function checkPostPassword(AAM_Core_Object_Post $post, $password = null)
-    {
+    public function checkPostPassword(
+        AAM_Framework_Resource_Post $post, $password = null
+    ) {
         $result = true;
 
         if ($post->is('protected')) {
             // Get password values
-            $protected = $post->get('protected');
+            $protected = $post->get_setting('protected');
 
             // If password is empty or not provided, try to read it from the cookie.
             // This is the default WordPress behavior when it comes to password

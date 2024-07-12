@@ -53,7 +53,6 @@
                                             <li><?php echo $message; // Already properly handled in the AAM_Core_Console ?></li>
                                         <?php } ?>
                                     </ul>
-                                    <div class="hidden" id="migration-errors-container"><?php echo base64_encode(print_r(AAM_Core_Migration::getFailureLog(), 1)); ?></div>
                                 </div>
                             </div>
                         </div>

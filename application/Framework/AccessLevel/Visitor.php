@@ -8,14 +8,21 @@
  */
 
 /**
- * Visitor subject
+ * Visitor access level
  *
  * @package AAM
  *
  * @version 6.9.34
  */
-class AAM_Framework_AccessLevel_Visitor extends AAM_Framework_AccessLevel_Abstract
+class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Interface
 {
+
+    use AAM_Framework_AccessLevel_BaseTrait;
+
+    /**
+     * @inheritDoc
+     */
+    const TYPE = AAM_Framework_Type_AccessLevel::VISITOR;
 
     /**
      * @inheritDoc

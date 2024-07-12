@@ -50,13 +50,13 @@ class AAM_Backend_Feature_Main_IdentityGovernance
      */
     protected function get_allowed_rule_types()
     {
-        return apply_filters('aam_allowed_user_governance_rule_types_filter', array(
+        return [
             'role'       => __('Roles', AAM_KEY),
             'role_level' => __('Roles by highest level_n capability', AAM_KEY),
             'user_role'  => __('Users that have certain role', AAM_KEY),
             'user'       => __('Users', AAM_KEY),
             'user_level' => __('Users by highest level_n capability', AAM_KEY),
-        ));
+        ];
     }
 
     /**

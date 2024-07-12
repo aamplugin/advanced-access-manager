@@ -221,7 +221,9 @@ class AAM_Service_AdminMenu
     {
         global $menu, $submenu;
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::BACKEND_MENU
+        );
 
         foreach ($menu as $id => $item) {
             $menu_slug = $item[2];
@@ -229,7 +231,7 @@ class AAM_Service_AdminMenu
             if (!empty($submenu[$menu_slug])) {
                 // Cover the scenario when there are some dynamic submenus
                 $subs = $this->filterSubmenu(
-                    $item, ($object->isRestricted('menu-' . $menu_slug))
+                    $item, ($resource->is_restricted('menu-' . $menu_slug))
                 );
             } else {
                 $subs = array();
@@ -237,9 +239,9 @@ class AAM_Service_AdminMenu
 
             // Cover scenario like with Visual Composer where landing page
             // is defined dynamically
-            if ($object->isRestricted('menu-' . $menu_slug)) {
+            if ($resource->is_restricted('menu-' . $menu_slug)) {
                 unset($menu[$id]);
-            } elseif ($object->isRestricted($menu_slug)) {
+            } elseif ($resource->is_restricted($menu_slug)) {
                 if (count($subs)) {
                     $submenu[$item[2]] = $subs;
                 } else {
@@ -308,9 +310,11 @@ class AAM_Service_AdminMenu
             }
         }
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::BACKEND_MENU
+        );
 
-        if ($object->isRestricted($id)) {
+        if ($resource->is_restricted($id)) {
             wp_die(
                 __('Sorry, you are not allowed to view this page.', AAM_KEY),
                 'aam_access_denied'
@@ -335,11 +339,14 @@ class AAM_Service_AdminMenu
     {
         global $submenu;
 
-        $object   = AAM::getUser()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE);
-        $filtered = array();
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::BACKEND_MENU
+        );
+
+        $filtered = [];
 
         foreach ($submenu[$parent[2]] as $id => $item) {
-            if ($deny_all || $object->isRestricted($this->normalizeItem($item[2]))) {
+            if ($deny_all || $resource->is_restricted($this->normalizeItem($item[2]))) {
                 unset($submenu[$parent[2]][$id]);
             } else {
                 $filtered[] = $submenu[$parent[2]][$id];

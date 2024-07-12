@@ -36,46 +36,41 @@ class AAM_Restful_LoginRedirectService
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get current redirect
+            // Get current login redirect
             $this->_register_route('/redirect/login', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_redirect'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
 
-            // Create a redirect rule
+            // Set/create a login redirect
             $this->_register_route('/redirect/login', array(
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => array($this, 'set_redirect'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'type' => array(
-                        'description' => 'Rule type',
+                        'description' => 'Redirect type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => array_values(
-                            AAM_Framework_Service_LoginRedirect::REDIRECT_TYPE_ALIAS
-                        )
+                        'enum'        => AAM_Framework_Resource_LoginRedirect::ALLOWED_REDIRECT_TYPES
                     ),
                     'redirect_page_id' => array(
                         'description' => 'Existing page ID to redirect to',
                         'type'        => 'number',
                         'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_page_id($value, $request);
+                            return $this->_validate_redirect_page_id(
+                                $value, $request
+                            );
                         }
                     ),
                     'redirect_url' => array(
                         'description' => 'Valid URL to redirect to',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_url($value, $request);
-                        }
-                    ),
-                    'http_status_code' => array(
-                        'description' => 'HTTP Status Code',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_status_code($value, $request);
+                            return $this->_validate_redirect_url(
+                                $value, $request
+                            );
                         }
                     ),
                     'callback' => array(
@@ -88,7 +83,7 @@ class AAM_Restful_LoginRedirectService
                 )
             ));
 
-            // Delete the redirect rule
+            // Delete the login redirect
             $this->_register_route('/redirect/login', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_redirect'),
@@ -289,56 +284,6 @@ class AAM_Restful_LoginRedirectService
     }
 
     /**
-     * Validate HTTP status code
-     *
-     * @param string          $value
-     * @param WP_REST_Request $request
-     *
-     * @return boolean|WP_Error
-     *
-     * @access private
-     * @version 6.9.26
-     */
-    private function _validate_redirect_status_code($value, $request)
-    {
-        $response    = true;
-        $rule_type   = $request->get_param('type');
-        $status_code = intval($value);
-
-        $allowed = AAM_Framework_Service_LoginRedirect::HTTP_STATUS_CODES[$rule_type];
-
-        if (is_null($allowed) && !empty($status_code)) {
-            throw new InvalidArgumentException(
-                "Redirect type {$rule_type} does not accept status codes"
-            );
-        } elseif (is_array($allowed)) {
-            $list = array();
-
-            foreach($allowed as $range) {
-                $list = array_merge(
-                    $list,
-                    range(
-                        str_replace('xx', '00', $range),
-                        str_replace('xx', '99', $range)
-                    )
-                );
-            }
-
-            if (!in_array($status_code, $list, true)) {
-                $allowed = implode(', ', $allowed);
-
-                $response = new WP_Error(
-                    'rest_invalid_param',
-                    "For redirect type {$rule_type} allowed status codes are {$allowed}",
-                    array('status'  => 400)
-                );
-            }
-        }
-
-        return $response;
-    }
-
-    /**
      * Get service
      *
      * @param WP_REST_Request $request
@@ -351,7 +296,7 @@ class AAM_Restful_LoginRedirectService
     private function _get_service(WP_REST_Request $request)
     {
         return AAM_Framework_Manager::login_redirect([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

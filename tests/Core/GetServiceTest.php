@@ -46,7 +46,7 @@ class GetServiceTest extends TestCase
         );
 
         $this->assertEquals(
-            'AAM_Service_DeniedRedirect',
+            'AAM_Service_AccessDeniedRedirect',
             get_class(apply_filters('aam_get_service_filter', null, 'access-denied-redirect'))
         );
 

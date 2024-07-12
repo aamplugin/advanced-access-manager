@@ -71,10 +71,10 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', AAM_KEY),
                 'value'       => $service->get_config('core.settings.tips')
             ),
-            'core.settings.multiSubject' => array(
+            'core.settings.multi_access_levels' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),
                 'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),
-                'value'       => $service->get_config('core.settings.multiSubject')
+                'value'       => $service->get_config('core.settings.multi_access_levels')
             ),
             'core.settings.merge.preference' => array(
                 'title'       => __('Default Access Settings Merging Preference', AAM_KEY),

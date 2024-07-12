@@ -6820,17 +6820,6 @@
         //load the UI javascript support
         UI();
 
-        // Migration log downloader
-        if ($('#download-migration-log').length) {
-            $('#download-migration-log').bind('click', function() {
-                getAAM().downloadFile(
-                    $('#migration-errors-container').html(),
-                    'migration-error.log',
-                    'text/plain'
-                );
-            });
-        }
-
         //initialize help context
         $('.aam-help-menu').each(function () {
             var target = $(this).data('target');

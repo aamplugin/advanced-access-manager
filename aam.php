@@ -44,14 +44,26 @@ class AAM
     private static $_instance = null;
 
     /**
-     * User Subject
+     * Current user (legacy version)
      *
-     * @var AAM_Core_Subject_User|AAM_Core_Subject_Visitor
+     * @var AAM_Core_Subject
      *
      * @access private
-     * @version 6.0.0
+     * @version 7.0.0
+     * @deprecated 7.0.0 Replaced with _current_user
+     * @todo Remove in July 2025
      */
-    private $_user = null;
+    private $_legacy_current_user = null;
+
+    /**
+     * Current user
+     *
+     * @var AAM_Framework_AccessLevel_Interface
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_current_user = null;
 
     /**
      * Initialize the AAM Object
@@ -66,33 +78,17 @@ class AAM
      */
     protected function __construct()
     {
-        // Initialize current user
-        $this->initializeUser();
-
         // Make sure if user is changed dynamically, AAM adjusts accordingly
         add_action('set_current_user', function() {
-            $this->initializeUser();
+            $this->_legacy_current_user = null;
+            $this->_current_user        = null;
         });
 
         // The same with with after user login. WordPress core has bug with this
         add_action('wp_login', function($_, $user) {
-            $this->initializeUser($user);
+            $this->_init_current_user($user);
+            $this->_init_legacy_current_user($user);
         }, 10, 2);
-    }
-
-    /**
-     * Set Current User
-     *
-     * @param AAM_Core_Subject $user
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function setUser(AAM_Core_Subject $user)
-    {
-        $this->_user = $user;
     }
 
     /**
@@ -115,27 +111,43 @@ class AAM
      *
      * @access public
      * @version 6.0.0
+     * @deprecated 7.0.0 Replaced with AAM::current_user();
      */
     public static function getUser()
     {
-        return self::getInstance()->_user;
+        if (self::getInstance()->_legacy_current_user === null) {
+            self::getInstance()->_init_legacy_current_user();
+        }
+
+        return self::getInstance()->_legacy_current_user;
     }
 
     /**
-     * Change current user
+     * Get current user
      *
-     * This method is triggered if some process updates current user
-     *
-     * @return AAM_Core_Subject
-     *
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
-     * @since 6.0.0  Initial implementation of the method
+     * @return AAM_Framework_AccessLevel_Interface
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function initializeUser($user = null)
+    public static function current_user()
+    {
+        if (self::getInstance()->_current_user === null) {
+            self::getInstance()->_init_current_user();
+        }
+
+        return self::getInstance()->_current_user;
+    }
+
+    /**
+     * Initialize current user
+     *
+     * @return void
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _init_current_user($user = null)
     {
         global $current_user;
 
@@ -146,18 +158,42 @@ class AAM
             $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
         }
 
-        // Change current user
-        if ($id) {
-            $user = new AAM_Core_Subject_User($id);
+        // Set current user
+        if (is_numeric($id) && $id > 0) {
+            $this->_current_user = self::api()->user($id);
         } else {
-            $user = new AAM_Core_Subject_Visitor();
+            $this->_current_user = self::api()->visitor();
+        }
+    }
+
+    /**
+     * Initialize legacy current user
+     *
+     * @return void
+     *
+     * @access private
+     * @version 7.0.0
+     * @deprecated 7.0.0
+     * @todo Remove in July 2025 legacy subject implementation
+     */
+    private function _init_legacy_current_user($user = null)
+    {
+        global $current_user;
+
+        // Important! Do not use WP core function to avoid loop
+        if (is_a($user, 'WP_User')) {
+            $id = $user->ID;
+        } else {
+            $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
         }
 
-        $this->setUser($user);
-
-        $user->initialize();
-
-        return $user;
+        // Set current user
+        if (is_numeric($id) && $id > 0) {
+            $this->_legacy_current_user = new AAM_Core_Subject_User($id);
+            $this->_legacy_current_user->initialize();
+        } else {
+            $this->_legacy_current_user = new AAM_Core_Subject_Visitor();
+        }
     }
 
     /**
@@ -191,15 +227,15 @@ class AAM
      */
     public static function onPluginsLoaded()
     {
-        // Load the core service first
-        require_once __DIR__ . '/application/Service/Core.php';
-
         // Load all the defined AAM services
-        foreach (new DirectoryIterator(__DIR__ . '/application/Service') as $service) {
-            if ($service->isFile()) {
-                require_once $service->getPathname();
-            }
-        }
+        AAM_Service_Core::bootstrap();
+        AAM_Service_Url::bootstrap();
+        AAM_Service_LoginRedirect::bootstrap();
+        AAM_Service_LogoutRedirect::bootstrap();
+
+
+        AAM_Service_SecureLogin::bootstrap();
+        AAM_Service_Jwt::bootstrap();
 
         do_action('aam_services_loaded');
 

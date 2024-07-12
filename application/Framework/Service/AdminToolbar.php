@@ -34,10 +34,10 @@ class AAM_Framework_Service_AdminToolbar
     public function get_item_list($inline_context = null)
     {
         try {
-            $result  = array();
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->reloadObject(
-                AAM_Core_Object_Toolbar::OBJECT_TYPE
+            $result       = [];
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::TOOLBAR, null, true
             );
 
             // Getting the menu cache so we can build the list
@@ -47,7 +47,7 @@ class AAM_Framework_Service_AdminToolbar
                 foreach($cache as $branch) {
                     array_push(
                         $result,
-                        $this->_prepare_item_branch($branch, $object, true)
+                        $this->_prepare_item_branch($branch, $resource, true)
                     );
                 }
             }
@@ -116,11 +116,13 @@ class AAM_Framework_Service_AdminToolbar
         $id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $menu    = $this->get_item_by_id($id);
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
+            $menu         = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::TOOLBAR
+            );
 
-            if ($object->store($menu['slug'], $is_hidden) === false) {
+            if (!$resource->set_explicit_setting($menu['slug'], $is_hidden)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -148,25 +150,28 @@ class AAM_Framework_Service_AdminToolbar
     public function delete_item_permission($id, $inline_context = null)
     {
         try {
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
-            $menu    = $this->get_item_by_id($id);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::TOOLBAR
+            );
+
+            $menu = $this->get_item_by_id($id);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
             if ($menu['is_inherited'] === false) {
-                $found       = false;
-                $new_options = array();
+                $found    = false;
+                $settings = [];
 
-                foreach($object->getExplicitOption() as $slug => $is_restricted) {
+                foreach($resource->get_explicit_settings() as $slug => $effect) {
                     if ($slug === $menu['slug']) {
                         $found = true;
                     } else {
-                        $new_options[$slug] = $is_restricted;
+                        $settings[$slug] = $effect;
                     }
                 }
 
                 if ($found) {
-                    $success = $object->setExplicitOption($new_options)->save();
+                    $success = $resource->set_explicit_settings($settings);
                 } else {
                     throw new OutOfRangeException(
                         'Setting for the menu item does not exist'
@@ -202,10 +207,12 @@ class AAM_Framework_Service_AdminToolbar
     {
         try {
             // Reset the object
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
+            $access_level = $this->_get_access_level($inline_context);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::TOOLBAR
+            );
 
-            if ($object->reset()) {
+            if ($resource->reset()) {
                 $result = $this->get_item_list($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');
@@ -220,18 +227,19 @@ class AAM_Framework_Service_AdminToolbar
     /**
      * Prepare the item branch
      *
-     * @param object                  $branch
-     * @param AAM_Core_Object_Toolbar $object
-     * @param boolean                 $is_top_level
+     * @param object                         $branch
+     * @param AAM_Framework_Resource_Toolbar $resource
+     * @param boolean                        $is_top_level
      *
      * @return array
      *
      * @access private
      * @version 6.9.13
      */
-    private function _prepare_item_branch($branch, $object, $is_top_level = false)
-    {
-        $response = $this->_prepare_item($branch, $object, $is_top_level);
+    private function _prepare_item_branch(
+        $branch, $resource, $is_top_level = false
+    ) {
+        $response = $this->_prepare_item($branch, $resource, $is_top_level);
 
         if ($is_top_level) {
             $response['children'] = array();
@@ -239,7 +247,7 @@ class AAM_Framework_Service_AdminToolbar
             foreach($branch['children'] as $child) {
                 array_push(
                     $response['children'],
-                    $this->_prepare_item($child, $object)
+                    $this->_prepare_item($child, $resource)
                 );
             }
         }
@@ -250,29 +258,29 @@ class AAM_Framework_Service_AdminToolbar
     /**
      * Normalize and prepare the menu item model
      *
-     * @param object               $menu_item
-     * @param AAM_Core_Object_Menu $object,
-     * @param bool                 $is_top_level
+     * @param object                         $menu_item
+     * @param AAM_Framework_Resource_Toolbar $resource,
+     * @param bool                           $is_top_level
      *
      * @return array
      *
      * @access private
      * @version 6.9.13
      */
-    private function _prepare_item($item, $object, $is_top_level = false)
+    private function _prepare_item($item, $resource, $is_top_level = false)
     {
         // Add toolbar- prefix to define that this is the top level menu.
         // WordPress by default gives the same menu id to the first
         // submenu
         $slug     = ($is_top_level ? 'toolbar-' : '') . $item['id'];
-        $explicit = $object->getExplicitOption();
+        $explicit = $resource->get_explicit_settings();
 
         $response = array(
             'id'            => abs(crc32($slug)),
             'slug'          => $slug,
             'uri'           => $this->_prepare_item_uri($item['href']),
             'name'          => $this->_prepare_item_name($item),
-            'is_hidden'     => $object->isHidden($slug),
+            'is_hidden'     => $resource->is_hidden($slug),
             'is_inherited'  => !array_key_exists($slug, $explicit)
         );
 

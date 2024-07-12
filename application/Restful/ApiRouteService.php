@@ -244,7 +244,7 @@ class AAM_Restful_ApiRouteService
     private function _get_service($request)
     {
         return AAM_Framework_Manager::api_routes([
-            'subject'        => $this->_determine_subject($request),
+            'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
     }

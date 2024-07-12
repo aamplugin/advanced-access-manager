@@ -71,7 +71,7 @@ class AAM_Restful_MuService
     public function get_access_level($access_level, $request)
     {
         if (is_null($access_level)) {
-            $access_level = $this->_determine_subject($request);
+            $access_level = $this->_determine_access_level($request);
         }
 
         return $access_level;

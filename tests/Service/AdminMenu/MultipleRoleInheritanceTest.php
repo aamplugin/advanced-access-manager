@@ -35,7 +35,7 @@ class MultipleRoleInheritanceTest extends TestCase
     {
         // Enable multi-role support
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         // Set current User. Emulate that this is admin login
@@ -69,7 +69,7 @@ class MultipleRoleInheritanceTest extends TestCase
     {
         // Enable multi-role support
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         $user = AAM::getUser();
@@ -120,7 +120,7 @@ class MultipleRoleInheritanceTest extends TestCase
     {
         // Enable multi-role support
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         $user = AAM::getUser();
@@ -169,7 +169,7 @@ class MultipleRoleInheritanceTest extends TestCase
     {
         // Enable multi-role support
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         $user = AAM::getUser();
@@ -227,7 +227,7 @@ class MultipleRoleInheritanceTest extends TestCase
     {
         // Enable multi-role support
         AAM_Framework_Manager::configs()->set_config(
-            'core.settings.multiSubject', true
+            'core.settings.multi_access_levels', true
         );
 
         $user = AAM::getUser();

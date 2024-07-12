@@ -16,6 +16,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @version 6.9.31
+ * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_AccessPolicy
  */
 class AAM_Core_Object_Policy extends AAM_Core_Object
 {

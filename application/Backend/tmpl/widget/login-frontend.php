@@ -17,7 +17,7 @@ if (defined('AAM_KEY')) {
         echo $this->args['after_title'];
     } elseif (is_user_logged_in()) {
         echo $this->args['before_title'];
-        echo str_replace('%username%', AAM::getUser()->display_name, esc_js($this->args['user-title']));
+        echo str_replace('%username%', AAM::current_user()->display_name, esc_js($this->args['user-title']));
         echo $this->args['after_title'];
     }
 

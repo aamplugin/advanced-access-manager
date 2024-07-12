@@ -95,13 +95,13 @@ class AAM_Framework_Service_AccessDeniedRedirect
     public function get_redirect($area = null, $inline_context = null)
     {
         try {
-            $object = $this->_get_subject($inline_context)->reloadObject(
-                AAM_Core_Object_Redirect::OBJECT_TYPE
+            $resource = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, true
             );
 
             $redirects = $this->_prepare_redirects(
-                $object->getOption(),
-                !$object->isOverwritten()
+                $resource->get_settings(),
+                !$resource->is_overwritten()
             );
 
             if (!empty($area)) {
@@ -132,17 +132,18 @@ class AAM_Framework_Service_AccessDeniedRedirect
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $data   = $this->_validate_redirect($redirect);
-            $object = $this->_get_subject($inline_context)->getObject(
-                AAM_Core_Object_Redirect::OBJECT_TYPE
+            $data     = $this->_validate_redirect($redirect);
+            $resource = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
             );
 
-            // Merging explicit options
-            $new_option = array_merge($object->getExplicitOption(), $data);
-            $result     = $object->setExplicitOption($new_option)->save();
+            // Store the explicit settings
+            $result = $resource->set_explicit_settings($data);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
+            } else {
+                $result = $resource->get_explicit_settings();
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -165,14 +166,14 @@ class AAM_Framework_Service_AccessDeniedRedirect
     public function reset($area = null, $inline_context = null)
     {
         try {
-            $object = $this->_get_subject($inline_context)->getObject(
-                AAM_Core_Object_Redirect::OBJECT_TYPE
+            $resource = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
             );
 
             if (empty($area)) {
-                $success = $object->reset();
+                $success = $resource->reset();
             } else {
-                $settings     = $object->getExplicitOption();
+                $settings     = $resource->get_explicit_settings();
                 $new_settings = array();
 
                 foreach($settings as $k => $v) {
@@ -181,7 +182,7 @@ class AAM_Framework_Service_AccessDeniedRedirect
                     }
                 }
 
-                $success = $object->setExplicitOption($new_settings)->save();
+                $success = $resource->set_explicit_settings($new_settings);
             }
 
             if ($success) {

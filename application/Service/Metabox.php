@@ -155,12 +155,14 @@ class AAM_Service_Metabox
     {
         global $wp_registered_widgets;
 
-        $object = AAM::getUser()->getObject('metabox');
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::METABOX
+        );
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
                 $callback = $this->getWidgetCallback($widget);
-                if ($object->isHidden('widgets', $callback)) {
+                if ($resource->is_hidden('widgets', $callback)) {
                     unregister_widget($callback);
                     // Remove it from registered widget global var!!
                     // INFORM: Why Unregister Widget does not clear global var?
@@ -310,11 +312,13 @@ class AAM_Service_Metabox
     {
         global $wp_registered_widgets;
 
-        $object = AAM::getUser()->getObject('metabox');
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::METABOX
+        );
 
         foreach ($wp_registered_widgets as $id => $widget) {
             $callback = $this->getWidgetCallback($widget);
-            if ($object->isHidden('widgets', $callback)) {
+            if ($resource->is_hidden('widgets', $callback)) {
                 unregister_widget($callback);
                 unset($wp_registered_widgets[$id]);
             }
@@ -355,10 +359,12 @@ class AAM_Service_Metabox
      */
     protected function removeMetaboxes($zone, $metaboxes, $screen_id)
     {
-        $object = AAM::getUser()->getObject('metabox');
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::METABOX
+        );
 
         foreach (array_keys($metaboxes) as $id) {
-            if ($object->isHidden($screen_id, $id)) {
+            if ($resource->is_hidden($screen_id, $id)) {
                 remove_meta_box($id, $screen_id, $zone);
             }
         }

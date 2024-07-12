@@ -8,26 +8,21 @@
  */
 
 /**
- * Role subject
+ * Role access level
  *
  * @package AAM
  *
- * @version 6.9.34
+ * @version 7.0.0
  */
-class AAM_Framework_AccessLevel_Role extends AAM_Framework_AccessLevel_Abstract
+class AAM_Framework_AccessLevel_Role implements AAM_Framework_AccessLevel_Interface
 {
 
+    use AAM_Framework_AccessLevel_BaseTrait;
+
     /**
-     * Collection of siblings
-     *
-     * Sibling is access level that is on the same level. For example, access level
-     * role can have siblings when user is assigned to multiple roles.
-     *
-     * @var array
-     *
-     * @version 6.9.34
+     * @inheritDoc
      */
-    private $_siblings = [];
+    const TYPE = AAM_Framework_Type_AccessLevel::ROLE;
 
     /**
      * @inheritDoc
@@ -41,34 +36,6 @@ class AAM_Framework_AccessLevel_Role extends AAM_Framework_AccessLevel_Abstract
             $levels->get(AAM_Framework_Type_AccessLevel::ALL),
             $this
         );
-    }
-
-    /**
-     * Add new siblings to the collection
-     *
-     * @param AAM_Framework_AccessLevel_Role $role
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public function add_sibling(AAM_Framework_AccessLevel_Role $role)
-    {
-        array_push($this->_siblings, $role);
-    }
-
-    /**
-     * Check if there are any siblings
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public function has_siblings()
-    {
-        return count($this->_siblings) > 0;
     }
 
 }

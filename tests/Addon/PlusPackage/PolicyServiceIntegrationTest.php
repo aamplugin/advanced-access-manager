@@ -11,9 +11,9 @@ namespace AAM\UnitTest\Addon\PlusPackage;
 
 use AAM,
     AAM_Core_Object_Post,
-    AAM_Core_Object_Policy,
     AAM_Core_Policy_Factory,
     PHPUnit\Framework\TestCase,
+    AAM_Framework_Type_Resource,
     AAM\UnitTest\Libs\ResetTrait,
     AAM\AddOn\PlusPackage\Object\Term;
 
@@ -566,10 +566,12 @@ class PolicyServiceIntegrationTest extends TestCase
             array('ID' => self::$policy_id)
         );
 
-        $object = AAM::getUser()->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
+        $resource = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::ACCESS_POLICY
+        );
 
         $this->assertTrue(
-            $object->updateOptionItem(self::$policy_id, true)->save()
+            $resource->set_explicit_setting(self::$policy_id, true)
         );
 
         // Reset Access Policy Factory cache

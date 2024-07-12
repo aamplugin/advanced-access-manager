@@ -22,6 +22,7 @@
  *
  * @package AAM
  * @version 6.9.31
+ * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_BackendMenu
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
