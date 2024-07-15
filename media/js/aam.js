@@ -3596,7 +3596,7 @@
                 } else if (current.level_type === 'type_posts') {
                     PreparePostListTable(reload);
                 } else if (current.level_type === 'type_terms') {
-                    PrepareTermListTable(CurrentLevel().scope, reload);
+                    PrepareTermListTable(CurrentLevel(), reload);
                 } else if (current.level_type === 'taxonomy_terms') {
                     PrepareTermListTable(null, reload)
                 }
@@ -4051,7 +4051,13 @@
                 $('#post-content .dataTables_wrapper').addClass('hidden');
                 $('#post-content .table').addClass('hidden');
 
-                $('#term-list').attr('data-scope', scope);
+                if (scope) {
+                    $('#term-list').attr('data-scope', scope.scope);
+                    $('#term-list').attr('data-scope-id', scope.scope_id);
+                } else {
+                    $('#term-list').removeAttr('data-scope');
+                    $('#term-list').removeAttr('data-scope-id');
+                }
 
                 if (!$('#term-list').hasClass('dataTable')) {
                     $('#term-list').DataTable({
@@ -4091,7 +4097,7 @@
                                 href: '#'
                             }).bind('click', function () {
                                 const scope  = $('#term-list').attr('data-scope');
-                                let scope_id = null;
+                                let scope_id = $('#term-list').attr('data-scope-id');
 
                                 // Preparing internal AAM term's id
                                 let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4099,8 +4105,7 @@
                                 // If scope is post, then we are withing certain
                                 // post type
                                 if (scope === 'post') {
-                                    id      += `|${data[4].post_type}`;
-                                    scope_id = data[4].post_type;
+                                    id += `|${scope_id}`;
                                 }
 
                                 NavigateToAccessForm({
@@ -4124,7 +4129,7 @@
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
                                             const scope = $('#term-list').attr('data-scope');
-                                            let scope_id = null;
+                                            let scope_id = $('#term-list').attr('data-scope-id');
 
                                             // Preparing internal AAM term's id
                                             let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4132,8 +4137,7 @@
                                             // If scope is post, then we are withing certain
                                             // post type
                                             if (scope === 'post') {
-                                                id      += `|${data[4].post_type}`;
-                                                scope_id = data[4].post_type;
+                                                id += `|${scope_id}`;
                                             }
 
                                             NavigateToAccessForm({
