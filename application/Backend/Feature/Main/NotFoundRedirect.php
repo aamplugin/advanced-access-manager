@@ -17,8 +17,7 @@
  * @package AAM
  * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_404Redirect
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_NotFoundRedirect extends AAM_Backend_Feature_Abstract
 {
 
     /**
@@ -29,37 +28,11 @@ class AAM_Backend_Feature_Main_404Redirect
     const ACCESS_CAPABILITY = 'aam_manage_404_redirect';
 
     /**
-     * Type of AAM core object
-     *
-     * @version 6.4.0
-     */
-    const OBJECT_TYPE = AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE;
-
-    /**
      * HTML template to render
      *
      * @version 6.0.0
      */
-    const TEMPLATE = 'service/404redirect.php';
-
-    /**
-     * Get option value
-     *
-     * @param string $name
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    public function getOption($name, $default = null)
-    {
-        $object = $this->getSubject()->getObject(self::OBJECT_TYPE);
-        $option = $object->getOption();
-
-        return (!empty($option[$name]) ? $option[$name] : $default);
-    }
+    const TEMPLATE = 'service/not-found-redirect.php';
 
     /**
      * Register 404 redirect feature
@@ -71,20 +44,14 @@ class AAM_Backend_Feature_Main_404Redirect
      */
     public static function register()
     {
-        AAM_Backend_Feature::registerFeature((object)array(
+        AAM_Backend_Feature::registerFeature((object) [
             'uid'        => '404redirect',
             'position'   => 50,
             'title'      => __('404 Redirect', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Default::UID,
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID
-            ),
             'view'       => __CLASS__
-        ));
+        ]);
     }
 
 }

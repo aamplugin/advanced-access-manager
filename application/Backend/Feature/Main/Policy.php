@@ -23,8 +23,7 @@
  * @package AAM
  * @version 6.8.4
  */
-class AAM_Backend_Feature_Main_Policy
-extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -241,7 +240,7 @@ extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAwar
      */
     protected function preparePolicyActionList($record)
     {
-        $subject = AAM_Backend_Subject::getInstance();
+        $access_level = AAM_Backend_AccessLevel::getInstance();
 
         $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);

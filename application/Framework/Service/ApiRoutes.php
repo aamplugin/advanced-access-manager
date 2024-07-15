@@ -10,11 +10,12 @@
 /**
  * AAM service for RESTful API routes
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
  * @since 6.9.10 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.35
  */
 class AAM_Framework_Service_ApiRoutes
 {
@@ -213,8 +214,11 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @return array
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.10
+     * @version 6.9.35
      */
     public function reset($inline_context = null)
     {
@@ -224,11 +228,10 @@ class AAM_Framework_Service_ApiRoutes
                 AAM_Framework_Type_Resource::API_ROUTE
             );
 
-            if ($resource->reset()) {
-                $result = $this->get_route_list($inline_context);
-            } else {
-                throw new RuntimeException('Failed to reset settings');
-            }
+            // Reset settings to default
+            $resource->reset();
+
+            $result = $this->get_route_list($inline_context);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

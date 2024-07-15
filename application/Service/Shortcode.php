@@ -84,8 +84,19 @@ class AAM_Service_Shortcode
 
                 return $shortcode->process();
             });
+
             add_shortcode('aam-login', function($args, $content) {
-                $shortcode = new AAM_Service_Shortcode_Handler_LoginForm($args, $content);
+                $shortcode = new AAM_Service_Shortcode_Handler_LoginForm(
+                    $args, $content
+                );
+
+                return $shortcode->run();
+            });
+
+            add_shortcode('aam-post-list', function($args, $content) {
+                $shortcode = new AAM_Service_Shortcode_Handler_PostList(
+                    $args, $content
+                );
 
                 return $shortcode->run();
             });

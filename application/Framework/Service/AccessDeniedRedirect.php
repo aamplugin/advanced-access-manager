@@ -10,71 +10,39 @@
 /**
  * AAM service Access Denied Redirect manager
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
  * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
  * @since 6.9.14 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.35
  */
 class AAM_Framework_Service_AccessDeniedRedirect
+    implements AAM_Framework_Service_ResourceInterface
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Redirect type aliases
+     * List of allowed rule types
      *
-     * To be a bit more verbose, we are renaming the legacy rule types to something
-     * that is more intuitive
-     *
-     * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
-     * @since 6.9.14 Initial implementation of the constant
-     *
-     * @version 6.9.22
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE_ALIAS = [
-        'default'  => 'default',
-        'login'    => 'login_redirect',
-        'message'  => 'custom_message',
-        'page'     => 'page_redirect',
-        'url'      => 'url_redirect',
-        'callback' => 'trigger_callback'
-    ];
-
-    /**
-     * Array of allowed HTTP status codes
-     *
-     * @version 6.9.26
-     */
-    const HTTP_STATUS_CODES = [
-        'default'          => [ '4xx', '5xx' ],
-        'custom_message'   => [ '4xx', '5xx' ],
-        'page_redirect'    => [ '3xx' ],
-        'url_redirect'     => [ '3xx' ],
-        'login_redirect'   => null,
-        'trigger_callback' => [ '3xx', '4xx', '5xx' ]
-    ];
-
-    /**
-     * Array of default HTTP status codes
-     *
-     * @version 6.9.26
-     */
-    const HTTP_DEFAULT_STATUS_CODES = [
-        'default'          => 401,
-        'custom_message'   => 401,
-        'page_redirect'    => 307,
-        'url_redirect'     => 307,
-        'login_redirect'   => null,
-        'trigger_callback' => 401
+    const ALLOWED_REDIRECT_TYPES = [
+        'default',
+        'custom_message',
+        'page_redirect',
+        'url_redirect',
+        'trigger_callback',
+        'login_redirect'
     ];
 
     /**
      * Allowed redirect areas
      *
-     * @version 6.9.33
+     * @version 7.0.0
      */
     const ALLOWED_REDIRECT_AREAS = [
         'frontend',
@@ -95,17 +63,14 @@ class AAM_Framework_Service_AccessDeniedRedirect
     public function get_redirect($area = null, $inline_context = null)
     {
         try {
-            $resource = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, true
-            );
-
+            $resource  = $this->get_resource(null, true, $inline_context);
             $redirects = $this->_prepare_redirects(
                 $resource->get_settings(),
                 !$resource->is_overwritten()
             );
 
             if (!empty($area)) {
-                $result = isset($redirects[$area]) ? $redirects[$area] : array();
+                $result = $redirects[$area];
             } else {
                 $result = array_values($redirects);
             }
@@ -119,8 +84,9 @@ class AAM_Framework_Service_AccessDeniedRedirect
     /**
      * Set the access denied redirect
      *
-     * @param array $redirect       Redirect settings
-     * @param array $inline_context Runtime context
+     * @param string $area           Redirect area
+     * @param array  $incoming_data  Redirect settings
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
@@ -128,22 +94,17 @@ class AAM_Framework_Service_AccessDeniedRedirect
      * @version 6.9.14
      * @throws RuntimeException If fails to persist the data
      */
-    public function set_redirect(array $redirect, $inline_context = null)
+    public function set_redirect($area, array $incoming_data, $inline_context = null)
     {
         try {
-            // Validating that incoming data is correct and normalize is for storage
-            $data     = $this->_validate_redirect($redirect);
-            $resource = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
-            );
-
-            // Store the explicit settings
-            $result = $resource->set_explicit_settings($data);
+            $resource = $this->get_resource(null, false, $inline_context);
+            $redirect = $this->_convert_to_redirect($incoming_data);
+            $result   = $resource->set_explicit_setting($area, $redirect);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
             } else {
-                $result = $resource->get_explicit_settings();
+                $result = $resource->get_setting($area);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -160,29 +121,27 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return boolean
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.14 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.14
+     * @version 6.9.35
      */
     public function reset($area = null, $inline_context = null)
     {
         try {
-            $resource = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
-            );
+            $resource = $this->get_resource(null, false, $inline_context);
 
             if (empty($area)) {
                 $success = $resource->reset();
             } else {
-                $settings     = $resource->get_explicit_settings();
-                $new_settings = array();
+                $settings = $resource->get_explicit_settings();
 
-                foreach($settings as $k => $v) {
-                    if (strpos($k, $area) !== 0) {
-                        $new_settings[$k] = $v;
-                    }
+                if (array_key_exists($area, $settings)) {
+                    unset($settings[$area]);
                 }
 
-                $success = $resource->set_explicit_settings($new_settings);
+                $success = $resource->set_explicit_settings($settings);
             }
 
             if ($success) {
@@ -198,6 +157,26 @@ class AAM_Framework_Service_AccessDeniedRedirect
     }
 
     /**
+     * Get Access Denied Redirect resource
+     *
+     * @param null    $resource_id
+     * @param boolean $reload
+     * @param array   $inline_context
+     *
+     * @return AAM_Framework_Resource_AccessDeniedRedirect
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource(
+        $resource_id = null, $reload = false, $inline_context = null
+    ) {
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, $reload
+        );
+    }
+
+    /**
      * Normalize and prepare the redirect details
      *
      * @param array $settings
@@ -206,29 +185,23 @@ class AAM_Framework_Service_AccessDeniedRedirect
      * @return array
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _prepare_redirects($settings, $is_inherited = false)
     {
-        // Split the redirect settings by area
-        $areas = array();
+        $result = [];
 
-        foreach($settings as $k => $v) {
-            $split = explode('.', $k);
-
-            if (!isset($areas[$split[0]])) {
-                $areas[$split[0]] = array();
+        foreach([ 'frontend', 'backend' ] as $area) {
+            if (array_key_exists($area, $settings)) {
+                $result[$area] = $this->_prepare_redirect(
+                    $settings[$area], $is_inherited
+                );
+            } else {
+                $result[$area] = $this->_prepare_redirect([], $is_inherited);
             }
-
-            $areas[$split[0]][str_replace($split[0] . '.', '', $k)] = $v;
         }
 
-        // Normalize each redirect
-        foreach($areas as $area => $data) {
-            $areas[$area] = $this->_prepare_redirect($area, $data, $is_inherited);
-        }
-
-        return $areas;
+        return $result;
     }
 
     /**
@@ -240,175 +213,86 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @return array
      *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
-     * @since 6.9.14 Initial implementation of the method
-     *
      * @access private
-     * @version 6.9.26
+     * @version 7.0.0
      */
-    private function _prepare_redirect($area, $settings, $is_inherited)
+    private function _prepare_redirect($settings, $is_inherited)
     {
-        // Determine current rule type. If none set, deny by default
-        if (isset($settings['redirect.type'])) {
-            $legacy_type = $settings['redirect.type'];
-        } else {
-            $legacy_type = 'default';
-        }
-
-        $response = array(
-            'area' => $area,
-            'type' => self::REDIRECT_TYPE_ALIAS[$legacy_type]
+        return array_merge(
+            [ 'type' => 'default' ],
+            $settings,
+            [ 'is_inherited' => $is_inherited ]
         );
-
-        if ($response['type'] === 'page_redirect') {
-            $response['redirect_page_id'] = intval($settings['redirect.page']);
-        } elseif ($response['type'] === 'url_redirect') {
-            $response['redirect_url'] = $settings['redirect.url'];
-        } elseif ($response['type'] === 'trigger_callback') {
-            $response['callback'] = $settings['redirect.callback'];
-        } elseif ($response['type'] === 'custom_message') {
-            $response['message']     = $settings['redirect.message'];
-
-            if (isset($settings['redirect.message.code'])) {
-                $response['http_status_code'] = $settings['redirect.message.code'];
-            }
-        } elseif ($response['type'] === 'default') {
-            if (isset($settings['redirect.default.code'])) {
-                $response['http_status_code'] = $settings['redirect.default.code'];
-            }
-        }
-
-        $response['is_inherited'] = $is_inherited;
-
-        return $response;
     }
 
     /**
-     * Validate and normalize the incoming redirect data
+     * Validate and prepare redirect data
      *
-     * @param array $rule Incoming rule's data
+     * @param array $data
      *
      * @return array
      *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
-     * @since 6.9.14 Initial implementation of the method
-     *
      * @access private
-     * @version 6.9.26
+     * @version 7.0.0
      */
-    private function _validate_redirect(array $rule)
+    private function _convert_to_redirect($data)
     {
-        $normalized = array();
-
-        // Determine the area
-        $area = isset($rule['area']) ? $rule['area'] : null;
-
-        if (!in_array($area, self::ALLOWED_REDIRECT_AREAS, true)) {
-            throw new InvalidArgumentException(
-                'The `area` is not valid. It should be either frontend or backend'
-            );
+        // First, let's validate tha the rule type is correct
+        if (!in_array($data['type'], self::ALLOWED_REDIRECT_TYPES, true)) {
+            throw new InvalidArgumentException('The valid `type` is required');
         }
 
-        $type       = array_search($rule['type'], self::REDIRECT_TYPE_ALIAS);
-        $normalized[$area . '.redirect.type'] = $type;
+        $result = [
+            'type' => $data['type']
+        ];
 
-        if (empty($type)) {
-            throw new InvalidArgumentException('The `type` is required');
-        } elseif ($type === 'page') {
-            $page_id = intval($rule['redirect_page_id']);
+        if ($data['type'] === 'custom_message') {
+            $message = wp_kses_post($data['message']);
+
+            if (empty($message)) {
+                throw new InvalidArgumentException('The `message` is required');
+            } else {
+                $result['message'] = $message;
+            }
+        } elseif ($data['type'] === 'page_redirect') {
+            $page_id = intval($data['redirect_page_id']);
 
             if ($page_id === 0) {
                 throw new InvalidArgumentException(
                     'The `redirect_page_id` is required'
                 );
             } else {
-                $normalized[$area . '.redirect.page'] = $page_id;
+                $result['redirect_page_id'] = $page_id;
             }
-        } elseif ($type === 'url') {
-            $redirect_url = wp_validate_redirect($rule['redirect_url']);
+        } elseif ($data['type'] === 'url_redirect') {
+            $redirect_url = wp_validate_redirect($data['redirect_url']);
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(
                     'The valid `redirect_url` is required'
                 );
             } else {
-                $normalized[$area . '.redirect.url'] = $redirect_url;
+                $result['redirect_url'] = $redirect_url;
             }
-        } elseif ($type === 'callback') {
-            if (is_callable($rule['callback'], true)) {
-                $normalized[$area . '.redirect.callback'] = $rule['callback'];
-            } else {
+        } elseif ($data['type'] === 'trigger_callback') {
+            if (!is_callable($data['callback'], true)) {
                 throw new InvalidArgumentException(
                     'The valid `callback` is required'
                 );
-            }
-        } elseif ($type === 'message') {
-            if (is_callable($rule['message'], true)) {
-                $normalized[$area . '.redirect.message'] = wp_kses_post(
-                    $rule['message']
-                );
             } else {
-                throw new InvalidArgumentException(
-                    'The access denied `message` is required'
-                );
+                $result['callback'] = $data['callback'];
             }
         }
 
-        // If HTTP status code is defined, save it as well
-        if (!empty($rule['http_status_code'])) {
-            $normalized["{$area}.redirect.{$type}.code"] = $this->_validate_status_code(
-                $rule['http_status_code'], $rule['type']
-            );
-        }
+        if (!empty($data['http_status_code'])) {
+            $code = intval($data['http_status_code']);
 
-        return $normalized;
-    }
-
-    /**
-     * Validate status code
-     *
-     * @param int    $code
-     * @param string $redirect_type
-     *
-     * @return int
-     * @throws InvalidArgumentException
-     * @access private
-     *
-     * @version 6.9.26
-     */
-    private function _validate_status_code($code, $redirect_type)
-    {
-        $allowed_codes = self::HTTP_STATUS_CODES[$redirect_type];
-        $code          = intval($code);
-
-        if (is_null($allowed_codes) && !empty($code)) {
-            throw new InvalidArgumentException(
-                "Redirect type {$redirect_type} does not accept status codes"
-            );
-        } elseif (is_array($allowed_codes)) {
-            $list = array();
-
-            foreach($allowed_codes as $range) {
-                $list = array_merge(
-                    $list,
-                    range(
-                        str_replace('xx', '00', $range),
-                        str_replace('xx', '99', $range)
-                    )
-                );
-            }
-
-            if (!in_array($code, $list, true)) {
-                $allowed = implode(', ', $allowed_codes);
-
-                throw new InvalidArgumentException(
-                    "For redirect type {$redirect_type} allowed status codes are {$allowed}"
-                );
+            if ($code >= 300) {
+                $result['http_status_code'] = $code;
             }
         }
 
-        return $code;
+        return $result;
     }
 
 }

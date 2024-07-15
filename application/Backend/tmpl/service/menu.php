@@ -15,8 +15,6 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $object = AAM_Backend_Subject::getInstance()->getObject(AAM_Core_Object_Menu::OBJECT_TYPE); ?>
-
     <div class="aam-feature" id="admin_menu-content">
         <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
@@ -37,19 +35,19 @@
             </div>
         </div>
 
-        <?php echo apply_filters('aam_backend_menu_mode_panel_filter', '', $object); ?>
+        <?php echo apply_filters('aam_backend_menu_mode_panel_filter', '', AAM_Backend_AccessLevel::getInstance()->backend_menu()); ?>
 
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
             $first = false;
             $menu  = AAM_Framework_Manager::backend_menu(array(
-                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+                'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
             ))->get_item_list();
 
             if (!empty($menu)) {
                 foreach ($menu as $menu) {
             ?>
-                    <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_Subject::getInstance()->hasCapability($menu['capability']) ? 1 : '0.5'; ?>">
+                    <div class="panel panel-default" style="opacity: <?php echo AAM_Backend_AccessLevel::getInstance()->has_cap($menu['capability']) ? 1 : '0.5'; ?>">
                         <div class="panel-heading" role="tab" id="menu-<?php echo esc_js($menu['id']); ?>-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#admin-menu" href="#menu-<?php echo esc_js($menu['id']); ?>" aria-controls="menu-<?php echo esc_js($menu['id']); ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>

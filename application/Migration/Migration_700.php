@@ -69,6 +69,24 @@ final class AAM_Migration_700
                 return $this->_convert_legacy_logout_redirect($data);
             }
         );
+
+        // Convert Access Denied Redirect settings to new format
+        $this->_transform_legacy_settings(
+            AAM_Core_Object_Redirect::OBJECT_TYPE,
+            AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT,
+            function($data) {
+                return $this->_convert_legacy_access_denied_redirect($data);
+            }
+        );
+
+        // Convert 404 Redirect settings to new format
+        $this->_transform_legacy_settings(
+            AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE,
+            AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT,
+            function($data) {
+                return $this->_convert_legacy_not_found_redirect($data);
+            }
+        );
     }
 
     /**
@@ -87,10 +105,14 @@ final class AAM_Migration_700
 
         // The list of changes
         $changes = [
-            'core.settings.multiSubject'           => 'core.settings.multi_access_levels',
-            'core.service.login-redirect.enabled'  => 'service.log_redirect.enabled',
-            'core.service.logout-redirect.enabled' => 'service.logout_redirect.enabled',
-            'core.service.denied-redirect.enabled' => 'service.access_denied_redirect.enabled'
+            'core.settings.multiSubject'               => 'core.settings.multi_access_levels',
+            'core.service.login-redirect.enabled'      => 'service.log_redirect.enabled',
+            'core.service.logout-redirect.enabled'     => 'service.logout_redirect.enabled',
+            'core.service.denied-redirect.enabled'     => 'service.access_denied_redirect.enabled',
+            'core.service.404-redirect.enabled'        => 'service.not_found_redirect.enabled',
+            'core.service.content.enabled'             => 'service.content.enabled',
+            'core.service.content.manageAllPostTypes'  => 'service.content.manage_all_post_types',
+            'core.service.content.manageAllTaxonomies' => 'service.content.manage_all_taxonomies'
         ];
 
         foreach($changes as $legacy => $new) {
@@ -226,6 +248,122 @@ final class AAM_Migration_700
     }
 
     /**
+     * Convert legacy access denied redirect
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_access_denied_redirect($data)
+    {
+        $result = [];
+
+        // Group frontend and backend settings
+        $settings = [
+            'frontend' => [],
+            'backend'  => []
+        ];
+
+        foreach(['frontend', 'backend'] as $area) {
+            foreach($data as $key => $value) {
+                if (strpos($key, $area) === 0) {
+                    $settings[$area][str_replace("{$area}.", '' , $key)] = $value;
+                }
+            }
+        }
+
+        // Do the actual conversion
+        foreach($settings as $area => $setting) {
+            if (!empty($setting)) {
+                $redirect = [];
+
+                $type = $setting['redirect.type'];
+
+                if ($type === 'message') {
+                    $redirect['type']    = 'custom_message';
+                    $redirect['message'] = $setting['redirect.message'];
+
+                    if (isset($setting['redirect.message.code'])) {
+                        $redirect['http_status_code'] = intval(
+                            $setting['redirect.message.code']
+                        );
+                    }
+                } elseif ($type === 'page') {
+                    $redirect = [
+                        'type'             => 'page_redirect',
+                        'redirect_page_id' => intval($setting['redirect.page'])
+                    ];
+                } elseif ($type === 'url') {
+                    $redirect = [
+                        'type'         => 'url_redirect',
+                        'redirect_url' => $setting['redirect.url']
+                    ];
+                } elseif ($type === 'callback') {
+                    $redirect = [
+                        'type'     => 'trigger_callback',
+                        'callback' => $setting['redirect.callback']
+                    ];
+                } elseif ($type === 'login') {
+                    $redirect = [ 'type' => 'login_redirect' ];
+                } else {
+                    $redirect['type'] = 'default';
+
+                    if (isset($setting['redirect.default.code'])) {
+                        $redirect['http_status_code'] = intval(
+                            $setting['redirect.default.code']
+                        );
+                    }
+                }
+
+                $result[$area] = $redirect;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert legacy 404 (Not Found) Redirect
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_not_found_redirect($data)
+    {
+        $type = $data['404.redirect.type'];
+
+        if ($type === 'page') {
+            $result = [
+                'type'             => 'page_redirect',
+                'redirect_page_id' => intval($data['404.redirect.page'])
+            ];
+        } elseif ($type === 'url') {
+            $result = [
+                'type'         => 'url_redirect',
+                'redirect_url' => $data['404.redirect.url']
+            ];
+        } elseif ($type === 'callback') {
+            $result = [
+                'type'     => 'trigger_callback',
+                'callback' => $data['404.redirect.callback']
+            ];
+        } elseif ($type !== 'login_redirect') {
+            $result = [
+                'type' => 'default'
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Convert legacy URL Access rules to new format
      *
      * @param array $rules
@@ -240,9 +378,9 @@ final class AAM_Migration_700
         $result = [];
 
         foreach($rules as $url => $rule) {
-            if (in_array($rule['type'], ['allow', 'default'], true)) {
+            if ($rule['type'] === 'allow') {
                 $result[$url] = [
-                    'effect' => $rule['type'] === 'allow' ? 'allow' : 'deny',
+                    'effect' => 'allow',
                     'url'    => $url
                 ];
             } else {

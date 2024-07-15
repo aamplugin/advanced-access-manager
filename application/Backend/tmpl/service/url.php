@@ -12,23 +12,39 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php
+        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $service      = $access_level->urls();
+    ?>
+
     <div class="aam-feature" id="uri-content">
-        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
-            <div class="row">
-                <div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
+                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
                     <p class="aam-info">
                         <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to an unlimited number of individual URLs. With the premium %sComplete Package%s, you can use the wildcard [*] denotation to manage access to a specific website section (e.g. [/members/*], [/premium*]) or make the entire website private. To learn more, refer to our official documentation page %shere%s.', 'strong', 'i', 'i'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/managing-access-to-wordpress-website-urls?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
-                </div>
-            </div>
-        <?php } ?>
+                <?php } ?>
 
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="aam-overwrite" id="aam-uri-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-uri-overwrite" style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="uri-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
                 </div>
+
+                <table id="uri-list" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th width="60%"><?php echo __('URL', AAM_KEY); ?></th>
+                            <th width="20%"><?php echo __('Type', AAM_KEY); ?></th>
+                            <th>Type Details</th>
+                            <th>HTTP Code</th>
+                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th>Additional Details</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
@@ -41,8 +57,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with premium Complete Package)]', 'small'); ?></label>
-                            <input type="text" class="form-control form-clearable" id="uri-rule" placeholder="Enter valid URL" />
+                            <label><?php echo AAM_Backend_View_Helper::preparePhrase('Enter URL [(wildcard * is available with premium add-on)]', 'small'); ?></label>
+                            <input
+                                type="text"
+                                class="form-control form-clearable"
+                                id="uri-rule"
+                                placeholder="<?php echo __('Enter valid URL', AAM_KEY); ?>"
+                            />
                         </div>
 
                         <label><?php echo __('What should be done when a URL is matched?', AAM_KEY); ?></label><br />
@@ -59,7 +80,7 @@
                             <input type="radio" name="uri.access.type" id="uri-access-deny-message" data-action="#uri-access-custom-message" value="custom_message" />
                             <label for="uri-access-deny-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                         </div>
-                        <?php if ($this->getSubject()->isVisitor()) { ?>
+                        <?php if ($access_level->is_visitor()) { ?>
                             <div class="radio">
                                 <input type="radio" name="uri.access.type" id="uri-access-deny-login_redirect" value="login_redirect" />
                                 <label for="uri-access-deny-login_redirect"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
@@ -87,10 +108,10 @@
                             <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                             <?php
                                 wp_dropdown_pages(array(
-                                    'depth' => 99,
-                                    'echo' => 1,
-                                    'id' => 'uri-access-page_redirect-value',
-                                    'class' => 'form-control form-clearable',
+                                    'depth'            => 99,
+                                    'echo'             => 1,
+                                    'id'               => 'uri-access-page_redirect-value',
+                                    'class'            => 'form-control form-clearable',
                                     'show_option_none' => __('-- Select Page --', AAM_KEY)
                                 ));
                             ?>
@@ -148,25 +169,6 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-12">
-                <table id="uri-list" class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th width="60%"><?php echo __('URL', AAM_KEY); ?></th>
-                            <th width="20%"><?php echo __('Type', AAM_KEY); ?></th>
-                            <th>Type Details</th>
-                            <th>HTTP Code</th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
-                            <th>Additional Details</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
             </div>
         </div>
     </div>

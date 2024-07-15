@@ -83,20 +83,18 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * Constructor
      *
-     * @param AAM_Framework_Proxy_Interface $proxy_instance
+     * @param object $core_instance
      *
      * @return void
      *
      * @access public
      * @version 7.0.0
      */
-    public function __construct($proxy_instance = null)
+    public function __construct($core_instance = null)
     {
-        $this->_proxy_instance = $proxy_instance;
-
         // Extend access level with more methods
         $closures = apply_filters(
-            'aam_access_level_methods_filter', [], $this, $proxy_instance
+            'aam_access_level_methods_filter', [], $this, $core_instance
         );
 
         if (is_array($closures)) {
@@ -107,8 +105,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
             $this->_extended_methods = $closures;
         }
 
-        if (method_exists($this, 'initialize_hooks')) {
-            $this->initialize_hooks();
+        if (method_exists($this, 'initialize')) {
+            $this->initialize($core_instance);
         };
     }
 
@@ -225,6 +223,14 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritdoc
      */
+    public function get_id()
+    {
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function add_sibling(AAM_Framework_AccessLevel_Interface $sibling)
     {
         array_push($this->_siblings, $sibling);
@@ -244,14 +250,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
     public function get_siblings()
     {
         return $this->_siblings;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function url($url = null, $reload = false)
-    {
-        return $this->get_resource(AAM_Framework_Type_Resource::URL, $url, $reload);
     }
 
     /**
@@ -280,6 +278,26 @@ trait AAM_Framework_AccessLevel_BaseTrait
     public function logout_redirect()
     {
         return AAM_Framework_Manager::logout_redirect([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function access_denied_redirect()
+    {
+        return AAM_Framework_Manager::access_denied_redirect([
+            'access_level' => $this
+        ]);
+    }
+
+     /**
+     * @inheritDoc
+     */
+    public function not_found_redirect()
+    {
+        return AAM_Framework_Manager::not_found_redirect([
             'access_level' => $this
         ]);
     }

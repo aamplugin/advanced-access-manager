@@ -62,7 +62,7 @@ class AAM_Restful_UrlService
                         'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Resource_Url::ALLOWED_RULE_TYPES
+                        'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
                     ),
                     'http_status_code' => array(
                         'description' => 'HTTP Status Code',
@@ -135,7 +135,7 @@ class AAM_Restful_UrlService
                         'description' => 'Rule type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Resource_Url::ALLOWED_RULE_TYPES
+                        'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
                     ),
                     'http_status_code' => array(
                         'description' => 'HTTP Status Code',

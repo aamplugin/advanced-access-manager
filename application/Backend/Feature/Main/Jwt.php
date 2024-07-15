@@ -18,8 +18,7 @@
  * @package AAM
  * @version 6.9.10
  */
-class AAM_Backend_Feature_Main_Jwt
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;

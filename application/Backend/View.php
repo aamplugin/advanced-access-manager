@@ -37,11 +37,11 @@ class AAM_Backend_View
      */
     protected function __construct()
     {
-        $subject = AAM_Backend_Subject::getInstance();
-
         // Allow other plugins to register new AAM UI tabs/features
         do_action(
-            'aam_init_ui_action', 'AAM_Backend_Feature::registerFeature', $subject
+            'aam_init_ui_action',
+            'AAM_Backend_Feature::registerFeature',
+            AAM_Backend_AccessLevel::getInstance()
         );
     }
 
@@ -113,9 +113,9 @@ class AAM_Backend_View
     {
         $response = null;
 
-        $action  = $this->getFromPost('sub_action');
-        $parts   = explode('.', $action);
-        $subject = AAM_Backend_Subject::getInstance();
+        $action       = $this->getFromPost('sub_action');
+        $parts        = explode('.', $action);
+        $access_level = AAM_Backend_AccessLevel::getInstance();
 
         if (count($parts) === 2) {
             $id = 'AAM_Backend_Feature_' . $parts[0];
@@ -127,7 +127,10 @@ class AAM_Backend_View
             }
 
             $response = apply_filters(
-                'aam_ajax_filter', $response, $subject->getSubject(), $action
+                'aam_ajax_filter',
+                $response,
+                $access_level->get_access_level(),
+                $action
             );
         } elseif ($action === 'renderContent') {
             $partial  = $this->getFromPost('partial');

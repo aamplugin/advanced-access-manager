@@ -29,7 +29,7 @@ class AAM_Service_NotFoundRedirect
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.404-redirect.enabled';
+    const FEATURE_FLAG = 'service.not_found_redirect.enabled';
 
     /**
      * Constructor
@@ -55,7 +55,7 @@ class AAM_Service_NotFoundRedirect
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_init_ui_action', function () {
-                    AAM_Backend_Feature_Main_404Redirect::register();
+                    AAM_Backend_Feature_Main_NotFoundRedirect::register();
                 });
             }
 
@@ -65,7 +65,7 @@ class AAM_Service_NotFoundRedirect
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('404 Redirect', AAM_KEY),
-                    'description' => __('Manage frontend 404 (Not Found) redirect for any group of users or individual user.', AAM_KEY),
+                    'description' => __('Handle frontend 404 (Not Found) redirects for any group of users or individual user.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -74,7 +74,7 @@ class AAM_Service_NotFoundRedirect
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -90,68 +90,50 @@ class AAM_Service_NotFoundRedirect
      * @access protected
      * @version 6.9.12
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
-        add_action('wp', array($this, 'wp'));
+        add_action('wp', function() {
+            global $wp_query;
+
+            if ($wp_query->is_404) { // Handle 404 redirect
+                $redirect = AAM::api()->user()->not_found_redirect()->get_redirect();
+
+                if ($redirect['type'] !== 'default') {
+                    AAM_Framework_Utility::do_redirect($redirect);
+                }
+            }
+        });
 
         // Policy generation hook
         add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+            'aam_generated_policy_filter',
+            function($policy, $resource_type, $options, $generator) {
+                return $this->generate_policy(
+                    $policy, $resource_type, $options, $generator
+                );
+            },
+            10,
+            4
+        );
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT
+                ) {
+                    $resource = new AAM_Framework_Resource_NotFoundRedirect(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
         );
 
         // Register the RESTful API
         AAM_Restful_NotFoundRedirectService::bootstrap();
-    }
-
-    /**
-     * Main frontend access control hook
-     *
-     * @return void
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.8.5  https://github.com/aamplugin/advanced-access-manager/issues/215
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/64
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @global WP_Post $post
-     * @version 6.9.26
-     */
-    public function wp()
-    {
-        global $wp_query;
-
-        if ($wp_query->is_404) { // Handle 404 redirect
-            $settings = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT
-            )->get_settings();
-
-            if (isset($settings['404.redirect.type'])) {
-                $type = $settings['404.redirect.type'];
-            } else {
-                $type = 'default';
-            }
-
-            if (isset($settings["404.redirect.code"])) {
-                $status = $settings["404.redirect.code"];
-            } else {
-                $status = null;
-            }
-
-            if ($type !== 'default') {
-                // Prepare the metadata
-                if (isset($settings["404.redirect.{$type}"])) {
-                    $metadata = array(
-                        $type    => $settings["404.redirect.{$type}"],
-                        'status' => $status
-                    );
-                } else {
-                    $metadata = array();
-                }
-
-                AAM_Core_Redirect::execute($type, $metadata);
-            }
-        }
     }
 
     /**
@@ -164,12 +146,12 @@ class AAM_Service_NotFoundRedirect
      *
      * @return array
      *
-     * @access public
+     * @access protected
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
+    protected function generate_policy($policy, $resource_type, $options, $generator)
     {
-        if ($resource_type === AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE) {
+        if ($resource_type === AAM_Framework_Resource_NotFoundRedirect::TYPE) {
             if (!empty($options)) {
                 $policy['Param'] = array_merge(
                     $policy['Param'],
@@ -181,8 +163,4 @@ class AAM_Service_NotFoundRedirect
         return $policy;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_NotFoundRedirect::bootstrap();
 }

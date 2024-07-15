@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 6.9.34
+ * Version: 6.9.35
  * Author: AAM <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
@@ -230,8 +230,10 @@ class AAM
         // Load all the defined AAM services
         AAM_Service_Core::bootstrap();
         AAM_Service_Url::bootstrap();
-        AAM_Service_LoginRedirect::bootstrap();
-        AAM_Service_LogoutRedirect::bootstrap();
+        // AAM_Service_LoginRedirect::bootstrap();
+        // AAM_Service_LogoutRedirect::bootstrap();
+        // AAM_Service_AccessDeniedRedirect::bootstrap();
+        AAM_Service_NotFoundRedirect::bootstrap();
 
 
         AAM_Service_SecureLogin::bootstrap();
@@ -299,8 +301,8 @@ class AAM
         //check PHP Version
         if (version_compare(PHP_VERSION, '5.6.40') === -1) {
             exit(__('PHP 5.6.40 or higher is required.', AAM_KEY));
-        } elseif (version_compare($wp_version, '5.0.0') === -1) {
-            exit(__('WP 5.0.0 or higher is required.', AAM_KEY));
+        } elseif (version_compare($wp_version, '5.8.0') === -1) {
+            exit(__('WP 5.8.0 or higher is required.', AAM_KEY));
         }
     }
 
@@ -353,7 +355,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.34');
+    define('AAM_VERSION', '6.9.35');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

@@ -250,7 +250,9 @@ class AAM_Backend_Manager
     public function printFooterJavascript()
     {
         if (AAM::isAAM()) {
-            $subject  = AAM_Backend_Subject::getInstance();
+            $access_level = AAM_Backend_AccessLevel::getInstance()->get_access_level();
+
+            // Prepare the JS locals
             $locals   = apply_filters('aam_js_localization_filter', array(
                 'nonce'      => wp_create_nonce('aam_ajax'),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
@@ -265,9 +267,9 @@ class AAM_Backend_Manager
                     'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
                 ),
                 'subject'   => array(
-                    'type'  => $subject->getSubjectType(),
-                    'id'    => $subject->getId(),
-                    'name'  => $subject->getName()
+                    'type'  => $access_level::TYPE,
+                    'id'    => $access_level->get_id(),
+                    'name'  => $access_level->get_display_name()
                 ),
                 'system' => array(
                     'apiEndpoint' => AAM_Core_API::getAPIEndpoint()

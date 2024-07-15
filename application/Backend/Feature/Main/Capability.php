@@ -18,8 +18,7 @@
  * @package AAM
  * @version 6.9.33
  */
-class AAM_Backend_Feature_Main_Capability
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Capability extends AAM_Backend_Feature_Abstract
 {
 
     /**
@@ -47,16 +46,16 @@ class AAM_Backend_Feature_Main_Capability
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'capability',
-            'position'   => 15,
-            'title'      => __('Capabilities', AAM_KEY),
-            'capability' => self::ACCESS_CAPABILITY,
-            'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID
-            ),
-            'view'       => __CLASS__
+            'uid'           => 'capability',
+            'position'      => 15,
+            'title'         => __('Capabilities', AAM_KEY),
+            'capability'    => self::ACCESS_CAPABILITY,
+            'type'          => 'main',
+            'view'          => __CLASS__,
+            'access_levels' => array(
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER
+            )
         ));
     }
 

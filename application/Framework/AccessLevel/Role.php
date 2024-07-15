@@ -38,4 +38,38 @@ class AAM_Framework_AccessLevel_Role implements AAM_Framework_AccessLevel_Interf
         );
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function get_id()
+    {
+        return $this->_proxy_instance->slug;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_display_name()
+    {
+        return $this->_proxy_instance->display_name;
+    }
+
+    /**
+     * Initialize the access level
+     *
+     * @param WP_Role $core_instance
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize($core_instance)
+    {
+        $this->_proxy_instance = new AAM_Framework_Proxy_Role(
+            wp_roles()->role_names[$core_instance->name],
+            $core_instance
+        );
+    }
+
 }

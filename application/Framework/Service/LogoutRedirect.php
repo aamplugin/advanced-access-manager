@@ -17,9 +17,22 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_LogoutRedirect
+    implements AAM_Framework_Service_ResourceInterface
 {
 
     use AAM_Framework_Service_BaseTrait;
+
+    /**
+     * List of allowed redirect types
+     *
+     * @version 7.0.0
+     */
+    const ALLOWED_REDIRECT_TYPES = [
+        'default',
+        'page_redirect',
+        'url_redirect',
+        'trigger_callback'
+    ];
 
     /**
      * Get the logout redirect
@@ -34,7 +47,7 @@ class AAM_Framework_Service_LogoutRedirect
     public function get_redirect($inline_context = null)
     {
         try {
-            $resource = $this->_get_resource($inline_context, true);
+            $resource = $this->get_resource(null, true, $inline_context);
             $result   = $this->_prepare_redirect(
                 $resource->get_settings(),
                 !$resource->is_overwritten()
@@ -60,8 +73,8 @@ class AAM_Framework_Service_LogoutRedirect
     public function set_redirect(array $redirect, $inline_context = null)
     {
         try {
-            $resource = $this->_get_resource($inline_context);
-            $settings = $resource->convert_to_redirect($redirect);
+            $resource = $this->get_resource(null, false, $inline_context);
+            $settings = $this->_convert_to_redirect($redirect);
 
             if (!$resource->set_explicit_settings($settings)) {
                 throw new RuntimeException('Failed to persist settings');
@@ -90,7 +103,7 @@ class AAM_Framework_Service_LogoutRedirect
     public function reset($inline_context = null)
     {
         try {
-            if ($this->_get_resource($inline_context)->reset()) {
+            if ($this->get_resource(null, false, $inline_context)->reset()) {
                 $result = $this->get_redirect($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');
@@ -100,6 +113,26 @@ class AAM_Framework_Service_LogoutRedirect
         }
 
         return $result;
+    }
+
+    /**
+     * Get logout redirect resource
+     *
+     * @param null    $resource_id
+     * @param boolean $reload
+     * @param array   $inline_context
+     *
+     * @return AAM_Framework_Resource_LogoutRedirect
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource(
+        $resource_id = null, $reload = false, $inline_context = null
+    ) {
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Type_Resource::LOGOUT_REDIRECT, null, $reload
+        );
     }
 
     /**
@@ -123,20 +156,67 @@ class AAM_Framework_Service_LogoutRedirect
     }
 
     /**
-     * Get object
+     * Validate and normalize the incoming redirect data
      *
-     * @param array $inline_context
+     * @param array $incoming_data
      *
-     * @return AAM_Framework_Resource_LogoutRedirect
+     * @return array
      *
-     * @access private
+     * @access public
      * @version 7.0.0
      */
-    private function _get_resource($inline_context, $reload = false)
+    private function _convert_to_redirect(array $incoming_data)
     {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::LOGOUT_REDIRECT, null, $reload
-        );
+        // First, let's validate tha the rule type is correct
+        if (!in_array($incoming_data['type'], self::ALLOWED_REDIRECT_TYPES, true)) {
+            throw new InvalidArgumentException('The valid `type` is required');
+        }
+
+        $result = [
+            'type' => $incoming_data['type']
+        ];
+
+        if ($incoming_data['type'] === 'page_redirect') {
+            if (isset($incoming_data['redirect_page_id'])) {
+                $page_id = intval($incoming_data['redirect_page_id']);
+            } else {
+                $page_id = 0;
+            }
+
+            if ($page_id === 0) {
+                throw new InvalidArgumentException(
+                    'The `redirect_page_id` is required'
+                );
+            } else {
+                $result['redirect_page_id'] = $page_id;
+            }
+        } elseif ($incoming_data['type'] === 'url_redirect') {
+            if (isset($incoming_data['redirect_url'])) {
+                $redirect_url = wp_validate_redirect($incoming_data['redirect_url']);
+            } else {
+                $redirect_url = null;
+            }
+
+            if (empty($redirect_url)) {
+                throw new InvalidArgumentException(
+                    'The valid `redirect_url` is required'
+                );
+            } else {
+                $result['redirect_url'] = $redirect_url;
+            }
+        } elseif ($incoming_data['type'] === 'trigger_callback') {
+            if (isset($incoming_data['callback'])
+                && is_callable($incoming_data['callback'], true)
+            ) {
+                $result['callback'] = $incoming_data['callback'];
+            } else {
+                throw new InvalidArgumentException(
+                    'The valid `callback` is required'
+                );
+            }
+        }
+
+        return $result;
     }
 
 }

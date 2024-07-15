@@ -10,8 +10,11 @@
 /**
  * AAM service for Metaboxes & Widgets
  *
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+ * @since 6.9.13 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.13
+ * @version 6.9.35
  */
 class AAM_Framework_Service_Components
 {
@@ -190,8 +193,11 @@ class AAM_Framework_Service_Components
      *
      * @return array
      *
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.13
+     * @version 6.9.35
      */
     public function reset($screen_id = null, $inline_context = null)
     {
@@ -201,8 +207,10 @@ class AAM_Framework_Service_Components
                 AAM_Framework_Type_Resource::COMPONENT
             );
 
+            $success = true;
+
             if (empty($screen_id)) {
-                $status = $resource->reset();
+                $resource->reset();
             } else {
                 $id          = $this->_convert_screen_id($screen_id);
                 $new_options = [];
@@ -216,10 +224,10 @@ class AAM_Framework_Service_Components
                     }
                 }
 
-                $status = $resource->set_explicit_settings($new_options);
+                $success = $resource->set_explicit_settings($new_options);
             }
 
-            if ($status){
+            if ($success){
                 $result = $this->get_item_list($screen_id);
             } else {
                 throw new RuntimeException('Failed to reset settings');

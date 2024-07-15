@@ -53,7 +53,7 @@ class AAM_Restful_LogoutRedirectService
                         'description' => 'Redirect type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Resource_LogoutRedirect::ALLOWED_REDIRECT_TYPES
+                        'enum'        => AAM_Framework_Service_LogoutRedirect::ALLOWED_REDIRECT_TYPES
                     ),
                     'redirect_page_id' => array(
                         'description' => 'Existing page ID to redirect to',

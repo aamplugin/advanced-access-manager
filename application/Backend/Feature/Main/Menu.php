@@ -19,8 +19,7 @@
  * @package AAM
  * @version 6.9.33
  */
-class AAM_Backend_Feature_Main_Menu
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract
 {
 
     /**

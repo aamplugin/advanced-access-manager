@@ -19,8 +19,7 @@
  * @package AAM
  * @version 6.9.9
  */
-class AAM_Backend_Feature_Main_Uri
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -33,18 +32,11 @@ class AAM_Backend_Feature_Main_Uri
     const ACCESS_CAPABILITY = 'aam_manage_uri';
 
     /**
-     * Type of AAM core object
-     *
-     * @version 6.0.0
-     */
-    const OBJECT_TYPE = AAM_Core_Object_Uri::OBJECT_TYPE;
-
-    /**
      * HTML template to render
      *
      * @version 6.0.0
      */
-    const TEMPLATE = 'service/uri.php';
+    const TEMPLATE = 'service/url.php';
 
     /**
      * Register service UI
@@ -62,12 +54,6 @@ class AAM_Backend_Feature_Main_Uri
             'title'      => __('URL Access', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

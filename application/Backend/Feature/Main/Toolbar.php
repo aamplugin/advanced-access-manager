@@ -17,8 +17,7 @@
  * @package AAM
  * @version 6.9.33
  */
-class AAM_Backend_Feature_Main_Toolbar
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Toolbar extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;

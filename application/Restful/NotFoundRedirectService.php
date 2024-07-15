@@ -50,9 +50,10 @@ class AAM_Restful_NotFoundRedirectService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'type' => array(
-                        'description' => 'Rule type',
+                        'description' => 'Redirect type',
                         'type'        => 'string',
-                        'required'    => true
+                        'required'    => true,
+                        'enum'        => AAM_Framework_Service_NotFoundRedirect::ALLOWED_REDIRECT_TYPES
                     ),
                     'redirect_page_id' => array(
                         'description' => 'Existing page ID to redirect to',
@@ -70,10 +71,7 @@ class AAM_Restful_NotFoundRedirectService
                     ),
                     'http_status_code' => array(
                         'description' => 'HTTP Status Code',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_status_code($value, $request);
-                        }
+                        'type'        => 'number'
                     ),
                     'callback' => array(
                         'description' => 'Custom callback function',
@@ -280,56 +278,6 @@ class AAM_Restful_NotFoundRedirectService
                 __('The callback is not valid PHP callback', AAM_KEY),
                 array('status'  => 400)
             );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Validate HTTP status code
-     *
-     * @param string          $value
-     * @param WP_REST_Request $request
-     *
-     * @return boolean|WP_Error
-     *
-     * @access private
-     * @version 6.9.26
-     */
-    private function _validate_redirect_status_code($value, $request)
-    {
-        $response    = true;
-        $rule_type   = $request->get_param('type');
-        $status_code = intval($value);
-
-        $allowed = AAM_Framework_Service_NotFoundRedirect::HTTP_STATUS_CODES[$rule_type];
-
-        if (is_null($allowed) && !empty($status_code)) {
-            throw new InvalidArgumentException(
-                "Redirect type {$rule_type} does not accept status codes"
-            );
-        } elseif (is_array($allowed)) {
-            $list = array();
-
-            foreach($allowed as $range) {
-                $list = array_merge(
-                    $list,
-                    range(
-                        str_replace('xx', '00', $range),
-                        str_replace('xx', '99', $range)
-                    )
-                );
-            }
-
-            if (!in_array($status_code, $list, true)) {
-                $allowed = implode(', ', $allowed);
-
-                $response = new WP_Error(
-                    'rest_invalid_param',
-                    "For redirect type {$rule_type} allowed status codes are {$allowed}",
-                    array('status'  => 400)
-                );
-            }
         }
 
         return $response;

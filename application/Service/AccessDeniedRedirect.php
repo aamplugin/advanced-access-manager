@@ -41,16 +41,6 @@ class AAM_Service_AccessDeniedRedirect
     const FEATURE_FLAG = 'service.access_denied_redirect.enabled';
 
     /**
-     * Default wp_die handler
-     *
-     * @var callback
-     *
-     * @access private
-     * @version 6.0.0
-     */
-    private $_defaultHandler;
-
-    /**
      * Constructor
      *
      * @return void
@@ -84,7 +74,7 @@ class AAM_Service_AccessDeniedRedirect
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Access Denied Redirect', AAM_KEY),
-                    'description' => __('Manage the default access denied redirect when access gets denied for any protected website resource. The service hooks into the WordPress core wp_die function and redirect any frontend or backend denied requests accordingly.', AAM_KEY),
+                    'description' => __('Manage the default access-denied redirect separately for the frontend and backend when access to any protected website resource is denied.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -93,36 +83,8 @@ class AAM_Service_AccessDeniedRedirect
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
-    }
-
-    /**
-     * Set original wp_die handler
-     *
-     * @param callback $handler
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function setDefaultHandler($handler)
-    {
-        $this->_defaultHandler = $handler;
-    }
-
-    /**
-     * Get original wp_die handler
-     *
-     * @return callable
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function getDefaultHandler()
-    {
-        return $this->_defaultHandler;
     }
 
     /**
@@ -139,18 +101,67 @@ class AAM_Service_AccessDeniedRedirect
      * @access protected
      * @version 6.9.26
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
-        add_filter('wp_die_handler', function($handler) {
-            $service = AAM_Service_AccessDeniedRedirect::getInstance();
-            $service->setDefaultHandler($handler);
+        add_action('aam_access_denied_redirect_handler_filter', function($handler) {
+            if (is_null($handler)) {
+                $handler = function() {
+                    $is_post  = $_SERVER['REQUEST_METHOD'] === 'POST';
+                    $is_rest = (defined('REST_REQUEST') && REST_REQUEST);
 
-            return array($service, 'processDie');
-        }, PHP_INT_MAX);
+                    if (!$is_post && !$is_rest) {
+                        $service  = AAM::api()->user()->access_denied_redirect();
+                        $redirect = $service->get_redirect(
+                            (is_admin() ? 'backend' : 'frontend')
+                        );
+
+                        if ($redirect['type'] === 'default') {
+                            if (isset($redirect['http_status_code'])) {
+                                $status_code = $redirect['http_status_code'];
+                            } else {
+                                $status_code = 401;
+                            }
+
+                            wp_die(
+                                __('The access is denied.', AAM_KEY),
+                                __('Access Denied', AAM_KEY),
+                                apply_filters('aam_wp_die_args_filter', [
+                                    'exit'     => true,
+                                    'response' => $status_code
+                                ])
+                            );
+                        } else {
+                            AAM_Framework_Utility::do_redirect($redirect);
+                        }
+                    }
+                };
+            }
+
+            return $handler;
+        });
 
         // Policy generation hook
         add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 3
+            'aam_generated_policy_filter',
+            [ $this, 'generate_policy' ],
+            10,
+            3
+        );
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
+                ) {
+                    $resource = new AAM_Framework_Resource_AccessDeniedRedirect(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
         );
 
         // Register RESTful API endpoints
@@ -172,7 +183,7 @@ class AAM_Service_AccessDeniedRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options)
+    public function generate_policy($policy, $resource_type, $options)
     {
         if ($resource_type === AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT) {
             if (!empty($options)) {
@@ -216,72 +227,6 @@ class AAM_Service_AccessDeniedRedirect
         }
 
         return $policy;
-    }
-
-    /**
-     * WP Die custom handler
-     *
-     * @param string $message
-     * @param string $title
-     * @param array  $args
-     *
-     * @return void
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
-     * @since 6.4.0  Small refactoring to meet AAM coding standards
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.26
-     */
-    public function processDie($message, $title = '', $args = array())
-    {
-        static $in = false;
-
-        if ($title === 'aam_access_denied' && !$in) { // Prevent loop
-            $method = AAM_Core_Request::server('REQUEST_METHOD');
-            $isApi  = (defined('REST_REQUEST') && REST_REQUEST);
-            $in     = true;
-
-            if (($method !== 'POST') && !$isApi) {
-                $area     = (is_admin() ? 'backend' : 'frontend');
-                $resource = AAM::api()->user()->get_resource(
-                    AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT
-                );
-
-                $type = $resource->get_setting("{$area}.redirect.type");
-
-                if (!empty($type)) {
-                    $code = $resource->get_setting("{$area}.redirect.{$type}.code");
-
-                    if (!empty($code)) {
-                        $args['response'] = $code;
-                    }
-
-                    AAM_Core_Redirect::execute(
-                        $type,
-                        array_merge($args, array(
-                            $type     => $resource->get_setting(
-                                "{$area}.redirect.{$type}"
-                            ),
-                            'status'  => $code
-                        ))
-                    );
-                } else {
-                    AAM_Core_Redirect::execute('default', $args);
-                }
-            } else {
-                call_user_func($this->getDefaultHandler(), $message, '', $args);
-            }
-        } else {
-            call_user_func($this->getDefaultHandler(), $message, $title, $args);
-        }
-
-        $in = false;
-
-        if (!empty($args['exit'])) {
-            exit; // Halt the execution
-        }
     }
 
 }

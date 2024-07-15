@@ -9,8 +9,6 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="jwt-content">
-        <?php $subject = AAM_Backend_Subject::getInstance(); ?>
-
         <div class="row">
             <div class="col-xs-12">
                 <table id="jwt-list" class="table table-striped table-bordered">
@@ -100,7 +98,7 @@
 
                         <hr/>
 
-                        <div class="form-group">
+                        <div class="form-group" id="jwt-passwordless-url-container">
                             <label for="view-jwt-url" class="aam-block">
                                 <?php echo __('Passwordless Login URL (with JWT token)', AAM_KEY); ?>
                                 <a href="#" class="aam-copy-clipboard" data-clipboard-target="#view-jwt-url"><?php echo __('Copy to clipboard', AAM_KEY); ?></a>

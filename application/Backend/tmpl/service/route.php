@@ -11,7 +11,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="route-content">
-        <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+        <?php $access_level = AAM_Backend_AccessLevel::getInstance(); ?>
 
         <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <?php echo apply_filters('aam_route_mode_panel_filter', '', $subject->getObject(AAM_Core_Object_Route::OBJECT_TYPE)); ?>
+        <?php echo apply_filters('aam_route_mode_panel_filter', '', $access_level->api_routes()); ?>
 
         <table id="route-list" class="table table-striped table-bordered">
             <thead>

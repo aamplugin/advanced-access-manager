@@ -29,78 +29,11 @@ abstract class AAM_Backend_Feature_Abstract
     const ACCESS_CAPABILITY = 'aam_manager';
 
     /**
-     * Type of AAM core object
-     *
-     * @version 6.0.0
-     */
-    const OBJECT_TYPE = null;
-
-    /**
      * HTML template to render
      *
      * @version 6.0.0
      */
     const TEMPLATE = null;
-
-    /**
-     * Save access settings for the specific object
-     *
-     * @return string
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.7.9
-     */
-    public function save()
-    {
-        $param = $this->getFromPost('param');
-        $value = $this->getSafeFromPost('value');
-
-        $object = $this->getSubject()->getObject(static::OBJECT_TYPE, null, true);
-
-        if ($object) {
-            $object->updateOptionItem($param, $value)->save();
-            $status = 'success';
-        } else {
-            $status = 'failure';
-        }
-
-        return wp_json_encode(array('status' => $status));
-    }
-
-    /**
-     * Rest access settings for the specific object
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function reset()
-    {
-        $result = $this->getSubject()->getObject(static::OBJECT_TYPE)->reset();
-
-        return wp_json_encode(array('status' => ($result ? 'success' : 'failure')));
-    }
-
-    /**
-     * Check inheritance status
-     *
-     * Check if access settings are overwritten
-     *
-     * @return boolean
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function isOverwritten()
-    {
-        $object = $this->getSubject()->getObject(static::OBJECT_TYPE);
-
-        return $object->isOverwritten();
-    }
 
     /**
      * Get HTML content
@@ -121,16 +54,16 @@ abstract class AAM_Backend_Feature_Abstract
     }
 
     /**
-     * Get currently managed subject
+     * Get currently managed access level
      *
-     * @return AAM_Backend_Subject
+     * @return AAM_Backend_AccessLevel
      *
      * @access public
      * @version 6.0.0
      */
-    public function getSubject()
+    public function get_access_level()
     {
-        return AAM_Backend_Subject::getInstance();
+        return AAM_Backend_AccessLevel::getInstance();
     }
 
     /**

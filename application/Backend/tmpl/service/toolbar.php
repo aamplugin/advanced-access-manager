@@ -30,13 +30,13 @@
             </div>
         </div>
 
-        <?php echo apply_filters('aam_toolbar_mode_panel_filter', '', AAM_Backend_Subject::getInstance()->getObject('toolbar')); ?>
+        <?php echo apply_filters('aam_toolbar_mode_panel_filter', '', $access_level->admin_toolbar()); ?>
 
         <div class="panel-group" id="toolbar-list" role="tablist" aria-multiselectable="true">
             <?php
             $first   = false;
             $toolbar = AAM_Framework_Manager::admin_toolbar(array(
-                'subject' => AAM_Backend_Subject::getInstance()->getSubject()
+                'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
             ))->get_item_list();
 
             if (!empty($toolbar)) { ?>

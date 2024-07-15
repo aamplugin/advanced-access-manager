@@ -26,21 +26,6 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::URL;
 
     /**
-     * List of allowed rule types
-     *
-     * @version 7.0.0
-     */
-    const ALLOWED_RULE_TYPES = [
-        'allow',
-        'deny',
-        'custom_message',
-        'page_redirect',
-        'url_redirect',
-        'trigger_callback',
-        'login_redirect'
-    ];
-
-    /**
      * Merge URL access settings
      *
      * @param array $target
@@ -114,107 +99,6 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
         $rule = $this->_find_matching_rule($url);
 
         return $rule && ($rule['effect'] !== 'allow') ? $rule['redirect'] : null;
-    }
-
-    /**
-     * Validate and prepare rule data
-     *
-     * This method takes flat URL rule data and convert it into format that is stored
-     * in the database.
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    public function convert_to_rule(array $data)
-    {
-        // First, let's validate tha the rule type is correct
-        if (!in_array($data['type'], self::ALLOWED_RULE_TYPES, true)) {
-            throw new InvalidArgumentException('The valid `type` is required');
-        }
-
-        // Now, validating that the URL is acceptable
-        // Parse and validate the incoming URL
-        if ($data['url'] === '*') {
-            $url = '*';
-        } else {
-            $parsed = wp_parse_url($data['url']);
-            $url    = wp_validate_redirect(
-                empty($parsed['path']) ? '/' : $parsed['path']
-            );
-        }
-
-        // Adding query params if provided
-        if (isset($parsed['query'])) {
-            $url .= '?' . $parsed['query'];
-        }
-
-        if (empty($url)) {
-            throw new InvalidArgumentException('The valid `url` is required');
-        }
-
-        $result = [
-            'effect' => $data['type'] === 'allow' ? 'allow' : 'deny',
-            'url'    => $url
-        ];
-
-        // Redirect data will be stored in the "redirect" property
-        if (!in_array($data['type'], ['allow', 'deny'], true)) {
-            $result['redirect'] = [
-                'type' => $data['type']
-            ];
-        }
-
-        if ($data['type'] === 'custom_message') {
-            $message = wp_kses_post($data['message']);
-
-            if (empty($message)) {
-                throw new InvalidArgumentException('The `message` is required');
-            } else {
-                $result['redirect']['message'] = $message;
-            }
-        } elseif ($data['type'] === 'page_redirect') {
-            $page_id = intval($data['redirect_page_id']);
-
-            if ($page_id === 0) {
-                throw new InvalidArgumentException(
-                    'The `redirect_page_id` is required'
-                );
-            } else {
-                $result['redirect']['redirect_page_id'] = $page_id;
-            }
-        } elseif ($data['type'] === 'url_redirect') {
-            $redirect_url = wp_validate_redirect($data['redirect_url']);
-
-            if (empty($redirect_url)) {
-                throw new InvalidArgumentException(
-                    'The valid `redirect_url` is required'
-                );
-            } else {
-                $result['redirect']['redirect_url'] = $redirect_url;
-            }
-        } elseif ($data['type'] === 'trigger_callback') {
-            if (!is_callable($data['callback'], true)) {
-                throw new InvalidArgumentException(
-                    'The valid `callback` is required'
-                );
-            } else {
-                $result['redirect']['callback'] = $data['callback'];
-            }
-        }
-
-        if (!empty($data['http_status_code'])) {
-            $code = intval($data['http_status_code']);
-
-            if ($code >= 300) {
-                $result['redirect']['http_status_code'] = $code;
-            }
-        }
-
-        return apply_filters('aam_validate_url_access_rule_filter', $result, $data);
     }
 
     /**

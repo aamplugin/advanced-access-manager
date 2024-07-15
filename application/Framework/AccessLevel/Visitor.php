@@ -38,4 +38,12 @@ class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Int
         );
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function get_display_name()
+    {
+        return __('Visitors', AAM_KEY);
+    }
+
 }

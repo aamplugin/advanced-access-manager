@@ -1066,6 +1066,10 @@ input[type=radio]:checked+label:before {
   margin-top: 15px !important;
 }
 
+.aam-margin-bottom-xs {
+  margin-bottom: 15px !important;
+}
+
 .aam-margin-top-md {
   margin-top: 50px !important;
 }
@@ -1089,7 +1093,7 @@ input[type=radio]:checked+label:before {
   background-color: #f0ad4e;
   color: #FFFFFF;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   letter-spacing: 1px;
 }
 

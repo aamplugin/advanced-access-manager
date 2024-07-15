@@ -3739,7 +3739,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_inherited === false) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -3848,7 +3848,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_inherited === false) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4679,7 +4679,7 @@
                     $('input[type="text"],select', container).each(function () {
                         $(this).bind('change', function () {
                             const value = $.trim($(this).val());
-                            const type  = $('input[name="404.redirect.type"]:checked').val();
+                            const type  = $('input[name="not_found_redirect_type"]:checked').val();
 
                             const payload = {
                                 type
@@ -5848,7 +5848,7 @@
                                     data.push([
                                         token.id,
                                         token.token,
-                                        token.signed_url,
+                                        token.signed_url || '',
                                         token.is_valid,
                                         details,
                                         'view,delete'
@@ -5921,7 +5921,14 @@
                                             'class': 'aam-row-action icon-eye text-success'
                                         }).bind('click', function () {
                                             $('#view-jwt-token').val(data[1]);
-                                            $('#view-jwt-url').val(data[2]);
+
+                                            if (data[2] !== '') {
+                                                $('#view-jwt-url').val(data[2]);
+                                                $('#jwt-passwordless-url-container').removeClass('hidden');
+                                            } else {
+                                                $('#jwt-passwordless-url-container').addClass('hidden');
+                                            }
+
                                             $('#view-jwt-modal').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -6623,19 +6630,24 @@
     AAM.prototype.fetchContent = function (view) {
         var _this = this;
 
-        var data = {
+        var payload = {
             action: 'aam',
             sub_action: 'renderContent',
             _ajax_nonce: getLocal().nonce,
             partial: view,
-            subject: this.getSubject().type,
-            subjectId: this.getSubject().id
+            access_level: this.getSubject().type
         };
+
+        if (payload.access_level === 'role') {
+            payload.role_id = this.getSubject().id;
+        } else if (payload.access_level === 'user') {
+            payload.user_id = this.getSubject().id;
+        }
 
         $.ajax(getLocal().ajaxurl, {
             type: 'POST',
             dataType: 'html',
-            data: data,
+            data: payload,
             beforeSend: function () {
                 if ($('#aam-initial-load').length === 0) {
                     $('#aam-content').html(
@@ -6697,19 +6709,26 @@
         var object = window.location.search.match(/&id\=([^&]*)/);
         var type = window.location.search.match(/&type\=([^&]*)/);
 
+        const payload = {
+            action: 'aam',
+            sub_action: 'renderContent',
+            _ajax_nonce: getLocal().nonce,
+            partial: view,
+            access_level: this.getSubject().type,
+            id: object ? object[1] : null,
+            type: type ? type[1] : null
+        }
+
+        if (payload.access_level === 'role') {
+            payload.role_id = this.getSubject().id;
+        } else if (payload.access_level === 'user') {
+            payload.user_id = this.getSubject().id;
+        }
+
         $.ajax(getLocal().ajaxurl, {
             type: 'POST',
             dataType: 'html',
-            data: {
-                action: 'aam',
-                sub_action: 'renderContent',
-                _ajax_nonce: getLocal().nonce,
-                partial: view,
-                subject: this.getSubject().type,
-                subjectId: this.getSubject().id,
-                id: object ? object[1] : null,
-                type: type ? type[1] : null
-            },
+            data: payload,
             success: function (response) {
                 success.call(_this, response);
             },

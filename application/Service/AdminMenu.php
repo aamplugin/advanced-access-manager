@@ -315,10 +315,7 @@ class AAM_Service_AdminMenu
         );
 
         if ($resource->is_restricted($id)) {
-            wp_die(
-                __('Sorry, you are not allowed to view this page.', AAM_KEY),
-                'aam_access_denied'
-            );
+            AAM_Framework_Utility::do_access_denied_redirect();
         }
     }
 

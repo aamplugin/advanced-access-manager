@@ -105,11 +105,6 @@ class AAM_Service_UserLevelFilter
         // Check if user has ability to perform certain task on other users
         add_filter('map_meta_cap', array($this, 'mapMetaCaps'), 999, 4);
 
-        // Determine if current user is allowed to manage specific user level
-        add_filter(
-            'aam_user_can_manage_level_filter', array($this, 'isUserLevelAllowed'), 10, 2
-        );
-
         // Determine if user is allowed to be managed by other user based on the
         // user level
         add_filter('aam_get_user', function($user) {

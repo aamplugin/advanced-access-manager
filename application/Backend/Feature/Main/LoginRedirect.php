@@ -13,8 +13,7 @@
  * @package AAM
  * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_LoginRedirect
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_LoginRedirect extends AAM_Backend_Feature_Abstract
 {
 
     /**
@@ -68,17 +67,17 @@ class AAM_Backend_Feature_Main_LoginRedirect
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'login_redirect',
-            'position'   => 40,
-            'title'      => __('Login Redirect', AAM_KEY),
-            'capability' => self::ACCESS_CAPABILITY,
-            'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Default::UID
-            ),
-            'view'       => __CLASS__
+            'uid'           => 'login_redirect',
+            'position'      => 40,
+            'title'         => __('Login Redirect', AAM_KEY),
+            'capability'    => self::ACCESS_CAPABILITY,
+            'type'          => 'main',
+            'view'          => __CLASS__,
+            'access_levels' => array(
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER,
+                AAM_Framework_Type_AccessLevel::ALL
+            )
         ));
     }
 

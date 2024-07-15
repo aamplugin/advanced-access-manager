@@ -1,11 +1,12 @@
 <?php
     /**
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/406
      * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
      * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
      * @since 6.4.0  Added the ability to edit role's slug
      * @since 6.0.0  Initial implementation of the template
      *
-     * @version 6.9.32
+     * @version 6.9.35
      * */
 ?>
 
@@ -37,7 +38,13 @@
                             <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
                         </select>
                     </div>
-                    <?php echo apply_filters('aam_add_role_ui_filter', AAM_Backend_View::getInstance()->loadPartial('role-inheritance')); ?>
+                    <div class="checkbox">
+                        <label for="clone">
+                            <input type="checkbox" id="clone-role" name="clone_role_settings" />
+                            <?php echo __('Also clone all AAM access settings from selected role (admin menu, metaboxes, redirects, etc.)', AAM_KEY); ?>
+                        </label>
+                    </div>
+                    <?php echo apply_filters('aam_add_role_ui_filter', ''); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="add-role-btn"><?php echo __('Create', AAM_KEY); ?></button>

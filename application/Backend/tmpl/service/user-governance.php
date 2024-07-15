@@ -8,12 +8,14 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php $access_level = AAM_Backend_AccessLevel::getInstance(); ?>
+
     <div class="aam-feature" id="user-governance-content">
         <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Determine how [%s] can see and manager other users. With the premium %sadd-on%s, you have the ability to target all users at once. To learn more, refer to our official documentation page %shere%s.', 'strong', 'strong'), AAM_Backend_Subject::getInstance()->getName(), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/users-and-roles-governance?ref=plugin" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Determine how [%s] can see and manager other users. With the premium %sadd-on%s, you have the ability to target all users at once. To learn more, refer to our official documentation page %shere%s.', 'strong', 'strong'), $access_level->get_display_name(), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/users-and-roles-governance?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
@@ -71,7 +73,7 @@
                                             <?php echo $config['title']; ?>
                                         </strong>
                                         <p class="aam-hint">
-                                            <?php echo sprintf($config['hint'], AAM_Backend_Subject::getInstance()->getName()); ?>
+                                            <?php echo sprintf($config['hint'], $access_level->get_display_name()); ?>
                                         </p>
                                     </td>
                                     <td>
@@ -121,7 +123,7 @@
                                             <?php echo $config['title']; ?>
                                         </strong>
                                         <p class="aam-hint">
-                                            <?php echo sprintf($config['hint'], AAM_Backend_Subject::getInstance()->getName()); ?>
+                                            <?php echo sprintf($config['hint'], $access_level->get_display_name()); ?>
                                         </p>
                                     </td>
                                     <td>

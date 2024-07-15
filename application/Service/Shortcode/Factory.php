@@ -10,11 +10,12 @@
 /**
  * Shortcode factory for the [aam] shortcode
  *
- * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/405
+ * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/90
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.6.0
+ * @version 6.9.35
  */
 class AAM_Service_Shortcode_Factory
 {
@@ -37,22 +38,29 @@ class AAM_Service_Shortcode_Factory
      *
      * @return void
      *
-     * @since 6.6.0 https://github.com/aamplugin/advanced-access-manager/issues/90
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/405
+     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/90
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.6.0
+     * @version 6.9.35
      */
     public function __construct($args, $content)
     {
         $cnt = strtolower(!empty($args['context']) ? $args['context'] : 'content');
 
         if ($cnt === 'content') {
-            $this->handler = new AAM_Service_Shortcode_Handler_Content($args, $content);
+            $this->handler = new AAM_Service_Shortcode_Handler_Content(
+                $args, $content
+            );
         } elseif ($cnt === 'loginredirect') {
-            $this->handler = new AAM_Service_Shortcode_Handler_LoginRedirect($args, $content);
+            $this->handler = new AAM_Service_Shortcode_Handler_LoginRedirect(
+                $args, $content
+            );
         } elseif ($cnt === 'loginform') {
             $this->handler = new AAM_Service_Shortcode_Handler_LoginForm($args);
+        } elseif ($cnt === 'postlist') {
+            $this->handler = new AAM_Service_Shortcode_Handler_PostList($args);
         } else {
             $this->handler = apply_filters(
                 'aam_shortcode_filter', null, $cnt, $args, $content

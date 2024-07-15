@@ -17,35 +17,23 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_NotFoundRedirect
+    implements AAM_Framework_Service_ResourceInterface
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Array of allowed HTTP status codes
+     * List of allowed redirect types
      *
-     * @version 6.9.26
+     * @version 7.0.0
      */
-    const HTTP_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => array('3xx'),
-        'url_redirect'     => array('3xx'),
-        'login_redirect'   => null,
-        'trigger_callback' => array('3xx', '4xx', '5xx')
-    );
-
-    /**
-     * Array of default HTTP status codes
-     *
-     * @version 6.9.26
-     */
-    const HTTP_DEFAULT_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => 307,
-        'url_redirect'     => 307,
-        'login_redirect'   => null,
-        'trigger_callback' => 404
-    );
+    const ALLOWED_REDIRECT_TYPES = [
+        'default',
+        'page_redirect',
+        'url_redirect',
+        'trigger_callback',
+        'login_redirect'
+    ];
 
     /**
      * Get the 404 redirect
@@ -60,9 +48,8 @@ class AAM_Framework_Service_NotFoundRedirect
     public function get_redirect($inline_context = null)
     {
         try {
-            $resource = $this->_get_resource($inline_context, true);
-
-            $result = $this->_prepare_redirect(
+            $resource = $this->get_resource(null, true, $inline_context);
+            $result   = $this->_prepare_redirect(
                 $resource->get_settings(),
                 !$resource->is_overwritten()
             );
@@ -76,7 +63,7 @@ class AAM_Framework_Service_NotFoundRedirect
     /**
      * Set the 404 redirect
      *
-     * @param array $redirect       Redirect settings
+     * @param array $incoming_data  Redirect settings
      * @param array $inline_context Runtime context
      *
      * @return array
@@ -84,12 +71,12 @@ class AAM_Framework_Service_NotFoundRedirect
      * @access public
      * @version 7.0.0
      */
-    public function set_redirect(array $redirect, $inline_context = null)
+    public function set_redirect(array $incoming_data, $inline_context = null)
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $data    = $this->_validate_redirect($redirect);
-            $resource = $this->_get_resource($inline_context);
+            $resource = $this->get_resource(null, false, $inline_context);
+            $data     = $this->_convert_to_redirect($incoming_data);
 
             if (!$resource->set_explicit_settings($data)) {
                 throw new RuntimeException('Failed to persist settings');
@@ -118,16 +105,34 @@ class AAM_Framework_Service_NotFoundRedirect
     public function reset($inline_context = null)
     {
         try {
-            if ($this->_get_resource($inline_context)->reset()) {
-                $result = $this->get_redirect($inline_context);
-            } else {
-                throw new RuntimeException('Failed to reset settings');
-            }
+            $this->get_resource(null, false, $inline_context)->reset();
+
+            $result = $this->get_redirect($inline_context);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
 
         return $result;
+    }
+
+    /**
+     * Get Not Found Redirect resource
+     *
+     * @param null    $resource_id
+     * @param boolean $reload
+     * @param array   $inline_context
+     *
+     * @return AAM_Framework_Resource_LoginRedirect
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource(
+        $resource_id = null, $reload = false, $inline_context = null
+    ) {
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT, null, $reload
+        );
     }
 
     /**
@@ -143,44 +148,37 @@ class AAM_Framework_Service_NotFoundRedirect
      */
     private function _prepare_redirect($settings, $is_inherited = false)
     {
-        $response = [
-            'type' => $settings['404.redirect.type']
-        ];
-
-        if ($response['type'] === 'page_redirect') {
-            $response['redirect_page_id'] = intval(
-                $settings['404.redirect.page']
-            );
-        } elseif ($response['type'] === 'url_redirect') {
-            $response['redirect_url'] = $settings['404.redirect.url'];
-        } elseif ($response['type'] === 'trigger_callback') {
-            $response['callback'] = $settings['404.redirect.callback'];
-        }
-
-        $response['is_inherited'] = $is_inherited;
-
-        return $response;
+        return array_merge(
+            [ 'type' => 'default' ],
+            $settings,
+            [ 'is_inherited' => $is_inherited ]
+        );
     }
 
     /**
      * Validate and normalize the incoming redirect data
      *
-     * @param array $rule Incoming rule's data
+     * @param array $incoming_data
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _validate_redirect(array $rule)
+    private function _convert_to_redirect(array $incoming_data)
     {
+        // First, let's validate tha the rule type is correct
+        if (!in_array($incoming_data['type'], self::ALLOWED_REDIRECT_TYPES, true)) {
+            throw new InvalidArgumentException('The valid `type` is required');
+        }
+
         $result = [
-            '404.redirect.type' => $rule['type']
+            'type' => $incoming_data['type']
         ];
 
-        if ($rule['type'] === 'page_redirect') {
-            if (isset($rule['redirect_page_id'])) {
-                $page_id = intval($rule['redirect_page_id']);
+        if ($incoming_data['type'] === 'page_redirect') {
+            if (isset($incoming_data['redirect_page_id'])) {
+                $page_id = intval($incoming_data['redirect_page_id']);
             } else {
                 $page_id = 0;
             }
@@ -190,11 +188,11 @@ class AAM_Framework_Service_NotFoundRedirect
                     'The `redirect_page_id` is required'
                 );
             } else {
-                $result['404.redirect.page'] = $page_id;
+                $result['redirect_page_id'] = $page_id;
             }
-        } elseif ($rule['type'] === 'url_redirect') {
-            if (isset($rule['redirect_url'])) {
-                $redirect_url = wp_validate_redirect($rule['redirect_url']);
+        } elseif ($incoming_data['type'] === 'url_redirect') {
+            if (isset($incoming_data['redirect_url'])) {
+                $redirect_url = wp_validate_redirect($incoming_data['redirect_url']);
             } else {
                 $redirect_url = null;
             }
@@ -204,11 +202,13 @@ class AAM_Framework_Service_NotFoundRedirect
                     'The valid `redirect_url` is required'
                 );
             } else {
-                $result['404.redirect.url'] = $redirect_url;
+                $result['redirect_url'] = $redirect_url;
             }
-        } elseif ($rule['type'] === 'trigger_callback') {
-            if (isset($rule['callback']) && is_callable($rule['callback'], true)) {
-                $result['404.redirect.callback'] = $rule['callback'];
+        } elseif ($incoming_data['type'] === 'trigger_callback') {
+            if (isset($incoming_data['callback'])
+                && is_callable($incoming_data['callback'], true)
+            ) {
+                $result['callback'] = $incoming_data['callback'];
             } else {
                 throw new InvalidArgumentException(
                     'The valid `callback` is required'
@@ -217,23 +217,6 @@ class AAM_Framework_Service_NotFoundRedirect
         }
 
         return $result;
-    }
-
-    /**
-     * Get object
-     *
-     * @param array $inline_context
-     *
-     * @return AAM_Framework_Resource_NotFoundRedirect
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _get_resource($inline_context)
-    {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT
-        );
     }
 
 }

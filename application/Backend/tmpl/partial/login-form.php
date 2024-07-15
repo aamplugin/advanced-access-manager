@@ -68,12 +68,19 @@ if (defined('AAM_KEY')) { ?>
                         if (4 === this.readyState) {
                             c.disabled = !1;
                             var a = JSON.parse(this.responseText);
+
                             if (200 === this.status) {
                                 a.redirect_to ? location.href = a.redirect_to : location.reload();
                             } else {
                                 var b = document.getElementById("aam-login-error-<?php echo esc_js($params->id); ?>");
-                                b.innerHTML = a.reason;
-                                b.style.display = "block"
+
+                                if (a.reason !== undefined) {
+                                    b.innerHTML = a.reason;
+                                } else if (a.errors !== undefined) {
+                                    b.innerHTML = a.errors[Object.keys(a.errors)[0]][0];
+                                }
+
+                                b.style.display = "block";
                             }
                         }
                     });

@@ -48,7 +48,7 @@ class AAM_Service_Content
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.content.enabled';
+    const FEATURE_FLAG = 'service.content.enabled';
 
     /**
      * Default configurations
@@ -56,9 +56,9 @@ class AAM_Service_Content
      * @version 6.9.34
      */
     const DEFAULT_CONFIG = [
-        'core.service.content.enabled'             => true,
-        'core.service.content.manageAllPostTypes'  => false,
-        'core.service.content.manageAllTaxonomies' => false
+        'service.content.enabled'               => true,
+        'service.content.manage_all_post_types' => false,
+        'service.content.manage_all_taxonomies' => false
     ];
 
     /**
@@ -753,7 +753,7 @@ class AAM_Service_Content
                     if ($error->get_error_code() === 'post_access_redirected') {
                         AAM_Core_Redirect::execute($data['type'], $data);
                     } elseif ($error->get_error_code() !== 'post_access_protected') {
-                        wp_die($error->get_error_message(), 'aam_access_denied', $data);
+                        AAM_Framework_Utility::do_access_denied_redirect();
                     }
                 } else {
                     $this->incrementPostReadCounter($post);

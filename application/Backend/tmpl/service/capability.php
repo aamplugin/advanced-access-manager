@@ -10,13 +10,11 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="capability-content">
-        <?php $subject = AAM_Backend_Subject::getInstance(); ?>
-
         <?php if (current_user_can('aam_page_help_tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-notification">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Be careful!] On this tab, you can manage capabilities for [%s]. Any changes to the list of capabilities is [permanent]. Consider to backup at least your database tables [_options] and [_usermeta] regularly.', 'b', 'b', 'b', 'i', 'i'), AAM_Backend_Subject::getInstance()->getName()); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Be careful!] On this tab, you can manage capabilities for [%s]. Any changes to the list of capabilities is [permanent]. Consider to backup at least your database tables [_options] and [_usermeta] regularly.', 'b', 'b', 'b', 'i', 'i'), AAM_Backend_AccessLevel::getInstance()->get_display_name()); ?>
                     </p>
                 </div>
             </div>

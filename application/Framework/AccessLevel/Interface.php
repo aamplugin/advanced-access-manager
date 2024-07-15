@@ -54,6 +54,26 @@ interface AAM_Framework_AccessLevel_Interface
     public function get_proxy_instance();
 
     /**
+     * Get access level ID
+     *
+     * @return string|int|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_id();
+
+    /**
+     * Get access level display name
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_display_name();
+
+    /**
      * Add new siblings to the collection
      *
      * @param AAM_Framework_AccessLevel_Role $role
@@ -98,19 +118,6 @@ interface AAM_Framework_AccessLevel_Interface
     public function get_parent();
 
     /**
-     * Get URL resource
-     *
-     * @param string  $url
-     * @param boolean $reload
-     *
-     * @return AAM_Framework_Resource_Url
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function url($url = null, $reload = false);
-
-    /**
      * Get URLs service
      *
      * @return AAM_Framework_Service_Urls
@@ -139,5 +146,25 @@ interface AAM_Framework_AccessLevel_Interface
      * @version 7.0.0
      */
     public function logout_redirect();
+
+    /**
+     * Get Access Denied Redirect service
+     *
+     * @return AAM_Framework_Service_AccessDeniedRedirect
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function access_denied_redirect();
+
+    /**
+     * Get Not Found Redirect service
+     *
+     * @return AAM_Framework_Service_NotFoundRedirect
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function not_found_redirect();
 
 }

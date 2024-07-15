@@ -214,7 +214,7 @@ class AAM_Service_Multisite
 
             // If user is restricted, deny access
             if ($restricted) {
-                wp_die('Access Denied', 'aam_access_denied');
+                AAM_Framework_Utility::do_access_denied_redirect();
             }
         }, 999);
     }

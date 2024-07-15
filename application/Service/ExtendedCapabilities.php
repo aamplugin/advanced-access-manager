@@ -119,7 +119,7 @@ class AAM_Service_ExtendedCapabilities
                     // If this is the AJAX call, still allow it because it will break a lot
                     // of frontend stuff that depends on it
                     if (!defined('DOING_AJAX')) {
-                        wp_die(__('Access Denied', AAM_KEY), 'aam_access_denied');
+                        AAM_Framework_Utility::do_access_denied_redirect();
                     }
                 }
 

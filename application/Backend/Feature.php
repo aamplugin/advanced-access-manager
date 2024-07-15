@@ -41,8 +41,8 @@ class AAM_Backend_Feature
      */
     public static function registerFeature($feature)
     {
-        $response = false;
-        $subject  = AAM_Backend_Subject::getInstance();
+        $response     = false;
+        $access_level = AAM_Backend_AccessLevel::getInstance();
 
         // Determine correct AAM UI capability
         if (empty($feature->capability)) {
@@ -58,24 +58,13 @@ class AAM_Backend_Feature
             $show = true;
         }
 
-        // Determine that current user has enough user level to manage
-        // requested subject but only if it is manages settings for individual
-        // subjects
-        if (!empty($feature->subjects)) {
-            $allowed = apply_filters(
-                'aam_user_can_manage_level_filter', true, $subject->getSubject()->getMaxLevel()
-            );
-        } else { // Other allow because access to the feature is managed with cap
-            $allowed = true;
-        }
-
-        if ($show && $allowed && current_user_can($cap)) {
+        if ($show && current_user_can($cap)) {
             if (is_object($feature->view)) {
                 self::$_features[get_class($feature->view)] = $feature;
             } else {
                 self::$_features[$feature->view] = $feature;
                 // Initialize view manage so it can register any necessary hooks
-                $feature->view = new $feature->view($subject);
+                $feature->view = new $feature->view($access_level);
             }
 
             $response = true;
@@ -134,15 +123,16 @@ class AAM_Backend_Feature
      */
     public static function retrieveList($type)
     {
-        $response = array();
-        $subject  = AAM_Backend_Subject::getInstance()->getSubjectType();
+        $response     = [];
+        $access_level = AAM_Backend_AccessLevel::getInstance()->get_access_level();
 
         foreach (self::$_features as $feature) {
-            if (
-                $feature->type === $type
-                && (empty($feature->subjects) || in_array($subject, $feature->subjects, true))
-            ) {
-                $response[] = self::initView($feature);
+            if ($feature->type === $type) {
+                if (empty($feature->subjects)
+                    || in_array($access_level::TYPE, $feature->subjects, true)
+                ) {
+                    $response[] = self::initView($feature);
+                }
             }
         }
 
@@ -200,7 +190,9 @@ class AAM_Backend_Feature
     protected static function initView($feature)
     {
         if (is_string($feature->view)) {
-            $feature->view = new $feature->view(AAM_Backend_Subject::getInstance());
+            $feature->view = new $feature->view(
+                AAM_Backend_AccessLevel::getInstance()
+            );
         }
 
         return $feature;

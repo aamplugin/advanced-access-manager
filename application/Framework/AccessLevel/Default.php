@@ -35,4 +35,12 @@ class AAM_Framework_AccessLevel_Default implements AAM_Framework_AccessLevel_Int
         return apply_filters('aam_get_parent_access_level_filter', null, $this);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function get_display_name()
+    {
+        return __('Default Access Level', AAM_KEY);
+    }
+
 }

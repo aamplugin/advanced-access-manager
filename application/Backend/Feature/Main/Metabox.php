@@ -21,8 +21,7 @@
  * @package AAM
  * @version 6.9.33
  */
-class AAM_Backend_Feature_Main_Metabox
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -240,7 +239,7 @@ class AAM_Backend_Feature_Main_Metabox
         }
 
         // If visitor, return only frontend widgets
-        if (AAM_Backend_Subject::getInstance()->isVisitor()) {
+        if (AAM_Backend_AccessLevel::getInstance()->is_visitor()) {
             if (!empty($cache['widgets'])) {
                 $response = array('widgets' => $cache['widgets']);
             } else {

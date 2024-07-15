@@ -68,4 +68,37 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
         return $parent;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function get_id()
+    {
+        return $this->_proxy_instance->ID;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_display_name()
+    {
+        return $this->_proxy_instance->display_name;
+    }
+
+    /**
+     * Initialize the access level
+     *
+     * @param WP_User $core_instance
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize($core_instance)
+    {
+        $this->_proxy_instance = new AAM_Framework_Proxy_User(
+            $core_instance
+        );
+    }
+
 }

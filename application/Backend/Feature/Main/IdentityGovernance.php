@@ -13,8 +13,7 @@
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Backend_Feature_Main_IdentityGovernance
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_IdentityGovernance extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -70,17 +69,17 @@ class AAM_Backend_Feature_Main_IdentityGovernance
     protected function get_permission_list()
     {
         // Determine current access level ability to manage users
-        $access_level = AAM_Backend_Subject::getInstance();
-        $can_edit     = $access_level->hasCapability('edit_users');
+        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $can_edit     = $access_level->has_cap('edit_users');
 
         if (AAM_Core_API::capExists('aam_change_passwords')) {
-            $can_change_password = $access_level->hasCapability('aam_change_passwords');
+            $can_change_password = $access_level->has_cap('aam_change_passwords');
         } else {
-            $can_change_password = $access_level->hasCapability('edit_users');
+            $can_change_password = $access_level->has_cap('edit_users');
         }
 
-        $can_delete  = $access_level->hasCapability('delete_users');
-        $can_promote = $access_level->hasCapability('promote_users');
+        $can_delete  = $access_level->has_cap('delete_users');
+        $can_promote = $access_level->has_cap('promote_users');
 
         return [
             'list_role' => [

@@ -222,7 +222,14 @@ trait AAM_Framework_Resource_BaseTrait
         $settings[$key] = $value;
 
         // Store the settings
-        return $this->set_explicit_settings($settings);
+        $result = $this->set_explicit_settings($settings);
+
+        // Also override the final settings
+        if ($result) {
+            $this->_settings[$key] = $value;
+        }
+
+        return $result;
     }
 
     /**

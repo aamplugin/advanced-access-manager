@@ -141,16 +141,21 @@ class AAM_Service_Url
      *
      * @return boolean
      *
-     * @access public
+     * @access protected
      * @version 7.0.0
      */
     protected function authorize()
     {
-        $resource = AAM::api()->user()->url($this->getFromServer('REQUEST_URI'));
-        $redirect = $resource->get_redirect();
+        $service = AAM::api()->user()->urls();
 
-        if (!empty($redirect)) {
-            AAM_Framework_Utility::do_redirect($redirect);
+        if ($service->is_restricted($_SERVER['REQUEST_URI'])) {
+            $redirect = $service->get_redirect($_SERVER['REQUEST_URI']);
+
+            if ($redirect['type'] === 'default') {
+                AAM_Framework_Utility::do_access_denied_redirect();
+            } else {
+                AAM_Framework_Utility::do_redirect($redirect);
+            }
         }
     }
 

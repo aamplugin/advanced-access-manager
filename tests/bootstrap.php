@@ -99,5 +99,16 @@ if ($editor_user_id) {
     define('AAM_UNITTEST_USER_EDITOR_USER_ID', $editor_user_id);
 }
 
+// Take control over wp_die
+add_filter('aam_wp_die_args_filter', function($args) {
+    if (is_array($args)) {
+        $args['exit'] = false;
+    } else {
+        $args = [ 'exit' => false ];
+    }
+
+    return $args;
+});
+
 // Very important to allow to test headers
 ob_start();

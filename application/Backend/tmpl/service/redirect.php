@@ -13,18 +13,18 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $subject = AAM_Backend_Subject::getInstance(); ?>
+    <?php $access_level = AAM_Backend_AccessLevel::getInstance(); ?>
 
     <div class="aam-feature" id="redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if ($subject->isDefault()) {  ?>
+                <?php if ($access_level->is_default()) {  ?>
                     <p class="aam-info">
                         <?php echo AAM_Backend_View_Helper::preparePhrase('Define the [default] redirect for all users, roles and visitors when access is denied to any restricted resources on your website.', 'strong'); ?>
                     </p>
                 <?php } else { ?>
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for [%s] when access is denied to restricted resources like posts, categories, menus, etc.', 'b'), AAM_Backend_Subject::getInstance()->getName()); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Customize redirect for [%s] when access is denied to restricted resources like posts, categories, menus, etc.', 'b'), $access_level->get_display_name()); ?>
                     </p>
                 <?php } ?>
                 <div class="aam-overwrite" id="aam-redirect-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
@@ -39,7 +39,7 @@
                 <div>
                     <ul class="nav nav-tabs" role="tablist">
                         <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
-                        <?php if (!$subject->isVisitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
+                        <?php if (!$access_level->is_visitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
                     </ul>
 
                     <?php $frontendType = $this->getOption('frontend.redirect.type', 'default'); ?>
@@ -55,7 +55,7 @@
                                 <input type="radio" name="frontend.redirect.type" id="frontend-redirect-message" data-action="#frontend-message-action" value="custom_message" data-group="frontend"<?php echo ($frontendType == 'message' ? ' checked' : ''); ?> />
                                 <label for="frontend-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                             </div>
-                            <?php if ($subject->isVisitor()) { ?>
+                            <?php if ($access_level->is_visitor()) { ?>
                                 <div class="radio">
                                     <input type="radio" name="frontend.redirect.type" id="frontend-redirect-login" value="login_redirect" data-action="none" data-group="frontend"<?php echo ($frontendType == 'login' ? ' checked' : ''); ?> />
                                     <label for="frontend-redirect-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>

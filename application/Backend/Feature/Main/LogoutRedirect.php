@@ -13,8 +13,7 @@
  * @package AAM
  * @version 6.0.0
  */
-class AAM_Backend_Feature_Main_LogoutRedirect
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_LogoutRedirect extends AAM_Backend_Feature_Abstract
 {
 
     /**

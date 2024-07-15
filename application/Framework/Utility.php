@@ -31,8 +31,8 @@ class AAM_Framework_Utility
      */
     public static function do_redirect(array $redirect)
     {
-        // Determine redirect HTTP status code and use it if applicable to redirect
-        // type
+        // Determine redirect HTTP status code and use it if applicable for given
+        // redirect type
         if (!empty($redirect['http_status_code'])) {
             $status_code = $redirect['http_status_code'];
         } else {
@@ -50,12 +50,53 @@ class AAM_Framework_Utility
                 $status_code ? $status_code : 302
             );
         } elseif ($redirect['type'] === 'custom_message') {
-            wp_die($redirect['message'], '', [
-                'exit'     => defined('AAM_UNITTEST_RUNNING') ? false : true,
-                'response' => $status_code ? $status_code : 401
-            ]);
+            wp_die(
+                $redirect['message'],
+                '',
+                apply_filters('aam_wp_die_args_filter', [
+                    'exit'     => true,
+                    'response' => $status_code ? $status_code : 401
+                ])
+            );
         } else {
-            wp_die(__('Access Denied', AAM_KEY), 'aam_access_denied');
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                'Unsupported redirect type',
+                AAM_VERSION
+            );
+        }
+
+        exit;
+    }
+
+    /**
+     * Handle the access denied redirect
+     *
+     * This method will either show a generic "Access Denied" message through WP core
+     * function wp_die or handle the actual redirect defined with the "Access Denied
+     * Redirect" service (if enabled)
+     *
+     * @param string $message
+     * @param string $title
+     * @param int    $status_code
+     *
+     * @return void
+     */
+    public static function do_access_denied_redirect()
+    {
+        $handler = apply_filters('aam_access_denied_redirect_handler_filter', null);
+
+        if (is_null($handler)) {
+            wp_die(
+                __('The access is denied.', AAM_KEY),
+                __('Access Denied', AAM_KEY),
+                apply_filters('aam_wp_die_args_filter', [
+                    'exit'     => true,
+                    'response' => 401
+                ])
+            );
+        } else {
+            call_user_func($handler);
         }
 
         exit;
@@ -97,6 +138,5 @@ class AAM_Framework_Utility
 
         return $result ? $result : $default;
     }
-
 
 }

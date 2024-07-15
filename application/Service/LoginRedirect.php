@@ -243,7 +243,7 @@ class AAM_Service_LoginRedirect
     {
         $redirect = AAM::api()->user($user->ID)->login_redirect()->get_redirect();
 
-        if (empty($redirect) || $redirect['type'] === 'default') {
+        if ($redirect['type'] === 'default') {
             $redirect = [
                 'type'         => 'url_redirect',
                 'redirect_url' => admin_url()
