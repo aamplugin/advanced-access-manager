@@ -12,10 +12,10 @@
         <div class="col-xs-12">
             <p class="aam-notification">
                 <?php echo sprintf(
-                    AAM_Backend_View_Helper::preparePhrase('Manage default access to all posts that belong to the post type %s. This feature is available only with the premium %s[Complete Package]%s add-on.', 'b', 'b'),
-                    $params->postType->label,
+                    AAM_Backend_View_Helper::preparePhrase('Gain full control over the entire post type! Upgrade to our %s[premium add-on]%s to manage default access to all posts within the post type "%s". Discover the power of complete management today.', 'b', 'b'),
                     '<a href="https://aamportal.com/premium?ref=plugin">',
-                    '</a>'
+                    '</a>',
+                    $params->postType->label
                 ); ?>
             </p>
         </div>

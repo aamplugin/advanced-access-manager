@@ -3596,7 +3596,7 @@
                 } else if (current.level_type === 'type_posts') {
                     PreparePostListTable(reload);
                 } else if (current.level_type === 'type_terms') {
-                    PrepareTermListTable(CurrentLevel().scope, reload);
+                    PrepareTermListTable(CurrentLevel(), reload);
                 } else if (current.level_type === 'taxonomy_terms') {
                     PrepareTermListTable(null, reload)
                 }
@@ -3699,7 +3699,8 @@
                         level_id: data.level_id,
                         label: data.label,
                         scope: data.scope,
-                        scope_id: data.scope_id
+                        scope_id: data.scope_id,
+                        is_access_form: true
                     });
                 });
             }
@@ -4051,7 +4052,13 @@
                 $('#post-content .dataTables_wrapper').addClass('hidden');
                 $('#post-content .table').addClass('hidden');
 
-                $('#term-list').attr('data-scope', scope);
+                if (scope) {
+                    $('#term-list').attr('data-scope', scope.scope);
+                    $('#term-list').attr('data-scope-id', scope.scope_id);
+                } else {
+                    $('#term-list').removeAttr('data-scope');
+                    $('#term-list').removeAttr('data-scope-id');
+                }
 
                 if (!$('#term-list').hasClass('dataTable')) {
                     $('#term-list').DataTable({
@@ -4091,7 +4098,7 @@
                                 href: '#'
                             }).bind('click', function () {
                                 const scope  = $('#term-list').attr('data-scope');
-                                let scope_id = null;
+                                let scope_id = $('#term-list').attr('data-scope-id');
 
                                 // Preparing internal AAM term's id
                                 let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4099,8 +4106,7 @@
                                 // If scope is post, then we are withing certain
                                 // post type
                                 if (scope === 'post') {
-                                    id      += `|${data[4].post_type}`;
-                                    scope_id = data[4].post_type;
+                                    id += `|${scope_id}`;
                                 }
 
                                 NavigateToAccessForm({
@@ -4124,7 +4130,7 @@
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
                                             const scope = $('#term-list').attr('data-scope');
-                                            let scope_id = null;
+                                            let scope_id = $('#term-list').attr('data-scope-id');
 
                                             // Preparing internal AAM term's id
                                             let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4132,8 +4138,7 @@
                                             // If scope is post, then we are withing certain
                                             // post type
                                             if (scope === 'post') {
-                                                id      += `|${data[4].post_type}`;
-                                                scope_id = data[4].post_type;
+                                                id += `|${scope_id}`;
                                             }
 
                                             NavigateToAccessForm({
@@ -4206,12 +4211,13 @@
                     AdjustList();
                 }
 
-                // Take into consideration the initial load of a AAM Metabox
-                const level_type = $('#content-object-type').val();
-                const level_id = $('#content-object-id').val();
+                const current_level = CurrentLevel();
 
-                if (level_type) {
-                    InitializeAccessForm(level_type, level_id);
+                if (current_level && current_level.is_access_form) {
+                    RenderAccessForm(
+                        current_level.level_type,
+                        current_level.level_id
+                    );
                 }
             }
 
