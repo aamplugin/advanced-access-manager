@@ -3699,7 +3699,8 @@
                         level_id: data.level_id,
                         label: data.label,
                         scope: data.scope,
-                        scope_id: data.scope_id
+                        scope_id: data.scope_id,
+                        is_access_form: true
                     });
                 });
             }
@@ -4210,12 +4211,13 @@
                     AdjustList();
                 }
 
-                // Take into consideration the initial load of a AAM Metabox
-                const level_type = $('#content-object-type').val();
-                const level_id = $('#content-object-id').val();
+                const current_level = CurrentLevel();
 
-                if (level_type) {
-                    InitializeAccessForm(level_type, level_id);
+                if (current_level && current_level.is_access_form) {
+                    RenderAccessForm(
+                        current_level.level_type,
+                        current_level.level_id
+                    );
                 }
             }
 

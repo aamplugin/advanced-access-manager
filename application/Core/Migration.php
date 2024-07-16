@@ -156,8 +156,10 @@ final class AAM_Core_Migration
     {
         if (file_exists($file_path)) {
             $results = include $file_path;
+
+            self::storeCompletedScript(basename($file_path));
         } else {
-            $results = array();
+            $results = [];
         }
 
         return $results;
