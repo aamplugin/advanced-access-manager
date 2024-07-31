@@ -18,6 +18,8 @@
  * @version 6.9.35
  */
 class AAM_Framework_Service_AdminToolbar
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;

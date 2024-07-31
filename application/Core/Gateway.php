@@ -374,7 +374,7 @@ final class AAM_Core_Gateway
         }
 
         if (AAM_Framework_Manager::configs()->get_config(
-            AAM_Service_AccessPolicy::FEATURE_FLAG, true
+            AAM_Service_AccessPolicy::FEATURE_FLAG
         )) {
             $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
         } else {

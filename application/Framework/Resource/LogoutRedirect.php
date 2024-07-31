@@ -14,24 +14,15 @@
  * @version 7.0.0
  */
 class AAM_Framework_Resource_LogoutRedirect
-    implements AAM_Framework_Resource_Interface
+implements
+    AAM_Framework_Resource_Interface
 {
 
-    use AAM_Framework_Resource_BaseTrait;
-
-    /**
-     * Resource type
-     *
-     * @version 7.0.0
-     */
-    const TYPE = AAM_Framework_Type_Resource::LOGOUT_REDIRECT;
+    use AAM_Framework_Resource_PreferenceTrait;
 
     /**
      * @inheritDoc
      */
-    public function merge_settings($incoming_settings)
-    {
-        return array_replace_recursive($incoming_settings, $this->_settings);
-    }
+    const TYPE = AAM_Framework_Type_Resource::LOGOUT_REDIRECT;
 
 }

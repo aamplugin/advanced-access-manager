@@ -20,7 +20,8 @@
  * @version 6.9.35
  */
 class AAM_Framework_Service_AccessDeniedRedirect
-    implements AAM_Framework_Service_ResourceInterface
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -63,10 +64,10 @@ class AAM_Framework_Service_AccessDeniedRedirect
     public function get_redirect($area = null, $inline_context = null)
     {
         try {
-            $resource  = $this->get_resource(null, true, $inline_context);
+            $preference  = $this->get_preference(true, $inline_context);
             $redirects = $this->_prepare_redirects(
-                $resource->get_settings(),
-                !$resource->is_overwritten()
+                $preference->get_settings(),
+                !$preference->is_overwritten()
             );
 
             if (!empty($area)) {
@@ -92,19 +93,18 @@ class AAM_Framework_Service_AccessDeniedRedirect
      *
      * @access public
      * @version 6.9.14
-     * @throws RuntimeException If fails to persist the data
      */
     public function set_redirect($area, array $incoming_data, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, false, $inline_context);
-            $redirect = $this->_convert_to_redirect($incoming_data);
-            $result   = $resource->set_explicit_setting($area, $redirect);
+            $preference = $this->get_preference(false, $inline_context);
+            $redirect   = $this->_convert_to_redirect($incoming_data);
+            $result     = $preference->set_explicit_setting($area, $redirect);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
             } else {
-                $result = $resource->get_setting($area);
+                $result = $preference->get_setting($area);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -130,18 +130,18 @@ class AAM_Framework_Service_AccessDeniedRedirect
     public function reset($area = null, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, false, $inline_context);
+            $preference = $this->get_preference(false, $inline_context);
 
             if (empty($area)) {
-                $success = $resource->reset();
+                $success = $preference->reset();
             } else {
-                $settings = $resource->get_explicit_settings();
+                $settings = $preference->get_explicit_settings();
 
                 if (array_key_exists($area, $settings)) {
                     unset($settings[$area]);
                 }
 
-                $success = $resource->set_explicit_settings($settings);
+                $success = $preference->set_explicit_settings($settings);
             }
 
             if ($success) {
@@ -157,9 +157,8 @@ class AAM_Framework_Service_AccessDeniedRedirect
     }
 
     /**
-     * Get Access Denied Redirect resource
+     * Get preference resource
      *
-     * @param null    $resource_id
      * @param boolean $reload
      * @param array   $inline_context
      *
@@ -168,12 +167,16 @@ class AAM_Framework_Service_AccessDeniedRedirect
      * @access public
      * @version 7.0.0
      */
-    public function get_resource(
-        $resource_id = null, $reload = false, $inline_context = null
-    ) {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, $reload
-        );
+    public function get_preference($reload = false, $inline_context = null) {
+        try {
+            $result = $this->_get_access_level($inline_context)->get_preference(
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, $reload
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
     }
 
     /**

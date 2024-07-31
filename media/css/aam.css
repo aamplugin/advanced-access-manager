@@ -938,38 +938,13 @@ input[type="radio"]:focus {
   outline: none;
 }
 
-input[type=radio] {
-  /* to hide the checkbox itself */
-  display: none;
+.radio, .checkbox {
+  margin-left: 20px;
 }
 
-input[type=radio]+label {
-  width: 1.2em;
-  font-weight: normal;
-}
-
-input[type=radio]+label:before {
-  font-family: 'fontello';
-  display: inline-block;
-  font-size: 1.2em;
-  content: "\F1DB";
-  /* unchecked icon */
-  margin-right: 10px;
-}
-
-input[type=radio]:checked+label:before {
-  font-size: 1.2em;
-  content: "\F111";
-  /* checked icon */
-  margin-right: 10px;
-}
-
-input[type=radio]:checked+label:before {
-  color: #3c763d;
-}
-
+.checkbox label,
 .radio label {
-  display: inline;
+  padding-left: 0;
 }
 
 .aam-small-highlighted {

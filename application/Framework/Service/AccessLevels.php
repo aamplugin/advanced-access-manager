@@ -14,6 +14,8 @@
  * @version 7.0.0
  */
 class AAM_Framework_Service_AccessLevels
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;

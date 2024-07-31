@@ -46,11 +46,11 @@ class AAM_Service_Core
      * @version 6.9.34
      */
     const DEFAULT_CONFIG = [
-        'core.settings.tips'              => true,
-        'core.settings.multi_access_levels'  => false,
-        'ui.settings.renderAccessMetabox' => false,
-        'core.settings.merge.preference'  => 'deny',
-        'core.export.groups'              => [ 'settings', 'config', 'roles' ]
+        'core.settings.ui.tips'                  => true,
+        'core.settings.multi_access_levels'      => false,
+        'core.settings.ui.render_access_metabox' => false,
+        'core.settings.merge.preference'         => 'deny',
+        'core.export.groups'                     => [ 'settings', 'config', 'roles' ]
     ];
 
     /**
@@ -86,7 +86,7 @@ class AAM_Service_Core
 
         if (is_admin()) {
             $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
-                'ui.settings.renderAccessMetabox'
+                'core.settings.ui.render_access_metabox'
             );
 
             if ($metaboxEnabled && current_user_can('aam_manager')) {

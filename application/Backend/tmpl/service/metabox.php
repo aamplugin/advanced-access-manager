@@ -15,7 +15,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="metabox-content">
-        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
+        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

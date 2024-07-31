@@ -13,15 +13,15 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Url
+implements
+    AAM_Framework_Resource_Interface
 {
 
-    use AAM_Framework_Resource_BaseTrait;
+    use AAM_Framework_Resource_PermissionTrait;
 
     /**
-     * Resource type
-     *
-     * @version 7.0.0
+     * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::URL;
 

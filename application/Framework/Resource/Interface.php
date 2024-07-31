@@ -8,7 +8,7 @@
  */
 
 /**
- * Interface for all resources
+ * Interface for all resources that hold settings
  *
  * @package AAM
  * @version 7.0.0
@@ -27,19 +27,6 @@ interface AAM_Framework_Resource_Interface
     const TYPE = null;
 
     /**
-     * Get resource internal ID
-     *
-     * The internal ID represents unique resource identify AAM Framework users to
-     * distinguish between collection of initialize resources
-     *
-     * @return string|int|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_internal_id();
-
-    /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
@@ -48,6 +35,21 @@ interface AAM_Framework_Resource_Interface
      * @version 7.0.0
      */
     public function get_access_level();
+
+    /**
+     * Get resource internal ID
+     *
+     * The internal ID represents unique resource identify AAM Framework users to
+     * distinguish between collection of initialize resources
+     *
+     * @param bool $serialize
+     *
+     * @return string|int|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_internal_id($serialize = true);
 
     /**
      * Get the collection of resource settings
@@ -82,32 +84,6 @@ interface AAM_Framework_Resource_Interface
     public function get_explicit_settings();
 
     /**
-     * Get setting by key
-     *
-     * @param string $key
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_setting($key, $default = null);
-
-    /**
-     * Set one explicit setting
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_explicit_setting($key, $value);
-
-    /**
      * Set explicit settings
      *
      * @param array $settings
@@ -120,20 +96,45 @@ interface AAM_Framework_Resource_Interface
     public function set_explicit_settings(array $settings);
 
     /**
-     * Check if settings are overwritten for this resource
+     * Get setting by namespace
+     *
+     * @param string $ns
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_setting($ns, $default = null);
+
+    /**
+     * Set one explicit setting
+     *
+     * @param string $ns
+     * @param mixed  $value
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_overwritten();
+    public function set_explicit_setting($ns, $value);
+
+    /**
+     * Check if settings are overwritten for give namespace
+     *
+     * @param string $ns
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_overwritten($ns = null);
 
     /**
      * Merge incoming settings
-     *
-     * Depending on the resource type, different strategies may be applied to merge
-     * settings
      *
      * @param array $incoming_settings
      *

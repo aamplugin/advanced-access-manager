@@ -27,7 +27,7 @@ interface AAM_Framework_AccessLevel_Interface
      */
     const TYPE = null;
 
-     /**
+    /**
      * Get resource by its type and internal ID
      *
      * @param string     $resource_type
@@ -42,6 +42,19 @@ interface AAM_Framework_AccessLevel_Interface
     public function get_resource(
         $resource_type, $resource_id = null, $reload = false
     );
+
+    /**
+     * Get preference resource by its type
+     *
+     * @param string  $preference_type
+     * @param boolean $reload
+     *
+     * @return AAM_Framework_Resource_Interface|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_preference($preference_type, $reload = false);
 
     /**
      * Get AAM proxy instance to the WP core instance (if applicable)
@@ -166,5 +179,15 @@ interface AAM_Framework_AccessLevel_Interface
      * @version 7.0.0
      */
     public function not_found_redirect();
+
+    /**
+     * Get Content service
+     *
+     * @return AAM_Framework_Service_Content
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function content();
 
 }

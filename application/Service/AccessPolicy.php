@@ -1356,7 +1356,3 @@ class AAM_Service_AccessPolicy
     }
 
 }
-
-if (defined('AAM_KEY')) {
-    AAM_Service_AccessPolicy::bootstrap();
-}

@@ -15,7 +15,7 @@
     <div class="aam-feature" id="welcome-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
+                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
                     <div class="row">
                         <div class="col-xs-12">
                             <p class="aam-info"><?php echo __("Here, we've outlined several typical scenarios where you can leverage AAM, along with some key features. If you require assistance, don't hesitate to reach out by filling out the contact form below. We'll get back to you as soon as possible.", AAM_KEY); ?></p>

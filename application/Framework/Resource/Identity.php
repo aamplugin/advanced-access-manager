@@ -13,18 +13,17 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_IdentityGovernance
-    implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Identity
+implements
+    AAM_Framework_Resource_Interface
 {
 
-    use AAM_Framework_Resource_BaseTrait;
+    use AAM_Framework_Resource_PermissionTrait;
 
     /**
-     * Resource alias
-     *
-     * @version 7.0.0
+     * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::IDENTITY_GOVERNANCE;
+    const TYPE = AAM_Framework_Type_Resource::IDENTITY;
 
     /**
      * Check whether given role is allowed to perform an action

@@ -77,9 +77,7 @@ trait AAM_Framework_Service_BaseTrait
     protected function __construct()
     {
         // Extend the service instance with additional methods
-        $closures = apply_filters(
-            'aam_framework_service_closures_filter', [], $this
-        );
+        $closures = apply_filters('aam_framework_service_methods_filter', [], $this);
 
         if (is_array($closures)) {
             foreach($closures as $name => $closure) {

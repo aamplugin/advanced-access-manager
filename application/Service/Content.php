@@ -112,12 +112,12 @@ class AAM_Service_Content
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_init_ui_action', function () {
-                    AAM_Backend_Feature_Main_Post::register();
+                    AAM_Backend_Feature_Main_Content::register();
                 });
 
                 // Check if Access Manager metabox feature is enabled
                 $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
-                    'ui.settings.renderAccessMetabox'
+                    'core.settings.ui.render_access_metabox'
                 );
 
                 if ($metaboxEnabled && current_user_can('aam_manage_content')) {
@@ -157,7 +157,7 @@ class AAM_Service_Content
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -222,94 +222,122 @@ class AAM_Service_Content
      * @access protected
      * @version 6.9.29
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
-        if (!is_admin()) {
-            // Password protected filter
-            add_filter('post_password_required', array($this, 'isPasswordRequired'), 10, 2);
+        // if (!is_admin()) {
+        //     // Password protected filter
+        //     add_filter('post_password_required', array($this, 'isPasswordRequired'), 10, 2);
 
-            // Manage password check expiration
-            add_filter('post_password_expires', array($this, 'checkPassExpiration'));
+        //     // Manage password check expiration
+        //     add_filter('post_password_expires', array($this, 'checkPassExpiration'));
 
-            // Filter navigation pages & taxonomies
-            add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
+        //     // Filter navigation pages & taxonomies
+        //     add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
 
-            // Filter navigation pages & taxonomies
-            add_filter('get_pages', array($this, 'filterPages'), 999);
+        //     // Filter navigation pages & taxonomies
+        //     add_filter('get_pages', array($this, 'filterPages'), 999);
 
-            // Manage access to frontend posts & pages
-            add_action('wp', array($this, 'wp'), PHP_INT_MAX);
-        }
+        //     // Manage access to frontend posts & pages
+        //     add_action('wp', array($this, 'wp'), PHP_INT_MAX);
+        // }
 
-        // Control post visibility
-        add_filter('posts_clauses_request', array($this, 'filterPostQuery'), 10, 2);
+        // // Control post visibility
+        // add_filter('posts_clauses_request', array($this, 'filterPostQuery'), 10, 2);
 
-        // Filter post content
-        add_filter('the_content', array($this, 'filterPostContent'), PHP_INT_MAX);
+        // // Filter post content
+        // add_filter('the_content', array($this, 'filterPostContent'), PHP_INT_MAX);
 
-        // Check if user has ability to perform certain task based on provided
-        // capability and meta data
-        add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
+        // // Check if user has ability to perform certain task based on provided
+        // // capability and meta data
+        // add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
 
-        // Get control over commenting stuff
-        add_filter('comments_open', function ($open, $id) {
-            $resource = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::POST, $id
-            );
+        // // Get control over commenting stuff
+        // add_filter('comments_open', function ($open, $id) {
+        //     $resource = AAM::api()->user()->get_resource(
+        //         AAM_Framework_Type_Resource::POST, $id
+        //     );
 
-            // If Leave Comments option is defined then override the default status.
-            // Otherwise keep it as-is
-            if ($resource->get_setting('comment') !== null) {
-                $open = $resource->is_allowed_to('comment');
-            }
+        //     // If Leave Comments option is defined then override the default status.
+        //     // Otherwise keep it as-is
+        //     if ($resource->get_setting('comment') !== null) {
+        //         $open = $resource->is_allowed_to('comment');
+        //     }
 
-            return $open;
-        }, 10, 2);
+        //     return $open;
+        // }, 10, 2);
 
-        // REST API action authorization. Triggered before call is dispatched
-        add_filter('rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3);
+        // // REST API action authorization. Triggered before call is dispatched
+        // add_filter('rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3);
 
-        // REST API. Control if user is allowed to publish content
-        add_action('registered_post_type', function ($post_type, $obj) {
-            add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
-                $status = (isset($request['status']) ? $request['status'] : null);
+        // // REST API. Control if user is allowed to publish content
+        // add_action('registered_post_type', function ($post_type, $obj) {
+        //     add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
+        //         $status = (isset($request['status']) ? $request['status'] : null);
 
-                if (in_array($status, array('publish', 'future'), true)) {
-                    if ($this->isAuthorizedToPublishPost($request['id']) === false) {
-                        $post = new WP_Error(
-                            'rest_cannot_publish',
-                            __('You are not allowed to publish this content', AAM_KEY),
-                            array('status' => rest_authorization_required_code())
+        //         if (in_array($status, array('publish', 'future'), true)) {
+        //             if ($this->isAuthorizedToPublishPost($request['id']) === false) {
+        //                 $post = new WP_Error(
+        //                     'rest_cannot_publish',
+        //                     __('You are not allowed to publish this content', AAM_KEY),
+        //                     array('status' => rest_authorization_required_code())
+        //                 );
+        //             }
+        //         }
+
+        //         return $post;
+        //     }, 10, 2);
+
+        //     // Populate the collection of post type caps
+        //     foreach ($obj->cap as $cap) {
+        //         if (
+        //             !in_array($cap, $this->postTypeCaps, true)
+        //             && ($cap !== 'do_not_allow')
+        //         ) {
+        //             $this->postTypeCaps[] = $cap;
+        //         }
+        //     }
+        // }, 10, 2);
+
+        // // Policy generation hook
+        // add_filter(
+        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        // );
+
+        // // Share post access settings conversion with add-ons and other third-party
+        // // solutions
+        // add_filter('aam_post_policy_generator_filter', function($list, $res, $opts) {
+        //     return array_merge(
+        //         $list, $this->_convertToPostStatements($res, $opts)
+        //     );
+        // }, 10, 3);
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)) {
+                    if ($resource_type === AAM_Framework_Type_Resource::POST) {
+                        $resource = new AAM_Framework_Resource_Post(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::POST_TYPE) {
+                        $resource = new AAM_Framework_Resource_PostType(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::TAXONOMY) {
+                        $resource = new AAM_Framework_Resource_Taxonomy(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::TERM) {
+                        $resource = new AAM_Framework_Resource_Term(
+                            $access_level, $resource_id
                         );
                     }
                 }
 
-                return $post;
-            }, 10, 2);
-
-            // Populate the collection of post type caps
-            foreach ($obj->cap as $cap) {
-                if (
-                    !in_array($cap, $this->postTypeCaps, true)
-                    && ($cap !== 'do_not_allow')
-                ) {
-                    $this->postTypeCaps[] = $cap;
-                }
-            }
-        }, 10, 2);
-
-        // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+                return $resource;
+            }, 10, 4
         );
-
-        // Share post access settings conversion with add-ons and other third-party
-        // solutions
-        add_filter('aam_post_policy_generator_filter', function($list, $res, $opts) {
-            return array_merge(
-                $list, $this->_convertToPostStatements($res, $opts)
-            );
-        }, 10, 3);
 
         // Register RESTful API
         AAM_Restful_ContentService::bootstrap();
@@ -1588,8 +1616,4 @@ class AAM_Service_Content
         return $result;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Content::bootstrap();
 }

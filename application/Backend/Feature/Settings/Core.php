@@ -61,15 +61,15 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'description' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
                 'value'       => $service->get_config('core.settings.editCapabilities')
             ),
-            'ui.settings.renderAccessMetabox' => array(
+            'core.settings.ui.render_access_metabox' => array(
                 'title'       => __('Render Access Manager Metabox', AAM_KEY),
                 'description' => __('Render "Access Manager" metabox on all post, term or user edit pages.', AAM_KEY),
-                'value'       => $service->get_config('ui.settings.renderAccessMetabox'),
+                'value'       => $service->get_config('core.settings.ui.render_access_metabox'),
             ),
-            'core.settings.tips' => array(
+            'core.settings.ui.tips' => array(
                 'title'       => __('Show UI Tooltips', AAM_KEY),
                 'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', AAM_KEY),
-                'value'       => $service->get_config('core.settings.tips')
+                'value'       => $service->get_config('core.settings.ui.tips')
             ),
             'core.settings.multi_access_levels' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),

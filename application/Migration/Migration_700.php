@@ -87,6 +87,42 @@ final class AAM_Migration_700
                 return $this->_convert_legacy_not_found_redirect($data);
             }
         );
+
+        // Convert Post settings to new format
+        $this->_transform_legacy_settings(
+            AAM_Core_Object_Post::OBJECT_TYPE,
+            AAM_Framework_Type_Resource::POST,
+            function($data) {
+                return $this->_convert_legacy_post_settings($data);
+            }
+        );
+
+        // Convert Post Type settings to new format
+        $this->_transform_legacy_settings(
+            'type',
+            AAM_Framework_Type_Resource::POST_TYPE,
+            function($data) {
+                return $this->_convert_legacy_post_type_settings($data);
+            }
+        );
+
+        // Convert Taxonomy settings to new format
+        $this->_transform_legacy_settings(
+            'taxonomy',
+            AAM_Framework_Type_Resource::TAXONOMY,
+            function($data) {
+                return $this->_convert_legacy_taxonomy_settings($data);
+            }
+        );
+
+        // Convert Term settings to new format
+        $this->_transform_legacy_settings(
+            'term',
+            AAM_Framework_Type_Resource::TERM,
+            function($data) {
+                return $this->_convert_legacy_term_settings($data);
+            }
+        );
     }
 
     /**
@@ -112,7 +148,9 @@ final class AAM_Migration_700
             'core.service.404-redirect.enabled'        => 'service.not_found_redirect.enabled',
             'core.service.content.enabled'             => 'service.content.enabled',
             'core.service.content.manageAllPostTypes'  => 'service.content.manage_all_post_types',
-            'core.service.content.manageAllTaxonomies' => 'service.content.manage_all_taxonomies'
+            'core.service.content.manageAllTaxonomies' => 'service.content.manage_all_taxonomies',
+            'core.settings.tips'                       => 'core.settings.ui.tips',
+            'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox'
         ];
 
         foreach($changes as $legacy => $new) {
@@ -385,7 +423,7 @@ final class AAM_Migration_700
                 ];
             } else {
                 $redirect = [
-                    'type' => $this->_convert_legacy_access_rule_type(
+                    'type' => $this->_convert_legacy_redirect_type(
                         $rule['type']
                     )
                 ];
@@ -437,7 +475,7 @@ final class AAM_Migration_700
      * @access private
      * @version 7.0.0
      */
-    private function _convert_legacy_access_rule_type($type)
+    private function _convert_legacy_redirect_type($type)
     {
         if (isset(self::REDIRECT_TYPE_ALIAS[$type])) {
             $type = self::REDIRECT_TYPE_ALIAS[$type];
@@ -484,6 +522,427 @@ final class AAM_Migration_700
 
         // Condition has to be valid in order to be translated
         return $data_points === 3 ? $condition : null;
+    }
+
+    /**
+     * Convert legacy post access controls to new format
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_post_settings($settings)
+    {
+        $result = [];
+
+        foreach($settings as $id => $data) {
+            $result[$id] = $this->_convert_legacy_post_object($data);
+        }
+    }
+
+    /**
+     * Convert legacy post access controls to new format
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_post_type_settings($settings)
+    {
+        $result = [];
+
+        foreach($settings as $id => $data) {
+            // Group by scopes
+            $scopes = [
+                'post' => [],
+                'term' => []
+            ];
+
+            foreach($data as $action => $d) {
+                list($scope, $a)    = explode('/', $action);
+                $scopes[$scope][$a] = $d;
+            }
+
+            $result[$id] = [];
+
+            if (!empty($scopes['post'])) {
+                $result[$id]['post'] = $this->_convert_legacy_post_object(
+                    $scopes['post']
+                );
+            }
+
+            if (!empty($scopes['term'])) {
+                $result[$id]['term'] = $this->_convert_legacy_term_object(
+                    $scopes['term']
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert legacy taxonomy access controls to new format
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_taxonomy_settings($settings)
+    {
+        $result = [];
+
+        foreach($settings as $id => $data) {
+            // Group by scopes
+            $scopes = [
+                'term' => []
+            ];
+
+            foreach($data as $action => $d) {
+                list($scope, $a)    = explode('/', $action);
+
+                if ($scope === 'term') {
+                    $scopes[$scope][$a] = $d;
+                }
+            }
+
+            $result[$id] = [];
+
+            if (!empty($scopes['term'])) {
+                $result[$id]['term'] = $this->_convert_legacy_term_object(
+                    $scopes['term']
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert legacy term access controls to new format
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_term_settings($settings)
+    {
+        $result = [];
+
+        foreach($settings as $id => $data) {
+            // Group by scopes
+            $scopes = [
+                'post' => [],
+                'term' => []
+            ];
+
+            foreach($data as $action => $d) {
+                list($scope, $a)    = explode('/', $action);
+                $scopes[$scope][$a] = $d;
+            }
+
+            $result[$id] = [];
+
+            if (!empty($scopes['post'])) {
+                $result[$id]['post'] = $this->_convert_legacy_post_object(
+                    $scopes['post']
+                );
+            }
+
+            if (!empty($scopes['term'])) {
+                $result[$id]['term'] = $this->_convert_legacy_term_object(
+                    $scopes['term']
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert legacy post actions to permissions
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_post_object($data)
+    {
+        $result = [];
+
+        // The following actions compete for the same permission. If there are more
+        // then one competing action defined - ignore others.
+        $read_permissions = [
+            'restricted',  // Simply restricted without any conditions
+            'protected',   // Password-protected
+            'teaser',      // Show custom wp_die message
+            'redirected',  // Redirected to a different location
+            'ceased'       // Deny access after certain day/time
+        ];
+
+        // Prepare the filtered list of actions
+        $filtered_list      = [];
+        $ignore_other_reads = false;
+
+        foreach($data as $action => $settings) {
+            if (in_array($action, $read_permissions, true)) {
+                if (!$ignore_other_reads) {
+                    $filtered_list[$action] = $settings;
+                    $ignore_other_reads     = true;
+                }
+            } elseif ($action !== 'limited') {
+                $filtered_list[$action] = $settings;
+            }
+        }
+
+        // Convert the filtered list of actions to new format
+        foreach($filtered_list as $action => $settings) {
+            if (in_array($action, ['hidden', 'hidden_others'], true)) {
+                // Determine the areas the post is hidden on
+                $areas = $this->_prepare_visibility_areas($settings);
+
+                $item = [
+                    'permission' => 'list',
+                    'enabled'    => $this->_convert_to_boolean($settings),
+                    'on'         => $areas
+                ];
+
+                if ($action !== 'hidden') {
+                    $item['exclude_authors'] = true;
+                }
+
+                if (!empty($areas)) { // Ignore the control if no areas defined
+                    array_push($result, $item);
+                }
+            } elseif (in_array($action, ['restricted', 'restricted_others'], true)) {
+                $item = [
+                    'permission'       => 'read',
+                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'restriction_type' => 'default'
+                ];
+
+                if ($action !== 'restricted') {
+                    $item['exclude_authors'] = true;
+                }
+
+                array_push($result, $item);
+            } elseif (in_array($action, ['edit', 'edit_others'], true)) {
+                $item = [
+                    'permission' => 'edit',
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ];
+
+                if ($action !== 'edit') {
+                    $item['exclude_authors'] = true;
+                }
+
+                array_push($result, $item);
+            } elseif (in_array($action, ['delete', 'delete_others'], true)) {
+                $item = [
+                    'permission' => 'delete',
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ];
+
+                if ($action !== 'delete') {
+                    $item['exclude_authors'] = true;
+                }
+
+                array_push($result, $item);
+            } elseif (in_array($action, ['publish', 'publish_others'], true)) {
+                $item = [
+                    'permission' => 'publish',
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ];
+
+                if ($action !== 'publish') {
+                    $item['exclude_authors'] = true;
+                }
+
+                array_push($result, $item);
+            } elseif ($action === 'comment') {
+                array_push($result, [
+                    'permission' => 'comment',
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ]);
+            } elseif ($action === 'teaser') {
+                array_push($result, [
+                    'permission'       => 'read',
+                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'restriction_type' => 'teaser_message',
+                    'message'          => $settings['message']
+                ]);
+            } elseif ($action === 'redirected') {
+                $redirect = [
+                    'type' => $this->_convert_legacy_redirect_type($settings['type'])
+                ];
+
+                if (isset($settings['httpCode'])) {
+                    $redirect['http_status_code'] = intval($settings['httpCode']);
+                }
+
+                if ($redirect['type'] === 'page_redirect') {
+                    $redirect['redirect_page_id'] = intval($settings['destination']);
+                } elseif($redirect['type'] === 'url_redirect') {
+                    $redirect['redirect_url'] = trim($settings['destination']);
+                } elseif($redirect['type'] === 'trigger_callback') {
+                    $redirect['callback'] = trim($settings['destination']);
+                }
+
+                array_push($result, [
+                    'permission'       => 'read',
+                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'restriction_type' => 'redirect',
+                    'redirect'         => $redirect
+                ]);
+            } elseif ($action === 'protected') {
+                array_push($result, [
+                    'permission'       => 'read',
+                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'restriction_type' => 'password_protected',
+                    'password'         => $settings['password']
+                ]);
+            } elseif ($action === 'ceased') {
+                array_push($result, [
+                    'permission'       => 'read',
+                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'restriction_type' => 'expire',
+                    'after_timestamp'  => intval($settings['after'])
+                ]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert term actions into new format
+     *
+     * @param array $data
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_legacy_term_object($data)
+    {
+        $result = [];
+
+        foreach($data as $action => $settings) {
+            if ($action === 'restricted') {
+                array_push($result, [
+                    'permission' => 'browse',
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ]);
+            } elseif ($action === 'hidden') {
+                array_push($result, [
+                    'permission' => 'list',
+                    'enabled'    => $this->_convert_to_boolean($settings),
+                    'on'         =>  $this->_prepare_visibility_areas($settings)
+                ]);
+            } elseif (in_array($action, ['create', 'edit', 'delete', 'assign'], true)) {
+                array_push($result, [
+                    'permission' => $action,
+                    'enabled'    => $this->_convert_to_boolean($settings)
+                ]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get "HIDDEN" access control areas
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_visibility_areas($settings)
+    {
+        $areas = [];
+
+        foreach(['frontend', 'backend', 'api'] as $area) {
+            if (isset($settings[$area])
+                && ($settings[$area] || $settings[$area] === '1')
+            ) {
+                array_push($areas, $area);
+            }
+        }
+
+        return $areas;
+    }
+
+    /**
+     * Convert REFERENCE access control rules to new format
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _convert_selective_rules($settings)
+    {
+        $result = [];
+
+        foreach($settings['rules'] as $rule => $effect) {
+            list($criteria, $value) = explode('|', $rule);
+
+            array_push($result, [
+                'effect'   => $this->_convert_to_boolean($effect) ? 'deny' : 'allow',
+                'criteria' => $criteria,
+                'compare'  => $value
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert AAM access control flag to permission effect
+     *
+     * @param mixed $setting
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 6.9.31
+     */
+    private function _convert_to_boolean($setting)
+    {
+        $response = false;
+
+        if(is_bool($setting)) {
+            $response = $setting;
+        } elseif(is_numeric($setting)) { // Legacy
+            $response = intval($setting) === 1;
+        } elseif(is_array($setting)) {
+            $response = $this->_convert_to_boolean(
+                isset($setting['enabled']) ? $setting['enabled'] : false
+            );
+        }
+
+        return $response;
     }
 
 }

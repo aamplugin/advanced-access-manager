@@ -197,9 +197,9 @@ class AAM_Framework_Service_Settings
                 }
             }
 
-            if ($this->_save_option(self::DB_OPTION, $this->_settings)) {
-                $result = $this->_get_settings_pointer($inline_context);
-            } else {
+            $result = $this->_save_option(self::DB_OPTION, $this->_settings);
+
+            if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
             }
         } catch (Exception $e) {

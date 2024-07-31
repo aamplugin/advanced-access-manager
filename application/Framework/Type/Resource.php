@@ -17,6 +17,9 @@ class AAM_Framework_Type_Resource
 {
 
     const POST = 'post';
+    const POST_TYPE = 'post_type';
+    const TAXONOMY = 'taxonomy';
+    const TERM = 'term';
     const ACCESS_DENIED_REDIRECT = 'denied_redirect';
     const TOOLBAR = 'toolbar';
     const API_ROUTE = 'route';
@@ -24,7 +27,7 @@ class AAM_Framework_Type_Resource
     const COMPONENT = 'metabox';
     const METABOX = 'metabox';
     const WIDGET = 'metabox';
-    const IDENTITY_GOVERNANCE = 'identity_governance';
+    const IDENTITY = 'identity';
     const LOGOUT_REDIRECT = 'logout_redirect';
     const LOGIN_REDIRECT = 'login_redirect';
     const NOT_FOUND_REDIRECT = 'not_found_redirect';

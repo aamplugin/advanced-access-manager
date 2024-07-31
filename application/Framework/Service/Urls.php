@@ -22,7 +22,9 @@
  * @package AAM
  * @version 6.9.35
  */
-class AAM_Framework_Service_Urls implements AAM_Framework_Service_ResourceInterface
+class AAM_Framework_Service_Urls
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;

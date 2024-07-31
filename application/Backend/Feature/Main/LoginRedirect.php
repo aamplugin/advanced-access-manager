@@ -24,37 +24,11 @@ class AAM_Backend_Feature_Main_LoginRedirect extends AAM_Backend_Feature_Abstrac
     const ACCESS_CAPABILITY = 'aam_manage_login_redirect';
 
     /**
-     * Type of AAM core object
-     *
-     * @version 6.0.0
-     */
-    const OBJECT_TYPE = AAM_Core_Object_LoginRedirect::OBJECT_TYPE;
-
-    /**
      * HTML template to render
      *
      * @version 6.0.0
      */
     const TEMPLATE = 'service/login-redirect.php';
-
-    /**
-     * Get option value
-     *
-     * @param string $name
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function getOption($name, $default = null)
-    {
-        $object = $this->getSubject()->getObject(self::OBJECT_TYPE);
-        $option = $object->getOption();
-
-        return (!empty($option[$name]) ? $option[$name] : $default);
-    }
 
     /**
      * Register login redirect feature

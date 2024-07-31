@@ -1931,16 +1931,16 @@
              */
             function save(item, is_restricted, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/backend-menu/${item}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/backend-menu/${item}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: getAAM().prepareRequestSubjectData({
+                        data: {
                             is_restricted
-                        }),
+                        },
                         success: function (response) {
                             cb(response);
                         },
@@ -2040,14 +2040,13 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/backend-menu`, {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/backend-menu`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
                                     'X-HTTP-Method-Override': 'DELETE'
                                 },
                                 dataType: 'json',
-                                data: getAAM().prepareRequestSubjectData(),
                                 beforeSend: function () {
                                     _this.attr('data-original-label', _this.text());
                                     _this.text(getAAM().__('Resetting...'));
@@ -2094,16 +2093,14 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/admin-toolbar/${item}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/admin-toolbar/${item}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: getAAM().prepareRequestSubjectData({
-                            is_hidden
-                        }),
+                        data: { is_hidden },
                         success: function (response) {
                             cb(response);
                         },
@@ -2173,14 +2170,13 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/admin-toolbar`, {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/admin-toolbar`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
                                     'X-HTTP-Method-Override': 'DELETE'
                                 },
                                 dataType: 'json',
-                                data: getAAM().prepareRequestSubjectData(),
                                 beforeSend: function () {
                                     _this.attr('data-original-label', _this.text());
                                     _this.text(getAAM().__('Resetting...'));
@@ -2261,16 +2257,14 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/component/${item}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/component/${item}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: getAAM().prepareRequestSubjectData({
-                            is_hidden
-                        }),
+                        data: { is_hidden },
                         success: function (response) {
                             cb(response);
                         },
@@ -2376,14 +2370,13 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/components`, {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/components`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
                                     'X-HTTP-Method-Override': 'DELETE'
                                 },
                                 dataType: 'json',
-                                data: getAAM().prepareRequestSubjectData(),
                                 beforeSend: function () {
                                     _this.attr('data-original-label', _this.text());
                                     _this.text(getAAM().__('Resetting...'));
@@ -2989,55 +2982,33 @@
 
             /**
              *
-             * @param {*} param
-             * @param {*} value
-             * @param {*} object
-             * @param {*} object_id
-             * @param {*} successCallback
+             * @param {Number}   post_id
+             * @param {String}   permission
+             * @param {Object}   payload
+             * @param {Callback} cb
+             *
+             * @returns {Void}
              */
-            function save(param, value, object, object_id, successCallback) {
+            function save(post_id, permission, payload, cb = null) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getLocal().ajaxurl, {
+                    $.ajax(getAAM().prepareApiEndpoint(
+                        `/service/content/post/${post_id}/${permission}`
+                    ), {
                         type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'aam',
-                            sub_action: 'Main_Post.save',
-                            _ajax_nonce: getLocal().nonce,
-                            subject: getAAM().getSubject().type,
-                            subjectId: getAAM().getSubject().id,
-                            param: param,
-                            value: value,
-                            object: object,
-                            objectId: object_id
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'PATCH'
                         },
+                        dataType: 'json',
+                        data: payload,
                         success: function (response) {
-                            if (response.status === 'failure') {
-                                getAAM().notification('danger', response.error);
-                            } else {
-                                $('#post-overwritten').removeClass('hidden');
-                                //add some specific attributes to reset button
-                                $('#content-reset').attr({
-                                    'data-type': object,
-                                    'data-id': object_id
-                                });
+                            if (cb) {
+                                cb(response);
                             }
 
-                            // Manually update the data in a table because both
-                            // Post Types & Taxonomies are static tables
-                            if (['type', 'taxonomy'].includes(object)) {
-                                let row = null;
-
-                                if (object === 'type') {
-                                    row = cache.post_types.data.filter(t => t[0] === object_id).pop();
-                                } else {
-                                    row = cache.taxonomies.data.filter(t => t[0] === object_id).pop();
-                                }
-
-                                row[4].is_inherited = false;
-                            }
-
-                            successCallback(response);
+                            $('#content_resource_settings').text(JSON.stringify(
+                                response.permissions
+                            ));
                         },
                         error: function () {
                             getAAM().notification('danger');
@@ -3063,25 +3034,26 @@
                 $.ajax(getLocal().ajaxurl, {
                     type: 'POST',
                     dataType: 'html',
-                    data: {
+                    data: getAAM().prepareAjaxRequestPayload({
                         action: 'aam',
                         sub_action: 'renderContent',
                         partial: 'post-access-form',
                         _ajax_nonce: getLocal().nonce,
-                        type: level_type,
-                        id: level_id,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id
-                    },
+                        resource_type: level_type,
+                        resource_id: level_id
+                    }),
                     beforeSend: function () {
                         if (btn) {
                             $(btn).attr('data-class', $(btn).attr('class'));
-                            $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
+                            $(btn).attr(
+                                'class',
+                                'aam-row-action icon-spin4 animate-spin'
+                            );
                         }
                     },
                     success: function (response) {
-                        $('#aam-access-form-container').html(response);
-                        $('#post-content .dataTables_wrapper').addClass('hidden');
+                        $('#aam_access_form_container').html(response);
+                        $('#content_list_container .dataTables_wrapper').addClass('hidden');
                         container.addClass('active');
 
                         InitializeAccessForm(level_type, level_id);
@@ -3095,9 +3067,13 @@
                     },
                     complete: function () {
                         if (btn){
-                            $(btn).attr('class', $(btn).attr('data-class')).removeAttr('data-class');
+                            $(btn).attr(
+                                'class',
+                                $(btn).attr('data-class')
+                            ).removeAttr('data-class');
                         }
-                        //hide overlay if present
+
+                        // Hide overlay if present
                         $('.aam-overlay', container).hide();
                     }
                 });
@@ -3105,48 +3081,131 @@
 
             /**
              *
-             * @param {*} object
-             * @param {*} id
+             * @param {*} permission
+             * @returns
              */
-            function InitializeAccessForm(object, id) {
-                // Initialize the checkbox events
-                $('.aam-row-action', '#aam-access-form-container').each(function () {
-                    // Initialize each access property
-                    $(this).bind('click', function () {
-                        var btn     = $(this);
-                        var checked = !btn.hasClass('icon-check');
+            function GetResourcePermission(permission) {
+                const permissions = JSON.parse($('#content_resource_settings').text());
 
-                        btn.attr('class', 'aam-row-action icon-spin4 animate-spin');
-                        save(
-                            btn.data('property'),
-                            (btn.data('trigger') ? {enabled: checked} : checked),
-                            object,
-                            id,
-                            function () {
-                                RenderAccessForm(object, id, null, function() {
-                                    // Trigger modal to collection additional data
-                                    if (btn.data('trigger') && checked) {
-                                        $('#' + btn.data('trigger')).trigger('click');
-                                    }
-                                });
-                            }
-                        );
+                return permissions.filter((p) => p.permission === permission).shift();
+            }
+
+            /**
+             *
+             * @param {*} resource_type
+             * @param {*} resource_id
+             */
+            function InitializeAccessForm(resource_type, resource_id)
+            {
+                $('[data-toggle="toggle"]', '#aam_access_form_container').bootstrapToggle();
+
+                // Initialize the Customize Restriction modal
+                $('input[type="radio"]', '#restriction_types').each(function () {
+                    $(this).bind('click', function () {
+                        $('#restriction_type_extra > div').addClass('hidden');
+                        $('#restriction_type_extra > div[data-type="' + $(this).val() + '"').removeClass('hidden')
                     });
                 });
 
-                // Initialize advanced options modals (the "change" link)
-                $('.advanced-post-option').each(function () {
-                    $(this).bind('click', function () {
-                        var container = $(this).attr('href');
+                $('#restricted_redirect_type').bind('change', function() {
+                    $('.restricted-redirect-type').addClass('hidden');
 
-                        //add attributes to the .extended-post-access-btn
-                        $('.btn-save', container).attr({
-                            'data-ref': $(this).attr('data-ref')
+                    $('.restricted-redirect-type[data-type="' + $(this).val() + '"]').removeClass('hidden')
+                });
+
+                // Initialize the Expiration picker
+                const def = $('#aam_expire_datetime').val();
+
+                $('#post_expire_datapicker').datetimepicker({
+                    icons: {
+                        time: "icon-clock",
+                        date: "icon-calendar",
+                        up: "icon-angle-up",
+                        down: "icon-angle-down",
+                        previous: "icon-angle-left",
+                        next: "icon-angle-right"
+                    },
+                    inline: true,
+                    defaultDate: $.trim(def) ? new Date(def * 1000) : new Date(),
+                    sideBySide: true
+                });
+
+                $('#post_expire_datapicker').on('dp.change', function (res) {
+                    $('#aam_expire_datetime').val(res.date.unix());
+                });
+
+                // Permission toggles
+                if (resource_type === 'post') {
+                    $('input[data-toggle="toggle"]', '#permission_toggles').each(function() {
+                        $(this).bind('change', function() {
+                            save(
+                                $('#content_resource_id').val(),
+                                $(this).data('permission'),
+                                {
+                                    effect: $(this).prop('checked') ? 'deny' : 'allow'
+                                }
+                            );
                         });
                     });
-                });
+                }
 
-                $('[data-toggle="toggle"]', '#aam-access-form-container').bootstrapToggle();
+                // Initialize the Post Visibility modal functionality
+                if ($('#modal_post_hidden').length) {
+                    $('#modal_post_hidden').on('shown.bs.modal', function () {
+                        const permission = GetResourcePermission('list');
+
+                        if (permission) {
+                            $('input[data-toggle="toggle"]', '#modal_post_hidden')
+                                .prop('checked', false)
+                                .trigger('change');
+
+                            $.each(permission.on, (_, area) => {
+                                $(`input[name="${area}"]`, '#modal_post_hidden').prop(
+                                    'checked', true
+                                ).trigger('change');
+                            });
+                        }
+                    });
+
+                    $('#save_list_permission').bind('click', function() {
+                        // Prepare the payload
+                        let payload = GetResourcePermission('list');
+
+                        if (payload === undefined) {
+                            payload = {
+                                effect: 'deny',
+                                on: []
+                            }
+                        } else {
+                            payload.on = [];
+                        }
+
+                        $('input[data-toggle="toggle"]', '#modal_post_hidden').each(function() {
+                            if ($(this).prop('checked')) {
+                                payload.on.push($(this).attr('name'));
+                            }
+                        });
+
+                        if (payload.on.length > 0) {
+                            $(this).prop('disabled', true).text(getAAM().__('Saving'));
+
+                            save(
+                                $('#content_resource_id').val(),
+                                'list',
+                                getAAM().applyFilters('aam-list-permission-payload', payload),
+                                () => {
+                                    $('#modal_post_hidden').modal('hide');
+
+                                    // Reload the access form
+                                    RenderAccessForm(
+                                        $('#content_resource_type').val(),
+                                        $('#content_resource_id').val()
+                                    );
+                                }
+                            );
+                        }
+                    });
+                }
 
                 // Initialize the Reset to default button
                 $('#content-reset').bind('click', function () {
@@ -3164,13 +3223,128 @@
                         }
                     }
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/content/${type}/${obj_id}`, {
+                    if (CurrentLevel().permissions) {
+                        CurrentLevel().permissions = undefined;
+                    }
+
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/${type}/${obj_id}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'DELETE'
                         },
-                        data: getAAM().prepareRequestSubjectData(payload),
+                        data: payload,
+                        beforeSend: function () {
+                            var label = $('#content-reset').text();
+                            $('#content-reset').attr('data-original-label', label);
+                            $('#content-reset').text(getAAM().__('Resetting...'));
+                        },
+                        success: function () {
+                            $('#post-overwritten').addClass('hidden');
+
+                            RenderAccessForm(type, id);
+
+                            // Manually update the data in a table because both
+                            // Post Types & Taxonomies are static tables
+                            if (['type', 'taxonomy'].includes(type)) {
+                                let row = null;
+
+                                if (type === 'type') {
+                                    row = cache.post_types.data.filter(
+                                        t => t[0] === obj_id
+                                    ).pop();
+                                } else {
+                                    row = cache.taxonomies.data.filter(
+                                        t => t[0] === obj_id
+                                    ).pop();
+                                }
+
+                                row[4].is_inherited = true;
+                            }
+                        },
+                        complete: function () {
+                            $('#content-reset').text(
+                                $('#content-reset').attr('data-original-label')
+                            );
+                        }
+                    });
+                });
+
+                // Allow third-party plugins to initialize the Access Form
+                getAAM().triggerHook('init-access-form', {
+                    RenderAccessForm
+                });
+            }
+
+            /**
+             *
+             * @param {*} object
+             * @param {*} id
+             */
+            function _InitializeAccessForm(object, id) {
+                // Initialize the checkbox events
+                // $('.aam-row-action', '#aam_access_form_container').each(function () {
+                //     // Initialize each access property
+                //     $(this).bind('click', function () {
+                //         var btn     = $(this);
+                //         var checked = !btn.hasClass('icon-check');
+
+                //         btn.attr('class', 'aam-row-action icon-spin4 animate-spin');
+                //         save(
+                //             btn.data('property'),
+                //             (btn.data('trigger') ? {enabled: checked} : checked),
+                //             object,
+                //             id,
+                //             function () {
+                //                 RenderAccessForm(object, id, null, function() {
+                //                     // Trigger modal to collection additional data
+                //                     if (btn.data('trigger') && checked) {
+                //                         $('#' + btn.data('trigger')).trigger('click');
+                //                     }
+                //                 });
+                //             }
+                //         );
+                //     });
+                // });
+
+                // Initialize advanced options modals (the "change" link)
+                $('.advanced-post-option').each(function () {
+                    $(this).bind('click', function () {
+                        var container = $(this).attr('href');
+
+                        //add attributes to the .extended-post-access-btn
+                        $('.btn-save', container).attr({
+                            'data-ref': $(this).attr('data-ref')
+                        });
+                    });
+                });
+
+                $('[data-toggle="toggle"]', '#aam_access_form_container').bootstrapToggle();
+
+
+                // Initialize the Reset to default button
+                $('#content-reset').bind('click', function () {
+                    const type   = $(this).attr('data-type');
+                    const id     = $(this).attr('data-id');
+                    const obj_id = id.split('|')[0];
+
+                    const payload = {};
+
+                    if (CurrentLevel().scope) {
+                        payload.scope = CurrentLevel().scope;
+
+                        if (payload.scope === 'post') {
+                            payload.post_type = CurrentLevel().scope_id;
+                        }
+                    }
+
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/${type}/${obj_id}`), {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'DELETE'
+                        },
+                        data: payload,
                         beforeSend: function () {
                             var label = $('#content-reset').text();
                             $('#content-reset').attr('data-original-label', label);
@@ -3218,7 +3392,7 @@
                         object,
                         id,
                         function () {
-                            $('#modal-hidden').modal('hide');
+                            $('#modal_post_hidden').modal('hide');
                             RenderAccessForm(object, id);
                         }
                     );
@@ -3411,12 +3585,11 @@
             function FetchPostTypeList(cb) {
                 if (cache.post_types === undefined) {
                     // Fetching the list of all registered post types.
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/content/types`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/post_types`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
                         },
-                        data: getAAM().prepareRequestSubjectData(),
                         success: function (response) {
                             const types = [];
 
@@ -3451,12 +3624,11 @@
             function FetchTaxonomyList(cb) {
                 // Fetching the list of all registered post types.
                 if (cache.taxonomies === undefined) {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/content/taxonomies`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/taxonomies`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
                         },
-                        data: getAAM().prepareRequestSubjectData(),
                         success: function (response) {
                             const taxonomies = [];
 
@@ -3491,17 +3663,17 @@
              */
             function FetchPostList(filters, cb) {
                 // Fetching the list of posts
-                $.ajax(`${getLocal().rest_base}aam/v2/service/content/posts`, {
+                $.ajax(getAAM().prepareApiEndpoint(`/service/content/posts`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
                     },
-                    data: getAAM().prepareRequestSubjectData({
-                        type: CurrentLevel().level_id,
+                    data: {
+                        post_type: CurrentLevel().level_id,
                         offset: filters.start,
                         per_page: filters.length,
                         search: filters.search.value
-                    }),
+                    },
                     success: function (response) {
                         const result = {
                             data: [],
@@ -3548,12 +3720,12 @@
                 }
 
                 // Fetching the list of terms
-                $.ajax(`${getLocal().rest_base}aam/v2/service/content/terms`, {
+                $.ajax(getAAM().prepareApiEndpoint(`/service/content/terms`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
                     },
-                    data: getAAM().prepareRequestSubjectData(payload),
+                    data: payload,
                     success: function (response) {
                         const result = {
                             data: [],
@@ -3709,8 +3881,8 @@
              *
              */
             function PrepareTypeListTable() {
-                $('#post-content .dataTables_wrapper').addClass('hidden');
-                $('#post-content .table').addClass('hidden');
+                $('#content_list_container .dataTables_wrapper').addClass('hidden');
+                $('#content_list_container .table').addClass('hidden');
 
                 if (!$('#type-list').hasClass('dataTable')) {
                     $('#type-list').DataTable({
@@ -3782,7 +3954,7 @@
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
                                             NavigateToAccessForm({
-                                                level_type: 'type',
+                                                level_type: 'post_type',
                                                 level_id: data[0],
                                                 label: data[2],
                                                 btn: $(this)
@@ -3818,8 +3990,8 @@
              *
              */
             function PrepareTaxonomyListTable() {
-                $('#post-content .dataTables_wrapper').addClass('hidden');
-                $('#post-content .table').addClass('hidden');
+                $('#content_list_container .dataTables_wrapper').addClass('hidden');
+                $('#content_list_container .table').addClass('hidden');
 
                 if (!$('#taxonomy-list').hasClass('dataTable')) {
                     $('#taxonomy-list').DataTable({
@@ -3927,8 +4099,8 @@
              *
              */
             function PreparePostListTable(reload = false) {
-                $('#post-content .dataTables_wrapper').addClass('hidden');
-                $('#post-content .table').addClass('hidden');
+                $('#content_list_container .dataTables_wrapper').addClass('hidden');
+                $('#content_list_container .table').addClass('hidden');
 
                 if (!$('#post-list').hasClass('dataTable')) {
                     $('#post-list').DataTable({
@@ -4049,8 +4221,8 @@
              * @param {*} scope
              */
             function PrepareTermListTable(scope = null, reload = false) {
-                $('#post-content .dataTables_wrapper').addClass('hidden');
-                $('#post-content .table').addClass('hidden');
+                $('#content_list_container .dataTables_wrapper').addClass('hidden');
+                $('#content_list_container .table').addClass('hidden');
 
                 if (scope) {
                     $('#term-list').attr('data-scope', scope.scope);
@@ -4085,7 +4257,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_overwritten) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4097,8 +4269,8 @@
                                 $('td:eq(1)', row).html($('<a/>', {
                                 href: '#'
                             }).bind('click', function () {
-                                const scope  = $('#term-list').attr('data-scope');
-                                let scope_id = $('#term-list').attr('data-scope-id');
+                                const scope    = $('#term-list').attr('data-scope');
+                                const scope_id = $('#term-list').attr('data-scope-id');
 
                                 // Preparing internal AAM term's id
                                 let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4129,8 +4301,8 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
-                                            const scope = $('#term-list').attr('data-scope');
-                                            let scope_id = $('#term-list').attr('data-scope-id');
+                                            const scope    = $('#term-list').attr('data-scope');
+                                            const scope_id = $('#term-list').attr('data-scope-id');
 
                                             // Preparing internal AAM term's id
                                             let id = `${data[0]}|${data[4].taxonomy}`;
@@ -4287,7 +4459,7 @@
                             const http_status_code = $(`#${area}-${type}-status-code`).val();
 
                             if (['default', 'login_redirect'].includes(type)) {
-                                save(getAAM().prepareRequestSubjectData({ area, type, http_status_code }), () => {
+                                save({ area, type, http_status_code }, () => {
                                     $('#aam-redirect-overwrite').show();
                                 });
                             }
@@ -4334,7 +4506,7 @@
                             }
 
                             //save redirect type
-                            save(getAAM().prepareRequestSubjectData(payload), () => {
+                            save(payload, () => {
                                 $('#aam-redirect-overwrite').show();
                             });
                         });
@@ -4343,13 +4515,12 @@
                     $('#redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/access-denied`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/access-denied`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -4431,7 +4602,7 @@
                             const type = $(this).val();
 
                             if (type === 'default') {
-                                save(getAAM().prepareRequestSubjectData({ type }), () => {
+                                save({ type }, () => {
                                     $('#aam-login-redirect-overwrite').show();
                                 });
                             }
@@ -4455,8 +4626,8 @@
                                 payload.callback = value;
                             }
 
-                            //save redirect type
-                            save(getAAM().prepareRequestSubjectData(payload), () => {
+                            // Save redirect type
+                            save(payload, () => {
                                 $('#aam-login-redirect-overwrite').show();
                             });
                         });
@@ -4465,13 +4636,12 @@
                     $('#login-redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/login`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/login`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -4553,7 +4723,7 @@
                             const type = $(this).val();
 
                             if (type === 'default') {
-                                save(getAAM().prepareRequestSubjectData({ type }), () => {
+                                save({ type }, () => {
                                     $('#aam-logout-redirect-overwrite').show();
                                 });
                             }
@@ -4577,8 +4747,8 @@
                                 payload.callback = value;
                             }
 
-                            //save redirect type
-                            save(getAAM().prepareRequestSubjectData(payload), () => {
+                            // Save redirect type
+                            save(payload, () => {
                                 $('#aam-logout-redirect-overwrite').show();
                             });
                         });
@@ -4587,13 +4757,12 @@
                     $('#logout-redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/logout`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/logout`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -4675,7 +4844,7 @@
                             const type = $(this).val();
 
                             if (['default', 'login_redirect'].includes(type)) {
-                                save(getAAM().prepareRequestSubjectData({ type }), () => {
+                                save({ type }, () => {
                                     $('#aam-404redirect-overwrite').show();
                                 });
                             }
@@ -4699,8 +4868,8 @@
                                 payload.callback = value;
                             }
 
-                            //save redirect type
-                            save(getAAM().prepareRequestSubjectData(payload), () => {
+                            // Save redirect type
+                            save(payload, () => {
                                 $('#aam-404redirect-overwrite').show();
                             });
                         });
@@ -4709,13 +4878,12 @@
                     $('#404redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/not-found`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/not-found`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -4762,12 +4930,10 @@
                     //show indicator
                     $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/api-route/${id}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/api-route/${id}`), {
                         type: 'POST',
                         dataType: 'json',
-                        data: getAAM().prepareRequestSubjectData({
-                            is_restricted: value
-                        }),
+                        data: { is_restricted: value },
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                         },
@@ -4827,12 +4993,11 @@
                         pagingType: 'simple',
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}aam/v2/service/api-routes`,
+                            url: getAAM().prepareApiEndpoint(`/service/api-routes`),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             dataSrc: function (routes) {
                                 // Transform the received data into DT format
@@ -4904,13 +5069,12 @@
                     $('#route-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/api-routes`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/api-routes`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -4978,13 +5142,12 @@
                     $('#uri-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/urls`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/urls`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -5047,7 +5210,7 @@
                                 payload.http_status_code = parseInt(code, 10);
                             }
 
-                            let endpoint = `${getLocal().rest_base}aam/v2/service/url`;
+                            let endpoint = `/service/url`;
 
                             if (editingRule !== null) {
                                 endpoint += '/' + editingRule[0];
@@ -5055,13 +5218,11 @@
                                 endpoint += 's'
                             }
 
-                            $.ajax(endpoint, {
+                            $.ajax(getAAM().prepareApiEndpoint(endpoint), {
                                 type: 'POST',
                                 contentType: 'application/json',
                                 dataType: 'json',
-                                data: JSON.stringify(
-                                    getAAM().prepareRequestSubjectData(payload)
-                                ),
+                                data: payload,
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
                                 },
@@ -5090,10 +5251,9 @@
 
                         const id = $('#uri-delete-btn').attr('data-id');
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/url/${id}`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/url/${id}`), {
                             type: 'POST',
                             dataType: 'json',
-                            data: getAAM().prepareRequestSubjectData(),
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
@@ -5125,12 +5285,11 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}aam/v2/service/urls`,
+                            url: getAAM().prepareApiEndpoint(`/service/urls`),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             dataSrc: function (json) {
                                 // Transform the received data into DT format
@@ -5431,13 +5590,12 @@
                     $('#user-governance-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/identity-governance`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             beforeSend: function () {
                                 var label = _btn.text();
@@ -5490,13 +5648,11 @@
                         });
 
                         if (valid) {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance`, {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/identity-governance`), {
                                 type: 'POST',
                                 contentType: 'application/json',
                                 dataType: 'json',
-                                data: JSON.stringify(
-                                    getAAM().prepareRequestSubjectData(data)
-                                ),
+                                data,
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
                                 },
@@ -5539,13 +5695,11 @@
                         });
 
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance/${editing_rule.id}`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/identity-governance/${editing_rule.id}`), {
                             type: 'POST',
                             contentType: 'application/json',
                             dataType: 'json',
-                            data: JSON.stringify(
-                                getAAM().prepareRequestSubjectData(data)
-                            ),
+                            data,
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
                             },
@@ -5575,10 +5729,9 @@
 
                         const id = $('#user-governance-delete-btn').attr('data-id');
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/identity-governance/${id}`, {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/identity-governance/${id}`), {
                             type: 'POST',
                             dataType: 'json',
-                            data: getAAM().prepareRequestSubjectData(),
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
@@ -5610,12 +5763,11 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}aam/v2/service/identity-governance`,
+                            url: getAAM().prepareApiEndpoint(`/service/identity-governance`),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
                             },
-                            data: getAAM().prepareRequestSubjectData(),
                             dataType: 'json',
                             dataSrc: function (json) {
                                 // Transform the received data into DT format
@@ -6357,10 +6509,9 @@
                 const _this = $(this);
 
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/settings`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/settings`), {
                         type: 'POST',
                         dataType: 'json',
-                        data: getAAM().prepareRequestSubjectData(),
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'DELETE'
@@ -7098,10 +7249,39 @@
 
     /**
      *
+     * @param {*} url
+     * @param {*} include_access_level
+     * @returns
+     */
+    AAM.prototype.prepareApiEndpoint = function (url, include_access_level = true) {
+        let response = `${getLocal().rest_base}aam/v2${url}`;
+
+        if (include_access_level) {
+            const type   = getAAM().getSubject().type;
+            const params = [`access_level=${type}`];
+
+            if (type === 'role') {
+                params.push(`role_id=${getAAM().getSubject().id}`);
+            } else if (type === 'user') {
+                params.push(`user_id=${getAAM().getSubject().id}`);
+            }
+
+            if (response.includes('?')) {
+                response += '&' + params.join('&');
+            } else {
+                response += '?' + params.join('&');
+            }
+        }
+
+        return response;
+    }
+
+    /**
+     *
      * @param {*} mergeWith
      * @returns
      */
-    AAM.prototype.prepareRequestSubjectData = function(mergeWith = {}) {
+    AAM.prototype.prepareAjaxRequestPayload = function(mergeWith = {}) {
        // Prepare the payload
        const data = {
            access_level: getAAM().getSubject().type

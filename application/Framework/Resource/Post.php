@@ -16,127 +16,32 @@
 class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
 {
 
-    use AAM_Framework_Resource_BaseTrait;
+    use AAM_Framework_Resource_PermissionTrait;
 
     /**
-     *
+     * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::POST;
 
     /**
-     * Check if particular access property is enabled
+     * Determine if post is hidden on given area
      *
-     * Examples of such a access property is "restricted", "hidden", etc.
-     *
-     * @param string $property
-     *
-     * @return boolean|null
-     *
-     * @access public
-     * @version 7.0.0
-     * @todo - Should this be moved to Interface for all resources?
-     */
-    public function is($action)
-    {
-        $result = null;
-
-        if (array_key_exists($action, $this->_settings)) {
-            if (is_bool($this->_settings[$action])) {
-                $result = $this->_settings[$action];
-            } else {
-                $result = !empty($this->_settings[$action]['enabled']);
-            }
-        }
-
-        return apply_filters(
-            'aam_post_action_denied_filter', $result, $action, $this
-        );
-    }
-
-    /**
-     * Alias for the `is` method
-     *
-     * @param string $action
+     * @param string $area Can be either frontend, backend or api
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
-     * @todo - Should this be moved to Interface for all resources?
      */
-    public function has($action)
+    public function is_hidden_on($area)
     {
-        return $this->is($action);
-    }
+        $permission = array_filter($this->_settings, function($p) {
+            return $p['permission'] === 'list';
+        });
 
-    /**
-     * Whether certain action is allowed or not
-     *
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     * @todo - Should this be moved to Interface for all resources?
-     */
-    public function is_allowed_to($action)
-    {
-        // Normalize some names to improve code verbosity
-        $lower_case = strtolower($action);
-
-        if (in_array($lower_case, array('read', 'access'))) {
-            $action = 'restricted';
-        } elseif ($lower_case === 'list') {
-            $action = 'hidden';
-        }
-
-        $result = $this->is($action);
-
-        return $result !== null ? !$result : null;
-    }
-
-    /**
-     * Get core instance property
-     *
-     * @param  $name
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function __get($name)
-    {
-        if (property_exists($this->_core_instance, $name)) {
-            $result = $this->_core_instance->{$name};
-        } else {
-            $result = null;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Invoke core instance method
-     *
-     * @param string $name
-     * @param array  $args
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function __call($name, $args)
-    {
-        if (method_exists($this->_core_instance, $name)) {
-            $result = call_user_func_array([ $this->_core_instance, $name ], $args);
-        } else {
-            $result = null;
-        }
-
-        return $result;
+        return !empty($permission)
+            && in_array($area, $permission[0]['on'], true)
+            && $permission[0]['effect'] == 'deny';
     }
 
     /**

@@ -113,7 +113,7 @@ class AAM_Backend_AccessLevel
      * @return boolean
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
     public function is_default()
     {
@@ -194,7 +194,7 @@ class AAM_Backend_AccessLevel
      * @return mixed
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
     public function __call($name, $args)
     {

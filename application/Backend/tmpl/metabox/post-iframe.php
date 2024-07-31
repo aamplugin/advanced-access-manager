@@ -24,7 +24,10 @@
 
         <div class="col-sm-8" style="padding: 0;">
             <div id="aam-access-form-container">
-                <?php echo $params->postManager->getAccessForm($params->objectId, $params->objectType); ?>
+                <?php echo $params->postManager->getAccessForm(
+                    $params->objectId,
+                    $params->objectType
+                ); ?>
             </div>
         </div>
     </div>

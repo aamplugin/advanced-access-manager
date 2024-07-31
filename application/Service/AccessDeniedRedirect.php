@@ -64,7 +64,7 @@ class AAM_Service_AccessDeniedRedirect
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_init_ui_action', function () {
-                    AAM_Backend_Feature_Main_Redirect::register();
+                    AAM_Backend_Feature_Main_AccessDeniedRedirect::register();
                 });
             }
 

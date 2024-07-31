@@ -17,7 +17,8 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_NotFoundRedirect
-    implements AAM_Framework_Service_ResourceInterface
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -48,10 +49,10 @@ class AAM_Framework_Service_NotFoundRedirect
     public function get_redirect($inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, true, $inline_context);
-            $result   = $this->_prepare_redirect(
-                $resource->get_settings(),
-                !$resource->is_overwritten()
+            $preference = $this->get_preference(true, $inline_context);
+            $result     = $this->_prepare_redirect(
+                $preference->get_settings(),
+                !$preference->is_overwritten()
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -75,15 +76,15 @@ class AAM_Framework_Service_NotFoundRedirect
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $resource = $this->get_resource(null, false, $inline_context);
-            $data     = $this->_convert_to_redirect($incoming_data);
+            $preference = $this->get_preference(false, $inline_context);
+            $data       = $this->_convert_to_redirect($incoming_data);
 
-            if (!$resource->set_explicit_settings($data)) {
+            if (!$preference->set_explicit_settings($data)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
             $result = $this->_prepare_redirect(
-                $resource->get_explicit_settings(), false
+                $preference->get_explicit_settings(), false
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -105,7 +106,7 @@ class AAM_Framework_Service_NotFoundRedirect
     public function reset($inline_context = null)
     {
         try {
-            $this->get_resource(null, false, $inline_context)->reset();
+            $this->get_preference(false, $inline_context)->reset();
 
             $result = $this->get_redirect($inline_context);
         } catch (Exception $e) {
@@ -116,23 +117,27 @@ class AAM_Framework_Service_NotFoundRedirect
     }
 
     /**
-     * Get Not Found Redirect resource
+     * Get Not Found Redirect preference resource
      *
-     * @param null    $resource_id
      * @param boolean $reload
      * @param array   $inline_context
      *
-     * @return AAM_Framework_Resource_LoginRedirect
+     * @return AAM_Framework_Resource_NotFoundRedirect
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource(
-        $resource_id = null, $reload = false, $inline_context = null
-    ) {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT, null, $reload
-        );
+    public function get_preference($reload = false, $inline_context = null)
+    {
+        try {
+            $result = $this->_get_access_level($inline_context)->get_preference(
+                AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT, $reload
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
     }
 
     /**

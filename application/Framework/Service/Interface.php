@@ -8,21 +8,26 @@
  */
 
 /**
- * Access Policy resource
+ * Framework service interface
  *
  * @package AAM
+ *
  * @version 7.0.0
  */
-class AAM_Framework_Resource_AccessPolicy
-implements
-    AAM_Framework_Resource_Interface
+interface AAM_Framework_Service_Interface
 {
 
-    use AAM_Framework_Resource_PermissionTrait;
-
     /**
-     * @inheritDoc
+     * Bootstrap and return an instance of the service
+     *
+     * @param array $runtime_context
+     *
+     * @return static::class
+     *
+     * @access public
+     * @static
+     * @version 7.0.0
      */
-    const TYPE = AAM_Framework_Type_Resource::ACCESS_POLICY;
+    public static function get_instance($runtime_context = []);
 
 }

@@ -59,7 +59,7 @@ class AAM_Restful_MuService
         AAM_Restful_ConfigService::bootstrap();
         AAM_Restful_SettingService::bootstrap();
 
-        // Get currently managed "Access Level" (previously known as "subject")
+        // Get currently managed "Access Level"
         add_filter(
             'aam_rest_get_access_level_filter', [$this, 'get_access_level'], 10, 2
         );

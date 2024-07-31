@@ -7,6 +7,8 @@
  * ======================================================================
  */
 
+use MaxMind\Db\Reader\InvalidDatabaseException;
+
 /**
  * Base trait for the access level
  *
@@ -59,14 +61,14 @@ trait AAM_Framework_AccessLevel_BaseTrait
     private $_extended_methods = [];
 
     /**
-     * Array of already instantiated resources
+     * Array of already instantiated resources or preferences
      *
      * @var array
      *
      * @access private
      * @version 7.0.0
      */
-    private $_resources = [];
+    private $_repository = [];
 
     /**
      * Collection of siblings
@@ -110,7 +112,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
         };
     }
 
-     /**
+    /**
      * Proxy methods to WordPress core instance
      *
      * @param string $name
@@ -172,16 +174,25 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function get_resource(
         $resource_type, $resource_id = null, $reload = false
     ) {
         $resource  = null;
-        $cache_key = $resource_type . $resource_id;
+
+        if (is_scalar($resource_id) || is_null($resource_id)) {
+            $cache_key = $resource_type . $resource_id;
+        } elseif (is_array($resource_id)) {
+            $cache_key = $resource_type . implode('', array_values($resource_id));
+        } else {
+            throw new InvalidDatabaseException(
+                'The resource_id has to be either scalar value or an array'
+            );
+        }
 
         // Is resource with specified internal ID already instantiated?
-        if (!isset($this->_resources[$cache_key]) || $reload) {
+        if (!isset($this->_repository[$cache_key]) || $reload) {
             $resource = apply_filters(
                 'aam_get_resource_filter',
                 null,
@@ -194,7 +205,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 // Kick in the inheritance chain if needed
                 $this->_inherit_from_parent($resource, $reload);
 
-                // Trigger initialized action only for the lowest access level
+                // Trigger initialized action only when we are at the bottom of the
+                // inheritance chain
                 if (in_array(get_class($resource->get_access_level()), [
                     AAM_Framework_AccessLevel_User::class,
                     AAM_Framework_AccessLevel_Visitor::class
@@ -203,17 +215,25 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 }
 
                 // Finally cache the instance of the resource
-                $this->_resources[$cache_key] = $resource;
+                $this->_repository[$cache_key] = $resource;
             }
         } else {
-            $resource = $this->_resources[$cache_key];
+            $resource = $this->_repository[$cache_key];
         }
 
         return $resource;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
+     */
+    public function get_preference($preference_type, $reload = false)
+    {
+        return $this->get_resource($preference_type, null, $reload);
+    }
+
+    /**
+     * @inheritDoc
      */
     public function get_proxy_instance()
     {
@@ -221,7 +241,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function get_id()
     {
@@ -229,7 +249,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function add_sibling(AAM_Framework_AccessLevel_Interface $sibling)
     {
@@ -237,7 +257,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function has_siblings()
     {
@@ -245,7 +265,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function get_siblings()
     {
@@ -303,6 +323,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
+     * @inheritDoc
+     */
+    public function content()
+    {
+        return AAM_Framework_Manager::content([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
      * Inherit settings from parent access level (if any)
      *
      * @param AAM_Framework_Resource_Interface $resource
@@ -320,7 +350,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
         if (is_object($parent)) {
             $parent_resource = $parent->get_resource(
                 $resource::TYPE,
-                $resource->get_internal_id(),
+                $resource->get_internal_id(false),
                 $reload
             );
 

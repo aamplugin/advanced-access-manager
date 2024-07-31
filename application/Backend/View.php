@@ -191,7 +191,7 @@ class AAM_Backend_View
                     (object) array(
                         'objectId'    => $this->getFromQuery('id'),
                         'objectType'  => $this->getFromQuery('type'),
-                        'postManager' => new AAM_Backend_Feature_Main_Post()
+                        'postManager' => new AAM_Backend_Feature_Main_Content()
                     )
                 );
             } elseif ($type === 'user' && current_user_can('aam_manage_users')) {
@@ -364,11 +364,11 @@ class AAM_Backend_View
                 break;
 
             case 'post-access-form':
-                $type    = $this->getFromPost('type'); // Type of object to load
-                $id      = $this->getFromPost('id'); // Object Id
-
-                $manager = new AAM_Backend_Feature_Main_Post();
-                $content = $manager->getAccessForm($id, $type);
+                $manager = new AAM_Backend_Feature_Main_Content();
+                $content = $manager->render_content_access_form(
+                    $this->getFromPost('resource_id'),
+                    $this->getFromPost('resource_type')
+                );
                 break;
 
             default:

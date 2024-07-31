@@ -48,15 +48,15 @@ class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'jwt',
-            'position'   => 65,
-            'title'      => __('JWT Tokens', AAM_KEY),
-            'capability' => self::ACCESS_CAPABILITY,
-            'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_User::UID
-            ),
-            'view'       => __CLASS__
+            'uid'           => 'jwt',
+            'position'      => 65,
+            'title'         => __('JWT Tokens', AAM_KEY),
+            'capability'    => self::ACCESS_CAPABILITY,
+            'type'          => 'main',
+            'view'          => __CLASS__,
+            'access_levels' => array(
+                AAM_Framework_Type_AccessLevel::USER
+            )
         ));
     }
 

@@ -11,7 +11,7 @@
     <?php $access_level = AAM_Backend_AccessLevel::getInstance(); ?>
 
     <div class="aam-feature" id="user-governance-content">
-        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
+        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

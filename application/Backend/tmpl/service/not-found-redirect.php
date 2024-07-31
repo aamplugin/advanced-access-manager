@@ -21,13 +21,13 @@
     <div class="aam-feature" id="404redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (current_user_can('aam_page_help_tips')) { ?>
+                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
                         <?php echo __('The "404 Redirect" service ensures seamless user experience by automatically managing 404 (Not Found) errors, redirecting users to relevant pages, URL or trigger a custom PHP callback function to maintain site engagement and reduce bounce rates.'); ?>
                     </p>
                 <?php } ?>
 
-                <div class="aam-overwrite" id="aam-404redirect-overwrite" style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-404redirect-overwrite" style="display: <?php echo ($service->get_preference()->is_overwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="404redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>

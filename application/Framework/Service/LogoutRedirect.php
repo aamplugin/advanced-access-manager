@@ -17,7 +17,8 @@
  * @version 6.9.26
  */
 class AAM_Framework_Service_LogoutRedirect
-    implements AAM_Framework_Service_ResourceInterface
+implements
+    AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -47,10 +48,10 @@ class AAM_Framework_Service_LogoutRedirect
     public function get_redirect($inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, true, $inline_context);
-            $result   = $this->_prepare_redirect(
-                $resource->get_settings(),
-                !$resource->is_overwritten()
+            $preference = $this->get_preference(true, $inline_context);
+            $result     = $this->_prepare_redirect(
+                $preference->get_settings(),
+                !$preference->is_overwritten()
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -73,15 +74,15 @@ class AAM_Framework_Service_LogoutRedirect
     public function set_redirect(array $redirect, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, false, $inline_context);
-            $settings = $this->_convert_to_redirect($redirect);
+            $preference = $this->get_preference(false, $inline_context);
+            $settings   = $this->_convert_to_redirect($redirect);
 
-            if (!$resource->set_explicit_settings($settings)) {
+            if (!$preference->set_explicit_settings($settings)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
             $result = $this->_prepare_redirect(
-                $resource->get_explicit_settings(), false
+                $preference->get_explicit_settings(), false
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -103,7 +104,7 @@ class AAM_Framework_Service_LogoutRedirect
     public function reset($inline_context = null)
     {
         try {
-            if ($this->get_resource(null, false, $inline_context)->reset()) {
+            if ($this->get_preference(false, $inline_context)->reset()) {
                 $result = $this->get_redirect($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');
@@ -116,9 +117,8 @@ class AAM_Framework_Service_LogoutRedirect
     }
 
     /**
-     * Get logout redirect resource
+     * Get Logout Redirect preference resource
      *
-     * @param null    $resource_id
      * @param boolean $reload
      * @param array   $inline_context
      *
@@ -127,12 +127,17 @@ class AAM_Framework_Service_LogoutRedirect
      * @access public
      * @version 7.0.0
      */
-    public function get_resource(
-        $resource_id = null, $reload = false, $inline_context = null
-    ) {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::LOGOUT_REDIRECT, null, $reload
-        );
+    public function get_preference($reload = false, $inline_context = null)
+    {
+        try {
+            $result = $this->_get_access_level($inline_context)->get_preference(
+                AAM_Framework_Type_Resource::LOGOUT_REDIRECT, $reload
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
     }
 
     /**

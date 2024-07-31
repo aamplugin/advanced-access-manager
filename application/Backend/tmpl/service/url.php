@@ -20,7 +20,7 @@
     <div class="aam-feature" id="uri-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
+                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
                         <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to an unlimited number of individual URLs. With the premium %sComplete Package%s, you can use the wildcard [*] denotation to manage access to a specific website section (e.g. [/members/*], [/premium*]) or make the entire website private. To learn more, refer to our official documentation page %shere%s.', 'strong', 'i', 'i'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/managing-access-to-wordpress-website-urls?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>

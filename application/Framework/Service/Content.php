@@ -23,74 +23,70 @@ class AAM_Framework_Service_Content
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Get list of registered post type
+     * Get list of registered post types
      *
-     * @param array $args
-     * @param array $inline_context
+     * @param array  $args
+     * @param string $result_type
+     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 6.9.31
      */
-    public function get_post_types(array $args = [], $inline_context = null)
+    public function get_post_types(
+        array $args = [], $result_type = 'list', $inline_context = null
+    ) {
+        try {
+            // Get the list of all registered post types based on the provided
+            // filters
+            $raw_list = get_post_types($args, 'names', 'or');
+
+            if ($result_type === 'summary') {
+                $result = [
+                    'total_count'    => count($raw_list),
+                    'filtered_count' => count(get_post_types())
+                ];
+            } else {
+                $result = [];
+
+                foreach($raw_list as $post_type) {
+                    array_push(
+                        $result,
+                        $this->get_post_type($post_type, $inline_context)
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get a single post type resource
+     *
+     * @param string $post_type
+     * @param array  $inline_context
+     *
+     * @return AAM_Framework_Resource_PostType
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_post_type($post_type, $inline_context = null)
     {
         try {
-            $args = array_merge([
-                'include_all' => false,  // Only return manageable post types
-                'result_type' => 'full', // Return both list and summary,
-                'scope'       => 'all'   // Permission scopes to return all
-            ], $args);
-
-            // Preparing the list of
-            if (!empty($args['include_all'])) {
-                $filters = [];
-            } else {
-                $filters = [
-                    'public'            => true,
-                    'show_ui'           => true,
-                    'show_in_menu'      => true,
-                    'show_in_rest'      => true,
-                    'show_in_nav_menus' => true,
-                    'show_in_admin_bar' => true
-                ];
+            if (!is_string($post_type)) {
+                throw new InvalidArgumentException(
+                    "The post_type argument has to be a valid string"
+                );
             }
 
-            // Convert the list to models
-            $raw_list     = get_post_types($filters, 'objects', 'or');
-            $access_level = $this->_get_access_level($inline_context);
-
-            $result = [
-                'list'    => [],
-                'summary' => [
-                    'total_count'    => count($raw_list),
-                    'filtered_count' => count($raw_list)
-                ]
-            ];
-
-            foreach($raw_list as $post_type) {
-                if ($this->_extended_method_exists('get_post_type')) {
-                    $item = $this->get_post_type(
-                        $post_type, $args['scope'], $inline_context
-                    );
-                } else {
-                    $item = $this->_prepare_post_type_item($post_type);
-                }
-
-                array_push($result['list'], apply_filters(
-                    'aam_get_post_type_filter',
-                    $item,
-                    $post_type,
-                    $access_level
-                ));
-            }
-
-            // Determine what to return
-            if ($args['result_type'] === 'list') {
-                $result = $result['list'];
-            } elseif ($args['result_type'] === 'summary') {
-                $result = $result['summary'];
-            }
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::POST_TYPE, $post_type, true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -109,65 +105,57 @@ class AAM_Framework_Service_Content
      * @access public
      * @version 6.9.31
      */
-    public function get_taxonomies(array $args = [], $inline_context = null)
+    public function get_taxonomies(
+        array $args = [], $result_type = 'list', $inline_context = null
+    ) {
+        try {
+            // Convert the list to models
+            $raw_list = get_taxonomies($args, 'names', 'or');
+
+            if ($result_type === 'summary') {
+                $result = [
+                    'total_count'    => count($raw_list),
+                    'filtered_count' => count(get_taxonomies())
+                ];
+            } else {
+                $result = [];
+
+                foreach($raw_list as $taxonomy) {
+                    array_push(
+                        $result, $this->get_taxonomy($taxonomy, $inline_context)
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get a single taxonomy resource
+     *
+     * @param string $taxonomy
+     * @param array  $inline_context
+     *
+     * @return AAM_Framework_Resource_Taxonomy
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_taxonomy($taxonomy, $inline_context = null)
     {
         try {
-            $args = array_merge([
-                'include_all' => false,  // Only return manageable taxonomies
-                'result_type' => 'full', // Return both list and summary
-                'scope'       => 'all'   // Permission scopes to return all
-            ], $args);
-
-            // Preparing the list of
-            if (!empty($args['include_all'])) {
-                $filters = [];
-            } else {
-                $filters = [
-                    'public'             => true,
-                    'show_ui'            => true,
-                    'show_in_rest'       => true,
-                    'show_in_menu'       => true,
-                    'show_in_quick_edit' => true,
-                    'show_in_nav_menus'  => true,
-                    'show_in_admin_bar'  => true
-                ];
+            if (!is_string($taxonomy)) {
+                throw new InvalidArgumentException(
+                    "The taxonomy argument has to be a valid string"
+                );
             }
 
-            // Convert the list to models
-            $raw_list     = get_taxonomies($filters, 'objects', 'or');
-            $access_level = $this->_get_access_level($inline_context);
-
-            $result = [
-                'list'    => [],
-                'summary' => [
-                    'total_count'    => count($raw_list),
-                    'filtered_count' => count($raw_list)
-                ]
-            ];
-
-            foreach($raw_list as $taxonomy) {
-                if ($this->_extended_method_exists('get_taxonomy')) {
-                    $item = $this->get_taxonomy(
-                        $taxonomy, $args['scope'], $inline_context
-                    );
-                } else {
-                    $item = $this->_prepare_taxonomy_item($taxonomy);
-                }
-
-                array_push($result['list'], apply_filters(
-                    'aam_get_taxonomy_filter',
-                    $item,
-                    $taxonomy,
-                    $access_level
-                ));
-            }
-
-            // Determine what to return
-            if ($args['result_type'] === 'list') {
-                $result = $result['list'];
-            } elseif ($args['result_type'] === 'summary') {
-                $result = $result['summary'];
-            }
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::TAXONOMY, $taxonomy, true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -178,8 +166,9 @@ class AAM_Framework_Service_Content
     /**
      * Get list of posts
      *
-     * @param array $args
-     * @param array $inline_context
+     * @param array  $args
+     * @param string $result_type
+     * @param array  $inline_context
      *
      * @return array
      *
@@ -189,18 +178,10 @@ class AAM_Framework_Service_Content
      * @access public
      * @version 6.9.35
      */
-    public function get_posts(array $args = [], $inline_context = null)
-    {
+    public function get_posts(
+        array $args = [],  $result_type = 'list', $inline_context = null
+    ) {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $args         = array_merge([
-                'numberposts'      => 10,   // By default, only top 10
-                'result_type'      => 'full', // Return both list and summary
-                'suppress_filters' => true,
-                'post_status'      => 'any',
-                'search_columns'   => ['post_title']
-            ], $args);
-
             // The minimum required attribute is post_type. If it is not defined,
             // throw an error
             if (empty($args['post_type']) || !is_string($args['post_type'])) {
@@ -209,47 +190,130 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            // If result type is either "full" or "summary", gather additional info
-            if (in_array($args['result_type'], ['full', 'summary'], true)) {
-                // Prep some stats
-                $total_count = $this->_get_post_count($args['post_type']);
-
-                if ($args['s']) {
-                    $filtered_count = $this->_get_post_count(
-                        $args['post_type'], $args['s']
-                    );
-                } else {
-                    $filtered_count = $total_count;
-                }
-            }
-
-            if ($args['result_type'] !== 'summary') {
-                $list = [];
-
-                foreach(get_posts($args) as $post) {
-                    array_push(
-                        $list, $this->_prepare_post_item($post, $access_level)
-                    );
-                }
-            }
-
-            // Determine what to return
-            if ($args['result_type'] === 'list') {
-                $result = $list;
-            } elseif ($args['result_type'] === 'summary') {
+            if ($result_type === 'summary') {
                 $result = [
-                    'total_count'    => $total_count,
-                    'filtered_count' => $filtered_count
+                    'total_count'    => $this->_get_post_count($args['post_type']),
+                    'filtered_count' => $this->_get_post_count(
+                        $args['post_type'], $args['s']
+                    )
                 ];
             } else {
-                $result = [
-                    'list'    => $list,
-                    'summary' => [
-                        'total_count'    => $total_count,
-                        'filtered_count' => $filtered_count
-                    ]
-                ];
+                $result   = [];
+                $raw_list = get_posts(array_merge([
+                    'numberposts'      => 10,   // By default, only top 10
+                    'suppress_filters' => true,
+                    'post_status'      => 'any',
+                    'search_columns'   => ['post_title']
+                ], $args, [ 'fields' => 'ids' ]));
+
+                foreach($raw_list as $id) {
+                    array_push(
+                        $result, $this->get_post($id, $inline_context)
+                    );
+                }
             }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get list of terms
+     *
+     * @param array  $args
+     * @param string $result_type
+     * @param array  $inline_context
+     *
+     * @return array
+     *
+     * @access public
+     * @version 6.9.31
+     */
+    public function get_terms(
+        array $args = [], $result_type = 'list', $inline_context = null
+    ) {
+        try {
+            // The minimum required attribute is taxonomy. If it is not defined,
+            // throw an error
+            if (empty($args['taxonomy']) || !is_string($args['taxonomy'])) {
+                throw new InvalidArgumentException(
+                    'The taxonomy has to be a valid string'
+                );
+            }
+
+            if ($result_type === 'summary') {
+                $result = [
+                    'total_count'    => intval(get_terms([
+                        'fields'           => 'count',
+                        'hide_empty'       => false,
+                        'suppress_filters' => true,
+                        'taxonomy'         => $args['taxonomy']
+                    ])),
+                    'filtered_count' => intval(get_terms(array_merge(
+                        $args, [ 'fields' => 'count', 'suppress_filters' => true ]
+                    )))
+                ];
+            } else {
+                // Get the paginated list of terms
+                $terms = get_terms(array_merge([
+                    'number'           => 10,
+                    'fields'           => 'ids',
+                    'suppress_filters' => true,
+                    'hide_empty'       => false
+                ], $args));
+
+                $result = [];
+
+                foreach($terms as $term_id) {
+                    array_push(
+                        $result, $this->get_term($term_id, $inline_context)
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get a single term resource
+     *
+     * @param int|array $term_id
+     * @param array     $inline_context
+     *
+     * @return AAM_Framework_Resource_Term
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_term($term_id, $inline_context = null)
+    {
+        try {
+            if (is_array($term_id)) {
+                if (!isset($term_id['id']) || !is_numeric($term_id['id'])) {
+                    throw new InvalidArgumentException(
+                        "The term_id has to have a valid numeric id"
+                    );
+                }
+
+                if (!isset($term_id['taxonomy']) || !is_string($term_id['taxonomy'])) {
+                    throw new InvalidArgumentException(
+                        "The term_id has to have a valid string taxonomy"
+                    );
+                }
+            } elseif (!is_numeric($term_id)) {
+                throw new InvalidArgumentException(
+                    "The term_id argument has to be a valid numeric value"
+                );
+            }
+
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::TERM, $term_id, true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -279,104 +343,9 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            $result = $this->_prepare_post_item(
-                get_post($post_id),
-                $this->_get_access_level($inline_context)
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::POST, $post_id, true
             );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get list of terms
-     *
-     * @param array $args
-     * @param array $inline_context
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.31
-     */
-    public function get_terms(array $args = [], $inline_context = null)
-    {
-        try {
-            $access_level = $this->_get_access_level($inline_context);
-            $args         = array_merge([
-                'number'           => 10,     // By default, only top 10
-                'result_type'      => 'full', // Return both list and summary
-                'suppress_filters' => true,
-                'hide_empty'       => false,
-                'scope'            => 'all'
-            ], $args);
-
-            // The minimum required attribute is taxonomy. If it is not defined,
-            // throw an error
-            if (empty($args['taxonomy']) || !is_string($args['taxonomy'])) {
-                throw new InvalidArgumentException(
-                    'The taxonomy has to be a valid string'
-                );
-            }
-
-            // If result type is either "full" or "summary", gather additional info
-            if (in_array($args['result_type'], ['full', 'summary'], true)) {
-                $total_count = get_terms([
-                    'fields'     => 'count',
-                    'hide_empty' => false,
-                    'taxonomy'   => $args['taxonomy']
-                ]);
-
-                if ($args['search']) {
-                    $filtered_count = get_terms([
-                        'fields'     => 'count',
-                        'hide_empty' => false,
-                        'search'     => $args['search'],
-                        'taxonomy'   => $args['taxonomy']
-                    ]);
-                } else {
-                    $filtered_count = $total_count;
-                }
-            }
-
-            if ($args['result_type'] !== 'summary') {
-                $list = [];
-
-                foreach(get_terms($args) as $term) {
-                    if ($this->_extended_method_exists('get_term')) {
-                        $item = $this->get_term($term, $args, $inline_context);
-                    } else {
-                        $item = $this->_prepare_term_item($term);
-                    }
-
-                    array_push($list, apply_filters(
-                        'get_term_filter',
-                        $item,
-                        $term,
-                        $access_level
-                    ));
-                }
-            }
-
-            // Determine what to return
-            if ($args['result_type'] === 'list') {
-                $result = $list;
-            } elseif ($args['result_type'] === 'summary') {
-                $result = [
-                    'total_count'    => $total_count,
-                    'filtered_count' => $filtered_count
-                ];
-            } else {
-                $result = [
-                    'list'    => $list,
-                    'summary' => [
-                        'total_count'    => $total_count,
-                        'filtered_count' => $filtered_count
-                    ]
-                ];
-            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -401,31 +370,70 @@ class AAM_Framework_Service_Content
     ) {
         try {
             $access_level = $this->_get_access_level($inline_context);
-
-            // Get list of all permissions and convert them back to AAM internal
-            // content settings
-            $settings = [];
-
-            foreach($permissions as $permission) {
-                $converted = $this->_convert_permission_to_option($permission);
-
-                if (!is_null($converted)) {
-                    $settings = array_merge($settings, $converted);
-                }
-            }
-
-            $post = $access_level->get_resource(
+            $post         = $access_level->get_resource(
                 AAM_Framework_Type_Resource::POST, $post_id
             );
 
             // Set new permissions
-            if (!empty($settings)) {
-                $result = $post->set_explicit_settings($settings);
-            } else {
-                $result = $this->delete_post_permissions(
-                    $post_id, $inline_context
-                );
+            $result = $post->set_explicit_settings($permissions);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Set post permission
+     *
+     * @param int    $post_id
+     * @param string $permission
+     * @param array  $settings
+     * @param array  $inline_context
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function set_post_permission(
+        $post_id, $permission, $settings, $inline_context = null
+    ) {
+        try {
+            $access_level = $this->_get_access_level($inline_context);
+            $post         = $access_level->get_resource(
+                AAM_Framework_Type_Resource::POST, $post_id
+            );
+
+            $settings = $this->_validate_permission($permission, $settings);
+
+            // Get list of explicitly defined permissions and override existing
+            // permission or add it to the list, if not yet defined
+            $is_replaced       = false;
+            $explicit_settings = [];
+
+            foreach($post->get_explicit_settings() as $p) {
+                if ($p['permission'] === $permission) {
+                    array_push($explicit_settings, array_merge(
+                        [ 'permission' => $permission ],
+                        $settings
+                    ));
+
+                    $is_replaced = true;
+                } else {
+                    array_push($explicit_settings, $p);
+                }
             }
+
+            if (!$is_replaced) {
+                array_push($explicit_settings, array_merge(
+                    [ 'permission' => $permission ],
+                    $settings
+                ));
+            }
+
+            // Set new permissions
+            $result = $post->set_explicit_settings($explicit_settings);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -455,10 +463,7 @@ class AAM_Framework_Service_Content
                 AAM_Framework_Type_Resource::POST, $post_id
             );
 
-            // Reset post permissions
-            $post->reset();
-
-            $result = $this->get_post($post_id, $inline_context);
+            return $post->reset();
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -510,648 +515,81 @@ class AAM_Framework_Service_Content
     }
 
     /**
-     * Prepare post model
+     * Validate permission's settings
      *
-     * @param WP_Post                             $post
-     * @param AAM_Framework_AccessLevel_Interface $access_level
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.29
-     */
-    private function _prepare_post_item($post, $access_level)
-    {
-        // Get post type to add additional information about post
-        $post_type = get_post_type_object($post->post_type);
-
-        $item = [
-            'id'              => $post->ID,
-            'icon'            => $post_type->menu_icon,
-            'is_hierarchical' => $post_type->hierarchical
-        ];
-
-        if ($post->post_type === 'nav_menu_item') {
-            $item['title'] = wp_setup_nav_menu_item($post)->title;
-        } else {
-            $item['title'] = $post->post_title;
-        }
-
-        // Get permissions
-        $resource = $access_level->get_resource(
-            AAM_Framework_Type_Resource::POST, $post->ID, true
-        );
-
-        $item = array_merge($item, [
-            'permissions'  => $this->_convert_to_permissions(
-                $resource->get_settings()
-            ),
-            'is_inherited' => !$resource->is_overwritten()
-        ]);
-
-        return apply_filters('aam_get_post_filter', $item, $post, $access_level);
-    }
-
-    /**
-     * Prepare post type
-     *
-     * @param string|WP_Post_Type $post_type
+     * @param string $permission
+     * @param array  $settings
      *
      * @return array
      *
      * @access private
-     * @version 6.9.31
+     * @version 7.0.0
      */
-    private function _prepare_post_type_item($post_type)
+    private function _validate_permission($permission, $settings)
     {
-        if (is_string($post_type)) {
-            $post_type_obj = get_post_type_object($post_type);
+        $result = [];
+
+        if ($permission === 'list') {
+            $result = $this->_validate_list_permission($settings);
         } else {
-            $post_type_obj = $post_type;
-        }
-
-        if (!is_a($post_type_obj, 'WP_Post_Type')) {
-            throw new OutOfRangeException("The post type {$post_type} is not valid");
-        }
-
-        return [
-            'title'           => $post_type_obj->label,
-            'slug'            => $post_type_obj->name,
-            'icon'            => $post_type_obj->menu_icon,
-            'is_hierarchical' => $post_type_obj->hierarchical
-        ];
-    }
-
-    /**
-     * Prepare taxonomy
-     *
-     * @param string|WP_Taxonomy $taxonomy
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _prepare_taxonomy_item($taxonomy)
-    {
-        if (is_string($taxonomy)) {
-            $taxonomy_obj = get_taxonomy($taxonomy);
-        } else {
-            $taxonomy_obj = $taxonomy;
-        }
-
-        if (!is_a($taxonomy_obj, 'WP_Taxonomy')) {
-            throw new OutOfRangeException("The taxonomy {$taxonomy} is not valid");
-        }
-
-        return [
-            'title'           => $taxonomy_obj->label,
-            'slug'            => $taxonomy_obj->name,
-            'is_hierarchical' => $taxonomy_obj->hierarchical,
-            'post_types'      => array_values($taxonomy_obj->object_type)
-        ];
-    }
-
-    /**
-     * Prepare term
-     *
-     * @param int|WP_Term $term
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _prepare_term_item($term)
-    {
-        if (is_numeric($term)) {
-            $term_obj = get_term($term);
-        } else {
-            $term_obj = $term;
-        }
-
-        if (!is_a($term_obj, 'WP_Term')) {
-            throw new OutOfRangeException("The term {$term} is not valid");
-        }
-
-        // Get post type to add additional information about post
-        $taxonomy = get_taxonomy($term_obj->taxonomy);
-
-        return [
-            'title'           => $term_obj->name,
-            'id'              => $term_obj->term_id,
-            'taxonomy'        => $term_obj->taxonomy,
-            'is_hierarchical' => $taxonomy->hierarchical
-        ];
-    }
-
-    /**
-     * Convert AAM internal options to array of permissions
-     *
-     * @param array  $options
-     * @param string $scope
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.29
-     * @todo Weak link
-     */
-    private function _convert_to_permissions($options, $scope = null)
-    {
-        $response = [];
-
-        if (is_array($options)) {
-            foreach($options as $action => $data) {
-                $converted = $this->_convert_option_to_permission($action, $data);
-
-                if ($converted !== null) {
-                    if (!is_null($scope)) {
-                        $converted['scope'] = $scope;
-                    }
-
-                    array_push($response, $converted);
-                }
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert AAM internal options into models
-     *
-     * @param string     $action
-     * @param array|null $data
-     *
-     * @return array|null
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_option_to_permission($action, $data)
-    {
-        if ($action === 'restricted') {
-            $response = $this->_convert_simple_action('read', $data);
-        } elseif ($action === 'hidden') {
-            $response = $this->_convert_list_action($data);
-        } elseif ($action === 'comment') {
-            $response = $this->_convert_simple_action('comment', $data);
-        } elseif ($action === 'ceased') {
-            $response = $this->_convert_ceased_action($data);
-        } elseif ($action === 'limited') {
-            $response = $this->_convert_limited_action($data);
-        } elseif ($action === 'teaser') {
-            $response = $this->_convert_teaser_action($data);
-        } elseif ($action === 'redirected') {
-            $response = $this->_convert_redirect_action($data);
-        } elseif ($action === 'protected') {
-            $response = $this->_convert_protected_action($data);
-        } elseif ($action === 'edit') {
-            $response = $this->_convert_simple_action('edit', $data);
-        } elseif ($action === 'delete') {
-            $response = $this->_convert_simple_action('delete', $data);
-        } elseif ($action === 'publish') {
-            $response = $this->_convert_simple_action('publish', $data);
-        } else {
-            $response = apply_filters(
-                'aam_content_option_to_permission_filter', null, $action, $data
+            $result = apply_filters(
+                'aam_validate_content_permission_filter', $settings, $permission
             );
         }
 
-        return $response;
+        return $result;
     }
 
     /**
-     * Convert "HIDDEN" action to list permission
+     * Validate "LIST" permission
      *
-     * @param array $data
+     * Validating the list permission and enriching with default values if not fully
+     * provided
      *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_list_action($data)
-    {
-        $response = [
-            'permission' => 'list'
-        ];
-
-        if (is_bool($data)) {
-            $effect = $this->_convert_to_permission_effect($data);
-            $response['on'] = [
-                'frontend' => $effect,
-                'backend'  => $effect,
-                'api'      => $effect
-            ];
-        } elseif (is_array($data)) {
-            $response['on'] = [
-                'frontend' => $this->_convert_to_permission_effect(
-                    isset($data['frontend']) ? $data['frontend'] : false
-                ),
-                'backend'  => $this->_convert_to_permission_effect(
-                    isset($data['backend']) ? $data['backend'] : false
-                ),
-                'api'      => $this->_convert_to_permission_effect(
-                    isset($data['api']) ? $data['api'] : false
-                )
-            ];
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert primitive AAM internal access controls to permission model
-     *
-     * @param string $type
-     * @param mixed  $data
+     * @param array $settings
      *
      * @return array
      *
      * @access private
-     * @version 6.9.31
+     * @version 7.0.0
      */
-    private function _convert_simple_action($type, $data)
+    private function _validate_list_permission($settings)
     {
-        return [
-            'permission' => $type,
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-    }
-
-     /**
-     * Convert "Expires After" internal AAM access control to permission model
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_ceased_action($data)
-    {
-        $response = [
-            'permission' => 'read',
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-
-        if (!empty($data['after'])) {
-            $response['after_timestamp'] = $data['after'];
-            $response['after_datetime']  = date(
-                DATE_RSS, $data['after']
+        if (!isset($settings['effect'])
+            || !in_array($settings['effect'], [ 'allow', 'deny' ], true)
+        ) {
+            throw new InvalidArgumentException(
+                'The required effect property is missing or invalid'
             );
         }
 
-        return $response;
-    }
-
-    /**
-     * Convert "LIMITED" access control to permission model
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_limited_action($data)
-    {
-        $response = [
-            'permission' => 'read',
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-
-        if (isset($data['threshold'])) {
-            $response['read_max_count'] = intval($data['threshold']);
+        // By default the "on" will contain all areas
+        if (!isset($settings['on']) || !is_array($settings['on'])) {
+            $settings['on'] = [ 'frontend', 'backend', 'api' ];
         }
 
-        return $response;
+        return $settings;
     }
 
     /**
-     * Convert "Teaser" access control to permission model
+     * Validate effect
      *
-     * @param array $data
+     * @param array $settings
      *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_teaser_action($data)
-    {
-        $response = [
-            'permission' => 'read',
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-
-        if (!empty($data['message'])) {
-            $response['teaser_message'] = $data['message'];
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert "Redirect" access control to permission model
-     *
-     * @param array $data
-     *
-     * @return array
+     * @return void
      *
      * @access private
-     * @version 6.9.31
+     * @version 7.0.0
      */
-    private function _convert_redirect_action($data)
+    private function _validate_effect($settings)
     {
-        $response = [
-            'permission' => 'read',
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-
-        if (!empty($data['type'])) {
-            $response['redirect_type'] = $data['type'];
-
-            if ($data['type'] === 'page') {
-                $response['redirect_page_id'] = $data['destination'];
-            } elseif ($data['type'] === 'url') {
-                $response['redirect_url'] = $data['destination'];
-            } elseif ($data['type'] === 'callback') {
-                $response['redirect_callback'] = $data['destination'];
-            }
-
-            if ($data['type'] !== 'login' && isset($data['httpCode'])) {
-                $response['redirect_http_code'] = intval(
-                    $data['httpCode']
-                );
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert "Password Protected" access control to permission model
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_protected_action($data)
-    {
-        $response = [
-            'permission' => 'read',
-            'effect'     => $this->_convert_to_permission_effect($data)
-        ];
-
-        if (!empty($data['password'])) {
-            $response['password'] = $data['password'];
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert AAM access control flag to permission effect
-     *
-     * @param mixed $setting
-     *
-     * @return string
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_to_permission_effect($setting)
-    {
-        $response = 'allow';
-
-        if(is_bool($setting)) {
-            $response = $setting ? 'deny' : 'allow';
-        } elseif(is_numeric($setting)) { // Legacy
-            $response = intval($setting) === 1 ? 'deny' : 'allow';
-        } elseif(is_array($setting)) {
-            $response = $this->_convert_to_permission_effect(
-                isset($setting['enabled']) ? $setting['enabled'] : false
+        if (!isset($settings['effect'])
+            || !in_array($settings['effect'], [ 'allow', 'deny' ], true)
+        ) {
+            throw new InvalidArgumentException(
+                'The required effect property is missing or invalid'
             );
         }
-
-        return $response;
-    }
-
-    /**
-     * Convert models into AAM internal settings
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.31
-     */
-    private function _convert_permission_to_option($data)
-    {
-        $action = isset($data['permission']) ? $data['permission'] : null;
-
-        if ($action === 'read') {
-            $response = $this->_convert_read_permission($data);
-        } elseif ($action === 'list') {
-            $response = $this->_convert_list_permission($data);
-        } elseif ($action === 'comment') {
-            $response = [
-                'comment' => $this->_convert_permission_effect_to_bool($data)
-            ];
-        } elseif ($action === 'edit') {
-            $response = [
-                'edit' => $this->_convert_permission_effect_to_bool($data)
-            ];
-        } elseif ($action === 'delete') {
-            $response = [
-                'delete' => $this->_convert_permission_effect_to_bool($data)
-            ];
-        } elseif ($action === 'publish') {
-            $response = [
-                'publish' => $this->_convert_permission_effect_to_bool($data)
-            ];
-        } else {
-            $response = apply_filters(
-                'aam_content_permission_to_option_filter',
-                null,
-                $data
-            );
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert "read" permissions to internal AAM settings
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_read_permission($data)
-    {
-        $response = null;
-
-        // Checking if it is "ceased"
-        if (isset($data['after_timestamp']) || isset($data['after_datetime'])) {
-            $response = [
-                'ceased' => [
-                    'enabled' => $this->_convert_permission_effect_to_bool($data),
-                    'after'   => $this->_prepare_ceased_after_value($data)
-                ]
-            ];
-        } elseif (isset($data['read_max_count'])) {
-            $response = [
-                'limited' => [
-                    'enabled'   => $this->_convert_permission_effect_to_bool($data),
-                    'threshold' => intval($data['read_max_count'])
-                ]
-            ];
-        } elseif (isset($data['teaser_message'])) {
-            $response = [
-                'teaser' => [
-                    'enabled' => $this->_convert_permission_effect_to_bool($data),
-                    'message' => trim($data['teaser_message'])
-                ]
-            ];
-        } elseif (isset($data['redirect_type'])) {
-            $response = $this->_convert_redirect_permission_to_option($data);
-        } elseif (isset($data['password'])) {
-            $response = [
-                'protected' => [
-                    'enabled' => $this->_convert_permission_effect_to_bool($data),
-                    'password' => trim($data['password'])
-                ]
-            ];
-        } else {
-            $response = apply_filters('aam_content_permission_to_option_filter', [
-                'restricted' => $this->_convert_permission_effect_to_bool($data)
-            ], $data);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert "list" permission to "HIDDEN" internal AAM access control
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_list_permission($data)
-    {
-        $effect   = $this->_convert_permission_effect_to_bool($data);
-        $areas    = isset($data['on']) && is_array($data['on']) ? $data['on'] : [];
-        $response = [
-            'hidden' => [
-                'enabled' => true
-            ]
-        ];
-
-        foreach(['frontend', 'backend', 'api'] as $area) {
-            if (in_array($area, $areas, true)) {
-                $response['hidden'][$area] = $effect;
-            } else {
-                $response['hidden'][$area] = !$effect;
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert permission "effect" into boolean representation
-     *
-     * @param string $data
-     *
-     * @return boolean
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_permission_effect_to_bool($data)
-    {
-        if (is_string($data)) {
-            $effect = $data;
-        } else {
-            $effect = isset($data['effect']) ? strtolower($data['effect']) : 'deny';
-        }
-
-        return $effect === 'deny';
-    }
-
-    /**
-     * Convert "Expires After" values into timestamp
-     *
-     * @param array $data
-     *
-     * @return int|null
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _prepare_ceased_after_value($data)
-    {
-        $response = null;
-
-        if (isset($data['after_timestamp'])) {
-            $response = intval($data['after_timestamp']);
-        } elseif (isset($data['after_datetime'])) {
-            $response = strtotime($data['after_datetime']);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Convert "Redirect" permission model to internal AAM control action
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 6.9.31
-     */
-    private function _convert_redirect_permission_to_option($data)
-    {
-        $props = [
-            'type' => $data['redirect_type']
-        ];
-
-        if ($props['type'] === 'page') {
-            $props['destination'] = $data['redirect_page_id'];
-        } elseif ($props['type'] === 'url') {
-            $props['destination'] = $data['redirect_url'];
-        } elseif ($props['type'] === 'callback') {
-            $props['destination'] = $data['redirect_callback'];
-        }
-
-        if (isset($data['redirect_http_code'])) {
-            $props['httpCode'] = intval($data['redirect_http_code']);
-        }
-
-        return [
-            'redirected' => array_merge([
-                'enabled' => $this->_convert_permission_effect_to_bool($data)
-            ], $props)
-        ];
     }
 
 }
