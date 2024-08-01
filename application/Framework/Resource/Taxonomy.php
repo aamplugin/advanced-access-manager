@@ -26,30 +26,6 @@ implements
     const TYPE = AAM_Framework_Type_Resource::TAXONOMY;
 
     /**
-     * Return the list of all properly scoped permissions
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_permissions()
-    {
-        $result = [];
-
-        foreach($this->get_settings() as $scope => $permissions) {
-            array_push(
-                $result,
-                ...array_map(function($permission) use ($scope) {
-                    return array_merge($permission, [ 'scope' => $scope ]);
-                }, $permissions)
-            );
-        }
-
-        return $result;
-    }
-
-    /**
      * Initialize the core instance
      *
      * @return void

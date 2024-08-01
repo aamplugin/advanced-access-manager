@@ -42,12 +42,6 @@ class AAM_Restful_ContentService
                 'callback'            => [ $this, 'get_post_types' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
-                    'permissions_scope' => [
-                        'description' => 'Permissions scope',
-                        'type'        => 'string',
-                        'default'     => 'all',
-                        'enum'        => [ 'term', 'post', 'all' ]
-                    ],
                     'include_all' => [
                         'description' => 'Include all post types or only public',
                         'type'        => 'boolean',
@@ -60,15 +54,7 @@ class AAM_Restful_ContentService
             $this->_register_route('/content/taxonomies', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_taxonomies'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => [
-                    'permissions_scope' => [
-                        'description' => 'Permissions scope',
-                        'type'        => 'string',
-                        'default'     => 'all',
-                        'enum'        => [ 'term', 'post', 'all' ]
-                    ]
-                ]
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Get list of posts for given post type
@@ -106,15 +92,9 @@ class AAM_Restful_ContentService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'taxonomy' => array(
-                        'description' => 'Unique taxonomy identifier',
+                        'description' => 'Scope for specific taxonomy',
                         'type'        => 'string',
                         'required'    => true
-                    ),
-                    'permissions_scope' => array(
-                        'description' => 'Permissions scope',
-                        'type'        => 'string',
-                        'default'     => 'all',
-                        'enum'        => [ 'term', 'post', 'all' ]
                     ),
                     'post_type' => array(
                         'description' => 'Scope for specific post type',

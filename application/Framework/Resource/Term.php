@@ -26,24 +26,25 @@ implements
     const TYPE = AAM_Framework_Type_Resource::TERM;
 
     /**
-     * Return the list of all properly scoped permissions
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
+     * @inheritDoc
      */
-    public function get_permissions()
+    public function get_internal_id($serialize = true)
     {
-        $result = [];
+        // Overriding the default serialization method to ensure that term's
+        // compound ID is serialized with keys in correct order:
+        // term_id|<taxonomy>|<post_type>
+        if (is_array($this->_internal_id) && $serialize) {
+            $parts = [];
 
-        foreach($this->get_settings() as $scope => $permissions) {
-            array_push(
-                $result,
-                ...array_map(function($permission) use ($scope) {
-                    return array_merge($permission, [ 'scope' => $scope ]);
-                }, $permissions)
-            );
+            foreach([ 'id', 'taxonomy', 'post_type' ] as $prop) {
+                if (array_key_exists($prop, $this->_internal_id)) {
+                    array_push($parts, $this->_internal_id[$prop]);
+                }
+            }
+
+            $result = implode('|', $parts);
+        } else {
+            $result = $this->_internal_id;
         }
 
         return $result;

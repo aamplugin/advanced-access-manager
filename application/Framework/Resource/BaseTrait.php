@@ -95,7 +95,7 @@ trait AAM_Framework_Resource_BaseTrait
         // Read explicitly defined settings from DB
         $settings = AAM_Framework_Manager::settings([
             'access_level' => $access_level
-        ])->get_setting(constant('static::TYPE'), []);
+        ])->get_setting($this->_get_settings_ns(), []);
 
         if (!empty($settings)) {
             $this->_explicit_settings = $settings;
@@ -103,13 +103,15 @@ trait AAM_Framework_Resource_BaseTrait
 
         // Allow other implementations to modify defined settings
         $this->_settings = apply_filters(
-            'aam_init_' . constant('static::TYPE') . '_resource_settings_filter',
+            'aam_initialize_resource_settings_filter',
             $settings,
             $this
         );
 
         // Extend access level with more methods
-        $closures = apply_filters('aam_framework_resource_methods_filter', [], $this);
+        $closures = apply_filters(
+            'aam_framework_resource_methods_filter', [], $this
+        );
 
         if (is_array($closures)) {
             foreach($closures as $name => $closure) {
@@ -195,7 +197,7 @@ trait AAM_Framework_Resource_BaseTrait
         // Store changes in DB
         return AAM_Framework_Manager::settings([
             'access_level' => $this->get_access_level()
-        ])->set_setting(constant('static::TYPE'), $settings);
+        ])->set_setting($this->_get_settings_ns(), $settings);
     }
 
     /**
@@ -279,7 +281,27 @@ trait AAM_Framework_Resource_BaseTrait
 
         return AAM_Framework_Manager::settings([
             'access_level' => $this->get_access_level()
-        ])->delete_setting(constant('static::TYPE'));
+        ])->delete_setting($this->_get_settings_ns());
+    }
+
+    /**
+     * Get settings namespace
+     *
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_settings_ns()
+    {
+        // Determine the namespace for resource settings within all settings
+        $resource_id = $this->get_internal_id();
+
+        // Compile the namespace
+        $ns  = constant('static::TYPE');
+        $ns .= (is_null($resource_id) ? '' : ".{$resource_id}");
+
+        return $ns;
     }
 
 }

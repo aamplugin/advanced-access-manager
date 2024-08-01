@@ -561,7 +561,7 @@ final class AAM_Migration_700
             // Group by scopes
             $scopes = [
                 'post' => [],
-                'term' => []
+                'term' => [] // We are going to ignore these settings
             ];
 
             foreach($data as $action => $d) {
@@ -572,14 +572,8 @@ final class AAM_Migration_700
             $result[$id] = [];
 
             if (!empty($scopes['post'])) {
-                $result[$id]['post'] = $this->_convert_legacy_post_object(
+                $result[$id] = $this->_convert_legacy_post_object(
                     $scopes['post']
-                );
-            }
-
-            if (!empty($scopes['term'])) {
-                $result[$id]['term'] = $this->_convert_legacy_term_object(
-                    $scopes['term']
                 );
             }
         }
@@ -618,7 +612,7 @@ final class AAM_Migration_700
             $result[$id] = [];
 
             if (!empty($scopes['term'])) {
-                $result[$id]['term'] = $this->_convert_legacy_term_object(
+                $result[$id] = $this->_convert_legacy_term_object(
                     $scopes['term']
                 );
             }
@@ -656,13 +650,11 @@ final class AAM_Migration_700
             $result[$id] = [];
 
             if (!empty($scopes['post'])) {
-                $result[$id]['post'] = $this->_convert_legacy_post_object(
+                $result[$id] = $this->_convert_legacy_post_object(
                     $scopes['post']
                 );
-            }
-
-            if (!empty($scopes['term'])) {
-                $result[$id]['term'] = $this->_convert_legacy_term_object(
+            } elseif (!empty($scopes['term'])) {
+                $result[$id] = $this->_convert_legacy_term_object(
                     $scopes['term']
                 );
             }
