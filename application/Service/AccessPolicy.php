@@ -10,6 +10,7 @@
 /**
  * Access Policy service
  *
+ * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/408
  * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/389
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
@@ -32,7 +33,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.32
+ * @version 6.9.36
  */
 class AAM_Service_AccessPolicy
 {
@@ -762,30 +763,28 @@ class AAM_Service_AccessPolicy
      *
      * @return string
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/408
+     * @since 6.9.28 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.28
+     * @version 6.9.36
      */
     private function _convertIdentityGovernanceAction($action, $resource_type)
     {
         $response = null;
 
-        // 'list_role',
-        // 'list_user',
-        // 'edit_user',
-        // 'delete_user',
-        // 'change_user_password',
-        // 'change_user_role'
+        if (!empty($action)) {
+            $lowercase = strtolower($action);
 
-        $lowercase = strtolower($action);
-
-        if ($lowercase === 'list') {
-            $response = "list_{$resource_type}";
-        } elseif (in_array($lowercase, ['edit', 'delete'], true)) {
-            $response = "{$lowercase}_{$resource_type}";
-        } elseif ($lowercase === 'changepassword') {
-            $response = 'change_user_password';
-        } elseif (in_array($lowercase, ['promote','changerole'], true)) {
-            $response = 'change_user_role';
+            if ($lowercase === 'list') {
+                $response = "list_{$resource_type}";
+            } elseif (in_array($lowercase, ['edit', 'delete'], true)) {
+                $response = "{$lowercase}_{$resource_type}";
+            } elseif ($lowercase === 'changepassword') {
+                $response = 'change_user_password';
+            } elseif (in_array($lowercase, ['promote','changerole'], true)) {
+                $response = 'change_user_role';
+            }
         }
 
         return $response;

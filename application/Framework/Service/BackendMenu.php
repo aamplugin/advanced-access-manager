@@ -10,13 +10,14 @@
 /**
  * AAM service for Backend Menu
  *
+ * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/409
  * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
  * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/326
  * @since 6.9.13 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.35
+ * @version 6.9.36
  */
 class AAM_Framework_Service_BackendMenu
 {
@@ -230,20 +231,24 @@ class AAM_Framework_Service_BackendMenu
      *
      * @return array
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/409
+     * @since 6.9.13 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.13
+     * @version 6.9.36
      */
     private function _prepare_menu($menu_item, $object, $is_top_level = false) {
         // Add menu- prefix to define that this is the top level menu.
         // WordPress by default gives the same menu id to the first
         // submenu
-        $slug     = ($is_top_level ? 'menu-' : '') . $menu_item['id'];
+        $menu_id  = strtolower(htmlspecialchars_decode($menu_item['id']));
+        $slug     = ($is_top_level ? 'menu-' : '') . $menu_id;
         $explicit = $object->getExplicitOption();
 
         $response = array(
             'id'            => abs(crc32($slug)),
             'slug'          => $slug,
-            'uri'           => $this->_prepare_admin_uri($menu_item['id']),
+            'uri'           => $this->_prepare_admin_uri($menu_id),
             'name'          => $this->_filter_menu_name($menu_item['name']),
             'capability'    => $menu_item['cap'],
             'is_restricted' => $object->isRestricted($slug),
@@ -254,7 +259,7 @@ class AAM_Framework_Service_BackendMenu
             $cache = AAM_Service_AdminMenu::getInstance()->getMenuCache();
 
             $response['children'] = $this->_get_submenu(
-                $menu_item['id'],
+                $menu_id,
                 $cache['submenu'],
                 $object
             );

@@ -10,6 +10,7 @@
 /**
  * Menu object
  *
+ * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/409
  * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/385
  * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/364
  * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/331
@@ -21,7 +22,7 @@
  * @since 6.0.0  Initial implementation of the method
  *
  * @package AAM
- * @version 6.9.31
+ * @version 6.9.36
  */
 class AAM_Core_Object_Menu extends AAM_Core_Object
 {
@@ -68,26 +69,27 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
      *
      * @return boolean
      *
-     * @since 6.2.2 Added new filter `aam_backend_menu_is_restricted_filter`
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/409
+     * @since 6.2.2  Added new filter `aam_backend_menu_is_restricted_filter`
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access public
-     * @version 6.5.0
+     * @version 6.9.36
      */
     public function isRestricted($menu)
     {
         // Decode URL in case of any special characters like &amp;
-        $s = strtolower(htmlspecialchars_decode($menu));
+        $menu_item = htmlspecialchars_decode(strtolower($menu));
 
-        if (!in_array($s, array('index.php', 'menu-index.php'))) {
+        if (!in_array($menu_item, array('index.php', 'menu-index.php'))) {
             $options = $this->getOption();
-            $parent  = $this->getParentMenu($s);
+            $parent  = $this->getParentMenu($menu_item);
 
             // Step #1. Check if menu is directly restricted
-            $direct = !empty($options[$s]);
+            $direct = !empty($options[$menu_item]);
 
             // Step #2. Check if whole branch is restricted
-            $branch = !empty($options['menu-' . $s]);
+            $branch = !empty($options['menu-' . $menu_item]);
 
             // Step #3. Check if dynamic submenu is restricted because of whole branch
             $indirect = ($parent && (!empty($options['menu-' . $parent])));
@@ -95,7 +97,7 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
             $restricted = apply_filters(
                 'aam_backend_menu_is_restricted_filter',
                 $direct || $branch || $indirect,
-                $s,
+                $menu_item,
                 $this
             );
         } else {
@@ -149,11 +151,12 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
      *
      * @return null|string
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/409
      * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/364
      * @since 6.9.19 Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.28
+     * @version 6.9.36
      */
     protected function findParentInArray($array, $search)
     {
@@ -161,12 +164,18 @@ class AAM_Core_Object_Menu extends AAM_Core_Object
 
         if (is_array($array)) {
             // Covering scenario when the submenu is also a link to the parent branch
-            if (array_key_exists($search, $array)) {
+            $keys = array_map(function($k) {
+                return strtolower(htmlspecialchars_decode($k));
+            }, array_keys($array));
+
+            if (array_key_exists($search, $keys)) {
                 $result = $search;
             } else {
                 foreach ($array as $parent => $subs) {
                     foreach ($subs as $sub) {
-                        if (isset($sub[2]) && $sub[2] === $search) {
+                        if (isset($sub[2])
+                            && strtolower(htmlspecialchars_decode($sub[2])) === $search
+                        ) {
                             $result = $parent;
                             break;
                         }

@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
-Tested up to: 6.5.4
-Stable tag: 6.9.35
+Tested up to: 6.6.1
+Stable tag: 6.9.6
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,11 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.36 =
+* Fixed: [Allowed memory size of XXX bytes exhausted (tried to allocate YYY bytes)](https://github.com/aamplugin/advanced-access-manager/issues/407)
+* Fixed: [Deprecated PHP notice](https://github.com/aamplugin/advanced-access-manager/issues/408)
+* Fixed: [Not all admin menu items get properly protected](https://github.com/aamplugin/advanced-access-manager/issues/409)
 
 = 6.9.35 =
 * Fixed: PHP Fatal error: Uncaught Error: Call to undefined function switch_to_user_locale [https://github.com/aamplugin/advanced-access-manager/issues/398](https://github.com/aamplugin/advanced-access-manager/issues/398)
