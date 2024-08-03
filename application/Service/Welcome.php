@@ -64,7 +64,7 @@ class AAM_Service_Welcome
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Welcome', AAM_KEY),
-                    'description' => __('Introduction panel to the AAM functionality. This is just a simple tab that contains some introductory material to the AAM plugin and its capabilities.', AAM_KEY),
+                    'description' => __('This service provides a simple overview of the plugin and its capabilities. It presents essential information about how AAM can enhance your experience and streamline your tasks. Explore the features and benefits of AAM and discover how it can help you achieve your goals efficiently.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -72,9 +72,9 @@ class AAM_Service_Welcome
             }, 1);
         }
 
-        if ($enabled) {
-            AAM_Restful_SupportService::bootstrap();
-        }
+        // Keep the support RESTful service enabled at all times because it is used
+        // by issue reporting feature as well
+        AAM_Restful_SupportService::bootstrap();
     }
 
 }
