@@ -42,10 +42,14 @@ final class AAM_Migration_6_9_36 implements AAM_Core_Contract_MigrationInterface
     }
 
     /**
-     * Undocumented function
+     * Fix corruption
      *
-     * @param [type] $settings
+     * @param array $settings
+     *
      * @return void
+     *
+     * @access private
+     * @version 6.9.36
      */
     private function _fix_corruption($settings)
     {
