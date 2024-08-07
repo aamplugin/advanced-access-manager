@@ -46,7 +46,10 @@ class AAM_Restful_RoleService
             $this->_register_route('/service/roles', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_role_list'),
-                'permission_callback' => [ $this, 'check_permissions' ],
+                'permission_callback' => function() {
+                    return current_user_can('aam_manager')
+                        && current_user_can('aam_list_roles');
+                },
                 'args'                => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -62,7 +65,10 @@ class AAM_Restful_RoleService
             $this->_register_route('/service/role/(?P<role_slug>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_role'),
-                'permission_callback' => [ $this, 'check_permissions' ],
+                'permission_callback' => function() {
+                    return current_user_can('aam_manager')
+                        && current_user_can('aam_list_roles');
+                },
                 'args' => array(
                     'role_slug'   => array(
                         'description' => 'Unique role slug (aka ID)',
@@ -391,20 +397,6 @@ class AAM_Restful_RoleService
         }
 
         return rest_ensure_response($result);
-    }
-
-     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_roles');
     }
 
     /**

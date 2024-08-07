@@ -374,7 +374,7 @@ class AAM_Service_IdentityGovernance
                 $caps = $this->_authorize_user_action(
                     'change_user_password', $id, $caps
                 );
-            } elseif ($cap === 'aam_list_user') {
+            } elseif ($cap === 'aam_list_users') {
                 $caps = $this->_authorize_user_action('list_user', $id, $caps);
             }
         }
