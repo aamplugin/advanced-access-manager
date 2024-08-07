@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 6.9.35
+ * Version: 7.0.0
  * Author: AAM <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
@@ -18,6 +18,7 @@
 /**
  * Main plugin's class
  *
+ * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/325
  * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
  * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
@@ -28,7 +29,7 @@
  * @package AAM
  * @author AAM <support@aamplugin.com>
  *
- * @version 6.9.17
+ * @version 6.9.36
  */
 class AAM
 {
@@ -70,26 +71,14 @@ class AAM
      *
      * @return void
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
      * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.12
+     * @version 6.9.36
      */
-    protected function __construct()
-    {
-        // Make sure if user is changed dynamically, AAM adjusts accordingly
-        add_action('set_current_user', function() {
-            $this->_legacy_current_user = null;
-            $this->_current_user        = null;
-        });
-
-        // The same with with after user login. WordPress core has bug with this
-        add_action('wp_login', function($_, $user) {
-            $this->_init_current_user($user);
-            $this->_init_legacy_current_user($user);
-        }, 10, 2);
-    }
+    protected function __construct() { }
 
     /**
      * Get AAM API manager
@@ -267,13 +256,19 @@ class AAM
      *
      * @return AAM
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
+     * @since 6.0.0  Initial implementation of the method
+     *
      * @access public
-     * @version 6.0.0
+     * @version 6.9.36
      */
     public static function getInstance()
     {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
+
+            // Init current user
+            self::$_instance->_initialize_current_user();
 
             // Load AAM internationalization
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
@@ -283,6 +278,29 @@ class AAM
         }
 
         return self::$_instance;
+    }
+
+    /**
+     * Initialize current user
+     *
+     * @return void
+     *
+     * @access private
+     * @version 6.9.36
+     */
+    private function _initialize_current_user()
+    {
+        // Make sure if user is changed dynamically, AAM adjusts accordingly
+        add_action('set_current_user', function() {
+            $this->_legacy_current_user = null;
+            $this->_current_user        = null;
+        });
+
+        // The same with with after user login. WordPress core has bug with this
+        add_action('wp_login', function($_, $user) {
+            $this->_init_current_user($user);
+            $this->_init_legacy_current_user($user);
+        }, 10, 2);
     }
 
     /**
@@ -357,7 +375,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '6.9.35');
+    define('AAM_VERSION', '7.0.0');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

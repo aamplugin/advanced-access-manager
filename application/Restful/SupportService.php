@@ -10,8 +10,11 @@
 /**
  * RESTful API for support service
  *
+ * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/410
+ * @since 6.9.15 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.15
+ * @version 6.9.36
  */
 class AAM_Restful_SupportService
 {
@@ -38,8 +41,11 @@ class AAM_Restful_SupportService
      *
      * @return void
      *
+     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/410
+     * @since 6.9.15 Initial implementation of the method
+     *
      * @access protected
-     * @version 6.9.15
+     * @version 6.9.36
      */
     protected function __construct()
     {
@@ -57,11 +63,13 @@ class AAM_Restful_SupportService
                     'fullname' => array(
                         'description' => 'Customer name',
                         'type'        => 'string',
+                        'default'     => 'No Name',
                         'required'    => false
                     ),
                     'email' => array(
                         'description' => 'Customer email',
                         'type'        => 'string',
+                        'default'     => 'notprovided@domain.xyz',
                         'validate_callback' => function($value) {
                             return $this->_validate_email($value);
                         }
@@ -162,10 +170,10 @@ class AAM_Restful_SupportService
         $response = true;
         $message  = trim($value);
 
-        if (strlen($message) === 0 || strlen($message) > 700) {
+        if (strlen($message) === 0) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                'The message field is required and cannot exceed 700 characters',
+                'The message field is required and cannot be empty',
                 array('status'  => 400)
             );
         }

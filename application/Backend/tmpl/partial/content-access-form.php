@@ -22,9 +22,20 @@
         value="<?php echo esc_attr($params->resource::TYPE); ?>"
         id="content_resource_type"
     />
+
+    <?php
+        $internal_id = $params->resource->get_internal_id();
+
+        // Determine the correct resource ID. Terms typically have compound ID
+        if ($params->resource::TYPE === AAM_Framework_Type_Resource::TERM) {
+            $id = is_array($internal_id) ? $internal_id['id'] : intval($internal_id);
+        } else {
+            $id = $internal_id;
+        }
+    ?>
     <input
         type="hidden"
-        value="<?php echo esc_attr($params->resource->get_internal_id()); ?>"
+        value="<?php echo esc_attr($id); ?>"
         id="content_resource_id"
     />
     <div id="content_resource_settings" class="hidden"><?php echo json_encode($params->resource->get_permissions()); ?></div>
@@ -60,7 +71,11 @@
                                 type="checkbox"
                                 <?php echo ($settings['is_denied'] ? 'checked' : ''); ?>
                                 data-permission="<?php echo esc_attr($control); ?>"
-                                data-scope="<?php echo ($settings['scope'] ? $settings['scope'] : ''); ?>"
+                                <?php if (isset($settings['attributes'])) { ?>
+                                    <?php foreach($settings['attributes'] as $key => $value) {
+                                        echo 'data-' . esc_attr($key) . '="' . esc_attr($value) . '"';
+                                    } ?>
+                                <?php } ?>
                                 data-on="<?php echo __('Deny', AAM_KEY); ?>"
                                 data-off="<?php echo __('Allow', AAM_KEY); ?>"
                                 data-size="small"

@@ -94,7 +94,7 @@ class AAM_Service_Core
             }
 
             // Hook that initialize the AAM UI part of the service
-            add_action('aam_init_ui_action', function () {
+            add_action('aam_initialize_ui_action', function () {
                 AAM_Backend_Feature_Settings_Service::register();
                 AAM_Backend_Feature_Settings_Core::register();
                 AAM_Backend_Feature_Settings_Content::register();

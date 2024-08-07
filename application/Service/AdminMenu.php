@@ -73,7 +73,7 @@ class AAM_Service_AdminMenu
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
-                add_action('aam_init_ui_action', function () {
+                add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Main_Menu::register();
                 });
             }

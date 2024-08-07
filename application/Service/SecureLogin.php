@@ -113,7 +113,7 @@ class AAM_Service_SecureLogin
 
             // Register additional tab for the Settings
             if ($enabled) {
-                add_action('aam_init_ui_action', function () {
+                add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Settings_Security::register();
                 }, 1);
             }

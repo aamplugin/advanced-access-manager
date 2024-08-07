@@ -497,7 +497,7 @@
                         });
                     });
 
-                    $('#add-role-modal').on('shown.bs.modal', function (e) {
+                    $('#add-role-modal').on('show.bs.modal', function (e) {
                         LoadRolesDropdown();
 
                         //clear add role form first
@@ -505,7 +505,7 @@
                         $('input[name="name"]', '#add-role-modal').focus();
                     });
 
-                    $('#edit-role-modal').on('shown.bs.modal', function () {
+                    $('#edit-role-modal').on('show.bs.modal', function () {
                         $('input[name="name"]', '#edit-role-modal').focus();
                     });
 
@@ -681,12 +681,22 @@
                                     $('#role-list').DataTable().ajax.reload();
                                 }
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification(
+                                    'danger',
+                                    getAAM().__('I\'m having trouble deleting the role.'),
+                                    {
+                                        request: `aam/v2/service/role/${$(_this).data('role')}`,
+                                        response: response.responseJSON
+                                    }
+                                );
                             },
                             complete: function () {
                                 $('#delete-role-modal').modal('hide');
-                                $(_this).text(getAAM().__('Delete role')).attr('disabled', false);
+
+                                $(_this).text(
+                                    getAAM().__('Delete role')
+                                ).attr('disabled', false);
                             }
                         });
                     });
@@ -775,8 +785,12 @@
                             });
                         }
                     },
-                    error: function () {
-                        getAAM().notification('danger');
+                    error: function (response) {
+                        getAAM().notification('danger', null, {
+                            request: `aam/v2/service/user/${id}?fields=status`,
+                            payload: { status },
+                            response: response.responseJSON
+                        });
                     }
                 });
             }
@@ -822,8 +836,12 @@
                                 $('#login-url-preview').data('url').replace('%s', response.token)
                             );
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/jwts',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 }
@@ -1296,8 +1314,12 @@
                     success: function () {
                         $('#user-list').DataTable().ajax.reload();
                     },
-                    error: function () {
-                        getAAM().notification('danger');
+                    error: function (response) {
+                        getAAM().notification('danger', null, {
+                            request: `aam/v2/service/user/${id}`,
+                            payload: { expiration: payload },
+                            response: response.responseJSON
+                        });
                     },
                     complete: function () {
                         $('#edit-user-modal').modal('hide');
@@ -1306,7 +1328,7 @@
                 });
             });
 
-            //reset user button
+            // Reset user
             $('#reset-user-expiration-btn').bind('click', function () {
                 var _this = this;
 
@@ -1325,8 +1347,11 @@
                     success: function () {
                         $('#user-list').DataTable().ajax.reload();
                     },
-                    error: function () {
-                        getAAM().notification('danger');
+                    error: function (response) {
+                        getAAM().notification('danger', null, {
+                            request: `aam/v2/service/user/${id}`,
+                            response: response.responseJSON
+                        });
                     },
                     complete: function () {
                         $('#edit-user-modal').modal('hide');
@@ -1354,7 +1379,6 @@
             });
 
         })(jQuery);
-
 
         /**
          * Visitor Interface
@@ -1872,7 +1896,7 @@
                         });
                     });
 
-                    $('#modal-install-policy').on('shown.bs.modal', function() {
+                    $('#modal-install-policy').on('show.bs.modal', function() {
                         $('#policy-id').val('').focus();
                         reset();
                     });
@@ -1931,21 +1955,27 @@
              */
             function save(item, is_restricted, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/backend-menu/${item}`), {
+                    const payload = getAAM().prepareRequestSubjectData({
+                        is_restricted
+                    });
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/backend-menu/${item}`, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: {
-                            is_restricted
-                        },
+                        data: payload,
                         success: function (response) {
                             cb(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/backend-menu/${item}`,
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -2035,7 +2065,7 @@
                         });
                     });
 
-                    //reset button
+                    // Reset button
                     $('#menu-reset').bind('click', function () {
                         const _this = $(this);
 
@@ -2054,8 +2084,11 @@
                                 success: function () {
                                     getAAM().fetchContent('main');
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/backend-menu',
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     _this.text(_this.attr('data-original-label'));
@@ -2093,19 +2126,27 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/admin-toolbar/${item}`), {
+                    const payload = getAAM().prepareRequestSubjectData({
+                        is_hidden
+                    });
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/admin-toolbar/${item}`, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: { is_hidden },
+                        data: payload,
                         success: function (response) {
                             cb(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/admin-toolbar/${item}`,
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -2184,8 +2225,11 @@
                                 success: function () {
                                     getAAM().fetchContent('main');
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/admin-toolbar',
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     _this.text(_this.attr('data-original-label'));
@@ -2237,7 +2281,6 @@
 
         })(jQuery);
 
-
         /**
          * Metaboxes & Widgets Interface
          *
@@ -2257,19 +2300,27 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/component/${item}`), {
+                    const payload = getAAM().prepareRequestSubjectData({
+                        is_hidden
+                    });
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/component/${item}`, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: { is_hidden },
+                        data: payload,
                         success: function (response) {
                             cb(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/component/${item}`,
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -2384,8 +2435,11 @@
                                 success: function () {
                                     getAAM().fetchContent('main');
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/components',
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     _this.text(_this.attr('data-original-label'));
@@ -2435,7 +2489,6 @@
             getAAM().addHook('init', initialize);
 
         })(jQuery);
-
 
         /**
          * Capabilities Interface
@@ -2512,8 +2565,12 @@
                                 );
                             }
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: endpoint,
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -2528,6 +2585,8 @@
              */
             function deleteCapability(capability, btn, scoped = false) {
                 getAAM().queueRequest(function () {
+                    const payload = (scoped ? PreparePayload() : {});
+
                     $.ajax(`${getLocal().rest_base}aam/v2/service/capability/${encodeURIComponent(capability)}`, {
                         type: 'POST',
                         headers: {
@@ -2535,7 +2594,7 @@
                             'X-HTTP-Method-Override': 'DELETE'
                         },
                         dataType: 'json',
-                        data: (scoped ? PreparePayload() : {}),
+                        data: payload,
                         beforeSend: function () {
                             $(btn).attr('data-original', $(btn).text());
                             $(btn).text(getAAM().__('Deleting...')).attr('disabled', true);
@@ -2543,8 +2602,12 @@
                         success: function () {
                             $('#capability-list').DataTable().ajax.reload();
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/capability/${encodeURIComponent(capability)}`,
+                                payload,
+                                response: response.responseJSON
+                            });
                         },
                         complete: function () {
                             $('#delete-capability-modal').modal('hide');
@@ -2746,7 +2809,7 @@
                         });
                     });
 
-                    $('#add-capability-modal').on('shown.bs.modal', function (e) {
+                    $('#add-capability-modal').on('show.bs.modal', function (e) {
                         $('#new-capability-name').val('');
                         $('#new-capability-name').focus();
                     });
@@ -2781,8 +2844,12 @@
                                         $('#add-capability-modal').modal('hide');
                                         $('#capability-list').DataTable().ajax.reload();
                                     },
-                                    error: function () {
-                                        getAAM().notification('danger');
+                                    error: function (response) {
+                                        getAAM().notification('danger', null, {
+                                            request: 'aam/v2/service/capabilities',
+                                            payload,
+                                            response: response.responseJSON
+                                        });
                                     },
                                     complete: function () {
                                         $(_this).text(getAAM().__('Add Capability')).attr('disabled', false);
@@ -2820,8 +2887,12 @@
                                     success: function () {
                                         $('#capability-list').DataTable().ajax.reload();
                                     },
-                                    error: function () {
-                                        getAAM().notification('danger');
+                                    error: function (response) {
+                                        getAAM().notification('danger', null, {
+                                            request: `aam/v2/service/capability/${encodeURIComponent(old_slug)}`,
+                                            payload,
+                                            response: response.responseJSON
+                                        });
                                     },
                                     complete: function () {
                                         $('#update-capability-modal').modal('hide');
@@ -2848,7 +2919,6 @@
             getAAM().addHook('init', initialize);
 
         })(jQuery);
-
 
         /**
          * Posts & Terms Interface
@@ -2887,7 +2957,9 @@
             }
 
             /**
+             * Render the breadcrumb
              *
+             * @param {Boolean} reload
              */
             function RenderBreadcrumb(reload) {
                 // Resetting the breadcrumb
@@ -2895,9 +2967,13 @@
 
                 $.each(breadcrumb, function(i, level) {
                     if (level.level_type === null) { // Root, append home icon
-                        $('.aam-post-breadcrumb').append('<i class="icon-home"></i>');
+                        $('.aam-post-breadcrumb').append(
+                            '<i class="icon-home"></i>'
+                        );
                     } else {
-                        $('.aam-post-breadcrumb').append('<i class="icon-angle-double-right"></i>');
+                        $('.aam-post-breadcrumb').append(
+                            '<i class="icon-angle-double-right"></i>'
+                        );
                     }
 
                     if (i === breadcrumb.length - 1) { // last element
@@ -2981,6 +3057,7 @@
             }
 
             /**
+             * Save a single permission
              *
              * @param {Number}   post_id
              * @param {String}   permission
@@ -2999,8 +3076,9 @@
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
+                        contentType: 'application/json; charset=UTF-8',
                         dataType: 'json',
-                        data: payload,
+                        data: JSON.stringify(payload),
                         success: function (response) {
                             if (cb) {
                                 cb(response);
@@ -3018,11 +3096,14 @@
             }
 
             /**
+             * Render the content access form
              *
-             * @param {*} object
-             * @param {*} id
-             * @param {*} btn
-             * @param {*} callback
+             * This is the SSR to reduce complexity for the frontend implementation
+             *
+             * @param {String}   level_type
+             * @param {Mixed}    level_id
+             * @param {Object}   btn
+             * @param {Callback} callback
              */
             function RenderAccessForm(level_type, level_id, btn, callback) {
                 //reset the form first
@@ -3053,7 +3134,10 @@
                     },
                     success: function (response) {
                         $('#aam_access_form_container').html(response);
-                        $('#content_list_container .dataTables_wrapper').addClass('hidden');
+
+                        $('#content_list_container .dataTables_wrapper').addClass(
+                            'hidden'
+                        );
                         container.addClass('active');
 
                         InitializeAccessForm(level_type, level_id);
@@ -3579,8 +3663,11 @@
             });
 
             /**
+             * Get the list of post types
              *
-             * @param {*} cb
+             * It is a static list, so we are caching it
+             *
+             * @param {Callback} cb
              */
             function FetchPostTypeList(cb) {
                 if (cache.post_types === undefined) {
@@ -3618,8 +3705,11 @@
             }
 
             /**
+             * Get the list of taxonomies
              *
-             * @param {*} cb
+             * This is another static list, so we are caching it as well
+             *
+             * @param {Callback} cb
              */
             function FetchTaxonomyList(cb) {
                 // Fetching the list of all registered post types.
@@ -3657,9 +3747,10 @@
             }
 
             /**
+             * Fetch list of posts
              *
-             * @param {*} filters
-             * @param {*} cb
+             * @param {Object}   filters
+             * @param {Callback} cb
              */
             function FetchPostList(filters, cb) {
                 // Fetching the list of posts
@@ -3756,7 +3847,9 @@
             }
 
             /**
+             * Adjust the list of content items based on where are we
              *
+             * @param {Boolean} reload
              */
             function AdjustList(reload = true) {
                 const current = CurrentLevel();
@@ -3768,9 +3861,9 @@
                 } else if (current.level_type === 'type_posts') {
                     PreparePostListTable(reload);
                 } else if (current.level_type === 'type_terms') {
-                    PrepareTermListTable(CurrentLevel(), reload);
+                    PrepareTermListTable(current, reload);
                 } else if (current.level_type === 'taxonomy_terms') {
-                    PrepareTermListTable(null, reload)
+                    PrepareTermListTable(current, reload)
                 }
             }
 
@@ -3835,15 +3928,17 @@
                     }).html(
                         options.map(o => `'<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')
                     ).bind('change', function () {
-                        const value                       = $(this).val();
-                        const [level_type, post_type, id] = $(this).val().split(':');
+                        const value = $(this).val();
+                        const [
+                            level_type, post_type, taxonomy
+                        ] = $(this).val().split(':');
 
                         AddToBreadcrumb({
                             level_type,
-                            level_id: id,
+                            level_id: taxonomy,
                             label: $(`.aam-post-taxonomy-filter option:selected`).text(),
-                            scope: 'post',
-                            scope_id: post_type
+                            post_type,
+                            taxonomy
                         });
 
                         $(`.aam-post-taxonomy-filter option[value="${value}"]`).prop(
@@ -3870,8 +3965,8 @@
                         level_type: data.level_type,
                         level_id: data.level_id,
                         label: data.label,
-                        scope: data.scope,
-                        scope_id: data.scope_id,
+                        post_type: data.post_type,
+                        taxonomy: data.taxonomy,
                         is_access_form: true
                     });
                 });
@@ -4036,7 +4131,8 @@
                                 AddToBreadcrumb({
                                     level_type: 'taxonomy_terms',
                                     level_id: data[0],
-                                    label: data[2]
+                                    label: data[2],
+                                    taxonomy: data[0]
                                 });
                             }).html(data[2]));
 
@@ -4224,12 +4320,16 @@
                 $('#content_list_container .dataTables_wrapper').addClass('hidden');
                 $('#content_list_container .table').addClass('hidden');
 
-                if (scope) {
-                    $('#term-list').attr('data-scope', scope.scope);
-                    $('#term-list').attr('data-scope-id', scope.scope_id);
+                if (scope && scope.post_type) {
+                    $('#term-list').attr('data-post-type', scope.post_type);
                 } else {
-                    $('#term-list').removeAttr('data-scope');
-                    $('#term-list').removeAttr('data-scope-id');
+                    $('#term-list').removeAttr('data-post-type');
+                }
+
+                if (scope && scope.taxonomy) {
+                    $('#term-list').attr('data-taxonomy', scope.taxonomy);
+                } else {
+                    $('#term-list').removeAttr('data-taxonomy');
                 }
 
                 if (!$('#term-list').hasClass('dataTable')) {
@@ -4269,16 +4369,16 @@
                                 $('td:eq(1)', row).html($('<a/>', {
                                 href: '#'
                             }).bind('click', function () {
-                                const scope    = $('#term-list').attr('data-scope');
-                                const scope_id = $('#term-list').attr('data-scope-id');
+                                const post_type = $('#term-list').attr('data-post-type');
+                                const taxonomy  = $('#term-list').attr('data-taxonomy');
 
                                 // Preparing internal AAM term's id
-                                let id = `${data[0]}|${data[4].taxonomy}`;
+                                let id = `${data[0]}|${taxonomy}`;
 
-                                // If scope is post, then we are withing certain
-                                // post type
-                                if (scope === 'post') {
-                                    id += `|${scope_id}`;
+                                // If we browse list of terms within post type, add
+                                // it to the ID
+                                if (post_type) {
+                                    id += `|${post_type}`;
                                 }
 
                                 NavigateToAccessForm({
@@ -4286,8 +4386,8 @@
                                     level_id: id,
                                     label: data[2],
                                     btn:  $('.icon-cog', row),
-                                    scope,
-                                    scope_id
+                                    post_type,
+                                    taxonomy
                                 });
                             }).html(data[2]));
 
@@ -4301,16 +4401,14 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
-                                            const scope    = $('#term-list').attr('data-scope');
-                                            const scope_id = $('#term-list').attr('data-scope-id');
+                                            const post_type = $('#term-list').attr('data-post-type');
+                                            const taxonomy  = $('#term-list').attr('data-taxonomy');
 
                                             // Preparing internal AAM term's id
-                                            let id = `${data[0]}|${data[4].taxonomy}`;
+                                            let id = `${data[0]}|${taxonomy}`;
 
-                                            // If scope is post, then we are withing certain
-                                            // post type
-                                            if (scope === 'post') {
-                                                id += `|${scope_id}`;
+                                            if (post_type) {
+                                                id += `|${post_type}`;
                                             }
 
                                             NavigateToAccessForm({
@@ -4318,8 +4416,8 @@
                                                 level_id: id,
                                                 label: data[2],
                                                 btn: $(this),
-                                                scope,
-                                                scope_id
+                                                post_type,
+                                                taxonomy
                                             });
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -4423,8 +4521,12 @@
                         success: function (response) {
                             successCallback(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/redirect/access-denied',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -4530,8 +4632,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/redirect/access-denied',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -4573,8 +4678,12 @@
                         success: function (response) {
                             successCallback(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/redirect/login',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -4651,8 +4760,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/redirect/login',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -4694,8 +4806,12 @@
                         success: function (response) {
                             successCallback(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/redirect/logout',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -4772,8 +4888,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/redirect/logout',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -4815,8 +4934,12 @@
                         success: function (response) {
                             successCallback(response);
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/redirect/not-found',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -4893,8 +5016,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/redirect/not-found',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -4927,13 +5053,17 @@
                 var value = $(btn).hasClass('icon-check-empty');
 
                 getAAM().queueRequest(function () {
-                    //show indicator
+                    // Show indicator
                     $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/api-route/${id}`), {
+                    const payload = getAAM().prepareRequestSubjectData({
+                        is_restricted: value
+                    });
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/api-route/${id}`, {
                         type: 'POST',
                         dataType: 'json',
-                        data: { is_restricted: value },
+                        data: payload,
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                         },
@@ -4941,9 +5071,14 @@
                             $('#aam-route-overwrite').removeClass('hidden');
                             updateBtn(btn, value);
                         },
-                        error: function () {
+                        error: function (response) {
                             updateBtn(btn, value ? 0 : 1);
-                            getAAM().notification('danger');
+
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/api-route/${id}`,
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -5084,8 +5219,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/api-routes',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -5157,8 +5295,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/urls',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -5235,8 +5376,12 @@
                                     $('#uri-list').DataTable().ajax.reload();
                                     $('#aam-uri-overwrite').show();
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: endpoint,
+                                        payload,
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     $('#uri-model').modal('hide');
@@ -5266,8 +5411,11 @@
                             success: function () {
                                 $('#uri-list').DataTable().ajax.reload();
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: `aam/v2/service/url/${id}`,
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 $('#uri-delete-model').modal('hide');
@@ -5536,8 +5684,11 @@
                                             value: u.username
                                         })));
                                     },
-                                    error: function () {
-                                        getAAM().notification('danger');
+                                    error: function (response) {
+                                        getAAM().notification('danger', null, {
+                                            request: `wp/v2/service/users?context=edit&search=${term}`,
+                                            response: response.responseJSON
+                                        });
                                     },
                                     complete: function () {
                                     }
@@ -5605,8 +5756,11 @@
                             success: function () {
                                 getAAM().fetchContent('main');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: 'aam/v2/service/identity-governance',
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 _btn.text(_btn.attr('data-original-label'));
@@ -5665,8 +5819,12 @@
                                     $('#user-governance-list').DataTable().ajax.reload();
                                     $('#aam-user-governance-overwrite').show();
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/identity-governance',
+                                        payload: data,
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     $('#user-governance-model').modal('hide');
@@ -5712,8 +5870,12 @@
                                 $('#user-governance-list').DataTable().ajax.reload();
                                 $('#aam-user-governance-overwrite').show();
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: `aam/v2/service/identity-governance/${editing_rule.id}`,
+                                    payload: data,
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 $('#user-governance-edit-model').modal('hide');
@@ -5744,8 +5906,11 @@
                             success: function () {
                                 $('#user-governance-list').DataTable().ajax.reload();
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: `aam/v2/service/identity-governance/${id}`,
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 $('#user-governance-delete-model').modal('hide');
@@ -6138,8 +6303,12 @@
                                 $('#view-jwt-url').val(response.signed_url);
                                 $('#view-jwt-modal').modal('show');
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: `aam/v2/service/jwts?fields=token,signed_url`,
+                                    payload,
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 $('#create-jwt-btn').html(getAAM().__('Create'));
@@ -6148,12 +6317,14 @@
                     });
 
                     $('#jwt-delete-btn').bind('click', function () {
+                        const payload = {
+                            user_id: getAAM().getSubject().id
+                        };
+
                         $.ajax(`${getLocal().rest_base}aam/v2/service/jwt/${$('#jwt-delete-btn').attr('data-id')}`, {
                             type: 'POST',
                             dataType: 'json',
-                            data: {
-                                user_id: getAAM().getSubject().id
-                            },
+                            data: payload,
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
                                 'X-HTTP-Method-Override': 'DELETE'
@@ -6165,8 +6336,12 @@
                                 $('#delete-jwt-modal').modal('hide');
                                 $('#jwt-list').DataTable().ajax.reload();
                             },
-                            error: function () {
-                                getAAM().notification('danger');
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: `aam/v2/service/jwt/${$('#jwt-delete-btn').attr('data-id')}`,
+                                    payload,
+                                    response: response.responseJSON
+                                });
                             },
                             complete: function () {
                                 $('#jwt-delete-btn').html(getAAM().__('Delete'));
@@ -6234,18 +6409,24 @@
              */
             function save(param, value) {
                 getAAM().queueRequest(function () {
+                    const payload = {
+                        key: param,
+                        value
+                    };
+
                     $.ajax(`${getLocal().rest_base}aam/v2/service/configs`, {
                         type: 'POST',
                         dataType: 'json',
-                        data: {
-                            key: param,
-                            value
-                        },
+                        data: payload,
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
                         },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/configs',
+                                payload,
+                                response: response.responseJSON
+                            });
                         }
                     });
                 });
@@ -6323,8 +6504,11 @@
                                     'X-WP-Nonce': getLocal().rest_nonce,
                                     'X-HTTP-Method-Override': 'DELETE'
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/configs',
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     $('#clear-settings').prop('disabled', false);
@@ -6345,8 +6529,11 @@
                                 success: () => {
                                     location.reload();
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/settings',
+                                        response: response.responseJSON
+                                    });
                                 },
                                 complete: function () {
                                     $('#clear-settings').prop('disabled', false);
@@ -6371,17 +6558,23 @@
 
                     editor.on("blur", function () {
                         getAAM().queueRequest(function () {
+                            const payload = {
+                                ini: editor.getValue()
+                            };
+
                             $.ajax(`${getLocal().rest_base}aam/v2/service/configpress`, {
                                 type: 'POST',
                                 dataType: 'json',
-                                data: {
-                                    ini: editor.getValue()
-                                },
+                                data: payload,
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
                                 },
-                                error: function () {
-                                    getAAM().notification('danger');
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/configpress',
+                                        payload,
+                                        response: response.responseJSON
+                                    });
                                 }
                             });
                         });
@@ -6523,8 +6716,11 @@
                             getAAM().fetchContent('main');
                             $('#reset-subject-modal').modal('hide');
                     },
-                        error: function () {
-                            getAAM().notification('danger');
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: 'aam/v2/service/settings',
+                                response: response.responseJSON
+                            });
                         },
                         complete: function () {
                             _this.text(getAAM().__('Reset')).prop('disabled', false);
@@ -6612,6 +6808,52 @@
                             $('#send-message-btn').text(
                                 getAAM().__('Send the Message')
                             );
+                        }
+                    });
+                });
+            });
+        })(jQuery);
+
+        /**
+         * Report issue modal
+         */
+        (function ($) {
+            getAAM().addHook('init', function() {
+                $('#send_report_btn').bind('click', () => {
+                    const payload = {
+                        message: $('#sending_info_preview').text()
+                    };
+
+                    const email = $.trim($('#issue_reporter_email').val());
+
+                    if (email) {
+                        payload.email = email;
+                    }
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/support`, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        dataType: 'json',
+                        data: payload,
+                        beforeSend: function () {
+                            $('#send_report_btn').text(
+                                getAAM().__('Sending...')
+                            ).attr('disabled', true);
+                        },
+                        success: function () {
+                            getAAM().notification(
+                                'success',
+                                'Issue report submitted successfully!'
+                            );
+
+                            $('#report_issue_modal').modal('hide');
+                        },
+                        complete: function () {
+                            $('#send_report_btn')
+                                .text(getAAM().__('Send Report'))
+                                .attr('disabled', false);
                         }
                     });
                 });
@@ -6996,7 +7238,18 @@
         //load the UI javascript support
         UI();
 
-        //initialize help context
+        // Migration log downloader
+        if ($('#download-migration-log').length) {
+            $('#download-migration-log').bind('click', function() {
+                getAAM().downloadFile(
+                    $('#migration-errors-container').html(),
+                    'migration-error.log',
+                    'text/plain'
+                );
+            });
+        }
+
+        // Initialize help context
         $('.aam-help-menu').each(function () {
             var target = $(this).data('target');
 
@@ -7015,7 +7268,7 @@
             }
         });
 
-        //help tooltip
+        // Help tooltip
         $('body').delegate('[data-toggle="tooltip"]', 'hover', function (event) {
             event.preventDefault();
 
@@ -7025,6 +7278,11 @@
             });
 
             $(this).tooltip('show');
+        });
+
+        // Making sure that when modal is presented, we scroll to the top
+        $('body').delegate('.modal', 'show.bs.modal', function() {
+            parent.window.scrollTo(0, 0);
         });
 
         $('.aam-area').each(function () {
@@ -7123,14 +7381,15 @@
     };
 
     /**
+     * Show notification
      *
-     * @param {type} status
-     * @param {type} message
-     * @returns {undefined}
+     * @param {String} status
+     * @param {String} message
+     * @param {Object} metadata
+     *
+     * @returns {Void}
      */
-    AAM.prototype.notification = function (status, message) {
-        var notification = $('<div/>', { 'class': 'aam-sticky-note ' + status });
-
+    AAM.prototype.notification = function (status, message, metadata = null) {
         if (!message) {
             switch (status) {
                 case 'success':
@@ -7138,7 +7397,7 @@
                     break;
 
                 case 'danger':
-                    message = getAAM().__('Unexpected application error');
+                    message  = getAAM().__('An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.');
                     break;
 
                 default:
@@ -7146,12 +7405,43 @@
             }
         }
 
-        notification.append($('<span/>').text(message));
-        $('.wrap').append(notification);
+        $('#report_issue_modal').on('show.bs.modal', function (e) {
+            $('#sending_info_preview').text(JSON.stringify(metadata, null, ' '));
 
-        setTimeout(function () {
-            $('.aam-sticky-note').remove();
-        }, 9000);
+            $.toast().reset('all');
+        });
+
+        if (status === 'success') {
+            $.toast({
+                text: message,
+                heading: 'Success',
+                icon: 'success',
+                showHideTransition: 'fade',
+                allowToastClose: true,
+                hideAfter: 6000,
+                stack: 5,
+                position: 'top-right',
+                textAlign: 'left',
+                loader: true,
+                loaderBg: '#5cb85c'
+            });
+        } else {
+            $.toast({
+                text: message + (metadata ? ' <a href="#report_issue_modal" data-toggle="modal">' + getAAM().__('Report issue') + '</a>' : ''),
+                heading: 'Unexpected Issue',
+                icon: 'error',
+                showHideTransition: 'fade',
+                allowToastClose: true,
+                hideAfter: false,
+                stack: 5,
+                position: 'top-right',
+                textAlign: 'left',
+                loader: true,
+                loaderBg: '#a94442'
+            });
+        }
+
+        parent.window.scrollTo(0, 0);
     };
 
     /**

@@ -39,7 +39,7 @@ class AAM_Backend_View
     {
         // Allow other plugins to register new AAM UI tabs/features
         do_action(
-            'aam_init_ui_action',
+            'aam_initialize_ui_action',
             'AAM_Backend_Feature::registerFeature',
             AAM_Backend_AccessLevel::getInstance()
         );

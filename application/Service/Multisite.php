@@ -96,7 +96,7 @@ class AAM_Service_Multisite
             }, 20);
 
             if ($enabled && is_multisite()) {
-                add_action('aam_init_ui_action', function () {
+                add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Settings_Multisite::register();
                 });
             }

@@ -490,7 +490,7 @@ class AAM_Restful_ContentService
             $service->set_post_permission(
                 $request->get_param('id'),
                 $request->get_param('permission'),
-                $request->get_body_params()
+                $request->get_json_params()
             );
 
             $result = apply_filters(
