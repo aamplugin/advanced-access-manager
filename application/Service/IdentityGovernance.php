@@ -374,7 +374,7 @@ class AAM_Service_IdentityGovernance
                 $caps = $this->_authorize_user_action(
                     'change_user_password', $id, $caps
                 );
-            } elseif ($cap === 'aam_list_user') {
+            } elseif ($cap === 'aam_list_users') {
                 $caps = $this->_authorize_user_action('list_user', $id, $caps);
             }
         }
@@ -503,7 +503,7 @@ class AAM_Service_IdentityGovernance
     private function _get_resource()
     {
         return AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::IDENTITY_GOVERNANCE
+            AAM_Framework_Type_Resource::IDENTITY
         );
     }
 
