@@ -62,21 +62,19 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     {
         $access_level = AAM_Backend_AccessLevel::getInstance();
 
-        // Making sure we are dealing a correct resource ID
+        // Making sure we are dealing with correct resource ID
         if ($resource_type === AAM_Framework_Type_Resource::TERM) {
-            $term_parts = explode('|', $resource_id);
-
             // Term ID is compound and can have up to 3 layer of controls
             $resource_id = [
-                'id' => intval($term_parts[0])
+                'id' => intval($resource_id)
             ];
 
-            if (isset($term_parts[1])) { // Is taxonomy specified?
-                $resource_id['taxonomy'] = trim($term_parts[1]);
+            if (isset($_POST['taxonomy'])) { // Is taxonomy specified?
+                $resource_id['taxonomy'] = trim($_POST['taxonomy']);
             }
 
-            if (isset($term_parts[2])) { // Is post type specified?
-                $resource_id['post_type'] = trim($term_parts[2]);
+            if (isset($_POST['post_type'])) { // Is post type specified?
+                $resource_id['post_type'] = trim($_POST['post_type']);
             }
         }
 
@@ -209,12 +207,16 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     private function _prepare_post_access_controls($resource)
     {
-        return apply_filters('aam_ui_post_access_form_controls_filter', [
+        return apply_filters('aam_ui_content_access_controls_filter', [
             'list' => array(
                 'title'       => __('Hidden', AAM_KEY),
-                'modal'       => 'modal_post_hidden',
+                'modal'       => 'modal_content_visibility',
                 'is_denied'   => $this->is_permission_denied('list', $resource),
                 'customize'   => __('Customize visibility', AAM_KEY),
+                'tooltip'     => sprintf(
+                    __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', AAM_KEY),
+                    $resource->post_title
+                ),
                 'description' => sprintf(
                     __('Hide the "%s" from all menus, lists, and API responses. However, it remains accessible via a direct URL. Visibility can be customized for the frontend, backend and API areas independently.', AAM_KEY),
                     $resource->post_title
@@ -236,9 +238,13 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             ),
             'read' => array(
                 'title'       => __('Restricted', AAM_KEY),
-                'modal'       => 'modal-restricted',
+                'modal'       => 'modal_content_restriction',
                 'is_denied'   => $this->is_permission_denied('read', $resource),
                 'customize'   => __('Customize direct access', AAM_KEY),
+                'tooltip'     => sprintf(
+                    __('Restrict direct access to read or download the "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
+                    $resource->post_title
+                ),
                 'description' => sprintf(
                     __('Restrict direct access to "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
                     $resource->post_title
@@ -293,7 +299,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     private function _prepare_other_access_controls($resource)
     {
         return apply_filters(
-            'aam_ui_content_access_form_controls_filter', [], $resource
+            'aam_ui_content_access_controls_filter', [], $resource
         );
     }
 

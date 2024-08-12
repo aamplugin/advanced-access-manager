@@ -3059,17 +3059,29 @@
             /**
              * Save a single permission
              *
-             * @param {Number}   post_id
              * @param {String}   permission
              * @param {Object}   payload
              * @param {Callback} cb
              *
              * @returns {Void}
              */
-            function save(post_id, permission, payload, cb = null) {
+            function UpdateContentPermission(permission, payload, cb = null) {
                 getAAM().queueRequest(function () {
+                    const resource_type    = $('#content_resource_type').val();
+                    const resource_id      = $('#content_resource_id').val();
+                    const permission_scope = JSON.parse(
+                        $('#content_permission_scope').val()
+                    );
+
+                    // If there is additional resource permission scope, add it
+                    const query = [];
+
+                    for(key in permission_scope) {
+                        query.push(`${key}=${permission_scope[key]}`);
+                    }
+
                     $.ajax(getAAM().prepareApiEndpoint(
-                        `/service/content/post/${post_id}/${permission}`
+                        `/service/content/${resource_type}/${resource_id}/${permission}?${query.join('&')}`
                     ), {
                         type: 'POST',
                         headers: {
@@ -3100,38 +3112,41 @@
              *
              * This is the SSR to reduce complexity for the frontend implementation
              *
-             * @param {String}   level_type
-             * @param {Mixed}    level_id
-             * @param {Object}   btn
+             * @param {Object}   target
              * @param {Callback} callback
              */
-            function RenderAccessForm(level_type, level_id, btn, callback) {
+            function RenderAccessForm(target = null, callback = null) {
                 //reset the form first
                 var container = $('.aam-access-form');
 
                 //show overlay if present
                 $('.aam-overlay', container).show();
 
+                if (target === null) {
+                    let scope = {};
+
+                    if ($('#content_permission_scope').length) {
+                        scope = JSON.parse($('#content_permission_scope').val());
+                    }
+
+                    target = Object.assign(scope, {
+                        resource_type: $('#content_resource_type').val(),
+                        resource_id: $('#content_resource_id').val()
+                    });
+                }
+
+                // Prepare payload for the SSR rendering
+                const payload = Object.assign({
+                    action: 'aam',
+                    sub_action: 'renderContent',
+                    partial: 'content-access-form',
+                    _ajax_nonce: getLocal().nonce,
+                }, target);
+
                 $.ajax(getLocal().ajaxurl, {
                     type: 'POST',
                     dataType: 'html',
-                    data: getAAM().prepareAjaxRequestPayload({
-                        action: 'aam',
-                        sub_action: 'renderContent',
-                        partial: 'post-access-form',
-                        _ajax_nonce: getLocal().nonce,
-                        resource_type: level_type,
-                        resource_id: level_id
-                    }),
-                    beforeSend: function () {
-                        if (btn) {
-                            $(btn).attr('data-class', $(btn).attr('class'));
-                            $(btn).attr(
-                                'class',
-                                'aam-row-action icon-spin4 animate-spin'
-                            );
-                        }
-                    },
+                    data: getAAM().prepareAjaxRequestPayload(payload),
                     success: function (response) {
                         $('#aam_access_form_container').html(response);
 
@@ -3140,7 +3155,7 @@
                         );
                         container.addClass('active');
 
-                        InitializeAccessForm(level_type, level_id);
+                        InitializeAccessForm();
 
                         if (typeof callback === 'function') {
                             callback.call();
@@ -3148,17 +3163,6 @@
                     },
                     error: function () {
                         getAAM().notification('danger');
-                    },
-                    complete: function () {
-                        if (btn){
-                            $(btn).attr(
-                                'class',
-                                $(btn).attr('data-class')
-                            ).removeAttr('data-class');
-                        }
-
-                        // Hide overlay if present
-                        $('.aam-overlay', container).hide();
                     }
                 });
             }
@@ -3179,78 +3183,23 @@
              * @param {*} resource_type
              * @param {*} resource_id
              */
-            function InitializeAccessForm(resource_type, resource_id)
+            function InitializeAccessForm()
             {
                 $('[data-toggle="toggle"]', '#aam_access_form_container').bootstrapToggle();
 
-                // Initialize the Customize Restriction modal
-                $('input[type="radio"]', '#restriction_types').each(function () {
-                    $(this).bind('click', function () {
-                        $('#restriction_type_extra > div').addClass('hidden');
-                        $('#restriction_type_extra > div[data-type="' + $(this).val() + '"').removeClass('hidden')
-                    });
-                });
-
-                $('#restricted_redirect_type').bind('change', function() {
-                    $('.restricted-redirect-type').addClass('hidden');
-
-                    $('.restricted-redirect-type[data-type="' + $(this).val() + '"]').removeClass('hidden')
-                });
-
-                // Initialize the Expiration picker
-                const def = $('#aam_expire_datetime').val();
-
-                $('#post_expire_datapicker').datetimepicker({
-                    icons: {
-                        time: "icon-clock",
-                        date: "icon-calendar",
-                        up: "icon-angle-up",
-                        down: "icon-angle-down",
-                        previous: "icon-angle-left",
-                        next: "icon-angle-right"
-                    },
-                    inline: true,
-                    defaultDate: $.trim(def) ? new Date(def * 1000) : new Date(),
-                    sideBySide: true
-                });
-
-                $('#post_expire_datapicker').on('dp.change', function (res) {
-                    $('#aam_expire_datetime').val(res.date.unix());
-                });
-
                 // Permission toggles
-                if (resource_type === 'post') {
-                    $('input[data-toggle="toggle"]', '#permission_toggles').each(function() {
-                        $(this).bind('change', function() {
-                            save(
-                                $('#content_resource_id').val(),
-                                $(this).data('permission'),
-                                {
-                                    effect: $(this).prop('checked') ? 'deny' : 'allow'
-                                }
-                            );
-                        });
+                $('input[data-toggle="toggle"]', '#permission_toggles').each(function() {
+                    $(this).bind('change', function() {
+                        UpdateContentPermission(
+                            $(this).data('permission'),
+                            { effect: $(this).prop('checked') ? 'deny' : 'allow' },
+                            () => RenderAccessForm()
+                        );
                     });
-                }
+                });
 
-                // Initialize the Post Visibility modal functionality
-                if ($('#modal_post_hidden').length) {
-                    $('#modal_post_hidden').on('shown.bs.modal', function () {
-                        const permission = GetResourcePermission('list');
-
-                        if (permission) {
-                            $('input[data-toggle="toggle"]', '#modal_post_hidden')
-                                .prop('checked', false)
-                                .trigger('change');
-
-                            $.each(permission.on, (_, area) => {
-                                $(`input[name="${area}"]`, '#modal_post_hidden').prop(
-                                    'checked', true
-                                ).trigger('change');
-                            });
-                        }
-                    });
-
+                // Initialize the Content Visibility modal functionality
+                if ($('#modal_content_visibility').length) {
                     $('#save_list_permission').bind('click', function() {
                         // Prepare the payload
                         let payload = GetResourcePermission('list');
@@ -3264,7 +3213,7 @@
                             payload.on = [];
                         }
 
-                        $('input[data-toggle="toggle"]', '#modal_post_hidden').each(function() {
+                        $('input[data-toggle="toggle"]', '#modal_content_visibility').each(function() {
                             if ($(this).prop('checked')) {
                                 payload.on.push($(this).attr('name'));
                             }
@@ -3273,60 +3222,152 @@
                         if (payload.on.length > 0) {
                             $(this).prop('disabled', true).text(getAAM().__('Saving'));
 
-                            save(
-                                $('#content_resource_id').val(),
+                            UpdateContentPermission(
                                 'list',
                                 getAAM().applyFilters('aam-list-permission-payload', payload),
                                 () => {
-                                    $('#modal_post_hidden').modal('hide');
+                                    $('#modal_content_visibility').modal('hide');
 
                                     // Reload the access form
-                                    RenderAccessForm(
-                                        $('#content_resource_type').val(),
-                                        $('#content_resource_id').val()
-                                    );
+                                    RenderAccessForm();
                                 }
                             );
                         }
                     });
                 }
 
-                // Initialize the Reset to default button
-                $('#content-reset').bind('click', function () {
-                    const type   = $(this).attr('data-type');
-                    const id     = $(this).attr('data-id');
-                    const obj_id = id.split('|')[0];
+                // Initialize the Content Restriction modal functionality
+                if ($('#modal_content_restriction').length) {
+                    // Initialize the restriction type toggles
+                    $('input[type="radio"]', '#restriction_types').each(function () {
+                        $(this).bind('click', function () {
+                            $('#restriction_type_extra > div').addClass('hidden');
+                            $('#restriction_type_extra > div[data-type="' + $(this).val() + '"').removeClass('hidden')
+                        });
+                    });
 
-                    const payload = {};
+                    // Initialize the redirect type element
+                    $('#restricted_redirect_type').bind('change', function() {
+                        $('.restricted-redirect-type').addClass('hidden');
 
-                    if (CurrentLevel().scope) {
-                        payload.scope = CurrentLevel().scope;
+                        $('.restricted-redirect-type[data-type="' + $(this).val() + '"]').removeClass('hidden')
+                    });
 
-                        if (payload.scope === 'post') {
-                            payload.post_type = CurrentLevel().scope_id;
+                    // Initialize the expiration picker
+                    const def = $('#aam_expire_datetime').val();
+
+                    $('#content_expire_datepicker').datetimepicker({
+                        icons: {
+                            time: "icon-clock",
+                            date: "icon-calendar",
+                            up: "icon-angle-up",
+                            down: "icon-angle-down",
+                            previous: "icon-angle-left",
+                            next: "icon-angle-right"
+                        },
+                        inline: true,
+                        defaultDate: $.trim(def) ? new Date(def * 1000) : new Date(),
+                        sideBySide: true
+                    });
+
+                    $('#content_expire_datepicker').on('dp.change', function (res) {
+                        console.log(res.date.unix());
+                        $('#aam_expire_datetime').val(res.date.unix());
+                    });
+
+                    $('#save_read_permission').bind('click', function() {
+                        const payload = {
+                            effect: 'deny'
                         }
+
+                        // Depending on the restriction type, collect additional
+                        // attributes
+                        const restriction_type = $(
+                            'input[name="content_restriction_type"]:checked',
+                            '#restriction_types'
+                        ).val();
+
+                        payload.restriction_type = restriction_type;
+
+                        if (restriction_type === 'teaser_message') {
+                            payload.teaser_message = $.trim(
+                                $('#aam_teaser_message').val()
+                            );
+                        } else if (restriction_type === 'redirect') {
+                            const redirect = {
+                                // The the redirect type
+                                type: $('#restricted_redirect_type').val()
+                            };
+
+                            if (redirect.type === 'page_redirect') {
+                                redirect.redirect_page_id = $('#restricted_redirect_page_id').val();
+                            } else if (redirect.type === 'url_redirect') {
+                                redirect.redirect_url = $('#restricted_redirect_url').val();
+                            } else if (redirect.type === 'trigger_callback') {
+                                redirect.callback = $('#restricted_callback').val();
+                            }
+
+                            payload.redirect = redirect;
+                        } else if (restriction_type === 'password_protected') {
+                            payload.password = $.trim(
+                                $('#restricted_password').val()
+                            );
+                        } else if (restriction_type === 'expire') {
+                            payload.expires_after = $('#aam_expire_datetime').val();
+                        }
+
+                        $(this).prop('disabled', true).text(getAAM().__('Saving'));
+
+                        UpdateContentPermission(
+                            'read',
+                            getAAM().applyFilters('aam-read-permission-payload', payload),
+                            () => {
+                                $('#modal_content_restriction').modal('hide');
+
+                                // Reload the access form
+                                RenderAccessForm();
+                            }
+                        );
+                    });
+                }
+
+                // Initialize the Reset to default button
+                $('#content_reset').bind('click', function () {
+                    const resource_type    = $('#content_resource_type').val();
+                    const resource_id      = $('#content_resource_id').val();
+                    const permission_scope = JSON.parse(
+                        $('#content_permission_scope').val()
+                    );
+
+                    // If there is additional resource permission scope, add it
+                    const query = [];
+
+                    for(key in permission_scope) {
+                        query.push(`${key}=${permission_scope[key]}`);
                     }
 
                     if (CurrentLevel().permissions) {
                         CurrentLevel().permissions = undefined;
                     }
 
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/${type}/${obj_id}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(
+                        `/service/content/${resource_type}/${resource_id}?${query.join('&')}`
+                    ), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'DELETE'
                         },
-                        data: payload,
                         beforeSend: function () {
-                            var label = $('#content-reset').text();
-                            $('#content-reset').attr('data-original-label', label);
-                            $('#content-reset').text(getAAM().__('Resetting...'));
+                            $('#content_reset').attr(
+                                'data-original-label', $('#content_reset').text()
+                            );
+                            $('#content_reset').text(getAAM().__('Resetting...'));
                         },
                         success: function () {
                             $('#post-overwritten').addClass('hidden');
 
-                            RenderAccessForm(type, id);
+                            RenderAccessForm();
 
                             // Manually update the data in a table because both
                             // Post Types & Taxonomies are static tables
@@ -3335,11 +3376,11 @@
 
                                 if (type === 'type') {
                                     row = cache.post_types.data.filter(
-                                        t => t[0] === obj_id
+                                        t => t[0] === resource_id
                                     ).pop();
                                 } else {
                                     row = cache.taxonomies.data.filter(
-                                        t => t[0] === obj_id
+                                        t => t[0] === resource_id
                                     ).pop();
                                 }
 
@@ -3347,8 +3388,8 @@
                             }
                         },
                         complete: function () {
-                            $('#content-reset').text(
-                                $('#content-reset').attr('data-original-label')
+                            $('#content_reset').text(
+                                $('#content_reset').attr('data-original-label')
                             );
                         }
                     });
@@ -3356,7 +3397,9 @@
 
                 // Allow third-party plugins to initialize the Access Form
                 getAAM().triggerHook('init-access-form', {
-                    RenderAccessForm
+                    RenderAccessForm,
+                    UpdateContentPermission,
+                    GetResourcePermission
                 });
             }
 
@@ -3476,7 +3519,7 @@
                         object,
                         id,
                         function () {
-                            $('#modal_post_hidden').modal('hide');
+                            $('#modal_content_visibility').modal('hide');
                             RenderAccessForm(object, id);
                         }
                     );
@@ -3959,7 +4002,29 @@
              * @param {*} data
              */
             function NavigateToAccessForm(data) {
-                RenderAccessForm(data.level_type, data.level_id, data.btn, () => {
+                if (data.btn) {
+                    $(data.btn).attr('data-class', $(data.btn).attr('class'));
+                    $(data.btn).attr(
+                        'class',
+                        'aam-row-action icon-spin4 animate-spin'
+                    );
+                }
+
+                // Determine the targeting resource
+                const target = {
+                    resource_type: data.level_type,
+                    resource_id: data.level_id
+                };
+
+                if (data.post_type !== undefined) {
+                    target.post_type = data.post_type;
+                }
+
+                if (data.taxonomy !== undefined) {
+                    target.taxonomy = data.taxonomy;
+                }
+
+                RenderAccessForm(target, () => {
                     // Update the breadcrumb
                     AddToBreadcrumb({
                         level_type: data.level_type,
@@ -3969,6 +4034,13 @@
                         taxonomy: data.taxonomy,
                         is_access_form: true
                     });
+
+                    if (data.btn){
+                        $(data.btn).attr(
+                            'class',
+                            $(data.btn).attr('data-class')
+                        ).removeAttr('data-class');
+                    }
                 });
             }
 
@@ -4016,7 +4088,7 @@
                             );
 
                             // Decorating the post type title & make it actionable
-                                $('td:eq(1)', row).html($('<a/>', {
+                            $('td:eq(1)', row).html($('<a/>', {
                                 href: '#'
                             }).bind('click', function () {
                                 AddToBreadcrumb({
@@ -4372,18 +4444,9 @@
                                 const post_type = $('#term-list').attr('data-post-type');
                                 const taxonomy  = $('#term-list').attr('data-taxonomy');
 
-                                // Preparing internal AAM term's id
-                                let id = `${data[0]}|${taxonomy}`;
-
-                                // If we browse list of terms within post type, add
-                                // it to the ID
-                                if (post_type) {
-                                    id += `|${post_type}`;
-                                }
-
                                 NavigateToAccessForm({
                                     level_type: 'term',
-                                    level_id: id,
+                                    level_id: data[0],
                                     label: data[2],
                                     btn:  $('.icon-cog', row),
                                     post_type,
@@ -4404,16 +4467,9 @@
                                             const post_type = $('#term-list').attr('data-post-type');
                                             const taxonomy  = $('#term-list').attr('data-taxonomy');
 
-                                            // Preparing internal AAM term's id
-                                            let id = `${data[0]}|${taxonomy}`;
-
-                                            if (post_type) {
-                                                id += `|${post_type}`;
-                                            }
-
                                             NavigateToAccessForm({
                                                 level_type: 'term',
-                                                level_id: id,
+                                                level_id: data[0],
                                                 label: data[2],
                                                 btn: $(this),
                                                 post_type,
@@ -4484,10 +4540,21 @@
                 const current_level = CurrentLevel();
 
                 if (current_level && current_level.is_access_form) {
-                    RenderAccessForm(
-                        current_level.level_type,
-                        current_level.level_id
-                    );
+                    // Determine the targeting resource
+                    const target = {
+                        resource_type: current_level.level_type,
+                        resource_id: current_level.level_id
+                    };
+
+                    if (current_level.post_type !== undefined) {
+                        target.post_type = current_level.post_type;
+                    }
+
+                    if (current_level.taxonomy !== undefined) {
+                        target.taxonomy = current_level.taxonomy;
+                    }
+
+                    RenderAccessForm(target);
                 }
             }
 

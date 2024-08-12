@@ -363,7 +363,7 @@ class AAM_Backend_View
                 }
                 break;
 
-            case 'post-access-form':
+            case 'content-access-form':
                 $manager = new AAM_Backend_Feature_Main_Content();
                 $content = $manager->render_content_access_form(
                     $this->getFromPost('resource_id'),

@@ -3,8 +3,10 @@
 /** @version 6.9.35 */
 
 if (defined('AAM_KEY')) {
+    $params    = isset($params) ? $params : (object) [];
     $old_query = $GLOBALS['wp_query'];
 
+    // Query posts
     query_posts($params);
 
     while (have_posts()) {
