@@ -64,10 +64,10 @@ implements
     public function get_redirect($area = null, $inline_context = null)
     {
         try {
-            $preference  = $this->get_preference(true, $inline_context);
+            $resource  = $this->get_resource(true, $inline_context);
             $redirects = $this->_prepare_redirects(
-                $preference->get_settings(),
-                !$preference->is_overwritten()
+                $resource->get_preferences(),
+                !$resource->is_overwritten()
             );
 
             if (!empty($area)) {
@@ -97,14 +97,14 @@ implements
     public function set_redirect($area, array $incoming_data, $inline_context = null)
     {
         try {
-            $preference = $this->get_preference(false, $inline_context);
-            $redirect   = $this->_convert_to_redirect($incoming_data);
-            $result     = $preference->set_explicit_setting($area, $redirect);
+            $resource = $this->get_resource(false, $inline_context);
+            $redirect = $this->_convert_to_redirect($incoming_data);
+            $result   = $resource->set_preference($area, $redirect);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
             } else {
-                $result = $preference->get_setting($area);
+                $result = $resource->get_preference($area);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -130,18 +130,18 @@ implements
     public function reset($area = null, $inline_context = null)
     {
         try {
-            $preference = $this->get_preference(false, $inline_context);
+            $resource = $this->get_resource(false, $inline_context);
 
             if (empty($area)) {
-                $success = $preference->reset();
+                $success = $resource->reset();
             } else {
-                $settings = $preference->get_explicit_settings();
+                $preferences = $resource->get_preferences(true);
 
-                if (array_key_exists($area, $settings)) {
-                    unset($settings[$area]);
+                if (array_key_exists($area, $preferences)) {
+                    unset($preferences[$area]);
                 }
 
-                $success = $preference->set_explicit_settings($settings);
+                $success = $resource->set_preferences($preferences);
             }
 
             if ($success) {
@@ -167,10 +167,10 @@ implements
      * @access public
      * @version 7.0.0
      */
-    public function get_preference($reload = false, $inline_context = null) {
+    public function get_resource($reload = false, $inline_context = null) {
         try {
-            $result = $this->_get_access_level($inline_context)->get_preference(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, $reload
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

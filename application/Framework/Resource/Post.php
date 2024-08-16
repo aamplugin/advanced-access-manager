@@ -13,7 +13,10 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Post
+implements
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;
@@ -35,13 +38,11 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
      */
     public function is_hidden_on($area)
     {
-        $permission = array_filter($this->_settings, function($p) {
-            return $p['permission'] === 'list';
-        });
+        $list = isset($this->_settings['list']) ? $this->_settings['list'] : null;
 
-        return !empty($permission)
-            && in_array($area, $permission[0]['on'], true)
-            && $permission[0]['effect'] == 'deny';
+        return !empty($list)
+            && in_array($area, $list['on'], true)
+            && $list['effect'] == 'deny';
     }
 
     /**

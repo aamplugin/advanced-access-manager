@@ -37,11 +37,8 @@ implements
     public function get_item_list($inline_context = null)
     {
         try {
-            $result       = [];
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR, null, true
-            );
+            $result   = [];
+            $resource = $this->_get_resource($inline_context, true);
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Service_Toolbar::getInstance()->getToolbarCache();
@@ -119,13 +116,10 @@ implements
         $id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $menu         = $this->get_item_by_id($id);
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR
-            );
+            $menu     = $this->get_item_by_id($id);
+            $resource = $this->_get_resource($inline_context);
 
-            if (!$resource->set_explicit_setting($menu['slug'], $is_hidden)) {
+            if (!$resource->set_permission($menu['slug'], $is_hidden)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -153,10 +147,7 @@ implements
     public function delete_item_permission($id, $inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR
-            );
+            $resource = $this->_get_resource($inline_context);
 
             $menu = $this->get_item_by_id($id);
 
@@ -165,7 +156,7 @@ implements
                 $found    = false;
                 $settings = [];
 
-                foreach($resource->get_explicit_settings() as $slug => $effect) {
+                foreach($resource->get_permissions(true) as $slug => $effect) {
                     if ($slug === $menu['slug']) {
                         $found = true;
                     } else {
@@ -174,7 +165,7 @@ implements
                 }
 
                 if ($found) {
-                    $success = $resource->set_explicit_settings($settings);
+                    $success = $resource->set_permissions($settings);
                 } else {
                     throw new OutOfRangeException(
                         'Setting for the menu item does not exist'
@@ -212,14 +203,8 @@ implements
     public function reset($inline_context = null)
     {
         try {
-            // Reset the object
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR
-            );
-
             // Resetting settings to default
-            $resource->reset();
+            $this->_get_resource($inline_context)->reset();
 
             $result = $this->get_item_list($inline_context);
         } catch (Exception $e) {
@@ -227,6 +212,24 @@ implements
         }
 
         return $result;
+    }
+
+    /**
+     * Get Admin Toolbar resource
+     *
+     * @param array   $inline_context
+     * @param boolean $reload
+     *
+     * @return AAM_Framework_Resource_AdminToolbar
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource($inline_context, $reload = false)
+    {
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Type_Resource::TOOLBAR, null, $reload
+        );
     }
 
     /**

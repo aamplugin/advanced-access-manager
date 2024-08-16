@@ -97,8 +97,8 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Determine if permission is denied
      *
-     * @param string                           $permission
-     * @param AAM_Framework_Resource_Interface $resource
+     * @param string                      $permission
+     * @param AAM_Framework_Resource_Post $resource
      *
      * @return boolean
      *
@@ -107,25 +107,16 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     protected function is_permission_denied($permission, $resource)
     {
-        $result = null;
+        $settings = $resource->get_permission($permission);
 
-        foreach($resource->get_settings() as $setting) {
-            if ($setting['permission'] === $permission
-                && $setting['effect'] === 'deny'
-            ) {
-                $result = true;
-                break;
-            }
-        }
-
-        return $result;
+        return !empty($settings) && $settings['effect'] === 'deny';
     }
 
     /**
      * Get specific permission's settings
      *
-     * @param string                           $permission
-     * @param AAM_Framework_Resource_Interface $resource
+     * @param string                                     $permission
+     * @param AAM_Framework_Resource_PermissionInterface $resource
      *
      * @return array
      *
@@ -134,16 +125,9 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     protected function get_permission_settings($permission, $resource)
     {
-        $result = [];
+        $permissions = $resource->get_permissions();
 
-        foreach($resource->get_settings() as $setting) {
-            if ($setting['permission'] === $permission) {
-                $result = $setting;
-                break;
-            }
-        }
-
-        return $result;
+        return isset($permissions[$permission]) ? $permissions[$permission] : [];
     }
 
     /**

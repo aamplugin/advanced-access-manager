@@ -15,7 +15,8 @@
  */
 class AAM_Framework_Resource_PostType
 implements
-    AAM_Framework_Resource_Interface
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;

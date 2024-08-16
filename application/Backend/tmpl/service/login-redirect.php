@@ -23,7 +23,7 @@
                     </p>
                 <?php } ?>
 
-                <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($service->get_preference()->is_overwritten() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="login-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>
@@ -75,7 +75,11 @@
                     <label for="login-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger a PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                 </div>
 
-                <div class="form-group login-redirect-action" id="page-login-redirect-action" style="display: <?php echo ($type == 'page' ? 'block' : 'none'); ?>;">
+                <div
+                    class="form-group login-redirect-action"
+                    id="page-login-redirect-action"
+                    style="display: <?php echo ($type == 'page_redirect' ? 'block' : 'none'); ?>;"
+                >
                     <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                     <?php
                         wp_dropdown_pages(array(
@@ -89,7 +93,11 @@
                         ?>
                 </div>
 
-                <div class="form-group login-redirect-action" id="url-login-redirect-action" style="display: <?php echo ($type === 'url' ? 'block' : 'none'); ?>;">
+                <div
+                    class="form-group login-redirect-action"
+                    id="url-login-redirect-action"
+                    style="display: <?php echo ($type === 'url_redirect' ? 'block' : 'none'); ?>;"
+                >
                     <label><?php echo __('The URL', AAM_KEY); ?></label>
                     <input
                         type="text"
@@ -100,7 +108,11 @@
                     />
                 </div>
 
-                <div class="form-group login-redirect-action" id="callback-login-redirect-action" style="display: <?php echo ($type === 'callback' ? 'block' : 'none'); ?>;">
+                <div
+                    class="form-group login-redirect-action"
+                    id="callback-login-redirect-action"
+                    style="display: <?php echo ($type === 'trigger_callback' ? 'block' : 'none'); ?>;"
+                >
                     <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                     <input
                         type="text"

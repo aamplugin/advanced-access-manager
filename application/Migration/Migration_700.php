@@ -150,7 +150,9 @@ final class AAM_Migration_700
             'core.service.content.manageAllPostTypes'  => 'service.content.manage_all_post_types',
             'core.service.content.manageAllTaxonomies' => 'service.content.manage_all_taxonomies',
             'core.settings.tips'                       => 'core.settings.ui.tips',
-            'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox'
+            'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox',
+            'core.settings.inheritParentPost'          => 'service.content.inherit_from_parent_post',
+            'core.service.content.exclude.taxonomies'  => 'service.content.exclude.taxonomies'
         ];
 
         foreach($changes as $legacy => $new) {
@@ -719,7 +721,7 @@ final class AAM_Migration_700
                 }
 
                 if (!empty($areas)) { // Ignore the control if no areas defined
-                    array_push($result, $item);
+                    $result['list'] = $item;
                 }
             } elseif (in_array($action, ['restricted', 'restricted_others'], true)) {
                 $item = [
@@ -732,7 +734,7 @@ final class AAM_Migration_700
                     $item['exclude_authors'] = true;
                 }
 
-                array_push($result, $item);
+                $result['read'] = $item;
             } elseif (in_array($action, ['edit', 'edit_others'], true)) {
                 $item = [
                     'permission' => 'edit',
@@ -743,7 +745,7 @@ final class AAM_Migration_700
                     $item['exclude_authors'] = true;
                 }
 
-                array_push($result, $item);
+                $result['edit'] = $item;
             } elseif (in_array($action, ['delete', 'delete_others'], true)) {
                 $item = [
                     'permission' => 'delete',
@@ -754,7 +756,7 @@ final class AAM_Migration_700
                     $item['exclude_authors'] = true;
                 }
 
-                array_push($result, $item);
+                $result['delete'] = $item;
             } elseif (in_array($action, ['publish', 'publish_others'], true)) {
                 $item = [
                     'permission' => 'publish',
@@ -765,19 +767,19 @@ final class AAM_Migration_700
                     $item['exclude_authors'] = true;
                 }
 
-                array_push($result, $item);
+                $result['publish'] = $item;
             } elseif ($action === 'comment') {
-                array_push($result, [
+                $result['comment'] = [
                     'permission' => 'comment',
                     'enabled'    => $this->_convert_to_boolean($settings)
-                ]);
+                ];
             } elseif ($action === 'teaser') {
-                array_push($result, [
+                $result['read'] = [
                     'permission'       => 'read',
                     'enabled'          => $this->_convert_to_boolean($settings),
                     'restriction_type' => 'teaser_message',
                     'message'          => $settings['message']
-                ]);
+                ];
             } elseif ($action === 'redirected') {
                 $redirect = [
                     'type' => $this->_convert_legacy_redirect_type($settings['type'])
@@ -795,26 +797,26 @@ final class AAM_Migration_700
                     $redirect['callback'] = trim($settings['destination']);
                 }
 
-                array_push($result, [
+                $result['read'] = [
                     'permission'       => 'read',
                     'enabled'          => $this->_convert_to_boolean($settings),
                     'restriction_type' => 'redirect',
                     'redirect'         => $redirect
-                ]);
+                ];
             } elseif ($action === 'protected') {
-                array_push($result, [
+                $result['read'] = [
                     'permission'       => 'read',
                     'enabled'          => $this->_convert_to_boolean($settings),
                     'restriction_type' => 'password_protected',
                     'password'         => $settings['password']
-                ]);
+                ];
             } elseif ($action === 'ceased') {
-                array_push($result, [
+                $result['read'] = [
                     'permission'       => 'read',
                     'enabled'          => $this->_convert_to_boolean($settings),
                     'restriction_type' => 'expire',
                     'after_timestamp'  => intval($settings['after'])
-                ]);
+                ];
             }
         }
 
@@ -837,21 +839,21 @@ final class AAM_Migration_700
 
         foreach($data as $action => $settings) {
             if ($action === 'restricted') {
-                array_push($result, [
+                $result['browse'] = [
                     'permission' => 'browse',
                     'enabled'    => $this->_convert_to_boolean($settings)
-                ]);
+                ];
             } elseif ($action === 'hidden') {
-                array_push($result, [
+                $result['list'] = [
                     'permission' => 'list',
                     'enabled'    => $this->_convert_to_boolean($settings),
                     'on'         =>  $this->_prepare_visibility_areas($settings)
-                ]);
+                ];
             } elseif (in_array($action, ['create', 'edit', 'delete', 'assign'], true)) {
-                array_push($result, [
+                $result[$action] = [
                     'permission' => $action,
                     'enabled'    => $this->_convert_to_boolean($settings)
-                ]);
+                ];
             }
         }
 

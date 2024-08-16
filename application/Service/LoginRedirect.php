@@ -23,6 +23,7 @@
  */
 class AAM_Service_LoginRedirect
 {
+
     use AAM_Core_Contract_ServiceTrait;
 
     /**

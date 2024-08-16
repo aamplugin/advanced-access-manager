@@ -267,9 +267,17 @@ class AAM_Framework_Service_Content
                 $result = [];
 
                 foreach($terms as $term_id) {
-                    array_push(
-                        $result, $this->get_term($term_id, $inline_context)
-                    );
+                    // Prepare compound term_id
+                    $id = [
+                        'id'       => $term_id,
+                        'taxonomy' => $args['taxonomy']
+                    ];
+
+                    if (isset($args['post_type'])) {
+                        $id['post_type'] = $args['post_type'];
+                    }
+
+                    array_push($result, $this->get_term($id, $inline_context));
                 }
             }
         } catch (Exception $e) {
@@ -327,7 +335,7 @@ class AAM_Framework_Service_Content
      * @param int   $post_id
      * @param array $inline_context
      *
-     * @return array
+     * @return AAM_Framework_Resource_Post
      *
      * @access public
      * @version 6.9.31
@@ -369,13 +377,17 @@ class AAM_Framework_Service_Content
         $post_id, array $permissions = [], $inline_context = null
     ) {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $post         = $access_level->get_resource(
-                AAM_Framework_Type_Resource::POST, $post_id
-            );
+            $post = $this->get_post($post_id, $inline_context);
+
+            // Normalize array of permissions
+            $normalized = [];
+
+            foreach($permissions as $permission) {
+                $normalized[$permission['permission']] = $permission;
+            }
 
             // Set new permissions
-            $result = $post->set_explicit_settings($permissions);
+            $result = $post->set_permissions($normalized);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -400,40 +412,19 @@ class AAM_Framework_Service_Content
         $post_id, $permission, $settings, $inline_context = null
     ) {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $post         = $access_level->get_resource(
-                AAM_Framework_Type_Resource::POST, $post_id
-            );
-
+            $post     = $this->get_post($post_id, $inline_context);
             $settings = $this->_validate_permission($permission, $settings);
 
             // Get list of explicitly defined permissions and override existing
-            // permission or add it to the list, if not yet defined
-            $is_replaced       = false;
-            $explicit_settings = [];
+            // permission
+            $permissions = $post->get_permissions(true);
 
-            foreach($post->get_explicit_settings() as $p) {
-                if ($p['permission'] === $permission) {
-                    array_push($explicit_settings, array_merge(
-                        [ 'permission' => $permission ],
-                        $settings
-                    ));
-
-                    $is_replaced = true;
-                } else {
-                    array_push($explicit_settings, $p);
-                }
-            }
-
-            if (!$is_replaced) {
-                array_push($explicit_settings, array_merge(
-                    [ 'permission' => $permission ],
-                    $settings
-                ));
-            }
+            $permissions[$permission] = array_merge(
+                [ 'permission' => $permission ], $settings
+            );
 
             // Set new permissions
-            $result = $post->set_explicit_settings($explicit_settings);
+            $result = $post->set_permissions($permissions);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -458,12 +449,7 @@ class AAM_Framework_Service_Content
     public function delete_post_permissions($post_id, $inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $post         = $access_level->get_resource(
-                AAM_Framework_Type_Resource::POST, $post_id
-            );
-
-            return $post->reset();
+            $result = $this->get_post($post_id, $inline_context)->reset();
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }

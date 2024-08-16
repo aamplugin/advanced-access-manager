@@ -704,7 +704,7 @@
             }
 
             //add setSubject hook
-            getAAM().addHook('setSubject', function () {
+            getAAM().addHook('access-level-changed', function () {
                 //clear highlight
                 $('tbody tr', '#role-list').each(function () {
                     if ($('strong', $(this)).length) {
@@ -1361,7 +1361,7 @@
             });
 
             //add setSubject hook
-            getAAM().addHook('setSubject', function () {
+            getAAM().addHook('access-level-changed', function () {
                 //clear highlight
                 $('tbody tr', '#user-list').each(function () {
                     if ($('strong', $(this)).length) {
@@ -2946,7 +2946,7 @@
             ];
 
             // Internal cache
-            const cache = {};
+            let cache = {};
 
             /**
              *
@@ -3403,300 +3403,6 @@
                 });
             }
 
-            /**
-             *
-             * @param {*} object
-             * @param {*} id
-             */
-            function _InitializeAccessForm(object, id) {
-                // Initialize the checkbox events
-                // $('.aam-row-action', '#aam_access_form_container').each(function () {
-                //     // Initialize each access property
-                //     $(this).bind('click', function () {
-                //         var btn     = $(this);
-                //         var checked = !btn.hasClass('icon-check');
-
-                //         btn.attr('class', 'aam-row-action icon-spin4 animate-spin');
-                //         save(
-                //             btn.data('property'),
-                //             (btn.data('trigger') ? {enabled: checked} : checked),
-                //             object,
-                //             id,
-                //             function () {
-                //                 RenderAccessForm(object, id, null, function() {
-                //                     // Trigger modal to collection additional data
-                //                     if (btn.data('trigger') && checked) {
-                //                         $('#' + btn.data('trigger')).trigger('click');
-                //                     }
-                //                 });
-                //             }
-                //         );
-                //     });
-                // });
-
-                // Initialize advanced options modals (the "change" link)
-                $('.advanced-post-option').each(function () {
-                    $(this).bind('click', function () {
-                        var container = $(this).attr('href');
-
-                        //add attributes to the .extended-post-access-btn
-                        $('.btn-save', container).attr({
-                            'data-ref': $(this).attr('data-ref')
-                        });
-                    });
-                });
-
-                $('[data-toggle="toggle"]', '#aam_access_form_container').bootstrapToggle();
-
-
-                // Initialize the Reset to default button
-                $('#content-reset').bind('click', function () {
-                    const type   = $(this).attr('data-type');
-                    const id     = $(this).attr('data-id');
-                    const obj_id = id.split('|')[0];
-
-                    const payload = {};
-
-                    if (CurrentLevel().scope) {
-                        payload.scope = CurrentLevel().scope;
-
-                        if (payload.scope === 'post') {
-                            payload.post_type = CurrentLevel().scope_id;
-                        }
-                    }
-
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/${type}/${obj_id}`), {
-                        type: 'POST',
-                        headers: {
-                            'X-WP-Nonce': getLocal().rest_nonce,
-                            'X-HTTP-Method-Override': 'DELETE'
-                        },
-                        data: payload,
-                        beforeSend: function () {
-                            var label = $('#content-reset').text();
-                            $('#content-reset').attr('data-original-label', label);
-                            $('#content-reset').text(getAAM().__('Resetting...'));
-                        },
-                        success: function () {
-                            $('#post-overwritten').addClass('hidden');
-
-                            RenderAccessForm(type, id);
-
-                            // Manually update the data in a table because both
-                            // Post Types & Taxonomies are static tables
-                            if (['type', 'taxonomy'].includes(type)) {
-                                let row = null;
-
-                                if (type === 'type') {
-                                    row = cache.post_types.data.filter(t => t[0] === obj_id).pop();
-                                } else {
-                                    row = cache.taxonomies.data.filter(t => t[0] === obj_id).pop();
-                                }
-
-                                row[4].is_inherited = true;
-                            }
-                        },
-                        complete: function () {
-                            $('#content-reset').text(
-                                $('#content-reset').attr('data-original-label')
-                            );
-                        }
-                    });
-                });
-
-                // Initialize the "Hidden Areas" modal
-                $('#save-hidden-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            frontend: $('#hidden-frontend').prop('checked'),
-                            backend: $('#hidden-backend').prop('checked'),
-                            api: $('#hidden-api').prop('checked')
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal_content_visibility').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                // Initialize the "Teaser Message" modal
-                $('#save-teaser-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            message: $('#aam-teaser-message').val()
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal-teaser').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                // Initialize the "Limited Access" modal
-                $('#save-limited-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            threshold: $('#aam-access-threshold').val()
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal-limited').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                // Reset LIMIT counter
-                $('#reset-limited-btn').bind('click', function() {
-                    getAAM().queueRequest(function () {
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Main_Post.resetCounter',
-                                _ajax_nonce: getLocal().nonce,
-                                subject: getAAM().getSubject().type,
-                                subjectId: getAAM().getSubject().id,
-                                object: object,
-                                objectId: id
-                            },
-                            beforeSend: function() {
-                                $('#reset-limited-btn').text(
-                                    getAAM().__('Resetting...')
-                                ).attr('disabled', true);
-                            },
-                            success: function (response) {
-                                if (response.status === 'failure') {
-                                    getAAM().notification('danger', response.error);
-                                } else {
-                                    getAAM().notification(
-                                        'success',
-                                        getAAM().__('Counter was reset successfully')
-                                    );
-                                    $('#modal-limited').modal('hide');
-                                    RenderAccessForm(object, id);
-                                }
-                            },
-                            error: function () {
-                                getAAM().notification('danger');
-                            },
-                            complete: function() {
-                                $('#reset-limited-btn').text(
-                                    getAAM().__('Reset')
-                                ).attr('disabled', false);
-                            }
-                        });
-                    });
-                });
-
-                // Initialize the "Access Redirect" modal
-                $('.post-redirect-type').each(function () {
-                    $(this).bind('click', function () {
-                        $('.post-redirect-value').hide();
-                        $(`#post-redirect-${$(this).val()}-value-container`).show();
-                        $('#post-redirect-code-value-container').show();
-                    });
-                });
-
-                $('#save-redirect-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-                    const type = $('.post-redirect-type:checked').val();
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            type: type,
-                            destination: $(`#post-redirect-${type}-value`).val(),
-                            httpCode: $('#post-redirect-code-value').val()
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal-redirect').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                // Initialize the "Password Protected" modal
-                $('#save-password-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            password: $('#aam-access-password').val()
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal-password').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                // Initialize the "Ceased" modal
-                $('#save-ceased-btn').bind('click', function() {
-                    $(this).text(getAAM().__('Saving...'));
-
-                    save(
-                        $(this).attr('data-ref'),
-                        {
-                            enabled: true,
-                            after: $('#aam-expire-datetime').val()
-                        },
-                        object,
-                        id,
-                        function () {
-                            $('#modal-cease').modal('hide');
-                            RenderAccessForm(object, id);
-                        }
-                    );
-                });
-
-                const def = $('#aam-expire-datetime').val();
-
-                $('#post-expiration-datapicker').datetimepicker({
-                    icons: {
-                        time: "icon-clock",
-                        date: "icon-calendar",
-                        up: "icon-angle-up",
-                        down: "icon-angle-down",
-                        previous: "icon-angle-left",
-                        next: "icon-angle-right"
-                    },
-                    inline: true,
-                    defaultDate: $.trim(def) ? new Date(def * 1000) : new Date(),
-                    sideBySide: true
-                });
-                $('#post-expiration-datapicker').on('dp.change', function (res) {
-                    $('#aam-expire-datetime').val(res.date.unix());
-                });
-
-                getAAM().triggerHook('init-access-form');
-            }
-
             getAAM().addHook('load-access-form', function(params) {
                 RenderAccessForm(...params);
             });
@@ -3848,9 +3554,8 @@
                     search: filters.search.value
                 };
 
-                if (CurrentLevel().scope) {
-                    payload.scope     = CurrentLevel().scope;
-                    payload.post_type = CurrentLevel().scope_id;
+                if (CurrentLevel().post_type) {
+                    payload.post_type = CurrentLevel().post_type;
                 }
 
                 // Fetching the list of terms
@@ -4079,7 +3784,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_inherited === false) {
+                            if (data[4].is_overwritten) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4188,7 +3893,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_inherited === false) {
+                            if (data[4].is_overwritten) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4298,7 +4003,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (!data[4].is_inherited) {
+                            if (data[4].is_overwritten) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4525,16 +4230,13 @@
              */
             function initialize() {
                 if ($('#post-content').length) {
-                    RenderBreadcrumb();
-
                     // Go back button
                     $('.aam-slide-form').delegate('.post-back', 'click', function () {
                         $('.aam-slide-form').removeClass('active');
                         NavigateBack();
                     });
 
-                    // Adjust current list when switching between subjects or pages
-                    AdjustList();
+                    RenderBreadcrumb();
                 }
 
                 const current_level = CurrentLevel();
@@ -4559,6 +4261,9 @@
             }
 
             getAAM().addHook('init', initialize);
+            getAAM().addHook('access-level-changed', function() {
+                cache = {};
+            });
 
         })(jQuery);
 
@@ -4735,7 +4440,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/login`, {
+                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/login'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -7436,7 +7141,7 @@
             $('.aam-current-subject').append($('<strong/>').text(name));
         }
 
-        this.triggerHook('setSubject');
+        this.triggerHook('access-level-changed');
     };
 
     /**

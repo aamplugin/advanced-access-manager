@@ -33,28 +33,19 @@ interface AAM_Framework_AccessLevel_Interface
      * @param string     $resource_type
      * @param string|int $resource_id
      * @param boolean    $reload
+     * @param boolean    $skip_inheritance
      *
-     * @return AAM_Framework_Resource_Interface|null
+     * @return AAM_Framework_Resource_PermissionInterface|AAM_Framework_Resource_PreferenceInterface|null
      *
      * @access public
      * @version 7.0.0
      */
     public function get_resource(
-        $resource_type, $resource_id = null, $reload = false
+        $resource_type,
+        $resource_id = null,
+        $reload = false,
+        $skip_inheritance = false
     );
-
-    /**
-     * Get preference resource by its type
-     *
-     * @param string  $preference_type
-     * @param boolean $reload
-     *
-     * @return AAM_Framework_Resource_Interface|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_preference($preference_type, $reload = false);
 
     /**
      * Get AAM proxy instance to the WP core instance (if applicable)

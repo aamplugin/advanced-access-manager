@@ -177,7 +177,10 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @inheritDoc
      */
     public function get_resource(
-        $resource_type, $resource_id = null, $reload = false
+        $resource_type,
+        $resource_id = null,
+        $reload = false,
+        $skip_inheritance = false
     ) {
         $resource  = null;
 
@@ -191,6 +194,10 @@ trait AAM_Framework_AccessLevel_BaseTrait
             );
         }
 
+        if ($skip_inheritance) {
+            $cache_key .= '_direct';
+        }
+
         // Is resource with specified internal ID already instantiated?
         if (!isset($this->_repository[$cache_key]) || $reload) {
             $resource = apply_filters(
@@ -202,16 +209,20 @@ trait AAM_Framework_AccessLevel_BaseTrait
             );
 
             if (is_object($resource)) {
-                // Kick in the inheritance chain if needed
-                $this->_inherit_from_parent($resource, $reload);
+                if ($skip_inheritance !== true) {
+                    // Kick in the inheritance chain if needed
+                    $this->_inherit_from_parent($resource, $reload);
 
-                // Trigger initialized action only when we are at the bottom of the
-                // inheritance chain
-                if (in_array(get_class($resource->get_access_level()), [
-                    AAM_Framework_AccessLevel_User::class,
-                    AAM_Framework_AccessLevel_Visitor::class
-                ], true)) {
-                    do_action("aam_init_{$resource_type}_resource_action", $resource);
+                    // Trigger initialized action only when we are at the bottom of
+                    // the inheritance chain
+                    if (in_array(get_class($resource->get_access_level()), [
+                        AAM_Framework_AccessLevel_User::class,
+                        AAM_Framework_AccessLevel_Visitor::class
+                    ], true)) {
+                        do_action(
+                            "aam_init_{$resource_type}_resource_action", $resource
+                        );
+                    }
                 }
 
                 // Finally cache the instance of the resource
@@ -222,14 +233,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
         }
 
         return $resource;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get_preference($preference_type, $reload = false)
-    {
-        return $this->get_resource($preference_type, null, $reload);
     }
 
     /**
@@ -335,8 +338,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * Inherit settings from parent access level (if any)
      *
-     * @param AAM_Framework_Resource_Interface $resource
-     * @param boolean                          $reload
+     * @param object  $resource
+     * @param boolean $reload
      *
      * @return array
      *
@@ -345,12 +348,15 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     private function _inherit_from_parent($resource, $reload)
     {
-        $parent = $this->get_parent();
+        $parent        = $this->get_parent();
+        $is_permission = is_a(
+            $resource, AAM_Framework_Resource_PermissionInterface::class
+        );
 
         if (is_object($parent)) {
             $parent_resource = $parent->get_resource(
                 $resource::TYPE,
-                $resource->get_internal_id(false),
+                $is_permission ? $resource->get_internal_id(false) : null,
                 $reload
             );
 
@@ -365,7 +371,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 foreach ($parent->get_siblings() as $sibling) {
                     $sibling_resource = $sibling->get_resource(
                         $resource::TYPE,
-                        $resource->get_internal_id()
+                        $is_permission ? $resource->get_internal_id(false) : null
                     );
 
                     $settings = $sibling_resource->merge_settings($settings);
@@ -377,7 +383,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $settings, $resource->get_settings()
             );
 
-            // Finally set the option for provided object
+            // Finally set the settings
             $resource->set_settings($settings);
         }
 

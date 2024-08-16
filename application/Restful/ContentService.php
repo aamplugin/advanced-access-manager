@@ -731,8 +731,8 @@ class AAM_Restful_ContentService
             $data['title'] = $item->post_title;
         }
 
-        $data['permissions']  = $item->get_settings();
-        $data['is_inherited'] = !$item->is_overwritten();
+        $data['permissions']    = array_values($item->get_permissions());
+        $data['is_overwritten'] = $item->is_overwritten();
 
         return apply_filters('aam_rest_get_post_filter', $data, $item, $request);
     }

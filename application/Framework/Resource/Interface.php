@@ -37,21 +37,6 @@ interface AAM_Framework_Resource_Interface
     public function get_access_level();
 
     /**
-     * Get resource internal ID
-     *
-     * The internal ID represents unique resource identify AAM Framework users to
-     * distinguish between collection of initialize resources
-     *
-     * @param bool $serialize
-     *
-     * @return string|int|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_internal_id($serialize = true);
-
-    /**
      * Get the collection of resource settings
      *
      * @return array
@@ -59,82 +44,20 @@ interface AAM_Framework_Resource_Interface
      * @access public
      * @version 7.0.0
      */
-    public function get_settings();
+    public function get_settings($explicit_only = false);
 
     /**
-     * Set resource settings
-     *
-     * @param array $settings
-     *
-     * @return void
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_settings(array $settings);
-
-    /**
-     * Get explicitly defined settings
+     * Set the collection of resource settings
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_explicit_settings();
+    public function set_settings(array $settings, $explicit_only = false);
 
     /**
-     * Set explicit settings
-     *
-     * @param array $settings
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_explicit_settings(array $settings);
-
-    /**
-     * Get setting by namespace
-     *
-     * @param string $ns
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_setting($ns, $default = null);
-
-    /**
-     * Set one explicit setting
-     *
-     * @param string $ns
-     * @param mixed  $value
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_explicit_setting($ns, $value);
-
-    /**
-     * Check if settings are overwritten for give namespace
-     *
-     * @param string $ns
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_overwritten($ns = null);
-
-    /**
-     * Merge incoming settings
+     * Merge incoming settings with resource settings
      *
      * @param array $incoming_settings
      *
@@ -146,7 +69,17 @@ interface AAM_Framework_Resource_Interface
     public function merge_settings($incoming_settings);
 
     /**
-     * Reset all explicitly defined settings
+     * Check if resource settings are overwritten
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_overwritten();
+
+    /**
+     * Reset all explicitly defined settings to default
      *
      * @return array
      *

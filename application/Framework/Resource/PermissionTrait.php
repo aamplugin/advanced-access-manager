@@ -23,7 +23,62 @@
 trait AAM_Framework_Resource_PermissionTrait
 {
 
-    use AAM_Framework_Resource_BaseTrait;
+    /**
+     * Reference to the access level
+     *
+     * @var AAM_Framework_AccessLevel_Interface
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_access_level = null;
+
+    /**
+     * Collection of extended methods
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_extended_methods = [];
+
+    /**
+     * Resource permissions
+     *
+     * Array of final permissions. The final permissions are those that have been
+     * properly inherited and merged.
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_permissions = [];
+
+    /**
+     * Explicit permissions (not inherited from parent access level)
+     *
+     * When resource is initialized, it already contains the final set of the permissions,
+     * inherited from the parent access levels. This property contains permissions
+     * that are explicitly defined for current resource.
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_explicit_permissions = [];
+
+    /**
+     * Inherited permissions from parent access level (if applicable)
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_inherited_permissions = [];
 
     /**
      * Resource internal identifier
@@ -66,12 +121,68 @@ trait AAM_Framework_Resource_PermissionTrait
         $this->_access_level = $access_level;
         $this->_internal_id  = $internal_id;
 
-        // Initialize resource settings & extend with additional methods
-        $this->initialize_resource($access_level);
-
         if (method_exists($this, 'initialize_hook')) {
             $this->initialize_hook();
         };
+
+        // Initialize resource settings & extend with additional methods
+        $this->initialize_resource($access_level);
+    }
+
+    /**
+     * Initialize the resource settings and extend it with additional methods
+     *
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize_resource(
+        AAM_Framework_AccessLevel_Interface $access_level
+    ) {
+        // Read explicitly defined settings from DB
+        $settings = AAM_Framework_Manager::settings([
+            'access_level' => $access_level
+        ])->get_setting($this->_get_settings_ns(), []);
+
+        if (!empty($settings)) {
+            $this->_explicit_permissions = $settings;
+        }
+
+        // Allow other implementations to modify defined settings
+        $this->_permissions = apply_filters(
+            'aam_initialize_resource_settings_filter',
+            $settings,
+            $this
+        );
+
+        // Extend access level with more methods
+        $closures = apply_filters(
+            'aam_framework_resource_methods_filter', [], $this
+        );
+
+        if (is_array($closures)) {
+            foreach($closures as $name => $closure) {
+                $closures[$name] = $closure->bindTo($this, $this);
+            }
+
+            $this->_extended_methods = $closures;
+        }
+    }
+
+    /**
+     * Get access level this resource is tight to
+     *
+     * @return AAM_Framework_AccessLevel_Interface
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_access_level()
+    {
+        return $this->_access_level;
     }
 
     /**
@@ -152,34 +263,160 @@ trait AAM_Framework_Resource_PermissionTrait
     }
 
     /**
-     * Return the list of all permissions
+     * Get WordPress core instance
      *
-     * @return array
+     * @return mixed
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_permissions()
+    public function get_core_instance()
     {
-        return $this->get_settings();
+        return $this->_core_instance;
     }
 
     /**
-     * Merge incoming settings
+     * @inheritDoc
+     */
+    public function get_permissions($explicit_only = false)
+    {
+        if ($explicit_only) {
+            $result = $this->_explicit_permissions;
+        } else {
+            $result = $this->_permissions;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_settings($explicit_only = false)
+    {
+        return $this->get_permissions($explicit_only);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set_permissions($permissions)
+    {
+        // First, settings the explicit permissions
+        $this->_explicit_permissions = $permissions;
+
+        // Overriding the final set of settings
+        $this->_permissions = array_merge($this->_permissions, $permissions);
+
+        // Store changes in DB
+        return AAM_Framework_Manager::settings([
+            'access_level' => $this->get_access_level()
+        ])->set_setting($this->_get_settings_ns(), $permissions);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set_settings(array $settings, $explicit_only = false)
+    {
+        if ($explicit_only) {
+            $result = $this->set_permissions($settings);
+        } else {
+            $this->_permissions = $settings;
+            $result             = true;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_permission($permission_key)
+    {
+        if (array_key_exists($permission_key, $this->_permissions)) {
+            $result = $this->_permissions[$permission_key];
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set_permission($permission_key, $permission)
+    {
+        return $this->set_permissions(array_merge(
+            $this->_explicit_permissions,
+            [ $permission_key => $permission ]
+        ));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function is_overwritten()
+    {
+        return !empty($this->_explicit_permissions);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function reset()
+    {
+        $this->_explicit_permissions = [];
+
+        return AAM_Framework_Manager::settings([
+            'access_level' => $this->get_access_level()
+        ])->delete_setting($this->_get_settings_ns());
+    }
+
+    /**
+     * Merge incoming permissions
      *
      * Depending on the resource type, different strategies may be applied to merge
-     * settings
+     * permissions
      *
-     * @param array $incoming_settings
+     * @param array $incoming_permissions
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
+    public function merge_permissions($permissions)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function merge_settings($incoming_settings)
     {
-        return $this->_merge_binary_settings($incoming_settings);
+        return $this->merge_permissions($incoming_settings);
+    }
+
+    /**
+     * Get settings namespace
+     *
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_settings_ns()
+    {
+        // Determine the namespace for resource settings within all settings
+        $resource_id = $this->get_internal_id();
+
+        // Compile the namespace
+        $ns  = constant('static::TYPE');
+        $ns .= (is_null($resource_id) ? '' : ".{$resource_id}");
+
+        return $ns;
     }
 
     /**
