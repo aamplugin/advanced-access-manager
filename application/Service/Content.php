@@ -31,6 +31,7 @@
  */
 class AAM_Service_Content
 {
+
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
 
@@ -224,25 +225,40 @@ class AAM_Service_Content
      */
     protected function initialize_hooks()
     {
-        // if (!is_admin()) {
+        if (!is_admin()) {
         //     // Password protected filter
         //     add_filter('post_password_required', array($this, 'isPasswordRequired'), 10, 2);
 
         //     // Manage password check expiration
         //     add_filter('post_password_expires', array($this, 'checkPassExpiration'));
 
-        //     // Filter navigation pages & taxonomies
-        //     add_filter('wp_get_nav_menu_items', array($this, 'getNavigationMenu'), 999);
+            // Filter navigation pages & taxonomies
+            add_filter('wp_get_nav_menu_items', function($pages) {
+                return $this->_get_nav_menu_items($pages);
+            }, PHP_INT_MAX);
 
-        //     // Filter navigation pages & taxonomies
-        //     add_filter('get_pages', array($this, 'filterPages'), 999);
+            // Filter navigation pages & taxonomies
+            add_filter('get_pages', function($pages) {
+                return $this->_get_pages($pages);
+            }, PHP_INT_MAX);
 
         //     // Manage access to frontend posts & pages
         //     add_action('wp', array($this, 'wp'), PHP_INT_MAX);
-        // }
+        }
 
-        // // Control post visibility
-        // add_filter('posts_clauses_request', array($this, 'filterPostQuery'), 10, 2);
+        // Ability to share visibility settings with other solutions
+        add_filter('aam_get_content_visibility_filter', function($result) {
+            if (empty($result)) {
+                $result = AAM_Service_Content_Visibility::bootstrap()->get_settings();
+            }
+
+            return $result;
+        });
+
+        // Control post visibility
+        add_filter('posts_clauses_request', function($clauses, $query) {
+            return $this->_posts_clauses_request($clauses, $query);
+        }, 10, 2);
 
         // // Filter post content
         // add_filter('the_content', array($this, 'filterPostContent'), PHP_INT_MAX);
@@ -344,6 +360,97 @@ class AAM_Service_Content
 
         // Service fetch
         $this->registerService();
+    }
+
+    /**
+     * Filter traditional navigation menu
+     *
+     * @param array $pages
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_nav_menu_items($pages)
+    {
+        if (is_array($pages)) {
+            $service = AAM::api()->user()->content();
+
+            foreach ($pages as $i => $page) {
+                if (in_array($page->type, array('post_type', 'custom'), true)) {
+                    if ($service->get_post($page->object_id)->is_hidden()) {
+                        unset($pages[$i]);
+                    }
+                }
+            }
+        }
+
+        return $pages;
+    }
+
+     /**
+     * Filter posts from the list
+     *
+     * @param array $pages
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_pages($pages)
+    {
+        if (is_array($pages)) {
+            $service = AAM::api()->user()->content();
+            // TODO: Research the get current post reason
+            // $current = AAM_Core_API::getCurrentPost();
+
+            foreach ($pages as $i => $post) {
+                // if ($current && ($current->ID === $post->ID)) {
+                //     continue;
+                // }
+                if ($service->get_post($post->ID)->is_hidden()) {
+                    unset($pages[$i]);
+                }
+            }
+
+            $pages = array_values($pages);
+        }
+
+        return $pages;
+    }
+
+    /**
+     * After post SELECT query
+     *
+     * @param array    $clauses
+     * @param WP_Query $wpQuery
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _posts_clauses_request($clauses, $wp_query)
+    {
+        static $executing = false;
+
+        if (!$wp_query->is_singular && !$executing) {
+            $executing  = true;
+            $visibility = AAM_Service_Content_Visibility::bootstrap();
+
+            $clauses['where'] .= apply_filters(
+                'aam_content_visibility_where_clause_filter',
+                $visibility->prepare_post_query($wp_query),
+                $wp_query,
+                $visibility->get_settings()
+            );
+
+            $executing = false;
+        }
+
+        return $clauses;
     }
 
     /**
@@ -721,38 +828,6 @@ class AAM_Service_Content
     }
 
     /**
-     * Filter Navigation menu
-     *
-     * @param array $pages
-     *
-     * @return array
-     *
-     * @since 6.2.0 Enhanced HIDDEN option to be more granular
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.2.0
-     */
-    public function getNavigationMenu($pages)
-    {
-        if (is_array($pages)) {
-            foreach ($pages as $i => $page) {
-                if (in_array($page->type, array('post_type', 'custom'), true)) {
-                    $resource = AAM::api()->user()->get_resource(
-                        AAM_Framework_Type_Resource::POST, $page->object_id
-                    );
-
-                    if ($this->_isHidden($resource->get_settings())) {
-                        unset($pages[$i]);
-                    }
-                }
-            }
-        }
-
-        return $pages;
-    }
-
-    /**
      * Main frontend access control hook
      *
      * @return void
@@ -788,197 +863,6 @@ class AAM_Service_Content
                 }
             }
         }
-    }
-
-    /**
-     * Filter posts from the list
-     *
-     * @param array $pages
-     *
-     * @return array
-     *
-     * @since 6.2.0 Enhanced HIDDEN option to be more granular
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.2.0
-     */
-    public function filterPages($pages)
-    {
-        if (is_array($pages)) {
-            $current = AAM_Core_API::getCurrentPost();
-
-            foreach ($pages as $i => $post) {
-                if ($current && ($current->ID === $post->ID)) {
-                    continue;
-                }
-
-                $resource = AAM::api()->user()->get_resource(
-                    AAM_Framework_Type_Resource::POST, $post->ID
-                );
-
-                if ($this->_isHidden($resource->get_settings())) {
-                    unset($pages[$i]);
-                }
-            }
-
-            $pages = array_values($pages);
-        }
-
-        return $pages;
-    }
-
-    /**
-     * After post SELECT query
-     *
-     * @param array    $clauses
-     * @param WP_Query $wpQuery
-     *
-     * @return array
-     *
-     * @since 6.0.4 Fixed incompatibility with some quite aggressive plugins that
-     *              mutate global state of the WP_Query args
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.0.4
-     */
-    public function filterPostQuery($clauses, $wp_query)
-    {
-        static $executing = false;
-
-        if (!$wp_query->is_singular && !$executing) {
-            $executing = true;
-
-            $resource = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::CONTENT_VISIBILITY
-            );
-
-            $query = $this->preparePostQuery(
-                $resource->get_setting('post'), $wp_query
-            );
-
-            $clauses['where'] .= apply_filters(
-                'aam_content_visibility_where_clause_filter',
-                $query,
-                $wp_query
-            );
-
-            $executing = false;
-        }
-
-        return $clauses;
-    }
-
-    /**
-     * Prepare post query
-     *
-     * @param array    $visibility
-     * @param WP_Query $wpQuery
-     *
-     * @return string
-     *
-     * @since 6.2.0 Enhanced HIDDEN option to be more granular
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @global WPDB $wpdb
-     * @version 6.2.0
-     */
-    protected function preparePostQuery($visibility, $wpQuery)
-    {
-        global $wpdb;
-
-        $postTypes = $this->getQueryingPostType($wpQuery);
-        $excluded  = array();
-
-        foreach ($visibility as $id => $access) {
-            $chunks = explode('|', $id);
-
-            if (in_array($chunks[1], $postTypes, true) && $this->_isHidden($access)) {
-                $excluded[] = $chunks[0];
-            }
-        }
-
-        if (!empty($excluded)) {
-            $query = " AND {$wpdb->posts}.ID NOT IN (" . implode(',', $excluded) . ")";
-        } else {
-            $query = '';
-        }
-
-        return $query;
-    }
-
-    /**
-     * Determine if object is hidden based on access settings
-     *
-     * @param array $options
-     *
-     * @return boolean
-     *
-     * @access private
-     * @version 6.2.0
-     */
-    private function _isHidden($options)
-    {
-        $hidden = false;
-
-        // Determine current area
-        if (is_admin()) {
-            $area = 'backend';
-        } elseif (defined('REST_REQUEST') && REST_REQUEST) {
-            $area = 'api';
-        } else {
-            $area = 'frontend';
-        }
-
-        if (isset($options['hidden'])) {
-            if (
-                is_array($options['hidden'])
-                && !empty($options['hidden']['enabled'])
-                && !empty($options['hidden'][$area])
-            ) {
-                $hidden = true;
-            } elseif (is_bool($options['hidden']) && ($options['hidden'] === true)) {
-                $hidden = true;
-            }
-        }
-
-        return $hidden;
-    }
-
-    /**
-     * Get querying post type
-     *
-     * @param WP_Query $wpQuery
-     *
-     * @return array
-     *
-     * @since 6.0.3 Fetch list of all possible post types
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.0.3
-     */
-    protected function getQueryingPostType($wpQuery)
-    {
-        if (!empty($wpQuery->query['post_type'])) {
-            $postType = $wpQuery->query['post_type'];
-        } elseif (!empty($wpQuery->query_vars['post_type'])) {
-            $postType = $wpQuery->query_vars['post_type'];
-        } elseif ($wpQuery->is_attachment) {
-            $postType = 'attachment';
-        } elseif ($wpQuery->is_page) {
-            $postType = 'page';
-        } else {
-            $postType = 'any';
-        }
-
-        if ($postType === 'any') {
-            $postType = array_keys(get_post_types(array(), 'names'));
-        }
-
-        return (array) $postType;
     }
 
     /**

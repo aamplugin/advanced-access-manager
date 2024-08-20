@@ -227,8 +227,8 @@ class AAM
 
         // AAM_Service_AccessPolicy::bootstrap();
 
-        //AAM_Service_SecureLogin::bootstrap();
-        //AAM_Service_Jwt::bootstrap();
+        AAM_Service_SecureLogin::bootstrap();
+        AAM_Service_Jwt::bootstrap();
 
         do_action('aam_services_loaded');
 

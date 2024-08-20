@@ -3175,7 +3175,7 @@
             function GetResourcePermission(permission) {
                 const permissions = JSON.parse($('#content_resource_settings').text());
 
-                return permissions.filter((p) => p.permission === permission).shift();
+                return permissions[permission];
             }
 
             /**
