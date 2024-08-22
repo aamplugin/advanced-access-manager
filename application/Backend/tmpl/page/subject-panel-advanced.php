@@ -39,7 +39,7 @@
                         </select>
                     </div>
                     <div class="checkbox">
-                        <label for="clone">
+                        <label for="clone-role">
                             <input type="checkbox" id="clone-role" name="clone_role_settings" />
                             <?php echo __('Also clone all AAM access settings from selected role (admin menu, metaboxes, redirects, etc.)', AAM_KEY); ?>
                         </label>

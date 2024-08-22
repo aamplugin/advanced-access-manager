@@ -16,7 +16,13 @@
             <div class="aam-current-subject"></div>
             <div class="subject-top-actions">
                 <div class="action-row">
-                    <a href="#" id="reset-subject-settings" data-toggle="tooltip" data-placement="left" title="<?php echo __('Reset Settings', AAM_KEY); ?>"><i class="icon-ccw"></i></a>
+                    <a
+                        href="#"
+                        id="reset-subject-settings"
+                        data-toggle="tooltip"
+                        data-placement="left"
+                        title="<?php echo __('Reset Settings', AAM_KEY); ?>"
+                    ><i class="icon-ccw"></i></a>
                     <?php do_action('aam_top_subject_panel_action'); ?>
                 </div>
             </div>

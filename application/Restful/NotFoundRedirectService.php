@@ -10,11 +10,12 @@
 /**
  * RESTful API for the 404 Redirect service
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.12 Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.37
  */
 class AAM_Restful_NotFoundRedirectService
 {

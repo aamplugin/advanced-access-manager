@@ -10,12 +10,13 @@
 /**
  * RESTful API for the URL Access service
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.37
  */
 class AAM_Restful_UrlService
 {

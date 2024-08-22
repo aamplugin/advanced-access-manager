@@ -10,8 +10,11 @@
 /**
  * RESTful API service trait
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
+ * @since 6.9.10 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.37
  */
 trait AAM_Restful_ServiceTrait
 {
@@ -251,8 +254,11 @@ trait AAM_Restful_ServiceTrait
      *
      * @return bool|WP_Error
      *
+     * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
+     * @since 6.9.10 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.10
+     * @version 6.9.37
      */
     private function _validate_role_accessibility($slug)
     {
@@ -264,8 +270,10 @@ trait AAM_Restful_ServiceTrait
             ]);
 
             if (!$service->is_editable_role($slug)) {
-                throw new OutOfRangeException(
-                    "Role {$slug} is not editable to current user"
+                $response = new WP_Error(
+                    'rest_not_found',
+                    "Role {$slug} is not editable to current user",
+                    [ 'status'  => 404 ]
                 );
             }
         } catch (Exception $_) {

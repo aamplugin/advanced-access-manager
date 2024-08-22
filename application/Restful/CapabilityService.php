@@ -57,32 +57,39 @@ class AAM_Restful_CapabilityService
                     'slug' => array(
                         'description' => 'Capability slug',
                         'type'        => 'string',
-                        'pattern'     => '[a-z0-9_\-]+',
                         'required'    => true
-                    )
+                    ),
+                    'ignore_format' => [
+                        'description' => 'Bypass the recommended by WP core standard',
+                        'type'        => 'boolean',
+                        'default'     => false
+                    ]
                 )
             ));
 
             // Edit existing capability
-            $this->_register_route('/capability/(?P<slug>.+)', array(
+            $this->_register_route('/capability/(?P<slug>.+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_capability'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
-                    'slug' => array(
+                'callback'            => [ $this, 'update_capability' ],
+                'permission_callback' => [ $this, 'check_permissions' ],
+                'args'                => [
+                    'slug' => [
                         'description' => 'Existing capability slug',
                         'type'        => 'string',
-                        'pattern'     => '[a-z0-9_\-]+',
                         'required'    => true
-                    ),
-                    'new_slug' => array(
+                    ],
+                    'new_slug' => [
                         'description' => 'New capability slug',
                         'type'        => 'string',
-                        'pattern'     => '[a-z0-9_\-]+',
                         'required'    => true
-                    )
-                )
-            ));
+                    ],
+                    'ignore_format' => [
+                        'description' => 'Bypass the recommended by WP core standard',
+                        'type'        => 'boolean',
+                        'default'     => false
+                    ]
+                ]
+            ]);
 
             // Delete existing capability
             $this->_register_route('/capability/(?P<slug>.+)', array(
@@ -148,13 +155,21 @@ class AAM_Restful_CapabilityService
     public function create_capability(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $role_id = $request->get_param('role_id');
-            $user_id  = $request->get_param('user_id');
+            $service       = $this->_get_service($request);
+            $role_id       = $request->get_param('role_id');
+            $user_id       = $request->get_param('user_id');
+            $capability    = urldecode($request->get_param('slug'));
+            $ignore_format = $request->get_param('ignore_format');
+
+            if (!$ignore_format && !preg_match('/^[a-z\d-_]+/', $capability)) {
+                throw new InvalidArgumentException(
+                    'Valid capability slug is required'
+                );
+            }
 
             // Step #1. Let's create the capability and automatically assign it to
             // the administrator role
-            $result = $service->create($request->get_param('slug'));
+            $result = $service->create($capability);
 
             // Step #2. Assign the newly created capability to role or user specified
             if (!empty($role_id)) {
@@ -182,11 +197,18 @@ class AAM_Restful_CapabilityService
     public function update_capability(WP_REST_Request $request)
     {
         try {
-            $service    = $this->_get_service($request);
-            $role_id    = $request->get_param('role_id');
-            $user_id    = $request->get_param('user_id');
-            $capability = $request->get_param('slug');
-            $new_slug   = $request->get_param('new_slug');
+            $service       = $this->_get_service($request);
+            $role_id       = $request->get_param('role_id');
+            $user_id       = $request->get_param('user_id');
+            $capability    = urldecode($request->get_param('slug'));
+            $new_slug      = urldecode($request->get_param('new_slug'));
+            $ignore_format = $request->get_param('ignore_format');
+
+            if (!$ignore_format && !preg_match('/^[a-z\d-_]+/', $new_slug)) {
+                throw new InvalidArgumentException(
+                    'Valid capability slug is required'
+                );
+            }
 
             if (!empty($role_id)) {
                 $result = $service->update($capability, $new_slug, 'role', $role_id);
@@ -218,7 +240,7 @@ class AAM_Restful_CapabilityService
             $service    = $this->_get_service($request);
             $role_id    = $request->get_param('role_id');
             $user_id    = $request->get_param('user_id');
-            $capability = $request->get_param('slug');
+            $capability = urldecode($request->get_param('slug'));
 
             if (!empty($role_id)) {
                 $result = $service->delete($capability, 'role', $role_id);

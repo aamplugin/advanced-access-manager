@@ -10,6 +10,7 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/411
  * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
@@ -20,7 +21,7 @@
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.35
+ * @version 6.9.37
  */
 class AAM_Framework_Service_Urls
 implements
@@ -453,7 +454,7 @@ implements
         }
 
         if (empty($url)) {
-            throw new InvalidArgumentException('The valid `url` is required');
+            throw new InvalidArgumentException('The valid URL is required');
         }
 
         $result = [
@@ -476,7 +477,7 @@ implements
             $message = wp_kses_post($data['message']);
 
             if (empty($message)) {
-                throw new InvalidArgumentException('The `message` is required');
+                throw new InvalidArgumentException('Provide non-empty message');
             } else {
                 $result['redirect']['message'] = $message;
             }
@@ -485,7 +486,7 @@ implements
 
             if ($page_id === 0) {
                 throw new InvalidArgumentException(
-                    'The `redirect_page_id` is required'
+                    'The valid redirect page ID is required'
                 );
             } else {
                 $result['redirect']['redirect_page_id'] = $page_id;
@@ -495,7 +496,7 @@ implements
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(
-                    'The valid `redirect_url` is required'
+                    'The valid redirect URL is required'
                 );
             } else {
                 $result['redirect']['redirect_url'] = $redirect_url;
@@ -503,7 +504,7 @@ implements
         } elseif ($data['type'] === 'trigger_callback') {
             if (!is_callable($data['callback'], true)) {
                 throw new InvalidArgumentException(
-                    'The valid `callback` is required'
+                    'The valid PHP callback function is required'
                 );
             } else {
                 $result['redirect']['callback'] = $data['callback'];
