@@ -55,7 +55,7 @@
                                         </p>
                                     </td>
                                     <td class="text-center">
-                                    <input data-toggle="toggle" id="jwt-refreshable" type="checkbox" data-on="Yes" data-off="No" data-size="small" />
+                                        <input data-toggle="toggle" id="jwt-refreshable" type="checkbox" data-on="Yes" data-off="No" data-size="small" />
                                     </td>
                                 </tr>
                             </tbody>

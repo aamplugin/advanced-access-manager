@@ -20,8 +20,14 @@
                             <?php $roles = (!empty($user) ? $user->roles : array(get_option('default_role'))); ?>
                             <?php foreach (get_editable_roles() as $id => $role) { ?>
                                 <li>
-                                    <label>
-                                        <input type="checkbox" name="aam_user_roles[]" value="<?php echo esc_attr($id); ?>" <?php checked(in_array($id, $roles)); ?> />
+                                    <label for="aam_user_role_<?php echo esc_attr($id); ?>">
+                                        <input
+                                            type="checkbox"
+                                            name="aam_user_roles[]"
+                                            value="<?php echo esc_attr($id); ?>"
+                                            <?php checked(in_array($id, $roles)); ?>
+                                            id="aam_user_role_<?php echo esc_attr($id); ?>"
+                                        />
                                         <?php echo esc_html(translate_user_role($role['name'])); ?>
                                     </label>
                                 </li>

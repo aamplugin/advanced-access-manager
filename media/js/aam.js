@@ -789,7 +789,7 @@
                         getAAM().notification('danger', null, {
                             request: `aam/v2/service/user/${id}?fields=status`,
                             payload: { status },
-                            response: response.responseJSON
+                            response
                         });
                     }
                 });
@@ -840,7 +840,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/jwts',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -908,8 +908,6 @@
 
                                     if (user.permissions.includes('allow_edit')) {
                                         actions.push('edit');
-                                    } else {
-                                        actions.push('no-edit');
                                     }
 
                                     if (user.permissions.includes('allow_unlock')) {
@@ -1096,14 +1094,6 @@
                                     }
                                     break;
 
-                                case 'no-edit':
-                                    if (getAAM().isUI('main')) {
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-pencil text-muted'
-                                        }));
-                                    }
-                                    break;
-
                                 case 'lock':
                                     if (getAAM().isUI('main')) {
                                         $(container).append($('<i/>', {
@@ -1117,34 +1107,12 @@
                                     }
                                     break;
 
-                                case 'no-lock':
-                                    if (getAAM().isUI('main')) {
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-lock-open text-muted'
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Lock user')
-                                        }));
-                                    }
-                                    break;
-
                                 case 'unlock':
                                     if (getAAM().isUI('main')) {
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-lock text-danger'
                                         }).bind('click', function () {
                                             updateUserStatus(data[0], $(this));
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Unlock user')
-                                        }));
-                                    }
-                                    break;
-
-                                case 'no-unlock':
-                                    if (getAAM().isUI('main')) {
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-lock text-muted'
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Unlock user')
@@ -1318,7 +1286,7 @@
                         getAAM().notification('danger', null, {
                             request: `aam/v2/service/user/${id}`,
                             payload: { expiration: payload },
-                            response: response.responseJSON
+                            response
                         });
                     },
                     complete: function () {
@@ -1350,7 +1318,7 @@
                     error: function (response) {
                         getAAM().notification('danger', null, {
                             request: `aam/v2/service/user/${id}`,
-                            response: response.responseJSON
+                            response
                         });
                     },
                     complete: function () {
@@ -1975,7 +1943,7 @@
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/backend-menu/${item}`,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -2089,7 +2057,7 @@
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/backend-menu',
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -2147,7 +2115,7 @@
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/admin-toolbar/${item}`,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -2231,7 +2199,7 @@
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/admin-toolbar',
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -2323,7 +2291,7 @@
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/component/${item}`,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -2388,6 +2356,7 @@
                             },
                             error: function () {
                                 getAAM().notification('danger');
+
                                 $('i', '#refresh-metabox-list').attr(
                                     'class', 'icon-arrows-cw'
                                 );
@@ -2443,7 +2412,7 @@
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/components',
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -2575,7 +2544,7 @@
                             getAAM().notification('danger', null, {
                                 request: endpoint,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -2612,7 +2581,7 @@
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/capability/${encodeURIComponent(capability)}`,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         },
                         complete: function () {
@@ -2815,9 +2784,45 @@
                         });
                     });
 
-                    $('#add-capability-modal').on('show.bs.modal', function (e) {
+                    $('#add-capability-modal').on('show.bs.modal', function () {
+                        $('#add_capability_error').addClass('hidden');
+                        $('#ignore_capability_format_container').addClass('hidden');
+
                         $('#new-capability-name').val('');
                         $('#new-capability-name').focus();
+                    });
+
+                    $('#update-capability-modal').on('show.bs.modal', function () {
+                        $('#update_capability_error').addClass('hidden');
+                        $('#ignore_update_capability_format_container').addClass('hidden');
+                    });
+
+                    $('#new-capability-name').bind('change', function() {
+                        const cap = $('#new-capability-name').val();
+
+                        if (/^[a-z0-9_\-]+$/.test(cap) === false) {
+                            $('#add_capability_error').html(
+                                $('#add_capability_error').data('message').replace('%s', cap)
+                            ).removeClass('hidden');
+                            $('#ignore_capability_format_container').removeClass('hidden');
+                        } else {
+                            $('#add_capability_error').addClass('hidden');
+                            $('#ignore_capability_format_container').addClass('hidden');
+                        }
+                    });
+
+                    $('#update-capability-slug').bind('change', function() {
+                        const cap = $('#update-capability-slug').val();
+
+                        if (/^[a-z0-9_\-]+$/.test(cap) === false) {
+                            $('#update_capability_error').html(
+                                $('#update_capability_error').data('message').replace('%s', cap)
+                            ).removeClass('hidden');
+                            $('#ignore_update_capability_format_container').removeClass('hidden');
+                        } else {
+                            $('#update_capability_error').addClass('hidden');
+                            $('#ignore_update_capability_format_container').addClass('hidden');
+                        }
                     });
 
                     $('#add-capability').bind('click', function () {
@@ -2827,12 +2832,13 @@
                     $('#add-capability-btn').bind('click', function () {
                         var _this = this;
 
-                        const slug = $.trim($('#new-capability-name').val());
-                        $('#new-capability-name').parent().removeClass('has-error');
+                        const slug   = $.trim($('#new-capability-name').val());
+                        const ignore = $('#ignore_capability_format').is(':checked');
 
-                        if (slug) {
+                        if (slug && (/^[a-z0-9_\-]+$/.test(slug) || ignore)) {
                             const payload = PreparePayload({
-                                slug
+                                slug,
+                                ignore_format: ignore
                             });
 
                             getAAM().queueRequest(function () {
@@ -2854,7 +2860,7 @@
                                         getAAM().notification('danger', null, {
                                             request: 'aam/v2/service/capabilities',
                                             payload,
-                                            response: response.responseJSON
+                                            response
                                         });
                                     },
                                     complete: function () {
@@ -2870,12 +2876,14 @@
                     $('#update-capability-btn').bind('click', function () {
                         const btn      = this;
                         const old_slug = $(this).attr('data-cap');
-                        const new_slug = $.trim($('#update-capability-slug').val())
+                        const new_slug = $.trim($('#update-capability-slug').val());
+                        const ignore   = $('#ignore_update_capability_format').is(':checked');
 
-                        if (new_slug) {
+                        if (new_slug && (/^[a-z0-9_\-]+$/.test(new_slug) || ignore)) {
                             // Prepare request payload
                             const payload = {
-                                new_slug
+                                new_slug,
+                                ignore_format: ignore
                             };
 
                             getAAM().queueRequest(function () {
@@ -2897,7 +2905,7 @@
                                         getAAM().notification('danger', null, {
                                             request: `aam/v2/service/capability/${encodeURIComponent(old_slug)}`,
                                             payload,
-                                            response: response.responseJSON
+                                            response
                                         });
                                     },
                                     complete: function () {
@@ -4325,7 +4333,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/redirect/access-denied',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -4436,7 +4444,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/redirect/access-denied',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -4483,7 +4491,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/redirect/login',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -4565,7 +4573,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/redirect/login',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -4612,7 +4620,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/redirect/logout',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -4694,7 +4702,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/redirect/logout',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -4741,7 +4749,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/redirect/not-found',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -4823,7 +4831,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/redirect/not-found',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -4881,7 +4889,7 @@
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/api-route/${id}`,
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -5028,7 +5036,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/api-routes',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -5105,7 +5113,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/urls',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -5189,7 +5197,7 @@
                                     getAAM().notification('danger', null, {
                                         request: endpoint,
                                         payload,
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -5224,7 +5232,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: `aam/v2/service/url/${id}`,
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -5482,7 +5490,7 @@
                                 .pop();
 
                             if (!resolved_users.includes(term)){
-                                $.ajax(`${getLocal().rest_base}wp/v2/service/users?context=edit&search=${term}`, {
+                                $.ajax(`${getLocal().rest_base}wp/v2/users?context=edit&search=${term}`, {
                                     type: 'GET',
                                     contentType: 'application/json',
                                     dataType: 'json',
@@ -5497,8 +5505,8 @@
                                     },
                                     error: function (response) {
                                         getAAM().notification('danger', null, {
-                                            request: `wp/v2/service/users?context=edit&search=${term}`,
-                                            response: response.responseJSON
+                                            request: `wp/v2/users?context=edit&search=${term}`,
+                                            response
                                         });
                                     },
                                     complete: function () {
@@ -5571,7 +5579,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: 'aam/v2/service/identity-governance',
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -5637,7 +5645,7 @@
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/identity-governance',
                                         payload: data,
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -5690,7 +5698,7 @@
                                 getAAM().notification('danger', null, {
                                     request: `aam/v2/service/identity-governance/${editing_rule.id}`,
                                     payload: data,
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -5726,7 +5734,7 @@
                             error: function (response) {
                                 getAAM().notification('danger', null, {
                                     request: `aam/v2/service/identity-governance/${id}`,
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -6125,7 +6133,7 @@
                                 getAAM().notification('danger', null, {
                                     request: `aam/v2/service/jwts?fields=token,signed_url`,
                                     payload,
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -6158,7 +6166,7 @@
                                 getAAM().notification('danger', null, {
                                     request: `aam/v2/service/jwt/${$('#jwt-delete-btn').attr('data-id')}`,
                                     payload,
-                                    response: response.responseJSON
+                                    response
                                 });
                             },
                             complete: function () {
@@ -6243,7 +6251,7 @@
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/configs',
                                 payload,
-                                response: response.responseJSON
+                                response
                             });
                         }
                     });
@@ -6325,7 +6333,7 @@
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/configs',
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -6350,7 +6358,7 @@
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/settings',
-                                        response: response.responseJSON
+                                        response
                                     });
                                 },
                                 complete: function () {
@@ -6391,7 +6399,7 @@
                                     getAAM().notification('danger', null, {
                                         request: 'aam/v2/service/configpress',
                                         payload,
-                                        response: response.responseJSON
+                                        response
                                     });
                                 }
                             });
@@ -6538,7 +6546,7 @@
                         error: function (response) {
                             getAAM().notification('danger', null, {
                                 request: 'aam/v2/service/settings',
-                                response: response.responseJSON
+                                response
                             });
                         },
                         complete: function () {
@@ -7197,14 +7205,43 @@
      * @returns {Void}
      */
     AAM.prototype.notification = function (status, message, metadata = null) {
+        let notification_header;
+        let notification_message;
+        let allow_reporting = false;
+
         if (!message) {
             switch (status) {
                 case 'success':
-                    message = getAAM().__('Operation completed successfully');
+                    notification_header  = 'Success';
+                    notification_message = getAAM().__(
+                        'Operation completed successfully'
+                    );
                     break;
 
                 case 'danger':
-                    message  = getAAM().__('An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.');
+                    notification_header = 'Unexpected Issue';
+
+                    if (metadata
+                        && metadata.response
+                        && metadata.response.status !== 500
+                        && metadata.response.responseJSON.errors
+                    ) {
+                        const http_error = Object.keys(
+                            metadata.response.responseJSON.errors
+                        ).shift();
+
+                        if (http_error === 'rest_invalid_argument') {
+                            notification_header  = getAAM().__('Invalid Arguments');
+                        }
+
+                        notification_message = metadata.response.responseJSON.errors[http_error][0];
+                    } else {
+                        if (metadata !== null) {
+                            metadata.response = metadata.response.responseJSON;
+                            allow_reporting   = true;
+                        }
+                        notification_message = getAAM().__('An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.');
+                    }
                     break;
 
                 default:
@@ -7220,8 +7257,8 @@
 
         if (status === 'success') {
             $.toast({
-                text: message,
-                heading: 'Success',
+                text: notification_message,
+                heading: notification_header,
                 icon: 'success',
                 showHideTransition: 'fade',
                 allowToastClose: true,
@@ -7234,8 +7271,8 @@
             });
         } else {
             $.toast({
-                text: message + (metadata ? ' <a href="#report_issue_modal" data-toggle="modal">' + getAAM().__('Report issue') + '</a>' : ''),
-                heading: 'Unexpected Issue',
+                text: notification_message + (allow_reporting ? ' <a href="#report_issue_modal" data-toggle="modal">' + getAAM().__('Report issue') + '</a>' : ''),
+                heading: notification_header,
                 icon: 'error',
                 showHideTransition: 'fade',
                 allowToastClose: true,

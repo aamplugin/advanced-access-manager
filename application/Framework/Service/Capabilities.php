@@ -207,7 +207,7 @@ class AAM_Framework_Service_Capabilities
         array $inline_context = []
     ) {
         try {
-            $slug = sanitize_key($capability);
+            $slug = trim($capability);
 
             if (empty($slug)) {
                 throw new InvalidArgumentException(
@@ -264,15 +264,15 @@ class AAM_Framework_Service_Capabilities
         array $inline_context = []
     ) {
         try {
-            $slug = sanitize_key($new_capability);
+            $slug = trim($new_capability);
 
             if (empty($slug)) {
                 throw new InvalidArgumentException(
                     "The capability slug {$new_capability} is not valid"
                 );
-            } elseif (
-                $this->exists($slug, $assignee_type, $assignee_id, $inline_context)
-            ) {
+            } elseif ($this->exists(
+                $slug, $assignee_type, $assignee_id, $inline_context
+            )) {
                 throw new InvalidArgumentException(
                     "The {$slug} capability already exists"
                 );

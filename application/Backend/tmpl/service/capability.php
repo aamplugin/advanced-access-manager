@@ -1,10 +1,11 @@
 <?php
 /**
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/412
  * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
  * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
  * @since 6.0.0 Initial implementation of the template
  *
- * @version 6.9.33
+ * @version 6.9.37
  * */
 ?>
 
@@ -57,9 +58,21 @@
                         <h4 class="modal-title"><?php echo __('Create Capability', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
+                        <p
+                            id="add_capability_error"
+                            class="text-left alert alert-warning hidden aam-mb-2"
+                            data-message="<?php echo esc_attr(__('The "%s" capability does not adhere to the WordPress core standard, which recommends using only lowercase letters, numbers, underscores, and hyphens.', AAM_KEY)); ?>"
+                        ></p>
+
                         <div class="form-group">
                             <label for="new-capability-name"><?php echo __('Capability', AAM_KEY); ?><span class="aam-asterix">*</span></label>
                             <input type="text" class="form-control" id="new-capability-name" placeholder="<?php echo __('Enter Capability', AAM_KEY); ?>" />
+                        </div>
+                        <div class="checkbox hidden" id="ignore_capability_format_container">
+                            <label for="ignore_capability_format">
+                                <input type="checkbox" id="ignore_capability_format" />
+                                <?php echo __('Ignore warning and create new capability anyway', AAM_KEY); ?>
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -78,9 +91,21 @@
                         <h4 class="modal-title"><?php echo __('Update Capability', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
+                        <p
+                            id="update_capability_error"
+                            class="text-left alert alert-warning hidden aam-mb-2"
+                            data-message="<?php echo esc_attr(__('The "%s" capability does not adhere to the WordPress core standard, which recommends using only lowercase letters, numbers, underscores, and hyphens.', AAM_KEY)); ?>"
+                        ></p>
+
                         <div class="form-group">
                             <label for="capability-id"><?php echo __('Capability', AAM_KEY); ?><span class="aam-asterix">*</span></label>
                             <input type="text" class="form-control" id="update-capability-slug" placeholder="<?php echo __('Enter Capability', AAM_KEY); ?>" />
+                        </div>
+                        <div class="checkbox hidden" id="ignore_update_capability_format_container">
+                            <label for="ignore_update_capability_format">
+                                <input type="checkbox" id="ignore_update_capability_format" />
+                                <?php echo __('Ignore warning and update capability anyway', AAM_KEY); ?>
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">

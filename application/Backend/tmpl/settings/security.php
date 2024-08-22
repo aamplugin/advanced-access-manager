@@ -21,7 +21,16 @@
                             </p>
                         </td>
                         <td class="text-center">
-                            <input data-toggle="toggle" name="<?php echo esc_attr($id); ?>" id="utility-<?php echo esc_attr($id); ?>" <?php echo ($option['value'] ? 'checked' : ''); ?> type="checkbox" data-on="<?php echo __('Enabled', AAM_KEY); ?>" data-off="<?php echo __('Disabled', AAM_KEY); ?>" data-size="small" />
+                            <input
+                                data-toggle="toggle"
+                                name="<?php echo esc_attr($id); ?>"
+                                id="utility-<?php echo esc_attr($id); ?>"
+                                <?php echo ($option['value'] ? 'checked' : ''); ?>
+                                type="checkbox"
+                                data-on="<?php echo __('Enabled', AAM_KEY); ?>"
+                                data-off="<?php echo __('Disabled', AAM_KEY); ?>"
+                                data-size="small"
+                            />
                         </td>
                     </tr>
                 <?php } ?>

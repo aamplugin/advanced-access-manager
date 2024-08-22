@@ -10,12 +10,13 @@
 /**
  * RESTful API for the URL Access service
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.26
+ * @version 6.9.37
  */
 class AAM_Restful_UrlService
 {
@@ -508,8 +509,11 @@ class AAM_Restful_UrlService
      *
      * @return boolean|WP_Error
      *
+     * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
+     * @since 6.9.26 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.26
+     * @version 6.9.37
      */
     private function _validate_redirect_status_code($value, $request)
     {
@@ -520,8 +524,10 @@ class AAM_Restful_UrlService
         $allowed = AAM_Framework_Service_Urls::HTTP_STATUS_CODES[$rule_type];
 
         if (is_null($allowed) && !empty($status_code)) {
-            throw new InvalidArgumentException(
-                "Redirect type {$rule_type} does not accept status codes"
+            $response = new WP_Error(
+                'rest_invalid_param',
+                "Redirect type {$rule_type} does not accept status codes",
+                array('status'  => 400)
             );
         } elseif (is_array($allowed)) {
             $list = array();

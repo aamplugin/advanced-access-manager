@@ -10,6 +10,7 @@
 /**
  * AAM service URL manager
  *
+ * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/411
  * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
  * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
  * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
@@ -20,7 +21,7 @@
  * @since 6.9.9  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.35
+ * @version 6.9.37
  */
 class AAM_Framework_Service_Urls
 {
@@ -409,6 +410,7 @@ class AAM_Framework_Service_Urls
      *
      * @return array
      *
+     * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/411
      * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
      * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
@@ -416,7 +418,7 @@ class AAM_Framework_Service_Urls
      * @since 6.9.9  Initial implementation of the method
      *
      * @access private
-     * @version 6.9.26
+     * @version 6.9.37
      */
     private function _validate_rule(array $rule)
     {
@@ -440,14 +442,14 @@ class AAM_Framework_Service_Urls
         }
 
         if (empty($type)) {
-            throw new InvalidArgumentException('The `type` is required');
+            throw new InvalidArgumentException('The valid rule type is required');
         } elseif (empty($url)) {
-            throw new InvalidArgumentException('The `url` is required');
+            throw new InvalidArgumentException('The valid URL is required');
         } elseif ($type === 'message') {
             $message = wp_kses_post($rule['message']);
 
             if (empty($message)) {
-                throw new InvalidArgumentException('The `message` is required');
+                throw new InvalidArgumentException('Provide non-empty message');
             } else {
                 $normalized['action'] = $message;
             }
@@ -456,7 +458,7 @@ class AAM_Framework_Service_Urls
 
             if ($page_id === 0) {
                 throw new InvalidArgumentException(
-                    'The `redirect_page_id` is required'
+                    'The valid redirect page ID is required'
                 );
             } else {
                 $normalized['action'] = $page_id;
@@ -466,7 +468,7 @@ class AAM_Framework_Service_Urls
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(
-                    'The valid `redirect_url` is required'
+                    'The valid redirect URL is required'
                 );
             } else {
                 $normalized['action'] = $redirect_url;
@@ -476,7 +478,7 @@ class AAM_Framework_Service_Urls
                 $normalized['action'] = $rule['callback'];
             } else {
                 throw new InvalidArgumentException(
-                    'The valid `callback` is required'
+                    'The valid PHP callback function is required'
                 );
             }
         }
