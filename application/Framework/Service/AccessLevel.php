@@ -254,10 +254,10 @@ class AAM_Framework_Service_AccessLevel
     {
         $key = $access_level_type;
 
-        if ($access_level_type === AAM_Framework_AccessLevel_User::TYPE) {
+        if ($access_level_type === AAM_Framework_Type_AccessLevel::USER) {
             $user = $this->_determine_user_core_instance($identifier);
             $key .= '::' . $user->ID;
-        } elseif ($access_level_type === AAM_Framework_AccessLevel_Role::TYPE) {
+        } elseif ($access_level_type === AAM_Framework_Type_AccessLevel::ROLE) {
             if (is_a($identifier, 'WP_Role')) {
                 $key .= '::' . $identifier->name;
             } elseif (is_string($identifier)) {
