@@ -3,13 +3,11 @@
 /** @version 6.9.35 */
 
 if (defined('AAM_KEY')) {
+    $params    = isset($params) ? $params : (object) [];
     $old_query = $GLOBALS['wp_query'];
 
-    $m = query_posts([
-        'post_type'   => $params->post_type,
-        'nopaging'    => filter_var($params->nopaging, FILTER_VALIDATE_BOOL),
-        'post_status' => $params->post_status
-    ]);
+    // Query posts
+    query_posts($params);
 
     while (have_posts()) {
         the_post();
@@ -27,6 +25,7 @@ if (defined('AAM_KEY')) {
             $post = get_post();
 
             the_title(sprintf('<a href="%s">', esc_url(get_permalink())), '</a>');
+			echo '<br/>';
         } else {
             echo $content;
         }
