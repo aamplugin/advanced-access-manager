@@ -152,7 +152,8 @@ final class AAM_Migration_700
             'core.settings.tips'                       => 'core.settings.ui.tips',
             'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox',
             'core.settings.inheritParentPost'          => 'service.content.inherit_from_parent_post',
-            'core.service.content.exclude.taxonomies'  => 'service.content.exclude.taxonomies'
+            'core.service.content.exclude.taxonomies'  => 'service.content.exclude.taxonomies',
+            'feature.post.password.expires'            => 'service.content.password_ttl'
         ];
 
         foreach($changes as $legacy => $new) {

@@ -304,7 +304,7 @@ class AAM_Core_Policy_Token
      */
     protected static function getCurrentPostValue($option_name)
     {
-        $post = AAM_Core_API::getCurrentPost();
+        $post = AAM_Service_Content::getInstance()->get_current_post();
 
         return is_object($post) ? $post->{$option_name} : null;
     }

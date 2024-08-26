@@ -3279,7 +3279,6 @@
                     });
 
                     $('#content_expire_datepicker').on('dp.change', function (res) {
-                        console.log(res.date.unix());
                         $('#aam_expire_datetime').val(res.date.unix());
                     });
 

@@ -36,15 +36,6 @@ class AAM_Service_Content
         AAM_Core_Contract_ServiceTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'content';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
@@ -126,7 +117,13 @@ class AAM_Service_Content
                     foreach(get_taxonomies() as $taxonomy) {
                         add_action(
                             "{$taxonomy}_edit_form_fields",
-                            array($this, 'renderAccessTermMetabox')
+                            function($term) {
+                                if (is_a($term, 'WP_Term')) {
+                                    $view = AAM_Backend_View::getInstance();
+
+                                    echo $view->renderTermMetabox($term);
+                                }
+                            }
                         );
                     }
 
@@ -134,12 +131,23 @@ class AAM_Service_Content
                     add_action('registered_taxonomy', function($taxonomy) {
                         add_action(
                             "{$taxonomy}_edit_form_fields",
-                            array($this, 'renderAccessTermMetabox')
+                            function($term) {
+                                if (is_a($term, 'WP_Term')) {
+                                    $view = AAM_Backend_View::getInstance();
+
+                                    echo $view->renderTermMetabox($term);
+                                }
+                            }
                         );
                     });
 
-                    //register custom access control metabox
-                    add_action('add_meta_boxes', array($this, 'registerAccessPostMetabox'));
+                    // Register custom access control metabox
+                    add_action(
+                        'add_meta_boxes',
+                        function() {
+                            $this->_register_access_manager_metabox();
+                        }
+                    );
                 }
             }
 
@@ -163,51 +171,6 @@ class AAM_Service_Content
     }
 
     /**
-     * Render Access Manager metabox on term edit screen
-     *
-     * @param WP_Term $term
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function renderAccessTermMetabox($term)
-    {
-        if (is_a($term, 'WP_Term')) {
-            echo AAM_Backend_View::getInstance()->renderTermMetabox($term);
-        }
-    }
-
-    /**
-     * Register Access Manager metabox on post edit screen
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function registerAccessPostMetabox()
-    {
-        global $post;
-
-        if (is_a($post, 'WP_Post')) {
-            add_meta_box(
-                'aam-access-manager',
-                __('Access Manager', AAM_KEY),
-                function () {
-                    global $post;
-
-                    echo AAM_Backend_View::renderPostMetabox($post);
-                },
-                null,
-                'advanced',
-                'high'
-            );
-        }
-    }
-
-    /**
      * Initialize Content service hooks
      *
      * @return void
@@ -226,11 +189,21 @@ class AAM_Service_Content
     protected function initialize_hooks()
     {
         if (!is_admin()) {
-        //     // Password protected filter
-        //     add_filter('post_password_required', array($this, 'isPasswordRequired'), 10, 2);
+            // Password protected filter
+            add_filter(
+                'post_password_required',
+                function($result, $post) {
+                    return $this->_is_password_protected($result, $post);
+                }, 10, 2
+            );
 
-        //     // Manage password check expiration
-        //     add_filter('post_password_expires', array($this, 'checkPassExpiration'));
+            // Manage password check expiration
+            add_filter(
+                'post_password_expires',
+                function($result) {
+                    return $this->_post_password_expires($result);
+                }
+            );
 
             // Filter navigation pages & taxonomies
             add_filter('wp_get_nav_menu_items', function($pages) {
@@ -242,8 +215,14 @@ class AAM_Service_Content
                 return $this->_get_pages($pages);
             }, PHP_INT_MAX);
 
-        //     // Manage access to frontend posts & pages
-        //     add_action('wp', array($this, 'wp'), PHP_INT_MAX);
+            // Manage access to frontend posts & pages
+            add_action('wp', function() {
+                global $wp_query;
+
+                if ($wp_query->is_single || $wp_query->is_page) {
+                    $this->_authorize_post_access();
+                }
+            }, PHP_INT_MAX);
         }
 
         // Ability to share visibility settings with other solutions
@@ -260,8 +239,13 @@ class AAM_Service_Content
             return $this->_posts_clauses_request($clauses, $query);
         }, 10, 2);
 
-        // // Filter post content
-        // add_filter('the_content', array($this, 'filterPostContent'), PHP_INT_MAX);
+        // Evaluate if current user can see full content or only a teaser message
+        add_filter(
+            'the_content',
+            function($content) {
+                return $this->_the_content($content);
+            }, PHP_INT_MAX
+        );
 
         // // Check if user has ability to perform certain task based on provided
         // // capability and meta data
@@ -357,9 +341,213 @@ class AAM_Service_Content
 
         // Register RESTful API
         AAM_Restful_ContentService::bootstrap();
+    }
 
-        // Service fetch
-        $this->registerService();
+    /**
+     * Get current post
+     *
+     * @return AAM_Framework_Resource_Post|null
+     *
+     * @access public
+     *
+     * @global WP_Query $wp_query
+     * @global WP_Post  $post
+     */
+    public function get_current_post()
+    {
+        global $wp_query, $post;
+
+        $res = $post;
+
+        if (get_the_ID()) {
+            $res = get_post(get_the_ID());
+        } elseif (!empty($wp_query->queried_object)) {
+            $res = $wp_query->queried_object;
+        } elseif (!empty($wp_query->post)) {
+            $res = $wp_query->post;
+        } elseif (!empty($wp_query->query_vars['p'])) {
+            $res = get_post($wp_query->query_vars['p']);
+        } elseif (!empty($wp_query->query_vars['page_id'])) {
+            $res = get_post($wp_query->query_vars['page_id']);
+        } elseif (!empty($wp_query->query['name'])) {
+            //Important! Cover the scenario of NOT LIST but ALLOW READ
+            if (!empty($wp_query->posts)) {
+                foreach ($wp_query->posts as $p) {
+                    if ($p->post_name === $wp_query->query['name']) {
+                        $res = $p;
+                        break;
+                    }
+                }
+            } elseif (!empty($wp_query->query['post_type'])) {
+                $res = get_page_by_path(
+                    $wp_query->query['name'],
+                    OBJECT,
+                    $wp_query->query['post_type']
+                );
+            }
+        }
+
+        if (is_a($res, 'WP_Post')) {
+            $result = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::POST, $res->ID
+            );
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Main frontend access control hook
+     *
+     * @return void
+     *
+     * @access private
+     * @global WP_Query $wp_query
+     *
+     * @version 7.0.0
+     */
+    private function _authorize_post_access()
+    {
+        $post = $this->get_current_post();
+
+        if (is_a($post, AAM_Framework_Resource_Post::class)) {
+            if ($post->is_restricted()) {
+                AAM_Framework_Utility::do_access_denied_redirect();
+            } elseif ($post->has_teaser_message()) {
+
+            }
+            // if (is_wp_error($error)) {
+            //     $data = $error->get_error_data();
+
+            //     if ($error->get_error_code() === 'post_access_redirected') {
+            //         // AAM_Core_Redirect::execute($data['type'], $data);
+            //     } elseif ($error->get_error_code() !== 'post_access_protected') {
+            //         AAM_Framework_Utility::do_access_denied_redirect();
+            //     }
+            // } else {
+            //     $this->incrementPostReadCounter($post);
+            // }
+        }
+    }
+
+    /**
+     * Check if post is password protected
+     *
+     * This callback is used by the Frontend to determine if current post requires
+     * password in order to see its content
+     *
+     * @param boolean $result
+     * @param WP_Post $post
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _is_password_protected($result, $post)
+    {
+        // Honor the manually set password on the post
+        if (($result === false) && is_a($post, 'WP_Post')) {
+            $check = $this->_verify_post_password(AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::POST, $post->ID
+            ));
+
+            $result = is_wp_error($check);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check PASSWORD PROTECTED access option
+     *
+     * If post has password set, return WP_Error so the application can do further
+     * authorization process.
+     *
+     * @param AAM_Framework_Resource_Post $post
+     *
+     * @return boolean|WP_Error
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    private function _verify_post_password(AAM_Framework_Resource_Post $post)
+    {
+        $result = true;
+
+        if ($post->is_password_protected()) {
+            // Get password values
+            $permission = $post->get_permission('read');
+
+            // If password is empty or not provided, try to read it from the cookie.
+            // This is the default WordPress behavior when it comes to password
+            // protected posts/pages
+            $is_matched = AAM_Core_API::prepareHasher()->CheckPassword(
+                $permission['password'],
+                wp_unslash(
+                    $this->getFromCookie('wp-postpass_' . COOKIEHASH)
+                )
+            );
+
+            if ($is_matched === false) {
+                $result = new WP_Error(
+                    'post_access_protected',
+                    'The post is password protected. Invalid password provided.',
+                    array('status' => 401)
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Redefine entered password TTL
+     *
+     * @param int $expire
+     *
+     * @return int
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _post_password_expires($expire)
+    {
+        $ttl = AAM_Framework_Manager::configs()->get_config(
+            'service.content.password_ttl', null
+        );
+
+        return !empty($ttl) ? time() + strtotime($ttl) : $expire;
+    }
+
+    /**
+     * Register Access Manager metabox on post edit screen
+     *
+     * @return void
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _register_access_manager_metabox()
+    {
+        global $post;
+
+        if (is_a($post, 'WP_Post')) {
+            add_meta_box(
+                'aam-access-manager',
+                __('Access Manager', AAM_KEY),
+                function () {
+                    global $post;
+
+                    echo AAM_Backend_View::renderPostMetabox($post);
+                },
+                null,
+                'advanced',
+                'high'
+            );
+        }
     }
 
     /**
@@ -389,7 +577,7 @@ class AAM_Service_Content
         return $pages;
     }
 
-     /**
+    /**
      * Filter posts from the list
      *
      * @param array $pages
@@ -403,13 +591,13 @@ class AAM_Service_Content
     {
         if (is_array($pages)) {
             $service = AAM::api()->user()->content();
-            // TODO: Research the get current post reason
-            // $current = AAM_Core_API::getCurrentPost();
+            $current = $this->get_current_post();
 
             foreach ($pages as $i => $post) {
-                // if ($current && ($current->ID === $post->ID)) {
-                //     continue;
-                // }
+                if ($current && ($current->ID === $post->ID)) {
+                    continue;
+                }
+
                 if ($service->get_post($post->ID)->is_hidden()) {
                     unset($pages[$i]);
                 }
@@ -777,95 +965,6 @@ class AAM_Service_Content
     }
 
     /**
-     * Check if post is password protected
-     *
-     * This callback is used by the Frontend to determine if current post requires
-     * password in order to see its content
-     *
-     * @param boolean $result
-     * @param WP_Post $post
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function isPasswordRequired($result, $post)
-    {
-        // Honor the manually set password on the post
-        if (($result === false) && is_a($post, 'WP_Post')) {
-            $check = $this->checkPostPassword(AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::POST, $post->ID
-            ));
-
-            $result = is_wp_error($check);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Redefine entered password TTL
-     *
-     * @param int $expire
-     *
-     * @return int
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function checkPassExpiration($expire)
-    {
-        $overwrite = AAM_Framework_Manager::configs()->get_config(
-            'feature.post.password.expires', null
-        );
-
-        if (!is_null($overwrite)) {
-            $expire = ($overwrite ? time() + strtotime($overwrite) : 0);
-        }
-
-        return $expire;
-    }
-
-    /**
-     * Main frontend access control hook
-     *
-     * @return void
-     *
-     * @access public
-     * @global WP_Query $wp_query
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @version 6.9.26
-     */
-    public function wp()
-    {
-        global $wp_query;
-
-        if ($wp_query->is_single || $wp_query->is_page) {
-            $post = AAM_Core_API::getCurrentPost();
-
-            if (is_a($post, AAM_Framework_Resource_Post::class)) {
-                $error = $this->isAuthorizedToReadPost($post);
-
-                if (is_wp_error($error)) {
-                    $data = $error->get_error_data();
-
-                    if ($error->get_error_code() === 'post_access_redirected') {
-                        AAM_Core_Redirect::execute($data['type'], $data);
-                    } elseif ($error->get_error_code() !== 'post_access_protected') {
-                        AAM_Framework_Utility::do_access_denied_redirect();
-                    }
-                } else {
-                    $this->incrementPostReadCounter($post);
-                }
-            }
-        }
-    }
-
-    /**
      * Filter post content
      *
      * @param string $content
@@ -873,26 +972,38 @@ class AAM_Service_Content
      * @return string
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public function filterPostContent($content)
+    private function _the_content($content)
     {
-        $post = AAM_Core_API::getCurrentPost();
+        static $in = false;
 
-        if (is_object($post) && $post->has('teaser')) {
-            $teaser = $post->get_setting('teaser');
+        if (!$in) {
+            $in   = true;
+            $post = $this->get_current_post();
 
-            if (!empty($teaser['message'])) {
-                $message = $teaser['message'];
-            } else {
-                $message = __('[No teaser message provided]', AAM_KEY);
+            if (is_a($post, AAM_Framework_Resource_Post::class)
+                && $post->has_teaser_message()
+            ) {
+                $permission = $post->get_permission('read');
+
+                if (!empty($permission['teaser_message'])) {
+                    $message = $permission['teaser_message'];
+                } else {
+                    $message = __('[No teaser message provided]', AAM_KEY);
+                }
+
+                // Replace the [excerpt] placeholder with posts excerpt and do
+                // short-code evaluation
+                $content = do_shortcode(
+                    str_replace('[excerpt]', $post->post_excerpt, $message)
+                );
+
+                // Decorate message
+                $content = apply_filters('the_content', $content);
             }
 
-            // Replace the [excerpt] placeholder with posts excerpt and do
-            // short-code evaluation
-            $content = do_shortcode(
-                str_replace('[excerpt]', $post->post_excerpt, $message)
-            );
+            $in = false;
         }
 
         return $content;
@@ -1444,57 +1555,6 @@ class AAM_Service_Content
                 'Direct access is not allowed. Follow the provided redirect rule.',
                 $metadata
             );
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check PASSWORD PROTECTED access option
-     *
-     * If post has password set, return WP_Error so the application can do further
-     * authorization process.
-     *
-     * @param AAM_Framework_Resource_Post $post
-     * @param string                      $password
-     *
-     * @return boolean|WP_Error
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function checkPostPassword(
-        AAM_Framework_Resource_Post $post, $password = null
-    ) {
-        $result = true;
-
-        if ($post->is('protected')) {
-            // Get password values
-            $protected = $post->get_setting('protected');
-
-            // If password is empty or not provided, try to read it from the cookie.
-            // This is the default WordPress behavior when it comes to password
-            // protected posts/pages
-            if (empty($password)) {
-                $password = wp_unslash(
-                    $this->getFromCookie('wp-postpass_' . COOKIEHASH)
-                );
-
-                $isMatched = AAM_Core_API::prepareHasher()->CheckPassword(
-                    $protected['password'],
-                    $password
-                );
-            } else {
-                $isMatched = $protected['password'] === $password;
-            }
-
-            if ($isMatched === false) {
-                $result = new WP_Error(
-                    'post_access_protected',
-                    'The post is password protected. Invalid password provided.',
-                    array('status' => 401)
-                );
-            }
         }
 
         return $result;

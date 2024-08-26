@@ -41,15 +41,6 @@ class AAM_Service_Jwt
         AAM_Core_Contract_RequestTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'jwt';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
@@ -205,9 +196,6 @@ class AAM_Service_Jwt
 
         // Fetch specific claim from the JWT token if present
         add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
-
-        // Service fetch
-        $this->registerService();
     }
 
     /**

@@ -321,62 +321,6 @@ final class AAM_Core_API
     }
 
     /**
-     * Get current post
-     *
-     * @return AAM_Core_Object_Post|null
-     *
-     * @access public
-     * @global WP_Query $wp_query
-     * @global WP_Post  $post
-     * @version 6.0.0
-     * @todo - Ideally remove the entire method
-     */
-    public static function getCurrentPost()
-    {
-        global $wp_query, $post;
-
-        $res = $post;
-
-        if (get_the_ID()) {
-            $res = get_post(get_the_ID());
-        } elseif (!empty($wp_query->queried_object)) {
-            $res = $wp_query->queried_object;
-        } elseif (!empty($wp_query->post)) {
-            $res = $wp_query->post;
-        } elseif (!empty($wp_query->query_vars['p'])) {
-            $res = get_post($wp_query->query_vars['p']);
-        } elseif (!empty($wp_query->query_vars['page_id'])) {
-            $res = get_post($wp_query->query_vars['page_id']);
-        } elseif (!empty($wp_query->query['name'])) {
-            //Important! Cover the scenario of NOT LIST but ALLOW READ
-            if (!empty($wp_query->posts)) {
-                foreach ($wp_query->posts as $p) {
-                    if ($p->post_name === $wp_query->query['name']) {
-                        $res = $p;
-                        break;
-                    }
-                }
-            } elseif (!empty($wp_query->query['post_type'])) {
-                $res = get_page_by_path(
-                    $wp_query->query['name'],
-                    OBJECT,
-                    $wp_query->query['post_type']
-                );
-            }
-        }
-
-        if (is_a($res, 'WP_Post')) {
-            $result = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::POST, $res->ID
-            );
-        } else {
-            $result = null;
-        }
-
-        return $result;
-    }
-
-    /**
      * Get WP core password hasher
      *
      * @return PasswordHash

@@ -26,15 +26,6 @@ class AAM_Service_Route
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'api-route';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
@@ -178,9 +169,6 @@ class AAM_Service_Route
         add_filter(
             'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         );
-
-        // Service fetch
-        $this->registerService();
     }
 
     /**

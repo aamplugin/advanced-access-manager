@@ -25,15 +25,6 @@ class AAM_Service_AccessDeniedRedirect
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'access-denied-redirect';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
@@ -166,9 +157,6 @@ class AAM_Service_AccessDeniedRedirect
 
         // Register RESTful API endpoints
         AAM_Restful_AccessDeniedRedirectService::bootstrap();
-
-        // Service fetch
-        $this->registerService();
     }
 
      /**

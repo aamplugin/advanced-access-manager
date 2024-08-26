@@ -41,15 +41,6 @@ class AAM_Service_AccessPolicy
         AAM_Core_Contract_RequestTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'access-policy';
-
-    /**
      * AAM configuration setting that is associated with the feature
      *
      * @version 6.0.0
@@ -320,9 +311,6 @@ class AAM_Service_AccessPolicy
         add_action('aam_valid_jwt_token_detected_action', function($token, $claims) {
             update_user_meta($claims->userId, 'aam_auth_token', $token);
         }, 10, 2);
-
-        // Service fetch
-        $this->registerService();
     }
 
     /**

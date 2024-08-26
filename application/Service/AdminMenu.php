@@ -28,15 +28,6 @@ class AAM_Service_AdminMenu
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'admin-menu';
-
-    /**
      * DB cache option
      *
      * @version 6.0.0
@@ -148,9 +139,6 @@ class AAM_Service_AdminMenu
 
         // Register RESTful API endpoints
         AAM_Restful_BackendMenuService::bootstrap();
-
-        // Service fetch
-        $this->registerService();
     }
 
     /**

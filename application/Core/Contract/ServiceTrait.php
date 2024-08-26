@@ -31,25 +31,6 @@ trait AAM_Core_Contract_ServiceTrait
     protected static $instance = null;
 
     /**
-     * Register service to be fetched
-     *
-     * @return null|object
-     *
-     * @access protected
-     * @version 6.4.0
-     */
-    protected function registerService()
-    {
-        add_filter('aam_get_service_filter', function($service, $alias) {
-            if (empty($service) && ($alias === static::SERVICE_ALIAS)) {
-                $service = $this;
-            }
-
-            return $service;
-        }, 10, 2);
-    }
-
-    /**
      * Bootstrap the service
      *
      * @return void

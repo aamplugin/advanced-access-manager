@@ -38,9 +38,11 @@ implements
      */
     public function is_hidden_on($area)
     {
-        return !empty($this->_permissions['list'])
+        $result = !empty($this->_permissions['list'])
             && in_array($area, $this->_permissions['list']['on'], true)
             && $this->_permissions['list']['effect'] == 'deny';
+
+        return apply_filters('aam_post_is_hidden_on_filter', $result, $this);
     }
 
     /**
@@ -62,6 +64,88 @@ implements
         }
 
         return $this->is_hidden_on($area);
+    }
+
+    /**
+     * Determine if current post is password protected
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_password_protected()
+    {
+        if (!empty($this->_permissions['read']['restriction_type'])) {
+            $restriction_type = $this->_permissions['read']['restriction_type'];
+        } else {
+            $restriction_type = null;
+        }
+
+        $result = ($restriction_type === 'password_protected')
+            && $this->_permissions['read']['effect'] == 'deny'
+            && !empty($this->_permissions['read']['password']);
+
+        return apply_filters('aam_post_is_password_protected_filter', $result, $this);
+    }
+
+    /**
+     * Façade function that determines if post is restricted for direct access
+     *
+     * This method verifies is post is set as restricted by checking following:
+     * - Post is set as restricted without any additional conditions;
+     * - Post access is expired
+     * - The aam_post_is_restricted_filter returns positive result
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_restricted()
+    {
+        $result           = false;
+        $restriction_type = null;
+
+        if (!empty($this->_permissions['read'])) {
+            if (!empty($this->_permissions['read']['restriction_type'])) {
+                $restriction_type = $this->_permissions['read']['restriction_type'];
+            } else {
+                $restriction_type = 'default';
+            }
+        }
+
+        if ($restriction_type === 'default') {
+            $result = true;
+        } elseif ($restriction_type === 'expire') {
+            $result = time() >= intval($this->_permissions['read']['expires_after']);
+        }
+
+        return apply_filters('aam_post_is_restricted_filter', $result, $this);
+    }
+
+    /**
+     * Determine if current post has teaser message
+     *
+     * Instead of a post's content, the specified teaser message is displayed
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function has_teaser_message()
+    {
+        if (!empty($this->_permissions['read']['restriction_type'])) {
+            $restriction_type = $this->_permissions['read']['restriction_type'];
+        } else {
+            $restriction_type = null;
+        }
+
+        $result = ($restriction_type === 'teaser_message')
+            && $this->_permissions['read']['effect'] == 'deny';
+
+        return apply_filters('aam_post_has_teaser_message_filter', $result, $this);
     }
 
     /**

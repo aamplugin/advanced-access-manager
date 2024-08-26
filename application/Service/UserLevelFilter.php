@@ -23,15 +23,6 @@ class AAM_Service_UserLevelFilter
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * Service alias
-     *
-     * Is used to get service instance if it is enabled
-     *
-     * @version 6.4.0
-     */
-    const SERVICE_ALIAS = 'user-level';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
@@ -121,9 +112,6 @@ class AAM_Service_UserLevelFilter
 
             return $user;
         });
-
-        // Service fetch
-        $this->registerService();
     }
 
     /**
