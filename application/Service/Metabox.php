@@ -65,7 +65,7 @@ class AAM_Service_Metabox
                 // Hook that initialize the AAM UI part of the service
                 add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Main_Metabox::register();
-                }, 10);
+                });
             }
 
             $this->initializeHooks();

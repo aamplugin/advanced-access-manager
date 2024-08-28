@@ -27,13 +27,13 @@
                 <div class="col-xs-12 col-md-8">
                     <?php
                     foreach ($features as $feature) {
-                        echo $feature->view->getContent();
+                        echo call_user_func($feature->view);
                     }
                     ?>
                 </div>
             </div>
         <?php } else {
-            echo array_pop($features)->view->getContent();
+            echo call_user_func(array_pop($features)->view);
         } ?>
     <?php } else { ?>
         <div class="col-xs-12">

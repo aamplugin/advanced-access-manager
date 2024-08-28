@@ -31,16 +31,27 @@ implements
      *
      * @param string $area Can be either frontend, backend or api
      *
-     * @return boolean
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
      */
     public function is_hidden_on($area)
     {
-        $result = !empty($this->_permissions['list'])
-            && in_array($area, $this->_permissions['list']['on'], true)
-            && $this->_permissions['list']['effect'] == 'deny';
+        $result     = null;
+        $permission = null;
+
+        if (!empty($this->_permissions['list'])) {
+            $permission = $this->_permissions['list'];
+        }
+
+        if (!is_null($permission)) {
+            if ($permission['effect'] === 'deny') {
+                $result = in_array($area, $permission['on'], true);
+            } else {
+                $result = false;
+            }
+        }
 
         return apply_filters('aam_post_is_hidden_on_filter', $result, $this);
     }
@@ -69,22 +80,33 @@ implements
     /**
      * Determine if current post is password protected
      *
-     * @return boolean
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
      */
     public function is_password_protected()
     {
-        if (!empty($this->_permissions['read']['restriction_type'])) {
-            $restriction_type = $this->_permissions['read']['restriction_type'];
-        } else {
-            $restriction_type = null;
+        $result     = null;
+        $permission = null;
+
+        // Evaluate if we even have the read permission
+        if (!empty($this->_permissions['read'])) {
+            $permission = $this->_permissions['read'];
         }
 
-        $result = ($restriction_type === 'password_protected')
-            && $this->_permissions['read']['effect'] == 'deny'
-            && !empty($this->_permissions['read']['password']);
+        if (!is_null($permission)) {
+            if (!empty($permission['restriction_type'])) {
+                $restriction_type = $permission['restriction_type'];
+            } else {
+                $restriction_type = null;
+            }
+
+            if ($restriction_type === 'password_protected') {
+                $result = $permission['effect'] === 'deny'
+                    && !empty($permission['password']);
+            }
+        }
 
         return apply_filters('aam_post_is_password_protected_filter', $result, $this);
     }
@@ -97,28 +119,39 @@ implements
      * - Post access is expired
      * - The aam_post_is_restricted_filter returns positive result
      *
-     * @return boolean
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
      */
     public function is_restricted()
     {
-        $result           = false;
-        $restriction_type = null;
+        $result     = null;
+        $permission = null;
 
+        // Evaluate if we even have the read permission
         if (!empty($this->_permissions['read'])) {
-            if (!empty($this->_permissions['read']['restriction_type'])) {
-                $restriction_type = $this->_permissions['read']['restriction_type'];
+            $permission = $this->_permissions['read'];
+        }
+
+        if (!is_null($permission)) {
+            $restriction_type = null;
+
+            if (!empty($permission['restriction_type'])) {
+                $restriction_type = $permission['restriction_type'];
             } else {
                 $restriction_type = 'default';
             }
-        }
 
-        if ($restriction_type === 'default') {
-            $result = true;
-        } elseif ($restriction_type === 'expire') {
-            $result = time() >= intval($this->_permissions['read']['expires_after']);
+            if ($permission['effect'] === 'deny') {
+                if ($restriction_type === 'default') {
+                    $result = true;
+                } elseif ($restriction_type === 'expire') {
+                    $result = time() >= intval($permission['expires_after']);
+                }
+            } else {
+                $result = false;
+            }
         }
 
         return apply_filters('aam_post_is_restricted_filter', $result, $this);
@@ -129,21 +162,32 @@ implements
      *
      * Instead of a post's content, the specified teaser message is displayed
      *
-     * @return boolean
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
      */
     public function has_teaser_message()
     {
-        if (!empty($this->_permissions['read']['restriction_type'])) {
-            $restriction_type = $this->_permissions['read']['restriction_type'];
-        } else {
-            $restriction_type = null;
+        $result     = null;
+        $permission = null;
+
+        // Evaluate if we even have the read permission
+        if (!empty($this->_permissions['read'])) {
+            $permission = $this->_permissions['read'];
         }
 
-        $result = ($restriction_type === 'teaser_message')
-            && $this->_permissions['read']['effect'] == 'deny';
+        if (!is_null($permission)) {
+            if (!empty($permission['restriction_type'])) {
+                $restriction_type = $permission['restriction_type'];
+            } else {
+                $restriction_type = null;
+            }
+
+            if ($restriction_type === 'teaser_message') {
+                $result = $permission['effect'] === 'deny';
+            }
+        }
 
         return apply_filters('aam_post_has_teaser_message_filter', $result, $this);
     }

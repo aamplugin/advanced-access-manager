@@ -153,7 +153,13 @@ final class AAM_Migration_700
             'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox',
             'core.settings.inheritParentPost'          => 'service.content.inherit_from_parent_post',
             'core.service.content.exclude.taxonomies'  => 'service.content.exclude.taxonomies',
-            'feature.post.password.expires'            => 'service.content.password_ttl'
+            'feature.post.password.expires'            => 'service.content.password_ttl',
+            'geoapi.adapter'                           => 'service.geo_lookup.geoapi.adapter',
+            'ipstack.license'                          => 'service.geo_lookup.geoapi.api_key',
+            'geoapi.api_key'                           => 'service.geo_lookup.geoapi.api_key',
+            'geoapi.test_ip'                           => 'service.geo_lookup.geoapi.test_ip',
+            'ipstack.schema'                           => 'service.geo_lookup.ipstack.schema',
+            'ipstack.fields'                           => 'service.geo_lookup.ipstack.fields'
         ];
 
         foreach($changes as $legacy => $new) {

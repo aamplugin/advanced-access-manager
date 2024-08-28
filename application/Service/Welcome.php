@@ -55,7 +55,7 @@ class AAM_Service_Welcome
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Main_Welcome::register();
-                }, 1);
+                });
             }
 
             // Hook that returns the detailed information about the nature of the

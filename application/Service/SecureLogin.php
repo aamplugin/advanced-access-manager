@@ -106,7 +106,7 @@ class AAM_Service_SecureLogin
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Settings_Security::register();
-                }, 1);
+                });
             }
         }
 

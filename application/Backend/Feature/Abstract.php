@@ -36,6 +36,18 @@ abstract class AAM_Backend_Feature_Abstract
     const TEMPLATE = null;
 
     /**
+     * Get content
+     *
+     * @return string
+     *
+     * @access public
+     */
+    public function __invoke()
+    {
+        return $this->getContent();
+    }
+
+    /**
      * Get HTML content
      *
      * @return string

@@ -7,6 +7,8 @@
  * ======================================================================
  */
 
+use Vectorface\Whip\Whip;
+
 /**
  * AAM core service
  *
@@ -102,6 +104,13 @@ class AAM_Service_Core
                 AAM_Backend_Feature_Settings_Manager::register();
             }, 1);
         }
+
+        // Allow third-party plugins to use AAM user IP detection
+        add_filter('aam_get_user_ip_address_filter', function() {
+            $whip = new Whip();
+
+            return $whip->getValidIpAddress();
+        });
 
         // Add toolbar "Manage Access" item
         add_action('admin_bar_menu', function($wp_admin_bar) {

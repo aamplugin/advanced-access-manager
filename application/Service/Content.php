@@ -352,6 +352,7 @@ class AAM_Service_Content
      *
      * @global WP_Query $wp_query
      * @global WP_Post  $post
+     * @version 7.0.0
      */
     public function get_current_post()
     {
@@ -412,23 +413,10 @@ class AAM_Service_Content
     {
         $post = $this->get_current_post();
 
-        if (is_a($post, AAM_Framework_Resource_Post::class)) {
-            if ($post->is_restricted()) {
-                AAM_Framework_Utility::do_access_denied_redirect();
-            } elseif ($post->has_teaser_message()) {
-
-            }
-            // if (is_wp_error($error)) {
-            //     $data = $error->get_error_data();
-
-            //     if ($error->get_error_code() === 'post_access_redirected') {
-            //         // AAM_Core_Redirect::execute($data['type'], $data);
-            //     } elseif ($error->get_error_code() !== 'post_access_protected') {
-            //         AAM_Framework_Utility::do_access_denied_redirect();
-            //     }
-            // } else {
-            //     $this->incrementPostReadCounter($post);
-            // }
+        if (is_a($post, AAM_Framework_Resource_Post::class)
+            && $post->is_restricted()
+        ) {
+            AAM_Framework_Utility::do_access_denied_redirect();
         }
     }
 

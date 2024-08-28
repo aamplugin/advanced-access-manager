@@ -79,7 +79,7 @@ class AAM_Service_AccessPolicy
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
                     AAM_Backend_Feature_Main_Policy::register();
-                }, 40);
+                });
 
                 //register custom access control metabox
                 add_action('add_meta_boxes', array($this, 'registerMetaboxes'));

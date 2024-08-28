@@ -61,7 +61,7 @@ class AAM_Backend_Feature
         if ($show && current_user_can($cap)) {
             if (is_object($feature->view)) {
                 self::$_features[get_class($feature->view)] = $feature;
-            } else {
+            } elseif (!is_a($feature->view, Closure::class)) {
                 self::$_features[$feature->view] = $feature;
                 // Initialize view manage so it can register any necessary hooks
                 $feature->view = new $feature->view($access_level);
