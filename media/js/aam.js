@@ -5162,7 +5162,9 @@
                                 );
                             }
 
-                            if (code) {
+                            if (code
+                                && ['page_redirect', 'url_redirect'].includes(type)
+                            ) {
                                 payload.http_status_code = parseInt(code, 10);
                             }
 

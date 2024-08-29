@@ -26,19 +26,21 @@ final class AAM_Migration_6_9_36 implements AAM_Core_Contract_MigrationInterface
         $service  = AAM_Framework_Manager::settings();
         $settings = $service->get_settings();
 
-        foreach($settings as $access_level => $data) {
-            if (in_array($access_level, [ 'role', 'user' ], true)) {
-                foreach($data as $level_id => $controls) {
-                    $settings[$access_level][$level_id] = $this->_fix_corruption(
-                        $controls
-                    );
+        if (is_array($settings)) {
+            foreach($settings as $access_level => $data) {
+                if (in_array($access_level, [ 'role', 'user' ], true)) {
+                    foreach($data as $level_id => $controls) {
+                        $settings[$access_level][$level_id] = $this->_fix_corruption(
+                            $controls
+                        );
+                    }
+                } else {
+                    $settings[$access_level] = $this->_fix_corruption($data);
                 }
-            } else {
-                $settings[$access_level] = $this->_fix_corruption($data);
             }
-        }
 
-        $service->set_settings($settings);
+            $service->set_settings($settings);
+        }
     }
 
     /**
