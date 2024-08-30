@@ -158,6 +158,62 @@ implements
     }
 
     /**
+     * Façade function that determines if access level has certain permission
+     *
+     * @param string $permission
+     *
+     * @return boolean|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_allowed_to($permission)
+    {
+        if ($permission === 'read') {
+            $decision = !$this->is_restricted();
+        } elseif (array_key_exists($permission, $this->_permissions)) {
+            $decision = $this->_permissions[$permission]['effect'] === 'allow';
+        } else {
+            $decision = null;
+        }
+
+        return apply_filters(
+            'aam_post_is_allowed_to_filter',
+            is_bool($decision) ? $decision : null,
+            $permission,
+            $this
+        );
+    }
+
+    /**
+     * Façade function that determines if access level does not have certain
+     * permission
+     *
+     * @param string $permission
+     *
+     * @return boolean|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_denied_to($permission) {
+        if ($permission === 'read') {
+            $decision = $this->is_restricted();
+        } elseif (array_key_exists($permission, $this->_permissions)) {
+            $decision = $this->_permissions[$permission]['effect'] !== 'allow';
+        } else {
+            $decision = null;
+        }
+
+        return apply_filters(
+            'aam_post_is_denied_to_filter',
+            is_bool($decision) ? $decision : null,
+            $permission,
+            $this
+        );
+    }
+
+    /**
      * Determine if current post has teaser message
      *
      * Instead of a post's content, the specified teaser message is displayed
@@ -190,6 +246,96 @@ implements
         }
 
         return apply_filters('aam_post_has_teaser_message_filter', $result, $this);
+    }
+
+    /**
+     * Determine if current post has redirect defined
+     *
+     * @return boolean|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function has_redirect()
+    {
+        $result     = null;
+        $permission = null;
+
+        // Evaluate if we even have the read permission
+        if (!empty($this->_permissions['read'])) {
+            $permission = $this->_permissions['read'];
+        }
+
+        if (!is_null($permission)) {
+            if (!empty($permission['restriction_type'])) {
+                $restriction_type = $permission['restriction_type'];
+            } else {
+                $restriction_type = null;
+            }
+
+            if ($restriction_type === 'redirect') {
+                $result = $permission['effect'] === 'deny';
+            }
+        }
+
+        return apply_filters('aam_post_has_redirect_filter', $result, $this);
+    }
+
+    /**
+     * Get post password
+     *
+     * @return string|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_password()
+    {
+        if ($this->is_password_protected()) {
+            $result = $this->_permissions['read']['password'];
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get content teaser message
+     *
+     * @return string|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_teaser_message()
+    {
+        if ($this->has_teaser_message()) {
+            $result = $this->_permissions['read']['message'];
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get content redirect
+     *
+     * @return array|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_redirect()
+    {
+        if ($this->has_redirect()) {
+            $result = $this->_permissions['read']['redirect'];
+        } else {
+            $result = null;
+        }
+
+        return $result;
     }
 
     /**

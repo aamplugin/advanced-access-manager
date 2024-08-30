@@ -112,6 +112,11 @@ class AAM_Service_Core
             return $whip->getValidIpAddress();
         });
 
+        // Handle access denied
+        add_action('aam_deny_access_action', function() {
+            AAM_Framework_Utility::do_access_denied_redirect();
+        });
+
         // Add toolbar "Manage Access" item
         add_action('admin_bar_menu', function($wp_admin_bar) {
             if (current_user_can('aam_manager')) {

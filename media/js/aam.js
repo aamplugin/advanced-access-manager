@@ -7170,7 +7170,7 @@
      */
     AAM.prototype.notification = function (status, message, metadata = null) {
         let notification_header;
-        let notification_message;
+        let notification_message = message;
         let allow_reporting = false;
 
         if (!message) {

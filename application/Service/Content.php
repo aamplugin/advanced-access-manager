@@ -54,25 +54,18 @@ class AAM_Service_Content
     ];
 
     /**
-     * Post view counter
-     *
-     * @version 6.0.0
-     */
-    const POST_COUNTER_DB_OPTION = 'aam_post_%s_access_counter';
-
-    /**
      * Collection of post type caps
      *
      * This is a collection of post type capabilities for optimization reasons. It
-     * is used by filterMetaMaps method to determine if additional check needs to be
+     * is used by _map_meta_cap method to determine if additional check needs to be
      * perform
      *
      * @var array
      *
-     * @access protected
-     * @version 6.0.2
+     * @access private
+     * @version 7.0.0
      */
-    protected $postTypeCaps = array(
+    private $_content_capabilities = array(
         'edit_post', 'edit_page', 'read_post', 'read_page', 'publish_post'
     );
 
@@ -247,56 +240,65 @@ class AAM_Service_Content
             }, PHP_INT_MAX
         );
 
-        // // Check if user has ability to perform certain task based on provided
-        // // capability and meta data
-        // add_filter('map_meta_cap', array($this, 'filterMetaMaps'), 999, 4);
+        // Evaluate if user can comment on a post
+        add_filter('comments_open', function ($open, $post_id) {
+            $resource = AAM::api()->user()->content()->get_post($post_id);
 
-        // // Get control over commenting stuff
-        // add_filter('comments_open', function ($open, $id) {
-        //     $resource = AAM::api()->user()->get_resource(
-        //         AAM_Framework_Type_Resource::POST, $id
-        //     );
+            // If Leave Comments option is defined then override the default status.
+            // Otherwise keep it as-is
+            if ($resource->is_allowed_to('comment') === false) {
+                $open = false;
+            }
 
-        //     // If Leave Comments option is defined then override the default status.
-        //     // Otherwise keep it as-is
-        //     if ($resource->get_setting('comment') !== null) {
-        //         $open = $resource->is_allowed_to('comment');
-        //     }
+            return $open;
+        }, 10, 2);
 
-        //     return $open;
-        // }, 10, 2);
+        // Check if user has ability to perform certain task based on provided
+        // capability and meta data
+        add_filter('map_meta_cap', function($caps, $cap, $_, $args) {
+            return $this->_map_meta_cap($caps, $cap, $args);
+        }, PHP_INT_MAX, 4);
 
-        // // REST API action authorization. Triggered before call is dispatched
-        // add_filter('rest_request_before_callbacks', array($this, 'beforeDispatch'), 10, 3);
+        // REST API action authorization. Triggered before call is dispatched
+        add_filter(
+            'rest_request_before_callbacks',
+            function($response, $_, $request) {
+                return $this->_rest_request_before_callbacks($response, $request);
+            }, 10, 3
+        );
 
-        // // REST API. Control if user is allowed to publish content
-        // add_action('registered_post_type', function ($post_type, $obj) {
-        //     add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
-        //         $status = (isset($request['status']) ? $request['status'] : null);
+        // Audit all registered post types and adjust access controls accordingly
+        add_action('registered_post_type', function ($post_type, $obj) {
+            // REST API. Control if user is allowed to publish content
+            add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
+                $status = (isset($request['status']) ? $request['status'] : null);
 
-        //         if (in_array($status, array('publish', 'future'), true)) {
-        //             if ($this->isAuthorizedToPublishPost($request['id']) === false) {
-        //                 $post = new WP_Error(
-        //                     'rest_cannot_publish',
-        //                     __('You are not allowed to publish this content', AAM_KEY),
-        //                     array('status' => rest_authorization_required_code())
-        //                 );
-        //             }
-        //         }
+                if (in_array($status, array('publish', 'future'), true)) {
+                    $resource = AAM::api()->user()->content()->get_post(
+                        $request['id']
+                    );
 
-        //         return $post;
-        //     }, 10, 2);
+                    if ($resource->is_denied_to('publish') === false) {
+                        $post = new WP_Error(
+                            'rest_cannot_publish',
+                            __('You are not allowed to publish this content', AAM_KEY),
+                            array('status' => rest_authorization_required_code())
+                        );
+                    }
+                }
 
-        //     // Populate the collection of post type caps
-        //     foreach ($obj->cap as $cap) {
-        //         if (
-        //             !in_array($cap, $this->postTypeCaps, true)
-        //             && ($cap !== 'do_not_allow')
-        //         ) {
-        //             $this->postTypeCaps[] = $cap;
-        //         }
-        //     }
-        // }, 10, 2);
+                return $post;
+            }, 10, 2);
+
+            // Populate the collection of post type caps
+            foreach ($obj->cap as $cap) {
+                if (!in_array($cap, $this->_content_capabilities, true)
+                    && ($cap !== 'do_not_allow')
+                ) {
+                    $this->_content_capabilities[] = $cap;
+                }
+            }
+        }, 10, 2);
 
         // // Policy generation hook
         // add_filter(
@@ -413,10 +415,12 @@ class AAM_Service_Content
     {
         $post = $this->get_current_post();
 
-        if (is_a($post, AAM_Framework_Resource_Post::class)
-            && $post->is_restricted()
-        ) {
-            AAM_Framework_Utility::do_access_denied_redirect();
+        if (is_a($post, AAM_Framework_Resource_Post::class)) {
+            if ($post->is_restricted()) {
+                AAM_Framework_Utility::do_access_denied_redirect();
+            } elseif ($post->has_redirect()) {
+                AAM_Framework_Utility::do_redirect($post->get_redirect());
+            }
         }
     }
 
@@ -466,14 +470,11 @@ class AAM_Service_Content
         $result = true;
 
         if ($post->is_password_protected()) {
-            // Get password values
-            $permission = $post->get_permission('read');
-
             // If password is empty or not provided, try to read it from the cookie.
             // This is the default WordPress behavior when it comes to password
             // protected posts/pages
             $is_matched = AAM_Core_API::prepareHasher()->CheckPassword(
-                $permission['password'],
+                $post->get_password(),
                 wp_unslash(
                     $this->getFromCookie('wp-postpass_' . COOKIEHASH)
                 )
@@ -481,7 +482,7 @@ class AAM_Service_Content
 
             if ($is_matched === false) {
                 $result = new WP_Error(
-                    'post_access_protected',
+                    'rest_unauthorized',
                     'The post is password protected. Invalid password provided.',
                     array('status' => 401)
                 );
@@ -630,261 +631,27 @@ class AAM_Service_Content
     }
 
     /**
-     * Generate Post policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Framework_Type_Resource::POST) {
-            if (!empty($options)) {
-                $statements = array();
-
-                foreach($options as $id => $data) {
-                    $parts    = explode('|', $id);
-                    $post     = get_post($parts[0]);
-
-                    if (is_a($post, 'WP_Post')) {
-                        $resource = "Post:{$parts[1]}:{$post->post_name}";
-
-                        $statements = array_merge(
-                            $statements,
-                            $this->_convertToPostStatements($resource, $data)
-                        );
-                    }
-                }
-
-                $policy['Statement'] = array_merge($policy['Statement'], $statements);
-            }
-        }
-
-        return $policy;
-    }
-
-    /**
-     * Convert post settings to policy format
-     *
-     * @param string $resource
-     * @param array  $options
-     *
-     * @return array
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.4.0  Moved this method from AAM_Core_Policy_Generator
-     * @since 6.3.0  Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
-     * @since 6.2.2  Fixed bug that caused fatal error for PHP lower than 7.0.0
-     * @since 6.2.0  Initial implementation of the method
-     *
-     * @access private
-     * @version 6.9.26
-     */
-    private function _convertToPostStatements($resource, $options)
-    {
-        $tree = (object) array(
-            'allowed'    => array(),
-            'denied'     => array(),
-            'statements' => array()
-        );
-
-        foreach($options as $option => $settings) {
-            // Compute Effect property
-            if (is_bool($settings)) {
-                $effect = ($settings === true ? 'denied' : 'allowed');
-            } else {
-                $effect = (!empty($settings['enabled']) ? 'denied' : 'allowed');
-            }
-
-            $action = null;
-
-            switch($option) {
-                case 'restricted':
-                    $action = 'Read';
-                    break;
-
-                case 'comment':
-                case 'edit':
-                case 'delete':
-                case 'publish':
-                case 'create':
-                    $action = ucfirst($option);
-                    break;
-
-                case 'hidden':
-                    $item = array(
-                        'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'List',
-                        'Resource' => $resource
-                    );
-
-                    $conditions = array();
-
-                    if (is_array($settings)) {
-                        if (!empty($settings['frontend'])) {
-                            $conditions['(*boolean)${CALLBACK.is_admin}'] = false;
-                        }
-                        if (!empty($settings['backend'])) {
-                            $conditions['(*boolean)${CALLBACK.is_admin}'] = true;
-                        }
-                        if (!empty($settings['api'])) {
-                            $conditions['(*boolean)${CONST.REST_REQUEST}'] = true;
-                        }
-                    }
-
-                    if (!empty($conditions)) {
-                        $item['Condition']['Equals'] = $conditions;
-                    }
-
-                    $tree->statements[] = $item;
-                    break;
-
-                case 'teaser':
-                    $tree->statements[] = array(
-                        'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'Read',
-                        'Resource' => $resource,
-                        'Metadata' => array(
-                            'Teaser' => array(
-                                'Value' => esc_js($settings['message'])
-                            )
-                        )
-                    );
-                    break;
-
-                case 'limited':
-                    $tree->statements[] = array(
-                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'Read',
-                        'Resource' => $resource,
-                        'Metadata' => array(
-                            'Limited' => array(
-                                'Threshold' => intval($settings['threshold'])
-                            )
-                        )
-                    );
-                    break;
-
-                case 'redirected':
-                    $metadata = array(
-                        'Type' => $settings['type'],
-                        'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : null)
-                    );
-
-                    if ($settings['type'] === 'page') {
-                        $metadata['Id'] = intval($settings['destination']);
-                    } elseif ($settings['type']  === 'url') {
-                        $metadata['URL'] = trim($settings['destination']);
-                    } elseif ($settings['type'] === 'callback') {
-                        $metadata['Callback'] = trim($settings['destination']);
-                    } elseif ($settings['type'] === 'message') {
-                        $metadata['Message'] = trim($settings['destination']);
-                    }
-
-                    $tree->statements[] = array(
-                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'Read',
-                        'Resource' => $resource,
-                        'Metadata' => array(
-                            'Redirect' => $metadata
-                        )
-                    );
-                    break;
-
-                case 'protected':
-                    $tree->statements[] = array(
-                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'Read',
-                        'Resource' => $resource,
-                        'Metadata' => array(
-                            'Password' => array(
-                                'Value' => $settings['password']
-                            )
-                        )
-                    );
-                    break;
-
-                case 'ceased':
-                    $tree->statements[] = array(
-                        'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-                        'Action'   => 'Read',
-                        'Resource' => $resource,
-                        'Condition' => array(
-                            'Greater' => array(
-                                '(*int)${DATETIME.U}' => intval($settings['after'])
-                            )
-                        )
-                    );
-                    break;
-
-                default:
-                    do_action(
-                        'aam_post_option_to_policy_action',
-                        $resource,
-                        $option,
-                        $effect,
-                        $settings,
-                        $tree
-                    );
-                    break;
-            }
-
-            if ($action !== null) {
-                if ($effect === 'allowed') {
-                    $tree->allowed[] = $resource . ':' . $action;
-                } else {
-                    $tree->denied[] = $resource . ':' . $action;
-                }
-            }
-        }
-
-        // Finally prepare the consolidated statements
-        if (!empty($tree->denied)) {
-            $tree->statements[] = array(
-                'Effect'   => 'deny',
-                'Resource' => $tree->denied
-            );
-        }
-
-        if (!empty($tree->allowed)) {
-            $tree->statements[] = array(
-                'Effect'   => 'allow',
-                'Resource' => $tree->allowed
-            );
-        }
-
-        return $tree->statements;
-    }
-
-    /**
      * Authorize RESTful action before it is dispatched by RESTful Server
      *
      * @param mixed  $response
-     * @param object $handler
      * @param object $request
      *
      * @return mixed
      *
-     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/264
-     * @since 6.6.1 https://github.com/aamplugin/advanced-access-manager/issues/137
-     * @since 6.1.0 Fixed bug that causes fatal error when callback is Closure
-     * @since 6.0.2 Making sure that get_post returns actual post object
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.9
+     * @access private
+     * @version 7.0.0
      */
-    public function beforeDispatch($response, $handler, $request)
+    private function _rest_request_before_callbacks($response, $request)
     {
         // Register hooks that check post access
         foreach (get_post_types(array('show_in_rest' => true)) as $type) {
-            add_filter("rest_prepare_{$type}", array($this, 'authPostAccess'), 10, 3);
+            add_filter(
+                "rest_prepare_{$type}", function($response, $post, $request) {
+                    return $this->_authorize_post_rest_access(
+                        $response, $post, $request
+                    );
+                }, 10, 3
+            );
         }
 
         // Override the password authentication handling ONLY for posts
@@ -911,42 +678,56 @@ class AAM_Service_Content
     }
 
     /**
-     * Check if post is allowed to be viewed
+     * Check if post is allowed to be viewed through RESTful
      *
      * @param WP_REST_Response $response
      * @param WP_Post          $post
      * @param WP_REST_Request  $request
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public function authPostAccess($response, $post, $request)
+    private function _authorize_post_rest_access($response, $post, $request)
     {
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::POST,
-            $post->ID
-        );
+        $resource = AAM::api()->user()->content()->get_post($post->ID);
 
-        $auth = $this->isAuthorizedToReadPost(
-            $resource,
-            (isset($request['_password']) ? $request['_password'] : null)
-        );
+        if ($resource->is_password_protected()) {
+            $password = isset($request['_password']) ? $request['_password'] : null;
 
-        if (is_wp_error($auth)) {
-            $data           = $auth->get_error_data();
-            $data['reason'] = $auth->get_error_message();
-            $data['code']   = $auth->get_error_code();
-            $status         = $data['status'];
-
-            unset($data['status']); // No need to duplicate the status code
-
-            $response = new WP_REST_Response($data, $status);
-
-            if ($auth->get_error_code() === 'post_access_redirected') {
-                $response->set_headers(array('Location' => $data['url']));
+            if ($resource->get_password() !== $password) {
+                $response->set_status(401);
+                $response->set_data([
+                    'code'    => 'rest_unauthorized',
+                    'message' => 'The post is password protected. Invalid password provided.'
+                ]);
             }
-        } else {
-            $this->incrementPostReadCounter($resource);
+        } elseif ($resource->has_redirect()) {
+            $redirect = $resource->get_redirect();
+
+            // Determine redirect HTTP status code and use it if applicable for given
+            // redirect type
+            if (!empty($redirect['http_status_code'])) {
+                $status_code = $redirect['http_status_code'];
+            } else {
+                $status_code = 307;
+            }
+
+            $response->set_status($status_code);
+            $response->set_data([
+                'code'    => 'rest_redirected',
+                'message' => 'The request is redirected to a different location',
+                'data'    => [
+                    'redirect_url' => AAM_Framework_Utility::to_redirect_url(
+                        $redirect
+                    )
+                ]
+            ]);
+        } elseif ($resource->is_restricted()) {
+            $response->set_status(401);
+            $response->set_data([
+                'code'    => 'rest_unauthorized',
+                'message' => 'The content is restricted.'
+            ]);
         }
 
         return $response;
@@ -1007,60 +788,47 @@ class AAM_Service_Content
      *
      * @param array  $caps
      * @param string $cap
-     * @param int    $user_id
      * @param array  $args
      *
      * @return array
      *
-     * @since 6.7.7 https://github.com/aamplugin/advanced-access-manager/issues/184
-     * @since 6.1.0 Added internal cache to optimize performance for posts that no
-     *              longer exist but still referenced one way or another
-     * @since 6.0.2 Completely rewrote this method to fixed loop caused by mapped
-     *              aam|... post type capability
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.7.7
+     * @access private
+     * @version 7.0.0
      */
-    public function filterMetaMaps($caps, $cap, $user_id, $args)
+    private function _map_meta_cap($caps, $cap, $args)
     {
-        // Internal cache to optimize search for no longer existing posts
-        static $post_cache = array();
-
         global $post;
 
         // For optimization reasons, check only caps that belong to registered post
         // types
-        if (in_array($cap, $this->postTypeCaps, true)) {
+        if (in_array($cap, $this->_content_capabilities, true)) {
             // Critical part of the implementation. We do not know ahead what
             // capability is responsible for what action when it comes to post types.
             if (isset($args[0]) && is_scalar($args[0])) {
-                $objectId = intval($args[0]);
+                $post_id = intval($args[0]);
             } elseif (is_a($post, 'WP_Post')) {
-                $objectId = $post->ID;
+                $post_id = $post->ID;
             } else {
-                $objectId = null;
+                $post_id = null;
             }
 
-            // If object ID is not empty, then, potentially we are checking for perms
-            // to perform one of the action against a post
-            if (!empty($objectId) && !in_array($objectId, $post_cache, true)) {
-                $requested = get_post($objectId);
+            // If post_id is not empty, then, potentially we are checking
+            // permission to perform one of the action against a post
+            if (!empty($post_id)) {
+                $post = get_post($post_id);
 
-                if (is_a($requested, 'WP_Post')) {
-                    $post_type = get_post_type_object($requested->post_type);
+                if (is_a($post, 'WP_Post')) {
+                    $post_type = get_post_type_object($post->post_type);
 
                     if (is_a($post_type, 'WP_Post_Type')) {
-                        $caps = $this->__mapPostTypeCaps(
+                        $caps = $this->__map_post_type_caps(
                             $post_type,
                             $cap,
                             $caps,
-                            $requested,
+                            $post,
                             $args
                         );
                     }
-                } else {
-                    $post_cache[] = $objectId;
                 }
             }
         }
@@ -1080,16 +848,15 @@ class AAM_Service_Content
      * @return array
      *
      * @access private
-     * @version 6.0.2
+     * @version 7.0.0
      */
-    private function __mapPostTypeCaps(
+    private function __map_post_type_caps(
         WP_Post_Type $post_type,
         $cap,
         $caps,
         WP_Post $post,
         $args
     ) {
-
         // Cover the scenario when $cap is not part of the post type capabilities
         // There is a bug in the WP core when user is checked for 'publish_post'
         // capability
@@ -1101,7 +868,10 @@ class AAM_Service_Content
 
         switch ($primitive_cap) {
             case 'edit_post':
-            case 'edit_page':
+            case 'edit_posts':
+            case 'edit_others_posts':
+            case 'edit_private_posts':
+            case 'edit_published_posts':
                 // Cover the scenario when user uses Bulk Action or Quick Edit to
                 // change the Status to Published and post is not allowed to be
                 // published
@@ -1109,30 +879,33 @@ class AAM_Service_Content
                 $status = AAM_Core_Request::request('_status');
 
                 if (
-                    in_array($action, array('edit', 'inline-save', true))
+                    in_array($action, [ 'edit', 'inline-save'] , true)
                     && $status === 'publish'
                 ) {
-                    $caps = $this->mapPublishPostCaps($caps, $post->ID);
+                    $caps = $this->_map_publish_post_caps($caps, $post->ID);
                 } else {
-                    $caps = $this->mapEditPostCaps($caps, $post->ID);
+                    $caps = $this->_map_edit_post_caps($caps, $post->ID);
                 }
                 break;
 
             case 'delete_post':
-            case 'delete_page':
-                $caps = $this->mapDeletePostCaps($caps, $post->ID);
+            case 'delete_posts':
+            case 'delete_private_posts':
+            case 'delete_published_posts':
+            case 'delete_others_posts':
+                $caps = $this->_map_delete_post_caps($caps, $post->ID);
                 break;
 
             case 'read_post':
-            case 'read_page':
+            case 'read_private_posts':
+            case 'read':
                 $password = (isset($args[1]) ? $args[1] : null);
-                $caps     = $this->mapReadPostCaps($caps, $post->ID, $password);
+                $caps     = $this->_map_read_post_caps($caps, $post->ID, $password);
                 break;
 
             case 'publish_post':
-            case 'publish_page':
             case 'publish_posts':
-                $caps = $this->mapPublishPostCaps($caps, $post->ID);
+                $caps = $this->_map_publish_post_caps($caps, $post->ID);
                 break;
 
             default:
@@ -1145,142 +918,93 @@ class AAM_Service_Content
     /**
      * Mutate capability meta map based on ability to publish the post
      *
-     * @param array       $caps
-     * @param WP_Post|int $post
+     * @param array $caps
+     * @param int   $post_id
      *
      * @return array
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function mapPublishPostCaps($caps, $post)
+    private function _map_publish_post_caps($caps, $post_id)
     {
-        if ($this->isAuthorizedToPublishPost($post) === false) {
+        $resource = AAM::api()->user()->content()->get_post($post_id);
+
+        if ($resource->is_denied_to('publish') === true) {
             $caps[] = 'do_not_allow';
         }
 
         return $caps;
-    }
-
-    /**
-     * Authorize the post publishing action
-     *
-     * @param WP_Post|int $post
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function isAuthorizedToPublishPost($post)
-    {
-        return AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::POST,
-            (is_a($post, 'WP_Post') ? $post->ID : $post)
-        )->is_allowed_to('publish');
     }
 
     /**
      * Mutate capability meta map based on ability to edit/update the post
      *
-     * @param array       $caps
-     * @param WP_Post|int $post
+     * @param array $caps
+     * @param int   $post_id
      *
      * @return array
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function mapEditPostCaps($caps, $post)
+    private function _map_edit_post_caps($caps, $post_id)
     {
-        if ($this->isAuthorizedToEditPost($post) === false) {
+        $resource = AAM::api()->user()->content()->get_post($post_id);
+        $is_draft = $resource->post_status === 'auto-draft';
+
+        if (!$is_draft && ($resource->is_denied_to('edit') === true)) {
             $caps[] = 'do_not_allow';
         }
 
         return $caps;
-    }
-
-    /**
-     * Check if current user is allowed to edit post
-     *
-     * Draft posts have to be omitted to avoid "egg-chicken" problem
-     *
-     * @param WP_Post|int $post
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function isAuthorizedToEditPost($post)
-    {
-        $resource  = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::POST,
-            (is_a($post, 'WP_Post') ? $post->ID : $post)
-        );
-
-        $is_draft = $resource->post_status === 'auto-draft';
-
-        return $is_draft || $resource->is_allowed_to('edit');
     }
 
     /**
      * Mutate capability meta map based on ability to trash/delete the post
      *
-     * @param array       $caps
-     * @param WP_Post|int $post
+     * @param array $caps
+     * @param int   $post_id
      *
      * @return array
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function mapDeletePostCaps($caps, $post)
+    private function _map_delete_post_caps($caps, $post_id)
     {
-        if ($this->isAuthorizedToDeletePost($post) === false) {
+        $resource = AAM::api()->user()->content()->get_post($post_id);
+
+        if ($resource->is_denied_to('delete') === true) {
             $caps[] = 'do_not_allow';
         }
 
         return $caps;
-    }
-
-    /**
-     * Check if current user is authorized to trash or permanently delete the post
-     *
-     * @param WP_Post|int $post
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function isAuthorizedToDeletePost($post)
-    {
-        return AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::POST,
-            (is_a($post, 'WP_Post') ? $post->ID : $post)
-        )->is_allowed_to('delete');
     }
 
     /**
      * Mutate capability meta map based on ability to edit/update the post
      *
-     * @param array  $caps
-     * @param int    $post_id
-     * @param string $password
+     * @param array       $caps
+     * @param int         $post_id
+     * @param string|null $password
      *
      * @return array
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function mapReadPostCaps($caps, $post_id, $password = null)
+    private function _map_read_post_caps($caps, $post_id, $password = null)
     {
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::POST, $post_id
-        );
+        $resource = AAM::api()->user()->content()->get_post($post_id);
 
-        if ($this->isAuthorizedToReadPost($resource, $password) !== true) {
+        if ($resource->is_password_protected()) {
+            $permission = $resource->get_permission('read');
+
+            if ($permission['password'] !== $password) {
+                $caps[] = 'do_not_allow';
+            }
+        } elseif ($resource->is_restricted()) {
             $caps[] = 'do_not_allow';
         }
 
@@ -1288,264 +1012,235 @@ class AAM_Service_Content
     }
 
     /**
-     * Increment user view counter is tracking is defined
+     * Generate Post policy statements
      *
-     * @param AAM_Framework_Resource_Post $post
+     * @param array                     $policy
+     * @param string                    $resource_type
+     * @param array                     $options
+     * @param AAM_Core_Policy_Generator $generator
      *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function incrementPostReadCounter($post)
-    {
-        if (is_user_logged_in() && $post->is('limited')) {
-            $option  = sprintf(self::POST_COUNTER_DB_OPTION, $post->ID);
-            $counter = intval(get_user_option($option, get_current_user_id()));
-            update_user_option(get_current_user_id(), $option, ++$counter);
-        }
-    }
-
-    /**
-     * Check if current user is authorized to read the post
-     *
-     * If post requires, password, also path this as the second optional parameter
-     *
-     * @param AAM_Framework_Resource_Post $resource
-     * @param string                      $password
-     *
-     * @return boolean|WP_Error
+     * @return array
      *
      * @access public
-     * @version 6.0.0
+     * @version 6.4.0
      */
-    public function isAuthorizedToReadPost($resource, $password = null)
-    {
-        // Prepare the pipeline of steps that AAM core will perform to check post's
-        // accessibility
-        $pipeline = apply_filters('aam_post_read_access_pipeline_filter', array(
-            // Step #1. Check if access expired to the post
-            array($this, 'checkPostExpiration'),
-            // Step #2. Check if user has access to read the post
-            array($this, 'checkPostReadAccess'),
-            // Step #3. Check if counter exceeded max allowed views
-            array($this, 'checkPostLimitCounter'),
-            // Step #4. Check if redirect is defined for the post
-            array($this, 'checkPostRedirect'),
-            // Step #5. Check if post is password protected
-            array($this, 'checkPostPassword')
-        ));
+    // public function generatePolicy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Framework_Type_Resource::POST) {
+    //         if (!empty($options)) {
+    //             $statements = array();
 
-        // Execute the collection of steps and stop when first restriction captured
-        $result = true;
-        foreach ($pipeline as $callback) {
-            $result = call_user_func($callback, $resource, $password);
+    //             foreach($options as $id => $data) {
+    //                 $parts    = explode('|', $id);
+    //                 $post     = get_post($parts[0]);
 
-            if (is_wp_error($result)) {
-                break;
-            }
-        }
+    //                 if (is_a($post, 'WP_Post')) {
+    //                     $resource = "Post:{$parts[1]}:{$post->post_name}";
 
-        return $result;
-    }
+    //                     $statements = array_merge(
+    //                         $statements,
+    //                         $this->_convertToPostStatements($resource, $data)
+    //                     );
+    //                 }
+    //             }
+
+    //             $policy['Statement'] = array_merge($policy['Statement'], $statements);
+    //         }
+    //     }
+
+    //     return $policy;
+    // }
 
     /**
-     * Check CEASED access option
+     * Convert post settings to policy format
      *
-     * If access is expired, return WP_Error object with the reason
+     * @param string $resource
+     * @param array  $options
      *
-     * @param AAM_Framework_Resource_Post $post
-     *
-     * @return boolean|WP_Error
+     * @return array
      *
      * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.0.0  Initial implementation of the method
+     * @since 6.4.0  Moved this method from AAM_Core_Policy_Generator
+     * @since 6.3.0  Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
+     * @since 6.2.2  Fixed bug that caused fatal error for PHP lower than 7.0.0
+     * @since 6.2.0  Initial implementation of the method
      *
-     * @access public
+     * @access private
      * @version 6.9.26
      */
-    public function checkPostExpiration(AAM_Framework_Resource_Post $post)
-    {
-        $result = true;
+    // private function _convertToPostStatements($resource, $options)
+    // {
+    //     $tree = (object) array(
+    //         'allowed'    => array(),
+    //         'denied'     => array(),
+    //         'statements' => array()
+    //     );
 
-        if ($post->is('ceased')) {
-            $ceased = $post->get_setting('ceased');
-            $now    = (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
+    //     foreach($options as $option => $settings) {
+    //         // Compute Effect property
+    //         if (is_bool($settings)) {
+    //             $effect = ($settings === true ? 'denied' : 'allowed');
+    //         } else {
+    //             $effect = (!empty($settings['enabled']) ? 'denied' : 'allowed');
+    //         }
 
-            if ($ceased['after'] <= $now) {
-                $result = new WP_Error(
-                    'post_access_expired',
-                    'User is unauthorized to access this post. Access Expired.',
-                    array(
-                        'status' => 401,
-                        'message' => 'User is unauthorized to access this post. Access Expired.'
-                    )
-                );
-            }
-        }
+    //         $action = null;
 
-        return $result;
-    }
+    //         switch($option) {
+    //             case 'restricted':
+    //                 $action = 'Read';
+    //                 break;
 
-    /**
-     * Check RESTRICTED options
-     *
-     * If access is explicitly restricted, return WP_Error object with the reason
-     *
-     * @param AAM_Framework_Resource_Post $post
-     *
-     * @return boolean|WP_Error
-     *
-     * @access public
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @version 6.9.26
-     */
-    public function checkPostReadAccess(AAM_Framework_Resource_Post $post)
-    {
-        $result = true;
+    //             case 'comment':
+    //             case 'edit':
+    //             case 'delete':
+    //             case 'publish':
+    //             case 'create':
+    //                 $action = ucfirst($option);
+    //                 break;
 
-        if ($post->is('restricted')) {
-            $data   = $post->get_setting('restricted');
-            $result = new WP_Error(
-                'post_access_restricted',
-                'User is unauthorized to access this post. Access denied.',
-                array(
-                    'status' => isset($data['code']) ? $data['code'] : 401,
-                    'message' => 'User is unauthorized to access this post. Access denied.'
+    //             case 'hidden':
+    //                 $item = array(
+    //                     'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'List',
+    //                     'Resource' => $resource
+    //                 );
 
-                )
-            );
-        }
+    //                 $conditions = array();
 
-        return $result;
-    }
+    //                 if (is_array($settings)) {
+    //                     if (!empty($settings['frontend'])) {
+    //                         $conditions['(*boolean)${CALLBACK.is_admin}'] = false;
+    //                     }
+    //                     if (!empty($settings['backend'])) {
+    //                         $conditions['(*boolean)${CALLBACK.is_admin}'] = true;
+    //                     }
+    //                     if (!empty($settings['api'])) {
+    //                         $conditions['(*boolean)${CONST.REST_REQUEST}'] = true;
+    //                     }
+    //                 }
 
-    /**
-     * Check LIMITED access option
-     *
-     * The counter is stored per each user for every individual post that has LIMITED
-     * access option enabled. The WP_Error object will be returned if access counter
-     * exceeded maximum allowed threshold.
-     *
-     * @param AAM_Framework_Resource_Post $post
-     *
-     * @return boolean|WP_Error
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.2.0  Simplified implementation
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.26
-     */
-    public function checkPostLimitCounter(AAM_Framework_Resource_Post $post)
-    {
-        $result = true;
+    //                 if (!empty($conditions)) {
+    //                     $item['Condition']['Equals'] = $conditions;
+    //                 }
 
-        // Check current access counter only for authenticated users
-        if (is_user_logged_in() && $post->is('limited')) {
-            $limited = $post->get_setting('limited');
+    //                 $tree->statements[] = $item;
+    //                 break;
 
-            $option  = sprintf(self::POST_COUNTER_DB_OPTION, $post->ID);
-            $counter = intval(get_user_option($option, get_current_user_id()));
+    //             case 'teaser':
+    //                 $tree->statements[] = array(
+    //                     'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'Read',
+    //                     'Resource' => $resource,
+    //                     'Metadata' => array(
+    //                         'Teaser' => array(
+    //                             'Value' => esc_js($settings['message'])
+    //                         )
+    //                     )
+    //                 );
+    //                 break;
 
-            if ($counter >= $limited['threshold']) {
-                $result = new WP_Error(
-                    'post_access_exceeded_limit',
-                    'User exceeded allowed access number. Access denied.',
-                    array(
-                        'status' => 401,
-                        'message' => 'User exceeded allowed access number. Access denied.'
-                    )
-                );
-            }
-        }
+    //             case 'limited':
+    //                 $tree->statements[] = array(
+    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'Read',
+    //                     'Resource' => $resource,
+    //                     'Metadata' => array(
+    //                         'Limited' => array(
+    //                             'Threshold' => intval($settings['threshold'])
+    //                         )
+    //                     )
+    //                 );
+    //                 break;
 
-        return $result;
-    }
+    //             case 'redirected':
+    //                 $metadata = array(
+    //                     'Type' => $settings['type'],
+    //                     'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : null)
+    //                 );
 
-    /**
-     * Check REDIRECTED access option
-     *
-     * Do not allow direct access to the post and return WP_Error object with details
-     * for the location where user has to be redirected.
-     *
-     * @param AAM_Framework_Resource_Post $post
-     *
-     * @return boolean|WP_Error
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.26
-     */
-    public function checkPostRedirect(AAM_Framework_Resource_Post $post)
-    {
-        $result = true;
+    //                 if ($settings['type'] === 'page') {
+    //                     $metadata['Id'] = intval($settings['destination']);
+    //                 } elseif ($settings['type']  === 'url') {
+    //                     $metadata['URL'] = trim($settings['destination']);
+    //                 } elseif ($settings['type'] === 'callback') {
+    //                     $metadata['Callback'] = trim($settings['destination']);
+    //                 } elseif ($settings['type'] === 'message') {
+    //                     $metadata['Message'] = trim($settings['destination']);
+    //                 }
 
-        if ($post->is('redirected')) {
-            $redirect = $post->get_setting('redirected');
-            $metadata = array(
-                'type'   => 'url',
-                'status' => isset($redirect['httpCode']) ? $redirect['httpCode'] : null
-            );
+    //                 $tree->statements[] = array(
+    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'Read',
+    //                     'Resource' => $resource,
+    //                     'Metadata' => array(
+    //                         'Redirect' => $metadata
+    //                     )
+    //                 );
+    //                 break;
 
-            switch ($redirect['type']) {
-                case 'page':
-                    $metadata['url'] = get_page_link($redirect['destination']);
-                    break;
+    //             case 'protected':
+    //                 $tree->statements[] = array(
+    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'Read',
+    //                     'Resource' => $resource,
+    //                     'Metadata' => array(
+    //                         'Password' => array(
+    //                             'Value' => $settings['password']
+    //                         )
+    //                     )
+    //                 );
+    //                 break;
 
-                case 'login':
-                    $metadata['url'] = add_query_arg(
-                        'reason',
-                        'restricted',
-                        wp_login_url($this->getFromServer('REQUEST_URI'))
-                    );
-                    break;
+    //             case 'ceased':
+    //                 $tree->statements[] = array(
+    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
+    //                     'Action'   => 'Read',
+    //                     'Resource' => $resource,
+    //                     'Condition' => array(
+    //                         'Greater' => array(
+    //                             '(*int)${DATETIME.U}' => intval($settings['after'])
+    //                         )
+    //                     )
+    //                 );
+    //                 break;
 
-                case 'url':
-                    $metadata['url'] = $redirect['destination'];
-                    break;
+    //             default:
+    //                 do_action(
+    //                     'aam_post_option_to_policy_action',
+    //                     $resource,
+    //                     $option,
+    //                     $effect,
+    //                     $settings,
+    //                     $tree
+    //                 );
+    //                 break;
+    //         }
 
-                case 'message':
-                    $metadata['type']    = 'message';
-                    $metadata['message'] = $redirect['destination'];
+    //         if ($action !== null) {
+    //             if ($effect === 'allowed') {
+    //                 $tree->allowed[] = $resource . ':' . $action;
+    //             } else {
+    //                 $tree->denied[] = $resource . ':' . $action;
+    //             }
+    //         }
+    //     }
 
-                    // This is to support the wp_die function execution
-                    $metadata['args'] = array('response' => $metadata['status']);
-                    break;
+    //     // Finally prepare the consolidated statements
+    //     if (!empty($tree->denied)) {
+    //         $tree->statements[] = array(
+    //             'Effect'   => 'deny',
+    //             'Resource' => $tree->denied
+    //         );
+    //     }
 
-                case 'callback':
-                    if (is_callable($redirect['destination'])) {
-                        $metadata['url'] = call_user_func(
-                            $redirect['destination'], $post
-                        );
-                    } else {
-                        _doing_it_wrong(
-                            __CLASS__ . '::' . __METHOD__,
-                            'Callback is not invocable',
-                            AAM_VERSION
-                        );
-                    }
-                    break;
+    //     if (!empty($tree->allowed)) {
+    //         $tree->statements[] = array(
+    //             'Effect'   => 'allow',
+    //             'Resource' => $tree->allowed
+    //         );
+    //     }
 
-                default:
-                    $metadata['type'] = 'default';
-                    break;
-            }
-
-            $result = new WP_Error(
-                'post_access_redirected',
-                'Direct access is not allowed. Follow the provided redirect rule.',
-                $metadata
-            );
-        }
-
-        return $result;
-    }
-
+    //     return $tree->statements;
+    // }
 }
