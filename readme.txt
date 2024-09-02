@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.6.1
-Stable tag: 6.9.37
+Stable tag: 6.9.38
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,12 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.38 =
+* Fixed: Capabilities that do not follow WP naming standards can't be toggled [https://github.com/aamplugin/advanced-access-manager/issues/418](https://github.com/aamplugin/advanced-access-manager/issues/418)
+* Fixed: URL Access UI bug [https://github.com/aamplugin/advanced-access-manager/issues/417](https://github.com/aamplugin/advanced-access-manager/issues/417)
+* Fixed: Incorrectly handled PostList AAM shortcode [https://github.com/aamplugin/advanced-access-manager/issues/416](https://github.com/aamplugin/advanced-access-manager/issues/416)
+* Fixed: Uncaught TypeError: AAM_Framework_Service_Settings::set_settings(): Argument #1 [https://github.com/aamplugin/advanced-access-manager/issues/415](https://github.com/aamplugin/advanced-access-manager/issues/415)
 
 = 6.9.37 =
 * Fixed: Uncaught InvalidArgumentException: Redirect type allow does not accept status codes [https://github.com/aamplugin/advanced-access-manager/issues/413](https://github.com/aamplugin/advanced-access-manager/issues/413)
