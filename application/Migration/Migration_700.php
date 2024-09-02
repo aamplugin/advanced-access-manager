@@ -159,7 +159,8 @@ final class AAM_Migration_700
             'geoapi.api_key'                           => 'service.geo_lookup.geoapi.api_key',
             'geoapi.test_ip'                           => 'service.geo_lookup.geoapi.test_ip',
             'ipstack.schema'                           => 'service.geo_lookup.ipstack.schema',
-            'ipstack.fields'                           => 'service.geo_lookup.ipstack.fields'
+            'ipstack.fields'                           => 'service.geo_lookup.ipstack.fields',
+            'service.uri.enabled'                      => 'service.url.enabled'
         ];
 
         foreach($changes as $legacy => $new) {

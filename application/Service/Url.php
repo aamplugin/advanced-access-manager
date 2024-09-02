@@ -32,7 +32,7 @@ class AAM_Service_Url
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'service.uri.enabled';
+    const FEATURE_FLAG = 'service.url.enabled';
 
     /**
      * Constructor
@@ -58,7 +58,7 @@ class AAM_Service_Url
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Uri::register();
+                    AAM_Backend_Feature_Main_Url::register();
                 });
             }
 
@@ -104,14 +104,14 @@ class AAM_Service_Url
         });
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter',
-            function ($policy, $type, $settings, $gen) {
-                return $this->generate_policy($policy, $type, $settings, $gen);
-            },
-            10,
-            4
-        );
+        // add_filter(
+        //     'aam_generated_policy_filter',
+        //     function ($policy, $type, $settings, $gen) {
+        //         return $this->generate_policy($policy, $type, $settings, $gen);
+        //     },
+        //     10,
+        //     4
+        // );
 
         // Register the resource
         add_filter(
@@ -172,18 +172,18 @@ class AAM_Service_Url
      * @access protected
      * @version 6.4.0
      */
-    protected function generate_policy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Framework_Type_Resource::URL) {
-            if (!empty($options)) {
-                $policy['Statement'] = array_merge(
-                    $policy['Statement'],
-                    $generator->generateBasicStatements($options, 'URL')
-                );
-            }
-        }
+    // protected function generate_policy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Framework_Type_Resource::URL) {
+    //         if (!empty($options)) {
+    //             $policy['Statement'] = array_merge(
+    //                 $policy['Statement'],
+    //                 $generator->generateBasicStatements($options, 'URL')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
 }

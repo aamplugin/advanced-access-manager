@@ -58,7 +58,13 @@ class AAM_Backend_Feature
             $show = true;
         }
 
-        if ($show && current_user_can($cap)) {
+        if (is_array($cap)) {
+            $can = count(array_filter($cap, 'current_user_can')) > 0;
+        } else {
+            $can = current_user_can($cap);
+        }
+
+        if ($show && $can) {
             if (is_object($feature->view)) {
                 self::$_features[get_class($feature->view)] = $feature;
             } elseif (!is_a($feature->view, Closure::class)) {

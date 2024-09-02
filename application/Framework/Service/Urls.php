@@ -36,8 +36,7 @@ implements
      * @version 7.0.0
      */
     const ALLOWED_RULE_TYPES = [
-        'allow',
-        'deny',
+        'default',
         'custom_message',
         'page_redirect',
         'url_redirect',
@@ -61,21 +60,19 @@ implements
     public function get_rule_list($inline_context = null)
     {
         try {
-            $result   = [];
-            $resource = $this->get_resource(null, true, $inline_context);
-            $settings = $resource->get_settings();
+            $result      = [];
+            $resource    = $this->get_resource(null, true, $inline_context);
+            $permissions = $resource->get_permissions();
 
-            if (is_array($settings) && count($settings)) {
-                foreach($settings as $rule) {
-                    array_push(
-                        $result,
-                        $this->_prepare_rule(
-                            $rule,
-                            $this->_get_access_level($inline_context),
-                            $this->_is_inherited($rule, $resource)
-                        )
-                    );
-                }
+            foreach($permissions as $rule) {
+                array_push(
+                    $result,
+                    $this->_prepare_rule(
+                        $rule,
+                        $this->_get_access_level($inline_context),
+                        $this->_is_inherited($rule, $resource)
+                    )
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -85,38 +82,31 @@ implements
     }
 
     /**
-     * Get existing rule by ID
+     * Get existing rule by URL
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param array $inline_context Runtime context
+     * @param string $url
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      * @throws OutOfRangeException If rule does not exist
      */
-    public function get_rule_by_id($id, $inline_context = null)
+    public function get_rule($url, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, true, $inline_context);
-            $match    = false;
+            $resource    = $this->get_resource(null, true, $inline_context);
+            $permissions = $resource->get_permissions();
 
-            foreach($resource->get_settings() as $url => $rule) {
-                if (abs(crc32($url)) === $id) {
-                    $match = $rule;
-                    break;
-                }
-            }
-
-            if ($match === false) {
+            if (!array_key_exists($url, $permissions)) {
                 throw new OutOfRangeException('Rule does not exist');
             }
 
             $result = $this->_prepare_rule(
-                $match,
+                $permissions[$url],
                 $this->_get_access_level($inline_context),
-                $this->_is_inherited($match, $resource)
+                $this->_is_inherited($permissions[$url], $resource)
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -133,21 +123,16 @@ implements
      *
      * @return array
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      * @throws RuntimeException If fails to persist the rule
      */
     public function create_rule(array $incoming_data, $inline_context = null)
     {
         try {
             $resource  = $this->get_resource(null, false, $inline_context);
-            $rule_data = $this->_convert_to_rule($incoming_data);
-            $success   = $resource->set_explicit_setting(
-                $rule_data['url'], $rule_data
-            );
+            $rule_data = $this->_validate_incoming_data($incoming_data);
+            $success   = $resource->set_permission($rule_data['url'], $rule_data);
 
             if (!$success) {
                 throw new RuntimeException('Failed to persist settings');
@@ -166,47 +151,48 @@ implements
     /**
      * Update existing rule
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param array $incoming_data  Rule data
-     * @param array $inline_context Runtime context
+     * @param string $url            URL
+     * @param array  $incoming_data  Rule data
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      * @throws OutOfRangeException If rule does not exist
      * @throws RuntimeException If fails to persist a rule
      */
-    public function update_rule($id, array $incoming_data, $inline_context = null)
+    public function update_rule($url, array $incoming_data, $inline_context = null)
     {
         try {
-            $resource     = $this->get_resource(null, false, $inline_context);
-            $rule_data    = $this->_convert_to_rule($incoming_data);
-            $found        = false;
-            $new_settings = [];
+            $resource    = $this->get_resource(null, false, $inline_context);
+            $rule_data   = $this->_validate_incoming_data($incoming_data);
+            $permissions = $resource->get_permissions();
 
-            // Note! Getting here all rules (even inherited) to ensure that user can
-            // override the inherited rule
-            foreach($resource->get_settings() as $url => $settings) {
-                if (abs(crc32($url)) === $id) {
-                    $found                     = true;
-                    $new_settings[$rule_data['url']] = $rule_data;
-                } else {
-                    $new_settings[$url] = $settings;
+            // If URL exists in explicitly defined permissions, the update the rule.
+            // Otherwise, it means that user is trying to update inherited rule.
+            if (array_key_exists($url, $permissions)) {
+                $updates = [];
+                $updated = false;
+
+                foreach($resource->get_permissions(true) as $rule_url => $rule) {
+                    if ($rule_url === $url) { // Preserving the order
+                        $updates[$rule_data['url']] = $rule_data;
+                        $updated                    = true;
+                    } else {
+                        $updates[$rule_url] = $rule;
+                    }
                 }
-            }
 
-            if ($found) {
-                $success = $resource->set_explicit_settings($new_settings);
+                if (!$updated) {
+                    $updates[$rule_data['url']] = $rule_data;
+                }
+
+                if (!$resource->set_permissions($permissions)) {
+                    throw new RuntimeException('Failed to update the rule');
+                }
             } else {
                 throw new OutOfRangeException('Rule does not exist');
-            }
-
-            if (!$success) {
-                throw new RuntimeException('Failed to update the rule');
             }
 
             $result = $this->_prepare_rule(
@@ -222,40 +208,28 @@ implements
     /**
      * Delete rule
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param array $inline_context Runtime context
+     * @param string $url            URL
+     * @param array  $inline_context Runtime context
      *
      * @return boolean
      *
-     * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.20
+     * @version 7.0.0
      */
-    public function delete_rule($id, $inline_context = null)
+    public function delete_rule($url, $inline_context = null)
     {
         try {
-            $resource     = $this->get_resource(null, false, $inline_context);
-            $found        = null;
-            $new_settings = [];
+            $resource    = $this->get_resource(null, false, $inline_context);
+            $permissions = $resource->get_permissions(true);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
-            foreach($resource->get_explicit_settings() as $url => $rule) {
-                if (abs(crc32($url)) === $id) {
-                    $found = $rule;
-                } else {
-                    $new_settings[$url] = $rule;
-                }
-            }
-
-            if ($found !== null) {
-                $result = $resource->set_explicit_settings($new_settings);
+            if (array_key_exists($url, $permissions)) {
+                unset($permissions[$url]);
             } else {
                 throw new OutOfRangeException('Rule does not exist');
             }
 
-            if (!$result) {
+            if (!$resource->set_permissions($permissions)) {
                 throw new RuntimeException('Failed to persist the rule');
             }
         } catch (Exception $e) {
@@ -332,7 +306,7 @@ implements
     {
         try {
             $resource = $this->get_resource($url, false, $inline_context);
-            $result   = $resource->get_redirect($url);
+            $result   = $resource->get_redirect();
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -373,7 +347,7 @@ implements
      */
     private function _is_inherited($rule, $resource)
     {
-        return array_key_exists($rule['url'], $resource->get_explicit_settings());
+        return array_key_exists($rule['url'], $resource->get_permissions(true));
     }
 
     /**
@@ -385,33 +359,15 @@ implements
      *
      * @return array
      *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access private
      * @version 7.0.0
      */
     private function _prepare_rule(
         $rule, $access_level, $is_inherited = false
     ) {
-        $result = [
-            'id'           => abs(crc32($rule['url'])),
-            'url'          => $rule['url'],
-            'is_inherited' => $is_inherited
-        ];
-
-        if ($rule['effect'] === 'allow') {
-            $result['type'] = 'allow';
-        } elseif (!isset($rule['redirect'])) {
-            $result['type'] = 'deny'; //Default Access Denied Redirect behavior
-        } else {
-            $result = array_merge($result, $rule['redirect']);
-        }
-
         return apply_filters(
             'aam_url_access_rule_filter',
-            $result,
+            array_merge($rule, [ 'is_inherited' => $is_inherited ]),
             $rule,
             $access_level
         );
@@ -430,97 +386,115 @@ implements
      * @access private
      * @version 7.0.0
      */
-    private function _convert_to_rule($data)
+    private function _validate_incoming_data($data)
     {
-        // First, let's validate tha the rule type is correct
-        if (!in_array($data['type'], self::ALLOWED_RULE_TYPES, true)) {
-            throw new InvalidArgumentException('The valid `type` is required');
+        // Making sure that effect is set and is valid
+        if (empty($data['effect'])
+            || !in_array($data['effect'], [ 'allow', 'deny' ], true)
+        ) {
+            throw new InvalidArgumentException('Invalid effect value');
         }
 
-        // Now, validating that the URL is acceptable
-        // Parse and validate the incoming URL
-        if ($data['url'] === '*') {
-            $url = '*';
-        } else {
-            $parsed = wp_parse_url($data['url']);
-            $url    = wp_validate_redirect(
-                empty($parsed['path']) ? '/' : $parsed['path']
-            );
+        // Validating the incoming URL by parsing it first and them verifying that it
+        // is a safe redirect URL.
+        if (!empty($data['url'])) {
+            $normalized_url = $this->_validate_url($data['url']);
         }
 
-        // Adding query params if provided
-        if (isset($parsed['query'])) {
-            $url .= '?' . $parsed['query'];
-        }
-
-        if (empty($url)) {
+        if (empty($normalized_url)) {
             throw new InvalidArgumentException('The valid URL is required');
         }
 
         $result = [
-            'effect' => $data['type'] === 'allow' ? 'allow' : 'deny',
-            'url'    => $url
+            'effect' => $data['effect'],
+            'url'    => $normalized_url
         ];
 
-        // Redirect data will be stored in the "redirect" property
-        if (in_array($data['type'], ['deny', 'default'], true)) {
-            $result['redirect'] = [
-                'type' => 'default'
-            ];
-        } else {
-            $result['redirect'] = [
-                'type' => $data['type']
-            ];
-        }
+        // If redirect data is defined, validate data points
+        if (!empty($data['redirect'])) {
+            $redirect_type = $data['redirect']['type'];
 
-        if ($data['type'] === 'custom_message') {
-            $message = wp_kses_post($data['message']);
+            if ($redirect_type === 'custom_message') {
+                $message = wp_kses_post($data['redirect']['message']);
 
-            if (empty($message)) {
-                throw new InvalidArgumentException('Provide non-empty message');
-            } else {
-                $result['redirect']['message'] = $message;
-            }
-        } elseif ($data['type'] === 'page_redirect') {
-            $page_id = intval($data['redirect_page_id']);
+                if (empty($message)) {
+                    throw new InvalidArgumentException('Invalid custom message');
+                } else {
+                    $result['redirect']['message'] = $message;
+                }
+            } elseif ($redirect_type === 'page_redirect') {
+                $page_id = intval($data['redirect']['redirect_page_id']);
 
-            if ($page_id === 0) {
-                throw new InvalidArgumentException(
-                    'The valid redirect page ID is required'
+                if ($page_id === 0) {
+                    throw new InvalidArgumentException(
+                        'The valid redirect page ID is required'
+                    );
+                } else {
+                    $result['redirect']['redirect_page_id'] = $page_id;
+                }
+            } elseif ($redirect_type === 'url_redirect') {
+                $redirect_url = $this->__validate_url(
+                    $data['redirect']['redirect_url']
                 );
-            } else {
-                $result['redirect']['redirect_page_id'] = $page_id;
-            }
-        } elseif ($data['type'] === 'url_redirect') {
-            $redirect_url = wp_validate_redirect($data['redirect_url']);
 
-            if (empty($redirect_url)) {
-                throw new InvalidArgumentException(
-                    'The valid redirect URL is required'
-                );
-            } else {
-                $result['redirect']['redirect_url'] = $redirect_url;
+                if (empty($redirect_url)) {
+                    throw new InvalidArgumentException(
+                        'The valid redirect URL is required'
+                    );
+                } else {
+                    $result['redirect']['redirect_url'] = $redirect_url;
+                }
+            } elseif ($redirect_type === 'trigger_callback') {
+                if (!is_callable($data['redirect']['callback'], true)) {
+                    throw new InvalidArgumentException(
+                        'The valid PHP callback function is required'
+                    );
+                } else {
+                    $result['redirect']['callback'] = $data['redirect']['callback'];
+                }
             }
-        } elseif ($data['type'] === 'trigger_callback') {
-            if (!is_callable($data['callback'], true)) {
-                throw new InvalidArgumentException(
-                    'The valid PHP callback function is required'
-                );
-            } else {
-                $result['redirect']['callback'] = $data['callback'];
-            }
-        }
 
-        if (!empty($data['http_status_code'])) {
-            $code = intval($data['http_status_code']);
+            if (!empty($data['redirect']['http_status_code'])) {
+                $code = intval($data['redirect']['http_status_code']);
 
-            if ($code >= 300) {
-                $result['redirect']['http_status_code'] = $code;
+                if ($code >= 300) {
+                    $result['redirect']['http_status_code'] = $code;
+                }
             }
         }
 
         // TODO: Implement this hook in the premium add-on
-        return apply_filters('aam_convert_url_access_data_filter', $result, $data);
+        return apply_filters('aam_validate_url_rule_data_filter', $result, $data);
+    }
+
+    /**
+     * Validate incoming URL
+     *
+     * @param string $url
+     *
+     * @return boolean|string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function __validate_url($url)
+    {
+        $result     = false;
+        $parsed_url = wp_parse_url($url);
+
+        if ($parsed_url !== false) {
+            $result = empty($parsed_url['path']) ? '/' : $parsed_url['path'];
+
+            // Adding query params if provided
+            if (isset($parsed_url['query'])) {
+                $result .= '?' . $parsed_url['query'];
+            }
+
+            // Finally sanitize the safe URL
+            $result = wp_validate_redirect($result);
+        }
+
+        return apply_filters('aam_validate_url_filter', $result, $url);
     }
 
 }

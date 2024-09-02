@@ -218,9 +218,9 @@ class AAM
     {
         // Load all the defined AAM services
         AAM_Service_Core::bootstrap();
-        //AAM_Service_Url::bootstrap();
+        AAM_Service_Url::bootstrap();
         AAM_Service_LoginRedirect::bootstrap();
-        //AAM_Service_LogoutRedirect::bootstrap();
+        AAM_Service_LogoutRedirect::bootstrap();
         //AAM_Service_AccessDeniedRedirect::bootstrap();
         //AAM_Service_NotFoundRedirect::bootstrap();
         AAM_Service_Content::bootstrap();

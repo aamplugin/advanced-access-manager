@@ -15,7 +15,8 @@
  */
 class AAM_Framework_Resource_Url
 implements
-    AAM_Framework_Resource_Interface
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;
@@ -28,43 +29,70 @@ implements
     /**
      * Merge URL access settings
      *
-     * @param array $target
+     * @param array $incoming
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function merge_settings($incoming_settings)
+    public function merge_permissions($incoming)
     {
-        $merged = [];
+        $result = [];
+        $config = AAM_Framework_Manager::configs();
+        $base   = $this->_permissions;
 
-        // Converting the two sets into true/false representation where false is
-        // when effect === "allow" and everything else is true
-        $set1 = array_map(
-            function($v) { return $v['effect'] !== 'allow'; }, $incoming_settings
+        // If preference is not explicitly defined, fetch it from the AAM configs
+        $preference = $config->get_config(
+            'core.settings.merge.preference'
         );
 
-        $set2 = array_map(
-            function($v) { return $v['effect'] !== 'allow'; }, $this->_settings
+        $preference = $config->get_config(
+            'core.settings.' . constant('static::TYPE') . '.merge.preference',
+            $preference
         );
 
-        $result = $this->_merge_binary_settings(
-            $set1, $set2
-        );
+        // First get the complete list of unique keys
+        $rule_keys = array_unique([
+            ...array_keys($incoming),
+            ...array_keys($base)
+        ]);
 
-        // Convert back to the actual properties
-        foreach($result as $url => $effect) {
-            if ($effect === false) { // Which means we are allowing
-                $merged[$url] = [ 'effect' => 'allow' ];
-            } elseif (isset($this->_settings[$url])) {
-                $merged[$url] = $this->_settings[$url];
-            } else {
-                $merged[$url] = $incoming_settings[$url];
+        foreach($rule_keys as $rule_key) {
+            $effect_a = null;
+            $effect_b = null;
+
+            if (isset($base[$rule_key])) {
+                $effect_a = $base[$rule_key]['effect'] === 'allow';
+            }
+
+            if (isset($incoming[$rule_key])) {
+                $effect_b = $incoming[$rule_key]['effect'] === 'allow';
+            }
+
+            if ($preference === 'allow') { // Merging preference is to allow
+                // If at least one set has allowed rule, then allow the URL
+                if (in_array($effect_a, [ true, null ], true)
+                    || in_array($effect_b, [ true, null ], true)
+                ) {
+                    $result[$rule_key] = [ 'effect' => 'allow' ];
+                } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
+                    $result[$rule_key] = $base[$rule_key];
+                } else {
+                    $result[$rule_key] = $incoming[$rule_key];
+                }
+            } else { // Merging preference is to deny access by default
+                if ($effect_a === false) {
+                    $result[$rule_key] = $base[$rule_key];
+                } elseif ($effect_b === false) {
+                    $result[$rule_key] = $incoming[$rule_key];
+                } else {
+                    $result[$rule_key] = [ 'effect' => 'allow' ];
+                }
             }
         }
 
-        return $merged;
+        return $result;
     }
 
     /**
@@ -96,9 +124,18 @@ implements
      */
     public function get_redirect($url = null)
     {
-        $rule = $this->_find_matching_rule($url);
+        $result = null;
+        $rule   = $this->_find_matching_rule($url);
 
-        return $rule && ($rule['effect'] !== 'allow') ? $rule['redirect'] : null;
+        if (!empty($rule) && $rule['effect'] === 'deny') {
+            if (isset($rule['redirect'])) {
+                $result = $rule['redirect'];
+            } else {
+                $result = [ 'type' => 'default' ]; // Just do the default redirect
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -132,7 +169,7 @@ implements
 
             if ($uri_matched === false) {
                 $uri_matched = apply_filters(
-                    'aam_uri_match_filter', false, $url, $target['url']
+                    'aam_matching_url_filter', false, $url, $target['url']
                 );
             }
 
@@ -145,7 +182,7 @@ implements
             }
         }
 
-        return apply_filters('aam_uri_match_result_filter', $result);
+        return $result;
     }
 
     /**
@@ -194,7 +231,7 @@ implements
         // define whitelisted set of conditions
         $denied = $allowed = [];
 
-        foreach ($this->_settings as $url => $rule) {
+        foreach ($this->_permissions as $url => $rule) {
             if ($rule['effect'] === 'allow') {
                 $allowed[$url] = $rule;
             } else {

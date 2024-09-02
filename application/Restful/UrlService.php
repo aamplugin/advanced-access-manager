@@ -40,11 +40,11 @@ class AAM_Restful_UrlService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of rules
-            $this->_register_route('/urls', array(
+            $this->_register_route('/urls', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_rule_list'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'callback'            => [ $this, 'get_rule_list' ],
+                'permission_callback' => [ $this, 'check_permissions' ]
+            ]);
 
             // Create a new rule
             $this->_register_route('/urls', array(
@@ -55,137 +55,171 @@ class AAM_Restful_UrlService
                     'url' => array(
                         'description' => 'URL or URI for the rule',
                         'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_url($value, $request);
-                        }
+                        'required'    => true
                     ),
-                    'type' => array(
-                        'description' => 'Rule type',
+                    'effect' => array(
+                        'description' => 'Wether allow or deny access to URL',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                        'enum'        => [ 'allow', 'deny' ]
                     ),
-                    'http_status_code' => array(
-                        'description' => 'HTTP Status Code',
-                        'type'        => 'number'
-                    ),
-                    'message' => array(
-                        'description' => 'Custom access denied message',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_message($value, $request);
-                        }
-                    ),
-                    'redirect_page_id' => array(
-                        'description' => 'Existing page ID to redirect to',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_page_id($value, $request);
-                        }
-                    ),
-                    'redirect_url' => array(
-                        'description' => 'Valid URL to redirect to',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_url($value, $request);
-                        }
-                    ),
-                    'callback' => array(
-                        'description' => 'Custom callback function',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_callback($value, $request);
-                        }
-                    )
+                    'redirect' => [
+                        'type'     => 'object',
+                        'required' => false,
+                        'properties' => [
+                            'type' => [
+                                'description' => 'Rule type',
+                                'type'        => 'string',
+                                'required'    => true,
+                                'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                            ],
+                            'message' => [
+                                'description' => 'Custom access denied message',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_message(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'redirect_page_id' => [
+                                'description' => 'Existing page ID to redirect to',
+                                'type'        => 'number',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_redirect_page_id(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'redirect_url' => [
+                                'description' => 'Valid URL to redirect to',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_redirect_url(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'callback' => array(
+                                'description' => 'Custom callback function',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_callback(
+                                        $value, $request
+                                    );
+                                }
+                            ),
+                            'http_status_code' => [
+                                'description' => 'HTTP Status Code',
+                                'type'        => 'number'
+                            ]
+                        ]
+                    ]
                 )
             ));
 
             // Get a rule
-            $this->_register_route('/url/(?P<id>[\d]+)', array(
+            $this->_register_route('/url', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'URL unique ID',
-                        'type'        => 'number',
+                    'url' => array(
+                        'description' => 'URL or URI for the rule',
+                        'type'        => 'string',
                         'required'    => true
-                    )
+                    ),
                 )
             ));
 
             // Update an existing rule
-            $this->_register_route('/url/(?P<id>[\d]+)', array(
+            $this->_register_route('/url', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'URL unique ID',
-                        'type'        => 'number',
-                        'required'    => true
-                    ),
                     'url' => array(
                         'description' => 'URL or URI for the rule',
                         'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_url($value, $request);
-                        }
+                        'required'    => true
                     ),
-                    'type' => array(
-                        'description' => 'Rule type',
+                    'new_url' => array(
+                        'description' => 'Updated rule URL',
+                        'type'        => 'string',
+                        'required'    => false
+                    ),
+                    'effect' => array(
+                        'description' => 'Wether allow or deny access to URL',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                        'enum'        => [ 'allow', 'deny' ]
                     ),
-                    'http_status_code' => array(
-                        'description' => 'HTTP Status Code',
-                        'type'        => 'number'
-                    ),
-                    'message' => array(
-                        'description' => 'Custom access denied message',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_message($value, $request);
-                        }
-                    ),
-                    'redirect_page_id' => array(
-                        'description' => 'Existing page ID to redirect to',
-                        'type'        => 'number',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_page_id(
-                                $value, $request
-                            );
-                        }
-                    ),
-                    'redirect_url' => array(
-                        'description' => 'Valid URL to redirect to',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_url($value, $request);
-                        }
-                    ),
-                    'callback' => array(
-                        'description' => 'Custom callback function',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value, $request) {
-                            return $this->_validate_callback($value, $request);
-                        }
-                    )
+                    'redirect' => [
+                        'type'     => 'object',
+                        'required' => false,
+                        'properties' => [
+                            'type' => [
+                                'description' => 'Rule type',
+                                'type'        => 'string',
+                                'required'    => true,
+                                'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                            ],
+                            'message' => [
+                                'description' => 'Custom access denied message',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_message(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'redirect_page_id' => [
+                                'description' => 'Existing page ID to redirect to',
+                                'type'        => 'number',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_redirect_page_id(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'redirect_url' => [
+                                'description' => 'Valid URL to redirect to',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_redirect_url(
+                                        $value, $request
+                                    );
+                                }
+                            ],
+                            'callback' => array(
+                                'description' => 'Custom callback function',
+                                'type'        => 'string',
+                                'validate_callback' => function ($value, $request) {
+                                    return $this->_validate_callback(
+                                        $value, $request
+                                    );
+                                }
+                            ),
+                            'http_status_code' => [
+                                'description' => 'HTTP Status Code',
+                                'type'        => 'number'
+                            ]
+                        ]
+                    ]
                 )
             ));
 
             // Delete a rule
-            $this->_register_route('/url/(?P<id>[\d]+)', array(
+            $this->_register_route('/url', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_rule'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'URL unique ID',
-                        'type'        => 'number',
+                    'url' => array(
+                        'description' => 'URL or URI for the rule',
+                        'type'        => 'string',
                         'required'    => true
-                    )
+                    ),
                 )
             ));
 
@@ -256,9 +290,7 @@ class AAM_Restful_UrlService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_rule_by_id(
-                intval($request->get_param('id'))
-            );
+            $result  = $service->get_rule(urldecode($request->get_param('url')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -279,10 +311,17 @@ class AAM_Restful_UrlService
     public function update_rule(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = $service->update_rule(
-                intval($request->get_param('id')),
-                $request->get_params()
+            $service       = $this->_get_service($request);
+            $incoming_data = $request->get_params();
+
+            // Swapping the "new_url" prop with "url"
+            $incoming_data['url'] = $incoming_data['new_url'];
+            $incoming_data        = array_filter($incoming_data, function($key) {
+                return $key !== 'new_url';
+            }, ARRAY_FILTER_USE_KEY);
+
+            $result = $service->update_rule(
+                urldecode($request->get_param('url')), $incoming_data
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -307,7 +346,7 @@ class AAM_Restful_UrlService
             $service = $this->_get_service($request);
             $result  = [
                 'success' => $service->delete_rule(
-                    intval($request->get_param('id'))
+                    urldecode($request->get_param('url'))
                 )
             ];
         } catch (Exception $e) {
@@ -355,32 +394,6 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Validate the 'url' param
-     *
-     * @param string $value
-     *
-     * @return boolean|WP_Error
-     *
-     * @access private
-     * @version 6.9.9
-     */
-    private function _validate_url($value)
-    {
-        $response = true;
-        $url      = wp_validate_redirect($value);
-
-        if (empty($url)) {
-            $response = new WP_Error(
-                'rest_invalid_param',
-                __('The url is not a valid URL', AAM_KEY),
-                array('status'  => 400)
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Validate custom message
      *
      * @param string           $value
@@ -394,7 +407,8 @@ class AAM_Restful_UrlService
     private function _validate_message($value, $request)
     {
         $response  = true;
-        $rule_type = $request->get_param('type');
+        $redirect  = $request->get_param('redirect');
+        $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
         $message   = esc_js(trim($value));
 
         if ($rule_type === 'custom_message' && strlen($message) === 0) {
@@ -422,7 +436,8 @@ class AAM_Restful_UrlService
     private function _validate_redirect_page_id($value, $request)
     {
         $response  = true;
-        $rule_type = $request->get_param('type');
+        $redirect  = $request->get_param('redirect');
+        $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
         $page_id   = intval($value);
 
         if ($rule_type === 'page_redirect') {
@@ -452,7 +467,8 @@ class AAM_Restful_UrlService
     private function _validate_redirect_url($value, $request)
     {
         $response  = true;
-        $rule_type = $request->get_param('type');
+        $redirect  = $request->get_param('redirect');
+        $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
         $url       = wp_validate_redirect($value);
 
         if ($rule_type === 'url_redirect' && empty($url)) {
@@ -480,7 +496,8 @@ class AAM_Restful_UrlService
     private function _validate_callback($value, $request)
     {
         $response  = true;
-        $rule_type = $request->get_param('type');
+        $redirect  = $request->get_param('redirect');
+        $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
 
         if ($rule_type === 'trigger_callback'
             && is_callable($value, true) === false

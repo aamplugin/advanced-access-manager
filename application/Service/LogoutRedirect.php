@@ -130,12 +130,7 @@ class AAM_Service_LogoutRedirect
         }, PHP_INT_MAX);
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter',
-            [ $this, 'generate_policy' ],
-            10,
-            4
-        );
+        // add_filter('aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4);
 
         // Register the resource
         add_filter(
@@ -170,18 +165,18 @@ class AAM_Service_LogoutRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generate_policy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT) {
-            if (!empty($options)) {
-                $policy['Param'] = array_merge(
-                    $policy['Param'],
-                    $generator->generateRedirectParam($options, 'logout')
-                );
-            }
-        }
+    // public function generate_policy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT) {
+    //         if (!empty($options)) {
+    //             $policy['Param'] = array_merge(
+    //                 $policy['Param'],
+    //                 $generator->generateRedirectParam($options, 'logout')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
 }

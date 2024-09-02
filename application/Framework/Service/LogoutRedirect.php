@@ -48,10 +48,10 @@ implements
     public function get_redirect($inline_context = null)
     {
         try {
-            $preference = $this->get_preference(true, $inline_context);
-            $result     = $this->_prepare_redirect(
-                $preference->get_settings(),
-                !$preference->is_overwritten()
+            $resource = $this->get_resource(true, $inline_context);
+            $result   = $this->_prepare_redirect(
+                $resource->get_preferences(),
+                !$resource->is_overwritten()
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -74,16 +74,14 @@ implements
     public function set_redirect(array $redirect, $inline_context = null)
     {
         try {
-            $preference = $this->get_preference(false, $inline_context);
-            $settings   = $this->_convert_to_redirect($redirect);
+            $resource = $this->get_resource(false, $inline_context);
+            $settings = $this->_convert_to_redirect($redirect);
 
-            if (!$preference->set_explicit_settings($settings)) {
+            if (!$resource->set_preferences($settings)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->_prepare_redirect(
-                $preference->get_explicit_settings(), false
-            );
+            $result = $this->_prepare_redirect($resource->get_preferences(), false);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -104,7 +102,7 @@ implements
     public function reset($inline_context = null)
     {
         try {
-            if ($this->get_preference(false, $inline_context)->reset()) {
+            if ($this->get_resource(false, $inline_context)->reset()) {
                 $result = $this->get_redirect($inline_context);
             } else {
                 throw new RuntimeException('Failed to reset settings');
@@ -127,11 +125,11 @@ implements
      * @access public
      * @version 7.0.0
      */
-    public function get_preference($reload = false, $inline_context = null)
+    public function get_resource($reload = false, $inline_context = null)
     {
         try {
-            $result = $this->_get_access_level($inline_context)->get_preference(
-                AAM_Framework_Type_Resource::LOGOUT_REDIRECT, $reload
+            $result = $this->_get_access_level($inline_context)->get_resource(
+                AAM_Framework_Type_Resource::LOGOUT_REDIRECT, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

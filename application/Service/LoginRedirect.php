@@ -117,9 +117,7 @@ class AAM_Service_LoginRedirect
         add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4
-        );
+        // add_filter('aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4);
 
         // Register the resource
         add_filter(
@@ -154,19 +152,19 @@ class AAM_Service_LoginRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generate_policy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT) {
-            if (!empty($options)) {
-                $policy['Param'] = array_merge(
-                    $policy['Param'],
-                    $generator->generateRedirectParam($options, 'login')
-                );
-            }
-        }
+    // public function generate_policy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT) {
+    //         if (!empty($options)) {
+    //             $policy['Param'] = array_merge(
+    //                 $policy['Param'],
+    //                 $generator->generateRedirectParam($options, 'login')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
     /**
      * Prepare login redirect response

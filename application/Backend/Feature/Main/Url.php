@@ -19,7 +19,7 @@
  * @package AAM
  * @version 6.9.9
  */
-class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract
+class AAM_Backend_Feature_Main_Url extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -29,7 +29,10 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract
      *
      * @version 6.0.0
      */
-    const ACCESS_CAPABILITY = 'aam_manage_uri';
+    const ACCESS_CAPABILITY = [
+        'aam_manage_uri',
+        'aam_manage_url_access'
+    ];
 
     /**
      * HTML template to render
@@ -48,14 +51,14 @@ class AAM_Backend_Feature_Main_Uri extends AAM_Backend_Feature_Abstract
      */
     public static function register()
     {
-        AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'uri',
+        AAM_Backend_Feature::registerFeature((object) [
+            'uid'        => 'url',
             'position'   => 55,
             'title'      => __('URL Access', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__
-        ));
+        ]);
     }
 
 }
