@@ -59,11 +59,7 @@ class AAM_Framework_Utility
                 ])
             );
         } else {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                'Unsupported redirect type',
-                AAM_VERSION
-            );
+            do_action('aam_deny_access_action', $redirect);
         }
 
         exit;

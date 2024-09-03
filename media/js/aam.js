@@ -5032,16 +5032,62 @@
          */
         (function ($) {
 
+            /**
+             *
+             * @param {*} rule
+             */
             function ResetUrlManageForm(rule = null) {
-                // Clearing all values and resseting the form to default
+                // Clearing all values and resetting the form to default
                 $('.form-clearable', '#uri-model').val('');
                 $('.aam-uri-access-action').hide();
-                $('#url_save_btn').removeAttr('data-original-uri');
+                $('#url_save_btn').removeAttr('data-original-url');
                 $('input[type="radio"]', '#uri-model').prop('checked', false);
                 $('#uri-model').modal('show');
 
                 // If rule is provided, populating the values
+                if (rule !== null) {
+                    $('#url_save_btn').attr('data-original-url', encodeURI(rule.url));
 
+                    // Settings edit form attributes
+                    $('#url_rule_url').val(rule.url);
+
+                    let restriction_type = rule.effect === 'allow' ? 'allow' : 'deny';
+                    let http_status_code = null;
+
+                    if (rule.redirect !== undefined) {
+                        restriction_type = rule.redirect.type;
+                        http_status_code = rule.redirect.http_status_code;
+                    }
+
+                    $(`#url_access_${restriction_type}`, '#uri-model').prop(
+                        'checked', true
+                    ).trigger('click');
+
+                    if (restriction_type === 'custom_message') {
+                        $('#url_access_custom_message_value').val(
+                            rule.redirect.message
+                        );
+                    } else if (restriction_type === 'page_redirect') {
+                        $('#url_access_page_redirect_value').val(
+                            rule.redirect.redirect_page_id
+                        );
+                    } else if (restriction_type === 'url_redirect') {
+                        $('#url_access_url_redirect_value').val(
+                            rule.redirect.redirect_url
+                        );
+                    } else if (restriction_type === 'trigger_callback') {
+                        $('#url_access_trigger_callback_value').val(
+                            rule.redirect.callback
+                        );
+                    }
+
+                    $('#url_access_http_redirect_code').val(http_status_code);
+                }
+
+                getAAM().triggerHook('aam-reset-url-manage-form', {
+                    container: $('#uri-model'),
+                    rule
+                });
             }
             /**
              *
@@ -5097,42 +5143,50 @@
                     $('#url_save_btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const url  = $('#url_rule_url').val();
-                        const type = $('input[name="uri.access.type"]:checked').val();
+                        const url         = $('#url_rule_url').val();
+                        const type        = $(
+                            'input[name="uri.access.type"]:checked'
+                        ).val();
+                        const editing_url = $(this).attr('data-original-url');
 
-                        if (uri && type) {
+                        if (url && type) {
                             // Preparing the payload
                             const payload = {
-                                effect: type === 'allow' ? 'allow' : 'deny',
-                                url
+                                effect: type === 'allow' ? 'allow' : 'deny'
+                            }
+
+                            if (editing_url) {
+                                payload.new_url = url;
+                            } else {
+                                payload.url = url;
                             }
 
                             if (type === 'custom_message') {
                                 payload.redirect = {
                                     type,
                                     message: $.trim(
-                                        $('#url_access_custom_message').val()
+                                        $('#url_access_custom_message_value').val()
                                     )
                                 }
                             } else if (type === 'page_redirect') {
                                 payload.redirect = {
                                     type,
                                     redirect_page_id: parseInt(
-                                        $('#url_access_page_redirect').val(), 10
+                                        $('#url_access_page_redirect_value').val(), 10
                                     )
                                 }
                             } else if (type === 'url_redirect') {
                                 payload.redirect = {
                                     type,
                                     redirect_url: $.trim(
-                                        $('#url_access_url_redirect').val()
+                                        $('#url_access_url_redirect_value').val()
                                     )
                                 }
                             } else if (type === 'trigger_callback') {
                                 payload.redirect = {
                                     type,
                                     callback: $.trim(
-                                        $('#url_access_trigger_callback').val()
+                                        $('#url_access_trigger_callback_value').val()
                                     )
                                 }
                             }
@@ -5143,14 +5197,14 @@
                                 );
 
                                 if (code) {
-                                    payload.http_status_code = code;
+                                    payload.redirect.http_status_code = code;
                                 }
                             }
 
                             let endpoint = `/service/url`;
 
-                            if (editingRule !== null) {
-                                endpoint += '/' + editingRule[0];
+                            if (editing_url) {
+                                endpoint += '?url=' + editing_url;
                             } else {
                                 endpoint += 's'
                             }
@@ -5159,7 +5213,9 @@
                                 type: 'POST',
                                 contentType: 'application/json',
                                 dataType: 'json',
-                                data: getAAM().applyFilters('aam-url-access-payload', payload),
+                                data: JSON.stringify(
+                                    getAAM().applyFilters('aam-url-access-payload', payload)
+                                ),
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
                                 },
@@ -5192,9 +5248,9 @@
                     $('#uri-delete-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const id = $('#uri-delete-btn').attr('data-id');
+                        const url = $('#uri-delete-btn').attr('data-url');
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/url/${id}`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/url?url=${url}`), {
                             type: 'POST',
                             dataType: 'json',
                             headers: {
@@ -5211,13 +5267,15 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', null, {
-                                    request: `aam/v2/service/url/${id}`,
+                                    request: `aam/v2/service/url?url=${url}`,
                                     response
                                 });
                             },
                             complete: function () {
                                 $('#uri-delete-model').modal('hide');
-                                $('#uri-delete-btn').text(getAAM().__('Delete')).attr('disabled', false);
+                                $('#uri-delete-btn').text(
+                                    getAAM().__('Delete')
+                                ).attr('disabled', false);
                             }
                         });
                     });
@@ -5261,9 +5319,9 @@
                                     }
 
                                     data.push([
-                                        rule.id,
                                         rule.url,
                                         restriction_type,
+                                        actions,
                                         rule
                                     ]);
                                 });
@@ -5278,7 +5336,7 @@
                             infoFiltered: ''
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 4] }
+                            { visible: false, targets: [3] }
                         ],
                         initComplete: function () {
                             var create = $('<a/>', {
@@ -5292,16 +5350,17 @@
                             $('.dataTables_filter', '#uri-list_wrapper').append(create);
                         },
                         createdRow: function (row, data) {
-                            var actions = data[3].split(',');
+                            const container = $(
+                                '<div/>', { 'class': 'aam-row-actions' }
+                            );
 
-                            var container = $('<div/>', { 'class': 'aam-row-actions' });
-                            $.each(actions, function (i, action) {
+                            $.each(data[2], function (i, action) {
                                 switch (action) {
                                     case 'edit':
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-pencil text-warning'
                                         }).bind('click', function () {
-                                            ResetUrlManageForm(data[4]);
+                                            ResetUrlManageForm(data[3]);
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Edit Rule')
@@ -5321,7 +5380,9 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-trash-empty text-danger'
                                         }).bind('click', function () {
-                                            $('#uri-delete-btn').attr('data-id', data[0]);
+                                            $('#uri-delete-btn').attr(
+                                                'data-url', encodeURI(data[3].url)
+                                            );
                                             $('#uri-delete-model').modal('show');
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -5346,7 +5407,7 @@
                             // Decorate the type of access
                             var type = $('<span/>');
 
-                            switch(data[2]) {
+                            switch(data[1]) {
                                 case 'allow':
                                     type.html(getAAM().__('Allowed'));
                                     type.attr('class', 'badge success');
@@ -5373,7 +5434,7 @@
                                 default:
                                     getAAM().triggerHook('aam-decorate-url-rule', {
                                         badge: type,
-                                        rule: data[4]
+                                        rule: data[3]
                                     });
                                     break;
                             }

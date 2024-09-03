@@ -38,7 +38,6 @@
                 <table id="uri-list" class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th width="60%"><?php echo __('URL', AAM_KEY); ?></th>
                             <th width="20%"><?php echo __('Type', AAM_KEY); ?></th>
                             <th><?php echo __('Actions', AAM_KEY); ?></th>
@@ -118,7 +117,7 @@
                             <textarea
                                 class="form-control form-clearable"
                                 rows="3"
-                                id="url_access_custom_message"
+                                id="url_access_custom_message_value"
                                 placeholder="<?php echo __('Enter message...', AAM_KEY); ?>">
                             </textarea>
                         </div>
@@ -129,7 +128,7 @@
                                 wp_dropdown_pages(array(
                                     'depth'            => 99,
                                     'echo'             => 1,
-                                    'id'               => 'url_access_page_redirect',
+                                    'id'               => 'url_access_page_redirect_value',
                                     'class'            => 'form-control form-clearable',
                                     'show_option_none' => __('-- Select Page --', AAM_KEY)
                                 ));
@@ -142,7 +141,7 @@
                                 type="text"
                                 class="form-control form-clearable"
                                 placeholder="https://"
-                                id="url_access_url_redirect"
+                                id="url_access_url_redirect_value"
                             />
                         </div>
 
@@ -163,7 +162,7 @@
                                 type="text"
                                 class="form-control form-clearable"
                                 placeholder="Enter valid callback"
-                                id="url_access_trigger_callback"
+                                id="url_access_trigger_callback_value"
                             />
                         </div>
 

@@ -378,10 +378,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 }
             }
 
-            // Merge access settings while reading hierarchical chain
-            $settings = array_replace_recursive(
-                $settings, $resource->get_settings()
-            );
+            // Merge access settings while reading hierarchical chain but only
+            // replace the top keys. Do not replace recursively
+            $settings = array_replace($settings, $resource->get_settings());
 
             // Finally set the settings
             $resource->set_settings($settings);

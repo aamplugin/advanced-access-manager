@@ -40,7 +40,6 @@ implements
     {
         $result = [];
         $config = AAM_Framework_Manager::configs();
-        $base   = $this->_permissions;
 
         // If preference is not explicitly defined, fetch it from the AAM configs
         $preference = $config->get_config(
@@ -52,43 +51,25 @@ implements
             $preference
         );
 
-        // First get the complete list of unique keys
-        $rule_keys = array_unique([
-            ...array_keys($incoming),
-            ...array_keys($base)
-        ]);
+        if (!empty($this->_internal_id)) { // Only one URL is evaluated
+            $result = $this->_merge_permissions(
+                $this->_permissions, $incoming, $preference
+            );
+        } else { // All URL rules are evaluated
+            $base = $this->_permissions;
 
-        foreach($rule_keys as $rule_key) {
-            $effect_a = null;
-            $effect_b = null;
+            // First get the complete list of unique keys
+            $rule_keys = array_unique([
+                ...array_keys($incoming),
+                ...array_keys($base)
+            ]);
 
-            if (isset($base[$rule_key])) {
-                $effect_a = $base[$rule_key]['effect'] === 'allow';
-            }
-
-            if (isset($incoming[$rule_key])) {
-                $effect_b = $incoming[$rule_key]['effect'] === 'allow';
-            }
-
-            if ($preference === 'allow') { // Merging preference is to allow
-                // If at least one set has allowed rule, then allow the URL
-                if (in_array($effect_a, [ true, null ], true)
-                    || in_array($effect_b, [ true, null ], true)
-                ) {
-                    $result[$rule_key] = [ 'effect' => 'allow' ];
-                } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
-                    $result[$rule_key] = $base[$rule_key];
-                } else {
-                    $result[$rule_key] = $incoming[$rule_key];
-                }
-            } else { // Merging preference is to deny access by default
-                if ($effect_a === false) {
-                    $result[$rule_key] = $base[$rule_key];
-                } elseif ($effect_b === false) {
-                    $result[$rule_key] = $incoming[$rule_key];
-                } else {
-                    $result[$rule_key] = [ 'effect' => 'allow' ];
-                }
+            foreach($rule_keys as $rule_key) {
+                $result[$rule_key] = $this->_merge_permissions(
+                    isset($base[$rule_key]) ? $base[$rule_key] : null,
+                    isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
+                    $preference
+                );
             }
         }
 
@@ -100,16 +81,42 @@ implements
      *
      * @param string $url
      *
-     * @return boolean
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
      */
     public function is_restricted($url = null)
     {
-        $rule = $this->_find_matching_rule($url);
+        if (!empty($this->_internal_id)
+            && !empty($url)
+            && ($url !== $this->_internal_id)
+        ) {
+            throw new InvalidArgumentException(
+                'The provided URL does not match already initiated resource URL'
+            );
+        }
 
-        return !empty($rule) && ($rule['effect'] !== 'allow');
+        // If resource was already initialized with a single URL, then no need to
+        // search for match
+        if ($this->_internal_id) {
+            $rule = $this->_permissions;
+        } else {
+            $rule = $this->_find_matching_rule($url);
+        }
+
+        if (!empty($rule)) {
+            $result = $rule['effect'] !== 'allow';
+        } else {
+            $result = null;
+        }
+
+        return apply_filters(
+            'aam_url_is_restricted_filter',
+            $result,
+            $rule,
+            $this
+        );
     }
 
     /**
@@ -125,13 +132,79 @@ implements
     public function get_redirect($url = null)
     {
         $result = null;
-        $rule   = $this->_find_matching_rule($url);
+
+        if (!empty($this->_internal_id)
+            && !empty($url)
+            && ($url !== $this->_internal_id)
+        ) {
+            throw new InvalidArgumentException(
+                'The provided URL does not match already initiated resource URL'
+            );
+        }
+
+        // If resource was already initialized with a single URL, then no need to
+        // search for match
+        if ($this->_internal_id) {
+            $rule = $this->_permissions;
+        } else {
+            $rule = $this->_find_matching_rule($url);
+        }
 
         if (!empty($rule) && $rule['effect'] === 'deny') {
             if (isset($rule['redirect'])) {
                 $result = $rule['redirect'];
             } else {
                 $result = [ 'type' => 'default' ]; // Just do the default redirect
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge two rules based on provided preference
+     *
+     * @param array|null $base
+     * @param array|null $incoming
+     * @param string     $preference
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _merge_permissions($base, $incoming, $preference = 'deny')
+    {
+        $result   = null;
+        $effect_a = null;
+        $effect_b = null;
+
+        if (!empty($base)) {
+            $effect_a = $base['effect'] === 'allow';
+        }
+
+        if (!empty($incoming)) {
+            $effect_b = $incoming['effect'] === 'allow';
+        }
+
+        if ($preference === 'allow') { // Merging preference is to allow
+            // If at least one set has allowed rule, then allow the URL
+            if (in_array($effect_a, [ true, null ], true)
+                || in_array($effect_b, [ true, null ], true)
+            ) {
+                $result = [ 'effect' => 'allow' ];
+            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
+                $result = $base;
+            } else {
+                $result = $incoming;
+            }
+        } else { // Merging preference is to deny access by default
+            if ($effect_a === false) {
+                $result = $base;
+            } elseif ($effect_b === false) {
+                $result = $incoming;
+            } else {
+                $result = [ 'effect' => 'allow' ];
             }
         }
 

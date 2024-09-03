@@ -188,7 +188,7 @@ implements
                     $updates[$rule_data['url']] = $rule_data;
                 }
 
-                if (!$resource->set_permissions($permissions)) {
+                if (!$resource->set_permissions($updates)) {
                     throw new RuntimeException('Failed to update the rule');
                 }
             } else {
@@ -229,7 +229,9 @@ implements
                 throw new OutOfRangeException('Rule does not exist');
             }
 
-            if (!$resource->set_permissions($permissions)) {
+            $result = $resource->set_permissions($permissions);
+
+            if (!$result) {
                 throw new RuntimeException('Failed to persist the rule');
             }
         } catch (Exception $e) {
@@ -347,7 +349,7 @@ implements
      */
     private function _is_inherited($rule, $resource)
     {
-        return array_key_exists($rule['url'], $resource->get_permissions(true));
+        return !array_key_exists($rule['url'], $resource->get_permissions(true));
     }
 
     /**
@@ -412,7 +414,8 @@ implements
 
         // If redirect data is defined, validate data points
         if (!empty($data['redirect'])) {
-            $redirect_type = $data['redirect']['type'];
+            $redirect_type              = $data['redirect']['type'];
+            $result['redirect']['type'] = $redirect_type;
 
             if ($redirect_type === 'custom_message') {
                 $message = wp_kses_post($data['redirect']['message']);
@@ -433,7 +436,7 @@ implements
                     $result['redirect']['redirect_page_id'] = $page_id;
                 }
             } elseif ($redirect_type === 'url_redirect') {
-                $redirect_url = $this->__validate_url(
+                $redirect_url = $this->_validate_url(
                     $data['redirect']['redirect_url']
                 );
 
@@ -477,7 +480,7 @@ implements
      * @access private
      * @version 7.0.0
      */
-    private function __validate_url($url)
+    private function _validate_url($url)
     {
         $result     = false;
         $parsed_url = wp_parse_url($url);

@@ -71,7 +71,10 @@ class AAM_Restful_UrlService
                                 'description' => 'Rule type',
                                 'type'        => 'string',
                                 'required'    => true,
-                                'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                'enum'        => apply_filters(
+                                    'aam_url_access_allowed_rule_types_filter',
+                                    AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                )
                             ],
                             'message' => [
                                 'description' => 'Custom access denied message',
@@ -162,7 +165,10 @@ class AAM_Restful_UrlService
                                 'description' => 'Rule type',
                                 'type'        => 'string',
                                 'required'    => true,
-                                'enum'        => AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                'enum'        => apply_filters(
+                                    'aam_url_access_allowed_rule_types_filter',
+                                    AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                )
                             ],
                             'message' => [
                                 'description' => 'Custom access denied message',
