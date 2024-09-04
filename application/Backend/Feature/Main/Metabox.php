@@ -90,7 +90,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
     {
         global $wp_post_types;
 
-        AAM_Core_Cache::set(self::DB_CACHE_OPTION, array(), 31536000);
+        AAM_Framework_Utility_Cache::set(self::DB_CACHE_OPTION, array(), 31536000);
 
         $endpoints = array(add_query_arg(
             'init', 'metabox', admin_url('index.php')
@@ -132,7 +132,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
             $this->collectMetaboxes($post_type, $cache);
         }
 
-        AAM_Core_Cache::set(self::DB_CACHE_OPTION, $cache, 31536000); // 1 year
+        AAM_Framework_Utility_Cache::set(self::DB_CACHE_OPTION, $cache, 31536000); // 1 year
     }
 
     /**
@@ -232,7 +232,7 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
     {
         global $wp_post_types;
 
-        $cache = AAM_Core_Cache::get(self::DB_CACHE_OPTION);
+        $cache = AAM_Framework_Utility_Cache::get(self::DB_CACHE_OPTION);
 
         if (!is_array($cache)) {
             $cache = array();

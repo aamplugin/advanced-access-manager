@@ -288,7 +288,7 @@ final class AAM_Core_API
         $options = array(
             AAM_Framework_Service_Settings::DB_OPTION,
             AAM_Framework_Service_Configs::DB_OPTION,
-            AAM_Core_Cache::DB_OPTION,
+            AAM_Framework_Utility_Cache::DB_OPTION,
             AAM_Framework_Service_Configs::DB_CONFIGPRESS_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
             AAM_Service_Toolbar::CACHE_DB_OPTION

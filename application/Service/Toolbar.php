@@ -137,7 +137,7 @@ class AAM_Service_Toolbar
                     }
                 }
 
-                AAM_Core_Cache::set(
+                AAM_Framework_Utility_Cache::set(
                     self::CACHE_DB_OPTION,
                     $this->_normalize_tree($cache),
                     31536000
@@ -162,7 +162,7 @@ class AAM_Service_Toolbar
      */
     public function getToolbarCache()
     {
-        return AAM_Core_Cache::get(self::CACHE_DB_OPTION);
+        return AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
     }
 
     /**

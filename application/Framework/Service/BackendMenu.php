@@ -37,11 +37,8 @@ class AAM_Framework_Service_BackendMenu
     public function get_item_list($inline_context = null)
     {
         try {
-            $result       = [];
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::BACKEND_MENU, null, true
-            );
+            $result   = [];
+            $resource = $this->get_resource(true, $inline_context);
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Service_AdminMenu::getInstance()->getMenuCache();
@@ -67,8 +64,8 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Get existing menu by ID
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param array $inline_context Runtime context
+     * @param string $slug           Menu item slug
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
@@ -76,17 +73,17 @@ class AAM_Framework_Service_BackendMenu
      * @version 6.9.13
      * @throws OutOfRangeException If menu does not exist
      */
-    public function get_item_by_id($id, $inline_context = null)
+    public function get_item($slug, $inline_context = null)
     {
         try {
             $result = false;
 
             foreach($this->get_item_list($inline_context) as $menu) {
-                if ($menu['id'] === $id) {
+                if ($menu['id'] === $slug) {
                     $result = $menu;
                 } elseif (isset($menu['children'])) {
                     foreach($menu['children'] as $child) {
-                        if ($child['id'] === $id) {
+                        if ($child['id'] === $slug) {
                             $result = $child;
                         }
                     }
@@ -106,31 +103,27 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Update existing backend menu permission
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param bool  $is_restricted  Is restricted or not
-     * @param array $inline_context Runtime context
+     * @param string $slug           Menu item slug
+     * @param string $effect         Wether allow or deny
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.13
-     * @throws RuntimeException If fails to persist changes
+     * @version 7.0.0
      */
-    public function update_menu_permission(
-        $id, $is_restricted = true, $inline_context = null
+    public function update_item_permission(
+        $slug, $effect = 'deny', $inline_context = null
     ) {
         try {
-            $result       = $this->get_item_by_id($id);
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::BACKEND_MENU
-            );
+            $result   = $this->get_item($slug);
+            $resource = $this->get_resource(false, $inline_context);
 
-            if (!$resource->set_explicit_setting($result['slug'], $is_restricted)) {
+            if (!$resource->set_permission($result['slug'], $effect)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->get_item_by_id($id);
+            $result = $this->get_item($slug);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -141,53 +134,32 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Delete menu permission
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param array $inline_context Runtime context
+     * @param string $slug           Menu item slug
+     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.13
-     * @throws OutOfRangeException If rule does not exist
-     * @throws RuntimeException If fails to persist a rule
+     * @version 7.0.0
      */
-    public function delete_item_permission($id, $inline_context = null)
+    public function delete_item_permission($slug, $inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::BACKEND_MENU
-            );
-
-            $menu = $this->get_item_by_id($id);
+            $resource    = $this->get_resource(false, $inline_context);
+            $permissions = $resource->get_permissions(true);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
-            if ($menu['is_inherited'] === false) {
-                $found       = false;
-                $new_options = array();
+            if (array_key_exists($slug, $permissions)) {
+                unset($permissions[$slug]);
 
-                foreach($resource->get_explicit_settings() as $slug => $effect) {
-                    if ($slug === $menu['slug']) {
-                        $found = true;
-                    } else {
-                        $new_options[$slug] = $effect;
-                    }
-                }
-
-                if ($found) {
-                    $success = $resource->set_explicit_settings($new_options);
-                } else {
-                    throw new OutOfRangeException('Menu item does not exist');
+                if (!$resource->set_permissions($permissions)) {
+                    throw new RuntimeException('Failed to persist changes');
                 }
             } else {
-                $success = true;
+                throw new OutOfRangeException('Menu item does not exist');
             }
 
-            if (!$success) {
-                throw new RuntimeException('Failed to persist the rule');
-            }
-
-            $result = $this->get_item_by_id($id);
+            $result = $this->get_item($slug);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -211,15 +183,34 @@ class AAM_Framework_Service_BackendMenu
     public function reset($inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::BACKEND_MENU
-            );
-
             // Reset settings to default
-            $resource->reset();
+            $this->get_resource(false, $inline_context)->reset();
 
             $result = $this->get_item_list($inline_context);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get backend menu resource
+     *
+     * @param array $inline_context
+     *
+     * @return AAM_Framework_Resource_BackendMenu
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource($reload = false, $inline_context = null)
+    {
+        try {
+            $access_level = $this->_get_access_level($inline_context);
+            $result       = $access_level->get_resource(
+                AAM_Framework_Type_Resource::BACKEND_MENU, null, $reload
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -251,7 +242,6 @@ class AAM_Framework_Service_BackendMenu
         $explicit = $resource->get_explicit_settings();
 
         $response = array(
-            'id'            => abs(crc32($slug)),
             'slug'          => $slug,
             'uri'           => $this->_prepare_admin_uri($menu_id),
             'name'          => $this->_filter_menu_name($menu_item['name']),

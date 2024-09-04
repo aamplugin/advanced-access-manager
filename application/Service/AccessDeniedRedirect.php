@@ -122,7 +122,7 @@ class AAM_Service_AccessDeniedRedirect
                                 ])
                             );
                         } else {
-                            AAM_Framework_Utility::do_redirect($redirect);
+                            AAM_Framework_Utility_Redirect::do_redirect($redirect);
                         }
                     }
                 };
@@ -132,12 +132,12 @@ class AAM_Service_AccessDeniedRedirect
         });
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter',
-            [ $this, 'generate_policy' ],
-            10,
-            3
-        );
+        // add_filter(
+        //     'aam_generated_policy_filter',
+        //     [ $this, 'generate_policy' ],
+        //     10,
+        //     3
+        // );
 
         // Register the resource
         add_filter(
@@ -171,50 +171,50 @@ class AAM_Service_AccessDeniedRedirect
      * @access public
      * @version 6.4.0
      */
-    public function generate_policy($policy, $resource_type, $options)
-    {
-        if ($resource_type === AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT) {
-            if (!empty($options)) {
-                $params = array();
+    // public function generate_policy($policy, $resource_type, $options)
+    // {
+    //     if ($resource_type === AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT) {
+    //         if (!empty($options)) {
+    //             $params = array();
 
-                foreach($options as $key => $val) {
-                    $parts = explode('.', $key);
+    //             foreach($options as $key => $val) {
+    //                 $parts = explode('.', $key);
 
-                    if ($parts[2] === 'type') {
-                        $destination = $options["{$parts[0]}.redirect.{$val}"];
+    //                 if ($parts[2] === 'type') {
+    //                     $destination = $options["{$parts[0]}.redirect.{$val}"];
 
-                        $value = array(
-                            'Type' => $val
-                        );
+    //                     $value = array(
+    //                         'Type' => $val
+    //                     );
 
-                        if ($val === 'page') {
-                            $page = get_post($destination);
+    //                     if ($val === 'page') {
+    //                         $page = get_post($destination);
 
-                            if (is_a($page, 'WP_Post')) {
-                                $value['PageSlug'] = $page->post_name;
-                            } else{
-                                $value['PageId'] = intval($destination);
-                            }
-                        } elseif ($val  === 'url') {
-                            $value['Url'] = trim($destination);
-                        } elseif ($val === 'callback') {
-                            $value['Callback'] = trim($destination);
-                        } elseif ($val === 'message') {
-                            $value['Message'] = esc_js($destination);
-                        }
+    //                         if (is_a($page, 'WP_Post')) {
+    //                             $value['PageSlug'] = $page->post_name;
+    //                         } else{
+    //                             $value['PageId'] = intval($destination);
+    //                         }
+    //                     } elseif ($val  === 'url') {
+    //                         $value['Url'] = trim($destination);
+    //                     } elseif ($val === 'callback') {
+    //                         $value['Callback'] = trim($destination);
+    //                     } elseif ($val === 'message') {
+    //                         $value['Message'] = esc_js($destination);
+    //                     }
 
-                        $params[] = array(
-                            'Key'   => 'redirect:on:access-denied:' . $parts[0],
-                            'Value' => $value
-                        );
-                    }
-                }
+    //                     $params[] = array(
+    //                         'Key'   => 'redirect:on:access-denied:' . $parts[0],
+    //                         'Value' => $value
+    //                     );
+    //                 }
+    //             }
 
-                $policy["Param"] = array_merge($policy["Param"], $params);
-            }
-        }
+    //             $policy["Param"] = array_merge($policy["Param"], $params);
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
 }

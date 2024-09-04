@@ -400,7 +400,9 @@ implements
         // Validating the incoming URL by parsing it first and them verifying that it
         // is a safe redirect URL.
         if (!empty($data['url'])) {
-            $normalized_url = $this->_validate_url($data['url']);
+            $normalized_url = AAM_Framework_Utility_Redirect::validate_redirect_url(
+                $data['url']
+            );
         }
 
         if (empty($normalized_url)) {
@@ -436,8 +438,8 @@ implements
                     $result['redirect']['redirect_page_id'] = $page_id;
                 }
             } elseif ($redirect_type === 'url_redirect') {
-                $redirect_url = $this->_validate_url(
-                    $data['redirect']['redirect_url']
+                $redirect_url = AAM_Framework_Utility_Redirect::validate_redirect_url(
+                    $data['redirect']['redirect_url'], false
                 );
 
                 if (empty($redirect_url)) {
@@ -466,38 +468,7 @@ implements
             }
         }
 
-        // TODO: Implement this hook in the premium add-on
         return apply_filters('aam_validate_url_rule_data_filter', $result, $data);
-    }
-
-    /**
-     * Validate incoming URL
-     *
-     * @param string $url
-     *
-     * @return boolean|string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_url($url)
-    {
-        $result     = false;
-        $parsed_url = wp_parse_url($url);
-
-        if ($parsed_url !== false) {
-            $result = empty($parsed_url['path']) ? '/' : $parsed_url['path'];
-
-            // Adding query params if provided
-            if (isset($parsed_url['query'])) {
-                $result .= '?' . $parsed_url['query'];
-            }
-
-            // Finally sanitize the safe URL
-            $result = wp_validate_redirect($result);
-        }
-
-        return apply_filters('aam_validate_url_filter', $result, $url);
     }
 
 }

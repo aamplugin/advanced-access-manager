@@ -99,22 +99,22 @@ class AAM_Service_NotFoundRedirect
                 $redirect = AAM::api()->user()->not_found_redirect()->get_redirect();
 
                 if ($redirect['type'] !== 'default') {
-                    AAM_Framework_Utility::do_redirect($redirect);
+                    AAM_Framework_Utility_Redirect::do_redirect($redirect);
                 }
             }
         });
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter',
-            function($policy, $resource_type, $options, $generator) {
-                return $this->generate_policy(
-                    $policy, $resource_type, $options, $generator
-                );
-            },
-            10,
-            4
-        );
+        // add_filter(
+        //     'aam_generated_policy_filter',
+        //     function($policy, $resource_type, $options, $generator) {
+        //         return $this->generate_policy(
+        //             $policy, $resource_type, $options, $generator
+        //         );
+        //     },
+        //     10,
+        //     4
+        // );
 
         // Register the resource
         add_filter(
@@ -149,18 +149,18 @@ class AAM_Service_NotFoundRedirect
      * @access protected
      * @version 6.4.0
      */
-    protected function generate_policy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Framework_Resource_NotFoundRedirect::TYPE) {
-            if (!empty($options)) {
-                $policy['Param'] = array_merge(
-                    $policy['Param'],
-                    $generator->generateRedirectParam($options, '404')
-                );
-            }
-        }
+    // protected function generate_policy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Framework_Resource_NotFoundRedirect::TYPE) {
+    //         if (!empty($options)) {
+    //             $policy['Param'] = array_merge(
+    //                 $policy['Param'],
+    //                 $generator->generateRedirectParam($options, '404')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
 }

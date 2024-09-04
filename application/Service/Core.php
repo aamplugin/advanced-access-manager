@@ -114,7 +114,7 @@ class AAM_Service_Core
 
         // Handle access denied
         add_action('aam_deny_access_action', function() {
-            AAM_Framework_Utility::do_access_denied_redirect();
+            AAM_Framework_Utility_Redirect::do_access_denied_redirect();
         });
 
         // Add toolbar "Manage Access" item

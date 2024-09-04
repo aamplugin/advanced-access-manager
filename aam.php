@@ -35,6 +35,40 @@ class AAM
 {
 
     /**
+     * Collection of AAM services
+     *
+     * @version 7.0.0
+     */
+    const SERVICES = [
+        'AAM_Service_Core',
+        'AAM_Service_Url',
+        'AAM_Service_LoginRedirect',
+        'AAM_Service_LogoutRedirect',
+        'AAM_Service_AccessDeniedRedirect',
+        'AAM_Service_NotFoundRedirect',
+        'AAM_Service_AdminMenu',
+        // 'AAM_Service_Metabox'              => AAM_Service_Metabox::FEATURE_FLAG,
+        // 'AAM_Service_Toolbar'              => AAM_Service_Toolbar::FEATURE_FLAG,
+        // 'AAM_Service_Route'                => AAM_Service_Route::FEATURE_FLAG,
+
+        // 'AAM_Service_Capability'           => AAM_Service_Capability::FEATURE_FLAG,
+        // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
+        // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
+
+        // 'AAM_Service_IdentityGovernance'   => AAM_Service_IdentityGovernance::FEATURE_FLAG,
+        // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
+
+        // 'AAM_Service_Chatbot'              => AAM_Service_Chatbot::FEATURE_FLAG,
+        // 'AAM_Service_Cli'                  => AAM_Service_Cli::FEATURE_FLAG,
+        // 'AAM_Service_Welcome'              => AAM_Service_Welcome::FEATURE_FLAG,
+
+        // 'AAM_Service_AccessPolicy'         => AAM_Service_AccessPolicy::FEATURE_FLAG,
+        'AAM_Service_Content',
+        'AAM_Service_SecureLogin',
+        'AAM_Service_Jwt'
+    ];
+
+    /**
      * Single instance of itself
      *
      * @var AAM
@@ -217,18 +251,9 @@ class AAM
     public static function onPluginsLoaded()
     {
         // Load all the defined AAM services
-        AAM_Service_Core::bootstrap();
-        AAM_Service_Url::bootstrap();
-        AAM_Service_LoginRedirect::bootstrap();
-        AAM_Service_LogoutRedirect::bootstrap();
-        //AAM_Service_AccessDeniedRedirect::bootstrap();
-        //AAM_Service_NotFoundRedirect::bootstrap();
-        AAM_Service_Content::bootstrap();
-
-        // AAM_Service_AccessPolicy::bootstrap();
-
-        AAM_Service_SecureLogin::bootstrap();
-        AAM_Service_Jwt::bootstrap();
+        foreach(self::SERVICES as $service_class) {
+            call_user_func("{$service_class}::bootstrap");
+        }
 
         do_action('aam_services_loaded');
 

@@ -15,7 +15,8 @@
  */
 class AAM_Framework_Resource_BackendMenu
 implements
-    AAM_Framework_Resource_Interface
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;
@@ -45,14 +46,14 @@ implements
         if (!in_array($slug, array('index.php', 'menu-index.php'))) {
             $parent  = $this->_get_parent_item($slug);
 
-            if (array_key_exists($slug, $this->_settings)) {
+            if (array_key_exists($slug, $this->_permissions)) {
                 // Step #1. Check if menu is directly restricted
-                $restricted = !empty($this->_settings[$slug]);
-            } elseif (array_key_exists('menu-' . $slug, $this->_settings)) {
+                $restricted = !empty($this->_permissions[$slug]);
+            } elseif (array_key_exists('menu-' . $slug, $this->_permissions)) {
                 // Step #2. Check if whole branch is restricted
-                $restricted = !empty($this->_settings['menu-' . $slug]);
+                $restricted = !empty($this->_permissions['menu-' . $slug]);
             } elseif ($parent
-                && array_key_exists('menu-' . $parent, $this->_settings)
+                && array_key_exists('menu-' . $parent, $this->_permissions)
             ) {
                 // Step #3. Check if dynamic submenu is restricted because of
                 //          whole branch

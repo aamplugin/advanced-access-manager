@@ -27,7 +27,11 @@
                     <?php echo __('Automatically redirects users to a desired destination when access to restricted resources is denied, with options to customize redirects for specific users or roles for restricted areas like posts, categories, and menus.', AAM_KEY); ?>
                 </p>
 
-                <div class="aam-overwrite" id="aam-redirect-overwrite" style="display: <?php echo ($service->get_preference()->is_overwritten() ? 'block' : 'none'); ?>">
+                <div
+                    class="aam-overwrite"
+                    id="aam-redirect-overwrite"
+                    style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>"
+                >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>

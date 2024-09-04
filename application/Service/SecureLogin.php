@@ -249,12 +249,12 @@ class AAM_Service_SecureLogin
     protected function updateLoginAttemptsTransient($counter)
     {
         $name     = $this->_getLoginAttemptKeyName();
-        $attempts = AAM_Core_Cache::get($name);
+        $attempts = AAM_Framework_Utility_Cache::get($name);
 
         if ($attempts !== false) {
             $attempts = intval($attempts) + $counter;
 
-            AAM_Core_Cache::update($name, $attempts);
+            AAM_Framework_Utility_Cache::update($name, $attempts);
         } else {
             $timeout  = strtotime(
                 $this->_getConfigOption(
@@ -262,7 +262,7 @@ class AAM_Service_SecureLogin
                 )
             );
 
-            AAM_Core_Cache::set($name, 1, $timeout - time());
+            AAM_Framework_Utility_Cache::set($name, 1, $timeout - time());
         }
     }
 
@@ -307,7 +307,7 @@ class AAM_Service_SecureLogin
         if (AAM_Framework_Manager::configs()->get_config(
             'service.secureLogin.feature.bruteForceLockout'
         )) {
-            $attempts  = AAM_Core_Cache::get($this->_getLoginAttemptKeyName());
+            $attempts  = AAM_Framework_Utility_Cache::get($this->_getLoginAttemptKeyName());
             $threshold = $this->_getConfigOption(
                 'service.secure_login.login_attempts', 8
             );

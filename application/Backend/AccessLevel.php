@@ -165,7 +165,7 @@ class AAM_Backend_AccessLevel
         } elseif (current_user_can('aam_manage_default')) {
             $this->_init_access_level(AAM_Framework_Type_AccessLevel::ALL);
         } else {
-            AAM_Framework_Utility::do_redirect([
+            AAM_Framework_Utility_Redirect::do_redirect([
                 'type'    => 'custom_message',
                 'message' => __('You do not have permission to manage any access levels', AAM_KEY)
             ]);

@@ -38,47 +38,48 @@ class AAM_Restful_BackendMenuService
             ));
 
             // Get a menu
-            $this->_register_route('/backend-menu/(?P<id>[\d]+)', array(
+            $this->_register_route('/backend-menu', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_menu_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'Backend menu unique ID',
-                        'type'        => 'number',
+                    'slug' => array(
+                        'description' => 'Backend menu unique slug',
+                        'type'        => 'string',
                         'required'    => true
                     )
                 )
             ));
 
             // Update a menu's permission
-            $this->_register_route('/backend-menu/(?P<id>[\d]+)', array(
+            $this->_register_route('/backend-menu', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_menu_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'Backend menu unique ID',
-                        'type'        => 'number',
+                    'slug' => array(
+                        'description' => 'Backend menu unique slug',
+                        'type'        => 'string',
                         'required'    => true
                     ),
-                    'is_restricted' => array(
+                    'effect' => array(
                         'description' => 'Either menu is restricted or not',
-                        'type'        => 'boolean',
-                        'default'     => true
+                        'type'        => 'string',
+                        'default'     => 'deny',
+                        'enum'        => [ 'allow', 'deny' ]
                     )
                 )
             ));
 
             // Delete a menu's permission
-            $this->_register_route('/backend-menu/(?P<id>[\d]+)', array(
+            $this->_register_route('/backend-menu', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_menu_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => 'Backend menu unique ID',
-                        'type'        => 'number',
+                    'slug' => array(
+                        'description' => 'Backend menu unique slug',
+                        'type'        => 'string',
                         'required'    => true
                     )
                 )
@@ -129,9 +130,7 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_by_id(
-                intval($request->get_param('id'))
-            );
+            $result  = $service->get_item($request->get_param('slug'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -153,9 +152,9 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_menu_permission(
-                intval($request->get_param('id')),
-                $request->get_param('is_restricted')
+            $result  = $service->update_item_permission(
+                $request->get_param('slug'),
+                $request->get_param('effect')
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -179,7 +178,7 @@ class AAM_Restful_BackendMenuService
         try {
             $service = $this->_get_service($request);
             $result  = $service->delete_item_permission(
-                intval($request->get_param('id'))
+                $request->get_param('slug')
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);

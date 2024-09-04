@@ -214,7 +214,7 @@ class AAM_Service_Multisite
 
             // If user is restricted, deny access
             if ($restricted) {
-                AAM_Framework_Utility::do_access_denied_redirect();
+                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
             }
         }, 999);
     }

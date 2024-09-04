@@ -114,7 +114,7 @@ class AAM_Service_AdminMenu
                 add_filter('parent_file', function() {
                     global $menu, $submenu;
 
-                    AAM_Core_Cache::set(self::CACHE_DB_OPTION, array(
+                    AAM_Framework_Utility_Cache::set(self::CACHE_DB_OPTION, array(
                         'menu'    => $this->_filter_menu_items($menu),
                         'submenu' => $this->_filter_submenu_items($submenu)
                     ), 31536000); // Cache for a year
@@ -123,9 +123,9 @@ class AAM_Service_AdminMenu
         }
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        );
+        // add_filter(
+        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        // );
 
         // TODO - legacy and can be deleted in version 7.0.0
         add_action('aam_clear_settings_action', function() {
@@ -154,19 +154,19 @@ class AAM_Service_AdminMenu
      * @access public
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Core_Object_Menu::OBJECT_TYPE) {
-            if (!empty($options)) {
-                $policy['Statement'] = array_merge(
-                    $policy['Statement'],
-                    $generator->generateBasicStatements($options, 'BackendMenu')
-                );
-            }
-        }
+    // public function generatePolicy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Core_Object_Menu::OBJECT_TYPE) {
+    //         if (!empty($options)) {
+    //             $policy['Statement'] = array_merge(
+    //                 $policy['Statement'],
+    //                 $generator->generateBasicStatements($options, 'BackendMenu')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
     /**
      * Get cached menu array
@@ -182,7 +182,7 @@ class AAM_Service_AdminMenu
      */
     public function getMenuCache()
     {
-        $cache = AAM_Core_Cache::get(self::CACHE_DB_OPTION);
+        $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
 
         return is_array($cache) ? $cache : array();
     }
@@ -303,7 +303,7 @@ class AAM_Service_AdminMenu
         );
 
         if ($resource->is_restricted($id)) {
-            AAM_Framework_Utility::do_access_denied_redirect();
+            AAM_Framework_Utility_Redirect::do_access_denied_redirect();
         }
     }
 
@@ -331,7 +331,9 @@ class AAM_Service_AdminMenu
         $filtered = [];
 
         foreach ($submenu[$parent[2]] as $id => $item) {
-            if ($deny_all || $resource->is_restricted($this->normalizeItem($item[2]))) {
+            if ($deny_all
+                || $resource->is_restricted($this->normalizeItem($item[2]))
+            ) {
                 unset($submenu[$parent[2]][$id]);
             } else {
                 $filtered[] = $submenu[$parent[2]][$id];
@@ -435,8 +437,4 @@ class AAM_Service_AdminMenu
         return $response;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_AdminMenu::bootstrap();
 }

@@ -417,9 +417,9 @@ class AAM_Service_Content
 
         if (is_a($post, AAM_Framework_Resource_Post::class)) {
             if ($post->is_restricted()) {
-                AAM_Framework_Utility::do_access_denied_redirect();
+                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
             } elseif ($post->has_redirect()) {
-                AAM_Framework_Utility::do_redirect($post->get_redirect());
+                AAM_Framework_Utility_Redirect::do_redirect($post->get_redirect());
             }
         }
     }
@@ -717,7 +717,7 @@ class AAM_Service_Content
                 'code'    => 'rest_redirected',
                 'message' => 'The request is redirected to a different location',
                 'data'    => [
-                    'redirect_url' => AAM_Framework_Utility::to_redirect_url(
+                    'redirect_url' => AAM_Framework_Utility_Redirect::to_redirect_url(
                         $redirect
                     )
                 ]

@@ -249,7 +249,7 @@ class AAM_Service_LoginRedirect
             ];
         }
 
-        return AAM_Framework_Utility::to_redirect_url($redirect);
+        return AAM_Framework_Utility_Redirect::to_redirect_url($redirect);
     }
 
 }

@@ -13,27 +13,23 @@
  * AAM own caching solution to avoid using WP core transients. Some plugins disable
  * WP transients, so this is a work around.
  *
- * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/366
- * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/329
- * @since 6.9.17 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.28
+ * @version 7.0.0
  */
-class AAM_Core_Cache
+class AAM_Framework_Utility_Cache
 {
 
     /**
      * Maximum number of keys to keep in cache
      *
-     * @version 6.9.17
+     * @version 7.0.0
      */
     const DEFAULT_CACHE_CAPACITY = 1000;
 
     /**
      * Core AAM cache db option
      *
-     * @version 6.9.17
+     * @version 7.0.0
      */
     const DB_OPTION = 'aam_cache';
 
@@ -43,7 +39,7 @@ class AAM_Core_Cache
      * @var array
      *
      * @access protected
-     * @version 6.9.17
+     * @version 7.0.0
      */
     private static $_cache = null;
 
@@ -56,7 +52,7 @@ class AAM_Core_Cache
      * @return mixed
      *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
     public static function get($key, $default = null)
     {
@@ -81,11 +77,8 @@ class AAM_Core_Cache
      *
      * @return boolean
      *
-     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/329
-     * @since 6.9.17 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.18
+     * @version 7.0.0
      */
     public static function set($key, $value, $ttl = 86400)
     {
@@ -109,7 +102,7 @@ class AAM_Core_Cache
         }
 
         // Save cache to database
-        return AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
+        return self::_update(self::$_cache);
     }
 
     /**
@@ -122,7 +115,7 @@ class AAM_Core_Cache
      * @return boolean
      *
      * @access public
-     * @version 6.9.28
+     * @version 7.0.0
      */
     public static function update($key, $value, $ttl = null)
     {
@@ -140,7 +133,7 @@ class AAM_Core_Cache
         }
 
         // Save cache to database
-        return AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
+        return self::_update(self::$_cache);
     }
 
     /**
@@ -149,13 +142,17 @@ class AAM_Core_Cache
      * @return void
      *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
     public static function reset()
     {
-        self::$_cache = array();
+        self::$_cache = [];
 
-        AAM_Core_API::deleteOption(self::DB_OPTION);
+        if (is_multisite()) {
+            delete_blog_option(get_current_blog_id(), self::DB_OPTION);
+        } else {
+            delete_option(self::DB_OPTION);
+        }
     }
 
     /**
@@ -164,12 +161,12 @@ class AAM_Core_Cache
      * @return void
      *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
     private static function _bootstrap()
     {
-        self::$_cache = array();
-        $cache        = AAM_Core_API::getOption(self::DB_OPTION, array());
+        self::$_cache = [];
+        $cache        = self::_read_cache();
         $cleared      = false;
 
         // Self-cleaning
@@ -184,8 +181,63 @@ class AAM_Core_Cache
         }
 
         if ($cleared) {
-            AAM_Core_API::updateOption(self::DB_OPTION, self::$_cache, false);
+            self::_update(self::$_cache);
         }
+    }
+
+    /**
+     * Get cache from the database
+     *
+     * @param int $blog_id
+     *
+     * @return mixed
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private static function _read_cache($blog_id = null)
+    {
+        if (is_multisite()) {
+            $result = get_blog_option(
+                ($blog_id ? $blog_id : get_current_blog_id()), self::DB_OPTION, []
+            );
+        } else {
+            $result = get_option(self::DB_OPTION, []);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update cache in the DB
+     *
+     * @param mixed $data
+     * @param int   $blog_id
+     *
+     * @return bool
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private static function _update($data, $blog_id = null)
+    {
+        $old_value = self::_read_cache($blog_id);
+
+        if (maybe_serialize($old_value) !== maybe_serialize($data)) {
+            if (is_multisite()) {
+                $result = update_blog_option(
+                    ($blog_id ? $blog_id : get_current_blog_id()),
+                    self::DB_OPTION,
+                    $data
+                );
+            } else {
+                $result = update_option(self::DB_OPTION, $data, false);
+            }
+        } else {
+            $result = true;
+        }
+
+        return $result;
     }
 
 }

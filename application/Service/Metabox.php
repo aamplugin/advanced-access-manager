@@ -189,7 +189,7 @@ class AAM_Service_Metabox
     {
         global $wp_post_types;
 
-        $response = AAM_Core_Cache::get(
+        $response = AAM_Framework_Utility_Cache::get(
             AAM_Backend_Feature_Main_Metabox::DB_CACHE_OPTION
         );
 

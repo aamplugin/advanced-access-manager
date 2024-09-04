@@ -152,9 +152,9 @@ class AAM_Service_Url
             $redirect = $service->get_redirect($_SERVER['REQUEST_URI']);
 
             if ($redirect['type'] === 'default') {
-                AAM_Framework_Utility::do_access_denied_redirect();
+                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
             } else {
-                AAM_Framework_Utility::do_redirect($redirect);
+                AAM_Framework_Utility_Redirect::do_redirect($redirect);
             }
         }
     }

@@ -1924,10 +1924,10 @@
             function save(item, is_restricted, cb) {
                 getAAM().queueRequest(function () {
                     const payload = getAAM().prepareRequestSubjectData({
-                        is_restricted
+                        effect: is_restricted ? 'deny' : 'allow'
                     });
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/backend-menu/${item}`, {
+                    $.ajax(getAAM().prepareApiEndpoint('/service/backend-menu?slug=' + encodeURI(item)), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -1940,7 +1940,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/backend-menu/${item}`,
+                                request: '/service/backend-menu?slug=' + encodeURI(item),
                                 payload,
                                 response
                             });
@@ -2009,7 +2009,10 @@
                             const status = _this.hasClass('icon-lock-open');
 
                             // Show loading indicator
-                            _this.attr('class', 'aam-accordion-action icon-spin4 animate-spin');
+                            _this.attr(
+                                'class',
+                                'aam-accordion-action icon-spin4 animate-spin'
+                            );
 
                             save(
                                 _this.data('menu-id'),
@@ -2054,7 +2057,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
-                                        request: 'aam/v2/service/backend-menu',
+                                        request: '/service/backend-menu',
                                         response
                                     });
                                 },
@@ -2065,7 +2068,10 @@
                         });
                     });
 
-                    $('[data-toggle="toggle"]', '#admin_menu-content').bootstrapToggle();
+                    $(
+                        '[data-toggle="toggle"]',
+                        '#admin_menu-content'
+                    ).bootstrapToggle();
 
                     getAAM().triggerHook('init-backend-menu');
                 }
@@ -4278,7 +4284,7 @@
         })(jQuery);
 
         /**
-         * Redirect Interface
+         * Access Denied Redirect Interface
          *
          * @param {jQuery} $
          *
@@ -4293,7 +4299,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/access-denied`, {
+                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/access-denied'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4305,7 +4311,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: 'aam/v2/service/redirect/access-denied',
+                                request: '/service/redirect/access-denied',
                                 payload,
                                 response
                             });
@@ -4416,7 +4422,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', null, {
-                                    request: 'aam/v2/service/redirect/access-denied',
+                                    request: '/service/redirect/access-denied',
                                     response
                                 });
                             },
@@ -4706,7 +4712,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/redirect/not-found`, {
+                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/not-found'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4718,7 +4724,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: 'aam/v2/service/redirect/not-found',
+                                request: '/service/redirect/not-found',
                                 payload,
                                 response
                             });
@@ -4800,7 +4806,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', null, {
-                                    request: 'aam/v2/service/redirect/not-found',
+                                    request: '/service/redirect/not-found',
                                     response
                                 });
                             },

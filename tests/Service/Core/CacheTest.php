@@ -10,9 +10,9 @@
 namespace AAM\UnitTest\Service\Core;
 
 use AAM_Core_API,
-    AAM_Core_Cache,
     AAM_Framework_Manager,
     PHPUnit\Framework\TestCase,
+    AAM_Framework_Utility_Cache,
     AAM\UnitTest\Libs\ResetTrait;
 
 /**
@@ -35,21 +35,21 @@ class CacheTest extends TestCase
      */
     public function testCacheReset()
     {
-        AAM_Core_Cache::set('test', 1);
+        AAM_Framework_Utility_Cache::set('test', 1);
 
         $this->assertTrue(
             array_key_exists(
                 'test',
-                AAM_Core_API::getOption(AAM_Core_Cache::DB_OPTION)
+                AAM_Core_API::getOption(AAM_Framework_Utility_Cache::DB_OPTION)
             )
         );
 
-        AAM_Core_Cache::reset();
+        AAM_Framework_Utility_Cache::reset();
 
         $this->assertFalse(
             array_key_exists(
                 'test',
-                AAM_Core_API::getOption(AAM_Core_Cache::DB_OPTION)
+                AAM_Core_API::getOption(AAM_Framework_Utility_Cache::DB_OPTION)
             )
         );
     }
@@ -68,19 +68,19 @@ class CacheTest extends TestCase
             'core.settings.cache.capability', 2
         );
 
-        AAM_Core_Cache::set('test-1', 1);
-        AAM_Core_Cache::set('test-2', 2);
+        AAM_Framework_Utility_Cache::set('test-1', 1);
+        AAM_Framework_Utility_Cache::set('test-2', 2);
 
-        $this->assertEquals(1, AAM_Core_Cache::get('test-1'));
+        $this->assertEquals(1, AAM_Framework_Utility_Cache::get('test-1'));
 
-        AAM_Core_Cache::set('test-3', 3);
+        AAM_Framework_Utility_Cache::set('test-3', 3);
 
-        $this->assertFalse(AAM_Core_Cache::get('test-1', false));
+        $this->assertFalse(AAM_Framework_Utility_Cache::get('test-1', false));
 
         AAM_Framework_Manager::configs()->reset_config(
             'core.settings.cache.capability'
         );
-        AAM_Core_Cache::reset();
+        AAM_Framework_Utility_Cache::reset();
     }
 
 }
