@@ -266,10 +266,16 @@ class AAM_Service_Toolbar
         $response = array();
 
         foreach (json_decode(json_encode($branch), true) as $branch) {
+            if (is_string($branch['title'])) {
+                $title = $branch['title'];
+            } else {
+                $title = __('Invalid Title', AAM_KEY);
+            }
+
             array_push($response, array(
                 'id'       => $branch['id'],
                 'href'     => $branch['href'],
-                'title'    => base64_encode($branch['title']),
+                'title'    => base64_encode($title),
                 'children' => $this->_get_branch_children($branch)
             ));
         }
@@ -297,10 +303,16 @@ class AAM_Service_Toolbar
         foreach ($branch['children'] as $child) {
             if (empty($child['type'])
             || !in_array($child['type'], array('container', 'group'), true)) {
+                if (is_string($child['title'])) {
+                    $title = $child['title'];
+                } else {
+                    $title = __('Invalid Title', AAM_KEY);
+                }
+
                 $children[] = array(
                     'id'    => $child['id'],
                     'href'  => $child['href'],
-                    'title' => base64_encode($child['title'])
+                    'title' => base64_encode($title)
                 );
             }
 
