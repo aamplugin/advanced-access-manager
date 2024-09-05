@@ -29,19 +29,19 @@ implements
     /**
      * Check is menu or submenu is restricted
      *
-     * @param string $item_slug
+     * @param string $slug
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($item_slug)
+    public function is_restricted($slug)
     {
         $restricted = null;
 
         // Decode URL in case of any special characters like &amp;
-        $slug = strtolower(htmlspecialchars_decode($item_slug));
+        $slug = strtolower(htmlspecialchars_decode($slug));
 
         if (!in_array($slug, array('index.php', 'menu-index.php'))) {
             $parent  = $this->_get_parent_item($slug);

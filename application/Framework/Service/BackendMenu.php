@@ -25,6 +25,13 @@ class AAM_Framework_Service_BackendMenu
     use AAM_Framework_Service_BaseTrait;
 
     /**
+     * DB cache option
+     *
+     * @version 7.0.0
+     */
+    const CACHE_DB_OPTION = 'aam_menu_cache';
+
+    /**
      * Return the complete backend menu list with permissions
      *
      * @param array $inline_context Context
@@ -41,7 +48,7 @@ class AAM_Framework_Service_BackendMenu
             $resource = $this->get_resource(true, $inline_context);
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Service_AdminMenu::getInstance()->getMenuCache();
+            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
 
             if (!empty($cache) && is_array($cache)) {
                 foreach ($cache['menu'] as $item) {
@@ -116,10 +123,11 @@ class AAM_Framework_Service_BackendMenu
         $slug, $effect = 'deny', $inline_context = null
     ) {
         try {
-            $result   = $this->get_item($slug);
-            $resource = $this->get_resource(false, $inline_context);
+            $result     = $this->get_item($slug);
+            $resource   = $this->get_resource(false, $inline_context);
+            $permission = [ 'effect' => $effect ];
 
-            if (!$resource->set_permission($result['slug'], $effect)) {
+            if (!$resource->set_permission($result['slug'], $permission)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -233,13 +241,14 @@ class AAM_Framework_Service_BackendMenu
      * @access private
      * @version 6.9.36
      */
-    private function _prepare_menu($menu_item, $resource, $is_top_level = false) {
+    private function _prepare_menu($menu_item, $resource, $is_top_level = false)
+    {
         // Add menu- prefix to define that this is the top level menu.
         // WordPress by default gives the same menu id to the first
         // submenu
-        $menu_id  = strtolower(htmlspecialchars_decode($menu_item['id']));
-        $slug     = ($is_top_level ? 'menu-' : '') . $menu_id;
-        $explicit = $resource->get_explicit_settings();
+        $menu_id     = strtolower(htmlspecialchars_decode($menu_item['id']));
+        $slug        = ($is_top_level ? 'menu-' : '') . $menu_id;
+        $permissions = $resource->get_permissions(true);
 
         $response = array(
             'slug'          => $slug,
@@ -247,11 +256,11 @@ class AAM_Framework_Service_BackendMenu
             'name'          => $this->_filter_menu_name($menu_item['name']),
             'capability'    => $menu_item['cap'],
             'is_restricted' => $resource->is_restricted($slug),
-            'is_inherited'  => !array_key_exists($slug, $explicit)
+            'is_inherited'  => !array_key_exists($slug, $permissions)
         );
 
         if ($is_top_level) {
-            $cache = AAM_Service_AdminMenu::getInstance()->getMenuCache();
+            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
 
             $response['children'] = $this->_get_submenu(
                 $menu_id,

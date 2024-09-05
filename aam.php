@@ -46,12 +46,12 @@ class AAM
         'AAM_Service_LogoutRedirect',
         'AAM_Service_AccessDeniedRedirect',
         'AAM_Service_NotFoundRedirect',
-        'AAM_Service_AdminMenu',
+        // 'AAM_Service_AdminMenu',
         // 'AAM_Service_Metabox'              => AAM_Service_Metabox::FEATURE_FLAG,
         // 'AAM_Service_Toolbar'              => AAM_Service_Toolbar::FEATURE_FLAG,
         // 'AAM_Service_Route'                => AAM_Service_Route::FEATURE_FLAG,
 
-        // 'AAM_Service_Capability'           => AAM_Service_Capability::FEATURE_FLAG,
+        // 'AAM_Service_Capability',
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
 

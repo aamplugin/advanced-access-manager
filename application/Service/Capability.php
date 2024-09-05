@@ -215,7 +215,3 @@ class AAM_Service_Capability
     }
 
 }
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Capability::bootstrap();
-}
