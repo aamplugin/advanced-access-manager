@@ -23,7 +23,7 @@
  * @package AAM
  * @version 6.9.28
  */
-class AAM_Service_AdminMenu
+class AAM_Service_BackendMenu
 {
     use AAM_Core_Contract_ServiceTrait;
 
@@ -39,7 +39,7 @@ class AAM_Service_AdminMenu
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.admin-menu.enabled';
+    const FEATURE_FLAG = 'service.backend-menu.enabled';
 
     /**
      * Constructor
@@ -84,7 +84,7 @@ class AAM_Service_AdminMenu
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -103,21 +103,19 @@ class AAM_Service_AdminMenu
      * @access protected
      * @version 6.9.27
      */
-    public function initializeHooks()
+    protected function initialize_hooks()
     {
         if (is_admin()) {
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
             if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
-                add_filter('parent_file', array($this, 'filterMenu'), PHP_INT_MAX);
-            } elseif (is_super_admin() && AAM::isAAM()) {
+                add_filter('parent_file', function($parent_file) {
+                    return $this->_filter_menu($parent_file);
+                }, PHP_INT_MAX);
+            } elseif (AAM::isAAM() && current_user_can('aam_manage_admin_menu')) {
                 add_filter('parent_file', function() {
-                    global $menu, $submenu;
-
-                    AAM_Framework_Utility_Cache::set(self::CACHE_DB_OPTION, array(
-                        'menu'    => $this->_filter_menu_items($menu),
-                        'submenu' => $this->_filter_submenu_items($submenu)
-                    ), 31536000); // Cache for a year
+                    // This will rebuild the backend menu cache
+                    AAM::api()->backend_menu()->get_item_list();
                 }, PHP_INT_MAX - 1);
             }
         }
@@ -134,8 +132,26 @@ class AAM_Service_AdminMenu
 
         // Control admin area
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
-            add_action('admin_init', array($this, 'checkScreenAccess'));
+            add_action('admin_init', function() {
+                $this->_admin_init();
+            });
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::BACKEND_MENU
+                ) {
+                    $resource = new AAM_Framework_Resource_BackendMenu(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
+        );
 
         // Register RESTful API endpoints
         AAM_Restful_BackendMenuService::bootstrap();
@@ -169,25 +185,6 @@ class AAM_Service_AdminMenu
     // }
 
     /**
-     * Get cached menu array
-     *
-     * @return array
-     *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.17
-     */
-    public function getMenuCache()
-    {
-        $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
-
-        return is_array($cache) ? $cache : array();
-    }
-
-    /**
      * Filter Admin Menu
      *
      * Keep in mind that this function only filter the menu items but does not
@@ -197,42 +194,34 @@ class AAM_Service_AdminMenu
      *
      * @return array
      *
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @global array $menu
-     * @global array $submenu
-     * @version 6.9.14
+     * @access private
+     * @version 7.0.0
      */
-    public function filterMenu($parent_file)
+    private function _filter_menu($parent_file)
     {
         global $menu, $submenu;
 
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::BACKEND_MENU
-        );
+        $service = AAM::api()->backend_menu();
 
         foreach ($menu as $id => $item) {
-            $menu_slug = $item[2];
+            $menu_slug     = $item[2];
+            $is_restricted = $service->is_restricted($menu_slug);
 
             if (!empty($submenu[$menu_slug])) {
                 // Cover the scenario when there are some dynamic submenus
-                $subs = $this->filterSubmenu(
-                    $item, ($resource->is_restricted('menu-' . $menu_slug))
-                );
+                $sub_items = $this->_filter_submenu($item, $is_restricted);
             } else {
-                $subs = array();
+                $sub_items = [];
             }
 
             // Cover scenario like with Visual Composer where landing page
             // is defined dynamically
-            if ($resource->is_restricted('menu-' . $menu_slug)) {
+            if ($is_restricted) { // Is top level menu restricted?
                 unset($menu[$id]);
-            } elseif ($resource->is_restricted($menu_slug)) {
-                if (count($subs)) {
-                    $submenu[$item[2]] = $subs;
-                } else {
+            } elseif ($service->is_restricted($menu_slug)) { // Is sub restricted?
+                if (count($sub_items)) {
+                    $submenu[$item[2]] = $sub_items;
+                } else { // If there are no submenu items defined, just delete menu
                     unset($menu[$id]);
                 }
             }
@@ -261,15 +250,10 @@ class AAM_Service_AdminMenu
      * @return void
      *
      * @access public
-     * @global string $plugin_page
      *
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function checkScreenAccess()
+    private function _admin_init()
     {
         global $plugin_page;
 
@@ -298,11 +282,7 @@ class AAM_Service_AdminMenu
             }
         }
 
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::BACKEND_MENU
-        );
-
-        if ($resource->is_restricted($id)) {
+        if (AAM::api()->backend_menu()->is_restricted($id)) {
             AAM_Framework_Utility_Redirect::do_access_denied_redirect();
         }
     }
@@ -315,25 +295,20 @@ class AAM_Service_AdminMenu
      *
      * @return void
      *
-     * @access protected
+     * @access private
      * @global array $menu
      * @global array $submenu
      * @version 6.0.0
      */
-    protected function filterSubmenu(&$parent, $deny_all = false)
+    private function _filter_submenu(&$parent, $deny_all = false)
     {
         global $submenu;
 
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::BACKEND_MENU
-        );
-
+        $service  = AAM::api()->backend_menu();
         $filtered = [];
 
         foreach ($submenu[$parent[2]] as $id => $item) {
-            if ($deny_all
-                || $resource->is_restricted($this->normalizeItem($item[2]))
-            ) {
+            if ($deny_all || $service->is_restricted($item[2])) {
                 unset($submenu[$parent[2]][$id]);
             } else {
                 $filtered[] = $submenu[$parent[2]][$id];
@@ -346,95 +321,6 @@ class AAM_Service_AdminMenu
         }
 
         return $filtered;
-    }
-
-    /**
-     * Normalize menu item
-     *
-     * @param string $menu
-     *
-     * @return string
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function normalizeItem($menu)
-    {
-        if (strpos($menu, 'customize.php') === 0) {
-            $menu = 'customize.php';
-        }
-
-        return $menu;
-    }
-
-    /**
-     * Filter menu items
-     *
-     * @param array $items
-     *
-     * @return array
-     *
-     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
-     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
-     * @since 6.9.5  Initial implementation of the method
-     *
-     * @access private
-     * @version 6.9.28
-     */
-    private function _filter_menu_items($items)
-    {
-        $response = array();
-
-        if (is_array($items)) {
-            foreach($items as $i => $item) {
-                $response[$i] = array(
-                    'id'   => $item[2],
-                    'cap'  => $item[1],
-                    'name' => base64_encode(
-                        is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
-                    )
-                );
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Filter submenu item list
-     *
-     * @param array $items
-     *
-     * @return array
-     *
-     * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
-     * @since 6.9.27 Initial implementation of the method
-     *
-     * @access private
-     * @version 6.9.28
-     */
-    private function _filter_submenu_items($items)
-    {
-        $response = array();
-
-        if (is_array($items)) {
-            foreach($items as $menu_id => $sub_level) {
-                $response[$menu_id] = array();
-
-                foreach($sub_level as $i => $item) {
-                    $response[$menu_id][$i] = array(
-                        base64_encode(
-                            is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
-                        ),
-                        $item[1],
-                        $item[2]
-                    );
-                }
-            }
-        }
-
-        return $response;
     }
 
 }

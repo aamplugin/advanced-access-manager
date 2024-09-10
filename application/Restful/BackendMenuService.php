@@ -31,14 +31,14 @@ class AAM_Restful_BackendMenuService
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of backend menus
-            $this->_register_route('/backend-menu', array(
+            $this->_register_route('/backend-menu', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menus'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'callback'            => [ $this, 'get_menus' ],
+                'permission_callback' => [ $this, 'check_permissions' ]
+            ]);
 
             // Get a menu
-            $this->_register_route('/backend-menu', array(
+            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_menu_item'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -49,10 +49,10 @@ class AAM_Restful_BackendMenuService
                         'required'    => true
                     )
                 )
-            ));
+            ]);
 
             // Update a menu's permission
-            $this->_register_route('/backend-menu', array(
+            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_menu_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -67,12 +67,17 @@ class AAM_Restful_BackendMenuService
                         'type'        => 'string',
                         'default'     => 'deny',
                         'enum'        => [ 'allow', 'deny' ]
-                    )
+                    ),
+                    'is_top_level' => [
+                        'description' => 'Wether restricting whole branch or not',
+                        'type'        => 'boolean',
+                        'default'     => false
+                    ]
                 )
-            ));
+            ]);
 
             // Delete a menu's permission
-            $this->_register_route('/backend-menu', array(
+            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_menu_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -83,7 +88,7 @@ class AAM_Restful_BackendMenuService
                         'required'    => true
                     )
                 )
-            ));
+            ]);
 
             // Reset all backend menu permissions
             $this->_register_route('/backend-menu', array(
@@ -130,7 +135,9 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item($request->get_param('slug'));
+            $result  = $service->get_item(base64_decode(
+                $request->get_param('slug')
+            ));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -153,8 +160,9 @@ class AAM_Restful_BackendMenuService
         try {
             $service = $this->_get_service($request);
             $result  = $service->update_item_permission(
-                $request->get_param('slug'),
-                $request->get_param('effect')
+                base64_decode($request->get_param('slug')),
+                $request->get_param('effect'),
+                $request->get_param('is_top_level')
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -177,9 +185,9 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_item_permission(
+            $result  = $service->delete_item_permission(base64_decode(
                 $request->get_param('slug')
-            );
+            ));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

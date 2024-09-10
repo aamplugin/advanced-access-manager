@@ -198,22 +198,7 @@ class AAM_Backend_AccessLevel
      */
     public function __call($name, $args)
     {
-        $response = null;
-
-        // Make sure that method is callable
-        if (method_exists($this->_access_level, $name)) {
-            $response = call_user_func_array(
-                array($this->_access_level, $name), $args
-            );
-        } else {
-            _doing_it_wrong(
-                static::class . '::' . $name,
-                'Access level does not have method defined',
-                AAM_VERSION
-            );
-        }
-
-        return $response;
+        return call_user_func_array(array($this->_access_level, $name), $args);
     }
 
     /**

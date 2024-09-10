@@ -1917,17 +1917,23 @@
              *
              * @param {Number}   item
              * @param {Boolean}  is_restricted
+             * @param {Boolean}  is_top_level
              * @param {Callback} cb
              *
              * @returns {Void}
              */
-            function save(item, is_restricted, cb) {
+            function Save(item, is_restricted, is_top_level, cb) {
                 getAAM().queueRequest(function () {
-                    const payload = getAAM().prepareRequestSubjectData({
-                        effect: is_restricted ? 'deny' : 'allow'
-                    });
+                    const payload = {
+                        effect: is_restricted ? 'deny' : 'allow',
+                        is_top_level
+                    };
 
-                    $.ajax(getAAM().prepareApiEndpoint('/service/backend-menu?slug=' + encodeURI(item)), {
+                    const endpoint = getAAM().prepareApiEndpoint(
+                        '/service/backend-menu/' + btoa(item)
+                    );
+
+                    $.ajax(endpoint, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -1940,7 +1946,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: '/service/backend-menu?slug=' + encodeURI(item),
+                                request: '/service/backend-menu/' + encodeURI(item),
                                 payload,
                                 response
                             });
@@ -1963,7 +1969,7 @@
 
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
 
-                            save(_this.data('menu-id'), status, function () {
+                            Save(_this.data('menu-id'), status, true, function () {
                                 $('#aam-menu-overwrite').show();
 
                                 if (status) { //locked the menu
@@ -1998,7 +2004,6 @@
                             $('#menu-item-name').html($(this).data('name'));
                             $('#menu-item-cap').html($(this).data('cap'));
                             $('#menu-item-uri').html($(this).data('uri'));
-                            $('#menu-item-id').html($(this).data('id'));
                         });
                     });
 
@@ -2014,10 +2019,11 @@
                                 'aam-accordion-action icon-spin4 animate-spin'
                             );
 
-                            save(
+                            Save(
                                 _this.data('menu-id'),
                                 status,
-                                function () {
+                                false,
+                                () => {
                                     $('#aam-menu-overwrite').show();
 
                                     if (status) {

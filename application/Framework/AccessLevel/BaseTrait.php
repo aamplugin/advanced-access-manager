@@ -336,6 +336,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
+     * @inheritDoc
+     */
+    public function backend_menu()
+    {
+        return AAM_Framework_Manager::backend_menu([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
      * Inherit settings from parent access level (if any)
      *
      * @param object  $resource

@@ -36,7 +36,7 @@ class GetServiceTest extends TestCase
         );
 
         $this->assertEquals(
-            'AAM_Service_AdminMenu',
+            'AAM_Service_BackendMenu',
             get_class(apply_filters('aam_get_service_filter', null, 'admin-menu'))
         );
 

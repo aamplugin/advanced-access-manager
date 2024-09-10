@@ -181,4 +181,14 @@ interface AAM_Framework_AccessLevel_Interface
      */
     public function content();
 
+    /**
+     * Get Backend Menu service
+     *
+     * @return AAM_Framework_Service_BackendMenu
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function backend_menu();
+
 }
