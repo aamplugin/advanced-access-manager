@@ -161,7 +161,8 @@ final class AAM_Migration_700
             'ipstack.schema'                           => 'service.geo_lookup.ipstack.schema',
             'ipstack.fields'                           => 'service.geo_lookup.ipstack.fields',
             'service.uri.enabled'                      => 'service.url.enabled',
-            'core.service.admin-menu.enabled'          => 'service.backend-menu.enabled'
+            'core.service.admin-menu.enabled'          => 'service.backend-menu.enabled',
+            'core.service.metabox.enabled'             => 'service.metabox.enabled'
         ];
 
         foreach($changes as $legacy => $new) {

@@ -41,7 +41,7 @@ class AAM_Framework_Service_Components
             );
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Service_Metabox::getInstance()->getComponentsCache();
+            $cache = AAM_Service_Component::getInstance()->getComponentsCache();
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $id => $components) {
