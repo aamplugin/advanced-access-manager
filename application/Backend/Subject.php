@@ -13,12 +13,13 @@
  * Currently managed subject. Based on the HTTP request data, define what subject
  * is currently managed with AAM UI.
  *
- * @since 6.2.0 Enhanced security & improved general functionality
- * @since 6.1.1 Improved safety by using a last role as default
- * @since 6.0.0 Initial implementation of the class
+ * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/424
+ * @since 6.2.0  Enhanced security & improved general functionality
+ * @since 6.1.1  Improved safety by using a last role as default
+ * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.2.0
+ * @version 6.9.39
  */
 class AAM_Backend_Subject
 {
@@ -41,20 +42,40 @@ class AAM_Backend_Subject
      *
      * @return void
      *
-     * @since 6.2.0 Enhanced security. Making sure that subject type is normalized
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/424
+     * @since 6.2.0  Enhanced security. Making sure that subject type is normalized
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.9.39
      */
     protected function __construct()
     {
-        $subject = strtolower($this->getFromPost('subject'));
+        $access_level = strtolower($this->getFromPost('subject'));
+        $id           = $this->getFromPost('subjectId');
 
-        if ($subject) {
-            $this->initRequestedSubject($subject, $this->getFromPost('subjectId'));
+        if ($access_level) {
+            AAM_Core_Cache::set(
+                'managed_access_level_by_' . get_current_user_id(),
+                [
+                    'type' => $access_level,
+                    'id'   => $id
+                ]
+            );
+
+            $this->initRequestedSubject($access_level, $id);
         } else {
-            $this->initDefaultSubject();
+            // Read the last known access level that was managed
+            $last_managed_al = $this->_get_last_managed_access_level();
+
+            if (is_null($last_managed_al)) {
+                $this->initDefaultSubject();
+            } else {
+                $this->initRequestedSubject(
+                    $last_managed_al['type'],
+                    (!empty($last_managed_al['id']) ? $last_managed_al['id'] : null)
+                );
+            }
         }
     }
 
@@ -133,13 +154,14 @@ class AAM_Backend_Subject
      *
      * @return AAM_Core_Subject
      *
-     * @since 6.2.0 Refactored to use AAM API to retrieve subject
-     * @since 6.0.0 Initial implementation of the method
+     * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/424
+     * @since 6.2.0  Refactored to use AAM API to retrieve subject
+     * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.2.0
+     * @version 6.9.39
      */
-    protected function initRequestedSubject($type, $id)
+    protected function initRequestedSubject($type, $id = null)
     {
         if ($type === AAM_Core_Subject_User::UID) {
             $subject = AAM::api()->getUser(intval($id));
@@ -262,6 +284,41 @@ class AAM_Backend_Subject
     public function getSubject()
     {
         return $this->subject;
+    }
+
+    /**
+     * Get last managed access level
+     *
+     * @return array|null
+     *
+     * @access private
+     * @version 6.9.39
+     */
+    private function _get_last_managed_access_level()
+    {
+        $level = AAM_Core_Cache::get(
+            'managed_access_level_by_' . get_current_user_id()
+        );
+
+        if (!is_null($level)) {
+            // Verifying that access level exists and is accessible
+            if ($level['type'] === 'role') {
+                if (!AAM_Framework_Manager::roles()->is_editable_role($level['id'])) {
+                    $level = null;
+                }
+            } elseif ($level['type'] === 'user') {
+                $user = apply_filters('aam_get_user', get_user_by('id', $level['id']));
+
+                if ($user === false
+                    || is_wp_error($user)
+                    || !current_user_can('edit_user', $user->ID)
+                ) {
+                    $level = null;
+                }
+            }
+        }
+
+        return $level;
     }
 
 }

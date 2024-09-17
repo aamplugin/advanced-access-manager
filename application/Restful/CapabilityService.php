@@ -10,8 +10,12 @@
 /**
  * RESTful API for the Capabilities service
  *
+ * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/422
+ *               https://github.com/aamplugin/advanced-access-manager/issues/423
+ * @since 6.9.33 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.33
+ * @version 6.9.39
  */
 class AAM_Restful_CapabilityService
 {
@@ -149,8 +153,11 @@ class AAM_Restful_CapabilityService
      *
      * @return WP_REST_Response
      *
+     * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/423
+     * @since 6.9.33 Initial implementation of the method
+     *
      * @access public
-     * @version 6.9.33
+     * @version 6.9.39
      */
     public function create_capability(WP_REST_Request $request)
     {
@@ -161,7 +168,7 @@ class AAM_Restful_CapabilityService
             $capability    = urldecode($request->get_param('slug'));
             $ignore_format = $request->get_param('ignore_format');
 
-            if (!$ignore_format && !preg_match('/^[a-z\d-_]+/', $capability)) {
+            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+/', $capability)) {
                 throw new InvalidArgumentException(
                     'Valid capability slug is required'
                 );
@@ -420,8 +427,11 @@ class AAM_Restful_CapabilityService
      *
      * @return array
      *
+     * @since 6.9.39 https://github.com/aamplugin/advanced-access-manager/issues/422
+     * @since 6.9.33 Initial implementation of the method
+     *
      * @access private
-     * @version 6.9.33
+     * @version 6.9.39
      */
     private function _prepare_permissions($output, WP_REST_Request $request)
     {
@@ -456,7 +466,7 @@ class AAM_Restful_CapabilityService
             }
         }
 
-        if ($manage && $toggle !== false) {
+        if ($toggle !== false) {
             array_push($result, 'allow_toggle');
         }
 

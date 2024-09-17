@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
-Tested up to: 6.6.1
-Stable tag: 6.9.38
+Tested up to: 6.6.2
+Stable tag: 6.9.39
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -79,6 +79,11 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.39 =
+* Fixed: Can't toggle capabilities when "Edit/Delete Capabilities" option is disabled [https://github.com/aamplugin/advanced-access-manager/issues/422](https://github.com/aamplugin/advanced-access-manager/issues/422)
+* Fixed: Fail to create a custom capability with digits [https://github.com/aamplugin/advanced-access-manager/issues/423](https://github.com/aamplugin/advanced-access-manager/issues/423)
+* Fixed: Deleted user may cause DataTables errors on AAM UI [https://github.com/aamplugin/advanced-access-manager/issues/424](https://github.com/aamplugin/advanced-access-manager/issues/424)
 
 = 6.9.38 =
 * Fixed: Capabilities that do not follow WP naming standards can't be toggled [https://github.com/aamplugin/advanced-access-manager/issues/418](https://github.com/aamplugin/advanced-access-manager/issues/418)

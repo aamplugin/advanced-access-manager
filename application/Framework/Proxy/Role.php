@@ -278,9 +278,9 @@ class AAM_Framework_Proxy_Role
         }
 
         if ($save_immediately === true) {
-            $this->_role->remove_cap($sanitized);
+            $this->_role->add_cap($sanitized, false);
         } elseif (isset($this->_role->capabilities[$sanitized])) {
-            unset($this->_role->capabilities[$sanitized]);
+            $this->_role->capabilities[$sanitized] = false;
         }
     }
 
