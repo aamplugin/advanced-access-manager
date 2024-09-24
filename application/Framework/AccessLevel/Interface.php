@@ -191,4 +191,14 @@ interface AAM_Framework_AccessLevel_Interface
      */
     public function backend_menu();
 
+    /**
+     * Get Metaboxes service
+     *
+     * @return AAM_Framework_Service_Metaboxes
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function metaboxes();
+
 }

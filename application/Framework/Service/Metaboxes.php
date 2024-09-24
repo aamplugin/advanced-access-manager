@@ -8,18 +8,22 @@
  */
 
 /**
- * AAM service for Metaboxes & Widgets
- *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.13 Initial implementation of the class
+ * AAM service for Metaboxes
  *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
-class AAM_Framework_Service_Components
+class AAM_Framework_Service_Metaboxes
 {
 
     use AAM_Framework_Service_BaseTrait;
+
+    /**
+     * Collection of captured metaboxes
+     *
+     * @version 7.0.0
+     */
+    const CACHE_DB_OPTION = 'aam_metabox_cache';
 
     /**
      * Return the complete list of all indexed metaboxes & widgets
@@ -29,19 +33,16 @@ class AAM_Framework_Service_Components
      * @return array
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_item_list($screen_id = null, $inline_context = null)
     {
         try {
-            $result       = [];
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::COMPONENT
-            );
+            $result   = [];
+            $resource = $this->get_resource(true, $inline_context);
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Service_Component::getInstance()->getComponentsCache();
+            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $id => $components) {
@@ -76,8 +77,7 @@ class AAM_Framework_Service_Components
      * @return array
      *
      * @access public
-     * @version 6.9.13
-     * @throws OutOfRangeException If menu does not exist
+     * @version 7.0.0
      */
     public function get_item_by_id($id, $inline_context = null)
     {
@@ -111,23 +111,18 @@ class AAM_Framework_Service_Components
      * @return array
      *
      * @access public
-     * @version 6.9.13
-     * @throws RuntimeException If fails to persist changes
+     * @version 7.0.0
      */
     public function update_component_permission(
         $id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $component    = $this->get_item_by_id($id);
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::COMPONENT
-            );
-
+            $component = $this->get_item_by_id($id);
+            $resource  = $this->get_resource(false, $inline_context);
             $screen_id = $this->_convert_screen_id($component['screen_id']);
             $internal  = $screen_id . '|' . $component['slug'];
 
-            if (!$resource->set_explicit_setting($internal, $is_hidden)) {
+            if (!$resource->set_permission($internal, $is_hidden)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -148,27 +143,21 @@ class AAM_Framework_Service_Components
      * @return array
      *
      * @access public
-     * @version 6.9.13
-     * @throws OutOfRangeException If rule does not exist
-     * @throws RuntimeException If fails to persist a rule
+     * @version 7.0.0
      */
     public function delete_component_permission($id, $inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::COMPONENT
-            );
-
+            $resource  = $this->get_resource(false, $inline_context);
             $component = $this->get_item_by_id($id);
-            $explicit  = $resource->get_explicit_settings();
+            $explicit  = $resource->get_permissions(true);
             $screen_id = $this->_convert_screen_id($component['screen_id']);
             $internal  = strtolower($screen_id. '|' . $component['slug']);
 
             if (isset($explicit[$internal])) {
                 unset($explicit[$internal]); // Delete the setting
 
-                $success = $resource->set_explicit_settings($explicit);
+                $success = $resource->set_permissions($explicit);
             } else {
                 $success = true;
             }
@@ -193,21 +182,14 @@ class AAM_Framework_Service_Components
      *
      * @return array
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.13 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
     public function reset($screen_id = null, $inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::COMPONENT
-            );
-
-            $success = true;
+            $resource = $this->get_resource(false, $inline_context);
+            $success  = true;
 
             if (empty($screen_id)) {
                 $resource->reset();
@@ -216,7 +198,7 @@ class AAM_Framework_Service_Components
                 $new_options = [];
 
                 // Filter out all the components that belong to specified screen
-                foreach($resource->get_explicit_settings() as $key => $data) {
+                foreach($resource->get_permissions(true) as $key => $data) {
                     $parts = explode('|', $key);
 
                     if ($parts[0] !== $id) {
@@ -224,7 +206,7 @@ class AAM_Framework_Service_Components
                     }
                 }
 
-                $success = $resource->set_explicit_settings($new_options);
+                $success = $resource->set_permissions($new_options);
             }
 
             if ($success){
@@ -240,11 +222,35 @@ class AAM_Framework_Service_Components
     }
 
     /**
+     * Get metabox resource
+     *
+     * @param array $inline_context
+     *
+     * @return AAM_Framework_Resource_Metabox
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource($reload = false, $inline_context = null)
+    {
+        try {
+            $access_level = $this->_get_access_level($inline_context);
+            $result       = $access_level->get_resource(
+                AAM_Framework_Type_Resource::METABOX, null, $reload
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
      * Normalize and prepare the component model
      *
-     * @param array                            $component
-     * @param string                           $screen_id
-     * @param AAM_Framework_Resource_Component $resource
+     * @param array                          $component
+     * @param string                         $screen_id
+     * @param AAM_Framework_Resource_Metabox $resource
      *
      * @return array
      *
@@ -253,7 +259,7 @@ class AAM_Framework_Service_Components
      */
     private function _prepare_component($component, $screen_id, $resource)
     {
-        $explicit = $resource->get_explicit_settings();
+        $explicit = $resource->get_permissions(true);
         $internal = strtolower($screen_id . '|' . $component['slug']);
 
         $response = array(

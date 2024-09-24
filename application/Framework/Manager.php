@@ -193,18 +193,18 @@ class AAM_Framework_Manager
     }
 
     /**
-     * Get Metaboxes & Widgets (aka Components) service
+     * Get Metaboxes service
      *
      * @param array $runtime_context
      *
-     * @return AAM_Framework_Service_Components
+     * @return AAM_Framework_Service_Metaboxes
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public static function components(array $runtime_context = [])
+    public static function metaboxes(array $runtime_context = [])
     {
-        return AAM_Framework_Service_Components::get_instance(array_merge(
+        return AAM_Framework_Service_Metaboxes::get_instance(array_merge(
             self::$_default_context, $runtime_context
         ));
     }

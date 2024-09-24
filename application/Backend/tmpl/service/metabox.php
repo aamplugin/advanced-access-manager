@@ -14,6 +14,10 @@
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php
+        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $service      = $access_level->metaboxes();
+    ?>
     <div class="aam-feature" id="metabox-content">
         <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
             <div class="row">
@@ -32,7 +36,7 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
                 </div>
@@ -42,31 +46,38 @@
         <?php
             global $wp_post_types;
 
-            $first      = false;
-            $components = AAM_Framework_Manager::components(array(
+            $first = false;
+            $list  = AAM_Framework_Manager::metaboxes(array(
                 'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
             ))->get_item_list();
 
             // Group all the components by screen
             $grouped = array();
-            foreach($components as $component) {
-                $screen = $component['screen_id'];
+            foreach($list as $item) {
+                $screen = $item['screen_id'];
 
                 if (!isset($grouped[$screen])) {
                     $grouped[$screen] = array();
                 }
 
-                array_push($grouped[$screen], $component);
+                array_push($grouped[$screen], $item);
             }
         ?>
 
-        <?php if (!empty($components)) { ?>
+        <?php if (!empty($list)) { ?>
             <div class="panel-group" id="metabox-list" role="tablist">
-                <?php foreach ($grouped as $screen_id => $components) { ?>
+                <?php foreach ($grouped as $screen_id => $metaboxes) { ?>
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="group-<?php echo esc_js($screen_id); ?>-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#metabox-list" href="#group-<?php echo esc_js($screen_id); ?>" aria-controls="group-<?php echo esc_js($screen_id); ?>" <?php if (!$first) { echo 'aria-expanded="true"'; } ?>>
+                                <a
+                                    role="button"
+                                    data-toggle="collapse"
+                                    data-parent="#metabox-list"
+                                    href="#group-<?php echo esc_js($screen_id); ?>"
+                                    aria-controls="group-<?php echo esc_js($screen_id); ?>"
+                                    <?php if (!$first) { echo 'aria-expanded="true"'; } ?>
+                                >
                                     <?php
                                         switch ($screen_id) {
                                             case 'dashboard':
@@ -93,7 +104,7 @@
                         >
                             <div class="panel-body">
                                 <div class="row">
-                                    <?php foreach ($components as $component) { ?>
+                                    <?php foreach ($metaboxes as $component) { ?>
                                         <div class="col-xs-12 col-md-6 aam-submenu-item">
                                             <div class="aam-menu-details">
                                                 <?php echo esc_js($component['name']); ?>
@@ -119,10 +130,10 @@
                                 </div>
 
                                 <?php echo apply_filters(
-                                    'aam_component_screen_mode_panel_filter',
+                                    'aam_ui_metaboxes_screen_mode_panel_filter',
                                     '',
                                     $screen_id,
-                                    AAM_Backend_AccessLevel::getInstance()->components()
+                                    AAM_Backend_AccessLevel::getInstance()->metaboxes()
                                 ); ?>
                             </div>
                         </div>

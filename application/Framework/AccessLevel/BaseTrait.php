@@ -346,6 +346,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
+     * @inheritDoc
+     */
+    public function metaboxes()
+    {
+        return AAM_Framework_Manager::metaboxes([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
      * Inherit settings from parent access level (if any)
      *
      * @param object  $resource

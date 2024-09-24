@@ -8,12 +8,12 @@
  */
 
 /**
- * RESTful API for the Metaboxes & Widgets service
+ * RESTful API for the Metaboxes service
  *
  * @package AAM
- * @version 6.9.13
+ * @version 7.0.0
  */
-class AAM_Restful_ComponentService
+class AAM_Restful_MetaboxService
 {
 
     use AAM_Restful_ServiceTrait;
@@ -30,10 +30,10 @@ class AAM_Restful_ComponentService
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get the list of all metaboxes & widgets grouped by screen
-            $this->_register_route('/components', array(
+            // Get the list of all metaboxes grouped by screen
+            $this->_register_route('/metaboxes', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_components'),
+                'callback'            => array($this, 'get_list'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
                     'screen_id' => array(
@@ -43,29 +43,29 @@ class AAM_Restful_ComponentService
                 )
             ));
 
-            // Get a metabox or widget
-            $this->_register_route('/component/(?P<id>[\d]+)', array(
+            // Get a metabox
+            $this->_register_route('/metabox/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_component'),
+                'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Metabox or widget unique ID',
-                        'type'        => 'number',
+                        'description' => 'Metabox unique ID',
+                        'type'        => 'string',
                         'required'    => true
                     )
                 )
             ));
 
-            // Update a component's permission
-            $this->_register_route('/component/(?P<id>[\d]+)', array(
+            // Update a metabox's permission
+            $this->_register_route('/metabox/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_component_permission'),
+                'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Component unique ID',
-                        'type'        => 'number',
+                        'description' => 'Metabox unique ID',
+                        'type'        => 'string',
                         'required'    => true
                     ),
                     'is_hidden' => array(
@@ -76,14 +76,14 @@ class AAM_Restful_ComponentService
                 )
             ));
 
-            // Delete a component's permission
-            $this->_register_route('/component/(?P<id>[\d]+)', array(
+            // Delete a metabox's permission
+            $this->_register_route('/metabox/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_component_permission'),
+                'callback'            => array($this, 'delete_metabox_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Component unique ID',
+                        'description' => 'Metabox unique ID',
                         'type'        => 'number',
                         'required'    => true
                     )
@@ -91,7 +91,7 @@ class AAM_Restful_ComponentService
             ));
 
             // Reset all or specific screen permissions
-            $this->_register_route('/components', array(
+            $this->_register_route('/metaboxes', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -115,7 +115,7 @@ class AAM_Restful_ComponentService
      * @access public
      * @version 6.9.13
      */
-    public function get_components(WP_REST_Request $request)
+    public function get_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -128,7 +128,7 @@ class AAM_Restful_ComponentService
     }
 
     /**
-     * Get a component by ID
+     * Get a metabox by ID
      *
      * @param WP_REST_Request $request
      *
@@ -137,7 +137,7 @@ class AAM_Restful_ComponentService
      * @access public
      * @version 6.9.13
      */
-    public function get_component(WP_REST_Request $request)
+    public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -152,7 +152,7 @@ class AAM_Restful_ComponentService
     }
 
     /**
-     * Update component permission
+     * Update metabox permission
      *
      * @param WP_REST_Request $request
      *
@@ -161,7 +161,7 @@ class AAM_Restful_ComponentService
      * @access public
      * @version 6.9.13
      */
-    public function update_component_permission(WP_REST_Request $request)
+    public function update_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -177,7 +177,7 @@ class AAM_Restful_ComponentService
     }
 
     /**
-     * Delete component permission
+     * Delete metabox permission
      *
      * @param WP_REST_Request $request
      *
@@ -186,7 +186,7 @@ class AAM_Restful_ComponentService
      * @access public
      * @version 6.9.13
      */
-    public function delete_component_permission(WP_REST_Request $request)
+    public function delete_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -241,14 +241,14 @@ class AAM_Restful_ComponentService
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Framework_Service_Components
+     * @return AAM_Framework_Service_Metaboxes
      *
      * @access private
-     * @version 6.9.13
+     * @version 7.0.0
      */
     private function _get_service($request)
     {
-        return AAM_Framework_Manager::components([
+        return AAM_Framework_Manager::metaboxes([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
