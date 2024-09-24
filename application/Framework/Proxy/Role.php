@@ -10,12 +10,13 @@
 /**
  * AAM WP_Role proxy
  *
+ * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
  * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
  * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.35
+ * @version 6.9.38
  */
 class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 {
@@ -227,13 +228,16 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
      *
      * @return void
      *
+     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
+     * @since 6.9.6  Initial implementation of the method
+     *
      * @access public
      * @throws InvalidArgumentException
-     * @since 6.9.6
+     * @since 6.9.38
      */
     public function add_capability($capability, $save_immediately = false)
     {
-        $sanitized = sanitize_key($capability);
+        $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
             throw new InvalidArgumentException(
@@ -256,13 +260,16 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
      *
      * @return void
      *
+     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
+     * @since 6.9.6  Initial implementation of the method
+     *
      * @access public
      * @throws InvalidArgumentException
-     * @since 6.9.6
+     * @since 6.9.38
      */
     public function remove_capability($capability, $save_immediately = false)
     {
-        $sanitized = sanitize_key($capability);
+        $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
             throw new InvalidArgumentException(
@@ -271,9 +278,9 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
         }
 
         if ($save_immediately === true) {
-            $this->_role->remove_cap($sanitized);
+            $this->_role->add_cap($sanitized, false);
         } elseif (isset($this->_role->capabilities[$sanitized])) {
-            unset($this->_role->capabilities[$sanitized]);
+            $this->_role->capabilities[$sanitized] = false;
         }
     }
 

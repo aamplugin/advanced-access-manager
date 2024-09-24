@@ -10,12 +10,13 @@
 /**
  * RESTful API for role management
  *
+ * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
  * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
  * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.10
+ * @version 6.9.38
  */
 class AAM_Restful_RoleService
 {
@@ -32,11 +33,12 @@ class AAM_Restful_RoleService
      *
      * @return void
      *
-     * @since 6.9.7 https://github.com/aamplugin/advanced-access-manager/issues/259
-     * @since 6.9.7 Initial implementation of the method
+     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
+     * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
+     * @since 6.9.6  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.7
+     * @version 6.9.38
      */
     protected function __construct()
     {
@@ -114,12 +116,8 @@ class AAM_Restful_RoleService
                         'description' => 'List of capabilities to assign',
                         'type'        => 'array',
                         'items'       => array(
-                            'type'    => 'string',
-                            'pattern' => '[\w\-]+'
-                        ),
-                        'validate_callback' => function ($value) {
-                            return $this->_validate_keys_array_input($value);
-                        }
+                            'type' => 'string'
+                        )
                     ),
                     'parent_role' => array(
                         'description' => 'Parent role slug (aka ID)',
@@ -177,23 +175,15 @@ class AAM_Restful_RoleService
                         'description' => 'List of capabilities to assign',
                         'type'        => 'array',
                         'items'       => array(
-                            'type'    => 'string',
-                            'pattern' => '[\w\-]+'
-                        ),
-                        'validate_callback' => function ($value) {
-                            return $this->_validate_keys_array_input($value);
-                        }
+                            'type' => 'string'
+                        )
                     ),
                     'remove_capabilities' => array(
                         'description' => 'List of capabilities to remove',
                         'type'        => 'array',
                         'items'       => array(
-                            'type'    => 'string',
-                            'pattern' => '[\w\-]+'
-                        ),
-                        'validate_callback' => function ($value) {
-                            return $this->_validate_keys_array_input($value);
-                        }
+                            'type' => 'string'
+                        )
                     )
                 )
             ));

@@ -81,7 +81,7 @@ class CapabilityManagerTest extends TestCase
         $option = get_option(sprintf('%suser_roles', $wpdb->prefix));
 
         $this->assertFalse(
-            array_key_exists('aam_test_cap_a', $option['subscriber']['capabilities'])
+            $option['subscriber']['capabilities']['aam_test_cap_a']
         );
     }
 
