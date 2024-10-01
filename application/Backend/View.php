@@ -360,6 +360,12 @@ class AAM_Backend_View
                 }
                 break;
 
+            case 'audit':
+                if (current_user_can('aam_trigger_audit')) {
+                    $content = $this->loadTemplate($basedir . 'security-audit.php');
+                }
+                break;
+
             case 'post-access-form':
                 $type    = $this->getFromPost('type'); // Type of object to load
                 $id      = $this->getFromPost('id'); // Object Id

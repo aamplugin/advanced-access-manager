@@ -76,6 +76,12 @@
                                         <span><?php echo __('Settings', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
+                                <?php if (AAM_Service_SecurityAudit::bootstrap()->is_enabled()) { ?>
+                                    <a href="#" title="Security Audit" data-type="audit" class="aam-area">
+                                        <i class="icon-eye"></i>
+                                        <span><?php echo __('Security Audit', AAM_KEY); ?></span>
+                                    </a>
+                                <?php } ?>
                                 <?php if (current_user_can('aam_manage_addons')) { ?>
                                     <a href="#" title="Premium" data-type="extensions" class="aam-area">
                                         <i class="icon-cubes"></i>
@@ -222,6 +228,22 @@
                         </div>
                     </div>
                 <?php } ?>
+
+                <div class="metabox-holder audit-metabox" style="display:none;">
+                    <div class="postbox">
+                        <div class="inside">
+                            <div class="aam-postbox-inside text-center">
+                                <p class="text-larger aam-info text-left">
+                                    <strong>Need help interpreting your security audit report and identifying the next steps to address critical issues?</strong>
+                                    Email us your report at <a href="mailto:support@aamplugin.com">support@aamplugin.com</a>, and we'll schedule a video consultation to guide you.
+                                    Please note, this is a paid service, and we will send an invoice prior to the session.
+                                </p>
+                                <a href="#" class="btn btn-info btn-block download-latest-report""><?php echo __('Download Latest Report', AAM_KEY); ?></a>
+                                <a href="mailto:support@aamplugin.com" class="btn btn-primary btn-block"><?php echo __('Contact Us', AAM_KEY); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel.php'); ?>
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel-advanced.php'); ?>

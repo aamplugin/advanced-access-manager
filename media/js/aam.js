@@ -6221,6 +6221,215 @@
         })(jQuery);
 
         /**
+         * Security Audit Interface
+         *
+         * @param {jQuery} $
+         *
+         * @returns {void}
+         */
+        (function ($) {
+
+            /**
+             *
+             */
+            const queue = [];
+
+            /**
+             *
+             */
+            let issues_index = {};
+
+            /**
+             *
+             */
+            function TriggerAudit(reset = false) {
+                getAAM().queueRequest(function () {
+                    const current_step = queue[0];
+                    const step_title   = $(`#check_${current_step}_status`).data('title');
+                    const indicator    = $(`.aam-security-audit-step[data-step="${current_step}"]`);
+                    const payload      = {
+                        step: current_step,
+                        reset
+                    };
+
+                    if (issues_index[current_step] === undefined) {
+                        issues_index[current_step] = {};
+                    }
+
+                    indicator.attr(
+                        'class', 'aam-security-audit-step icon-spin4 animate-spin'
+                    );
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit`, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        dataType: 'json',
+                        data: payload,
+                        success: function (response) {
+                            // Append the list of identified issues to the list
+                            if (Array.isArray(response.issues)) {
+                                $.each(response.issues, (_, issue) => {
+                                    $(`#issue_list_${current_step} tbody`).append(
+                                        '<tr><td><strong>' + issue.type.toUpperCase() + ':</strong> ' + issue.reason + '</td></tr>'
+                                    );
+
+                                    // Also increment the issue index
+                                    if (issues_index[current_step][issue.type] === undefined) {
+                                        issues_index[current_step][issue.type] = 0;
+                                    }
+
+                                    issues_index[current_step][issue.type]++;
+                                });
+
+                                $(`#issue_list_${current_step}`).removeClass('hidden');
+                            }
+
+                            if (response.is_completed) {
+                                queue.shift(); // Remove completed step
+
+                                // Visual feedback that the step is completed
+                                const styles = ['aam-security-audit-step'];
+                                if (response.check_status === 'ok') {
+                                    styles.push('icon-ok-circled', 'text-success');
+                                } else if (response.check_status === 'critical') {
+                                    styles.push('icon-cancel-circled', 'text-danger');
+                                } else if (response.check_status === 'warning') {
+                                    styles.push('icon-attention-circled', 'text-warning');
+                                } else if (response.check_status === 'notice') {
+                                    styles.push('icon-info-circled', 'text-info');
+                                }
+
+                                indicator.attr('class', styles.join(' '));
+
+                                // Computing the number of issues
+                                const summary = [];
+
+                                for(const type in issues_index[current_step]) {
+                                    const c = issues_index[current_step][type];
+                                    const p = c > 1;
+
+                                    summary.push(
+                                        c + ' ' + getAAM().__(type + (p ? 's' : ''))
+                                    );
+                                }
+
+                                $(`#check_${current_step}_status`).html(
+                                    step_title + ' - <b>DONE ' + (summary.length ? '(' + summary.join(', ') + ')' : '(OK)' ) + '</b>'
+                                );
+
+                                if (queue.length) {
+                                    TriggerAudit();
+                                } else {
+                                    $('#execute_security_audit')
+                                        .text(getAAM().__('Execute the Security Audit'))
+                                        .attr('disabled', false);
+
+                                    $('#download_report_container').removeClass('hidden');
+                                }
+                            } else {
+                                $(`#check_${current_step}_status`).text(
+                                    step_title + ' - ' + (response.progress * 100).toFixed(2) + '%'
+                                );
+
+                                TriggerAudit();
+                            }
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/audit`,
+                                payload,
+                                response
+                            });
+                        }
+                    });
+                });
+            }
+
+            /**
+             *
+             */
+            function DownloadReport(btn) {
+                getAAM().queueRequest(function () {
+                    btn
+                        .text(getAAM().__('Generating Report...'))
+                        .prop('disabled', true);
+
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit/report`, {
+                        type: 'GET',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'Accept': 'text/csv'
+                        },
+                        success: function (response) {
+                            getAAM().downloadFile(
+                                response, 'audit-report.csv', 'text/csv', false
+                            );
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/audit/report`,
+                                response
+                            });
+                        },
+                        complete: function() {
+                            btn
+                                .text(getAAM().__('Download Latest Report'))
+                                .prop('disabled', false);
+                        }
+                    });
+                });
+            }
+
+            /**
+             *
+             * @returns {undefined}
+             */
+            function initialize() {
+                if ($('#audit-content').length) {
+                    $('#execute_security_audit').bind('click', function () {
+                        $(this)
+                            .text(getAAM().__('Running Audit. Do Not Refresh The Page'))
+                            .attr('disabled', true);
+
+                        // Hide the download report container
+                        $('#download_report_container').addClass('hidden');
+
+                        // Reset all previous results
+                        $('.aam-detected-issues tbody').empty();
+                        $('.aam-security-audit-step').attr(
+                            'class', 'icon-circle-thin text-info aam-security-audit-step'
+                        );
+                        $('.aam-check-status').each(function() {
+                            $(this).text($(this).data('title'));
+                        });
+
+                        // Reset the issues index
+                        issues_index = {};
+
+                        // Getting the queue of steps to execute
+                        $('.aam-security-audit-step').each(function() {
+                            queue.push($(this).data('step'));
+                        });
+
+                        // Triggering the queue loop and perform the audit
+                        // step-by-step
+                        TriggerAudit(true);
+                    });
+
+                    $('.download-latest-report').bind('click', function() {
+                        DownloadReport($(this));
+                    });
+                }
+            }
+
+            getAAM().addHook('init', initialize);
+
+        })(jQuery);
+
+        /**
          * Settings Interface
          *
          * @param {type} $
@@ -7327,10 +7536,17 @@
     /**
      *
      */
-    AAM.prototype.downloadFile = function(content, filename, mime) {
-        const binaryString = window.atob(content); // Comment this if not using base64
-        const bytes = new Uint8Array(binaryString.length);
-        const base64 = bytes.map((byte, i) => binaryString.charCodeAt(i));
+    AAM.prototype.downloadFile = function(content, filename, mime, decode = true) {
+        let binaryString;
+
+        if (decode) {
+            binaryString = window.atob(content);
+        } else {
+            binaryString = content;
+        }
+
+        const bytes  = new Uint8Array(binaryString.length);
+        const base64 = bytes.map((_, i) => binaryString.charCodeAt(i));
 
         var blob = new Blob([base64], { type: mime || 'application/octet-stream' });
 

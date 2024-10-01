@@ -52,7 +52,7 @@ trait AAM_Core_Contract_ServiceTrait
     /**
      * Bootstrap the service
      *
-     * @return void
+     * @return object
      *
      * @param boolean $reload
      *

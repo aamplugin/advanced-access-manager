@@ -983,6 +983,16 @@ input[type=radio]:checked+label:before {
   color: #f0ad4e;
 }
 
+.aam-security-audit-step {
+  font-size: 2rem;
+}
+
+.table-bordered.aam-detected-issues > thead > tr > th {
+  border-color: #333333;
+  background-color: #333333;
+  color: #FFFFFF;
+}
+
 .aam-redirect-action {
   padding: 10px 20px;
 }
@@ -1379,6 +1389,13 @@ input[type=radio]:checked+label:before {
   padding: 10px;
   position: relative;
   font-size: 1em;
+  margin-bottom: 20px !important;
+}
+
+.aam-highlighted {
+  background-color: #FAFAFA;
+  padding: 10px;
+  position: relative;
   margin-bottom: 20px !important;
 }
 
