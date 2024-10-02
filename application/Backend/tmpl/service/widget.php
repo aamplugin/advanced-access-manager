@@ -76,7 +76,21 @@
                                     aria-controls="group-<?php echo esc_js($screen_id); ?>"
                                     <?php if (!$first) { echo 'aria-expanded="true"'; } ?>
                                 >
-                                    <?php echo $wp_post_types[$screen_id]->labels->name; ?>
+                                    <?php
+                                        switch ($screen_id) {
+                                            case 'dashboard':
+                                                echo __('Dashboard Widgets', AAM_KEY);
+                                                break;
+
+                                            case 'frontend':
+                                                echo AAM_Backend_View_Helper::preparePhrase('Frontend Widgets [(including Appearance->Widgets)]', 'small');
+                                                break;
+
+                                            default:
+                                                echo $wp_post_types[$screen_id]->labels->name;
+                                                break;
+                                        }
+                                    ?>
                                 </a>
                             </h4>
                         </div>

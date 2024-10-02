@@ -38,8 +38,8 @@ implements
      */
     public function is_hidden($id)
     {
-        if (array_key_exists($id, $this->_settings)) {
-            $result = $this->_settings[$id]['effect'] !== 'allow';
+        if (array_key_exists($id, $this->_permissions)) {
+            $result = $this->_permissions[$id]['effect'] !== 'allow';
         } else {
             $result = null;
         }

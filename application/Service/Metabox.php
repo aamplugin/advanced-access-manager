@@ -47,7 +47,7 @@ class AAM_Service_Metabox
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Metaboxes', AAM_KEY),
-                    'description' => __('Control the visibility of classic backend metaboxes for any role, user, or visitor. This service exclusively hides unwanted metaboxes without preventing direct data manipulation or spoofing.', AAM_KEY),
+                    'description' => __('Control the visibility of classic backend metaboxes for any role, user, or visitor. This service exclusively hides unwanted metaboxes from the admin screens.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -95,8 +95,9 @@ class AAM_Service_Metabox
                         $id = ($screen ? $screen->id : '');
                     }
 
-                    $model = new AAM_Backend_Feature_Main_Metabox;
-                    $model->initialize($id);
+                    $this->_initialize_metaboxes($id);
+
+                    exit; // No need to load the rest of the site
                 }
             }, 999);
 
@@ -181,6 +182,51 @@ class AAM_Service_Metabox
     // }
 
     /**
+     * Initialize list of metaboxes for given screen
+     *
+     * @param string $screen_id
+     *
+     * @return void
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _initialize_metaboxes($screen_id)
+    {
+        global $wp_meta_boxes;
+
+        $cache = AAM_Framework_Utility_Cache::get(
+            AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, []
+        );
+
+        if (!isset($cache[$screen_id])) {
+            $cache[$screen_id] = [];
+        }
+
+        if (isset($wp_meta_boxes[$screen_id])) {
+            foreach ((array) $wp_meta_boxes[$screen_id] as $levels) {
+                foreach ((array) $levels as $boxes) {
+                    foreach ((array) $boxes as $data) {
+                        if (trim($data['id'])) { //exclude any junk
+                            $cache[$screen_id][$data['id']] = array(
+                                'slug'  => $data['id'],
+                                'title' => wp_strip_all_tags($data['title'])
+                            );
+                        }
+                    }
+                }
+            }
+
+            // Removing duplicates
+            $cache[$screen_id] = array_values($cache[$screen_id]);
+        }
+
+        AAM_Framework_Utility_Cache::set(
+            AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, $cache, 31536000
+        );
+    }
+
+    /**
      * Handle metabox initialization process
      *
      * @return void
@@ -205,7 +251,7 @@ class AAM_Service_Metabox
         ) {
             foreach ($wp_meta_boxes as $screen_id => $zones) {
                 if ($current_id === $screen_id) {
-                    $this->filterZones($zones, $screen_id);
+                    $this->_filter_zones($zones, $screen_id);
                 }
             }
         }
@@ -219,39 +265,20 @@ class AAM_Service_Metabox
      *
      * @return void
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function filterZones($zones, $screen_id)
+    private function _filter_zones($zones, $screen_id)
     {
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
-                $this->removeMetaboxes($zone, $metaboxes, $screen_id);
-            }
-        }
-    }
+                $resource = AAM::api()->metaboxes()->get_resource();
 
-    /**
-     * Filter list of metaboxes on the screen
-     *
-     * @param string $zone
-     * @param array  $metaboxes
-     * @param string $screen_id
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function removeMetaboxes($zone, $metaboxes, $screen_id)
-    {
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::METABOX
-        );
-
-        foreach (array_keys($metaboxes) as $id) {
-            if ($resource->is_hidden($screen_id, $id)) {
-                remove_meta_box($id, $screen_id, $zone);
+                foreach (array_keys($metaboxes) as $id) {
+                    if ($resource->is_hidden($screen_id, $id)) {
+                        remove_meta_box($id, $screen_id, $zone);
+                    }
+                }
             }
         }
     }

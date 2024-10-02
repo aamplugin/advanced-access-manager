@@ -43,6 +43,13 @@ class AAM_Restful_MetaboxService
                 )
             ));
 
+            // Get the list of admin screens
+            $this->_register_route('/screens', array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array($this, 'get_screen_list'),
+                'permission_callback' => array($this, 'check_permissions')
+            ));
+
             // Get a metabox
             $this->_register_route('/metabox/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
@@ -120,6 +127,30 @@ class AAM_Restful_MetaboxService
         try {
             $service = $this->_get_service($request);
             $result  = $service->get_item_list($request->get_param('screen_id'));
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Get the list of admin screens
+     *
+     * The list is used to initialize all the metaboxes
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_screen_list(WP_REST_Request $request)
+    {
+        try {
+            $service = $this->_get_service($request);
+            $result  = $service->get_screen_list();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

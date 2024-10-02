@@ -2335,40 +2335,31 @@
                 if ($('#metabox-content').length) {
                     //init refresh list button
                     $('#refresh-metabox-list').bind('click', function () {
-                        $.ajax(getLocal().ajaxurl, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Main_Metabox.prepareInitialization',
-                                _ajax_nonce: getLocal().nonce
-                            },
-                            beforeSend: function () {
-                                $('i', '#refresh-metabox-list').attr(
-                                    'class', 'icon-spin4 animate-spin'
-                                );
-                            },
-                            success: function (response) {
-                                if (response.status === 'success') {
-                                    fetchData(
-                                        response.endpoints,
-                                        0,
-                                        $('i', '#refresh-metabox-list')
+                        getAAM().queueRequest(function () {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/screens`), {
+                                type: 'GET',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce
+                                },
+                                dataType: 'json',
+                                beforeSend: function () {
+                                    $('i', '#refresh-metabox-list').attr(
+                                        'class', 'icon-spin4 animate-spin'
                                     );
-                                } else {
-                                    getAAM().notification(
-                                        'danger',
-                                        getAAM().__('Failed to retrieve mataboxes')
+                                },
+                                success: function (response) {
+                                    fetchData(
+                                        response, 0, $('i', '#refresh-metabox-list')
+                                    );
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+
+                                    $('i', '#refresh-metabox-list').attr(
+                                        'class', 'icon-arrows-cw'
                                     );
                                 }
-                            },
-                            error: function () {
-                                getAAM().notification('danger');
-
-                                $('i', '#refresh-metabox-list').attr(
-                                    'class', 'icon-arrows-cw'
-                                );
-                            }
+                            });
                         });
                     });
 

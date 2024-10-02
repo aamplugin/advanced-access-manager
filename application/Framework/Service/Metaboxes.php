@@ -37,19 +37,25 @@ class AAM_Framework_Service_Metaboxes
      */
     public function get_item_list($screen_id = null, $inline_context = null)
     {
+        global $wp_post_types;
+
         try {
             $result   = [];
             $resource = $this->get_resource(true, $inline_context);
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
+            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
 
             if (!empty($cache) && is_array($cache)) {
-                foreach($cache as $id => $components) {
-                    foreach($components as $component) {
-                        array_push($result, $this->_prepare_component(
-                            $component, $id, $resource
-                        ));
+                foreach($cache as $s_id => $components) {
+                    // Remove list of metaboxes for indexed post types that no longer
+                    // exist
+                    if (array_key_exists($s_id, $wp_post_types)) {
+                        foreach($components as $component) {
+                            array_push($result, $this->_prepare_component(
+                                $component, $s_id, $resource
+                            ));
+                        }
                     }
                 }
             }
@@ -60,6 +66,39 @@ class AAM_Framework_Service_Metaboxes
                         return $c['screen_id'] === $screen_id;
                     })
                 );
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the complete list of admin screens AAM uses to index metaboxes
+     *
+     * @param array $inline_context
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_screen_list($inline_context = null)
+    {
+        global $wp_post_types;
+
+        try {
+            $result = [];
+
+            foreach (array_keys($wp_post_types) as $type) {
+                if ($wp_post_types[$type]->show_ui) {
+                    $result[] = add_query_arg(
+                        'init',
+                        'metabox',
+                        admin_url('post-new.php?post_type=' . $type)
+                    );
+                }
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
