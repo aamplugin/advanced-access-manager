@@ -369,6 +369,11 @@ class AAM_Backend_View
                     $this->getFromPost('resource_id'),
                     $this->getFromPost('resource_type')
                 );
+
+            case 'audit':
+                if (current_user_can('aam_trigger_audit')) {
+                    $content = $this->loadTemplate($basedir . 'security-audit.php');
+                }
                 break;
 
             default:

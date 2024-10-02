@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.6.2
-Stable tag: 6.9.39
+Stable tag: 6.9.41
 
 Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
 
@@ -16,6 +16,7 @@ https://www.youtube.com/watch?v=9oU6wjlSRM8
 
 = Key Features =
 
+* **Security Audit:** Service that can quickly identified potential broken access controls, compromised accounts and server misconfigurations.
 * **Unparalleled Flexibility:** The only plugin that offers the freedom to define highly specific access controls across your entire site, with most features available for free.
 * **Proven Reliability:** Trusted by over 150,000 websites, AAM is rigorously tested and [well-documented](https://aamportal.com/support), ensuring top-notch quality with minimal support needed.
 * **Comprehensive Access Management:** Control access for any role, user, or visitor, and configure default permissions for posts, pages, custom post types, categories, and taxonomies.
@@ -79,6 +80,9 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.41 =
+* Added: New Security Audit service [https://github.com/aamplugin/advanced-access-manager/issues/425](https://github.com/aamplugin/advanced-access-manager/issues/425)
 
 = 6.9.39 =
 * Fixed: Can't toggle capabilities when "Edit/Delete Capabilities" option is disabled [https://github.com/aamplugin/advanced-access-manager/issues/422](https://github.com/aamplugin/advanced-access-manager/issues/422)

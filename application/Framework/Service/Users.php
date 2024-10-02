@@ -66,7 +66,7 @@ class AAM_Framework_Service_Users
             $result = $this->_handle_error($e);
         }
 
-        return $result;
+        return $args['result_type'] === 'list' ? $result['list'] : $result;
     }
 
     /**
