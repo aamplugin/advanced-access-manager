@@ -47,7 +47,7 @@ class AAM_Service_Widget
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
                     'title'       => __('Widgets', AAM_KEY),
-                    'description' => __('Control the visibility of widgets on the backend and frontend for any role, user, or visitor. This service exclusively hides unwanted widgets without preventing direct data manipulation or spoofing.', AAM_KEY),
+                    'description' => __('Control the visibility of widgets on the backend and frontend for any role, user, or visitor. This service exclusively hides unwanted widgets.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
@@ -59,7 +59,7 @@ class AAM_Service_Widget
             if (is_admin()) {
                 // Hook that initialize the AAM UI part of the service
                 add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Metabox::register();
+                    AAM_Backend_Feature_Main_Widget::register();
                 });
             }
 
@@ -68,55 +68,50 @@ class AAM_Service_Widget
     }
 
     /**
-     * Initialize Metaboxes & Widgets hooks
+     * Initialize Widgets hooks
      *
      * @return void
      *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/315
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.16
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
         if (is_admin()) {
             // Manager WordPress metaboxes
             add_action('in_admin_header', function () {
-                global $post;
+                if (AAM_Core_Request::get('init') === 'widget') {
+                    $screen = get_current_screen();
 
-                if (AAM_Core_Request::get('init') === 'metabox') {
-                    //make sure that nobody is playing with screen options
-                    if (is_a($post, 'WP_Post')) {
-                        $id = $post->post_type;
-                    } else {
-                        $screen = get_current_screen();
-                        $id = ($screen ? $screen->id : '');
+                    if ($screen && $screen->id === 'dashboard') {
+                        $this->_initialize_widgets();
+
+                        exit; // No need to load the rest of the site
                     }
-
-                    $model = new AAM_Backend_Feature_Main_Metabox;
-                    $model->initialize($id);
                 }
             }, 999);
 
-            // Manage Navigation Menu page to support
-            add_filter('nav_menu_meta_box_object', function ($obj) {
-                if (is_object($obj)) {
-                    $obj->_default_query['suppress_filters'] = false;
+            // Manage the list of widgets rendered on the "Appearance -> Widgets"
+            // page
+            add_action('widgets_admin_page', function() {
+                $this->_filter_frontend_widgets();
+            }, 999);
+
+            // Manager widget's visibility on the Dashboard ->  Home page
+            add_action('in_admin_header', function() {
+                $screen = get_current_screen();
+
+                if ($screen && $screen->id === 'dashboard') {
+                    $this->_filter_dashboard_widgets();
                 }
-
-                return $obj;
-            });
-
-            // Manager WordPress metaboxes - Classic Editor
-            add_action('in_admin_header', array($this, 'filterMetaboxes'), 999);
-
-            // Manage Dashboard widgets
-            add_action('widgets_admin_page', array($this, 'filterMetaboxes'), 999);
+            }, 1000);
         } else {
             // Widget filters
-            add_filter('sidebars_widgets', array($this, 'filterWidgets'), 999);
+            add_filter('sidebars_widgets', function($widgets) {
+                $this->_filter_frontend_widgets();
+
+                return $widgets;
+            }, 999);
         }
 
         // Policy generation hook
@@ -129,9 +124,9 @@ class AAM_Service_Widget
             'aam_get_resource_filter',
             function($resource, $access_level, $resource_type) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::COMPONENT
+                    && $resource_type === AAM_Framework_Type_Resource::WIDGET
                 ) {
-                    $resource = new AAM_Framework_Resource_Component(
+                    $resource = new AAM_Framework_Resource_Widget(
                         $access_level
                     );
                 }
@@ -141,7 +136,7 @@ class AAM_Service_Widget
         );
 
         // Register RESTful API endpoints
-        AAM_Restful_ComponentService::bootstrap();
+        AAM_Restful_WidgetService::bootstrap();
     }
 
     /**
@@ -185,30 +180,85 @@ class AAM_Service_Widget
     // }
 
     /**
-     * Handle metabox initialization process
+     * Collect the list of all registered widgets
      *
      * @return void
      *
-     * @access public
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    public function filterMetaboxes()
+    private function _initialize_widgets()
     {
-        global $post;
+        global $wp_registered_widgets, $wp_meta_boxes;
 
-        // Make sure that nobody is playing with screen options
-        if (is_a($post, 'WP_Post')) {
-            $id = $post->post_type;
-        } else {
-            $screen = get_current_screen();
-            $id     = ($screen ? $screen->id : null);
+        $cache = [
+            'frontend'  => [],
+            'dashboard' => []
+        ];
+
+        // Collect all registered frontend widgets
+        foreach ((array)$wp_registered_widgets as $widget) {
+            // Extracting class name from the registered widget
+            $slug = $this->_get_widget_slug($widget, true);
+
+            if (!empty($slug) && !isset($cache['frontend'][$slug])) {
+                $cache['frontend'][$slug] = array(
+                    'title' => base64_encode(wp_strip_all_tags($widget['name'])),
+                    'slug'  => $slug
+                );
+            }
         }
 
-        if (filter_input(INPUT_GET, 'init') !== 'metabox') {
-            if ($id !== 'widgets') {
-               $this->filterBackend($id);
-            } else {
-                $this->filterAppearanceWidgets();
+        // Now collect Admin Dashboard Widgets
+        if (isset($wp_meta_boxes['dashboard'])) {
+            foreach ((array) $wp_meta_boxes['dashboard'] as $levels) {
+                foreach ((array) $levels as $boxes) {
+                    foreach ((array) $boxes as $data) {
+                        $slug = $this->_get_widget_slug($data);
+
+                        if (!empty($slug) && !isset($cache['dashboard'][$slug])) {
+                            $cache['dashboard'][$slug] = array(
+                                'slug'  => $slug,
+                                'title' => base64_encode(
+                                    wp_strip_all_tags($data['title'])
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        AAM_Framework_Utility_Cache::set(
+            AAM_Framework_Service_Widgets::CACHE_DB_OPTION, $cache, 31536000
+        );
+    }
+
+    /**
+     * Filter the Dashboard -> Home widgets
+     *
+     * @return void
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _filter_dashboard_widgets()
+    {
+        global $wp_meta_boxes;
+
+        $resource = AAM::api()->widgets()->get_resource();
+
+        if (isset($wp_meta_boxes['dashboard'])) {
+            foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
+                foreach($groups as $widgets) {
+                    foreach($widgets as $widget) {
+                        $slug = $this->_get_widget_slug($widget);
+
+                        if ($resource->is_hidden($slug)) {
+                            remove_meta_box($slug, 'dashboard', $priority);
+                        }
+                    }
+                }
             }
         }
     }
@@ -216,198 +266,90 @@ class AAM_Service_Widget
     /**
      * Filter frontend widgets
      *
-     * @param array $widgets
+     * @return void
      *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    public function filterWidgets($widgets)
+    private function _filter_frontend_widgets()
     {
         global $wp_registered_widgets;
 
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::METABOX
-        );
+        $resource = AAM::api()->widgets()->get_resource();
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
-                $callback = $this->getWidgetCallback($widget);
-                if ($resource->is_hidden('widgets', $callback)) {
-                    unregister_widget($callback);
+                $slug = $this->_get_widget_slug($widget, true);
+
+                if ($resource->is_hidden($slug)) {
+                    unregister_widget($this->_get_widget_callback($widget));
+
                     // Remove it from registered widget global var!!
                     // INFORM: Why Unregister Widget does not clear global var?
                     unset($wp_registered_widgets[$id]);
                 }
             }
         }
-
-        return $widgets;
     }
 
     /**
-     * Get list of all cached components
+     * Get widget slug
      *
-     * @return array
+     * The callback is used as unique widget identifier
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.9.13 Initial implementation of the method
+     * @param mixed   $widget
+     * @param boolean $use_cb
      *
-     * @access public
-     * @version 6.9.17
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
      */
-    public function getComponentsCache()
+    private function _get_widget_slug($widget, $use_cb = false)
     {
-        global $wp_post_types;
+        $result = null;
 
-        $response = AAM_Framework_Utility_Cache::get(
-            AAM_Backend_Feature_Main_Metabox::DB_CACHE_OPTION
-        );
+        if (!empty($widget['id']) && !$use_cb) {
+            $result = str_replace('-', '_', strtolower($widget['id']));
+        } else {
+            $cb = $this->_get_widget_callback($widget);
 
-        if (!is_array($response)) {
-            $response = array();
-        }
-
-        // Filter non-existing metaboxes
-        foreach (array_keys($response) as $id) {
-            if (
-                !in_array($id, array('dashboard', 'widgets'), true)
-                && empty($wp_post_types[$id])
-            ) {
-                unset($response[$id]);
+            if (!is_null($cb)) { // Exclude any junk
+                // Normalizing the "widget ID"
+                $result = str_replace('\\', '_', strtolower($cb));
             }
         }
 
-        return $response;
-    }
-
-    /**
-     * Filter backend metaboxes and widgets
-     *
-     * @param string $screen
-     *
-     * @since 6.4.0 Making the method protected
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @global array $wp_meta_boxes
-     * @version 6.0.0
-     */
-    protected function filterBackend($screen)
-    {
-        global $wp_meta_boxes;
-
-        if (is_array($wp_meta_boxes)) {
-            foreach ($wp_meta_boxes as $screen_id => $zones) {
-                if ($screen === $screen_id) {
-                    $this->filterZones($zones, $screen_id);
-                }
-            }
-        }
-    }
-
-    /**
-     * Filter of widgets on the Appearance->Widgets screen
-     *
-     * @access protected
-     *
-     * @since 6.4.0 Making the method protected
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @return void
-     * @global array $wp_registered_widgets
-     * @version 6.0.0
-     */
-    protected function filterAppearanceWidgets()
-    {
-        global $wp_registered_widgets;
-
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::METABOX
-        );
-
-        foreach ($wp_registered_widgets as $id => $widget) {
-            $callback = $this->getWidgetCallback($widget);
-            if ($resource->is_hidden('widgets', $callback)) {
-                unregister_widget($callback);
-                unset($wp_registered_widgets[$id]);
-            }
-        }
-    }
-
-    /**
-     * Filter metaboxes based on screen
-     *
-     * @param array  $zones
-     * @param string $screen_id
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function filterZones($zones, $screen_id)
-    {
-        foreach ($zones as $zone => $priorities) {
-            foreach ($priorities as $metaboxes) {
-                $this->removeMetaboxes($zone, $metaboxes, $screen_id);
-            }
-        }
-    }
-
-    /**
-     * Filter list of metaboxes on the screen
-     *
-     * @param string $zone
-     * @param array  $metaboxes
-     * @param string $screen_id
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function removeMetaboxes($zone, $metaboxes, $screen_id)
-    {
-        $resource = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::METABOX
-        );
-
-        foreach (array_keys($metaboxes) as $id) {
-            if ($resource->is_hidden($screen_id, $id)) {
-                remove_meta_box($id, $screen_id, $zone);
-            }
-        }
+        return $result;
     }
 
     /**
      * Get widget's callback
      *
-     * The callback is used as unique widget identifier
-     *
      * @param mixed $widget
      *
-     * @return string
+     * @return mixed
      *
-     * @access protected
-     * @version 6.0.0
+     * @access private
+     * @version 7.0.0
      */
-    protected function getWidgetCallback($widget)
+    private function _get_widget_callback($widget)
     {
+        $cb = null;
+
         if (is_array($widget['callback'])) {
             if (is_object($widget['callback'][0])) {
-                $callback = get_class($widget['callback'][0]);
+                $cb = get_class($widget['callback'][0]);
             } elseif (is_string($widget['callback'][0])) {
-                $callback = $widget['callback'][0];
+                $cb = $widget['callback'][0];
             }
         }
 
-        if (empty($callback)) {
-            $callback = isset($widget['classname']) ? $widget['classname'] : null;
+        if (empty($cb)) {
+            $cb = isset($widget['classname']) ? $widget['classname'] : null;
         }
 
-        return $callback;
+        return $cb;
     }
 
 }

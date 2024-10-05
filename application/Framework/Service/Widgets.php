@@ -8,29 +8,30 @@
  */
 
 /**
- * AAM service for metaboxes
+ * AAM service for widgets
  *
- * Metaboxes are functional block that are rendered on the post edit admin screen
+ * Widgets are functional block that are rendered on the admin dashboard and frontend
+ * areas
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Service_Metaboxes
+class AAM_Framework_Service_Widgets
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Collection of captured metaboxes
+     * Collection of captured widgets
      *
      * @version 7.0.0
      */
-    const CACHE_DB_OPTION = 'aam_metaboxes_cache';
+    const CACHE_DB_OPTION = 'aam_widgets_cache';
 
     /**
-     * Return the complete list of all indexed metaboxes
+     * Return the complete list of all indexed widgets
      *
-     * @param string $post_type
+     * @param string $screen_id
      * @param array  $inline_context Context
      *
      * @return array
@@ -38,10 +39,8 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      * @version 7.0.0
      */
-    public function get_item_list($post_type = null, $inline_context = null)
+    public function get_item_list($screen_id = null, $inline_context = null)
     {
-        global $wp_post_types;
-
         try {
             $result   = [];
             $resource = $this->get_resource(true, $inline_context);
@@ -50,23 +49,19 @@ class AAM_Framework_Service_Metaboxes
             $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
 
             if (!empty($cache) && is_array($cache)) {
-                foreach($cache as $p_type => $metaboxes) {
-                    // Remove list of metaboxes for indexed post types that no longer
-                    // exist
-                    if (array_key_exists($p_type, $wp_post_types)) {
-                        foreach($metaboxes as $metabox) {
-                            array_push($result, $this->_prepare_metabox(
-                                $metabox, $p_type, $resource
-                            ));
-                        }
+                foreach($cache as $s_id => $widgets) {
+                    foreach($widgets as $widget) {
+                        array_push($result, $this->_prepare_widget(
+                            $widget, $s_id, $resource
+                        ));
                     }
                 }
             }
 
-            if (!empty($post_type)) {
+            if (!empty($screen_id)) {
                 $result = array_values(
-                    array_filter($result, function($c) use ($post_type) {
-                        return $c['post_type'] === $post_type;
+                    array_filter($result, function($c) use ($screen_id) {
+                        return $c['screen_id'] === $screen_id;
                     })
                 );
             }
@@ -78,7 +73,7 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Get existing metabox by slug
+     * Get existing widget by slug
      *
      * @param string $slug           Sudo-id for the metabox
      * @param array  $inline_context Runtime context
@@ -101,7 +96,7 @@ class AAM_Framework_Service_Metaboxes
             $result = array_shift($matches);
 
             if ($result === null) {
-                throw new OutOfRangeException('Metabox does not exist');
+                throw new OutOfRangeException('Widget does not exist');
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -126,13 +121,13 @@ class AAM_Framework_Service_Metaboxes
         $slug, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $metabox    = $this->get_item($slug);
+            $widget     = $this->get_item($slug);
             $resource   = $this->get_resource(false, $inline_context);
             $permission = [
                 'effect' => $is_hidden ? 'deny' : 'allow'
             ];
 
-            if (!$resource->set_permission($metabox['slug'], $permission)) {
+            if (!$resource->set_permission($widget['slug'], $permission)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -145,9 +140,9 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Delete metabox permission
+     * Delete widget permission
      *
-     * @param string $slug           Sudo-id for the metabox
+     * @param string $slug           Sudo-id for the widget
      * @param array  $inline_context Runtime context
      *
      * @return array
@@ -158,12 +153,12 @@ class AAM_Framework_Service_Metaboxes
     public function delete_item_permission($slug, $inline_context = null)
     {
         try {
-            $resource  = $this->get_resource(false, $inline_context);
-            $metabox   = $this->get_item($slug);
-            $explicit  = $resource->get_permissions(true);
+            $resource = $this->get_resource(false, $inline_context);
+            $widget   = $this->get_item($slug);
+            $explicit = $resource->get_permissions(true);
 
-            if (array_key_exists($metabox['slug'], $explicit)) {
-                unset($explicit[$metabox['slug']]); // Delete the setting
+            if (array_key_exists($widget['slug'], $explicit)) {
+                unset($explicit[$widget['slug']]); // Delete the setting
 
                 $success = $resource->set_permissions($explicit);
             } else {
@@ -185,7 +180,7 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Reset all permissions
      *
-     * @param string $post_type
+     * @param string $screen_id
      * @param array  $inline_context Runtime context
      *
      * @return array
@@ -193,25 +188,25 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      * @version 7.0.0
      */
-    public function reset($post_type = null, $inline_context = null)
+    public function reset($screen_id = null, $inline_context = null)
     {
         try {
             $resource = $this->get_resource(false, $inline_context);
             $success  = true;
 
-            if (empty($post_type)) {
+            if (empty($screen_id)) {
                 $resource->reset();
             } else {
                 $success = $resource->set_permissions(array_filter(
                     $resource->get_permissions(true),
-                    function($key) use ($post_type) {
-                        return strpos($key, $post_type) !== 0;
+                    function($key) use ($screen_id) {
+                        return strpos($key, $screen_id) !== 0;
                     }, ARRAY_FILTER_USE_KEY
                 ));
             }
 
             if ($success){
-                $result = $this->get_item_list($post_type);
+                $result = $this->get_item_list($screen_id);
             } else {
                 throw new RuntimeException('Failed to reset settings');
             }
@@ -223,11 +218,11 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Get metabox resource
+     * Get widget resource
      *
      * @param array $inline_context
      *
-     * @return AAM_Framework_Resource_Metabox
+     * @return AAM_Framework_Resource_Widget
      *
      * @access public
      * @version 7.0.0
@@ -237,7 +232,7 @@ class AAM_Framework_Service_Metaboxes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::METABOX, null, $reload
+                AAM_Framework_Type_Resource::WIDGET, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -247,27 +242,27 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Normalize and prepare the metabox model
+     * Normalize and prepare the widget model
      *
-     * @param array                          $metabox
-     * @param string                         $post_type
-     * @param AAM_Framework_Resource_Metabox $resource
+     * @param array                         $widget
+     * @param string                        $screen_id
+     * @param AAM_Framework_Resource_Widget $resource
      *
      * @return array
      *
      * @access private
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    private function _prepare_metabox($metabox, $post_type, $resource)
+    private function _prepare_widget($widget, $screen_id, $resource)
     {
         $explicit = $resource->get_permissions(true);
 
         $response = array(
-            'slug'         => $metabox['slug'],
-            'post_type'    => $post_type,
-            'title'        => base64_decode($metabox['title']),
-            'is_hidden'    => $resource->is_hidden($metabox['slug']),
-            'is_inherited' => !array_key_exists($metabox['slug'], $explicit)
+            'slug'         => $widget['slug'],
+            'screen_id'    => $screen_id,
+            'title'        => base64_decode($widget['title']),
+            'is_hidden'    => $resource->is_hidden($widget['slug']),
+            'is_inherited' => !array_key_exists($widget['slug'], $explicit)
         );
 
         return $response;

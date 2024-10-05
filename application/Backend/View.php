@@ -46,6 +46,39 @@ class AAM_Backend_View
     }
 
     /**
+     * Replace sprintf string with URLs to aamportal.com
+     *
+     * @param string $str
+     * @param string ...$url
+     *
+     * @return string
+     *
+     * @access public
+     * @static
+     * @version 7.0.0
+     */
+    public static function replace_aam_urls($str)
+    {
+        $args = array_slice(func_get_args(), 1);
+
+        if (!empty($args)) {
+            // Preparing the array of arguments for the sprintf
+            $replace_args = [$str];
+
+            foreach($args as $relative_url) {
+                array_push($replace_args,
+                    '<a href="https://aamportal.com' . $relative_url . '?ref=plugin" target="_blank">',
+                    '</a>'
+                );
+            }
+
+            $str = call_user_func_array('sprintf', $replace_args);
+        }
+
+        return $str;
+    }
+
+    /**
      * Load partial template
      *
      * The specified template has to be located inside the ./tmpl/partial folder

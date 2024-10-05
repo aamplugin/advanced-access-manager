@@ -61,6 +61,24 @@ class AAM_Backend_AccessLevel
             $access_level_id = null;
         }
 
+        if (empty($access_level_type)) {
+            $al = $this->_get_last_managed_access_level();
+
+            if (!empty($al)) {
+                $access_level_type = $al['type'];
+                $access_level_id   = !empty($al['id']) ? $al['id']: null;
+            }
+        } else { // Persist the last managed access level
+            AAM_Framework_Utility_Cache::set(
+                'managed_access_level_by_' . get_current_user_id(),
+                [
+                    'type' => $access_level_type,
+                    'id'   => $access_level_id
+                ],
+                2592000 // 30 days
+            );
+        }
+
         if ($access_level_type) {
             $this->_init_access_level($access_level_type, $access_level_id);
         } else {
@@ -118,6 +136,41 @@ class AAM_Backend_AccessLevel
     public function is_default()
     {
         return $this->_access_level::TYPE === AAM_Framework_Type_AccessLevel::ALL;
+    }
+
+    /**
+     * Get last managed access level
+     *
+     * @return array|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_last_managed_access_level()
+    {
+        $level = AAM_Framework_Utility_Cache::get(
+            'managed_access_level_by_' . get_current_user_id()
+        );
+
+        if (!is_null($level)) {
+            // Verifying that access level exists and is accessible
+            if ($level['type'] === 'role') {
+                if (!AAM_Framework_Manager::roles()->is_editable_role($level['id'])) {
+                    $level = null;
+                }
+            } elseif ($level['type'] === 'user') {
+                $user = apply_filters('aam_get_user', get_user_by('id', $level['id']));
+
+                if ($user === false
+                    || is_wp_error($user)
+                    || !current_user_can('edit_user', $user->ID)
+                ) {
+                    $level = null;
+                }
+            }
+        }
+
+        return $level;
     }
 
     /**

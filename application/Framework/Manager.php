@@ -210,6 +210,23 @@ class AAM_Framework_Manager
     }
 
     /**
+     * Get Widgets service
+     *
+     * @param array $runtime_context
+     *
+     * @return AAM_Framework_Service_Widgets
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function widgets(array $runtime_context = [])
+    {
+        return AAM_Framework_Service_Widgets::get_instance(array_merge(
+            self::$_default_context, $runtime_context
+        ));
+    }
+
+    /**
      * Get the Access Denied Redirect service
      *
      * @param array $runtime_context

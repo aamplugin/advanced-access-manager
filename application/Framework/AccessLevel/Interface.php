@@ -201,4 +201,14 @@ interface AAM_Framework_AccessLevel_Interface
      */
     public function metaboxes();
 
+    /**
+     * Get Widgets service
+     *
+     * @return AAM_Framework_Service_Widgets
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function widgets();
+
 }

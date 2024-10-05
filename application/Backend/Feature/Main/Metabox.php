@@ -41,21 +41,30 @@ class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
     const TEMPLATE = 'service/metabox.php';
 
     /**
-     * Constructor
+     * Get the complete list of admin screens AAM uses to index metaboxes
      *
-     * @return void
+     * @return array
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function __construct()
+    protected function get_screen_urls()
     {
-        // Customize the user experience
-        add_filter('aam_component_screen_mode_panel_filter', function() {
-            return AAM_Backend_View::getInstance()->loadPartial(
-                'component-screen-mode'
-            );
-        });
+        global $wp_post_types;
+
+        $result = [];
+
+        foreach (array_keys($wp_post_types) as $type) {
+            if ($wp_post_types[$type]->show_ui) {
+                $result[] = esc_url(add_query_arg(
+                    'init',
+                    'metabox',
+                    admin_url('post-new.php?post_type=' . $type)
+                ));
+            }
+        }
+
+        return $result;
     }
 
     /**

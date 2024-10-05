@@ -356,6 +356,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
+     * @inheritDoc
+     */
+    public function widgets()
+    {
+        return AAM_Framework_Manager::widgets([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
      * Inherit settings from parent access level (if any)
      *
      * @param object  $resource

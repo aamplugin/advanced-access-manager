@@ -23,15 +23,26 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access to WordPress classical metaboxes on post-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>'); ?>
+                        <?php echo AAM_Backend_View::replace_aam_urls(
+                            __('Manage access to WordPress classical metaboxes on post-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.', AAM_KEY),
+                            '/premium'
+                        ); ?>
                     </p>
                 </div>
             </div>
         <?php } ?>
 
         <div class="aam-feature-top-actions text-right">
-            <a href="#" class="btn btn-xs btn-primary" id="refresh-metabox-list"><i class="icon-arrows-cw"></i> <?php echo __('Refresh', AAM_KEY); ?></a>
-            <a href="#init-url-modal" class="btn btn-xs btn-primary" data-toggle="modal"><i class="icon-link"></i> <?php echo __('Init URL', AAM_KEY); ?></a>
+            <a
+                href="#"
+                class="btn btn-xs btn-primary"
+                id="refresh-metabox-list"
+            ><i class="icon-arrows-cw"></i> <?php echo __('Refresh', AAM_KEY); ?></a>
+            <a
+                href="#init-url-modal"
+                class="btn btn-xs btn-primary"
+                data-toggle="modal"><i class="icon-link"
+            ></i> <?php echo __('Init URL', AAM_KEY); ?></a>
         </div>
 
         <div class="row">
@@ -49,75 +60,87 @@
             $first = false;
             $list  = $service->get_item_list();
 
-            // Group all the components by screen
+            // Group all the metaboxes by post type
             $grouped = array();
             foreach($list as $item) {
-                $screen = $item['screen_id'];
+                $post_type = $item['post_type'];
 
-                if (!isset($grouped[$screen])) {
-                    $grouped[$screen] = array();
+                if (!isset($grouped[$post_type])) {
+                    $grouped[$post_type] = array();
                 }
 
-                array_push($grouped[$screen], $item);
+                array_push($grouped[$post_type], $item);
             }
         ?>
 
         <?php if (!empty($list)) { ?>
             <div class="panel-group" id="metabox-list" role="tablist">
-                <?php foreach ($grouped as $screen_id => $metaboxes) { ?>
+                <?php foreach ($grouped as $post_type => $metaboxes) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="group-<?php echo esc_js($screen_id); ?>-heading">
+                        <div class="panel-heading" role="tab" id="group_<?php echo esc_attr($post_type); ?>_heading">
                             <h4 class="panel-title">
                                 <a
                                     role="button"
                                     data-toggle="collapse"
                                     data-parent="#metabox-list"
-                                    href="#group-<?php echo esc_js($screen_id); ?>"
-                                    aria-controls="group-<?php echo esc_js($screen_id); ?>"
+                                    href="#group_<?php echo esc_attr($post_type); ?>"
+                                    aria-controls="group_<?php echo esc_attr($post_type); ?>"
                                     <?php if (!$first) { echo 'aria-expanded="true"'; } ?>
                                 >
-                                    <?php echo $wp_post_types[$screen_id]->labels->name; ?>
+                                    <?php echo $wp_post_types[$post_type]->labels->name; ?>
                                 </a>
                             </h4>
                         </div>
                         <div
-                            id="group-<?php echo esc_js($screen_id); ?>"
+                            id="group_<?php echo esc_attr($post_type); ?>"
                             class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>"
                             role="tabpanel"
-                            aria-labelledby="group-<?php echo esc_js($screen_id); ?>-heading"
+                            aria-labelledby="group_<?php echo esc_js($post_type); ?>_heading"
                         >
                             <div class="panel-body">
                                 <div class="row">
-                                    <?php foreach ($metaboxes as $component) { ?>
+                                    <?php foreach ($metaboxes as $metabox) { ?>
                                         <div class="col-xs-12 col-md-6 aam-submenu-item">
                                             <div class="aam-menu-details">
-                                                <?php echo esc_js($component['name']); ?>
+                                                <?php echo esc_js($metabox['title']); ?>
                                                 <small><a
                                                     href="#metabox-details-modal"
                                                     data-toggle="modal"
-                                                    data-title="<?php echo esc_attr($component['name']); ?>"
-                                                    data-screen="<?php echo esc_attr($screen_id); ?>"
-                                                    data-id="<?php echo esc_attr(strtolower($screen_id . '|' . $component['slug'])); ?>"
+                                                    data-title="<?php echo esc_attr($metabox['title']); ?>"
+                                                    data-screen="<?php echo esc_attr($post_type); ?>"
+                                                    data-id="<?php echo esc_attr($metabox['slug']); ?>"
                                                     class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?>
                                                 </a></small>
                                             </div>
 
-                                            <?php if ($component['is_hidden']) { ?>
-                                                <i class="aam-accordion-action icon-lock text-danger" id="metabox-<?php echo esc_js($component['id']); ?>" data-metabox="<?php echo esc_attr($component['id']); ?>"></i>
+                                            <?php if ($metabox['is_hidden']) { ?>
+                                                <i
+                                                    class="aam-accordion-action icon-lock text-danger"
+                                                    id="metabox_<?php echo esc_attr($metabox['slug']); ?>"
+                                                    data-metabox="<?php echo esc_attr($metabox['slug']); ?>"
+                                                ></i>
                                             <?php } else { ?>
-                                                <i class="aam-accordion-action icon-lock-open text-success" id="metabox-<?php echo esc_js($component['id']); ?>" data-metabox="<?php echo esc_js($component['id']); ?>"></i>
+                                                <i
+                                                    class="aam-accordion-action icon-lock-open text-success"
+                                                    id="metabox_<?php echo esc_attr($metabox['slug']); ?>"
+                                                    data-metabox="<?php echo esc_attr($metabox['slug']); ?>"
+                                                ></i>
                                             <?php } ?>
 
-                                            <label for="metabox-<?php echo esc_js($component['id']); ?>" data-toggle="tooltip" title="<?php echo ($component['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"></label>
+                                            <label
+                                                for="metabox_<?php echo esc_attr($metabox['slug']); ?>"
+                                                data-toggle="tooltip"
+                                                title="<?php echo ($metabox['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
+                                            ></label>
                                         </div>
                                     <?php } ?>
                                 </div>
 
                                 <?php echo apply_filters(
-                                    'aam_ui_metaboxes_screen_mode_panel_filter',
+                                    'aam_ui_metaboxes_post_type_mode_filter',
                                     '',
-                                    $screen_id,
-                                    AAM_Backend_AccessLevel::getInstance()->metaboxes()
+                                    AAM_Backend_AccessLevel::getInstance()->metaboxes(),
+                                    $post_type
                                 ); ?>
                             </div>
                         </div>
@@ -128,11 +151,13 @@
             <div class="row">
                 <div class="col-xs-12 text-center">
                     <p class="alert alert-info text-larger">
-                        <?php echo __('The list is not initialized. Click Refresh button above.', AAM_KEY); ?>
+                        <?php echo __('The list is not initialized. Select the "Refresh" button above.', AAM_KEY); ?>
                     </p>
                 </div>
             </div>
         <?php } ?>
+
+        <div class="hidden" id="aam_screen_list"><?php echo json_encode($this->get_screen_urls()); ?></div>
 
         <div class="modal fade" id="init-url-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -163,7 +188,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Metabox/Widget Details', AAM_KEY); ?></h4>
+                        <h4 class="modal-title"><?php echo __('Metabox Details', AAM_KEY); ?></h4>
                     </div>
                     <div class="modal-body">
                         <table class="table table-striped table-bordered">
@@ -173,11 +198,11 @@
                                     <td id="metabox-title"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Screen ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Post Type', AAM_KEY); ?></th>
                                     <td id="metabox-screen-id"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Internal ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Metabox ID', AAM_KEY); ?></th>
                                     <td id="metabox-id"></td>
                                 </tr>
                             </tbody>

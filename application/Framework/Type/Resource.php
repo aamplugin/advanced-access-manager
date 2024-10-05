@@ -24,7 +24,6 @@ class AAM_Framework_Type_Resource
     const TOOLBAR = 'toolbar';
     const API_ROUTE = 'route';
     const BACKEND_MENU = 'backend_menu';
-    const COMPONENT = 'metabox';
     const METABOX = 'metabox';
     const WIDGET = 'metabox';
     const IDENTITY = 'identity';
@@ -33,6 +32,5 @@ class AAM_Framework_Type_Resource
     const NOT_FOUND_REDIRECT = 'not_found_redirect';
     const URL = 'url';
     const ACCESS_POLICY = 'policy';
-    const CONTENT_VISIBILITY = 'visibility';
 
 }

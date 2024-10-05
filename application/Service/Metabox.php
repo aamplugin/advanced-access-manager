@@ -87,17 +87,12 @@ class AAM_Service_Metabox
                 global $post;
 
                 if (AAM_Core_Request::get('init') === 'metabox') {
-                    //make sure that nobody is playing with screen options
+                    // Make sure that nobody is playing with screen options
                     if (is_a($post, 'WP_Post')) {
-                        $id = $post->post_type;
-                    } else {
-                        $screen = get_current_screen();
-                        $id = ($screen ? $screen->id : '');
+                        $this->_initialize_metaboxes($post->post_type);
+
+                        exit; // No need to load the rest of the site
                     }
-
-                    $this->_initialize_metaboxes($id);
-
-                    exit; // No need to load the rest of the site
                 }
             }, 999);
 
@@ -184,14 +179,14 @@ class AAM_Service_Metabox
     /**
      * Initialize list of metaboxes for given screen
      *
-     * @param string $screen_id
+     * @param string $post_type
      *
      * @return void
      *
      * @access private
      * @version 7.0.0
      */
-    private function _initialize_metaboxes($screen_id)
+    private function _initialize_metaboxes($post_type)
     {
         global $wp_meta_boxes;
 
@@ -199,18 +194,18 @@ class AAM_Service_Metabox
             AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, []
         );
 
-        if (!isset($cache[$screen_id])) {
-            $cache[$screen_id] = [];
-        }
+        $cache[$post_type] = []; // Reset the list
 
-        if (isset($wp_meta_boxes[$screen_id])) {
-            foreach ((array) $wp_meta_boxes[$screen_id] as $levels) {
+        if (isset($wp_meta_boxes[$post_type])) {
+            foreach ((array) $wp_meta_boxes[$post_type] as $levels) {
                 foreach ((array) $levels as $boxes) {
                     foreach ((array) $boxes as $data) {
                         if (trim($data['id'])) { //exclude any junk
-                            $cache[$screen_id][$data['id']] = array(
-                                'slug'  => $data['id'],
-                                'title' => wp_strip_all_tags($data['title'])
+                            $cache[$post_type][$data['id']] = array(
+                                'slug'  => strtolower($post_type . '_' . $data['id']),
+                                'title' => base64_encode(
+                                    $this->_prepare_metabox_name($data)
+                                )
                             );
                         }
                     }
@@ -218,12 +213,31 @@ class AAM_Service_Metabox
             }
 
             // Removing duplicates
-            $cache[$screen_id] = array_values($cache[$screen_id]);
+            $cache[$post_type] = array_values($cache[$post_type]);
         }
 
         AAM_Framework_Utility_Cache::set(
             AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, $cache, 31536000
         );
+    }
+
+    /**
+     * Normalize the component title
+     *
+     * @param object $item
+     *
+     * @return string
+     *
+     * @access private
+     * @version 6.9.13
+     */
+    private function _prepare_metabox_name($item)
+    {
+        $title = wp_strip_all_tags(
+            !empty($item['title']) ? $item['title'] : $item['slug']
+        );
+
+        return ucwords(trim(preg_replace('/[\d]/', '', $title)));
     }
 
     /**
@@ -240,20 +254,16 @@ class AAM_Service_Metabox
 
         // Make sure that nobody is playing with screen options
         if (is_a($post, 'WP_Post')) {
-            $current_id = $post->post_type;
+            $post_type = $post->post_type;
         } else {
             $screen     = get_current_screen();
-            $current_id = ($screen ? $screen->id : null);
+            $post_type = ($screen ? $screen->id : null);
         }
 
         if (filter_input(INPUT_GET, 'init') !== 'metabox'
-            && is_array($wp_meta_boxes)
+            && !empty($wp_meta_boxes[$post_type])
         ) {
-            foreach ($wp_meta_boxes as $screen_id => $zones) {
-                if ($current_id === $screen_id) {
-                    $this->_filter_zones($zones, $screen_id);
-                }
-            }
+            $this->_filter_zones($wp_meta_boxes[$post_type], $post_type);
         }
     }
 
@@ -261,22 +271,22 @@ class AAM_Service_Metabox
      * Filter metaboxes based on screen
      *
      * @param array  $zones
-     * @param string $screen_id
+     * @param string $post_type
      *
      * @return void
      *
      * @access private
      * @version 7.0.0
      */
-    private function _filter_zones($zones, $screen_id)
+    private function _filter_zones($zones, $post_type)
     {
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
                 $resource = AAM::api()->metaboxes()->get_resource();
 
                 foreach (array_keys($metaboxes) as $id) {
-                    if ($resource->is_hidden($screen_id, $id)) {
-                        remove_meta_box($id, $screen_id, $zone);
+                    if ($resource->is_hidden($post_type . '_' . $id)) {
+                        remove_meta_box($id, $post_type, $zone);
                     }
                 }
             }

@@ -44,7 +44,7 @@ class AAM_Restful_BackendMenuService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Backend menu unique slug',
+                        'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -58,7 +58,7 @@ class AAM_Restful_BackendMenuService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Backend menu unique slug',
+                        'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -83,7 +83,7 @@ class AAM_Restful_BackendMenuService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Backend menu unique slug',
+                        'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )

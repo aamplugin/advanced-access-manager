@@ -41,10 +41,11 @@ abstract class AAM_Backend_Feature_Abstract
      * @return string
      *
      * @access public
+     * @version 7.0.0
      */
     public function __invoke()
     {
-        return $this->getContent();
+        return $this->get_content();
     }
 
     /**
@@ -53,9 +54,9 @@ abstract class AAM_Backend_Feature_Abstract
      * @return string
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public function getContent()
+    public function get_content()
     {
         ob_start();
         require_once(dirname(__DIR__) . '/tmpl/' . static::TEMPLATE);

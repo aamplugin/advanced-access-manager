@@ -2262,7 +2262,7 @@
         })(jQuery);
 
         /**
-         * Metaboxes & Widgets Interface
+         * Metaboxes Interface
          *
          * @param {jQuery} $
          *
@@ -2272,33 +2272,29 @@
 
             /**
              *
-             * @param {Number}   item
+             * @param {String}   slug
              * @param {Boolean}  status
              * @param {Callback} successCallback
              *
              * @returns {Void}
              */
-            function save(item, is_hidden, cb) {
+            function save(slug, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    const payload = getAAM().prepareRequestSubjectData({
-                        is_hidden
-                    });
-
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/component/${item}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/metabox/${btoa(slug)}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: payload,
+                        data: { is_hidden },
                         success: function (response) {
                             cb(response);
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/component/${item}`,
-                                payload,
+                                request: `aam/v2/service/metabox/${btoa(slug)}`,
+                                payload: { is_hidden },
                                 response
                             });
                         }
@@ -2335,32 +2331,11 @@
                 if ($('#metabox-content').length) {
                     //init refresh list button
                     $('#refresh-metabox-list').bind('click', function () {
-                        getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/screens`), {
-                                type: 'GET',
-                                headers: {
-                                    'X-WP-Nonce': getLocal().rest_nonce
-                                },
-                                dataType: 'json',
-                                beforeSend: function () {
-                                    $('i', '#refresh-metabox-list').attr(
-                                        'class', 'icon-spin4 animate-spin'
-                                    );
-                                },
-                                success: function (response) {
-                                    fetchData(
-                                        response, 0, $('i', '#refresh-metabox-list')
-                                    );
-                                },
-                                error: function () {
-                                    getAAM().notification('danger');
-
-                                    $('i', '#refresh-metabox-list').attr(
-                                        'class', 'icon-arrows-cw'
-                                    );
-                                }
-                            });
-                        });
+                        fetchData(
+                            JSON.parse($('#aam_screen_list').text()),
+                            0,
+                            $('i', '#refresh-metabox-list')
+                        );
                     });
 
                     $('#init-url-btn').bind('click', function () {
@@ -2393,7 +2368,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/components`), {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/metaboxes`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2409,7 +2384,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
-                                        request: 'aam/v2/service/components',
+                                        request: 'aam/v2/service/metaboxes',
                                         response
                                     });
                                 },
@@ -2455,6 +2430,165 @@
                     });
 
                     getAAM().triggerHook('init-metabox');
+                }
+            }
+
+            getAAM().addHook('init', initialize);
+
+        })(jQuery);
+
+        /**
+         * Widgets Interface
+         *
+         * @param {jQuery} $
+         *
+         * @returns {void}
+         */
+        (function ($) {
+
+            /**
+             *
+             * @param {String}   slug
+             * @param {Boolean}  status
+             * @param {Callback} successCallback
+             *
+             * @returns {Void}
+             */
+            function save(slug, is_hidden, cb) {
+                getAAM().queueRequest(function () {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/widget/${btoa(slug)}`), {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'PATCH'
+                        },
+                        dataType: 'json',
+                        data: { is_hidden },
+                        success: function (response) {
+                            cb(response);
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: `aam/v2/service/widget/${btoa(slug)}`,
+                                payload: { is_hidden },
+                                response
+                            });
+                        }
+                    });
+                });
+            }
+
+            /**
+             *
+             * @param {type} endpoints
+             * @param {type} index
+             * @param {type} btn
+             * @returns {undefined}
+             */
+            function fetchData(endpoints, index, btn) {
+                $.ajax(endpoints[index], {
+                    type: 'GET',
+                    complete: function () {
+                        if (index < endpoints.length) {
+                            fetchData(endpoints, index + 1, btn);
+                        } else {
+                            btn.attr('class', 'icon-arrows-cw');
+                            getAAM().fetchContent('main');
+                        }
+                    }
+                });
+            }
+
+            /**
+             *
+             * @returns {undefined}
+             */
+            function initialize() {
+                if ($('#widget-content').length) {
+                    //init refresh list button
+                    $('#refresh_widget_list').bind('click', function () {
+                        fetchData(
+                            JSON.parse($('#aam_widget_screen_list').text()),
+                            0,
+                            $('i', '#refresh-metabox-list')
+                        );
+                    });
+
+                    $('.aam-widget-item').each(function () {
+                        $(this).bind('click', function () {
+                            $('#widget_title').html($(this).data('title'));
+                            $('#widget_screen_id').html($(this).data('screen'));
+                            $('#widget_id').html($(this).data('id'));
+                        });
+                    });
+
+                    // Reset button
+                    $('#widget_reset').bind('click', function () {
+                        const _this = $(this);
+
+                        getAAM().queueRequest(function () {
+                            $.ajax(getAAM().prepareApiEndpoint(`/service/widgets`), {
+                                type: 'POST',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-HTTP-Method-Override': 'DELETE'
+                                },
+                                dataType: 'json',
+                                beforeSend: function () {
+                                    _this.attr('data-original-label', _this.text());
+                                    _this.text(getAAM().__('Resetting...'));
+                                },
+                                success: function () {
+                                    getAAM().fetchContent('main');
+                                },
+                                error: function (response) {
+                                    getAAM().notification('danger', null, {
+                                        request: 'aam/v2/service/widgets',
+                                        response
+                                    });
+                                },
+                                complete: function () {
+                                    _this.text(_this.attr('data-original-label'));
+                                }
+                            });
+                        });
+                    });
+
+                    $('.aam-accordion-action', '#widget-list').each(function () {
+                        $(this).bind('click', function () {
+                            var _this = $(this);
+
+                            const status = _this.hasClass('icon-lock-open');
+
+                            // Show loading indicator
+                            _this.attr(
+                                'class',
+                                'aam-accordion-action icon-spin4 animate-spin'
+                            );
+
+                            save(
+                                $(this).data('widget'),
+                                status,
+                                function () {
+                                    $('#aam-widget-overwrite').show();
+
+                                    if (status) {
+                                        _this.attr(
+                                            'class',
+                                            'aam-accordion-action icon-lock text-danger'
+                                        );
+                                    } else {
+                                        _this.attr(
+                                            'class',
+                                            'aam-accordion-action icon-lock-open text-success'
+                                        );
+                                    }
+                                }
+                            );
+                        });
+                    });
+
+                    getAAM().triggerHook('init-widget');
                 }
             }
 
