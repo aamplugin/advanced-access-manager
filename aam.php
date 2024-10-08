@@ -49,7 +49,7 @@ class AAM
         'AAM_Service_BackendMenu',
         'AAM_Service_Metabox',
         'AAM_Service_Widget',
-        // 'AAM_Service_Toolbar'              => AAM_Service_Toolbar::FEATURE_FLAG,
+        'AAM_Service_AdminToolbar',
         // 'AAM_Service_Route'                => AAM_Service_Route::FEATURE_FLAG,
 
         // 'AAM_Service_Capability',

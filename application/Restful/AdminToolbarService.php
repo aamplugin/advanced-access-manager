@@ -33,33 +33,33 @@ class AAM_Restful_AdminToolbarService
             // Get the list of backend menus
             $this->_register_route('/admin-toolbar', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menus'),
+                'callback'            => array($this, 'get_items'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Get a menu
-            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menu'),
+                'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Admin toolbar menu unique ID',
-                        'type'        => 'number',
+                        'description' => 'Base64 encoded backend menu unique id',
+                        'type'        => 'string',
                         'required'    => true
                     )
                 )
             ));
 
             // Set or update a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Admin toolbar menu unique ID',
-                        'type'        => 'number',
+                        'description' => 'Base64 encoded backend menu unique id',
+                        'type'        => 'string',
                         'required'    => true
                     ),
                     'is_hidden' => array(
@@ -71,14 +71,14 @@ class AAM_Restful_AdminToolbarService
             ));
 
             // Delete a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[\d]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Admin toolbar menu unique ID',
-                        'type'        => 'number',
+                        'description' => 'Base64 encoded backend menu unique id',
+                        'type'        => 'string',
                         'required'    => true
                     )
                 )
@@ -103,7 +103,7 @@ class AAM_Restful_AdminToolbarService
      * @access public
      * @version 6.9.13
      */
-    public function get_menus(WP_REST_Request $request)
+    public function get_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -125,12 +125,12 @@ class AAM_Restful_AdminToolbarService
      * @access public
      * @version 6.9.13
      */
-    public function get_menu(WP_REST_Request $request)
+    public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
             $result  = $service->get_item_by_id(
-                intval($request->get_param('id'))
+                base64_decode($request->get_param('id'))
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -154,7 +154,7 @@ class AAM_Restful_AdminToolbarService
         try {
             $service = $this->_get_service($request);
             $result  = $service->update_item_permission(
-                intval($request->get_param('id')),
+                base64_decode($request->get_param('id')),
                 $request->get_param('is_hidden')
             );
         } catch (Exception $e) {
@@ -179,7 +179,7 @@ class AAM_Restful_AdminToolbarService
         try {
             $service = $this->_get_service($request);
             $result  = $service->delete_item_permission(
-                intval($request->get_param('id'))
+                base64_decode($request->get_param('id'))
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -221,7 +221,7 @@ class AAM_Restful_AdminToolbarService
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && current_user_can('aam_manage_toolbar');
+            && current_user_can('aam_manage_admin_toolbar');
     }
 
     /**

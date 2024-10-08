@@ -192,6 +192,16 @@ interface AAM_Framework_AccessLevel_Interface
     public function backend_menu();
 
     /**
+     * Get Backend Menu service
+     *
+     * @return AAM_Framework_Service_Toolbar
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function admin_toolbar();
+
+    /**
      * Get Metaboxes service
      *
      * @return AAM_Framework_Service_Metaboxes

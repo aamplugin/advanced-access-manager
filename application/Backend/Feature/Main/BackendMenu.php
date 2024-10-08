@@ -19,7 +19,7 @@
  * @package AAM
  * @version 6.9.33
  */
-class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract
+class AAM_Backend_Feature_Main_BackendMenu extends AAM_Backend_Feature_Abstract
 {
 
     /**
@@ -27,21 +27,14 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract
      *
      * @version 6.0.0
      */
-    const ACCESS_CAPABILITY = 'aam_manage_admin_menu';
-
-    /**
-     * Type of AAM core object
-     *
-     * @version 6.0.0
-     */
-    const OBJECT_TYPE = AAM_Core_Object_Menu::OBJECT_TYPE;
+    const ACCESS_CAPABILITY = 'aam_manage_backend_menu';
 
     /**
      * HTML template to render
      *
      * @version 6.0.0
      */
-    const TEMPLATE = 'service/menu.php';
+    const TEMPLATE = 'service/backend-menu.php';
 
     /**
      * Constructor
@@ -75,12 +68,12 @@ class AAM_Backend_Feature_Main_Menu extends AAM_Backend_Feature_Abstract
             'title'      => __('Backend Menu', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Default::UID
-            ),
-            'view'       => __CLASS__
+            'view'       => __CLASS__,
+            'access_levels' => array(
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER,
+                AAM_Framework_Type_AccessLevel::ALL
+            )
         ));
     }
 

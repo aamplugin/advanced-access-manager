@@ -348,6 +348,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
+    public function admin_toolbar()
+    {
+        return AAM_Framework_Manager::admin_toolbar([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function metaboxes()
     {
         return AAM_Framework_Manager::metaboxes([

@@ -2088,7 +2088,7 @@
         })(jQuery);
 
         /**
-         * Toolbar Interface
+         * Admin Toolbar Interface
          *
          * @param {jQuery} $
          *
@@ -2106,11 +2106,12 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    const payload = getAAM().prepareRequestSubjectData({
-                        is_hidden
-                    });
+                    const payload  = { is_hidden };
+                    const endpoint = getAAM().prepareApiEndpoint(
+                        `/service/admin-toolbar/${btoa(item)}`
+                    );
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/admin-toolbar/${item}`, {
+                    $.ajax(endpoint, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2123,7 +2124,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/admin-toolbar/${item}`,
+                                request: endpoint,
                                 payload,
                                 response
                             });
@@ -2187,7 +2188,7 @@
                     });
 
                     // Reset button
-                    $('#toolbar-reset').bind('click', function () {
+                    $('#toolbar_reset').bind('click', function () {
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
@@ -2218,7 +2219,7 @@
                         });
                     });
 
-                    $('.aam-accordion-action', '#toolbar-list').each(function () {
+                    $('.aam-accordion-action', '#toolbar_list').each(function () {
                         $(this).bind('click', function () {
                             var _this    = $(this);
                             const status = _this.hasClass('icon-lock-open');
@@ -2233,7 +2234,7 @@
                                 [_this.data('toolbar')],
                                 status,
                                 function () {
-                                    $('#aam-toolbar-overwrite').show();
+                                    $('#aam_toolbar_overwrite').show();
 
                                     if (status) {
                                         _this.attr(

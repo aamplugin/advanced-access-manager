@@ -21,7 +21,7 @@ class AAM_Framework_Type_Resource
     const TAXONOMY = 'taxonomy';
     const TERM = 'term';
     const ACCESS_DENIED_REDIRECT = 'denied_redirect';
-    const TOOLBAR = 'toolbar';
+    const TOOLBAR = 'admin_toolbar';
     const API_ROUTE = 'route';
     const BACKEND_MENU = 'backend_menu';
     const METABOX = 'metabox';

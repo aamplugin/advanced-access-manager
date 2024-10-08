@@ -28,18 +28,11 @@ class AAM_Service_BackendMenu
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * DB cache option
-     *
-     * @version 6.0.0
-     */
-    const CACHE_DB_OPTION = 'aam_menu_cache';
-
-    /**
      * AAM configuration setting that is associated with the service
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'service.backend-menu.enabled';
+    const FEATURE_FLAG = 'service.backend_menu.enabled';
 
     /**
      * Constructor
@@ -65,7 +58,7 @@ class AAM_Service_BackendMenu
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Menu::register();
+                    AAM_Backend_Feature_Main_BackendMenu::register();
                 });
             }
 
@@ -74,7 +67,7 @@ class AAM_Service_BackendMenu
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('Admin Menu', AAM_KEY),
+                    'title'       => __('Backend Menu', AAM_KEY),
                     'description' => __('Manage access to the admin (backend) main menu for any role or individual user. The service removes restricted menu items and protects direct access to them.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
@@ -124,11 +117,6 @@ class AAM_Service_BackendMenu
         // add_filter(
         //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
         // );
-
-        // TODO - legacy and can be deleted in version 7.0.0
-        add_action('aam_clear_settings_action', function() {
-            AAM_Core_API::deleteOption(self::CACHE_DB_OPTION);
-        });
 
         // Control admin area
         if (!defined('DOING_AJAX') || !DOING_AJAX) {

@@ -132,8 +132,8 @@
                                 <?php echo apply_filters(
                                     'aam_ui_widgets_screen_mode_filter',
                                     '',
-                                    $screen_id,
-                                    AAM_Backend_AccessLevel::getInstance()->widgets()
+                                    AAM_Backend_AccessLevel::getInstance()->widgets(),
+                                    $screen_id
                                 ); ?>
                             </div>
                         </div>
