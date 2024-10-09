@@ -4970,17 +4970,17 @@
              * @returns {undefined}
              */
             function save(id, btn) {
-                var value = $(btn).hasClass('icon-check-empty');
+                const is_restricted = $(btn).hasClass('icon-check-empty');
 
                 getAAM().queueRequest(function () {
                     // Show indicator
                     $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
-                    const payload = getAAM().prepareRequestSubjectData({
-                        is_restricted: value
-                    });
+                    const payload = {
+                        is_restricted
+                    };
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/api-route/${id}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/api-route/${id}`), {
                         type: 'POST',
                         dataType: 'json',
                         data: payload,
@@ -4989,13 +4989,13 @@
                         },
                         success: function () {
                             $('#aam-route-overwrite').removeClass('hidden');
-                            updateBtn(btn, value);
+                            updateBtn(btn, is_restricted);
                         },
                         error: function (response) {
-                            updateBtn(btn, value ? 0 : 1);
+                            updateBtn(btn, !is_restricted);
 
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/api-route/${id}`,
+                                request: `/service/api-route/${id}`,
                                 payload,
                                 response
                             });
@@ -5062,7 +5062,7 @@
                                     data.push([
                                         route.id,
                                         route.method,
-                                        escapeHtml(route.route),
+                                        escapeHtml(route.endpoint),
                                         route.is_restricted ? 'checked' : 'unchecked'
                                     ]);
                                 });
@@ -5141,7 +5141,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', null, {
-                                    request: 'aam/v2/service/api-routes',
+                                    request: '/service/api-routes',
                                     response
                                 });
                             },

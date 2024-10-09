@@ -10,18 +10,10 @@
 /**
  * API Route service
  *
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/324
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
- * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
- * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
- *               https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.17
+ * @version 7.0.0
  */
-class AAM_Service_Route
+class AAM_Service_ApiRoute
 {
     use AAM_Core_Contract_ServiceTrait;
 
@@ -30,7 +22,7 @@ class AAM_Service_Route
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.route.enabled';
+    const FEATURE_FLAG = 'service.api_route.enabled';
 
     /**
      * Default configurations
@@ -38,9 +30,9 @@ class AAM_Service_Route
      * @version 6.9.34
      */
     const DEFAULT_CONFIG = [
-        'core.service.route.enabled' => true,
-        'core.settings.xmlrpc'       => true,
-        'core.settings.restful'      => true
+        self::FEATURE_FLAG      => true,
+        'core.settings.xmlrpc'  => true,
+        'core.settings.restful' => true
     ];
 
     /**
@@ -67,7 +59,7 @@ class AAM_Service_Route
             // Hook that initialize the AAM UI part of the service
             if ($enabled) {
                 add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Route::register();
+                    AAM_Backend_Feature_Main_ApiRoute::register();
                 });
             }
 
@@ -86,7 +78,7 @@ class AAM_Service_Route
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -95,16 +87,10 @@ class AAM_Service_Route
      *
      * @return void
      *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
-     * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
-     *               https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         if (is_admin()) {
             add_filter('aam_settings_list_filter', function ($settings, $type) {
@@ -140,7 +126,7 @@ class AAM_Service_Route
             }
 
             return $enabled;
-        });
+        }, PHP_INT_MAX);
 
         // Disable RESTful API if needed
         add_filter(
@@ -163,12 +149,30 @@ class AAM_Service_Route
         );
 
         // Register API manager is applicable
-        add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), PHP_INT_MAX, 3);
+        add_filter('rest_pre_dispatch', function($response, $_, $request) {
+            return $this->_rest_pre_dispatch($response, $request);
+        }, PHP_INT_MAX, 3);
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::API_ROUTE
+                ) {
+                    $resource = new AAM_Framework_Resource_ApiRoute(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
+        );
 
         // Policy generation hook
-        add_filter(
-            'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        );
+        // add_filter(
+        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
+        // );
     }
 
     /**
@@ -184,24 +188,24 @@ class AAM_Service_Route
      * @access public
      * @version 6.4.0
      */
-    public function generatePolicy($policy, $resource_type, $options, $generator)
-    {
-        if ($resource_type === AAM_Core_Object_Route::OBJECT_TYPE) {
-            if (!empty($options)) {
-                $normalized = array();
-                foreach($options as $id => $effect) {
-                    $normalized[str_replace('|', ':', $id)] = !empty($effect);
-                }
+    // public function generatePolicy($policy, $resource_type, $options, $generator)
+    // {
+    //     if ($resource_type === AAM_Core_Object_Route::OBJECT_TYPE) {
+    //         if (!empty($options)) {
+    //             $normalized = array();
+    //             foreach($options as $id => $effect) {
+    //                 $normalized[str_replace('|', ':', $id)] = !empty($effect);
+    //             }
 
-                $policy['Statement'] = array_merge(
-                    $policy['Statement'],
-                    $generator->generateBasicStatements($normalized, 'Route')
-                );
-            }
-        }
+    //             $policy['Statement'] = array_merge(
+    //                 $policy['Statement'],
+    //                 $generator->generateBasicStatements($normalized, 'Route')
+    //             );
+    //         }
+    //     }
 
-        return $policy;
-    }
+    //     return $policy;
+    // }
 
     /**
      * Authorize REST request
@@ -209,49 +213,26 @@ class AAM_Service_Route
      * Based on the matched route, check if it is disabled for current user
      *
      * @param WP_Error|null   $response
-     * @param WP_REST_Server  $server
      * @param WP_REST_Request $request
      *
      * @return WP_Error|null
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/324
-     * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
-    public function authorizeRequest($response, $server, $request)
+    private function _rest_pre_dispatch($response, $request)
     {
         if (!is_wp_error($response)) {
-            $resource  = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
-            );
-
-            $matched = $request->get_route();
-            $method  = $request->get_method();
-
-            foreach (array_keys($server->get_routes()) as $route) {
-                if ($route === $matched
-                    || preg_match('#^' . $route . '$#i', $matched)
-                ) {
-                    if ($resource->is_restricted($route, $method)) {
-                        $response = new WP_Error(
-                            'rest_access_denied',
-                            __('Access Denied', AAM_KEY),
-                            array('status' => 401)
-                        );
-                        break;
-                    }
-                }
+            if (AAM::api()->api_routes()->is_restricted($request)) {
+                $response = new WP_Error(
+                    'rest_access_denied',
+                    __('Access Denied', AAM_KEY),
+                    array('status' => 401)
+                );
             }
         }
 
         return $response;
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Route::bootstrap();
 }

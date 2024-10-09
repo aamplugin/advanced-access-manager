@@ -50,7 +50,7 @@ class AAM
         'AAM_Service_Metabox',
         'AAM_Service_Widget',
         'AAM_Service_AdminToolbar',
-        // 'AAM_Service_Route'                => AAM_Service_Route::FEATURE_FLAG,
+        'AAM_Service_ApiRoute',
 
         // 'AAM_Service_Capability',
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,

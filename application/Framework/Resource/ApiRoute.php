@@ -15,7 +15,8 @@
  */
 class AAM_Framework_Resource_ApiRoute
 implements
-    AAM_Framework_Resource_Interface
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;
@@ -32,23 +33,20 @@ implements
      * restricted. Additionally, it uses the "aam_api_route_is_restricted_filter" to
      * find a possible match.
      *
-     * @param string $route
-     * @param string $method
+     * @param string $endpoint API endpoint
+     * @param string $method   HTTP method
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($route, $method = 'POST')
+    public function is_restricted($endpoint, $method)
     {
-        $id       = "restful|{$route}|{$method}";
-        $lower_id = strtolower($id);
+        $id = strtolower("{$method} {$endpoint}");
 
-        if (array_key_exists($id, $this->_settings)) {
-            $result = $this->_settings[$id];
-        } elseif (array_key_exists($lower_id, $this->_settings)) {
-            $result = $this->_settings[$lower_id];
+        if (array_key_exists($id, $this->_permissions)) {
+            $result = $this->_permissions[$id]['effect'] !== 'allow';
         } else {
             $result = null;
         }
@@ -56,42 +54,10 @@ implements
         return apply_filters(
             'aam_api_route_is_restricted_filter',
             $result,
-            $route,
+            $endpoint,
             $method,
             $this
         );
-    }
-
-    /**
-     * Get parent menu item
-     *
-     * @param string $item
-     *
-     * @return null|string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function get_parent_item($item)
-    {
-        $parent = null;
-        $cache  = AAM_Service_Toolbar::getInstance()->getToolbarCache();
-
-        if (is_array($cache)) {
-            foreach($cache as $branch) {
-                foreach($branch['children'] as $child) {
-                    if ($child['id'] === $item) {
-                        $parent = $branch['id'];
-                    }
-
-                    if ($parent !== null) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $parent;
     }
 
 }

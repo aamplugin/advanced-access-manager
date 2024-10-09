@@ -221,4 +221,14 @@ interface AAM_Framework_AccessLevel_Interface
      */
     public function widgets();
 
+     /**
+     * Get API Routes service
+     *
+     * @return AAM_Framework_Service_ApiRoutes
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function api_routes();
+
 }

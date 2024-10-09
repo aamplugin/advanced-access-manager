@@ -17,7 +17,7 @@
  * @package AAM
  * @version 6.9.10
  */
-class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract
+class AAM_Backend_Feature_Main_ApiRoute extends AAM_Backend_Feature_Abstract
 {
 
     use AAM_Core_Contract_RequestTrait;
@@ -30,18 +30,11 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract
     const ACCESS_CAPABILITY = 'aam_manage_api_routes';
 
     /**
-     * Type of AAM core object
-     *
-     * @version 6.0.0
-     */
-    const OBJECT_TYPE = AAM_Core_Object_Route::OBJECT_TYPE;
-
-    /**
      * HTML template to render
      *
      * @version 6.0.0
      */
-    const TEMPLATE = 'service/route.php';
+    const TEMPLATE = 'service/api-route.php';
 
     /**
      * Constructor
@@ -54,8 +47,8 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract
     public function __construct()
     {
         // Customize the user experience
-        add_filter('aam_route_mode_panel_filter', function() {
-            return AAM_Backend_View::getInstance()->loadPartial('route-mode');
+        add_filter('aam_ui_api_route_mode_panel_filter', function() {
+            return AAM_Backend_View::getInstance()->loadPartial('api-route-mode');
         });
     }
 
@@ -75,12 +68,6 @@ class AAM_Backend_Feature_Main_Route extends AAM_Backend_Feature_Abstract
             'title'      => __('API Routes', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

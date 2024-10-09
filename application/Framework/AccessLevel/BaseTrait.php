@@ -358,6 +358,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
+    public function api_routes()
+    {
+        return AAM_Framework_Manager::api_routes([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function metaboxes()
     {
         return AAM_Framework_Manager::metaboxes([

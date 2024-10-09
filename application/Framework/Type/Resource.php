@@ -22,7 +22,7 @@ class AAM_Framework_Type_Resource
     const TERM = 'term';
     const ACCESS_DENIED_REDIRECT = 'denied_redirect';
     const TOOLBAR = 'admin_toolbar';
-    const API_ROUTE = 'route';
+    const API_ROUTE = 'api_route';
     const BACKEND_MENU = 'backend_menu';
     const METABOX = 'metabox';
     const WIDGET = 'metabox';

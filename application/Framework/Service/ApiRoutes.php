@@ -38,18 +38,13 @@ class AAM_Framework_Service_ApiRoutes
     public function get_route_list($inline_context = null)
     {
         try {
-            $result        = [];
-            $access_level  = $this->_get_access_level($inline_context);
-            $resource      = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE, null, true
-            );
-
-            $settings = $resource->get_explicit_settings();
+            $result   = [];
+            $resource = $this->get_resource(true, $inline_context);
 
             // Iterating over the list of all registered API routes and compile the
             // list
-            foreach (rest_get_server()->get_routes() as $route => $handlers) {
-                $methods = array();
+            foreach (rest_get_server()->get_routes() as $endpoint => $handlers) {
+                $methods = [];
 
                 foreach ($handlers as $handler) {
                     $methods = array_merge(
@@ -58,16 +53,9 @@ class AAM_Framework_Service_ApiRoutes
                 }
 
                 foreach (array_unique($methods) as $method) {
-                    $mask = strtolower("restful|{$route}|{$method}");
-
-                    array_push(
-                        $result,
-                        $this->_prepare_route(
-                            $mask,
-                            $resource->is_restricted($route, $method),
-                            !array_key_exists($mask, $settings)
-                        )
-                    );
+                    array_push($result, $this->_prepare_route(
+                        $endpoint, $method, $resource
+                    ));
                 }
             }
         } catch (Exception $e) {
@@ -78,32 +66,32 @@ class AAM_Framework_Service_ApiRoutes
     }
 
     /**
-     * Get existing route by ID
+     * Get existing route by combination of endpoint and HTTP method
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param array $inline_context Runtime context
+     * @param string      $endpoint       Route endpoint
+     * @param string|null $method         HTTP method
+     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.10
-     * @throws OutOfRangeException If rule does not exist
+     * @version 7.0.0
      */
-    public function get_route_by_id($id, $inline_context = null)
+    public function get_route($endpoint, $method = 'GET', $inline_context = null)
     {
         try {
-            $result = false;
+            $routes = $this->get_route_list($inline_context);
+            $found  = array_filter($routes, function($r) use ($endpoint, $method) {
+                return $r['endpoint'] === strtolower($endpoint)
+                            && $r['method'] === strtoupper($method);
+            });
 
-            foreach($this->get_route_list($inline_context) as $route) {
-                if ($route['id'] === $id) {
-                    $result = $route;
-                }
-            }
-
-            if ($result === false) {
+            if (empty($found)) {
                 throw new OutOfRangeException(__(
                     'Route does not exist', AAM_KEY
                 ));
+            } else{
+                $result = array_shift($found);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -115,33 +103,31 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Update existing route
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param bool  $is_restricted  Is restricted or not
-     * @param array $inline_context Runtime context
+     * @param bool        $is_restricted  Is restricted or not
+     * @param string      $endpoint       API endpoint
+     * @param string|null $method         HTTP method
+     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.10
-     * @throws RuntimeException If fails to persist a rule
+     * @version 7.0.0
      */
     public function update_route_permission(
-        $id, $is_restricted = true, $inline_context = null
+        $is_restricted, $endpoint, $method = 'GET', $inline_context = null
     ) {
         try {
-            $route        = $this->get_route_by_id($id);
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
-            );
+            $resource = $this->get_resource(false, $inline_context);
 
-            $mask = strtolower("restful|{$route['route']}|{$route['method']}");
+            // Compile the permission model
+            $permission = [ 'effect' => $is_restricted ? 'deny' : 'allow' ];
+            $key        = strtolower("{$method} {$endpoint}");
 
-            if (!$resource->set_explicit_setting($mask, $is_restricted)) {
+            if (!$resource->set_permission($key, $permission)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->get_route_by_id($id);
+            $result = $this->get_route($endpoint, $method);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -152,54 +138,41 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Delete route
      *
-     * @param int   $id             Sudo-id for the rule
-     * @param array $inline_context Runtime context
+     * @param string      $endpoint       API endpoint
+     * @param string|null $method         HTTP method
+     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.10
-     * @throws OutOfRangeException If rule does not exist
-     * @throws RuntimeException If fails to persist a rule
+     * @version 7.0.0
      */
-    public function delete_route_permission($id, $inline_context = null)
-    {
+    public function delete_route_permission(
+        $endpoint, $method = 'GET', $inline_context = null
+    ) {
         try {
             $access_level = $this->_get_access_level($inline_context);
             $resource  = $access_level->get_resource(
                 AAM_Framework_Type_Resource::API_ROUTE
             );
 
-            // Find the rule that we are updating
-            $found = null;
+            // Compile the rule's key
+            $key = strtolower("{$method} {$endpoint}");
 
             // Note! User can delete only explicitly set rule (overwritten rule)
-            $settings = [];
+            $permissions = $resource->get_permissions(true);
 
-            foreach($resource->get_explicit_settings() as $route => $effect) {
-                $parts = explode('|', $route);
-
-                if (abs(crc32($parts[1] . $parts[2])) === $id) {
-                    $found = array(
-                        'mask'       => $route,
-                        'restricted' => $effect
-                    );
-                } else {
-                    $settings[$route] = $effect;
-                }
-            }
-
-            if ($found) {
-                $success = $resource->set_explicit_settings($settings);
+            if (array_key_exists($key, $permissions)) {
+                unset($permissions[$key]);
             } else {
                 throw new OutOfRangeException('Route does not exist');
             }
 
-            if (!$success) {
+            if (!$resource->set_permissions($permissions)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->get_route_by_id($id);
+            $result = true;
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -223,10 +196,7 @@ class AAM_Framework_Service_ApiRoutes
     public function reset($inline_context = null)
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
-            $resource     = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
-            );
+            $resource = $this->get_resource(false, $inline_context);
 
             // Reset settings to default
             $resource->reset();
@@ -240,29 +210,88 @@ class AAM_Framework_Service_ApiRoutes
     }
 
     /**
+     * Get resource
+     *
+     * @param boolean $reload
+     * @param array   $inline_context
+     *
+     * @return AAM_Framework_Resource_ApiRoute
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource($reload = false, $inline_context = null)
+    {
+        try {
+            $access_level = $this->_get_access_level($inline_context);
+            $result       = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE, null, $reload
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if API route is restricted or not
+     *
+     * @param string|WP_REST_Request $route
+     * @param string|null            $method
+     * @param array|null             $inline_context
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_restricted($route, $method = 'GET', $inline_context = null)
+    {
+        try {
+            if (is_a($route, WP_REST_Request::class)) {
+                $endpoint = $route->get_route();
+                $method   = $route->get_method();
+            } elseif (is_string($route)) {
+                $endpoint = $route;
+            } else {
+                throw new InvalidArgumentException('Invalid route endpoint');
+            }
+
+            $result = $this->get_resource(true, $inline_context)->is_restricted(
+                $endpoint, $method
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
      * Normalize and prepare the route model
      *
-     * @param string $route
-     * @param bool   $is_restricted
-     * @param bool   $is_inherited
+     * @param string                          $endpoint
+     * @param string                          $method
+     * @param AAM_Framework_Resource_ApiRoute $resource
      *
      * @return array
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    private function _prepare_route(
-        $route, $is_restricted = false, $is_inherited = false
-    ) {
-        $parts = explode('|', $route);
+    private function _prepare_route($endpoint, $method, $resource)
+    {
+        $explicit = $resource->get_permissions(true);
+        $key      = strtolower("{$method} {$endpoint}");
 
-        return array(
-            'id'            => abs(crc32($parts[1].$parts[2])),
-            'route'         => $parts[1],
-            'method'        => strtoupper($parts[2]),
-            'is_restricted' => $is_restricted,
-            'is_inherited'  => $is_inherited
-        );
+        return [
+            'endpoint'      => strtolower($endpoint),
+            'method'        => strtoupper($method),
+            'is_restricted' => $resource->is_restricted($endpoint, $method),
+            'is_inherited'  => !array_key_exists($key, $explicit),
+            'id'            => base64_encode($key)
+        ];
     }
 
 }

@@ -39,34 +39,40 @@ class AAM_Restful_ApiRouteService
             // Get the list of routes
             $this->_register_route('/api-routes', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_routes'),
+                'callback'            => array($this, 'get_items'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Get a route
-            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_route'),
+                'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'API route unique ID',
-                        'type'        => 'number',
-                        'required'    => true
+                        'description'       => 'Based64 encoded API route + method',
+                        'type'              => 'string',
+                        'required'          => true,
+                        'validate_callback' => function ($value) {
+                            return $this->_validate_base64($value);
+                        }
                     )
                 )
             ));
 
             // Update a route permission
-            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_route'),
+                'callback'            => array($this, 'update_item_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'API route unique ID',
-                        'type'        => 'number',
-                        'required'    => true
+                        'description'       => 'Based64 encoded API route + method',
+                        'type'              => 'string',
+                        'required'          => true,
+                        'validate_callback' => function ($value) {
+                            return $this->_validate_base64($value);
+                        }
                     ),
                     'is_restricted' => array(
                         'description' => 'Either route is restricted or not',
@@ -77,15 +83,18 @@ class AAM_Restful_ApiRouteService
             ));
 
             // Delete a route permission
-            $this->_register_route('/api-route/(?P<id>[\d]+)', array(
+            $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_route'),
+                'callback'            => array($this, 'delete_item_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'API route unique ID',
-                        'type'        => 'number',
-                        'required'    => true
+                        'description'       => 'Based64 encoded API route + method',
+                        'type'              => 'string',
+                        'required'          => true,
+                        'validate_callback' => function ($value) {
+                            return $this->_validate_base64($value);
+                        }
                     )
                 )
             ));
@@ -93,23 +102,23 @@ class AAM_Restful_ApiRouteService
             // Reset all routes' permissions
             $this->_register_route('/api-routes', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_routes'),
+                'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
 
     /**
-     * Get list of all restrictions
+     * Get list of all API routes with permissions
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function get_routes(WP_REST_Request $request)
+    public function get_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -129,14 +138,47 @@ class AAM_Restful_ApiRouteService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function get_route(WP_REST_Request $request)
+    public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_route_by_id(
-                intval($request->get_param('id'))
+            $id      = $request->get_param('id');
+
+            // Unserialize the ID - extract HTTP method & endpoint
+            list($method, $endpoint) = explode(' ', base64_decode($id));
+
+            $result = $service->get_route($endpoint, $method);
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Update a route permissions
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function update_item_permissions(WP_REST_Request $request)
+    {
+        try {
+            $service       = $this->_get_service($request);
+            $id            = $request->get_param('id');
+            $is_restricted = $request->get_param('is_restricted');
+
+            // Unserialize the ID - extract HTTP method & endpoint
+            list($method, $endpoint) = explode(' ', base64_decode($id));
+
+            $result = $service->update_route_permission(
+                $is_restricted, $endpoint, $method
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -146,47 +188,27 @@ class AAM_Restful_ApiRouteService
     }
 
     /**
-     * Update a route
+     * Delete a route permissions
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function update_route(WP_REST_Request $request)
+    public function delete_item_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_route_permission(
-                intval($request->get_param('id')),
-                $request->get_param('is_restricted')
-            );
-        } catch (Exception $e) {
-            $result = $this->_prepare_error_response($e);
-        }
+            $id      = $request->get_param('id');
 
-        return rest_ensure_response($result);
-    }
+            // Unserialize the ID - extract HTTP method & endpoint
+            list($method, $endpoint) = explode(' ', base64_decode($id));
 
-    /**
-     * Delete a route
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public function delete_route(WP_REST_Request $request)
-    {
-        try {
-            $service = $this->_get_service($request);
-            $result  = $service->delete_route_permission(
-                intval($request->get_param('id'))
-            );
+            $result = [
+                'success' => $service->delete_route_permission($endpoint, $method)
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -202,9 +224,9 @@ class AAM_Restful_ApiRouteService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function reset_routes(WP_REST_Request $request)
+    public function reset_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -227,8 +249,7 @@ class AAM_Restful_ApiRouteService
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-                && (current_user_can('aam_manage_routes')
-                || current_user_can('aam_manage_api_routes'));
+            && current_user_can('aam_manage_api_routes');
     }
 
     /**
@@ -247,6 +268,31 @@ class AAM_Restful_ApiRouteService
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
+    }
+
+    /**
+     * Validate that the string is valid base64 encoded
+     *
+     * @param string $value
+     *
+     * @return boolean|WP_Error
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _validate_base64($value)
+    {
+        $response = true;
+
+        if (!AAM_Framework_Utility_String::is_base64_encoded($value)) {
+            $response = new WP_Error(
+                'rest_invalid_param',
+                'Invalid ID',
+                [ 'status'  => 400 ]
+            );
+        }
+
+        return $response;
     }
 
 }
