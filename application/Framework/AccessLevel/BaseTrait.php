@@ -368,6 +368,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
+    public function identity()
+    {
+        return AAM_Framework_Manager::identity([
+            'access_level' => $this
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function metaboxes()
     {
         return AAM_Framework_Manager::metaboxes([

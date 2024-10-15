@@ -15,7 +15,8 @@
  */
 class AAM_Framework_Resource_Identity
 implements
-    AAM_Framework_Resource_Interface
+    AAM_Framework_Resource_Interface,
+    AAM_Framework_Resource_PermissionInterface
 {
 
     use AAM_Framework_Resource_PermissionTrait;
@@ -26,152 +27,58 @@ implements
     const TYPE = AAM_Framework_Type_Resource::IDENTITY;
 
     /**
-     * Check whether given role is allowed to perform an action
+     * Determine if specific permission is allowed to given identity
      *
-     * @param string $role_slug
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_role_allowed_to($role_slug, $action)
-    {
-        return $this->_is_allowed_to('role', $role_slug, $action);
-    }
-
-    /**
-     * Check whether given level is allowed to perform an action
-     *
-     * @param int    $level
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_role_level_allowed_to($level, $action)
-    {
-        return $this->_is_allowed_to('role_level', $level, $action);
-    }
-
-    /**
-     * Check whether given user is allowed to perform an action
-     *
-     * @param string $user_login
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_user_allowed_to($user_login, $action)
-    {
-        return $this->_is_allowed_to('user', $user_login, $action);
-    }
-
-    /**
-     * Check whether given user level is allowed to perform an action
-     *
-     * @param int    $level
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_user_level_allowed_to($level, $action)
-    {
-        return $this->_is_allowed_to('user_level', $level, $action);
-    }
-
-    /**
-     * Check whether given user role is allowed to perform an action
-     *
-     * @param string $role_slug
-     * @param string $action
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_user_role_allowed_to($role_slug, $action)
-    {
-        return $this->_is_allowed_to('user_role', $role_slug, $action);
-    }
-
-    /**
-     * Check if certain action is allowed
-     *
-     * Method returns boolean true/false if rule is defined or null otherwise
-     *
-     * @param string $target
-     * @param string $action
+     * @param string     $identity_type
+     * @param string|int $identity
+     * @param string     $permission
      *
      * @return boolean|null
      *
-     * @access private
+     * @access public
      * @version 7.0.0
      */
-    private function _is_allowed_to($rule_type, $identifier, $action)
+    public function is_allowed_to($identity_type, $identity, $permission)
     {
+        // Find the permission
         $result = null;
-        $target = $rule_type . ($identifier ? "|{$identifier}" : '');
 
-        if (isset($this->_settings[$target][$action])) {
-            $result = ($this->_settings[$target][$action] === 'allow');
+        foreach($this->get_permissions() as $perm) {
+            if ($perm['identity_type'] === $identity_type
+                && $perm['identity'] == $identity
+                && $perm['permission'] === $permission
+            ) {
+                $result = $perm['effect'] === 'allow';
+            }
         }
 
         return apply_filters(
-            'aam_user_governance_is_allowed_to_filter',
+            'aam_identity_is_allowed_to_filter',
             $result,
-            $rule_type,
-            $identifier,
-            $action,
+            $identity_type,
+            $identity,
+            $permission,
             $this
         );
     }
 
     /**
-     * Merge access settings
+     * Determine if specific permission is denied to given identity
      *
-     * @param array $incoming
+     * @param string     $identity_type
+     * @param string|int $identity
+     * @param string     $permission
      *
-     * @return array
+     * @return boolean|null
      *
      * @access public
      * @version 7.0.0
-     * @todo Do we really need to store rules with "allow" "deny" flags instead of boolean?
      */
-    public function merge_settings($incoming)
+    public function is_denied_to($identity_type, $identity, $permission)
     {
-        // Determine the array of unique targets
-        $targets = array_keys($incoming);
-        foreach (array_keys($this->_settings) as $key) {
-            if (!in_array($key, $targets, true)) {
-                $targets[] = $key;
-            }
-        }
+        $result = $this->is_allowed_to($identity_type, $identity, $permission);
 
-        $merged  = [];
-        $convert = function($v) { return $v !== 'allow'; };
-
-        // Iterate over the array of all targets and merge settings
-        foreach($targets as $target) {
-            $merged[$target] = array_map(function($v) {
-                return $v === true ? 'deny' : 'allow';
-            }, $this->_merge_binary_settings(
-                array_map($convert, isset($incoming[$target]) ? $incoming[$target] : []),
-                array_map($convert, isset($this->_settings[$target]) ? $this->_settings[$target] : []),
-            ));
-        }
-
-        return $merged;
+        return is_bool($result) ? !$result : null;
     }
 
 }

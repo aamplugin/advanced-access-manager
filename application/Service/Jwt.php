@@ -45,7 +45,7 @@ class AAM_Service_Jwt
      *
      * @version 6.0.0
      */
-    const FEATURE_FLAG = 'core.service.jwt.enabled';
+    const FEATURE_FLAG = 'service.jwt.enabled';
 
     /**
      * JWT Registry DB option
@@ -123,7 +123,7 @@ class AAM_Service_Jwt
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -132,17 +132,10 @@ class AAM_Service_Jwt
      *
      * @return void
      *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
-     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/129
-     * @since 6.4.0  Added the ability to issue refreshable token through API.
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.3.0  https://github.com/aamplugin/advanced-access-manager/issues/25
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         if (AAM::isAAM()) {
             add_action('aam_post_edit_user_modal_action', function () {

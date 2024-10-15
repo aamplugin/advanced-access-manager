@@ -106,14 +106,13 @@ class AAM_Service_AdminToolbar
      */
     protected function initialize_hooks()
     {
-        // Determine if we should do admin toolbar filtering
-        $no_filtering = current_user_can('aam_manage_admin_toolbar') && AAM::isAAM();
+        add_action('wp_before_admin_bar_render', function () {
+            $can = current_user_can('aam_manage_admin_toolbar') && AAM::isAAM();
 
-        if (!$no_filtering) {
-            add_action('wp_before_admin_bar_render', function () {
+            if (!$can) {
                 $this->_filter_admin_toolbar();
-            }, PHP_INT_MAX);
-        }
+            }
+        }, PHP_INT_MAX);
 
         // Policy generation hook
         // add_filter(

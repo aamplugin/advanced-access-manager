@@ -284,7 +284,7 @@ class AAM_Restful_ApiRouteService
     {
         $response = true;
 
-        if (!AAM_Framework_Utility_String::is_base64_encoded($value)) {
+        if (!AAM_Framework_Utility_Misc::is_base64_encoded($value)) {
             $response = new WP_Error(
                 'rest_invalid_param',
                 'Invalid ID',

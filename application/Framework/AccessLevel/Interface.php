@@ -221,7 +221,7 @@ interface AAM_Framework_AccessLevel_Interface
      */
     public function widgets();
 
-     /**
+    /**
      * Get API Routes service
      *
      * @return AAM_Framework_Service_ApiRoutes
@@ -230,5 +230,15 @@ interface AAM_Framework_AccessLevel_Interface
      * @version 7.0.0
      */
     public function api_routes();
+
+    /**
+     * Get Identity service
+     *
+     * @return AAM_Framework_Service_Identity
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function identity();
 
 }

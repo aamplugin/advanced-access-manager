@@ -136,6 +136,8 @@ trait AAM_Framework_Service_BaseTrait
      */
     public function __get($name)
     {
+        $result = null;
+
         try {
             if ($name === 'access_level') {
                 $result = $this->_access_level;

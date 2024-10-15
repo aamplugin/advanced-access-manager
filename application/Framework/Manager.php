@@ -248,14 +248,14 @@ class AAM_Framework_Manager
      *
      * @param array $runtime_context
      *
-     * @return AAM_Framework_Service_IdentityGovernance
+     * @return AAM_Framework_Service_Identity
      *
      * @access public
-     * @version 6.9.28
+     * @version 7.0.0
      */
-    public static function identity_governance(array $runtime_context = [])
+    public static function identity(array $runtime_context = [])
     {
-        return AAM_Framework_Service_IdentityGovernance::get_instance(array_merge(
+        return AAM_Framework_Service_Identity::get_instance(array_merge(
             self::$_default_context, $runtime_context
         ));
     }

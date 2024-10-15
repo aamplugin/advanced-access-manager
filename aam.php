@@ -51,12 +51,14 @@ class AAM
         'AAM_Service_Widget',
         'AAM_Service_AdminToolbar',
         'AAM_Service_ApiRoute',
+        'AAM_Service_Identity',
+        'AAM_Service_Content',
+        'AAM_Service_SecureLogin',
+        'AAM_Service_Jwt'
 
         // 'AAM_Service_Capability',
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
-
-        // 'AAM_Service_IdentityGovernance'   => AAM_Service_IdentityGovernance::FEATURE_FLAG,
         // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
 
         // 'AAM_Service_Chatbot'              => AAM_Service_Chatbot::FEATURE_FLAG,
@@ -64,9 +66,6 @@ class AAM
         // 'AAM_Service_Welcome'              => AAM_Service_Welcome::FEATURE_FLAG,
 
         // 'AAM_Service_AccessPolicy'         => AAM_Service_AccessPolicy::FEATURE_FLAG,
-        'AAM_Service_Content',
-        'AAM_Service_SecureLogin',
-        'AAM_Service_Jwt'
     ];
 
     /**
