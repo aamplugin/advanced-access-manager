@@ -157,10 +157,13 @@ class AAM_Framework_Service_Capabilities
             // If there no assignee type, combine all the role capabilities + current
             // user capabilities
             if ($assignee_type === null) {
-                $all_caps = array_merge(
-                    $this->_prepare_all_role_capabilities(),
-                    array_keys(wp_get_current_user()->caps)
-                );
+                $all_caps = $this->_prepare_all_role_capabilities();
+
+                // Also get current user's capability add add them to the array
+                if (is_user_logged_in()) {
+                    $user     = wp_get_current_user();
+                    $all_caps = array_merge($user->allcaps, $all_caps);
+                }
             } elseif ($assignee_type === 'role') {
                 if (wp_roles()->is_role($assignee_id)) {
                     $all_caps = array_keys(

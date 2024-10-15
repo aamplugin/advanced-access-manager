@@ -439,7 +439,7 @@ class AAM_Restful_CapabilityService
 
         $slug   = $output['slug'];
         $manage = AAM_Framework_Manager::configs()->get_config(
-            'core.settings.editCapabilities', true
+            'service.capability.edit_caps'
         );
 
         $update = apply_filters('aam_cap_can_filter', true, $slug, 'update');

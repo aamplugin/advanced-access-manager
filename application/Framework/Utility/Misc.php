@@ -71,39 +71,4 @@ class AAM_Framework_Utility_Misc
         return intval($max);
     }
 
-    /**
-     * Checks if provided capability is registered on the site
-     *
-     * Due to potential performance implications, this method does not check if
-     * capability is assigned to any user directly except current user
-     *
-     * @param string $cap
-     *
-     * @return boolean
-     *
-     * @access public
-     * @static
-     * @version 7.0.0
-     */
-    public static function capability_exists($cap)
-    {
-        static $all_caps = [];
-
-        if (empty($all_caps)) {
-            foreach (wp_roles()->role_objects as $role) {
-                if (is_array($role->capabilities)) {
-                    $all_caps = array_merge($all_caps, $role->capabilities);
-                }
-            }
-
-            // Also get current user's capability add add them to the array
-            if (is_user_logged_in()) {
-                $user     = wp_get_current_user();
-                $all_caps = array_merge($user->allcaps, $all_caps);
-            }
-        }
-
-        return (is_string($cap) && array_key_exists($cap, $all_caps));
-    }
-
 }

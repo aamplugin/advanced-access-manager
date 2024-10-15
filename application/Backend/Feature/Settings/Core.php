@@ -56,10 +56,10 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
     {
         $service  = AAM_Framework_Manager::configs();
         $settings = array(
-            'core.settings.editCapabilities' => array(
+            'service.capability.edit_caps' => array(
                 'title'       => __('Edit/Delete Capabilities', AAM_KEY),
                 'description' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
-                'value'       => $service->get_config('core.settings.editCapabilities')
+                'value'       => $service->get_config('service.capability.edit_caps')
             ),
             'core.settings.ui.render_access_metabox' => array(
                 'title'       => __('Render Access Manager Metabox', AAM_KEY),

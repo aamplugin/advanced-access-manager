@@ -10,8 +10,11 @@
 /**
  * Capability service
  *
+ * @since 7.0.0 Major release
+ * @since 6.0.0 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 class AAM_Service_Capability
 {
@@ -20,18 +23,18 @@ class AAM_Service_Capability
     /**
      * AAM configuration setting that is associated with the feature
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    const FEATURE_FLAG = 'core.service.capability.enabled';
+    const FEATURE_FLAG = 'service.capability.enabled';
 
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'core.service.capability.enabled' => true,
-        'core.settings.editCapabilities'  => true
+        'service.capability.enabled'   => true,
+        'service.capability.edit_caps' => true
     ];
 
     /**
@@ -87,7 +90,7 @@ class AAM_Service_Capability
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -99,7 +102,7 @@ class AAM_Service_Capability
      * @access protected
      * @version 6.9.33
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         // Register RESTful API endpoints
         AAM_Restful_CapabilityService::bootstrap();

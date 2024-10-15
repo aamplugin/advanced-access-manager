@@ -166,7 +166,9 @@ final class AAM_Migration_700
             'core.service.toolbar.enabled'             => 'service.admin_toolbar.enabled',
             'core.service.route.enabled'               => 'service.api_route.enabled',
             'core.service.identity-governance.enabled' => 'service.identity.enabled',
-            'core.service.jwt.enabled'                 => 'service.jwt.enabled'
+            'core.service.jwt.enabled'                 => 'service.jwt.enabled',
+            'core.service.capability.enabled'          => 'service.capability.enabled',
+            'core.settings.editCapabilities'           => 'service.capability.edit_caps'
         ];
 
         foreach($changes as $legacy => $new) {

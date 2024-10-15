@@ -54,9 +54,8 @@ class AAM
         'AAM_Service_Identity',
         'AAM_Service_Content',
         'AAM_Service_SecureLogin',
-        'AAM_Service_Jwt'
-
-        // 'AAM_Service_Capability',
+        'AAM_Service_Jwt',
+        'AAM_Service_Capability'
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
         // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
