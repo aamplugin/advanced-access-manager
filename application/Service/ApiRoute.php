@@ -129,24 +129,26 @@ class AAM_Service_ApiRoute
         }, PHP_INT_MAX);
 
         // Disable RESTful API if needed
-        add_filter(
-            'rest_authentication_errors',
-            function ($response) {
-                if (!is_wp_error($response)
-                    && !AAM_Framework_Manager::configs()->get_config(
-                            'core.settings.restful'
-                )) {
-                    $response = new WP_Error(
-                        'rest_access_disabled',
-                        __('RESTful API is disabled', AAM_KEY),
-                        array('status' => 403)
-                    );
-                }
+        if (!current_user_can('aam_manager')) {
+            add_filter(
+                'rest_authentication_errors',
+                function ($response) {
+                    if (!is_wp_error($response)
+                        && !AAM_Framework_Manager::configs()->get_config(
+                                'core.settings.restful'
+                    )) {
+                        $response = new WP_Error(
+                            'rest_access_disabled',
+                            __('RESTful API is disabled', AAM_KEY),
+                            array('status' => 403)
+                        );
+                    }
 
-                return $response;
-            },
-            PHP_INT_MAX
-        );
+                    return $response;
+                },
+                PHP_INT_MAX
+            );
+        }
 
         // Register API manager is applicable
         add_filter('rest_pre_dispatch', function($response, $_, $request) {

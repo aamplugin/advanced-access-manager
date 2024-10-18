@@ -1,13 +1,13 @@
 <?php if (defined('AAM_KEY')) { ?>
     <div id="audit-content" class="audit-container">
-        <h1><?php echo __('Security audit', AAM_KEY); ?></h1>
+        <h1><?php echo __('Security Scan', AAM_KEY); ?></h1>
 
         <p class="aam-info">
-            This automated security audit will conduct a series of checks to verify the integrity of your website's configurations and detect any potential elevated privileges for users and roles.
+            This automated security scan will conduct a series of checks to verify the integrity of your website's configurations and detect any potential elevated privileges for users and roles.
             Below is a list of all the steps included in the audit. You can expand each item to learn more about its purpose and importance and we strongly advice conducting the automated security audit periodically to catch any potential issues.<br/><br/>
-            To learn more about the AAM security audit, refer to the article <a href="https://aamportal.com/article/what-is-aam-security-audit-and-how-it-works" target="_blank">"What is AAM security audit and how it works?"</a>
+            To learn more about the AAM security scan, refer to the article <a href="https://aamportal.com/article/what-is-aam-security-audit-and-how-it-works" target="_blank">"What is AAM security audit and how it works?"</a>
         </p>
-        <a href="#" class="btn btn-success" id="execute_security_audit">Execute the Security Audit</a>
+        <a href="#" class="btn btn-success" id="execute_security_audit">Run the Security Scan</a>
         <hr />
 
         <?php $has_report = AAM_Service_SecurityAudit::bootstrap()->has_report(); ?>

@@ -48,8 +48,8 @@ class AAM_Service_SecurityAudit
             // Settings->Services tab
             add_filter('aam_service_list_filter', function ($services) {
                 $services[] = array(
-                    'title'       => __('Security Audit', AAM_KEY),
-                    'description' => __('This automated security audit service conducts a series of checks to verify the integrity of your website\'s configurations and detect any potential elevated privileges for users and roles.', AAM_KEY),
+                    'title'       => __('Security Scan', AAM_KEY),
+                    'description' => __('This automated security scan service conducts a series of checks to verify the integrity of your website\'s configurations and detect any potential elevated privileges for users and roles.', AAM_KEY),
                     'setting'     => self::FEATURE_FLAG
                 );
 
