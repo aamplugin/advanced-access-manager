@@ -555,7 +555,8 @@
                                         response.name
                                     );
 
-                                    location.reload();
+                                    getAAM().fetchContent('main');
+                                    $('#role-list').DataTable().ajax.reload();
 
                                     $('#add-role-modal').modal('hide');
                                 },
@@ -7410,44 +7411,44 @@
         let notification_message;
         let allow_reporting = false;
 
-        if (!message) {
-            switch (status) {
-                case 'success':
-                    notification_header  = 'Success';
-                    notification_message = getAAM().__(
-                        'Operation completed successfully'
-                    );
-                    break;
+        switch (status) {
+            case 'success':
+                notification_header  = 'Success';
+                notification_message = getAAM().__(
+                    message || 'Operation completed successfully'
+                );
+                break;
 
-                case 'danger':
-                    notification_header = 'Unexpected Issue';
+            case 'danger':
+                notification_header = 'Unexpected Issue';
 
-                    if (metadata
-                        && metadata.response
-                        && metadata.response.status !== 500
-                        && metadata.response.responseJSON.errors
-                    ) {
-                        const http_error = Object.keys(
-                            metadata.response.responseJSON.errors
-                        ).shift();
+                if (metadata
+                    && metadata.response
+                    && metadata.response.status !== 500
+                    && metadata.response.responseJSON.errors
+                ) {
+                    const http_error = Object.keys(
+                        metadata.response.responseJSON.errors
+                    ).shift();
 
-                        if (http_error === 'rest_invalid_argument') {
-                            notification_header  = getAAM().__('Invalid Arguments');
-                        }
-
-                        notification_message = metadata.response.responseJSON.errors[http_error][0];
-                    } else {
-                        if (metadata !== null) {
-                            metadata.response = metadata.response.responseJSON;
-                            allow_reporting   = true;
-                        }
-                        notification_message = getAAM().__('An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.');
+                    if (http_error === 'rest_invalid_argument') {
+                        notification_header  = getAAM().__('Invalid Arguments');
                     }
-                    break;
 
-                default:
-                    break;
-            }
+                    notification_message = message || metadata.response.responseJSON.errors[http_error][0];
+                } else {
+                    if (metadata !== null) {
+                        metadata.response = metadata.response.responseJSON;
+                        allow_reporting   = true;
+                    }
+                    notification_message = getAAM().__(
+                        message || 'An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.'
+                    );
+                }
+                break;
+
+            default:
+                break;
         }
 
         $('#report_issue_modal').on('show.bs.modal', function (e) {

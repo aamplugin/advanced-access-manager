@@ -10,6 +10,7 @@
 /**
  * API Route service
  *
+ * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/420
  * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/324
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
  * @since 6.7.2  https://github.com/aamplugin/advanced-access-manager/issues/163
@@ -19,7 +20,7 @@
  * @since 6.0.0  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.17
+ * @version 6.9.41
  */
 class AAM_Service_Route
 {
@@ -104,6 +105,7 @@ class AAM_Service_Route
      *
      * @return void
      *
+     * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/420
      * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
      * @since 6.7.0  https://github.com/aamplugin/advanced-access-manager/issues/153
      * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
@@ -111,7 +113,7 @@ class AAM_Service_Route
      * @since 6.0.0  Initial implementation of the method
      *
      * @access protected
-     * @version 6.9.10
+     * @version 6.9.41
      */
     protected function initializeHooks()
     {
@@ -152,24 +154,26 @@ class AAM_Service_Route
         });
 
         // Disable RESTful API if needed
-        add_filter(
-            'rest_authentication_errors',
-            function ($response) {
-                if (!is_wp_error($response)
-                    && !AAM_Framework_Manager::configs()->get_config(
-                            'core.settings.restful'
-                )) {
-                    $response = new WP_Error(
-                        'rest_access_disabled',
-                        __('RESTful API is disabled', AAM_KEY),
-                        array('status' => 403)
-                    );
-                }
+        if (!current_user_can('aam_manager')) {
+            add_filter(
+                'rest_authentication_errors',
+                function ($response) {
+                    if (!is_wp_error($response)
+                        && !AAM_Framework_Manager::configs()->get_config(
+                                'core.settings.restful'
+                    )) {
+                        $response = new WP_Error(
+                            'rest_access_disabled',
+                            __('RESTful API is disabled', AAM_KEY),
+                            array('status' => 403)
+                        );
+                    }
 
-                return $response;
-            },
-            PHP_INT_MAX
-        );
+                    return $response;
+                },
+                PHP_INT_MAX
+            );
+        }
 
         // Register API manager is applicable
         add_filter('rest_pre_dispatch', array($this, 'authorizeRequest'), PHP_INT_MAX, 3);

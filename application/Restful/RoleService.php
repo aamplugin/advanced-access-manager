@@ -10,13 +10,14 @@
 /**
  * RESTful API for role management
  *
+ * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/419
  * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
  * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
  * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
  * @since 6.9.6  Initial implementation of the class
  *
  * @package AAM
- * @version 6.9.38
+ * @version 6.9.41
  */
 class AAM_Restful_RoleService
 {
@@ -264,8 +265,11 @@ class AAM_Restful_RoleService
      *
      * @param WP_REST_Request $request
      *
+     * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/419
+     * @since 6.9.6  Initial implementation of the method
+     *
      * @return WP_REST_Response
-     * @version 6.9.6
+     * @version 6.9.41
      */
     public function create_role(WP_REST_Request $request)
     {
@@ -288,10 +292,13 @@ class AAM_Restful_RoleService
             // can manage it
             if (is_string($clone_role) && strlen($clone_role) > 0) {
                 $cloning_role = $service->get_role($clone_role);
+                $cloning_caps = array_filter($cloning_role->capabilities, function($effect) {
+                    return !empty($effect);
+                });
 
                 $capabilities = array_merge(
                     $capabilities,
-                    array_keys($cloning_role->capabilities),
+                    array_keys($cloning_caps),
                     // Also adding role's slug to the list of capabilities
                     // https://github.com/aamplugin/advanced-access-manager/issues/97
                     array($clone_role)
