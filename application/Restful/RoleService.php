@@ -288,10 +288,13 @@ class AAM_Restful_RoleService
             // can manage it
             if (is_string($clone_role) && strlen($clone_role) > 0) {
                 $cloning_role = $service->get_role($clone_role);
+                $cloning_caps = array_filter($cloning_role->capabilities, function($effect) {
+                    return !empty($effect);
+                });
 
                 $capabilities = array_merge(
                     $capabilities,
-                    array_keys($cloning_role->capabilities),
+                    array_keys($cloning_caps),
                     // Also adding role's slug to the list of capabilities
                     // https://github.com/aamplugin/advanced-access-manager/issues/97
                     array($clone_role)
