@@ -159,7 +159,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Prepare list of access controls for currently managed resource
      *
-     * @param AAM_Framework_Resource_Interface $resource
+     * @param AAM_Framework_Resource_PermissionInterface $resource
      *
      * @return array
      *
@@ -273,7 +273,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Prepare access controls for other resources
      *
-     * @param AAM_Framework_Resource_Interface $resource
+     * @param AAM_Framework_Resource_PermissionInterface $resource
      *
      * @return array
      *

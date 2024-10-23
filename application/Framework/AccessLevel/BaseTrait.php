@@ -368,9 +368,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
-    public function identity()
+    public function identities()
     {
-        return AAM_Framework_Manager::identity([
+        return AAM_Framework_Manager::identities([
             'access_level' => $this
         ]);
     }
@@ -414,39 +414,99 @@ trait AAM_Framework_AccessLevel_BaseTrait
         );
 
         if (is_object($parent)) {
-            $parent_resource = $parent->get_resource(
-                $resource::TYPE,
-                $is_permission ? $resource->get_internal_id(false) : null,
-                $reload
-            );
-
-            $settings = $parent_resource->get_settings();
-
             // Merge access settings if multi access levels config is enabled
             $multi_support = AAM::api()->configs()->get_config(
                 'core.settings.multi_access_levels'
             );
 
             if ($multi_support && $parent->has_siblings()) {
-                foreach ($parent->get_siblings() as $sibling) {
-                    $sibling_resource = $sibling->get_resource(
-                        $resource::TYPE,
-                        $is_permission ? $resource->get_internal_id(false) : null
-                    );
-
-                    $settings = $sibling_resource->merge_settings($settings);
-                }
+                $siblings = $parent->get_siblings();
+            } else {
+                $siblings = [];
             }
 
-            // Merge access settings while reading hierarchical chain but only
-            // replace the top keys. Do not replace recursively
-            $settings = array_replace($settings, $resource->get_settings());
+            if ($is_permission) {
+                $resource->set_permissions($this->_prepare_permissions(
+                    $resource,
+                    $parent->get_resource(
+                        $resource::TYPE,
+                        $resource->get_internal_id(false),
+                        $reload
+                    ),
+                    $siblings,
+                    $reload
+                ), false);
+            } else {
+                $resource->set_preferences($this->_prepare_preferences(
+                    $resource,
+                    $parent->get_resource($resource::TYPE, null, $reload),
+                    $siblings,
+                    $reload
+                ), false);
+            }
+        }
+    }
 
-            // Finally set the settings
-            $resource->set_settings($settings);
+    /**
+     * Prepare resource's preferences
+     *
+     * @param AAM_Framework_Resource_PreferenceInterface $resource
+     * @param AAM_Framework_Resource_PreferenceInterface $parent_resource
+     * @param array                                      $siblings
+     * @param boolean                                    $reload
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_preferences(
+        $resource, $parent_resource, $siblings = [], $reload = false
+    ) {
+        $preferences = $parent_resource->get_preferences();
+
+        foreach ($siblings as $sibling) {
+            $sibling_resource = $sibling->get_resource(
+                $resource::TYPE, null, $reload
+            );
+
+            $preferences = $sibling_resource->merge_preferences($preferences);
         }
 
-        return $resource->get_settings();
+        // Merge preferences while reading hierarchical chain but only
+        // replace the top keys. Do not replace recursively
+        return array_replace($preferences, $resource->get_preferences());
+    }
+
+    /**
+     * Prepare resource's permissions
+     *
+     * @param AAM_Framework_Resource_PermissionInterface $resource
+     * @param AAM_Framework_Resource_PermissionInterface $parent_resource
+     * @param array                                      $siblings
+     * @param boolean                                    $reload
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_permissions(
+        $resource, $parent_resource, $siblings = [], $reload = false
+    ) {
+        $permissions = $parent_resource->get_permissions();
+
+        foreach ($siblings as $sibling) {
+            $sibling_resource = $sibling->get_resource(
+                $resource::TYPE, $resource->get_internal_id(false), $reload
+            );
+
+            $permissions = $sibling_resource->merge_permissions($permissions);
+        }
+
+        // Merge permissions while reading hierarchical chain but only
+        // replace the top keys. Do not replace recursively
+        return array_replace($permissions, $resource->get_permissions());
     }
 
 }

@@ -10,11 +10,8 @@
 /**
  * RESTful API for the Access Denied Redirect service
  *
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
- * @since 6.9.14 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.26
+ * @version 7.0.0
  */
 class AAM_Restful_AccessDeniedRedirectService
 {
@@ -26,16 +23,16 @@ class AAM_Restful_AccessDeniedRedirectService
      *
      * @return void
      *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
-     * @since 6.9.14 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.26
+     * @version 7.0.0
      */
     protected function __construct()
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
+            $a = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_AREAS;
+            $t = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_TYPES;
+
             // Get current access denied redirect rules
             $this->_register_route('/redirect/access-denied', array(
                 'methods'             => WP_REST_Server::READABLE,
@@ -46,7 +43,7 @@ class AAM_Restful_AccessDeniedRedirectService
                         'description' => 'Access area (frontend or backend)',
                         'type'        => 'string',
                         'required'    => false,
-                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_AREAS
+                        'enum'        => $a
                     ]
                 ]
             ));
@@ -61,25 +58,39 @@ class AAM_Restful_AccessDeniedRedirectService
                         'description' => 'Access area (frontend or backend)',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_AREAS
+                        'enum'        => $a
                     ],
                     'type' => [
                         'description' => 'Redirect type',
                         'type'        => 'string',
                         'required'    => true,
-                        'enum'        => array_values(
-                            AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_TYPES
-                        )
+                        'enum'        => array_values($t)
                     ],
                     'http_status_code' => [
                         'description'       => 'HTTP Status Code',
-                        'type'              => 'number'
+                        'type'              => 'number',
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_http_status_code(
+                                $value, $request
+                            );
+                        }
                     ],
                     'redirect_page_id' => [
                         'description'       => 'Existing page ID to redirect to',
                         'type'              => 'number',
                         'validate_callback' => function ($value, $request) {
-                            return $this->_validate_redirect_page_id($value, $request);
+                            return $this->_validate_redirect_page_id(
+                                $value, $request
+                            );
+                        }
+                    ],
+                    'redirect_page_slug' => [
+                        'description'       => 'Existing page slug to redirect to',
+                        'type'              => 'string',
+                        'validate_callback' => function ($value, $request) {
+                            return $this->_validate_redirect_page_slug(
+                                $value, $request
+                            );
                         }
                     ],
                     'redirect_url' => [
@@ -96,7 +107,7 @@ class AAM_Restful_AccessDeniedRedirectService
                             return $this->_validate_callback($value, $request);
                         }
                     ],
-                    'custom_message' => [
+                    'message' => [
                         'description' => 'Custom access denied message',
                         'type'        => 'string',
                         'validate_callback' => function ($value, $request) {
@@ -117,7 +128,7 @@ class AAM_Restful_AccessDeniedRedirectService
                         'description' => 'Access area (frontend or backend)',
                         'type'        => 'string',
                         'required'    => false,
-                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_AREAS
+                        'enum'        => $a
                     ],
                 ]
             ]);
@@ -132,7 +143,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public function get_redirect(WP_REST_Request $request)
     {
@@ -154,19 +165,56 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public function set_redirect(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
+            $area    = $request->get_param('area');
+            $data    = $request->get_params();
 
-            $service->set_redirect(
-                $request->get_param('area'),
-                $request->get_params()
-            );
+            // Preparing the proper array of properties to store
+            $redirect = [ 'type' => $data['type'] ];
 
-            $result = $service->get_redirect($request->get_param('area'));
+            if ($data['type'] === 'page_redirect') {
+                if (array_key_exists('redirect_page_id', $data)) {
+                    $redirect['page_id'] = intval($data['redirect_page_id']);
+                } elseif (array_key_exists('redirect_page_slug', $data)) {
+                    $redirect['page_slug'] = trim($data['redirect_page_slug']);
+                } else {
+                    throw new InvalidArgumentException(
+                        'Either redirect_page_id or redirect_page_slug is required'
+                    );
+                }
+            } elseif ($data['type'] === 'url_redirect') {
+                if (array_key_exists('redirect_page_id', $data)) {
+                    $redirect['url'] = $data['redirect_url'];
+                } else {
+                    throw new InvalidArgumentException('redirect_url is required');
+                }
+            } elseif ($data['type'] === 'trigger_callback') {
+                if (array_key_exists('callback', $data)) {
+                    $redirect['callback'] = $data['callback'];
+                } else {
+                    throw new InvalidArgumentException('callback is required');
+                }
+            } elseif ($data['type'] === 'custom_message') {
+                if (array_key_exists('message', $data)) {
+                    $redirect['message'] = $data['message'];
+                } else {
+                    throw new InvalidArgumentException('message is required');
+                }
+            }
+
+            if (array_key_exists('http_status_code', $data)) {
+                $redirect['http_status_code'] = $data['http_status_code'];
+            }
+
+            // Finally set the redirect
+            $service->set_redirect($area, $redirect);
+
+            $result = $service->get_redirect($area);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -182,7 +230,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public function reset_redirect(WP_REST_Request $request)
     {
@@ -202,13 +250,12 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return bool
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager') &&
-            (current_user_can('aam_manage_access_denied_redirect')
-            || current_user_can('aam_manage_403_redirect'));
+            current_user_can('aam_manage_access_denied_redirect');
     }
 
     /**
@@ -219,7 +266,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _validate_url($value)
     {
@@ -230,7 +277,7 @@ class AAM_Restful_AccessDeniedRedirectService
             $response = new WP_Error(
                 'rest_invalid_param',
                 'The provided url is not a valid URL',
-                array('status'  => 400)
+                [ 'status'  => 400 ]
             );
         }
 
@@ -246,7 +293,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _validate_redirect_page_id($value, $request)
     {
@@ -268,6 +315,35 @@ class AAM_Restful_AccessDeniedRedirectService
     }
 
     /**
+     * Validate redirect page slug
+     *
+     * @param string          $value
+     * @param WP_REST_Request $request
+     *
+     * @return boolean|WP_Error
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _validate_redirect_page_slug($value, $request)
+    {
+        $response  = true;
+        $rule_type = $request->get_param('type');
+
+        if ($rule_type === 'page_redirect') {
+            if (get_page_by_path($value) === null) {
+                $response = new WP_Error(
+                    'rest_invalid_param',
+                    'The redirect_page_slug refers to non-existing page',
+                    array('status'  => 400)
+                );
+            }
+        }
+
+        return $response;
+    }
+
+    /**
      * Validate redirect URL
      *
      * @param string          $value
@@ -276,7 +352,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _validate_redirect_url($value, $request)
     {
@@ -304,7 +380,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _validate_callback($value, $request)
     {
@@ -333,7 +409,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.14
+     * @version 7.0.0
      */
     private function _validate_message($value, $request)
     {
@@ -352,6 +428,44 @@ class AAM_Restful_AccessDeniedRedirectService
     }
 
     /**
+     * Validate HTTP status code
+     *
+     * @param int             $value
+     * @param WP_REST_Request $request
+     *
+     * @return boolean|WP_Error
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _validate_http_status_code($value, $request)
+    {
+        $type  = $request->get_param('type');
+        $code  = intval($value);
+        $valid = false;
+
+        if (in_array($type, ['default', 'custom_message'], true)) {
+            $valid = ($code >= 400 && $code <= 499) || ($code >= 500 && $code <= 599);
+        } elseif (in_array($type, ['page_redirect', 'url_redirect'], true)) {
+            $valid = $code >= 300 && $code <= 399;
+        } elseif ($type === 'trigger_callback') {
+            $valid = $code >= 300 && $code <= 599;
+        }
+
+        if ($valid === false) {
+            $response = new WP_Error(
+                'rest_invalid_param',
+                'The http_status_code is invalid for given redirect type',
+                [ 'status'  => 400 ]
+            );
+        } else {
+            $response = true;
+        }
+
+        return $response;
+    }
+
+    /**
      * Get Access Denied Redirect framework service
      *
      * @param WP_REST_Request $request
@@ -359,7 +473,7 @@ class AAM_Restful_AccessDeniedRedirectService
      * @return AAM_Framework_Service_AccessDeniedRedirect
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _get_service($request)
     {

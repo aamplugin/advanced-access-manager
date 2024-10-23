@@ -10,14 +10,8 @@
 /**
  * AAM service Access Denied Redirect manager
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
- * @since 6.9.22 https://github.com/aamplugin/advanced-access-manager/issues/346
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
- * @since 6.9.14 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
 class AAM_Framework_Service_AccessDeniedRedirect
 implements
@@ -47,7 +41,8 @@ implements
      */
     const ALLOWED_REDIRECT_AREAS = [
         'frontend',
-        'backend'
+        'backend',
+        'restful'
     ];
 
     /**
@@ -59,7 +54,7 @@ implements
      * @return array
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public function get_redirect($area = null, $inline_context = null)
     {
@@ -85,20 +80,33 @@ implements
     /**
      * Set the access denied redirect
      *
-     * @param string $area           Redirect area
-     * @param array  $incoming_data  Redirect settings
+     * Note! This method does not validate incoming redirect model. Valid incoming
+     * data:
+     *
+     * {
+     *    "type": "string",
+     *    "page_slug": "string",
+     *    "page_id": "numeric",
+     *    "url": "string",
+     *    "callback": "string",
+     *    "message": "string",
+     *    "http_status_code": "numeric"
+     * }
+     *
+     * @param string $area           Redirect area: frontend, backend or restful
+     * @param array  $redirect       Redirect settings
      * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
+     * @todo Potentially implement the $redirect validation
      */
-    public function set_redirect($area, array $incoming_data, $inline_context = null)
+    public function set_redirect($area, array $redirect, $inline_context = null)
     {
         try {
             $resource = $this->get_resource(false, $inline_context);
-            $redirect = $this->_convert_to_redirect($incoming_data);
             $result   = $resource->set_preference($area, $redirect);
 
             if (!$result) {
@@ -194,7 +202,7 @@ implements
     {
         $result = [];
 
-        foreach([ 'frontend', 'backend' ] as $area) {
+        foreach(self::ALLOWED_REDIRECT_AREAS as $area) {
             if (array_key_exists($area, $settings)) {
                 $result[$area] = $this->_prepare_redirect(
                     $settings[$area], $is_inherited

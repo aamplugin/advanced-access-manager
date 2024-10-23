@@ -53,13 +53,19 @@ trait AAM_Framework_Service_DbTrait
     {
         $old_value = $this->_read_option($option);
 
-        if (maybe_serialize($old_value) !== maybe_serialize($value)) {
+        if ($old_value === null) { // Option does not exist, add it
+            if (is_multisite()) {
+                $result = add_blog_option(get_current_blog_id(), $option, $value);
+            } else {
+                $result = add_option($option, $value, '', true);
+            }
+        } elseif (maybe_serialize($old_value) !== maybe_serialize($value)) {
             if (is_multisite()) {
                 $result = update_blog_option(get_current_blog_id(), $option, $value);
             } else {
                 $result = update_option($option, $value, true);
             }
-        } else {
+        } else{
             $result = true;
         }
 

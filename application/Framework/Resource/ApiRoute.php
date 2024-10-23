@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_ApiRoute
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PermissionInterface
 {
 

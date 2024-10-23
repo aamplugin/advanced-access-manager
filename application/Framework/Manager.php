@@ -12,20 +12,7 @@
  *
  * @package AAM
  *
- * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/383
- * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
- *               https://github.com/aamplugin/advanced-access-manager/issues/301
- *               https://github.com/aamplugin/advanced-access-manager/issues/293
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
- *               https://github.com/aamplugin/advanced-access-manager/issues/274
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
- * @since 6.9.6  Initial implementation of the class
- *
- * @version 6.9.32
+ * @version 7.0.0
  */
 class AAM_Framework_Manager
 {
@@ -37,7 +24,7 @@ class AAM_Framework_Manager
      *
      * @access private
      * @static
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private static $_default_context = [];
 
@@ -47,7 +34,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_Roles
      *
      * @access public
-     * @version 6.9.6
+     * @version 7.0.0
      */
     public static function roles(array $runtime_context = [])
     {
@@ -64,7 +51,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_Urls
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
     public static function urls(array $runtime_context = [])
     {
@@ -81,7 +68,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_ApiRoutes
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public static function api_routes(array $runtime_context = [])
     {
@@ -98,7 +85,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_Jwts
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public static function jwts(array $runtime_context = [])
     {
@@ -115,7 +102,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_LoginRedirect
      *
      * @access public
-     * @version 6.9.12
+     * @version 7.0.0
      */
     public static function login_redirect(array $runtime_context = [])
     {
@@ -132,7 +119,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_LogoutRedirect
      *
      * @access public
-     * @version 6.9.12
+     * @version 7.0.0
      */
     public static function logout_redirect(array $runtime_context = [])
     {
@@ -149,7 +136,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_NotFoundRedirect
      *
      * @access public
-     * @version 6.9.12
+     * @version 7.0.0
      */
     public static function not_found_redirect(array $runtime_context = [])
     {
@@ -166,7 +153,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_BackendMenu
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public static function backend_menu(array $runtime_context = [])
     {
@@ -183,7 +170,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_AdminToolbar
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public static function admin_toolbar(array $runtime_context = [])
     {
@@ -234,7 +221,7 @@ class AAM_Framework_Manager
      * @return AAM_Framework_Service_AccessDeniedRedirect
      *
      * @access public
-     * @version 6.9.14
+     * @version 7.0.0
      */
     public static function access_denied_redirect(array $runtime_context = [])
     {
@@ -248,14 +235,14 @@ class AAM_Framework_Manager
      *
      * @param array $runtime_context
      *
-     * @return AAM_Framework_Service_Identity
+     * @return AAM_Framework_Service_Identities
      *
      * @access public
      * @version 7.0.0
      */
-    public static function identity(array $runtime_context = [])
+    public static function identities(array $runtime_context = [])
     {
-        return AAM_Framework_Service_Identity::get_instance(array_merge(
+        return AAM_Framework_Service_Identities::get_instance(array_merge(
             self::$_default_context, $runtime_context
         ));
     }
@@ -361,7 +348,7 @@ class AAM_Framework_Manager
      *
      * @access public
      * @static
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public static function setup(array $default_context = [])
     {

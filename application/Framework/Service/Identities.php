@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Service_Identity
+class AAM_Framework_Service_Identities
 {
 
     use AAM_Framework_Service_BaseTrait;

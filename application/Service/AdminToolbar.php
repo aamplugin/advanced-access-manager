@@ -125,12 +125,12 @@ class AAM_Service_AdminToolbar
             });
 
             // Cache admin toolbar
-            if (current_user_can('aam_manage_admin_toolbar') && AAM::isAAM()) {
-                add_action('wp_after_admin_bar_render', function() {
-                    // Rebuild the cache
+            add_action('wp_after_admin_bar_render', function() {
+                // Rebuild the cache
+                if (current_user_can('aam_manage_admin_toolbar') && AAM::isAAM()) {
                     AAM::api()->admin_toolbar()->get_item_list();
-                });
-            }
+                }
+            });
         }
 
         // Register the resource

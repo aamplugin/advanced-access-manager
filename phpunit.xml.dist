@@ -3,30 +3,14 @@
     bootstrap="tests/bootstrap.php"
     backupGlobals="false"
     colors="true"
-    convertErrorsToExceptions="true"
-    convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
 >
     <testsuites>
-        <testsuite name="Core">
-            <directory suffix="Test.php">./tests/Core</directory>
-        </testsuite>
-        <testsuite name="Services">
-            <directory suffix="Test.php">./tests/Service</directory>
-        </testsuite>
-        <testsuite name="Addons">
-            <directory suffix="Test.php">./tests/Addon</directory>
-        </testsuite>
-        <testsuite name="AccessPolicy">
-            <directory suffix="Test.php">./tests/Service/AccessPolicy</directory>
+        <testsuite name="Framework">
+            <directory suffix="Test.php">./tests/Framework</directory>
         </testsuite>
     </testsuites>
     <php>
-        <const name="AAM_UNITTEST_RESET_DB" value="1" />
-        <const name="AAM_UNITTEST_RUNNING" value="1" />
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
-        <const name="AAM_UNITTEST_ADMIN_USERNAME" value="admin" />
-        <const name="AAM_UNITTEST_ADMIN_PASSWORD" value="123456" />
         <ini name="display_errors" value="On" />
         <ini name="display_startup_errors" value="On" />
     </php>

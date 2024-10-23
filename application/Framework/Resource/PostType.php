@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_PostType
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PermissionInterface
 {
 
@@ -42,7 +41,7 @@ implements
             $this->_core_instance = $post_type;
         } else {
             throw new OutOfRangeException(
-                "Post Type {$this->_internal_id} does not exist"
+                "Post Type '{$this->_internal_id}' does not exist"
             );
         }
     }

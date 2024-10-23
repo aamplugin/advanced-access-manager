@@ -21,7 +21,7 @@ interface AAM_Backend_Feature_Main_ResourceInterface
      *
      * @param string|int $resource_id
      *
-     * @return AAM_Framework_Resource_Interface
+     * @return AAM_Framework_Resource_PermissionInterface|AAM_Framework_Resource_PreferenceInterface
      *
      * @access public
      * @version 7.0.0

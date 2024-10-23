@@ -11,7 +11,7 @@
  * AAM service for JWT Tokens
  *
  * @package AAM
- * @version 6.9.10
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Jwts
 {
@@ -87,8 +87,7 @@ class AAM_Framework_Service_Jwts
      * @return array
      *
      * @access public
-     * @version 6.9.10
-     * @throws RuntimeException If fails to persist token
+     * @version 7.0.0
      */
     public function create_token(array $claims, $inline_context = null)
     {

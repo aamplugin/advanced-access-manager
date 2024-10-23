@@ -10,30 +10,8 @@
 /**
  * JWT Token service
  *
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
- * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
- * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/263
- * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
- * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
- *               https://github.com/aamplugin/advanced-access-manager/issues/224
- * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
- * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/136
- * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/129
- *               https://github.com/aamplugin/advanced-access-manager/issues/100
- *               https://github.com/aamplugin/advanced-access-manager/issues/118
- * @since 6.5.2  https://github.com/aamplugin/advanced-access-manager/issues/117
- * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/99
- *               https://github.com/aamplugin/advanced-access-manager/issues/98
- * @since 6.4.0  Added the ability to issue refreshable token via API.
- *               https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.3.0  Fixed incompatibility with other plugins that check for RESTful error
- *               status through `rest_authentication_errors` filter
- * @since 6.1.0  Enriched error response with more details
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.12
+ * @version 7.0.0
  */
 class AAM_Service_Jwt
 {
@@ -43,21 +21,21 @@ class AAM_Service_Jwt
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.jwt.enabled';
 
     /**
      * JWT Registry DB option
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const DB_OPTION = 'aam_jwt_registry';
 
     /**
      * Options aliases
      *
-     * @version 6.9.11
+     * @version 7.0.0
      */
     const OPTION_ALIAS = array(
         'service.jwt.registry_size' => 'authentication.jwt.registryLimit',
@@ -68,10 +46,10 @@ class AAM_Service_Jwt
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'core.service.jwt.enabled'     => true,
+        'service.jwt.enabled'          => true,
         'service.jwt.registry_size'    => 10,
         'service.jwt.bearer'           => 'header,query_param,post_param,cookie',
         'service.jwt.header_name'      => 'HTTP_AUTHENTICATION',
@@ -86,7 +64,7 @@ class AAM_Service_Jwt
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -159,7 +137,9 @@ class AAM_Service_Jwt
         AAM_Restful_JwtService::bootstrap();
 
         // Register API endpoint
-        add_action('rest_api_init', array($this, 'registerAPI'));
+        add_action('rest_api_init', function() {
+            $this->_rest_api_init();
+        });
 
         // Authentication hooks
         add_filter('aam_restful_authentication_args_filter', function ($args) {
@@ -196,29 +176,15 @@ class AAM_Service_Jwt
      *
      * @return void
      *
-     * @since 6.6.1 Fixed https://github.com/aamplugin/advanced-access-manager/issues/136
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.6.1
+     * @access private
+     * @version 7.0.0
      */
-    public function registerAPI()
+    private function _rest_api_init()
     {
         // Validate JWT token
         register_rest_route('aam/v2', '/jwt/validate', array(
             'methods'             => 'POST',
             'callback'            => array($this, 'validateToken'),
-            'permission_callback' => '__return_true',
-            'args'                => array(
-                'jwt' => array(
-                    'description' => __('JWT token.', AAM_KEY),
-                    'type'        => 'string',
-                )
-            ),
-        ));
-        register_rest_route('aam/v1', '/validate-jwt', array(
-            'methods'             => 'POST',
-            'callback'            => array($this, 'validateTokenDeprecated'),
             'permission_callback' => '__return_true',
             'args'                => array(
                 'jwt' => array(
@@ -240,17 +206,6 @@ class AAM_Service_Jwt
                 )
             ),
         ));
-        register_rest_route('aam/v1', '/refresh-jwt', array(
-            'methods'             => 'POST',
-            'callback'            => array($this, 'refreshTokenDeprecated'),
-            'permission_callback' => '__return_true',
-            'args'                => array(
-                'jwt' => array(
-                    'description' => __('JWT token.', AAM_KEY),
-                    'type'        => 'string',
-                )
-            ),
-        ));
 
         // Revoke JWT token
         register_rest_route('aam/v2', '/jwt/revoke', array(
@@ -264,23 +219,6 @@ class AAM_Service_Jwt
                 )
             ),
         ));
-    }
-
-    /**
-     * Validate JWT Token
-     *
-     * Deprecated endpoint that is replaced with V2
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     * @version 6.0.0
-     */
-    public function validateTokenDeprecated(WP_REST_Request $request)
-    {
-        _deprecated_function('aam/v1/validate-jwt', '6.0.0', 'aam/v2/jwt/validate');
-
-        return $this->validateToken($request);
     }
 
     /**
@@ -313,24 +251,6 @@ class AAM_Service_Jwt
         }
 
         return $response;
-    }
-
-    /**
-     * Refresh JWT Token
-     *
-     * Deprecated endpoint that is replaced with V2
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     * @version 6.0.0
-     * @todo Remove in 7.0.0
-     */
-    public function refreshTokenDeprecated(WP_REST_Request $request)
-    {
-        _deprecated_function('aam/v1/refresh-jwt', '6.0.0', 'aam/v2/jwt/refresh');
-
-        return $this->refreshToken($request);
     }
 
     /**

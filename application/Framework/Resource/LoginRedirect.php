@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_LoginRedirect
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PreferenceInterface
 {
 

@@ -53,17 +53,17 @@ class AAM_Restful_IdentityService
                                 'permission' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_Identity::PERMISSION_TYPES
+                                    'enum' => AAM_Framework_Service_Identities::PERMISSION_TYPES
                                 ),
                                 'effect' => array(
                                     'type' => 'string',
                                     'required' => true,
-                                    'enum' => AAM_Framework_Service_Identity::EFFECT_TYPES
+                                    'enum' => AAM_Framework_Service_Identities::EFFECT_TYPES
                                 ),
                                 'identity_type' => [
                                     'type'     => 'string',
                                     'required' => true,
-                                    'enum'     => AAM_Framework_Service_Identity::IDENTITY_TYPE
+                                    'enum'     => AAM_Framework_Service_Identities::IDENTITY_TYPE
                                 ],
                                 'identity' => [
                                     'type'     => [ 'string', 'number' ],
@@ -103,7 +103,7 @@ class AAM_Restful_IdentityService
                     'effect' => array(
                         'type' => 'string',
                         'required' => true,
-                        'enum' => AAM_Framework_Service_Identity::EFFECT_TYPES
+                        'enum' => AAM_Framework_Service_Identities::EFFECT_TYPES
                     )
                 )
             ));
@@ -353,14 +353,14 @@ class AAM_Restful_IdentityService
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Framework_Service_IdentityGovernance
+     * @return AAM_Framework_Service_Identities
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::identity([
+        return AAM_Framework_Manager::identities([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

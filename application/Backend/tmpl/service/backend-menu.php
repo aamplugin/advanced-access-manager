@@ -50,7 +50,7 @@
             $first = false;
             $menu  = AAM_Framework_Manager::backend_menu(array(
                 'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
-            ))->get_item_list();
+            ))->get_menu();
 
             if (!empty($menu)) {
                 foreach ($menu as $i => $top_menu_item) {
@@ -86,10 +86,10 @@
                             aria-labelledby="menu-<?php echo $i; ?>-heading"
                         >
                             <div class="panel-body">
-                                <?php if ($top_menu_item['slug'] != 'menu-index.php') { ?>
+                                <?php if ($top_menu_item['slug'] != 'index.php') { ?>
                                     <div class="row aam-inner-tab">
                                         <div class="col-xs-12 text-center">
-                                            <small class="aam-menu-capability"><?php echo __('Menu URI:', AAM_KEY); ?> <b><?php echo urldecode($top_menu_item['uri']); ?></b></small>
+                                            <small class="aam-menu-capability"><?php echo __('Menu URL:', AAM_KEY); ?> <b><?php echo urldecode($top_menu_item['path']); ?></b></small>
                                         </div>
                                     </div>
                                     <hr class="aam-divider" />
@@ -115,18 +115,27 @@
                                                             <a
                                                                 href="#menu-details-modal"
                                                                 data-toggle="modal"
-                                                                data-uri="<?php echo esc_attr($child['uri']); ?>"
+                                                                data-path="<?php echo esc_attr($child['path']); ?>"
                                                                 data-cap="<?php echo esc_attr($child['capability']); ?>"
                                                                 data-name="<?php echo esc_attr($child['name']); ?>"
-                                                                data-id="<?php echo esc_attr($child['slug']); ?>"
+                                                                data-slug="<?php echo esc_attr($child['slug']); ?>"
+                                                                data-id="<?php echo esc_attr(base64_encode($child['slug'])); ?>"
                                                                 class="aam-menu-item"
                                                             ><?php echo __('more details', AAM_KEY); ?></a>
                                                         </small>
                                                     </div>
                                                     <?php if ($child['is_restricted']) { ?>
-                                                        <i class="aam-accordion-action icon-lock text-danger" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo esc_attr($child['slug']); ?>"></i>
+                                                        <i
+                                                            class="aam-accordion-action icon-lock text-danger"
+                                                            id="menu-item-<?php echo $i . $j; ?>"
+                                                            data-menu-id="<?php echo esc_attr(base64_encode($child['slug'])); ?>"
+                                                        ></i>
                                                     <?php } else { ?>
-                                                        <i class="aam-accordion-action icon-lock-open text-success" id="menu-item-<?php echo $i . $j; ?>" data-menu-id="<?php echo esc_attr($child['slug']); ?>"></i>
+                                                        <i
+                                                            class="aam-accordion-action icon-lock-open text-success"
+                                                            id="menu-item-<?php echo $i . $j; ?>"
+                                                            data-menu-id="<?php echo esc_attr(base64_encode($child['slug'])); ?>"
+                                                        ></i>
                                                     <?php } ?>
                                                     <label
                                                         for="menu-item-<?php echo $i . $j; ?>"
@@ -141,14 +150,14 @@
                                     <hr class="aam-divider" />
                                 <?php } ?>
 
-                                <?php if ($top_menu_item['slug'] != 'menu-index.php') { ?>
+                                <?php if ($top_menu_item['slug'] != 'index.php') { ?>
                                     <div class="row<?php echo (!empty($top_menu_item['children']) ? ' aam-margin-top-xs' : ''); ?>">
                                         <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
                                             <?php if ($top_menu_item['is_restricted']) { ?>
                                                 <a
                                                     href="#"
                                                     class="btn btn-primary btn-sm btn-block aam-restrict-menu"
-                                                    data-menu-id="<?php echo esc_attr($top_menu_item['slug']); ?>"
+                                                    data-menu-id="<?php echo esc_attr(base64_encode($top_menu_item['slug'])); ?>"
                                                     data-target="#menu-<?php echo $i; ?>"
                                                 >
                                                     <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
@@ -157,7 +166,7 @@
                                                 <a
                                                     href="#"
                                                     class="btn btn-danger btn-sm btn-block aam-restrict-menu"
-                                                    data-menu-id="<?php echo esc_attr($top_menu_item['slug']); ?>"
+                                                    data-menu-id="<?php echo esc_attr(base64_encode($top_menu_item['slug'])); ?>"
                                                     data-target="#menu-<?php echo $i; ?>"
                                                 >
                                                     <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
@@ -220,12 +229,16 @@
                                     <td id="menu-item-name"></td>
                                 </tr>
                                 <tr>
+                                    <th width="20%"><?php echo __('Slug', AAM_KEY); ?></th>
+                                    <td id="menu-item-slug"></td>
+                                </tr>
+                                <tr>
                                     <th width="20%"><?php echo __('Capability', AAM_KEY); ?></th>
                                     <td id="menu-item-cap"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('URI', AAM_KEY); ?></th>
-                                    <td id="menu-item-uri"></td>
+                                    <th width="20%"><?php echo __('Path', AAM_KEY); ?></th>
+                                    <td id="menu-item-path"></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -1931,7 +1931,7 @@
                     };
 
                     const endpoint = getAAM().prepareApiEndpoint(
-                        '/service/backend-menu/' + btoa(item)
+                        '/service/backend-menu/' + item
                     );
 
                     $.ajax(endpoint, {
@@ -2003,8 +2003,9 @@
                     $('.aam-menu-item').each(function () {
                         $(this).bind('click', function () {
                             $('#menu-item-name').html($(this).data('name'));
+                            $('#menu-item-slug').html($(this).data('slug'));
                             $('#menu-item-cap').html($(this).data('cap'));
-                            $('#menu-item-uri').html($(this).data('uri'));
+                            $('#menu-item-path').html($(this).data('path'));
                         });
                     });
 

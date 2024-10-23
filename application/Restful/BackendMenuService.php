@@ -11,7 +11,7 @@
  * RESTful API for the Backend Menu service
  *
  * @package AAM
- * @version 6.9.13
+ * @version 7.0.0
  */
 class AAM_Restful_BackendMenuService
 {
@@ -24,7 +24,7 @@ class AAM_Restful_BackendMenuService
      * @return void
      *
      * @access protected
-     * @version 6.9.13
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -33,17 +33,17 @@ class AAM_Restful_BackendMenuService
             // Get the list of backend menus
             $this->_register_route('/backend-menu', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_menus' ],
+                'callback'            => [ $this, 'get_menu_items' ],
                 'permission_callback' => [ $this, 'check_permissions' ]
             ]);
 
             // Get a menu
-            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
+            $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_menu_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'slug' => array(
+                    'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
@@ -52,12 +52,12 @@ class AAM_Restful_BackendMenuService
             ]);
 
             // Update a menu's permission
-            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
+            $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_menu_permission'),
+                'callback'            => array($this, 'update_menu_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'slug' => array(
+                    'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
@@ -77,12 +77,12 @@ class AAM_Restful_BackendMenuService
             ]);
 
             // Delete a menu's permission
-            $this->_register_route('/backend-menu/(?P<slug>[A-Za-z0-9\/\+=]+)', [
+            $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_menu_permission'),
+                'callback'            => array($this, 'delete_menu_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'slug' => array(
+                    'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
@@ -93,27 +93,31 @@ class AAM_Restful_BackendMenuService
             // Reset all backend menu permissions
             $this->_register_route('/backend-menu', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_menu_permissions'),
+                'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
 
     /**
-     * Get the backend menu list
+     * Get the entire backend menu
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function get_menus(WP_REST_Request $request)
+    public function get_menu_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_list();
+            $result  = [];
+
+            foreach($service->get_menu() as $item) {
+                array_push($result, $this->_prepare_menu_item($item));
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -129,14 +133,14 @@ class AAM_Restful_BackendMenuService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_menu_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item(base64_decode(
-                $request->get_param('slug')
+            $result  = $this->_prepare_menu_item($service->get_menu_item(
+                base64_decode($request->get_param('id'))
             ));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -146,21 +150,21 @@ class AAM_Restful_BackendMenuService
     }
 
     /**
-     * Update backend menu permission
+     * Update backend menu item permissions
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function update_menu_permission(WP_REST_Request $request)
+    public function update_menu_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_item_permission(
-                base64_decode($request->get_param('slug')),
+            $result  = $service->update_menu_item_permission(
+                base64_decode($request->get_param('id')),
                 $request->get_param('effect'),
                 $request->get_param('is_top_level')
             );
@@ -172,22 +176,23 @@ class AAM_Restful_BackendMenuService
     }
 
     /**
-     * Delete menu permission
+     * Delete menu item permission
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function delete_menu_permission(WP_REST_Request $request)
+    public function delete_menu_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_item_permission(base64_decode(
-                $request->get_param('slug')
-            ));
+            $result  = $service->delete_menu_item_permission(
+                base64_decode($request->get_param('id')),
+                $request->get_param('is_top_level')
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -196,16 +201,16 @@ class AAM_Restful_BackendMenuService
     }
 
     /**
-     * Reset all permissions
+     * Reset all backend menu permissions
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function reset_menu_permissions(WP_REST_Request $request)
+    public function reset_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -223,12 +228,38 @@ class AAM_Restful_BackendMenuService
      * @return bool
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && current_user_can('aam_manage_admin_menu');
+            && current_user_can('aam_manage_backend_menu');
+    }
+
+    /**
+     * Prepare menu item
+     *
+     * @param array $menu
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_menu_item($menu)
+    {
+        // Adding ID so we can effectively communicate through RESTful API
+        $result = array_merge([
+            'id' => base64_encode($menu['slug']),
+        ], $menu);
+
+        if (!empty($result['children'])) {
+            foreach($result['children'] as $i => $child) {
+                $result['children'][$i] = $this->_prepare_menu_item($child);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -239,7 +270,7 @@ class AAM_Restful_BackendMenuService
      * @return AAM_Framework_Service_BackendMenu
      *
      * @access private
-     * @version 6.9.13
+     * @version 7.0.0
      */
     private function _get_service($request)
     {

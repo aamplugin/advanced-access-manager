@@ -199,14 +199,6 @@ trait AAM_Framework_Resource_PreferenceTrait
     /**
      * @inheritDoc
      */
-    public function get_settings($explicit_only = false)
-    {
-        return $this->get_preferences($explicit_only);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function set_preferences(array $preferences)
     {
         // First, set the explicit preferences
@@ -221,21 +213,6 @@ trait AAM_Framework_Resource_PreferenceTrait
         return AAM_Framework_Manager::settings([
             'access_level' => $this->get_access_level()
         ])->set_setting(constant('static::TYPE'), $preferences);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set_settings(array $settings, $explicit_only = false)
-    {
-        if ($explicit_only) {
-            $result = $this->set_preferences($settings);
-        } else {
-            $this->_preferences = $settings;
-            $result             = true;
-        }
-
-        return $result;
     }
 
     /**
@@ -266,17 +243,14 @@ trait AAM_Framework_Resource_PreferenceTrait
     /**
      * @inheritDoc
      */
-    public function merge_preferences($inherited_preferences)
+    public function merge_preferences($incoming_preferences)
     {
-        return array_merge($inherited_preferences, $this->_explicit_preferences);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function merge_settings($incoming_settings)
-    {
-        return $this->merge_preferences($incoming_settings);
+        return apply_filters(
+            'aam_merged_preferences_filter',
+            $this->_explicit_preferences,
+            $incoming_preferences,
+            $this
+        );
     }
 
     /**

@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_BackendMenu
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PermissionInterface
 {
 
@@ -29,43 +28,28 @@ implements
     /**
      * Check is menu or submenu is restricted
      *
-     * @param string $slug
+     * @param string  $menu_slug
+     * @param boolean $is_top_level
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($menu_slug, $parent_menu_slug = null)
+    public function is_restricted($menu_slug, $is_top_level = false)
     {
         $result = null;
 
-        // Decode URL in case of any special characters like &amp;
-        $slug = $this->_normalize_menu_slug($menu_slug);
-
-        if (is_string($parent_menu_slug)) {
-            $parent_slug = $this->_normalize_menu_slug($parent_menu_slug);
-        } else {
-            $parent_slug = null;
-        }
-
         // The default dashboard landing page is always excluded
-        if ($slug !== 'index.php') {
-            if (array_key_exists($slug, $this->_permissions)) {
-                $permission = $this->_permissions[$slug];
+        if ($menu_slug !== 'index.php') {
+            if (array_key_exists($menu_slug, $this->_permissions)) {
+                $effect = $this->_permissions[$menu_slug]['effect'];
+                $is_top = !empty($this->_permissions[$menu_slug]['is_top_level']);
 
-                // If parent menu slug is not provided, we are checking access to the
-                // entire menu branch
-                if (is_null($parent_slug)) {
-                    $result = $permission['effect'] === 'deny'
-                                && !empty($permission['is_top_level']);
-                } else { // Otherwise we are checking permission only for submenu
-                    $result = $permission['effect'] === 'deny'
-                                && empty($permission['is_top_level']);
+                // Making sure that we are checking the proper menu level
+                if ($is_top_level === $is_top) {
+                    $result = $effect === 'deny';
                 }
-            } elseif (array_key_exists($parent_slug, $this->_permissions)) {
-                // Inherit settings from the parent menu, if provided
-                $result = $this->_permissions[$parent_slug]['effect'] === 'deny';
             }
         } else {
             $result = false;
@@ -75,34 +59,9 @@ implements
             'aam_backend_menu_is_restricted_filter',
             $result,
             $this,
-            $slug,
-            $parent_slug
+            $menu_slug,
+            $is_top_level
         );
-    }
-
-    /**
-     * Normalize the menu slug
-     *
-     * Ensuring consistency
-     *
-     * @param string $slug
-     *
-     * @return string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _normalize_menu_slug($slug)
-    {
-        // Decode URL in case of any special characters like &amp;
-        $slug = strtolower(htmlspecialchars_decode($slug));
-
-        // The customize.php is funky
-        if (strpos($slug, 'customize.php') === 0) {
-            $slug = 'customize.php';
-        }
-
-        return $slug;
     }
 
 }

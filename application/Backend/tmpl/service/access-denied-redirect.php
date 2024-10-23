@@ -18,6 +18,7 @@
         $service           = $access_level->access_denied_redirect();
         $frontend_redirect = $service->get_redirect('frontend');
         $backend_redirect  = $service->get_redirect('backend');
+        $restful_redirect  = $service->get_redirect('restful');
     ?>
 
     <div class="aam-feature" id="redirect-content">
@@ -39,6 +40,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
                     <?php if (!$access_level->is_visitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
+                    <li role="presentation"><a href="#restful-redirect" aria-controls="restful" role="tab" data-toggle="tab"><i class="icon-exchange"></i> <?php echo __('RESTful Redirect', AAM_KEY); ?></a></li>
                 </ul>
 
                 <div class="tab-content">
@@ -366,6 +368,89 @@
                                 placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
                                 name="backend.redirect.callback"
                                 value="<?php echo stripslashes(esc_js(isset($backend_redirect['callback']) ? $backend_redirect['callback'] : '')); ?>"
+                            />
+                        </div>
+                    </div>
+
+                    <div role="tabpanel" class="tab-pane" id="restful-redirect">
+                        <div class="radio">
+                            <input
+                                type="radio"
+                                name="restful.redirect.type"
+                                id="restful-redirect-default"
+                                data-action="#restful-default"
+                                value="default"
+                                data-group="restful"
+                                <?php echo ($restful_redirect['type'] === 'default' ? ' checked' : ''); ?>
+                            />
+                            <label for="restful-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [(HTTP Status Code 404)]', 'small'); ?></label>
+                        </div>
+                        <div class="radio">
+                            <input
+                                type="radio"
+                                name="restful.redirect.type"
+                                id="restful-redirect-message"
+                                data-action="#restful-message"
+                                value="custom_message"
+                                data-group="restful"
+                                <?php echo ($restful_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
+                            />
+                            <label for="restful-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message', 'small'); ?></label>
+                        </div>
+                        <div class="radio">
+                            <input
+                                type="radio"
+                                name="restful.redirect.type"
+                                id="restful-redirect-callback"
+                                data-action="#restful-callback-action"
+                                value="trigger_callback"
+                                data-group="restful"
+                                <?php echo ($restful_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
+                            />
+                            <label for="restful-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                        </div>
+
+                        <div
+                            class="form-group aam-redirect-action restful"
+                            id="restful-message"
+                            style="display: <?php echo ($restful_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
+                        >
+                            <label for="restful-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <?php $redirect_message = isset($restful_redirect['message']) ? $restful_redirect['message'] : ''; ?>
+                            <textarea
+                                class="form-control"
+                                rows="3"
+                                data-group="restful"
+                                placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"
+                                name="restful.redirect.message"
+                            ><?php echo esc_textarea($redirect_message); ?></textarea>
+
+                            <div class="aam-mt-1">
+                                <label for="restful-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <?php $redirect_code = isset($restful_redirect['http_status_code']) ? $restful_redirect['http_status_code'] : 401; ?>
+                                <select class="form-control form-clearable" name="restful.redirect.message.code" id="restful-message-status-code" data-group="restful">
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
+                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
+                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
+                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
+                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div
+                            class="form-group aam-redirect-action restful"
+                            id="restful-callback-action"
+                            style="display: <?php echo ($restful_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
+                        >
+                            <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                data-group="restful"
+                                placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
+                                name="restful.redirect.callback"
+                                value="<?php echo stripslashes(esc_js(isset($restful_redirect['callback']) ? $restful_redirect['callback'] : '')); ?>"
                             />
                         </div>
                     </div>

@@ -17,21 +17,32 @@ class AAM_Service_Content_Visibility
 {
 
     /**
-     * Undocumented variable
+     * Single instance of itself
      *
-     * @var [type]
+     * @var AAM_Service_Content_Visibility
+     *
+     * @access private
+     * @version 7.0.0
      */
     private static $_instance = null;
 
     /**
-     * Undocumented variable
+     * Collection of visibility settings
      *
-     * @var [type]
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
      */
     private $_settings = null;
 
     /**
-     * Undocumented function
+     * Constructor
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -60,8 +71,6 @@ class AAM_Service_Content_Visibility
                 );
             }
         );
-
-        //echo '<pre>'; print_r($this->_visibility_settings); echo '</pre>';
     }
 
     /**
@@ -78,10 +87,14 @@ class AAM_Service_Content_Visibility
     }
 
     /**
-     * Undocumented function
+     * Modify content query to hide posts
      *
-     * @param [type] $wp_query
-     * @return void
+     * @param WP_Query $wp_query
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
      */
     public function prepare_post_query($wp_query)
     {
@@ -128,10 +141,17 @@ class AAM_Service_Content_Visibility
     }
 
     /**
-     * Undocumented function
+     * Get post type for targeted posts
      *
-     * @param [type] $settings
-     * @return void
+     * This method is important to better target hidden posts based on their post
+     * type
+     *
+     * @param array $settings
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
      */
     private function _enrich_post_visibility_settings($settings)
     {
@@ -139,7 +159,7 @@ class AAM_Service_Content_Visibility
 
         $ids     = implode(',', array_map('intval', array_keys($settings['post'])));
         $results = $wpdb->get_results(
-            "SELECT ID, post_type FROM {$wpdb->prefix}posts WHERE ID IN ({$ids})"
+            "SELECT ID, post_type FROM {$wpdb->posts} WHERE ID IN ({$ids})"
         );
 
         foreach($results as $row) {
@@ -198,7 +218,7 @@ class AAM_Service_Content_Visibility
             'core.settings.multi_access_levels'
         );
 
-        if ($multi_support && $parent_access_level->has_siblings()) {
+        if ($multi_support && is_object($parent_access_level)) {
             foreach ($parent_access_level->get_siblings() as $sibling) {
                 $sibling_controls = AAM::api()->settings()->get_setting(
                     $resource_type, [], $sibling

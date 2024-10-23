@@ -234,11 +234,11 @@ interface AAM_Framework_AccessLevel_Interface
     /**
      * Get Identity service
      *
-     * @return AAM_Framework_Service_Identity
+     * @return AAM_Framework_Service_Identities
      *
      * @access public
      * @version 7.0.0
      */
-    public function identity();
+    public function identities();
 
 }

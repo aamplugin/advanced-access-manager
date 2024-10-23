@@ -17,6 +17,26 @@ interface AAM_Framework_Resource_PreferenceInterface
 {
 
     /**
+     * Resource type
+     *
+     * Resource type is just an alias that refers to the instance of resource. It is
+     * used to better understand how to work with resource and merge settings
+     *
+     * @version 7.0.0
+     */
+    const TYPE = null;
+
+    /**
+     * Get access level this resource is tight to
+     *
+     * @return AAM_Framework_AccessLevel_Interface
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_access_level();
+
+    /**
      * Get the collection of resource preferences
      *
      * @param boolean $explicit_only
@@ -77,5 +97,25 @@ interface AAM_Framework_Resource_PreferenceInterface
      * @version 7.0.0
      */
     public function merge_preferences($incoming_preferences);
+
+    /**
+     * Check if resource settings are overwritten
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_overwritten();
+
+    /**
+     * Reset all explicitly defined settings to default
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function reset();
 
 }

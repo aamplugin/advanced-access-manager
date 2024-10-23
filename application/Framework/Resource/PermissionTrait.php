@@ -292,37 +292,21 @@ trait AAM_Framework_Resource_PermissionTrait
     /**
      * @inheritDoc
      */
-    public function get_settings($explicit_only = false)
-    {
-        return $this->get_permissions($explicit_only);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set_permissions($permissions)
-    {
-        // First, settings the explicit permissions
-        $this->_explicit_permissions = $permissions;
-
-        // Overriding the final set of settings
-        $this->_permissions = array_merge($this->_permissions, $permissions);
-
-        // Store changes in DB
-        return AAM_Framework_Manager::settings([
-            'access_level' => $this->get_access_level()
-        ])->set_setting($this->_get_settings_ns(), $permissions);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set_settings(array $settings, $explicit_only = false)
+    public function set_permissions($permissions, $explicit_only = true)
     {
         if ($explicit_only) {
-            $result = $this->set_permissions($settings);
+            // First, settings the explicit permissions
+            $this->_explicit_permissions = $permissions;
+
+            // Overriding the final set of settings
+            $this->_permissions = array_merge($this->_permissions, $permissions);
+
+            // Store changes in DB
+            $result = AAM_Framework_Manager::settings([
+                'access_level' => $this->get_access_level()
+            ])->set_setting($this->_get_settings_ns(), $permissions);
         } else {
-            $this->_permissions = $settings;
+            $this->_permissions = $permissions;
             $result             = true;
         }
 
@@ -380,23 +364,95 @@ trait AAM_Framework_Resource_PermissionTrait
      * Depending on the resource type, different strategies may be applied to merge
      * permissions
      *
-     * @param array $incoming_permissions
+     * @param array $incoming
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function merge_permissions($permissions)
+    public function merge_permissions($incoming)
     {
+        $result = [];
+        $config = AAM_Framework_Manager::configs();
+
+        // If preference is not explicitly defined, fetch it from the AAM configs
+        $preference = $config->get_config(
+            'core.settings.merge.preference'
+        );
+
+        $preference = $config->get_config(
+            'core.settings.' . constant('static::TYPE') . '.merge.preference',
+            $preference
+        );
+
+        $base = $this->_permissions;
+
+        // First get the complete list of unique keys
+        $rule_keys = array_unique([
+            ...array_keys($incoming),
+            ...array_keys($base)
+        ]);
+
+        foreach($rule_keys as $rule_key) {
+            $result[$rule_key] = $this->_merge_permissions(
+                isset($base[$rule_key]) ? $base[$rule_key] : null,
+                isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
+                $preference
+            );
+        }
+
+        return $result;
     }
 
     /**
-     * @inheritDoc
+     * Merge two rules based on provided preference
+     *
+     * @param array|null $base
+     * @param array|null $incoming
+     * @param string     $preference
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
      */
-    public function merge_settings($incoming_settings)
+    private function _merge_permissions($base, $incoming, $preference = 'deny')
     {
-        return $this->merge_permissions($incoming_settings);
+        $result   = null;
+        $effect_a = null;
+        $effect_b = null;
+
+        if (!empty($base)) {
+            $effect_a = $base['effect'] === 'allow';
+        }
+
+        if (!empty($incoming)) {
+            $effect_b = $incoming['effect'] === 'allow';
+        }
+
+        if ($preference === 'allow') { // Merging preference is to allow
+            // If at least one set has allowed rule, then allow the URL
+            if (in_array($effect_a, [ true, null ], true)
+                || in_array($effect_b, [ true, null ], true)
+            ) {
+                $result = [ 'effect' => 'allow' ];
+            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
+                $result = $base;
+            } else {
+                $result = $incoming;
+            }
+        } else { // Merging preference is to deny access by default
+            if ($effect_a === false) {
+                $result = $base;
+            } elseif ($effect_b === false) {
+                $result = $incoming;
+            } else {
+                $result = [ 'effect' => 'allow' ];
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -417,131 +473,6 @@ trait AAM_Framework_Resource_PermissionTrait
         $ns .= (is_null($resource_id) ? '' : ".{$resource_id}");
 
         return $ns;
-    }
-
-    /**
-     * Merge binary set of settings
-     *
-     * The binary set of settings are typically those that have a set with true/false
-     * values. Some values may be complex values. The complex values are those that
-     * have value as array. In this case there is an assumption that the "enabled"
-     * property is set that indicated if value (aka rule) is enforced or not.
-     *
-     * @param array $incoming_settings
-     * @param array $base_settings
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _merge_binary_settings(
-        $incoming_settings, $base_settings = null
-    ) {
-        $merged = [];
-        $config = AAM_Framework_Manager::configs();
-
-        // If base settings are not specified, use resource's settings instead. This
-        // is implemented this way because some resources may want to manipulate the
-        // settings' set before merging (see identity governance resource for
-        // example)
-        $base_settings = is_null($base_settings) ? $this->_settings : $base_settings;
-
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = $config->get_config(
-            'core.settings.merge.preference'
-        );
-
-        $preference = $config->get_config(
-            'core.settings.' . constant('static::TYPE') . '.merge.preference',
-            $preference
-        );
-
-        // First get the complete list of unique keys
-        $keys = array_keys($incoming_settings);
-        foreach (array_keys($base_settings) as $key) {
-            if (!in_array($key, $keys, true)) {
-                $keys[] = $key;
-            }
-        }
-
-        foreach ($keys as $key) {
-            // There can be only two types of preferences: "deny" or "allow". Based
-            // on that, choose access settings that have proper effect as following:
-            //
-            //   - If set1 and set2 have two different preferences, get the one that
-            //     has correct preference;
-            //   - If set1 and set2 have two the same preferences, choose the set2
-            //   - If only set1 has access settings, use set1 as-is
-            //   - If only set2 has access settings, use set2 as-is
-            //   - If set1 and set2 have different effect than preference, choose
-            //     set2
-            $effect1 = $this->_get_setting_effect($incoming_settings, $key);
-            $effect2 = $this->_get_setting_effect($base_settings, $key);
-            $effect  = ($preference === 'deny');
-
-            // Access Option is either boolean true or array with "enabled" key
-            // set as boolean true
-            if ($effect1 === $effect2) { // both equal
-                $merged[$key] = $base_settings[$key];
-            } elseif ($effect1 === $effect) { // set1 matches preference
-                $merged[$key] = $incoming_settings[$key];
-            } elseif ($effect2 === $effect) { // set2 matches preference
-                $merged[$key] = $base_settings[$key];
-            } else {
-                if ($preference === 'allow') {
-                    if (isset($base_settings[$key])) {
-                        $option = $base_settings[$key];
-                    } else {
-                        $option = $incoming_settings[$key];
-                    }
-
-                    if (is_array($option)) {
-                        $option['enabled'] = false;
-                    } else {
-                        $option = false;
-                    }
-
-                    $merged[$key] = $option;
-                } elseif (is_null($effect1)) {
-                    $merged[$key] = $base_settings[$key];
-                } elseif (is_null($effect2)) {
-                    $merged[$key] = $incoming_settings[$key];
-                }
-            }
-        }
-
-        return $merged;
-    }
-
-    /**
-     * Determine correct access option effect
-     *
-     * There can be two possible types of the access settings: straight boolean and
-     * array with "enabled" flag. If provided key is not a part of the access options,
-     * the null is returned, otherwise boolean true of false.
-     *
-     * @param array  $settings
-     * @param string $key
-     *
-     * @return null|boolean
-     *
-     * @access protected
-     * @version 7.0.0
-     */
-    private function _get_setting_effect($settings, $key)
-    {
-        $effect = null; // nothing is defined
-
-        if (array_key_exists($key, $settings)) {
-            if (is_array($settings[$key]) && isset($settings[$key]['enabled'])) {
-                $effect = !empty($settings[$key]['enabled']);
-            } else {
-                $effect = !empty($settings[$key]);
-            }
-        }
-
-        return $effect;
     }
 
 }

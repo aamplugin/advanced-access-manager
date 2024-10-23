@@ -3,7 +3,7 @@
 <?php if (defined('AAM_KEY')) { ?>
     <?php
         $access_level = AAM_Backend_AccessLevel::getInstance();
-        $service      = $access_level->identity();
+        $service      = $access_level->identities();
     ?>
     <div class="aam-feature" id="identity-content">
         <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>

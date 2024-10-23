@@ -1,8 +1,0 @@
-{
-    "Param": [
-        {
-            "Key": "hello-world-${PHP_GLOBAL.UT}",
-            "Value": "hello"
-        }
-    ]
-}

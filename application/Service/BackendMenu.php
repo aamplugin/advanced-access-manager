@@ -10,18 +10,8 @@
 /**
  * Admin Menu service
  *
- * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/370
- * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/307
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/272
- * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.28
+ * @version 7.0.0
  */
 class AAM_Service_BackendMenu
 {
@@ -30,7 +20,7 @@ class AAM_Service_BackendMenu
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.backend_menu.enabled';
 
@@ -40,7 +30,7 @@ class AAM_Service_BackendMenu
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -86,15 +76,8 @@ class AAM_Service_BackendMenu
      *
      * @return void
      *
-     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/293
-     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/240
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.27
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -103,20 +86,17 @@ class AAM_Service_BackendMenu
             // does not have the ability to manage admin menu through AAM UI
             if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
                 add_filter('parent_file', function($parent_file) {
-                    return $this->_filter_menu($parent_file);
+                    $this->filter_menu();
+
+                    return $parent_file;
                 }, PHP_INT_MAX);
             } elseif (AAM::isAAM() && current_user_can('aam_manage_admin_menu')) {
                 add_filter('parent_file', function() {
                     // This will rebuild the backend menu cache
-                    AAM::api()->backend_menu()->get_item_list();
+                    AAM::api()->backend_menu()->get_menu();
                 }, PHP_INT_MAX - 1);
             }
         }
-
-        // Policy generation hook
-        // add_filter(
-        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        // );
 
         // Control admin area
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
@@ -146,46 +126,17 @@ class AAM_Service_BackendMenu
     }
 
     /**
-     * Generate Backend Menu policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generatePolicy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Core_Object_Menu::OBJECT_TYPE) {
-    //         if (!empty($options)) {
-    //             $policy['Statement'] = array_merge(
-    //                 $policy['Statement'],
-    //                 $generator->generateBasicStatements($options, 'BackendMenu')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
-
-    /**
      * Filter Admin Menu
      *
      * Keep in mind that this function only filter the menu items but does not
      * restrict access to them.
      *
-     * @param array $parent_file
+     * @return void
      *
-     * @return array
-     *
-     * @access private
+     * @access public
      * @version 7.0.0
      */
-    private function _filter_menu($parent_file)
+    public function filter_menu()
     {
         global $menu, $submenu;
 
@@ -193,30 +144,40 @@ class AAM_Service_BackendMenu
 
         foreach ($menu as $id => $item) {
             $menu_slug     = $item[2];
-            $is_restricted = $service->is_restricted($menu_slug);
+            $is_restricted = $service->is_restricted($menu_slug, true);
 
-            if (!empty($submenu[$menu_slug])) {
-                // Cover the scenario when there are some dynamic submenus
-                $sub_items = $this->_filter_submenu($item, $is_restricted);
-            } else {
-                $sub_items = [];
+            // Remove the top level menu item if it is restricted
+            if ($is_restricted) {
+                unset($menu[$id]);
             }
 
-            // Cover scenario like with Visual Composer where landing page
-            // is defined dynamically
-            if ($is_restricted) { // Is top level menu restricted?
-                unset($menu[$id]);
-            } elseif ($service->is_restricted($menu_slug)) { // Is sub restricted?
-                if (count($sub_items)) {
-                    $submenu[$item[2]] = $sub_items;
-                } else { // If there are no submenu items defined, just delete menu
-                    unset($menu[$id]);
+            // If top level menu has submenu items - filter them out as well
+            if (!empty($submenu[$menu_slug])) {
+                if ($is_restricted) { // Is the whole menu branch is restricted?
+                    unset($submenu[$menu_slug]);
+                } else {
+                    $submenus = $this->_filter_submenu($submenu[$menu_slug]);
+
+                    // If all submenu items are restricted, there is no need to
+                    // render the top level menu because the top level menu always
+                    // points to the first submenu item
+                    if (count($submenus) === 0) {
+                        unset($submenu[$menu_slug]);
+                        unset($menu[$id]);
+                    } else {
+                        $submenu[$menu_slug] = $submenus;
+
+                        // Also ensuring the that parent menu item always points to
+                        // the first submenu item
+                        $item[2] = $submenus[0][2];
+                    }
                 }
             }
         }
 
         // Remove duplicated separators
         $count = 0;
+
         foreach ($menu as $id => $item) {
             if (preg_match('/^separator/', $item[2])) {
                 if ($count === 0) {
@@ -228,8 +189,6 @@ class AAM_Service_BackendMenu
                 $count = 0;
             }
         }
-
-        return $parent_file;
     }
 
     /**
@@ -278,37 +237,24 @@ class AAM_Service_BackendMenu
     /**
      * Filter submenu
      *
-     * @param array &$parent
-     * @param bool  $deny_all
+     * @param array $submenus
      *
-     * @return void
+     * @return array
      *
      * @access private
-     * @global array $menu
-     * @global array $submenu
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    private function _filter_submenu(&$parent, $deny_all = false)
+    private function _filter_submenu($submenus)
     {
-        global $submenu;
+        $service = AAM::api()->backend_menu();
 
-        $service  = AAM::api()->backend_menu();
-        $filtered = [];
-
-        foreach ($submenu[$parent[2]] as $id => $item) {
-            if ($deny_all || $service->is_restricted($item[2])) {
-                unset($submenu[$parent[2]][$id]);
-            } else {
-                $filtered[] = $submenu[$parent[2]][$id];
+        foreach ($submenus as $id => $item) {
+            if ($service->is_restricted($item[2])) {
+                unset($submenus[$id]);
             }
         }
 
-        if (count($filtered)) { // Make sure that the parent points to the first sub
-            $values    = array_values($filtered);
-            $parent[2] = $values[0][2];
-        }
-
-        return $filtered;
+        return array_values($submenus);
     }
 
 }

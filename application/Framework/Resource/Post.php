@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_Post
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PermissionInterface
 {
 
@@ -108,7 +107,9 @@ implements
             }
         }
 
-        return apply_filters('aam_post_is_password_protected_filter', $result, $this);
+        return apply_filters(
+            'aam_post_is_password_protected_filter', $result, $this
+        );
     }
 
     /**

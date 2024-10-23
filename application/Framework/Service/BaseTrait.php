@@ -140,7 +140,7 @@ trait AAM_Framework_Service_BaseTrait
 
         try {
             if ($name === 'access_level') {
-                $result = $this->_access_level;
+                $result = $this->_get_access_level();
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);

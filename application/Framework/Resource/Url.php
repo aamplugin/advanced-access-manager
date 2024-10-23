@@ -15,7 +15,6 @@
  */
 class AAM_Framework_Resource_Url
 implements
-    AAM_Framework_Resource_Interface,
     AAM_Framework_Resource_PermissionInterface
 {
 
@@ -155,56 +154,6 @@ implements
                 $result = $rule['redirect'];
             } else {
                 $result = [ 'type' => 'default' ]; // Just do the default redirect
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Merge two rules based on provided preference
-     *
-     * @param array|null $base
-     * @param array|null $incoming
-     * @param string     $preference
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _merge_permissions($base, $incoming, $preference = 'deny')
-    {
-        $result   = null;
-        $effect_a = null;
-        $effect_b = null;
-
-        if (!empty($base)) {
-            $effect_a = $base['effect'] === 'allow';
-        }
-
-        if (!empty($incoming)) {
-            $effect_b = $incoming['effect'] === 'allow';
-        }
-
-        if ($preference === 'allow') { // Merging preference is to allow
-            // If at least one set has allowed rule, then allow the URL
-            if (in_array($effect_a, [ true, null ], true)
-                || in_array($effect_b, [ true, null ], true)
-            ) {
-                $result = [ 'effect' => 'allow' ];
-            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
-                $result = $base;
-            } else {
-                $result = $incoming;
-            }
-        } else { // Merging preference is to deny access by default
-            if ($effect_a === false) {
-                $result = $base;
-            } elseif ($effect_b === false) {
-                $result = $incoming;
-            } else {
-                $result = [ 'effect' => 'allow' ];
             }
         }
 

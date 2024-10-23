@@ -247,13 +247,10 @@ class AAM
      *
      * @return void
      *
-     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.4
+     * @version 7.0.0
      */
-    public static function onPluginsLoaded()
+    public static function on_plugins_loaded()
     {
         // Load all the defined AAM services
         foreach(self::SERVICES as $service_class) {
@@ -297,8 +294,18 @@ class AAM
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
 
-            // Init current user
-            self::$_instance->_initialize_current_user();
+            // Make sure if user is changed dynamically, AAM adjusts accordingly
+            add_action('set_current_user', function() {
+                self::$_instance->_current_user = null;
+
+                // Reinitialize current user
+                self::$_instance->_init_current_user();
+            });
+
+            // The same with with after user login. WordPress core has bug with this
+            add_action('wp_login', function($_, $user) {
+                self::$_instance->_init_current_user($user);
+            }, 10, 2);
 
             // Load AAM internationalization
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
@@ -311,44 +318,18 @@ class AAM
     }
 
     /**
-     * Initialize current user
-     *
-     * @return void
-     *
-     * @access private
-     * @version 6.9.36
-     */
-    private function _initialize_current_user()
-    {
-        // Make sure if user is changed dynamically, AAM adjusts accordingly
-        add_action('set_current_user', function() {
-            $this->_legacy_current_user = null;
-            $this->_current_user        = null;
-        });
-
-        // The same with with after user login. WordPress core has bug with this
-        add_action('wp_login', function($_, $user) {
-            $this->_init_current_user($user);
-            $this->_init_legacy_current_user($user);
-        }, 10, 2);
-    }
-
-    /**
      * Activation hook
      *
      * @return void
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/325
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
     public static function activate()
     {
         global $wp_version;
 
-        //check PHP Version
+        // Check PHP Version
         if (version_compare(PHP_VERSION, '5.6.40') === -1) {
             exit(__('PHP 5.6.40 or higher is required.', AAM_KEY));
         } elseif (version_compare($wp_version, '5.8.0') === -1) {
@@ -365,9 +346,9 @@ class AAM
      *
      * @access public
      * @static
-     * @version 6.9.11
+     * @version 7.0.0
      */
-    public static function afterActivation($plugin)
+    public static function activated_plugin($plugin)
     {
         if (
             $plugin === "advanced-access-manager/aam.php"
@@ -416,7 +397,7 @@ if (defined('ABSPATH')) {
     AAM_Autoloader::register();
 
     // Keep this as the lowest priority
-    add_action('plugins_loaded', 'AAM::onPluginsLoaded', -999);
+    add_action('plugins_loaded', 'AAM::on_plugins_loaded', -999);
 
     // The highest priority (higher the core)
     // this is important to have to catch events like register core post types
@@ -428,5 +409,5 @@ if (defined('ABSPATH')) {
 
     // Improve user experience by redirecting user to the AAM page after it is
     // activated
-    add_action('activated_plugin', array('AAM', 'afterActivation'));
+    add_action('activated_plugin', array('AAM', 'activated_plugin'));
 }
