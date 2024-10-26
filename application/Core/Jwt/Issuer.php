@@ -54,7 +54,7 @@ class AAM_Core_Jwt_Issuer
 
         try {
             $headers = $this->extractTokenHeaders($token);
-            $service = AAM_Framework_Manager::configs();
+            $service = AAM::api()->configs();
 
             if (strpos($headers->alg, 'RS') === 0) {
                 $path = $service->get_config('authentication.jwt.publicKeyPath');
@@ -131,7 +131,7 @@ class AAM_Core_Jwt_Issuer
         if (!empty($expires)) {
             $time = $expires;
         } else {
-            $ttl = AAM_Framework_Manager::configs()->get_config(
+            $ttl = AAM::api()->configs()->get_config(
                 'authentication.jwt.expires', '+24 hours'
             );
 
@@ -236,7 +236,7 @@ class AAM_Core_Jwt_Issuer
      */
     protected function getJWTSigningAttributes()
     {
-        $service = AAM_Framework_Manager::configs();
+        $service = AAM::api()->configs();
         $alg     = strtoupper(
             $service->get_config('authentication.jwt.algorithm', 'HS256')
         );

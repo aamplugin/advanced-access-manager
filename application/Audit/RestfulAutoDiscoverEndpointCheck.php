@@ -64,7 +64,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
     {
         $response = [];
 
-        $visitor = AAM::api()->getVisitor();
+        $visitor = AAM::api()->visitor();
 
         // Check if API route "/" is enabled
         $api_route_enabled = !$visitor->getObject('route')->isRestricted(

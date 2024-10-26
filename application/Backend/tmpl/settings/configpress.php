@@ -24,6 +24,6 @@ if (defined('AAM_KEY')) { ?>
             class="configpress-editor"
             style="border: 1px solid #CCCCCC; width: 100%"
             rows="10"
-        ><?php $c = AAM_Framework_Manager::CONFIGS()->get_configpress(); echo esc_textarea(is_string($c) && !empty($c) ? $c : ''); ?></textarea>
+        ><?php $c = AAM::api()->CONFIGS()->get_configpress(); echo esc_textarea(is_string($c) && !empty($c) ? $c : ''); ?></textarea>
     </div>
 <?php }

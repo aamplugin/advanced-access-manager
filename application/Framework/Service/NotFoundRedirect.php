@@ -196,7 +196,7 @@ implements
                 $result['redirect_page_id'] = $page_id;
             }
         } elseif ($incoming_data['type'] === 'url_redirect') {
-            $redirect_url = AAM_Framework_Utility_Redirect::validate_redirect_url(
+            $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
                 $incoming_data['redirect_url']
             );
 

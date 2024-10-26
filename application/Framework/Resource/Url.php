@@ -38,7 +38,7 @@ implements
     public function merge_permissions($incoming)
     {
         $result = [];
-        $config = AAM_Framework_Manager::configs();
+        $config = AAM::api()->configs();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
         $preference = $config->get_config(
@@ -108,53 +108,6 @@ implements
             $result = $rule['effect'] !== 'allow';
         } else {
             $result = null;
-        }
-
-        return apply_filters(
-            'aam_url_is_restricted_filter',
-            $result,
-            $rule,
-            $this
-        );
-    }
-
-    /**
-     * Get redirect if URL is restricted
-     *
-     * @param string $url
-     *
-     * @return array|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_redirect($url = null)
-    {
-        $result = null;
-
-        if (!empty($this->_internal_id)
-            && !empty($url)
-            && ($url !== $this->_internal_id)
-        ) {
-            throw new InvalidArgumentException(
-                'The provided URL does not match already initiated resource URL'
-            );
-        }
-
-        // If resource was already initialized with a single URL, then no need to
-        // search for match
-        if ($this->_internal_id) {
-            $rule = $this->_permissions;
-        } else {
-            $rule = $this->_find_matching_rule($url);
-        }
-
-        if (!empty($rule) && $rule['effect'] === 'deny') {
-            if (isset($rule['redirect'])) {
-                $result = $rule['redirect'];
-            } else {
-                $result = [ 'type' => 'default' ]; // Just do the default redirect
-            }
         }
 
         return $result;

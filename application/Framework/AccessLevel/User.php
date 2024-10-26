@@ -42,7 +42,7 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
         // Note! AAM does not allow deleting roles if there is at least one user
         // assigned. However, it can be delete through other plugin or custom code
         if (wp_roles()->is_role($primary_role)) {
-            $parent = AAM_Framework_Manager::access_levels()->get(
+            $parent = AAM::api()->access_levels()->get(
                 AAM_Framework_Type_AccessLevel::ROLE, $primary_role
             );
 
@@ -54,13 +54,13 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
 
             if ($mu_role_support && count($roles)) {
                 foreach ($roles as $role) {
-                    $parent->add_sibling(AAM_Framework_Manager::access_levels()->get(
+                    $parent->add_sibling(AAM::api()->access_levels()->get(
                         AAM_Framework_Type_AccessLevel::ROLE, $role
                     ));
                 }
             }
         } else { // In this case - the Default access level is parent
-            $parent = AAM_Framework_Manager::access_levels()->get(
+            $parent = AAM::api()->access_levels()->get(
                 AAM_Framework_Type_AccessLevel::DEFAULT
             );
         }

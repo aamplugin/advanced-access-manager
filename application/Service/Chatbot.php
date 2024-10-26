@@ -63,7 +63,7 @@ class AAM_Service_Chatbot
             }, 40);
         }
 
-        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }

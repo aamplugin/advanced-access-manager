@@ -49,7 +49,7 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
     public static function getList()
     {
         $response = apply_filters('aam_service_list_filter', array());
-        $service  = AAM_Framework_Manager::configs();
+        $service  = AAM::api()->configs();
 
         // Get each service status
         foreach ($response as &$item) {

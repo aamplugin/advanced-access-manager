@@ -53,7 +53,7 @@ class AAM_Service_ApiRoute
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -95,7 +95,7 @@ class AAM_Service_ApiRoute
         if (is_admin()) {
             add_filter('aam_settings_list_filter', function ($settings, $type) {
                 if ($type === 'core') {
-                    $service  = AAM_Framework_Manager::configs();
+                    $service  = AAM::api()->configs();
                     $settings = array_merge($settings, array(
                         'core.settings.xmlrpc' => array(
                             'title'       => __('XML-RPC WordPress API', AAM_KEY),
@@ -119,7 +119,7 @@ class AAM_Service_ApiRoute
 
         // Disable XML-RPC if needed
         add_filter('xmlrpc_enabled', function($enabled) {
-            if (AAM_Framework_Manager::configs()->get_config(
+            if (AAM::api()->configs()->get_config(
                 'core.settings.xmlrpc') === false
             ) {
                 $enabled = false;
@@ -134,7 +134,7 @@ class AAM_Service_ApiRoute
             function ($response) {
                 if (!current_user_can('aam_manager')
                     && !is_wp_error($response)
-                    && !AAM_Framework_Manager::configs()->get_config(
+                    && !AAM::api()->configs()->get_config(
                             'core.settings.restful'
                 )) {
                     $response = new WP_Error(

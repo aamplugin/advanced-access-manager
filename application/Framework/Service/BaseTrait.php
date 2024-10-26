@@ -150,6 +150,28 @@ trait AAM_Framework_Service_BaseTrait
     }
 
     /**
+     * Are permissions customized for current access level
+     *
+     * Determine if permissions for the backend menu are customized for the current
+     * access level. Permissions are considered customized if there is at least one
+     * admin menu item explicitly allowed or denied.
+     *
+     * @param mixed $inline_context
+     *
+     * @return boolean
+     */
+    public function is_customized($inline_context = null)
+    {
+        try {
+            $result = $this->_get_resource(true, $inline_context)->is_overwritten();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $inline_context);
+        }
+
+        return $result;
+    }
+
+    /**
      * Get current subject
      *
      * @param mixed $inline_context Runtime context
@@ -168,6 +190,8 @@ trait AAM_Framework_Service_BaseTrait
         // framework service manager
         if (is_array($inline_context)) {
             $context = $inline_context;
+        } elseif (is_a($inline_context, AAM_Framework_AccessLevel_Interface::class)) {
+            $context = [ 'access_level' => $inline_context ];
         } elseif (is_array($this->_runtime_context)) {
             $context = $this->_runtime_context;
         } else {
@@ -177,7 +201,7 @@ trait AAM_Framework_Service_BaseTrait
         if (isset($context['access_level'])) {
             $result = $context['access_level'];
         } elseif (!empty($context['access_level_type'])) {
-            $result = AAM_Framework_Manager::access_levels()->get(
+            $result = AAM::api()->access_levels()->get(
                 $context['access_level_type'],
                 isset($context['access_level_id']) ? $context['access_level_id'] : null
             );

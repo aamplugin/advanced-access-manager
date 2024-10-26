@@ -10,12 +10,29 @@
 /**
  * AAM core API gateway
  *
- * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
- * @since 6.1.0 Significant improvement of the inheritance mechanism
- * @since 6.0.0 Initial implementation of the class
+ * @method AAM_Framework_Service_Roles roles(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Urls urls(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Jwts jwts(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Content content(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Users users(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Configs configs(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_AccessLevels access_levels(mixed $runtime_context = null)
  *
  * @package AAM
- * @version 6.9.6
+ * @version 7.0.0
  */
 final class AAM_Core_Gateway
 {
@@ -31,12 +48,56 @@ final class AAM_Core_Gateway
     private static $_instance = null;
 
     /**
+     * Default context shared by all services
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_default_context = [];
+
+    /**
+     * Collection of services
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_service_methods = [];
+
+    /**
      * Constructor
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function __construct() { }
+    protected function __construct()
+    {
+        $this->_service_methods = apply_filters('aam_api_gateway_services_filter', [
+            'roles'                  => AAM_Framework_Service_Roles::class,
+            'urls'                   => AAM_Framework_Service_Urls::class,
+            'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
+            'jwts'                   => AAM_Framework_Service_Jwts::class,
+            'login_redirect'         => AAM_Framework_Service_LoginRedirect::class,
+            'logout_redirect'        => AAM_Framework_Service_LogoutRedirect::class,
+            'not_found_redirect'     => AAM_Framework_Service_NotFoundRedirect::class,
+            'backend_menu'           => AAM_Framework_Service_BackendMenu::class,
+            'admin_toolbar'          => AAM_Framework_Service_AdminToolbar::class,
+            'metaboxes'              => AAM_Framework_Service_Metaboxes::class,
+            'widgets'                => AAM_Framework_Service_Widgets::class,
+            'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
+            'identities'             => AAM_Framework_Service_Identities::class,
+            'content'                => AAM_Framework_Service_Content::class,
+            'users'                  => AAM_Framework_Service_Users::class,
+            'capabilities'           => AAM_Framework_Service_Capabilities::class,
+            'caps'                   => AAM_Framework_Service_Capabilities::class,
+            'configs'                => AAM_Framework_Service_Configs::class,
+            'settings'               => AAM_Framework_Service_Settings::class,
+            'access_levels'          => AAM_Framework_Service_AccessLevels::class
+        ]);
+    }
 
     /**
      * Prevent from fatal errors
@@ -47,14 +108,16 @@ final class AAM_Core_Gateway
      * @return void
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
     public function __call($name, $args)
     {
         $result = null;
 
-        if (method_exists('AAM_Framework_Manager', $name)) {
-            $result = call_user_func_array("AAM_Framework_Manager::{$name}", $args);
+        if (array_key_exists($name, $this->_service_methods)) {
+            $result = $this->_return_service(
+                $this->_service_methods[$name], array_shift($args)
+            );
         } else {
             _doing_it_wrong(
                 __CLASS__ . '::' . __METHOD__,
@@ -81,7 +144,7 @@ final class AAM_Core_Gateway
      */
     public function user($identifier = null)
     {
-        $service = AAM_Framework_Manager::access_levels();
+        $service = $this->access_levels();
 
         if (is_null($identifier)) {
             $result = AAM::current_user();
@@ -106,7 +169,7 @@ final class AAM_Core_Gateway
      */
     public function role($role_slug)
     {
-        return AAM_Framework_Manager::access_levels()->get(
+        return $this->access_levels()->get(
             AAM_Framework_Type_AccessLevel::ROLE, $role_slug
         );
     }
@@ -121,7 +184,7 @@ final class AAM_Core_Gateway
      */
     public function visitor()
     {
-        return AAM_Framework_Manager::access_levels()->get(
+        return $this->access_levels()->get(
             AAM_Framework_Type_AccessLevel::VISITOR
         );
     }
@@ -162,7 +225,7 @@ final class AAM_Core_Gateway
      */
     public function default()
     {
-        return AAM_Framework_Manager::access_levels()->get(
+        return $this->access_levels()->get(
             AAM_Framework_Type_AccessLevel::DEFAULT
         );
     }
@@ -207,149 +270,47 @@ final class AAM_Core_Gateway
     }
 
     /**
-     * Get AAM configuration option
+     * Setup the framework manager
      *
-     * @param string $option
-     * @param mixed  $default
+     * @param array $default_context
      *
-     * @return mixed
+     * @return void
      *
      * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->get_config instead
-     * @todo Remove in July, 2025
+     * @version 7.0.0
      */
-    public function getConfig($option, $default = null)
+    public function setup(array $default_context = [])
     {
-        return AAM_Framework_Manager::configs()->get_config($option, $default);
+        if (is_array($default_context)) {
+            $this->_default_context = $default_context;
+        }
     }
 
     /**
-     * Update AAM configuration option
+     * Return an instance of requested service
      *
-     * @param string $option
-     * @param mixed  $value
+     * @param string $service_class_name
+     * @param mixed  $runtime_context
      *
-     * @return boolean
+     * @return AAM_Framework_Service_Interface
      *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->set_config instead
-     * @todo Remove in July, 2025
+     * @access private
+     * @version 7.0.0
      */
-    public function updateConfig($option, $value)
+    private function _return_service($service_class_name, $runtime_context)
     {
-        return AAM_Framework_Manager::configs()->set_config($option, $value);
-    }
-
-    /**
-     * Delete AAM configuration option
-     *
-     * @param string $option
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->reset_config instead
-     * @todo Remove in July, 2025
-     */
-    public function deleteConfig($option)
-    {
-        return AAM_Framework_Manager::configs()->reset_config($option);
-    }
-
-    /**
-     * Get user
-     *
-     * If no $id specified, current user will be returned
-     *
-     * @param int $id
-     *
-     * @return AAM_Core_Subject
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Use AAM::api()->user() instead
-     * @todo Remove in July, 2025
-     */
-    public function getUser($id = null)
-    {
-        if (!empty($id)) {
-            $user = new AAM_Core_Subject_User($id);
-            $user->initialize();
+        // Preparing the context first
+        if (is_array($runtime_context)) {
+            $context = array_merge($this->_default_context, $runtime_context);
+        } elseif (is_a($runtime_context, AAM_Framework_AccessLevel_Interface::class)) {
+            $context = array_merge($this->_default_context, [
+                'access_level' => $runtime_context
+            ]);
         } else {
-            $user = AAM::getUser();
+            $context = $this->_default_context;
         }
 
-        return $user;
-    }
-
-    /**
-     * Get role subject
-     *
-     * @param string $id
-     *
-     * @return AAM_Core_Subject_Role
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Use AAM::api()->role() instead
-     * @todo Remove in July, 2025
-     */
-    public function getRole($id)
-    {
-        return new AAM_Core_Subject_Role($id);
-    }
-
-    /**
-     * Get visitor subject
-     *
-     * @return AAM_Core_Subject_Visitor
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Use AAM::api()->visitor() instead
-     * @todo Remove in July, 2025
-     */
-    public function getVisitor()
-    {
-        if (is_user_logged_in()) {
-            $visitor = new AAM_Core_Subject_Visitor();
-        } else {
-            $visitor = AAM::getUser();
-        }
-
-        return $visitor;
-    }
-
-    /**
-     * Get default subject
-     *
-     * @return AAM_Core_Subject_Default
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Use AAM::api()->default() instead
-     * @todo Remove in July, 2025
-     */
-    public function getDefault()
-    {
-        return AAM_Core_Subject_Default::getInstance();
-    }
-
-    /**
-     * Log any critical message
-     *
-     * @param string $message
-     * @param string $markers...
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public function log()
-    {
-        call_user_func_array('AAM_Core_Console::add', func_get_args());
+        return call_user_func("{$service_class_name}::get_instance", $context);
     }
 
     /**
@@ -365,6 +326,7 @@ final class AAM_Core_Gateway
      *
      * @access public
      * @version 6.1.0
+     * @deprecated
      */
     public function getAccessPolicyManager(
         AAM_Core_Subject $subject = null, $skipInheritance = false
@@ -373,7 +335,7 @@ final class AAM_Core_Gateway
             $subject = AAM::getUser();
         }
 
-        if (AAM_Framework_Manager::configs()->get_config(
+        if (AAM::api()->configs()->get_config(
             AAM_Service_AccessPolicy::FEATURE_FLAG
         )) {
             $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
@@ -392,6 +354,7 @@ final class AAM_Core_Gateway
      * @access public
      *
      * @version 6.9.6
+     * @deprecated
      */
     public function reset()
     {
@@ -414,7 +377,6 @@ final class AAM_Core_Gateway
      * @access public
      * @version 6.0.0
      * @deprecated 7.0.0 Moved to resource abstract
-     * @todo Remove in July 2025
      */
     public function mergeSettings($set1, $set2, $objectType, $preference = null)
     {
@@ -498,7 +460,6 @@ final class AAM_Core_Gateway
      * @access protected
      * @version 6.0.0
      * @deprecated 7.0.0
-     * @todo Remove in July 2025
      */
     protected function computeAccessOptionEffect($opts, $key)
     {
@@ -512,23 +473,6 @@ final class AAM_Core_Gateway
     }
 
     /**
-     * Bootstrap the object
-     *
-     * @return AAM_Core_Gateway
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public static function bootstrap()
-    {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
-        }
-
-        return self::$_instance;
-    }
-
-    /**
      * Get single instance of itself
      *
      * @return AAM_Core_Gateway
@@ -536,9 +480,13 @@ final class AAM_Core_Gateway
      * @access public
      * @version 7.0.0
      */
-    public static function getInstance()
+    public static function get_instance()
     {
-        return self::bootstrap();
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
     }
 
 }

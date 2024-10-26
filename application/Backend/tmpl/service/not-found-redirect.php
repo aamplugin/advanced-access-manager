@@ -21,7 +21,7 @@
     <div class="aam-feature" id="404redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+                <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
                         <?php echo __('The "404 Redirect" service ensures seamless user experience by automatically managing 404 (Not Found) errors, redirecting users to relevant pages, URL or trigger a custom PHP callback function to maintain site engagement and reduce bounce rates.'); ?>
                     </p>

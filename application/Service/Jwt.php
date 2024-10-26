@@ -76,7 +76,7 @@ class AAM_Service_Jwt
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -583,7 +583,7 @@ class AAM_Service_Jwt
 
                 if (!is_wp_error($result)) {
                     // Verify that user is can be logged in
-                    $user = AAM_Framework_Manager::users([
+                    $user = AAM::api()->users([
                         'error_handling' => 'wp_error'
                     ])->verify_user_state($result->userId);
 
@@ -675,7 +675,7 @@ class AAM_Service_Jwt
 
         if (!is_wp_error($claims)) {
             // Check if account is active
-            $user = AAM_Framework_Manager::users([
+            $user = AAM::api()->users([
                 'error_handling' => 'wp_error'
             ])->verify_user_state($claims->userId);
         }
@@ -695,7 +695,7 @@ class AAM_Service_Jwt
                 ];
             }
 
-            AAM_Framework_Manager::users()->update($claims->userId, $data);
+            AAM::api()->users()->update($claims->userId, $data);
 
             do_action('wp_login', $user->user_login, $user->get_wp_user());
 
@@ -859,10 +859,10 @@ class AAM_Service_Jwt
      */
     private function _getConfigOption($option, $default = null)
     {
-        $value = AAM_Framework_Manager::configs()->get_config($option);
+        $value = AAM::api()->configs()->get_config($option);
 
         if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM_Framework_Manager::configs()->get_config(
+            $value = AAM::api()->configs()->get_config(
                 self::OPTION_ALIAS[$option]
             );
         }

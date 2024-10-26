@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework\Service;
 
 use AAM,
-    AAM_Framework_Manager,
     AAM_Service_BackendMenu,
     AAM_Framework_Utility_Cache,
     AAM\UnitTest\Utility\TestCase,
@@ -38,8 +37,8 @@ final class BackendMenuTest extends TestCase
         $this->_mockAdminMenu();
 
         // Triggering the get menu method to see if it'll pick up the mock data
-        $service = AAM_Framework_Manager::backend_menu();
-        $menu    = $service->get_menu();
+        $service = AAM::api()->backend_menu();
+        $menu    = $service->get_items();
 
         // The $menu variable should not be empty
         $this->assertNotEmpty($menu);
@@ -66,15 +65,22 @@ final class BackendMenuTest extends TestCase
         // Mocking backend menu
         $this->_mockAdminMenu();
 
-        // Find menu item by the slug
-        $service = AAM_Framework_Manager::backend_menu();
-        $item    = $service->get_menu_item('aam');
+        $service = AAM::api()->backend_menu();
+
+        // Find menu item by the slug without prefix
+        $item = $service->get_item('aam', true);
 
         // The $menu variable should not be empty
         $this->assertNotEmpty($item);
 
         // Also verifying that we retrieved correct menu item
-        $this->assertEquals('aam', $item['slug']);
+        $this->assertEquals('menu/aam', $item['slug']);
+
+        // Find menu item by the slug with prefix
+        $item = $service->get_item('menu/aam');
+
+        // The $menu variable should not be empty
+        $this->assertNotEmpty($item);
     }
 
     /**
@@ -84,22 +90,20 @@ final class BackendMenuTest extends TestCase
      */
     public function testUpdateAdminMenuItemPermission()
     {
-        $service = AAM_Framework_Manager::backend_menu([
-            'access_level' => AAM::api()->role('editor')
-        ]);
+        $service = AAM::api()->backend_menu(
+            AAM::api()->role('editor')
+        );
 
         // Update permission for a single submenu item
-        $result = $service->update_menu_item_permission(
-            'edit-tags.php?taxonomy=category', 'deny'
-        );
+        $result = $service->restrict('edit-tags.php?taxonomy=category');
 
         // Assert the the result of the execution is an array the represents a menu
         // item
-        $this->assertEquals('edit-tags.php?taxonomy=category', $result['slug']);
-        $this->assertTrue($result['is_restricted']);
+        $this->assertTrue($result);
+        $this->assertTrue($service->is_restricted('edit-tags.php?taxonomy=category'));
 
         // Update the entire menu branch and ensure that all sub items are restricted
-        $service->update_menu_item_permission('upload.php', 'deny', true);
+        $service->restrict('upload.php', true);
 
         $this->assertTrue($service->is_restricted('upload.php', true));
         $this->assertTrue($service->is_restricted('upload.php'));
@@ -119,17 +123,15 @@ final class BackendMenuTest extends TestCase
         global $menu, $submenu;
 
         $user_id = $this->createUser([ 'role' => 'administrator' ]);
-        $service = AAM_Framework_Manager::backend_menu([
+        $service = AAM::api()->backend_menu([
             'access_level' => AAM::api()->role('administrator')
         ]);
 
         // Update permission for a single submenu item
-        $service->update_menu_item_permission(
-            'edit-tags.php?taxonomy=category', 'deny'
-        );
+        $service->restrict('edit-tags.php?taxonomy=category');
 
         // Update the entire menu branch and ensure that all sub items are restricted
-        $service->update_menu_item_permission('upload.php', 'deny', true);
+        $service->restrict('upload.php', true);
 
         // Mocking backend menu
         $this->_mockAdminMenu();

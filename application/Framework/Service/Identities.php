@@ -443,7 +443,7 @@ class AAM_Framework_Service_Identities
         //          check role level
         if (is_null($result)) {
             $max_user_level = AAM_Framework_Utility_Misc::get_max_user_level(
-                AAM_Framework_Manager::roles()->get_role($role_slug)->capabilities
+                AAM::api()->roles()->get_role($role_slug)->capabilities
             );
 
             $result = $resource->is_allowed_to(
@@ -633,7 +633,7 @@ class AAM_Framework_Service_Identities
      */
     private function _validate_role($slug)
     {
-        $roles = AAM_Framework_Manager::roles();
+        $roles = AAM::api()->roles();
 
         if (!$roles->is_role($slug)
             && !apply_filters('aam_validate_role_identifier_filter', true, $slug)

@@ -110,7 +110,7 @@ trait AAM_Framework_Resource_PreferenceTrait
         AAM_Framework_AccessLevel_Interface $access_level
     ) {
         // Read explicitly defined settings from DB
-        $settings = AAM_Framework_Manager::settings([
+        $settings = AAM::api()->settings([
             'access_level' => $access_level
         ])->get_setting(constant('static::TYPE'), []);
 
@@ -210,7 +210,7 @@ trait AAM_Framework_Resource_PreferenceTrait
         );
 
         // Store changes in DB
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'access_level' => $this->get_access_level()
         ])->set_setting(constant('static::TYPE'), $preferences);
     }
@@ -268,7 +268,7 @@ trait AAM_Framework_Resource_PreferenceTrait
     {
         $this->_explicit_preferences = [];
 
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'access_level' => $this->get_access_level()
         ])->delete_setting(constant('static::TYPE'));
     }

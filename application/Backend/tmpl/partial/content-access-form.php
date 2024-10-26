@@ -75,7 +75,7 @@
                                 </small>
                             <?php } ?>
 
-                            <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+                            <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
                                 <p class="aam-hint">
                                     <?php echo esc_js($settings['description']); ?>
                                 </p>
@@ -141,7 +141,7 @@
                     <h4 class="modal-title"><?php echo __('Customize Visibility', AAM_KEY); ?></h4>
                 </div>
                 <div class="modal-body">
-                    <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+                    <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
                         <p class="aam-info">
                             <?php echo $params->access_controls['list']['tooltip']; ?>
                         </p>
@@ -251,7 +251,7 @@
                     <h4 class="modal-title"><?php echo __('Customize Restriction', AAM_KEY); ?></h4>
                 </div>
                 <div class="modal-body">
-                    <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+                    <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
                         <p class="aam-info">
                             <?php echo $params->access_controls['read']['tooltip']; ?>
                         </p>

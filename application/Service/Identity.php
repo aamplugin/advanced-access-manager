@@ -44,7 +44,7 @@ class AAM_Service_Identity
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -154,7 +154,7 @@ class AAM_Service_Identity
      */
     private function _filter_editable_roles($roles)
     {
-        $service = AAM_Framework_Manager::identities();
+        $service = AAM::api()->identities();
 
         foreach (array_keys($roles) as $slug) {
             // Filter out all the roles that are explicitly hidden with "Roles" rule
@@ -181,7 +181,7 @@ class AAM_Service_Identity
      */
     private function _filter_views_users($views)
     {
-        $service = AAM_Framework_Manager::identities();
+        $service = AAM::api()->identities();
 
         foreach(array_keys($views) as $slug) {
             if ($slug !== 'all'
@@ -239,7 +239,7 @@ class AAM_Service_Identity
      */
     private function _prepare_filter_args()
     {
-        $result = AAM_Framework_Manager::identities()->get_user_query_filters();
+        $result = AAM::api()->identities()->get_user_query_filters();
 
         return is_array($result) ? $result : [];
     }
@@ -302,7 +302,7 @@ class AAM_Service_Identity
     {
         // If do not allow is declared, there is no need to do anything else
         if (!in_array('do_not_allow', $caps, true)) {
-            $service = AAM_Framework_Manager::identities();
+            $service = AAM::api()->identities();
 
             if ($service->is_denied_to('user', $user_id, $action)) {
                 array_push($caps, 'do_not_allow');

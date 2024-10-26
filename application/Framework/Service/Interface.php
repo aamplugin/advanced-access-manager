@@ -28,6 +28,6 @@ interface AAM_Framework_Service_Interface
      * @static
      * @version 7.0.0
      */
-    public static function get_instance($runtime_context = []);
+    public static function get_instance(array $runtime_context = []);
 
 }

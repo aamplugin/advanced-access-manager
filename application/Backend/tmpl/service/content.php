@@ -9,7 +9,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="post-content">
-        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+        <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
             <?php echo apply_filters(
                 'aam_content_service_tips_filter',
                 AAM_Backend_View::getInstance()->loadPartial('content-service-tips')

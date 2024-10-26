@@ -149,7 +149,7 @@ class AAM_Restful_SettingService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

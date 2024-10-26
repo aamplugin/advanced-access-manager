@@ -65,7 +65,7 @@ class AAM_Service_UserLevelFilter
             }, 1);
         }
 
-        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }
@@ -294,7 +294,7 @@ class AAM_Service_UserLevelFilter
      */
     protected function authorizeUserUpdate($caps, $userId)
     {
-        $user      = AAM::api()->getUser($userId);
+        $user      = AAM::api()->user($userId);
         $userLevel = AAM_Core_API::maxLevel($user->allcaps);
 
         if (!$this->isUserLevelAllowed(true, $userLevel)) {

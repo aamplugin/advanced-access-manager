@@ -92,7 +92,7 @@ class AAM_Framework_Utility_Cache
             'ttl'   => time() + $ttl
         );
 
-        $capacity = AAM_Framework_Manager::configs()->get_config(
+        $capacity = AAM::api()->configs()->get_config(
             'core.settings.cache.capability',
             self::DEFAULT_CACHE_CAPACITY
         );

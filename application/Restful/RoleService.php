@@ -409,7 +409,7 @@ class AAM_Restful_RoleService
      */
     private function _clone_settings($role, $parent)
     {
-        $service = AAM_Framework_Manager::settings([
+        $service = AAM::api()->settings([
             'access_level_type' => AAM_Framework_Type_AccessLevel::ROLE,
             'access_level_id'   => $role->slug
         ]);
@@ -674,7 +674,7 @@ class AAM_Restful_RoleService
      */
     private function _get_service()
     {
-        return AAM_Framework_Manager::roles([
+        return AAM::api()->roles([
             'error_handling' => 'exception'
         ]);
     }

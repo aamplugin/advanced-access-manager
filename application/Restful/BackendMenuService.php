@@ -67,12 +67,7 @@ class AAM_Restful_BackendMenuService
                         'type'        => 'string',
                         'default'     => 'deny',
                         'enum'        => [ 'allow', 'deny' ]
-                    ),
-                    'is_top_level' => [
-                        'description' => 'Wether restricting whole branch or not',
-                        'type'        => 'boolean',
-                        'default'     => false
-                    ]
+                    )
                 )
             ]);
 
@@ -115,7 +110,7 @@ class AAM_Restful_BackendMenuService
             $service = $this->_get_service($request);
             $result  = [];
 
-            foreach($service->get_menu() as $item) {
+            foreach($service->get_items() as $item) {
                 array_push($result, $this->_prepare_menu_item($item));
             }
         } catch (Exception $e) {
@@ -139,7 +134,7 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $this->_prepare_menu_item($service->get_menu_item(
+            $result  = $this->_prepare_menu_item($service->get_item(
                 base64_decode($request->get_param('id'))
             ));
         } catch (Exception $e) {
@@ -163,11 +158,19 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_menu_item_permission(
-                base64_decode($request->get_param('id')),
-                $request->get_param('effect'),
-                $request->get_param('is_top_level')
-            );
+
+            // Get all the necessary attributes
+            $slug   = base64_decode($request->get_param('id'));
+            $effect = strtolower($request->get_param('effect'));
+
+            if ($effect === 'allow') {
+                $service->allow($slug);
+            } else {
+                $service->restrict($slug);
+            }
+
+            // Prepare response
+            $result = $this->_prepare_menu_item($service->get_item($slug));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -189,10 +192,12 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_menu_item_permission(
-                base64_decode($request->get_param('id')),
-                $request->get_param('is_top_level')
-            );
+
+            // Reset the menu item permissions
+            $service->reset(base64_decode($request->get_param('id')));
+
+            // Prepare response
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -214,7 +219,12 @@ class AAM_Restful_BackendMenuService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset();
+
+            // Reset all permissions
+            $service->reset();
+
+            // Prepare response
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -274,7 +284,7 @@ class AAM_Restful_BackendMenuService
      */
     private function _get_service($request)
     {
-        return AAM_Framework_Manager::backend_menu([
+        return AAM::api()->backend_menu([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

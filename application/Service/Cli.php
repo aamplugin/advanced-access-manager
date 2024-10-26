@@ -58,7 +58,7 @@ class AAM_Service_Cli
             }, 30);
         }
 
-        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }

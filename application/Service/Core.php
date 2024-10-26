@@ -87,7 +87,7 @@ class AAM_Service_Core
         }, 10, 2);
 
         if (is_admin()) {
-            $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
+            $metaboxEnabled = AAM::api()->configs()->get_config(
                 'core.settings.ui.render_access_metabox'
             );
 
@@ -234,7 +234,7 @@ class AAM_Service_Core
                 is_string($capability) && (strpos($capability, 'aam_') === 0)
                 && !AAM_Core_API::capExists($capability)
             ) {
-                $caps[$i] = AAM_Framework_Manager::configs()->get_config(
+                $caps[$i] = AAM::api()->configs()->get_config(
                     'page.capability',
                     'administrator'
                 );
@@ -284,7 +284,7 @@ class AAM_Service_Core
     {
         // Check if user is blocked
         if (is_a($user, 'WP_User')) {
-            $result = AAM_Framework_Manager::users([
+            $result = AAM::api()->users([
                 'error_handling' => 'wp_error'
             ])->verify_user_state($user);
 
@@ -308,7 +308,7 @@ class AAM_Service_Core
     public function verify_user_status()
     {
         if (is_user_logged_in()) {
-            $user = AAM_Framework_Manager::users()->get_user(
+            $user = AAM::api()->users()->get_user(
                 get_current_user_id()
             );
 
@@ -332,7 +332,7 @@ class AAM_Service_Core
 
                         wp_delete_user(
                             $user->ID,
-                            AAM_Framework_Manager::configs()->get_config(
+                            AAM::api()->configs()->get_config(
                                 'core.reasign.ownership.user'
                             )
                         );

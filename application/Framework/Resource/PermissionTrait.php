@@ -143,7 +143,7 @@ trait AAM_Framework_Resource_PermissionTrait
         AAM_Framework_AccessLevel_Interface $access_level
     ) {
         // Read explicitly defined settings from DB
-        $settings = AAM_Framework_Manager::settings([
+        $settings = AAM::api()->settings([
             'access_level' => $access_level
         ])->get_setting($this->_get_settings_ns(), []);
 
@@ -294,6 +294,8 @@ trait AAM_Framework_Resource_PermissionTrait
      */
     public function set_permissions($permissions, $explicit_only = true)
     {
+        $permissions = $this->_sanitize_permissions($permissions);
+
         if ($explicit_only) {
             // First, settings the explicit permissions
             $this->_explicit_permissions = $permissions;
@@ -302,7 +304,7 @@ trait AAM_Framework_Resource_PermissionTrait
             $this->_permissions = array_merge($this->_permissions, $permissions);
 
             // Store changes in DB
-            $result = AAM_Framework_Manager::settings([
+            $result = AAM::api()->settings([
                 'access_level' => $this->get_access_level()
             ])->set_setting($this->_get_settings_ns(), $permissions);
         } else {
@@ -311,6 +313,17 @@ trait AAM_Framework_Resource_PermissionTrait
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function add_permissions($permissions)
+    {
+        return $this->set_permissions(array_merge(
+            $this->_explicit_permissions,
+            $this->_sanitize_permissions($permissions)
+        ), true);
     }
 
     /**
@@ -332,10 +345,11 @@ trait AAM_Framework_Resource_PermissionTrait
      */
     public function set_permission($permission_key, $permission)
     {
-        return $this->set_permissions(array_merge(
-            $this->_explicit_permissions,
-            [ $permission_key => $permission ]
-        ));
+        return $this->set_permissions(array_merge($this->_explicit_permissions, [
+            $permission_key => $this->_sanitize_permission(
+                $permission, $permission_key
+            )
+        ]));
     }
 
     /**
@@ -353,7 +367,7 @@ trait AAM_Framework_Resource_PermissionTrait
     {
         $this->_explicit_permissions = [];
 
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'access_level' => $this->get_access_level()
         ])->delete_setting($this->_get_settings_ns());
     }
@@ -374,7 +388,7 @@ trait AAM_Framework_Resource_PermissionTrait
     public function merge_permissions($incoming)
     {
         $result = [];
-        $config = AAM_Framework_Manager::configs();
+        $config = AAM::api()->configs();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
         $preference = $config->get_config(
@@ -473,6 +487,80 @@ trait AAM_Framework_Resource_PermissionTrait
         $ns .= (is_null($resource_id) ? '' : ".{$resource_id}");
 
         return $ns;
+    }
+
+    /**
+     * Sanitize array of permissions
+     *
+     * @param array $permissions
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _sanitize_permissions(array $permissions)
+    {
+        $response = [];
+
+        foreach($permissions as $key => $permission) {
+            $response[$key] = $this->_sanitize_permission($permission, $key);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Sanitize permission
+     *
+     * Take given permission and convert to a standardized permission model
+     *
+     * @param mixed  $permission
+     * @param string $permission_key
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _sanitize_permission($permission, $permission_key)
+    {
+        if (is_string($permission)) {
+            $effect = strtolower($permission);
+            $result = [
+                'effect' => in_array($effect, [ 'allow', 'deny' ]) ? $effect : 'deny'
+            ];
+        } elseif (is_bool($permission)) {
+            $result = [
+                'effect' => $permission ? 'deny' : 'allow'
+            ];
+        } elseif (is_numeric($permission)) {
+            $result = [
+                'effect' => intval($permission) > 0 ? 'deny' : 'allow'
+            ];
+        } elseif (is_array($permission)) {
+            $result = $permission;
+        } else {
+            $result = [ 'effect' => 'deny' ];
+        }
+
+        return $this->_normalize_permission($result, $permission_key);
+    }
+
+    /**
+     * Allow individual resources to normalize permission model further
+     *
+     * @param array  $permission
+     * @param string $permission_key
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _normalize_permission($permission, $permission_key)
+    {
+        return $permission;
     }
 
 }

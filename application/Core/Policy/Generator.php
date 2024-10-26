@@ -62,7 +62,7 @@ class AAM_Core_Policy_Generator
         $this->subject = $subject;
 
         // Read all direct access settings for provided subject
-        $this->settings = AAM_Framework_Manager::settings([
+        $this->settings = AAM::api()->settings([
             'subject' => $subject
         ])->get_settings();
     }

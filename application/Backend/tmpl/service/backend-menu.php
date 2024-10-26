@@ -20,7 +20,7 @@
         $service      = $access_level->backend_menu();
     ?>
     <div class="aam-feature" id="admin_menu-content">
-        <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+        <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
@@ -35,7 +35,7 @@
                 <div
                     class="aam-overwrite"
                     id="aam-menu-overwrite"
-                    style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>"
+                    style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="menu-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
@@ -48,9 +48,9 @@
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
             $first = false;
-            $menu  = AAM_Framework_Manager::backend_menu(array(
+            $menu  = AAM::api()->backend_menu(array(
                 'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
-            ))->get_menu();
+            ))->get_items();
 
             if (!empty($menu)) {
                 foreach ($menu as $i => $top_menu_item) {

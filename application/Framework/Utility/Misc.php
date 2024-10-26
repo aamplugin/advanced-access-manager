@@ -71,4 +71,90 @@ class AAM_Framework_Utility_Misc
         return intval($max);
     }
 
+    /**
+     * Validate and sanitize URL
+     *
+     * @param string  $url
+     * @param boolean $suppress_filters
+     *
+     * @return boolean|string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    public static function sanitize_url($url, $suppress_filters = true)
+    {
+        $result     = false;
+        $parsed_url = self::_parse_url($url);
+
+        if ($parsed_url !== false) {
+            // Compile back the URL as following:
+            //   - If URL belongs to the same host as site runs on, take only the
+            //     relative path
+            //   - If URL belongs to a different host, return the absolute path,
+            //     however, this may result in failure to validate this URL with
+            //     WP core function `wp_validate_redirect` if host is not whitelisted
+            $parsed_site_url = self::_parse_url(site_url());
+
+            if ($parsed_url['domain'] === $parsed_site_url['domain']) {
+                $result = $parsed_url['relative'];
+            } else {
+                $result = $parsed_url['absolute'];
+            }
+
+            // Finally sanitize the safe URL
+            $result = wp_validate_redirect($result);
+        }
+
+        return $suppress_filters ? $result : apply_filters(
+            'aam_validate_url_filter', $result, $url
+        );
+    }
+
+    /**
+     * Parse given URL
+     *
+     * This method attempts to parse given URL and return back only essential
+     * attributes
+     *
+     * @param string $url
+     *
+     * @return array|bool
+     *
+     * @access private
+     * @static
+     * @version 7.0.0
+     */
+    private static function _parse_url($url)
+    {
+        $result = false;
+        $parsed = wp_parse_url($url);
+
+        if ($parsed !== false) {
+            // Compile domain
+            if (!empty($parsed['host'])) {
+                $domain  = $parsed['host'];
+                $domain .= !empty($parsed['port']) ? "::{$parsed['port']}" : '';
+            } else {
+                $domain = '';
+            }
+
+            // Compile relative path
+            $path = empty($parsed['path']) ? '/' : $parsed['path'];
+
+            // Adding query params if provided
+            if (isset($parsed['query'])) {
+                $path .= '?' . $parsed['query'];
+            }
+
+            $result = [
+                'domain'   => $domain,
+                'relative' => $path,
+                'absolute' => $domain . $path
+            ];
+        }
+
+        return $result;
+    }
+
 }

@@ -135,7 +135,7 @@ final class AAM_Migration_700
      */
     private function _transform_legacy_config_names()
     {
-        $service     = AAM_Framework_Manager::configs();
+        $service     = AAM::api()->configs();
         $configs     = $service->get_configs();
         $configpress = $service->get_configpress();
 
@@ -200,7 +200,7 @@ final class AAM_Migration_700
     private function _transform_legacy_settings($legacy_type, $new_type, $cb)
     {
         // Let's get all the settings first
-        $settings = AAM_Framework_Manager::settings()->get_settings();
+        $settings = AAM::api()->settings()->get_settings();
 
         // Iterating of the list of all settings and modify the URL Access rule
         foreach($settings as $access_level => &$level) {
@@ -224,7 +224,7 @@ final class AAM_Migration_700
         }
 
         // Save changes
-        AAM_Framework_Manager::settings()->set_settings($settings);
+        AAM::api()->settings()->set_settings($settings);
     }
 
     /**

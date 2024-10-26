@@ -97,7 +97,7 @@ class AAM_Framework_Service_AccessLevel
      */
     public function get_role($identifier)
     {
-        return AAM_Framework_Manager::roles()->get_role($identifier);
+        return AAM::api()->roles()->get_role($identifier);
     }
 
     /**

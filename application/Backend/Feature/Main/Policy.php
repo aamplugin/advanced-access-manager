@@ -472,14 +472,14 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
         $error = null;
 
         if ($s === 'visitor') {
-            $subject = AAM::api()->getVisitor();
+            $subject = AAM::api()->visitor();
         } elseif ($s === 'default') {
-            $subject = AAM::api()->getDefault();
+            $subject = AAM::api()->default();
         } elseif (strpos($s, 'role:') === 0) {
-            $subject = AAM::api()->getRole(substr($s, 5));
+            $subject = AAM::api()->role(substr($s, 5));
         } elseif (strpos($s, 'user:') === 0) {
             $uid     = substr($s, 5);
-            $subject = AAM::api()->getUser(($uid === 'current') ? null : $uid);
+            $subject = AAM::api()->user(($uid === 'current') ? null : $uid);
         } else {
             $error   = sprintf(__('Failed applying to %s', AAM_KEY), $s);
             $subject = null;

@@ -80,6 +80,18 @@ interface AAM_Framework_Resource_PermissionInterface
     public function set_permissions(array $permissions, $explicit_only = true);
 
     /**
+     * Add explicit permissions
+     *
+     * @param array   $permissions
+     *
+     * @return void
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function add_permissions(array $permissions);
+
+    /**
      * Get an individual permission
      *
      * @param string $permission

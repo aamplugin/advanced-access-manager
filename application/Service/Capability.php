@@ -65,7 +65,7 @@ class AAM_Service_Capability
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service

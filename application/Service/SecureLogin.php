@@ -86,7 +86,7 @@ class AAM_Service_SecureLogin
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -200,7 +200,7 @@ class AAM_Service_SecureLogin
     public function manageAuthCookie($cookie, $user_id, $expiration, $scheme, $token)
     {
         // Remove all other sessions if single session feature is enabled
-        if (AAM_Framework_Manager::configs()->get_config(
+        if (AAM::api()->configs()->get_config(
             'service.secureLogin.feature.singleSession'
         )) {
             $sessions = WP_Session_Tokens::get_instance($user_id);
@@ -226,7 +226,7 @@ class AAM_Service_SecureLogin
     public function trackFailedLoginAttempt()
     {
         // Track failed attempts only if Brute Force Lockout is enabled
-        if (AAM_Framework_Manager::configs()->get_config(
+        if (AAM::api()->configs()->get_config(
             'service.secureLogin.feature.bruteForceLockout'
         )) {
             $this->updateLoginAttemptsTransient(1);
@@ -304,7 +304,7 @@ class AAM_Service_SecureLogin
     public function enhanceAuthentication($response)
     {
         // Brute Force Lockout
-        if (AAM_Framework_Manager::configs()->get_config(
+        if (AAM::api()->configs()->get_config(
             'service.secureLogin.feature.bruteForceLockout'
         )) {
             $attempts  = AAM_Framework_Utility_Cache::get($this->_getLoginAttemptKeyName());
@@ -366,10 +366,10 @@ class AAM_Service_SecureLogin
      */
     private function _getConfigOption($option, $default = null)
     {
-        $value = AAM_Framework_Manager::configs()->get_config($option);
+        $value = AAM::api()->configs()->get_config($option);
 
         if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM_Framework_Manager::configs()->get_config(
+            $value = AAM::api()->configs()->get_config(
                 self::OPTION_ALIAS[$option]
             );
         }

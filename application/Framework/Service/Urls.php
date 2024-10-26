@@ -8,20 +8,10 @@
  */
 
 /**
- * AAM service URL manager
- *
- * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/411
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/337
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/322
- *               https://github.com/aamplugin/advanced-access-manager/issues/320
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/296
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/283
- * @since 6.9.9  Initial implementation of the class
+ * AAM URLs service
  *
  * @package AAM
- * @version 6.9.37
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Urls
 implements
@@ -45,34 +35,26 @@ implements
     ];
 
     /**
-     * Return list of rules for give subject
+     * Return list of all defined URL permissions
      *
      * @param array $inline_context Context
      *
      * @return array
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/320
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function get_rule_list($inline_context = null)
+    public function get_urls($inline_context = null)
     {
         try {
             $result      = [];
-            $resource    = $this->get_resource(null, true, $inline_context);
+            $resource    = $this->_get_resource(true, $inline_context);
             $permissions = $resource->get_permissions();
 
-            foreach($permissions as $rule) {
-                array_push(
-                    $result,
-                    $this->_prepare_rule(
-                        $rule,
-                        $this->_get_access_level($inline_context),
-                        $this->_is_inherited($rule, $resource)
-                    )
-                );
+            foreach($permissions as $url => $permission) {
+                array_push($result, $this->_prepare_url_model(
+                    $url, $permission, $resource
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -82,7 +64,22 @@ implements
     }
 
     /**
-     * Get existing rule by URL
+     * Alias for the get_urls method
+     *
+     * @param array $inline_context Context
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function urls($inline_context = null)
+    {
+        return $this->get_urls($inline_context);
+    }
+
+    /**
+     * Get permission for a given URL
      *
      * @param string $url
      * @param array  $inline_context Runtime context
@@ -91,22 +88,21 @@ implements
      *
      * @access public
      * @version 7.0.0
-     * @throws OutOfRangeException If rule does not exist
      */
-    public function get_rule($url, $inline_context = null)
+    public function get_url($url, $inline_context = null)
     {
         try {
-            $resource    = $this->get_resource(null, true, $inline_context);
+            $resource    = $this->_get_resource(true, $inline_context);
             $permissions = $resource->get_permissions();
 
             if (!array_key_exists($url, $permissions)) {
-                throw new OutOfRangeException('Rule does not exist');
+                throw new OutOfRangeException(sprintf(
+                    'Permission for URL "%s" does not exist', $url
+                ));
             }
 
-            $result = $this->_prepare_rule(
-                $permissions[$url],
-                $this->_get_access_level($inline_context),
-                $this->_is_inherited($permissions[$url], $resource)
+            $result = $this->_prepare_url_model(
+                $url, $permissions[$url], $resource
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -116,87 +112,37 @@ implements
     }
 
     /**
-     * Create new URL rule
+     * Alias for the get_url method
      *
-     * @param array $incoming_data  Rule settings
-     * @param array $inline_context Runtime context
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     * @throws RuntimeException If fails to persist the rule
-     */
-    public function create_rule(array $incoming_data, $inline_context = null)
-    {
-        try {
-            $resource  = $this->get_resource(null, false, $inline_context);
-            $rule_data = $this->_validate_incoming_data($incoming_data);
-            $success   = $resource->set_permission($rule_data['url'], $rule_data);
-
-            if (!$success) {
-                throw new RuntimeException('Failed to persist settings');
-            }
-
-            $result = $this->_prepare_rule(
-                $rule_data, $this->_get_access_level($inline_context)
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Update existing rule
-     *
-     * @param string $url            URL
-     * @param array  $incoming_data  Rule data
+     * @param string $url
      * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
-     * @throws OutOfRangeException If rule does not exist
-     * @throws RuntimeException If fails to persist a rule
      */
-    public function update_rule($url, array $incoming_data, $inline_context = null)
+    public function url($url, $inline_context = null)
+    {
+        return $this->get_url($url, $inline_context);
+    }
+
+    /**
+     * Allow access to a given URL
+     *
+     * @param string $url
+     * @param mixed  $inline_context
+     *
+     * @return boolean|WP_Error|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function allow($url, $inline_context = null)
     {
         try {
-            $resource    = $this->get_resource(null, false, $inline_context);
-            $rule_data   = $this->_validate_incoming_data($incoming_data);
-            $permissions = $resource->get_permissions();
-
-            // If URL exists in explicitly defined permissions, the update the rule.
-            // Otherwise, it means that user is trying to update inherited rule.
-            if (array_key_exists($url, $permissions)) {
-                $updates = [];
-                $updated = false;
-
-                foreach($resource->get_permissions(true) as $rule_url => $rule) {
-                    if ($rule_url === $url) { // Preserving the order
-                        $updates[$rule_data['url']] = $rule_data;
-                        $updated                    = true;
-                    } else {
-                        $updates[$rule_url] = $rule;
-                    }
-                }
-
-                if (!$updated) {
-                    $updates[$rule_data['url']] = $rule_data;
-                }
-
-                if (!$resource->set_permissions($updates)) {
-                    throw new RuntimeException('Failed to update the rule');
-                }
-            } else {
-                throw new OutOfRangeException('Rule does not exist');
-            }
-
-            $result = $this->_prepare_rule(
-                $rule_data, $this->_get_access_level($inline_context)
+            $result = $this->_set_url_permission(
+                $url, 'allow', null, $inline_context
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -206,34 +152,23 @@ implements
     }
 
     /**
-     * Delete rule
+     * Restrict access to a given URL
      *
-     * @param string $url            URL
-     * @param array  $inline_context Runtime context
+     * @param string $url
+     * @param array  $redirect
+     * @param mixed  $inline_context
      *
-     * @return boolean
+     * @return boolean|WP_Error|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function delete_rule($url, $inline_context = null)
+    public function restrict($url, $redirect = null, $inline_context = null)
     {
         try {
-            $resource    = $this->get_resource(null, false, $inline_context);
-            $permissions = $resource->get_permissions(true);
-
-            // Note! User can delete only explicitly set rule (overwritten rule)
-            if (array_key_exists($url, $permissions)) {
-                unset($permissions[$url]);
-            } else {
-                throw new OutOfRangeException('Rule does not exist');
-            }
-
-            $result = $resource->set_permissions($permissions);
-
-            if (!$result) {
-                throw new RuntimeException('Failed to persist the rule');
-            }
+            $result = $this->_set_url_permission(
+                $url, 'deny', $redirect, $inline_context
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -244,25 +179,28 @@ implements
     /**
      * Reset all rules
      *
-     * @param array $inline_context Runtime context
+     * @param string $url
+     * @param mixed  $inline_context
      *
-     * @return array
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.9 Initial implementation of the method
+     * @return boolean|WP_Error|null
      *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    public function reset($url = null, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(null, false, $inline_context);
+            $resource = $this->_get_resource(false, $inline_context);
 
-            // Resetting the settings to default
-            $resource->reset();
+            if (!empty($url) && is_string($url)) {
+                $result = $this->_delete_url_permission($url, $inline_context);
+            } else {
+                $result = $resource->reset();
+            }
 
-            $result = $this->get_rule_list($inline_context);
+            if (!$result) {
+                throw new RuntimeException('Failed to reset permissions');
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -276,7 +214,7 @@ implements
      * @param string $url
      * @param array  $inline_context
      *
-     * @return boolean
+     * @return boolean|WP_Error|null
      *
      * @access public
      * @version 7.0.0
@@ -284,13 +222,36 @@ implements
     public function is_restricted($url, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource($url, false, $inline_context);
-            $result   = $resource->is_restricted();
+            $resource = $this->_get_resource(false, $inline_context);
+            $result   = apply_filters(
+                'aam_url_is_restricted_filter',
+                $resource->is_restricted($url),
+                $url,
+                $this
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
 
         return $result;
+    }
+
+    /**
+     * Determine if given URL is allowed
+     *
+     * @param string $url
+     * @param array  $inline_context
+     *
+     * @return boolean|WP_Error|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_allowed($url, $inline_context = null)
+    {
+        $result = $this->is_restricted($url, $inline_context);
+
+        return is_bool($result) ? !$result : $result;
     }
 
     /**
@@ -307,8 +268,9 @@ implements
     public function get_redirect($url, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource($url, false, $inline_context);
-            $result   = $resource->get_redirect();
+            $resource = $this->_get_resource(false, $inline_context);
+            $perm     = $resource->get_permission($url);
+            $result   = !empty($perm['redirect']) ? $perm['redirect'] : null;
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -317,9 +279,68 @@ implements
     }
 
     /**
+     * Set URL permission
+     *
+     * @param string     $url
+     * @param string     $effect
+     * @param array|null $redirect
+     * @param mixed      $inline_context Runtime context
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _set_url_permission(
+        $url, $effect, $redirect = null, $inline_context = null
+    ) {
+        $resource = $this->_get_resource(false, $inline_context);
+
+        // Prepare the permission model
+        $permission = [ 'effect' => $effect ];
+
+        if ($effect !== 'allow' && !empty($redirect)) {
+            $permission['redirect'] = $redirect;
+        }
+
+        if (!$resource->set_permission($url, $permission)) {
+            throw new RuntimeException('Failed to persist settings');
+        }
+
+        return true;
+    }
+
+    /**
+     * Delete URL permission
+     *
+     * @param string $url
+     * @param mixed  $inline_context
+     *
+     * @return boolean
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _delete_url_permission($url, $inline_context)
+    {
+        $resource    = $this->_get_resource(false, $inline_context);
+        $permissions = $resource->get_permissions(true);
+
+        // Note! User can delete only explicitly set rule (overwritten rule)
+        if (array_key_exists($url, $permissions)) {
+            unset($permissions[$url]);
+
+            if (!$resource->set_permissions($permissions)) {
+                throw new RuntimeException('Failed to persist changes');
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Get URL resource
      *
-     * @param string  $resource_id
      * @param boolean $reload
      * @param array   $inline_context
      *
@@ -328,147 +349,35 @@ implements
      * @access public
      * @version 7.0.0
      */
-    public function get_resource(
-        $resource_id = null, $reload = false, $inline_context = null
-    ) {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Resource_Url::TYPE, $resource_id, $reload
-        );
-    }
-
-    /**
-     * Determine if current rule is inherited or not
-     *
-     * @param array                      $rule
-     * @param AAM_Framework_Resource_Url $resource
-     *
-     * @return boolean
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _is_inherited($rule, $resource)
+    private function _get_resource($reload = false, $inline_context = null)
     {
-        return !array_key_exists($rule['url'], $resource->get_permissions(true));
+        return $this->_get_access_level($inline_context)->get_resource(
+            AAM_Framework_Resource_Url::TYPE, null, $reload
+        );
     }
 
     /**
      * Normalize and prepare the rule model
      *
-     * @param array                               $rule
-     * @param AAM_Framework_AccessLevel_Interface $access_level
-     * @param bool                                $is_inherited
+     * @param string                     $url
+     * @param array                      $permission
+     * @param AAM_Framework_Resource_Url $resource
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_rule(
-        $rule, $access_level, $is_inherited = false
-    ) {
-        return apply_filters(
-            'aam_url_access_rule_filter',
-            array_merge($rule, [ 'is_inherited' => $is_inherited ]),
-            $rule,
-            $access_level
-        );
-    }
-
-    /**
-     * Convert raw URL rule data to rule
-     *
-     * The result of this method execution is an array of settings that is stored in
-     * DB.
-     *
-     * @param array $data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_incoming_data($data)
+    private function _prepare_url_model($url, $permission, $resource)
     {
-        // Making sure that effect is set and is valid
-        if (empty($data['effect'])
-            || !in_array($data['effect'], [ 'allow', 'deny' ], true)
-        ) {
-            throw new InvalidArgumentException('Invalid effect value');
-        }
+        // Determine if current permission is overwritten
+        $explicit     = $resource->get_permissions(true);
+        $is_inherited = !array_key_exists($url, $explicit);
 
-        // Validating the incoming URL by parsing it first and them verifying that it
-        // is a safe redirect URL.
-        if (!empty($data['url'])) {
-            $normalized_url = AAM_Framework_Utility_Redirect::validate_redirect_url(
-                $data['url']
-            );
-        }
-
-        if (empty($normalized_url)) {
-            throw new InvalidArgumentException('The valid URL is required');
-        }
-
-        $result = [
-            'effect' => $data['effect'],
-            'url'    => $normalized_url
-        ];
-
-        // If redirect data is defined, validate data points
-        if (!empty($data['redirect'])) {
-            $redirect_type              = $data['redirect']['type'];
-            $result['redirect']['type'] = $redirect_type;
-
-            if ($redirect_type === 'custom_message') {
-                $message = wp_kses_post($data['redirect']['message']);
-
-                if (empty($message)) {
-                    throw new InvalidArgumentException('Invalid custom message');
-                } else {
-                    $result['redirect']['message'] = $message;
-                }
-            } elseif ($redirect_type === 'page_redirect') {
-                $page_id = intval($data['redirect']['redirect_page_id']);
-
-                if ($page_id === 0) {
-                    throw new InvalidArgumentException(
-                        'The valid redirect page ID is required'
-                    );
-                } else {
-                    $result['redirect']['redirect_page_id'] = $page_id;
-                }
-            } elseif ($redirect_type === 'url_redirect') {
-                $redirect_url = AAM_Framework_Utility_Redirect::validate_redirect_url(
-                    $data['redirect']['redirect_url'], false
-                );
-
-                if (empty($redirect_url)) {
-                    throw new InvalidArgumentException(
-                        'The valid redirect URL is required'
-                    );
-                } else {
-                    $result['redirect']['redirect_url'] = $redirect_url;
-                }
-            } elseif ($redirect_type === 'trigger_callback') {
-                if (!is_callable($data['redirect']['callback'], true)) {
-                    throw new InvalidArgumentException(
-                        'The valid PHP callback function is required'
-                    );
-                } else {
-                    $result['redirect']['callback'] = $data['redirect']['callback'];
-                }
-            }
-
-            if (!empty($data['redirect']['http_status_code'])) {
-                $code = intval($data['redirect']['http_status_code']);
-
-                if ($code >= 300) {
-                    $result['redirect']['http_status_code'] = $code;
-                }
-            }
-        }
-
-        return apply_filters('aam_validate_url_rule_data_filter', $result, $data);
+        return array_merge($permission, [
+            'url'          => $url,
+            'is_inherited' => $is_inherited
+        ]);
     }
 
 }

@@ -91,7 +91,7 @@ class AAM_Service_Content
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -101,7 +101,7 @@ class AAM_Service_Content
                 });
 
                 // Check if Access Manager metabox feature is enabled
-                $metaboxEnabled = AAM_Framework_Manager::configs()->get_config(
+                $metaboxEnabled = AAM::api()->configs()->get_config(
                     'core.settings.ui.render_access_metabox'
                 );
 
@@ -504,7 +504,7 @@ class AAM_Service_Content
      */
     private function _post_password_expires($expire)
     {
-        $ttl = AAM_Framework_Manager::configs()->get_config(
+        $ttl = AAM::api()->configs()->get_config(
             'service.content.password_ttl', null
         );
 

@@ -273,7 +273,7 @@ class AAM_Restful_ConfigService
      */
     private function _get_service()
     {
-        return AAM_Framework_Manager::configs([
+        return AAM::api()->configs([
             'error_handling' => 'exception'
         ]);
     }

@@ -332,27 +332,42 @@ class AAM_Framework_Service_Content
     /**
      * Get a post
      *
-     * @param int   $post_id
-     * @param array $inline_context
+     * @param int|string   $post_identifier
+     * @param string|array $post_type
+     * @param array|null   $inline_context
      *
      * @return AAM_Framework_Resource_Post
      *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
-    public function get_post($post_id, $inline_context = null)
-    {
+    public function get_post(
+        $post_identifier, $post_type = '', $inline_context = null
+    ) {
         try {
-            $post = get_post($post_id);
+            // Determining if we are dealing with post ID or post slug
+            if (is_numeric($post_identifier)) {
+                // If is numeric first arg, assume second as inline context
+                $inline_context = $post_type;
+
+                // Fetching post by ID
+                $post = get_post(intval($post_identifier));
+            } elseif (!is_string($post_type)) {
+                throw new InvalidArgumentException(
+                    'The post_type has to be a string value'
+                );
+            } else {
+                $post = get_page_by_path($post_identifier, OBJECT, $post_type);
+            }
 
             if (!is_a($post, 'WP_Post')) {
                 throw new OutOfRangeException(
-                    "Post with ID {$post_id} does not exist"
+                    "Post '{$post_identifier}' does not exist"
                 );
             }
 
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::POST, $post_id, true
+                AAM_Framework_Type_Resource::POST, $post->ID, true
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -362,99 +377,20 @@ class AAM_Framework_Service_Content
     }
 
     /**
-     * Update post permissions
+     * Alias for the get_post method
      *
-     * @param int   $post_id
-     * @param array $permissions
-     * @param array $inline_context
+     * @param int|string   $post_identifier
+     * @param string|array $post_type
+     * @param array|null   $inline_context
      *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.31
-     */
-    public function update_post_permissions(
-        $post_id, array $permissions = [], $inline_context = null
-    ) {
-        try {
-            $post = $this->get_post($post_id, $inline_context);
-
-            // Normalize array of permissions
-            $normalized = [];
-
-            foreach($permissions as $permission) {
-                $normalized[$permission['permission']] = $permission;
-            }
-
-            // Set new permissions
-            $result = $post->set_permissions($normalized);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Set post permission
-     *
-     * @param int    $post_id
-     * @param string $permission
-     * @param array  $settings
-     * @param array  $inline_context
-     *
-     * @return boolean
+     * @return AAM_Framework_Resource_Post
      *
      * @access public
      * @version 7.0.0
      */
-    public function set_post_permission(
-        $post_id, $permission, $settings, $inline_context = null
-    ) {
-        try {
-            $post     = $this->get_post($post_id, $inline_context);
-            $settings = $this->_validate_permission($permission, $settings);
-
-            // Get list of explicitly defined permissions and override existing
-            // permission
-            $permissions = $post->get_permissions(true);
-
-            $permissions[$permission] = array_merge(
-                [ 'permission' => $permission ], $settings
-            );
-
-            // Set new permissions
-            $result = $post->set_permissions($permissions);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Delete post permissions
-     *
-     * @param int   $post_id
-     * @param array $inline_context
-     *
-     * @return boolean
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.31 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.35
-     */
-    public function delete_post_permissions($post_id, $inline_context = null)
+    public function post($post_id, $post_type = '', $inline_context = null)
     {
-        try {
-            $result = $this->get_post($post_id, $inline_context)->reset();
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
+        return $this->get_post($post_id, $post_type, $inline_context);
     }
 
     /**
@@ -470,7 +406,7 @@ class AAM_Framework_Service_Content
      *
      * @access private
      * @global WPDB $wpdb
-     * @version 6.9.29
+     * @version 7.0.0
      */
     private function _get_post_count($type, $search = null)
     {
@@ -498,84 +434,6 @@ class AAM_Framework_Service_Content
         }
 
         return $wpdb->get_var($wpdb->prepare($query, $args));
-    }
-
-    /**
-     * Validate permission's settings
-     *
-     * @param string $permission
-     * @param array  $settings
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_permission($permission, $settings)
-    {
-        $result = [];
-
-        if ($permission === 'list') {
-            $result = $this->_validate_list_permission($settings);
-        } else {
-            $result = apply_filters(
-                'aam_validate_content_permission_filter', $settings, $permission
-            );
-        }
-
-        return $result;
-    }
-
-    /**
-     * Validate "LIST" permission
-     *
-     * Validating the list permission and enriching with default values if not fully
-     * provided
-     *
-     * @param array $settings
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_list_permission($settings)
-    {
-        if (!isset($settings['effect'])
-            || !in_array($settings['effect'], [ 'allow', 'deny' ], true)
-        ) {
-            throw new InvalidArgumentException(
-                'The required effect property is missing or invalid'
-            );
-        }
-
-        // By default the "on" will contain all areas
-        if (!isset($settings['on']) || !is_array($settings['on'])) {
-            $settings['on'] = [ 'frontend', 'backend', 'api' ];
-        }
-
-        return $settings;
-    }
-
-    /**
-     * Validate effect
-     *
-     * @param array $settings
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_effect($settings)
-    {
-        if (!isset($settings['effect'])
-            || !in_array($settings['effect'], [ 'allow', 'deny' ], true)
-        ) {
-            throw new InvalidArgumentException(
-                'The required effect property is missing or invalid'
-            );
-        }
     }
 
 }

@@ -123,49 +123,18 @@ class AAM_Framework_Utility_Redirect
         } elseif ($redirect['type'] === 'page_redirect') {
             $result = get_page_link($redirect['redirect_page_id']);
         } elseif ($redirect['type'] === 'url_redirect') {
-            $result = self::validate_redirect_url($redirect['redirect_url']);
+            $result = AAM_Framework_Utility_Misc::sanitize_url(
+                $redirect['redirect_url']
+            );
         } elseif ($redirect['type'] === 'trigger_callback'
             && is_callable($redirect['callback'])
         ) {
-            $result = self::validate_redirect_url(
+            $result = AAM_Framework_Utility_Misc::sanitize_url(
                 call_user_func($redirect['callback'])
             );
         }
 
         return $result ? $result : $default;
-    }
-
-    /**
-     * Validate URL
-     *
-     * @param string  $url
-     * @param boolean $suppress_filters
-     *
-     * @return boolean|string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    public static function validate_redirect_url($url, $suppress_filters = true)
-    {
-        $result     = false;
-        $parsed_url = wp_parse_url($url);
-
-        if ($parsed_url !== false) {
-            $result = empty($parsed_url['path']) ? '/' : $parsed_url['path'];
-
-            // Adding query params if provided
-            if (isset($parsed_url['query'])) {
-                $result .= '?' . $parsed_url['query'];
-            }
-
-            // Finally sanitize the safe URL
-            $result = wp_validate_redirect($result);
-        }
-
-        return $suppress_filters ? $result : apply_filters(
-            'aam_validate_url_filter', $result, $url
-        );
     }
 
 }

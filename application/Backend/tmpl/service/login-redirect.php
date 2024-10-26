@@ -17,7 +17,7 @@
     <div class="aam-feature" id="login_redirect-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.ui.tips')) { ?>
+                <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
                         <?php echo __('Seamlessly redirects users to their designated landing page post-login, ensuring personalized and efficient access to the website.', AAM_KEY); ?>
                     </p>
@@ -90,7 +90,7 @@
                             'class'            => 'form-control',
                             'show_option_none' => __('-- Select Page --', AAM_KEY)
                         ));
-                        ?>
+                    ?>
                 </div>
 
                 <div

@@ -42,7 +42,7 @@ class AAM_Service_BackendMenu
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -93,7 +93,7 @@ class AAM_Service_BackendMenu
             } elseif (AAM::isAAM() && current_user_can('aam_manage_admin_menu')) {
                 add_filter('parent_file', function() {
                     // This will rebuild the backend menu cache
-                    AAM::api()->backend_menu()->get_menu();
+                    AAM::api()->backend_menu()->get_items();
                 }, PHP_INT_MAX - 1);
             }
         }
@@ -156,7 +156,9 @@ class AAM_Service_BackendMenu
                 if ($is_restricted) { // Is the whole menu branch is restricted?
                     unset($submenu[$menu_slug]);
                 } else {
-                    $submenus = $this->_filter_submenu($submenu[$menu_slug]);
+                    $submenus = $this->_filter_submenu(
+                        $submenu[$menu_slug], $service
+                    );
 
                     // If all submenu items are restricted, there is no need to
                     // render the top level menu because the top level menu always
@@ -237,17 +239,16 @@ class AAM_Service_BackendMenu
     /**
      * Filter submenu
      *
-     * @param array $submenus
+     * @param array                             $submenus
+     * @param AAM_Framework_Service_BackendMenu $service
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _filter_submenu($submenus)
+    private function _filter_submenu($submenus, $service)
     {
-        $service = AAM::api()->backend_menu();
-
         foreach ($submenus as $id => $item) {
             if ($service->is_restricted($item[2])) {
                 unset($submenus[$id]);

@@ -10,13 +10,8 @@
 /**
  * RESTful API for the URL Access service
  *
- * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
- * @since 6.9.9  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.37
+ * @version 7.0.0
  */
 class AAM_Restful_UrlService
 {
@@ -28,32 +23,28 @@ class AAM_Restful_UrlService
      *
      * @return void
      *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/339
-     * @since 6.9.9  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.26
+     * @version 7.0.0
      */
     protected function __construct()
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get the list of rules
+            // Get the list of define URL permissions
             $this->_register_route('/urls', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_rule_list' ],
+                'callback'            => [ $this, 'get_urls' ],
                 'permission_callback' => [ $this, 'check_permissions' ]
             ]);
 
-            // Create a new rule
+            // Define new URL permission
             $this->_register_route('/urls', array(
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'create_rule'),
+                'callback'            => array($this, 'create_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'url' => array(
-                        'description' => 'URL or URI for the rule',
+                        'description' => 'Absolute or relative URL',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -121,33 +112,33 @@ class AAM_Restful_UrlService
                 )
             ));
 
-            // Get a rule
-            $this->_register_route('/url', array(
+            // Get a permission
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_rule'),
+                'callback'            => array($this, 'get_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'url' => array(
-                        'description' => 'URL or URI for the rule',
+                    'id' => array(
+                        'description' => 'Base64 encoded absolute or relative URL',
                         'type'        => 'string',
                         'required'    => true
                     ),
                 )
             ));
 
-            // Update an existing rule
-            $this->_register_route('/url', array(
+            // Update an existing permission
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_rule'),
+                'callback'            => array($this, 'update_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'url' => array(
-                        'description' => 'URL or URI for the rule',
+                    'id' => array(
+                        'description' => 'Based64 encoded absolute or relative URL',
                         'type'        => 'string',
                         'required'    => true
                     ),
-                    'new_url' => array(
-                        'description' => 'Updated rule URL',
+                    'url' => array(
+                        'description' => 'New absolute or relative URL',
                         'type'        => 'string',
                         'required'    => false
                     ),
@@ -215,44 +206,48 @@ class AAM_Restful_UrlService
                 )
             ));
 
-            // Delete a rule
-            $this->_register_route('/url', array(
+            // Delete a permission
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_rule'),
+                'callback'            => array($this, 'delete_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'url' => array(
-                        'description' => 'URL or URI for the rule',
+                    'id' => array(
+                        'description' => 'Base64 encoded absolute or relative URL',
                         'type'        => 'string',
                         'required'    => true
                     ),
                 )
             ));
 
-            // Reset all rules
+            // Reset all permissions
             $this->_register_route('/urls', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_rules'),
+                'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
 
     /**
-     * Get list of all rules
+     * Get list of all defined URL permissions
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function get_rule_list(WP_REST_Request $request)
+    public function get_urls(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_rule_list();
+            $result  = [];
+
+            foreach ($service->get_urls() as $url) {
+                array_push($result, $this->_prepare_url($url));
+            }
         } catch(Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -261,20 +256,37 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Create new rule
+     * Create new permission for given URL
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function create_rule(WP_REST_Request $request)
+    public function create_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->create_rule($request->get_params());
+
+            // Grab all the necessary permission attributes
+            $url = AAM_Framework_Utility_Misc::sanitize_url(
+                $request->get_param('url')
+            );
+
+            $effect   = strtolower($request->get_param('effect'));
+            $redirect = $this->_sanitize_redirect($request->get_param('redirect'));
+
+            // Persist the permission
+            if ($effect === 'allow') {
+                $service->allow($url);
+            } else {
+                $service->restrict($url, $redirect);
+            }
+
+            // Prepare the response
+            $result = $this->_prepare_url($service->get_url($url));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -290,13 +302,14 @@ class AAM_Restful_UrlService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function get_rule(WP_REST_Request $request)
+    public function get_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_rule(urldecode($request->get_param('url')));
+            $url     = base64_decode($request->get_param('id'));
+            $result  = $this->_prepare_url($service->get_url($url));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -305,30 +318,45 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Update a rule
+     * Update permissions for a specific URL
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function update_rule(WP_REST_Request $request)
+    public function update_permission(WP_REST_Request $request)
     {
         try {
-            $service       = $this->_get_service($request);
-            $incoming_data = $request->get_params();
+            $service = $this->_get_service($request);
 
-            // Swapping the "new_url" prop with "url"
-            $incoming_data['url'] = $incoming_data['new_url'];
-            $incoming_data        = array_filter($incoming_data, function($key) {
-                return $key !== 'new_url';
-            }, ARRAY_FILTER_USE_KEY);
-
-            $result = $service->update_rule(
-                urldecode($request->get_param('url')), $incoming_data
+            // Get all the necessary attributes
+            $original_url = base64_decode($request->get_param('id'));
+            $new_url      = AAM_Framework_Utility_Misc::sanitize_url(
+                $request->get_param('url')
             );
+
+            $redirect = $this->_sanitize_redirect($request->get_param('redirect'));
+            $effect   = strtolower($request->get_param('effect'));
+
+            // If we are updating URL, then first, let's delete the original rule
+            if (!empty($new_url) && ($original_url !== $new_url)) {
+                $service->reset($original_url);
+            }
+
+            // Now we are settings permission for the given URL
+            $url = !empty($new_url) ? $new_url : $original_url;
+
+            if ($effect === 'allow') {
+                $service->allow($url);
+            } else {
+                $service->restrict($url, $redirect);
+            }
+
+            // Prepare the result
+            $result = $this->_prepare_url($service->get_url($url));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -337,24 +365,26 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Delete a rule
+     * Delete permission for a given URL
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function delete_rule(WP_REST_Request $request)
+    public function delete_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = [
-                'success' => $service->delete_rule(
-                    urldecode($request->get_param('url'))
-                )
-            ];
+            $url     = base64_decode($request->get_param('id'));
+
+            // Reset the permission
+            $service->reset($url);
+
+            // Prepare the result
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -363,20 +393,25 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Reset all rules
+     * Reset permissions to all URLs
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
-    public function reset_rules(WP_REST_Request $request)
+    public function reset_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset();
+
+            // Reset all permissions
+            $service->reset();
+
+            // Prepare the result
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -390,13 +425,12 @@ class AAM_Restful_UrlService
      * @return bool
      *
      * @access public
-     * @version 6.9.9
+     * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && (current_user_can('aam_manage_uri')
-            || current_user_can('aam_manage_url_access'));
+            && current_user_can('aam_manage_url_access');
     }
 
     /**
@@ -408,7 +442,7 @@ class AAM_Restful_UrlService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.9
+     * @version 7.0.0
      */
     private function _validate_message($value, $request)
     {
@@ -437,7 +471,7 @@ class AAM_Restful_UrlService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.9
+     * @version 7.0.0
      */
     private function _validate_redirect_page_id($value, $request)
     {
@@ -468,7 +502,7 @@ class AAM_Restful_UrlService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.9
+     * @version 7.0.0
      */
     private function _validate_redirect_url($value, $request)
     {
@@ -497,7 +531,7 @@ class AAM_Restful_UrlService
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.9
+     * @version 7.0.0
      */
     private function _validate_callback($value, $request)
     {
@@ -519,6 +553,51 @@ class AAM_Restful_UrlService
     }
 
     /**
+     * Sanitize the redirect values
+     *
+     * @param array|null $redirect
+     *
+     * @return array|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _sanitize_redirect($redirect)
+    {
+        if (is_array($redirect) && !empty($redirect)) {
+            if ($redirect['type'] === 'url_redirect') {
+                $redirect['url'] = AAM_Framework_Utility_Misc::sanitize_url(
+                    $redirect['redirect_url']
+                );
+            }
+        }
+
+        return $redirect;
+    }
+
+    /**
+     * Prepare the URL model
+     *
+     * This method prepares the URL model so it can be effectively used by RESTful
+     * API
+     *
+     * @param array $url
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_url($url)
+    {
+        if (is_array($url) && !empty($url)) {
+            $url = array_merge([ 'id' => base64_encode($url['url']) ], $url);
+        }
+
+        return $url;
+    }
+
+    /**
      * Get service
      *
      * @param WP_REST_Request $request
@@ -526,11 +605,11 @@ class AAM_Restful_UrlService
      * @return AAM_Framework_Service_Urls
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::urls([
+        return AAM::api()->urls([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

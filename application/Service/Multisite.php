@@ -79,7 +79,7 @@ class AAM_Service_Multisite
         }, 10, 2);
 
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -146,7 +146,7 @@ class AAM_Service_Multisite
                 }
             }, 10, 3);
 
-            if (AAM_Framework_Manager::configs()->get_config(
+            if (AAM::api()->configs()->get_config(
                 'multisite.settings.sync'
             )) {
                 add_action('aam_top_right_column_action', function() {
@@ -202,7 +202,7 @@ class AAM_Service_Multisite
             $restricted = false;
 
             // Check if the non-member access restriction is on
-            if (AAM_Framework_Manager::configs()->get_config(
+            if (AAM::api()->configs()->get_config(
                 'multisite.settings.nonmember'
             )) {
                 $restricted = !is_user_member_of_blog();

@@ -457,7 +457,7 @@ abstract class AAM_Core_Subject
      */
     public function updateOption($value, $object, $id = null)
     {
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'subject' => $this
         ])->set_setting($this->getOptionName($object, $id), $value);
     }
@@ -475,7 +475,7 @@ abstract class AAM_Core_Subject
      */
     public function readOption($object, $id = null)
     {
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'subject' => $this
         ])->get_setting($this->getOptionName($object, $id), []);
     }
@@ -493,7 +493,7 @@ abstract class AAM_Core_Subject
      */
     public function deleteOption($object, $id = null)
     {
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'subject' => $this
         ])->delete_setting($this->getOptionName($object, $id));
     }
@@ -539,7 +539,7 @@ abstract class AAM_Core_Subject
      */
     public function reset()
     {
-        return AAM_Framework_Manager::settings([
+        return AAM::api()->settings([
             'subject' => $this
         ])->reset();
     }

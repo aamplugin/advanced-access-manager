@@ -155,7 +155,7 @@ class AAM_Backend_AccessLevel
         if (!is_null($level)) {
             // Verifying that access level exists and is accessible
             if ($level['type'] === 'role') {
-                if (!AAM_Framework_Manager::roles()->is_editable_role($level['id'])) {
+                if (!AAM::api()->roles()->is_editable_role($level['id'])) {
                     $level = null;
                 }
             } elseif ($level['type'] === 'user') {
@@ -186,7 +186,7 @@ class AAM_Backend_AccessLevel
      */
     private function _init_access_level($type, $id = null)
     {
-        $this->_access_level = AAM_Framework_Manager::access_levels()->get(
+        $this->_access_level = AAM::api()->access_levels()->get(
             $type, $id
         );
     }

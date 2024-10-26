@@ -81,7 +81,7 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
     protected function retrievePrincipal()
     {
         try {
-            $role = AAM_Framework_Manager::roles([
+            $role = AAM::api()->roles([
                 'error_handling' => 'exception'
             ])->get_role($this->getId());
 
@@ -105,8 +105,8 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
      */
     public function delete()
     {
-        $role   = AAM_Framework_Manager::roles()->get_role($this->getId());
-        $result = AAM_Framework_Manager::roles()->delete_role($role);
+        $role   = AAM::api()->roles()->get_role($this->getId());
+        $result = AAM::api()->roles()->delete_role($role);
 
         return $result;
     }
@@ -137,7 +137,7 @@ class AAM_Core_Subject_Role extends AAM_Core_Subject
             $role->set_slug($slug);
         }
 
-        return AAM_Framework_Manager::roles()->update_role($role);
+        return AAM::api()->roles()->update_role($role);
     }
 
     /**

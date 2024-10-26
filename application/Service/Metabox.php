@@ -55,7 +55,7 @@ class AAM_Service_Metabox
             }, 30);
         }
 
-        if (AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
             if (is_admin()) {
                 // Hook that initialize the AAM UI part of the service
                 add_action('aam_initialize_ui_action', function () {

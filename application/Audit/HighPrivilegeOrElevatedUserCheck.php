@@ -70,7 +70,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         ], $params);
 
         try {
-            $service = AAM_Framework_Manager::users();
+            $service = AAM::api()->users();
 
             // Step #1. Let's determine how many users are on the site, but only if
             // it is the first iteration of the check and fetch the batch of users

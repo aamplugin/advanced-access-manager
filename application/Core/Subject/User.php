@@ -196,7 +196,7 @@ class AAM_Core_Subject_User extends AAM_Core_Subject
                     $this->_parent->setSiblings($siblings);
                 }
             } else {
-                $this->_parent = AAM::api()->getDefault();
+                $this->_parent = AAM::api()->default();
             }
         }
 

@@ -74,13 +74,13 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             switch($group) {
                 case 'settings':
                     $this->_prepareSettings(
-                        AAM_Framework_Manager::settings()->get_settings(),
+                        AAM::api()->settings()->get_settings(),
                         $dataset
                     );
                     break;
 
                 case 'config':
-                    $configs                = AAM_Framework_Manager::configs();
+                    $configs                = AAM::api()->configs();
                     $dataset['config']      = $configs->get_configs();
                     $dataset['configpress'] = $configs->get_configpress();
                     break;
@@ -225,19 +225,15 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                 foreach($payload['dataset'] as $group => $settings) {
                     switch($group) {
                         case 'settings':
-                            AAM_Framework_Manager::settings()->set_settings(
-                                $settings
-                            );
+                            AAM::api()->settings()->set_settings($settings);
                             break;
 
                         case 'config':
-                            AAM_Framework_Manager::configs()->set_configs($settings);
+                            AAM::api()->configs()->set_configs($settings);
                             break;
 
                         case 'configpress':
-                            AAM_Framework_Manager::configs()->set_configpress(
-                                $settings
-                            );
+                            AAM::api()->configs()->set_configpress($settings);
                             break;
 
                         case 'roles':

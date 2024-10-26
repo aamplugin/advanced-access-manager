@@ -48,7 +48,7 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
      */
     public static function getList()
     {
-        $service  = AAM_Framework_Manager::configs();
+        $service  = AAM::api()->configs();
         $settings = array(
             'service.secureLogin.feature.singleSession' => array(
                 'title'       => __('One Session Per User', AAM_KEY),

@@ -12,13 +12,12 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework;
 
 use AAM,
-    AAM_Framework_Manager,
     AAM\UnitTest\Utility\TestCase;
 
 /**
- * Framework manager test
+ * Framework API gateway test
  */
-final class ManagerTest extends TestCase
+final class ApiGatewayTest extends TestCase
 {
 
     /**
@@ -38,7 +37,7 @@ final class ManagerTest extends TestCase
 
         // Just user any service and do not provide runtime context. This will
         // force the framework to use the default context
-        $service = AAM_Framework_Manager::access_denied_redirect();
+        $service = AAM::api()->access_denied_redirect();
 
         $this->assertEquals($service->access_level->ID, $user_id);
     }
@@ -64,7 +63,7 @@ final class ManagerTest extends TestCase
 
         // Just user any service and do not provide runtime context. This will
         // force the framework to use the default context
-        $service = AAM_Framework_Manager::access_denied_redirect([
+        $service = AAM::api()->access_denied_redirect([
             'access_level' => AAM::api()->user($user_id_b)
         ]);
 

@@ -280,7 +280,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function urls()
     {
-        return AAM_Framework_Manager::urls([
+        return AAM::api()->urls([
             'access_level' => $this
         ]);
     }
@@ -290,7 +290,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function login_redirect()
     {
-        return AAM_Framework_Manager::login_redirect([
+        return AAM::api()->login_redirect([
             'access_level' => $this
         ]);
     }
@@ -300,7 +300,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function logout_redirect()
     {
-        return AAM_Framework_Manager::logout_redirect([
+        return AAM::api()->logout_redirect([
             'access_level' => $this
         ]);
     }
@@ -310,7 +310,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function access_denied_redirect()
     {
-        return AAM_Framework_Manager::access_denied_redirect([
+        return AAM::api()->access_denied_redirect([
             'access_level' => $this
         ]);
     }
@@ -320,7 +320,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function not_found_redirect()
     {
-        return AAM_Framework_Manager::not_found_redirect([
+        return AAM::api()->not_found_redirect([
             'access_level' => $this
         ]);
     }
@@ -330,7 +330,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function content()
     {
-        return AAM_Framework_Manager::content([
+        return AAM::api()->content([
             'access_level' => $this
         ]);
     }
@@ -340,7 +340,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function backend_menu()
     {
-        return AAM_Framework_Manager::backend_menu([
+        return AAM::api()->backend_menu([
             'access_level' => $this
         ]);
     }
@@ -350,7 +350,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function admin_toolbar()
     {
-        return AAM_Framework_Manager::admin_toolbar([
+        return AAM::api()->admin_toolbar([
             'access_level' => $this
         ]);
     }
@@ -360,7 +360,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function api_routes()
     {
-        return AAM_Framework_Manager::api_routes([
+        return AAM::api()->api_routes([
             'access_level' => $this
         ]);
     }
@@ -370,7 +370,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function identities()
     {
-        return AAM_Framework_Manager::identities([
+        return AAM::api()->identities([
             'access_level' => $this
         ]);
     }
@@ -380,7 +380,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function metaboxes()
     {
-        return AAM_Framework_Manager::metaboxes([
+        return AAM::api()->metaboxes([
             'access_level' => $this
         ]);
     }
@@ -390,7 +390,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      */
     public function widgets()
     {
-        return AAM_Framework_Manager::widgets([
+        return AAM::api()->widgets([
             'access_level' => $this
         ]);
     }

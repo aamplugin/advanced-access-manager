@@ -296,7 +296,7 @@ class AAM_Restful_NotFoundRedirectService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::not_found_redirect([
+        return AAM::api()->not_found_redirect([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

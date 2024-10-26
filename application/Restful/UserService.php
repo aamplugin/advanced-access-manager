@@ -484,7 +484,7 @@ class AAM_Restful_UserService
      */
     private function _get_service()
     {
-        return AAM_Framework_Manager::users();
+        return AAM::api()->users();
     }
 
 }

@@ -204,7 +204,7 @@ class AAM_Restful_JwtService
             $is_rev = $request->get_param('is_revocable');
 
             if (!is_bool($is_rev)) {
-                $is_rev = AAM_Framework_Manager::configs()->get_config(
+                $is_rev = AAM::api()->configs()->get_config(
                     'service.jwt.is_revocable', true
                 );
             }
@@ -462,11 +462,11 @@ class AAM_Restful_JwtService
      */
     private function _get_service($request)
     {
-        $access_level = AAM_Framework_Manager::access_levels()->get(
+        $access_level = AAM::api()->access_levels()->get(
             AAM_Framework_Type_AccessLevel::USER, $request->get_param('user_id')
         );
 
-        return AAM_Framework_Manager::jwts([
+        return AAM::api()->jwts([
             'access_level'   => $access_level,
             'error_handling' => 'exception'
         ]);

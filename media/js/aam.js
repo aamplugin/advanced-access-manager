@@ -1918,16 +1918,14 @@
              *
              * @param {Number}   item
              * @param {Boolean}  is_restricted
-             * @param {Boolean}  is_top_level
              * @param {Callback} cb
              *
              * @returns {Void}
              */
-            function Save(item, is_restricted, is_top_level, cb) {
+            function Save(item, is_restricted, cb) {
                 getAAM().queueRequest(function () {
                     const payload = {
-                        effect: is_restricted ? 'deny' : 'allow',
-                        is_top_level
+                        effect: is_restricted ? 'deny' : 'allow'
                     };
 
                     const endpoint = getAAM().prepareApiEndpoint(
@@ -1970,7 +1968,7 @@
 
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
 
-                            Save(_this.data('menu-id'), status, true, function () {
+                            Save(_this.data('menu-id'), status, function () {
                                 $('#aam-menu-overwrite').show();
 
                                 if (status) { //locked the menu
@@ -2024,7 +2022,6 @@
                             Save(
                                 _this.data('menu-id'),
                                 status,
-                                false,
                                 () => {
                                     $('#aam-menu-overwrite').show();
 
@@ -5283,10 +5280,10 @@
                     $('#url_save_btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const url         = $('#url_rule_url').val();
-                        const type        = $(
-                            'input[name="uri.access.type"]:checked'
-                        ).val();
+                        const url  = $('#url_rule_url').val();
+                        const code = $('#url_access_http_redirect_code').val();
+                        const type = $('input[name="uri.access.type"]:checked').val();
+
                         const editing_url = $(this).attr('data-original-url');
 
                         if (url && type) {

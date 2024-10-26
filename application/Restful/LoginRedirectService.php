@@ -296,7 +296,7 @@ class AAM_Restful_LoginRedirectService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::login_redirect([
+        return AAM::api()->login_redirect([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

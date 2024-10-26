@@ -197,7 +197,8 @@ implements
      * @access public
      * @version 7.0.0
      */
-    public function is_denied_to($permission) {
+    public function is_denied_to($permission)
+    {
         if ($permission === 'read') {
             $decision = $this->is_restricted();
         } elseif (array_key_exists($permission, $this->_permissions)) {
@@ -415,6 +416,32 @@ implements
                 "Post with ID {$this->_internal_id} does not exist"
             );
         }
+    }
+
+    /**
+     * Normalize permission model further
+     *
+     * @param array  $permission
+     * @param string $permission_key
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _normalize_permission($permission, $permission_key)
+    {
+        if ($permission_key === 'list'
+            && (!array_key_exists('on', $permission) || !is_array($permission['on']))
+        ) {
+            $permission['on'] = [
+                'frontend',
+                'backend',
+                'api'
+            ];
+        }
+
+        return $permission;
     }
 
 }

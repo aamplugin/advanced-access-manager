@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Utility;
 
 use AAM,
-    AAM_Framework_Manager,
     InvalidArgumentException,
     PHPUnit\Framework\TestCase as PHPUnitTestCase;
 

@@ -90,7 +90,7 @@ class AAM_Backend_Feature_Main_Identity extends AAM_Backend_Feature_Abstract
 
         // If current user is allowed to manage other users' password, add this control
         // to the list
-        if (AAM_Framework_Manager::capabilities()->exists('aam_change_passwords')) {
+        if (AAM::api()->capabilities()->exists('aam_change_passwords')) {
             $can_change_password = $access_level->has_cap('aam_change_passwords');
         } else {
             $can_change_password = $access_level->has_cap('edit_users');

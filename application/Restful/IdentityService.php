@@ -360,7 +360,7 @@ class AAM_Restful_IdentityService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::identities([
+        return AAM::api()->identities([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

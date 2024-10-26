@@ -72,7 +72,7 @@ class AAM_Service_AccessPolicy
             return $result;
         }, 10, 2);
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -1055,7 +1055,7 @@ class AAM_Service_AccessPolicy
 
             if (count($user_roles) > 1) {
                 $subject->getParent()->setSiblings(array_map(function($id) {
-                    return AAM::api()->getRole($id);
+                    return AAM::api()->role($id);
                 }, array_slice($user_roles, 1)));
             }
         }

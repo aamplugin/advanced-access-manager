@@ -12,10 +12,7 @@
  *
  * @package AAM
  *
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
- * @since 6.9.29 Initial implementation of the class
- *
- * @version 6.9.31
+ * @version 7.0.0
  */
 class AAM_Restful_ContentService
 {
@@ -27,11 +24,8 @@ class AAM_Restful_ContentService
      *
      * @return void
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.31
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -118,7 +112,7 @@ class AAM_Restful_ContentService
             ));
 
             // Get post permissions
-            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\w_-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_post'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -127,12 +121,16 @@ class AAM_Restful_ContentService
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
+                    ),
+                    'post_type' => array(
+                        'description' => 'If post identifier is slug, post type is required',
+                        'type'        => 'string'
                     )
                 )
             ));
 
             // Update post permissions
-            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\w_-]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_post_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -141,6 +139,10 @@ class AAM_Restful_ContentService
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
+                    ),
+                    'post_type' => array(
+                        'description' => 'If post identifier is slug, post type is required',
+                        'type'        => 'string'
                     ),
                     'permissions' => array(
                         'description' => 'Collection of permissions',
@@ -166,7 +168,7 @@ class AAM_Restful_ContentService
             ));
 
             // Update post permission
-            $this->_register_route('/content/post/(?P<id>[\d]+)/(?P<permission>[\w-]+)', [
+            $this->_register_route('/content/post/(?P<id>[\w_-]+)/(?P<permission>[\w-]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [ $this, 'set_post_permission' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
@@ -176,6 +178,10 @@ class AAM_Restful_ContentService
                         'type'        => 'number',
                         'required'    => true
                     ],
+                    'post_type' => array(
+                        'description' => 'If post identifier is slug, post type is required',
+                        'type'        => 'string'
+                    ),
                     'permission' => [
                         'description' => 'Permission',
                         'type'        => 'string',
@@ -191,7 +197,7 @@ class AAM_Restful_ContentService
             ]);
 
             // Delete all permissions
-            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\w_-]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_post_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -200,6 +206,10 @@ class AAM_Restful_ContentService
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
+                    ),
+                    'post_type' => array(
+                        'description' => 'If post identifier is slug, post type is required',
+                        'type'        => 'string'
                     )
                 )
             ));
@@ -229,11 +239,8 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_post_types(WP_REST_Request $request)
     {
@@ -280,11 +287,8 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_taxonomies(WP_REST_Request $request)
     {
@@ -332,11 +336,8 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_posts(WP_REST_Request $request)
     {
@@ -371,22 +372,15 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_post(WP_REST_Request $request)
     {
         try {
-            $service = AAM::api()->content([
-                'access_level' => $this->_determine_access_level($request)
-            ]);
-
             $result = apply_filters(
                 'aam_rest_prepare_content_item_filter',
-                $service->get_post($request->get_param('id')),
+                $this->_get_post($request),
                 $request
             );
 
@@ -404,11 +398,8 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_terms(WP_REST_Request $request)
     {
@@ -444,25 +435,26 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function update_post_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
+            $post = $this->_get_post($request);
 
-            $service->update_post_permissions(
-                $request->get_param('id'),
-                $request->get_param('permissions')
-            );
+            // Normalize array of permissions
+            $normalized = [];
+
+            foreach($request->get_param('permissions') as $permission) {
+                $normalized[$permission['permission']] = $permission;
+            }
+
+            $post->set_permissions($normalized);
 
             $result = apply_filters(
                 'aam_rest_prepare_content_item_filter',
-                $service->get_post($request->get_param('id')),
+                $post,
                 $request
             );
         } catch (Exception $e) {
@@ -485,17 +477,16 @@ class AAM_Restful_ContentService
     public function set_post_permission(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
+            $post = $this->_get_post($request);
 
-            $service->set_post_permission(
-                $request->get_param('id'),
+            $post->set_permission(
                 $request->get_param('permission'),
                 $request->get_json_params()
             );
 
             $result = apply_filters(
                 'aam_rest_prepare_content_item_filter',
-                $service->get_post($request->get_param('id')),
+                $post,
                 $request
             );
         } catch (Exception $e) {
@@ -512,22 +503,18 @@ class AAM_Restful_ContentService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/386
-     * @since 6.9.29 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function delete_post_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-
-            $service->delete_post_permissions($request->get_param('id'));
+            $this->_get_post($request)->reset();
 
             $result = apply_filters(
                 'aam_rest_prepare_content_item_filter',
-                $service->get_post($request->get_param('id')),
+                // Get the post again so we can re-init settings
+                $this->_get_post($request),
                 $request
             );
         } catch (Exception $e) {
@@ -571,6 +558,31 @@ class AAM_Restful_ContentService
         }
 
         return $result;
+    }
+
+    /**
+     * Get post resource
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return AAM_Framework_Resource_Post
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_post(WP_REST_Request $request)
+    {
+        $service   = $this->_get_service($request);
+        $post_id   = $request->get_param('id');
+        $post_type = $request->get_param('post_type');
+
+        if (empty($post_type)) {
+            $post = $service->get_post($post_id);
+        } else {
+            $post = $service->get_post($post_id, $post_type);
+        }
+
+        return $post;
     }
 
     /**
@@ -745,11 +757,11 @@ class AAM_Restful_ContentService
      * @return AAM_Framework_Service_Content
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM_Framework_Manager::content([
+        return AAM::api()->content([
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);

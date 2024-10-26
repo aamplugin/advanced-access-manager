@@ -46,7 +46,7 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
      */
     public static function getList()
     {
-        $service  = AAM_Framework_Manager::configs();
+        $service  = AAM::api()->configs();
         $settings = array(
             'multisite.settings.sync' => array(
                 'title'       => __('Unified Multisite Configuration Sync', AAM_KEY),

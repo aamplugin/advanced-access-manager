@@ -123,7 +123,7 @@ class AAM
      */
     public static function api()
     {
-        return AAM_Core_Gateway::getInstance();
+        return AAM_Core_Gateway::get_instance();
     }
 
     /**
@@ -189,7 +189,7 @@ class AAM
 
         // Updating AAM Framework default context. This way we do not have to write
         // code like AAM::api()->user()->...
-        AAM_Framework_Manager::setup([
+        AAM::api()->setup([
             'access_level' => $this->_current_user
         ]);
     }

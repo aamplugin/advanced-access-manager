@@ -54,7 +54,7 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      */
     public static function getList()
     {
-        $service  = AAM_Framework_Manager::configs();
+        $service  = AAM::api()->configs();
         $settings = array(
             'service.capability.edit_caps' => array(
                 'title'       => __('Edit/Delete Capabilities', AAM_KEY),
