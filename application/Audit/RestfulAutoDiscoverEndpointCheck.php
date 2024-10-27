@@ -67,16 +67,11 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         $visitor = AAM::api()->visitor();
 
         // Check if API route "/" is enabled
-        $api_route_enabled = !$visitor->getObject('route')->isRestricted(
-            'restful', '/', 'GET'
-        );
+        $api_route_enabled = !$visitor->api_routes()->is_restricted('/');
 
         // Additionally check if the same endpoint is restricted with URL Access
         // service
-        $parsed  = wp_parse_url(rest_url());
-        $matched = $visitor->getObject('uri')->findMatch(wp_validate_redirect(
-            empty($parsed['path']) ? '/' : $parsed['path']
-        ));
+        $matched = $visitor->urls()->is_restricted(rest_url());
 
         $url_enabled = empty($matched) || $matched['type'] === 'allow';
 

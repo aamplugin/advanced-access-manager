@@ -97,12 +97,6 @@ class TestCase extends PHPUnitTestCase
         $wpdb->query("TRUNCATE TABLE {$wpdb->term_taxonomy}");
         $wpdb->query("TRUNCATE TABLE {$wpdb->term_relationships}");
 
-        // Resetting all AAM settings
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'aam_%'");
-
-        // Clear entire WP cache
-        wp_cache_flush();
-
         // Re-building default user & content
         $user_result = self::_createUser([
             'user_login' => 'admin',
@@ -115,6 +109,22 @@ class TestCase extends PHPUnitTestCase
         file_put_contents(__DIR__ . '/../../.default.setup.json', json_encode([
             'admin_user' => $user_result
         ]));
+    }
+
+    /**
+     * Reset AAM settings to default
+     *
+     * @return void
+     */
+    public function tearDown() : void
+    {
+        global $wpdb;
+
+        // Resetting all AAM settings
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE 'aam_%'");
+
+        // Clear entire WP cache
+        wp_cache_flush();
     }
 
     /**

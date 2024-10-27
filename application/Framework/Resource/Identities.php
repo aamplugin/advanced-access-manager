@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Identity
+class AAM_Framework_Resource_Identities
 implements
     AAM_Framework_Resource_PermissionInterface
 {
@@ -23,7 +23,7 @@ implements
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::IDENTITY;
+    const TYPE = AAM_Framework_Type_Resource::IDENTITIES;
 
     /**
      * Determine if specific permission is allowed to given identity

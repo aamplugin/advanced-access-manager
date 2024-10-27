@@ -153,7 +153,7 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $resource  = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
+                AAM_Framework_Type_Resource::API_ROUTES
             );
 
             // Compile the rule's key
@@ -215,7 +215,7 @@ class AAM_Framework_Service_ApiRoutes
      * @param boolean $reload
      * @param array   $inline_context
      *
-     * @return AAM_Framework_Resource_ApiRoute
+     * @return AAM_Framework_Resource_ApiRoutes
      *
      * @access public
      * @version 7.0.0
@@ -225,7 +225,7 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE, null, $reload
+                AAM_Framework_Type_Resource::API_ROUTES, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -271,9 +271,9 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Normalize and prepare the route model
      *
-     * @param string                          $endpoint
-     * @param string                          $method
-     * @param AAM_Framework_Resource_ApiRoute $resource
+     * @param string                           $endpoint
+     * @param string                           $method
+     * @param AAM_Framework_Resource_ApiRoutes $resource
      *
      * @return array
      *

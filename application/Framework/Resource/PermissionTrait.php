@@ -71,16 +71,6 @@ trait AAM_Framework_Resource_PermissionTrait
     private $_explicit_permissions = [];
 
     /**
-     * Inherited permissions from parent access level (if applicable)
-     *
-     * @var array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_inherited_permissions = [];
-
-    /**
      * Resource internal identifier
      *
      * Some resource may have unique identifier like each post or term has unique

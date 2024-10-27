@@ -19,7 +19,7 @@
  *
  * @package AAM
  * @version 6.9.31
- * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_ApiRoute
+ * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_ApiRoutes
  */
 class AAM_Core_Object_Route extends AAM_Core_Object
 {

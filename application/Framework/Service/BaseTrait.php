@@ -12,10 +12,7 @@
  *
  * @package AAM
  *
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
- * @since 6.9.10 Initial implementation of the class
- *
- * @version 6.9.31
+ * @version 7.0.0
  */
 trait AAM_Framework_Service_BaseTrait
 {
@@ -27,7 +24,7 @@ trait AAM_Framework_Service_BaseTrait
      *
      * @access private
      * @static
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private static $_instance = null;
 
@@ -37,7 +34,7 @@ trait AAM_Framework_Service_BaseTrait
      * @var array
      *
      * @access private
-     * @version 6.9.31
+     * @version 7.0.0
      */
     private $_extended_methods = [];
 
@@ -49,7 +46,7 @@ trait AAM_Framework_Service_BaseTrait
      * @var array
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private $_runtime_context = null;
 
@@ -59,7 +56,7 @@ trait AAM_Framework_Service_BaseTrait
      * @var AAM_Core_Subject
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private $_access_level = null;
 
@@ -68,11 +65,8 @@ trait AAM_Framework_Service_BaseTrait
      *
      * @return void
      *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.31
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -101,7 +95,7 @@ trait AAM_Framework_Service_BaseTrait
      * @return mixed
      *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function __call($name, $args)
     {
@@ -132,7 +126,7 @@ trait AAM_Framework_Service_BaseTrait
      * @return mixed
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function __get($name)
     {
@@ -159,6 +153,7 @@ trait AAM_Framework_Service_BaseTrait
      * @param mixed $inline_context
      *
      * @return boolean
+     * @version 7.0.0
      */
     public function is_customized($inline_context = null)
     {
@@ -179,7 +174,7 @@ trait AAM_Framework_Service_BaseTrait
      * @return AAM_Framework_AccessLevel_Interface
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _get_access_level($inline_context = null)
     {
@@ -221,7 +216,7 @@ trait AAM_Framework_Service_BaseTrait
      * @return boolean
      *
      * @access private
-     * @version 6.9.31
+     * @version 7.0.0
      */
     private function _extended_method_exists($name)
     {
@@ -238,7 +233,7 @@ trait AAM_Framework_Service_BaseTrait
      * @return mixed
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _handle_error($exception, $runtime_context = null)
     {
@@ -279,7 +274,7 @@ trait AAM_Framework_Service_BaseTrait
      *
      * @access public
      * @static
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public static function get_instance($runtime_context = [])
     {

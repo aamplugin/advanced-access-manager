@@ -69,6 +69,22 @@ class AAM_Service_BackendMenu
         if ($enabled) {
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::BACKEND_MENU
+                ) {
+                    $resource = new AAM_Framework_Resource_BackendMenu(
+                        $access_level
+                    );
+                }
+
+                return $resource;
+            }, 10, 3
+        );
     }
 
     /**
@@ -105,22 +121,6 @@ class AAM_Service_BackendMenu
             });
         }
 
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::BACKEND_MENU
-                ) {
-                    $resource = new AAM_Framework_Resource_BackendMenu(
-                        $access_level
-                    );
-                }
-
-                return $resource;
-            }, 10, 3
-        );
-
         // Register RESTful API endpoints
         AAM_Restful_BackendMenuService::bootstrap();
     }
@@ -146,34 +146,45 @@ class AAM_Service_BackendMenu
             $menu_slug     = $item[2];
             $is_restricted = $service->is_restricted($menu_slug, true);
 
-            // Remove the top level menu item if it is restricted
-            if ($is_restricted) {
-                unset($menu[$id]);
-            }
-
             // If top level menu has submenu items - filter them out as well
             if (!empty($submenu[$menu_slug])) {
-                if ($is_restricted) { // Is the whole menu branch is restricted?
-                    unset($submenu[$menu_slug]);
-                } else {
-                    $submenus = $this->_filter_submenu(
-                        $submenu[$menu_slug], $service
-                    );
+                $submenus = $this->_filter_submenu(
+                    $submenu[$menu_slug], $service
+                );
 
-                    // If all submenu items are restricted, there is no need to
-                    // render the top level menu because the top level menu always
-                    // points to the first submenu item
-                    if (count($submenus) === 0) {
+                // If all submenu items are restricted, there is no need to
+                // render the top level menu because the top level menu always
+                // points to the first submenu item
+                if (count($submenus) === 0) {
+                    unset($submenu[$menu_slug]);
+                    unset($menu[$id]);
+                } else {
+                    // When we are swapping the submenu item pointer, making sure
+                    // that we correctly update submenu array
+                    if ($menu_slug !== $submenus[0][2]) {
+                        // Ensuring the parent menu item always points to
+                        // the first submenu item and title is updated accordingly
+                        $menu[$id][0] = $submenus[0][0]; // Swap title
+                        $menu[$id][1] = $submenus[0][1]; // Swap capability
+                        $menu[$id][2] = $submenus[0][2]; // Swap slug
+
+                        $submenu[$menu[$id][2]] = $submenus;
+
+                        // Remove the lingering reference
                         unset($submenu[$menu_slug]);
-                        unset($menu[$id]);
+
+                        // Update the pointer
+                        $menu_slug = $menu[$id][2];
                     } else {
                         $submenu[$menu_slug] = $submenus;
-
-                        // Also ensuring the that parent menu item always points to
-                        // the first submenu item
-                        $item[2] = $submenus[0][2];
                     }
                 }
+            }
+
+            // Remove the top level menu item if it is restricted and no other
+            // sub menu items are available
+            if ($is_restricted && empty($submenu[$menu_slug])) {
+                unset($menu[$id]);
             }
         }
 

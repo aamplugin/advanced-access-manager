@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Url
+class AAM_Framework_Resource_Urls
 implements
     AAM_Framework_Resource_PermissionInterface
 {
@@ -23,7 +23,7 @@ implements
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::URL;
+    const TYPE = AAM_Framework_Type_Resource::URLS;
 
     /**
      * Merge URL access settings
@@ -174,7 +174,7 @@ implements
     {
         $normalized = call_user_func(
             function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower',
-            rtrim($url,  '/')
+            is_string($url) ? rtrim($url,  '/') : ''
         );
 
         // Parse URL for further processing

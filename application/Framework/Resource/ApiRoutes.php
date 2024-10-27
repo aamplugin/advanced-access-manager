@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_ApiRoute
+class AAM_Framework_Resource_ApiRoutes
 implements
     AAM_Framework_Resource_PermissionInterface
 {
@@ -23,7 +23,7 @@ implements
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::API_ROUTE;
+    const TYPE = AAM_Framework_Type_Resource::API_ROUTES;
 
     /**
      * Check whether the RESTful API route is restricted

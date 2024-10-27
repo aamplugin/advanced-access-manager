@@ -124,9 +124,9 @@ class AAM_Service_Widget
             'aam_get_resource_filter',
             function($resource, $access_level, $resource_type) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::WIDGET
+                    && $resource_type === AAM_Framework_Type_Resource::WIDGETS
                 ) {
-                    $resource = new AAM_Framework_Resource_Widget(
+                    $resource = new AAM_Framework_Resource_Widgets(
                         $access_level
                     );
                 }

@@ -400,7 +400,7 @@ class AAM_Framework_Service_Identities
      *
      * @param array $inline_context
      *
-     * @return AAM_Framework_Resource_Identity
+     * @return AAM_Framework_Resource_Identities
      *
      * @access public
      * @version 7.0.0
@@ -410,7 +410,7 @@ class AAM_Framework_Service_Identities
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::IDENTITY, null, $reload
+                AAM_Framework_Type_Resource::IDENTITIES, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -498,7 +498,7 @@ class AAM_Framework_Service_Identities
                         // If preference is not explicitly defined, fetch it from the
                         // AAM configs
                         $preference = $configs->get_config(
-                            'core.settings.' . AAM_Framework_Type_Resource::IDENTITY . '.merge.preference',
+                            'core.settings.' . AAM_Framework_Type_Resource::IDENTITIES . '.merge.preference',
                             $configs->get_config('core.settings.merge.preference')
                         );
 
@@ -537,9 +537,9 @@ class AAM_Framework_Service_Identities
     /**
      * Prepare permission model
      *
-     * @param array                           $permissions
-     * @param string                          $id
-     * @param AAM_Framework_Resource_Identity $resource
+     * @param array                             $permissions
+     * @param string                            $id
+     * @param AAM_Framework_Resource_Identities $resource
      *
      * @return array
      *

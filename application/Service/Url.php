@@ -70,6 +70,22 @@ class AAM_Service_Url
         if ($enabled) {
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::URLS
+                ) {
+                    $resource = new AAM_Framework_Resource_Urls(
+                        $access_level, $resource_id
+                    );
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**
@@ -89,22 +105,6 @@ class AAM_Service_Url
         add_action('init', function() {
             $this->_authorize();
         });
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::URL
-                ) {
-                    $resource = new AAM_Framework_Resource_Url(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
     }
 
     /**
@@ -125,7 +125,7 @@ class AAM_Service_Url
         if ($service->is_restricted($_SERVER['REQUEST_URI'])) {
             $redirect = $service->get_redirect($_SERVER['REQUEST_URI']);
 
-            if ($redirect['type'] === 'default') {
+            if (empty($redirect) || $redirect['type'] === 'default') {
                 AAM_Framework_Utility_Redirect::do_access_denied_redirect();
             } else {
                 AAM_Framework_Utility_Redirect::do_redirect($redirect);

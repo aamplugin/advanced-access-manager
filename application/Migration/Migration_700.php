@@ -46,7 +46,7 @@ final class AAM_Migration_700
         // Convert URL Access rules to new format
         $this->_transform_legacy_settings(
             AAM_Core_Object_Uri::OBJECT_TYPE,
-            AAM_Framework_Type_Resource::URL,
+            AAM_Framework_Type_Resource::URLS,
             function($data) {
                 return $this->_convert_legacy_url_rules($data);
             }

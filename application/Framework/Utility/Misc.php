@@ -140,11 +140,16 @@ class AAM_Framework_Utility_Misc
             }
 
             // Compile relative path
-            $path = empty($parsed['path']) ? '/' : $parsed['path'];
+            $path = empty($parsed['path']) ? '/' : rtrim($parsed['path'], '/');
 
             // Adding query params if provided
             if (isset($parsed['query'])) {
-                $path .= '?' . $parsed['query'];
+                // Parse all query params and sort them in alphabetical order
+                parse_str($parsed['query'], $query_params);
+                ksort($query_params);
+
+                // Finally adding sorted query params to the URL
+                $path = add_query_arg($query_params, $path);
             }
 
             $result = [

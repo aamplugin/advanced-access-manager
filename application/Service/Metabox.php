@@ -121,9 +121,9 @@ class AAM_Service_Metabox
             'aam_get_resource_filter',
             function($resource, $access_level, $resource_type) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::METABOX
+                    && $resource_type === AAM_Framework_Type_Resource::METABOXES
                 ) {
-                    $resource = new AAM_Framework_Resource_Metabox(
+                    $resource = new AAM_Framework_Resource_Metaboxes(
                         $access_level
                     );
                 }

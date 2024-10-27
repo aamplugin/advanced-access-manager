@@ -159,9 +159,9 @@ class AAM_Service_ApiRoute
             'aam_get_resource_filter',
             function($resource, $access_level, $resource_type) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::API_ROUTE
+                    && $resource_type === AAM_Framework_Type_Resource::API_ROUTES
                 ) {
-                    $resource = new AAM_Framework_Resource_ApiRoute(
+                    $resource = new AAM_Framework_Resource_ApiRoutes(
                         $access_level
                     );
                 }

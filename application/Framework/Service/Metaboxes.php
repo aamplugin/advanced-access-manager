@@ -227,7 +227,7 @@ class AAM_Framework_Service_Metaboxes
      *
      * @param array $inline_context
      *
-     * @return AAM_Framework_Resource_Metabox
+     * @return AAM_Framework_Resource_Metaboxes
      *
      * @access public
      * @version 7.0.0
@@ -237,7 +237,7 @@ class AAM_Framework_Service_Metaboxes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::METABOX, null, $reload
+                AAM_Framework_Type_Resource::METABOXES, null, $reload
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -249,9 +249,9 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Normalize and prepare the metabox model
      *
-     * @param array                          $metabox
-     * @param string                         $post_type
-     * @param AAM_Framework_Resource_Metabox $resource
+     * @param array                            $metabox
+     * @param string                           $post_type
+     * @param AAM_Framework_Resource_Metaboxes $resource
      *
      * @return array
      *

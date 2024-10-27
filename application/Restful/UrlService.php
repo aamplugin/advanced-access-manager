@@ -271,9 +271,7 @@ class AAM_Restful_UrlService
             $service = $this->_get_service($request);
 
             // Grab all the necessary permission attributes
-            $url = AAM_Framework_Utility_Misc::sanitize_url(
-                $request->get_param('url')
-            );
+            $url = $request->get_param('url');
 
             $effect   = strtolower($request->get_param('effect'));
             $redirect = $this->_sanitize_redirect($request->get_param('redirect'));

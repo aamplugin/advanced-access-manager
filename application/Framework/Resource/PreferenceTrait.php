@@ -64,16 +64,6 @@ trait AAM_Framework_Resource_PreferenceTrait
     private $_explicit_preferences = [];
 
     /**
-     * Inherited preferences from parent access level (if applicable)
-     *
-     * @var array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_inherited_preferences = [];
-
-    /**
      * Constructor
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
@@ -199,20 +189,25 @@ trait AAM_Framework_Resource_PreferenceTrait
     /**
      * @inheritDoc
      */
-    public function set_preferences(array $preferences)
+    public function set_preferences(array $preferences, $explicit_only = true)
     {
-        // First, set the explicit preferences
-        $this->_explicit_preferences = $preferences;
+        if ($explicit_only) {
+            // First, set the explicit preferences
+            $this->_explicit_preferences = $preferences;
 
-        // Overriding the final set of preferences
-        $this->_preferences = array_merge(
-            $this->_inherited_preferences, $preferences
-        );
+            // Overriding the final set of preferences
+            $this->_preferences = array_merge($this->_preferences, $preferences);
 
-        // Store changes in DB
-        return AAM::api()->settings([
-            'access_level' => $this->get_access_level()
-        ])->set_setting(constant('static::TYPE'), $preferences);
+            // Store changes in DB
+            $result = AAM::api()->settings([
+                'access_level' => $this->get_access_level()
+            ])->set_setting(constant('static::TYPE'), $preferences);
+        } else {
+            $this->_preferences = $preferences;
+            $result             = true;
+        }
+
+        return $result;
     }
 
     /**

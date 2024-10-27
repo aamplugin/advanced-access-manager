@@ -11,7 +11,7 @@
  * Security Audit service
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Service_SecurityAudit
 {
@@ -20,7 +20,7 @@ class AAM_Service_SecurityAudit
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.security_audit.enabled';
 
@@ -30,7 +30,7 @@ class AAM_Service_SecurityAudit
      * @return void
      *
      * @access protected
-     * @version 6.9.40
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -68,7 +68,7 @@ class AAM_Service_SecurityAudit
      * @return boolean
      *
      * @access public
-     * @version 6.9.40
+     * @version 7.0.0
      */
     public function is_enabled()
     {
@@ -82,7 +82,7 @@ class AAM_Service_SecurityAudit
      * @return array
      *
      * @access public
-     * @version 6.9.40
+     * @version 7.0.0
      */
     public function get_steps()
     {
@@ -184,7 +184,7 @@ class AAM_Service_SecurityAudit
      * @return boolean
      *
      * @access public
-     * @version 6.9.40
+     * @version 7.0.0
      */
     public function has_report()
     {
@@ -193,8 +193,4 @@ class AAM_Service_SecurityAudit
         return !empty($report);
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_SecurityAudit::bootstrap();
 }

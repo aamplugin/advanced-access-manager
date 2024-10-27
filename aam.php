@@ -3,8 +3,8 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 7.0.0
- * Author: AAM <support@aamplugin.com>
+ * Version: 7.0.0-alpha.1
+ * Author: VasylTech LLC <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
  * Domain Path: /lang/
@@ -55,7 +55,8 @@ class AAM
         'AAM_Service_Content',
         'AAM_Service_SecureLogin',
         'AAM_Service_Jwt',
-        'AAM_Service_Capability'
+        'AAM_Service_Capability',
+        'AAM_Service_SecurityAudit'
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
         // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
@@ -386,7 +387,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '7.0.0');
+    define('AAM_VERSION', '7.0.0-alpha.1');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor
