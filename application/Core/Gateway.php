@@ -270,6 +270,19 @@ final class AAM_Core_Gateway
     }
 
     /**
+     * Get default access level
+     *
+     * @return AAM_Framework_AccessLevel_Default
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function any()
+    {
+        return $this->default();
+    }
+
+    /**
      * Setup the framework manager
      *
      * @param array $default_context
@@ -290,27 +303,43 @@ final class AAM_Core_Gateway
      * Return an instance of requested service
      *
      * @param string $service_class_name
-     * @param mixed  $runtime_context
+     * @param mixed  $context
      *
      * @return AAM_Framework_Service_Interface
      *
      * @access private
      * @version 7.0.0
      */
-    private function _return_service($service_class_name, $runtime_context)
+    private function _return_service($service_class_name, $context)
     {
-        // Preparing the context first
-        if (is_array($runtime_context)) {
-            $context = array_merge($this->_default_context, $runtime_context);
-        } elseif (is_a($runtime_context, AAM_Framework_AccessLevel_Interface::class)) {
-            $context = array_merge($this->_default_context, [
-                'access_level' => $runtime_context
-            ]);
-        } else {
-            $context = $this->_default_context;
+        $new_context = [];
+
+        // Parse the incoming context and determine correct access level
+        if (is_a($context, AAM_Framework_AccessLevel_Interface::class)) {
+            $new_context = [ 'access_level' => $context ];
+        } elseif (is_string($context)) {
+            // Trying to parse the context and extract the access level
+            if (in_array($context, [ 'visitor', 'anonymous', 'guest'], true)) {
+                $new_context = [ 'access_level' => $this->visitor() ];
+            } elseif (in_array($context, [ 'default', 'all', 'anyone', 'everyone' ], true)) {
+                $new_context = [ 'access_level' => $this->all() ];
+            } elseif (strpos($context, ':')) {
+                list($access_level, $id) = explode(':', $context, 2);
+
+                if ($access_level === 'role') {
+                    $new_context = [ 'access_level' => $this->role($id) ];
+                } elseif ($access_level === 'user') {
+                    $new_context = [ 'access_level' => $this->user($id) ];
+                }
+            }
+        } elseif (is_array($context)) {
+            $new_context = $context;
         }
 
-        return call_user_func("{$service_class_name}::get_instance", $context);
+        return call_user_func(
+            "{$service_class_name}::get_instance",
+            array_merge($this->_default_context, $new_context)
+        );
     }
 
     /**

@@ -103,7 +103,7 @@ class AAM_Service_Url
 
         // Authorize request
         add_action('init', function() {
-            $this->_authorize();
+            $this->authorize();
         });
     }
 
@@ -115,10 +115,10 @@ class AAM_Service_Url
      *
      * @return void
      *
-     * @access private
+     * @access public
      * @version 7.0.0
      */
-    private function _authorize()
+    public function authorize()
     {
         $service = AAM::api()->urls();
 

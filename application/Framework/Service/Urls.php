@@ -37,7 +37,7 @@ implements
     /**
      * Return list of all defined URL permissions
      *
-     * @param array $inline_context Context
+     * @param array $inline_context [optional]
      *
      * @return array
      *
@@ -66,7 +66,7 @@ implements
     /**
      * Alias for the get_urls method
      *
-     * @param array $inline_context Context
+     * @param array $inline_context [optional]
      *
      * @return array
      *
@@ -82,7 +82,7 @@ implements
      * Get permission for a given URL
      *
      * @param string $url
-     * @param array  $inline_context Runtime context
+     * @param array  $inline_context [optional]
      *
      * @return array
      *
@@ -116,7 +116,7 @@ implements
      * Alias for the get_url method
      *
      * @param string $url
-     * @param array  $inline_context Runtime context
+     * @param array  $inline_context [optional]
      *
      * @return array
      *
@@ -131,8 +131,8 @@ implements
     /**
      * Allow access to a given URL
      *
-     * @param string $url
-     * @param mixed  $inline_context
+     * @param string|array $url
+     * @param mixed        $inline_context [optional]
      *
      * @return boolean|WP_Error|null
      *
@@ -141,10 +141,14 @@ implements
      */
     public function allow($url, $inline_context = null)
     {
+        $result = true;
+
         try {
-            $result = $this->_set_url_permission(
-                $url, 'allow', null, $inline_context
-            );
+            foreach((array)$url as $u) {
+                $result = $result && $this->_set_url_permission(
+                    $u, 'allow', null, $inline_context
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -155,9 +159,9 @@ implements
     /**
      * Restrict access to a given URL
      *
-     * @param string $url
-     * @param array  $redirect
-     * @param mixed  $inline_context
+     * @param string|array $url
+     * @param array        $redirect       [optional]
+     * @param mixed        $inline_context [optional]
      *
      * @return boolean|WP_Error|null
      *
@@ -166,10 +170,14 @@ implements
      */
     public function restrict($url, $redirect = null, $inline_context = null)
     {
+        $result = true;
+
         try {
-            $result = $this->_set_url_permission(
-                $url, 'deny', $redirect, $inline_context
-            );
+            foreach((array)$url as $u) {
+                $result = $result && $this->_set_url_permission(
+                    $u, 'deny', $redirect, $inline_context
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -180,9 +188,9 @@ implements
     /**
      * Alias method for the redirect
      *
-     * @param string $url
-     * @param array  $redirect
-     * @param mixed  $inline_context
+     * @param string|array $url
+     * @param array        $redirect       [optional]
+     * @param mixed        $inline_context [optional]
      *
      * @return boolean|WP_Error|null
      *
@@ -195,10 +203,10 @@ implements
     }
 
     /**
-     * Reset all rules
+     * Reset all rules or any given
      *
-     * @param string $url
-     * @param mixed  $inline_context
+     * @param string|array $url            [optional]
+     * @param mixed        $inline_context [optional]
      *
      * @return boolean|WP_Error|null
      *
@@ -207,11 +215,17 @@ implements
      */
     public function reset($url = null, $inline_context = null)
     {
+        $result = true;
+
         try {
             $resource = $this->_get_resource(false, $inline_context);
 
-            if (!empty($url) && is_string($url)) {
-                $result = $this->_delete_url_permission($url, $inline_context);
+            if (!empty($url)) {
+                foreach((array)$url as $u) {
+                    $result = $result && $this->_delete_url_permission(
+                        $u, $inline_context
+                    );
+                }
             } else {
                 $result = $resource->reset();
             }
