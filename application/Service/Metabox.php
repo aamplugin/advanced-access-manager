@@ -111,11 +111,6 @@ class AAM_Service_Metabox
             }, PHP_INT_MAX);
         }
 
-        // Policy generation hook
-        // add_filter(
-        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        // );
-
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
@@ -135,46 +130,6 @@ class AAM_Service_Metabox
         // Register RESTful API endpoints
         AAM_Restful_MetaboxService::bootstrap();
     }
-
-    /**
-     * Generate Metabox & Widget policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generatePolicy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Core_Object_Metabox::OBJECT_TYPE) {
-    //         if (!empty($options)) {
-    //             $metaboxes = $widgets = array();
-
-    //             foreach($options as $id => $effect) {
-    //                 $parts = explode('|', $id);
-
-    //                 if (in_array($parts[0], array('dashboard', 'widgets'), true)) {
-    //                     $widgets[$id] = !empty($effect);
-    //                 } else {
-    //                     $metaboxes[$id] = !empty($effect);
-    //                 }
-    //             }
-
-    //             $policy['Statement'] = array_merge(
-    //                 $policy['Statement'],
-    //                 $generator->generateBasicStatements($widgets, 'Widget'),
-    //                 $generator->generateBasicStatements($metaboxes, 'Metabox')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
 
     /**
      * Initialize list of metaboxes for given screen

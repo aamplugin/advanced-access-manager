@@ -7,8 +7,6 @@
  * ======================================================================
  */
 
-use MaxMind\Db\Reader\InvalidDatabaseException;
-
 /**
  * Base trait for the access level
  *
@@ -29,6 +27,27 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
  * or role.
  *
  * @package AAM
+ *
+ * @method AAM_Framework_Service_Roles roles()
+ * @method AAM_Framework_Service_Urls urls()
+ * @method AAM_Framework_Service_ApiRoutes api_routes()
+ * @method AAM_Framework_Service_Jwts jwts()
+ * @method AAM_Framework_Service_LoginRedirect login_redirect()
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect()
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect()
+ * @method AAM_Framework_Service_BackendMenu backend_menu()
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar()
+ * @method AAM_Framework_Service_Metaboxes metaboxes()
+ * @method AAM_Framework_Service_Widgets widgets()
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect()
+ * @method AAM_Framework_Service_Identities identities()
+ * @method AAM_Framework_Service_Content content()
+ * @method AAM_Framework_Service_Users users()
+ * @method AAM_Framework_Service_Capabilities capabilities()
+ * @method AAM_Framework_Service_Capabilities caps()
+ * @method AAM_Framework_Service_Configs configs()
+ * @method AAM_Framework_Service_Settings settings()
+ * @method AAM_Framework_Service_AccessLevels access_levels()
  *
  * @version 7.0.0
  */
@@ -59,16 +78,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @version 7.0.0
      */
     private $_extended_methods = [];
-
-    /**
-     * Array of already instantiated resources or preferences
-     *
-     * @var array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_repository = [];
 
     /**
      * Collection of siblings
@@ -131,16 +140,24 @@ trait AAM_Framework_AccessLevel_BaseTrait
             $response = call_user_func_array(
                 $this->_extended_methods[$name], $arguments
             );
-        } elseif (is_object($this->_proxy_instance)) {
-            $response = call_user_func_array(
-                array($this->_proxy_instance, $name), $arguments
-            );
         } else {
-            _doing_it_wrong(
-                static::class . '::' . $name,
-                'Method does not exist',
-                AAM_VERSION
-            );
+            $services = AAM::api()->get_registered_services();
+
+            if (array_key_exists($name, $services)) {
+                $response = call_user_func("{$services[$name]}::get_instance", [
+                    'access_level' => $this
+                ]);
+            } elseif (is_object($this->_proxy_instance)) {
+                $response = call_user_func_array(
+                    array($this->_proxy_instance, $name), $arguments
+                );
+            } else {
+                _doing_it_wrong(
+                    static::class . '::' . $name,
+                    'Method does not exist',
+                    AAM_VERSION
+                );
+            }
         }
 
         return $response;
@@ -179,57 +196,33 @@ trait AAM_Framework_AccessLevel_BaseTrait
     public function get_resource(
         $resource_type,
         $resource_id = null,
-        $reload = false,
         $skip_inheritance = false
     ) {
-        $resource  = null;
 
-        if (is_scalar($resource_id) || is_null($resource_id)) {
-            $cache_key = $resource_type . $resource_id;
-        } elseif (is_array($resource_id)) {
-            $cache_key = $resource_type . implode('', array_values($resource_id));
-        } else {
-            throw new InvalidDatabaseException(
-                'The resource_id has to be either scalar value or an array'
-            );
-        }
+        $resource = apply_filters(
+            'aam_get_resource_filter',
+            null,
+            $this,
+            $resource_type,
+            $resource_id,
+        );
 
-        if ($skip_inheritance) {
-            $cache_key .= '_direct';
-        }
+        if (is_object($resource)) {
+            if ($skip_inheritance !== true) {
+                // Kick in the inheritance chain if needed
+                $this->_inherit_from_parent($resource);
 
-        // Is resource with specified internal ID already instantiated?
-        if (!isset($this->_repository[$cache_key]) || $reload) {
-            $resource = apply_filters(
-                'aam_get_resource_filter',
-                null,
-                $this,
-                $resource_type,
-                $resource_id,
-            );
-
-            if (is_object($resource)) {
-                if ($skip_inheritance !== true) {
-                    // Kick in the inheritance chain if needed
-                    $this->_inherit_from_parent($resource, $reload);
-
-                    // Trigger initialized action only when we are at the bottom of
-                    // the inheritance chain
-                    if (in_array(get_class($resource->get_access_level()), [
-                        AAM_Framework_AccessLevel_User::class,
-                        AAM_Framework_AccessLevel_Visitor::class
-                    ], true)) {
-                        do_action(
-                            "aam_init_{$resource_type}_resource_action", $resource
-                        );
-                    }
+                // Trigger initialized action only when we are at the bottom of
+                // the inheritance chain
+                if (in_array(get_class($resource->get_access_level()), [
+                    AAM_Framework_AccessLevel_User::class,
+                    AAM_Framework_AccessLevel_Visitor::class
+                ], true)) {
+                    do_action(
+                        "aam_init_{$resource_type}_resource_action", $resource
+                    );
                 }
-
-                // Finally cache the instance of the resource
-                $this->_repository[$cache_key] = $resource;
             }
-        } else {
-            $resource = $this->_repository[$cache_key];
         }
 
         return $resource;
@@ -276,137 +269,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * @inheritDoc
-     */
-    public function urls()
-    {
-        return AAM::api()->urls([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function login_redirect()
-    {
-        return AAM::api()->login_redirect([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function logout_redirect()
-    {
-        return AAM::api()->logout_redirect([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function access_denied_redirect()
-    {
-        return AAM::api()->access_denied_redirect([
-            'access_level' => $this
-        ]);
-    }
-
-     /**
-     * @inheritDoc
-     */
-    public function not_found_redirect()
-    {
-        return AAM::api()->not_found_redirect([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function content()
-    {
-        return AAM::api()->content([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function backend_menu()
-    {
-        return AAM::api()->backend_menu([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function admin_toolbar()
-    {
-        return AAM::api()->admin_toolbar([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function api_routes()
-    {
-        return AAM::api()->api_routes([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function identities()
-    {
-        return AAM::api()->identities([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function metaboxes()
-    {
-        return AAM::api()->metaboxes([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function widgets()
-    {
-        return AAM::api()->widgets([
-            'access_level' => $this
-        ]);
-    }
-
-    /**
      * Inherit settings from parent access level (if any)
      *
-     * @param object  $resource
-     * @param boolean $reload
+     * @param object $resource
      *
      * @return array
      *
      * @access protected
      * @version 7.0.0
      */
-    private function _inherit_from_parent($resource, $reload)
+    private function _inherit_from_parent($resource)
     {
         $parent        = $this->get_parent();
         $is_permission = is_a(
@@ -430,18 +302,15 @@ trait AAM_Framework_AccessLevel_BaseTrait
                     $resource,
                     $parent->get_resource(
                         $resource::TYPE,
-                        $resource->get_internal_id(false),
-                        $reload
+                        $resource->get_internal_id(false)
                     ),
-                    $siblings,
-                    $reload
+                    $siblings
                 ), false);
             } else {
                 $resource->set_preferences($this->_prepare_preferences(
                     $resource,
-                    $parent->get_resource($resource::TYPE, null, $reload),
-                    $siblings,
-                    $reload
+                    $parent->get_resource($resource::TYPE, null),
+                    $siblings
                 ), false);
             }
         }
@@ -453,7 +322,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param AAM_Framework_Resource_PreferenceInterface $resource
      * @param AAM_Framework_Resource_PreferenceInterface $parent_resource
      * @param array                                      $siblings
-     * @param boolean                                    $reload
      *
      * @return array
      *
@@ -461,16 +329,13 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @version 7.0.0
      */
     private function _prepare_preferences(
-        $resource, $parent_resource, $siblings = [], $reload = false
+        $resource, $parent_resource, $siblings = []
     ) {
         $preferences = $parent_resource->get_preferences();
 
         foreach ($siblings as $sibling) {
-            $sibling_resource = $sibling->get_resource(
-                $resource::TYPE, null, $reload
-            );
-
-            $preferences = $sibling_resource->merge_preferences($preferences);
+            $sibling_resource = $sibling->get_resource($resource::TYPE, null);
+            $preferences      = $sibling_resource->merge_preferences($preferences);
         }
 
         // Merge preferences while reading hierarchical chain but only
@@ -484,7 +349,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param AAM_Framework_Resource_PermissionInterface $resource
      * @param AAM_Framework_Resource_PermissionInterface $parent_resource
      * @param array                                      $siblings
-     * @param boolean                                    $reload
      *
      * @return array
      *
@@ -492,13 +356,13 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @version 7.0.0
      */
     private function _prepare_permissions(
-        $resource, $parent_resource, $siblings = [], $reload = false
+        $resource, $parent_resource, $siblings = []
     ) {
         $permissions = $parent_resource->get_permissions();
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_resource(
-                $resource::TYPE, $resource->get_internal_id(false), $reload
+                $resource::TYPE, $resource->get_internal_id(false)
             );
 
             $permissions = $sibling_resource->merge_permissions($permissions);

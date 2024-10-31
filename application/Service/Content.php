@@ -8,26 +8,10 @@
  */
 
 /**
- * Posts & Terms service
- *
- * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/264
- * @since 6.7.7  https://github.com/aamplugin/advanced-access-manager/issues/184
- * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/137
- * @since 6.5.1  https://github.com/aamplugin/advanced-access-manager/issues/115
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.2.0  Enhanced HIDDEN option with more granular access controls
- * @since 6.1.0  Multiple bug fixed
- * @since 6.0.4  Fixed incompatibility with some quite aggressive plugins
- * @since 6.0.2  Refactored the way access to posts is managed. No more pseudo caps
- *               aam|...
- * @since 6.0.1  Bug fixing
- * @since 6.0.0  Initial implementation of the class
+ * Content (aka Posts & Terms) service
  *
  * @package AAM
- * @version 6.9.29
+ * @version 7.0.0
  */
 class AAM_Service_Content
 {
@@ -38,14 +22,14 @@ class AAM_Service_Content
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.content.enabled';
 
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.9.34
      */
     const DEFAULT_CONFIG = [
         'service.content.enabled'               => true,
@@ -105,13 +89,15 @@ class AAM_Service_Content
                     'core.settings.ui.render_access_metabox'
                 );
 
-                if ($metaboxEnabled && current_user_can('aam_manage_content')) {
+                if ($metaboxEnabled) {
                     // Make sure that all already registered taxonomies are hooked
                     foreach(get_taxonomies() as $taxonomy) {
                         add_action(
                             "{$taxonomy}_edit_form_fields",
                             function($term) {
-                                if (is_a($term, 'WP_Term')) {
+                                if (is_a($term, 'WP_Term')
+                                    && current_user_can('aam_manage_content')
+                                ) {
                                     $view = AAM_Backend_View::getInstance();
 
                                     echo $view->renderTermMetabox($term);
@@ -242,7 +228,7 @@ class AAM_Service_Content
 
         // Evaluate if user can comment on a post
         add_filter('comments_open', function ($open, $post_id) {
-            $resource = AAM::api()->user()->content()->get_post($post_id);
+            $resource = AAM::api()->content()->get_post($post_id);
 
             // If Leave Comments option is defined then override the default status.
             // Otherwise keep it as-is
@@ -274,9 +260,7 @@ class AAM_Service_Content
                 $status = (isset($request['status']) ? $request['status'] : null);
 
                 if (in_array($status, array('publish', 'future'), true)) {
-                    $resource = AAM::api()->user()->content()->get_post(
-                        $request['id']
-                    );
+                    $resource = AAM::api()->content()->get_post($request['id']);
 
                     if ($resource->is_denied_to('publish') === false) {
                         $post = new WP_Error(
@@ -299,19 +283,6 @@ class AAM_Service_Content
                 }
             }
         }, 10, 2);
-
-        // // Policy generation hook
-        // add_filter(
-        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        // );
-
-        // // Share post access settings conversion with add-ons and other third-party
-        // // solutions
-        // add_filter('aam_post_policy_generator_filter', function($list, $res, $opts) {
-        //     return array_merge(
-        //         $list, $this->_convertToPostStatements($res, $opts)
-        //     );
-        // }, 10, 3);
 
         // Register the resource
         add_filter(
@@ -391,7 +362,7 @@ class AAM_Service_Content
         }
 
         if (is_a($res, 'WP_Post')) {
-            $result = AAM::api()->user()->get_resource(
+            $result = AAM::api()->get_resource(
                 AAM_Framework_Type_Resource::POST, $res->ID
             );
         } else {
@@ -442,7 +413,7 @@ class AAM_Service_Content
     {
         // Honor the manually set password on the post
         if (($result === false) && is_a($post, 'WP_Post')) {
-            $check = $this->_verify_post_password(AAM::api()->user()->get_resource(
+            $check = $this->_verify_post_password(AAM::api()->get_resource(
                 AAM_Framework_Type_Resource::POST, $post->ID
             ));
 
@@ -552,7 +523,7 @@ class AAM_Service_Content
     private function _get_nav_menu_items($pages)
     {
         if (is_array($pages)) {
-            $service = AAM::api()->user()->content();
+            $service = AAM::api()->content();
 
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'), true)) {
@@ -579,7 +550,7 @@ class AAM_Service_Content
     private function _get_pages($pages)
     {
         if (is_array($pages)) {
-            $service = AAM::api()->user()->content();
+            $service = AAM::api()->content();
             $current = $this->get_current_post();
 
             foreach ($pages as $i => $post) {
@@ -689,7 +660,7 @@ class AAM_Service_Content
      */
     private function _authorize_post_rest_access($response, $post, $request)
     {
-        $resource = AAM::api()->user()->content()->get_post($post->ID);
+        $resource = AAM::api()->content()->get_post($post->ID);
 
         if ($resource->is_password_protected()) {
             $password = isset($request['_password']) ? $request['_password'] : null;
@@ -928,7 +899,7 @@ class AAM_Service_Content
      */
     private function _map_publish_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->user()->content()->get_post($post_id);
+        $resource = AAM::api()->content()->get_post($post_id);
 
         if ($resource->is_denied_to('publish') === true) {
             $caps[] = 'do_not_allow';
@@ -950,7 +921,7 @@ class AAM_Service_Content
      */
     private function _map_edit_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->user()->content()->get_post($post_id);
+        $resource = AAM::api()->content()->get_post($post_id);
         $is_draft = $resource->post_status === 'auto-draft';
 
         if (!$is_draft && ($resource->is_denied_to('edit') === true)) {
@@ -973,7 +944,7 @@ class AAM_Service_Content
      */
     private function _map_delete_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->user()->content()->get_post($post_id);
+        $resource = AAM::api()->content()->get_post($post_id);
 
         if ($resource->is_denied_to('delete') === true) {
             $caps[] = 'do_not_allow';
@@ -996,7 +967,7 @@ class AAM_Service_Content
      */
     private function _map_read_post_caps($caps, $post_id, $password = null)
     {
-        $resource = AAM::api()->user()->content()->get_post($post_id);
+        $resource = AAM::api()->content()->get_post($post_id);
 
         if ($resource->is_password_protected()) {
             $permission = $resource->get_permission('read');
@@ -1011,236 +982,4 @@ class AAM_Service_Content
         return $caps;
     }
 
-    /**
-     * Generate Post policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generatePolicy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Framework_Type_Resource::POST) {
-    //         if (!empty($options)) {
-    //             $statements = array();
-
-    //             foreach($options as $id => $data) {
-    //                 $parts    = explode('|', $id);
-    //                 $post     = get_post($parts[0]);
-
-    //                 if (is_a($post, 'WP_Post')) {
-    //                     $resource = "Post:{$parts[1]}:{$post->post_name}";
-
-    //                     $statements = array_merge(
-    //                         $statements,
-    //                         $this->_convertToPostStatements($resource, $data)
-    //                     );
-    //                 }
-    //             }
-
-    //             $policy['Statement'] = array_merge($policy['Statement'], $statements);
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
-
-    /**
-     * Convert post settings to policy format
-     *
-     * @param string $resource
-     * @param array  $options
-     *
-     * @return array
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.4.0  Moved this method from AAM_Core_Policy_Generator
-     * @since 6.3.0  Fixed bug https://github.com/aamplugin/advanced-access-manager/issues/22
-     * @since 6.2.2  Fixed bug that caused fatal error for PHP lower than 7.0.0
-     * @since 6.2.0  Initial implementation of the method
-     *
-     * @access private
-     * @version 6.9.26
-     */
-    // private function _convertToPostStatements($resource, $options)
-    // {
-    //     $tree = (object) array(
-    //         'allowed'    => array(),
-    //         'denied'     => array(),
-    //         'statements' => array()
-    //     );
-
-    //     foreach($options as $option => $settings) {
-    //         // Compute Effect property
-    //         if (is_bool($settings)) {
-    //             $effect = ($settings === true ? 'denied' : 'allowed');
-    //         } else {
-    //             $effect = (!empty($settings['enabled']) ? 'denied' : 'allowed');
-    //         }
-
-    //         $action = null;
-
-    //         switch($option) {
-    //             case 'restricted':
-    //                 $action = 'Read';
-    //                 break;
-
-    //             case 'comment':
-    //             case 'edit':
-    //             case 'delete':
-    //             case 'publish':
-    //             case 'create':
-    //                 $action = ucfirst($option);
-    //                 break;
-
-    //             case 'hidden':
-    //                 $item = array(
-    //                     'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'List',
-    //                     'Resource' => $resource
-    //                 );
-
-    //                 $conditions = array();
-
-    //                 if (is_array($settings)) {
-    //                     if (!empty($settings['frontend'])) {
-    //                         $conditions['(*boolean)${CALLBACK.is_admin}'] = false;
-    //                     }
-    //                     if (!empty($settings['backend'])) {
-    //                         $conditions['(*boolean)${CALLBACK.is_admin}'] = true;
-    //                     }
-    //                     if (!empty($settings['api'])) {
-    //                         $conditions['(*boolean)${CONST.REST_REQUEST}'] = true;
-    //                     }
-    //                 }
-
-    //                 if (!empty($conditions)) {
-    //                     $item['Condition']['Equals'] = $conditions;
-    //                 }
-
-    //                 $tree->statements[] = $item;
-    //                 break;
-
-    //             case 'teaser':
-    //                 $tree->statements[] = array(
-    //                     'Effect'  => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'Read',
-    //                     'Resource' => $resource,
-    //                     'Metadata' => array(
-    //                         'Teaser' => array(
-    //                             'Value' => esc_js($settings['message'])
-    //                         )
-    //                     )
-    //                 );
-    //                 break;
-
-    //             case 'limited':
-    //                 $tree->statements[] = array(
-    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'Read',
-    //                     'Resource' => $resource,
-    //                     'Metadata' => array(
-    //                         'Limited' => array(
-    //                             'Threshold' => intval($settings['threshold'])
-    //                         )
-    //                     )
-    //                 );
-    //                 break;
-
-    //             case 'redirected':
-    //                 $metadata = array(
-    //                     'Type' => $settings['type'],
-    //                     'Code' => intval(isset($settings['httpCode']) ? $settings['httpCode'] : null)
-    //                 );
-
-    //                 if ($settings['type'] === 'page') {
-    //                     $metadata['Id'] = intval($settings['destination']);
-    //                 } elseif ($settings['type']  === 'url') {
-    //                     $metadata['URL'] = trim($settings['destination']);
-    //                 } elseif ($settings['type'] === 'callback') {
-    //                     $metadata['Callback'] = trim($settings['destination']);
-    //                 } elseif ($settings['type'] === 'message') {
-    //                     $metadata['Message'] = trim($settings['destination']);
-    //                 }
-
-    //                 $tree->statements[] = array(
-    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'Read',
-    //                     'Resource' => $resource,
-    //                     'Metadata' => array(
-    //                         'Redirect' => $metadata
-    //                     )
-    //                 );
-    //                 break;
-
-    //             case 'protected':
-    //                 $tree->statements[] = array(
-    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'Read',
-    //                     'Resource' => $resource,
-    //                     'Metadata' => array(
-    //                         'Password' => array(
-    //                             'Value' => $settings['password']
-    //                         )
-    //                     )
-    //                 );
-    //                 break;
-
-    //             case 'ceased':
-    //                 $tree->statements[] = array(
-    //                     'Effect'   => ($effect === 'denied' ? 'deny' : 'allow'),
-    //                     'Action'   => 'Read',
-    //                     'Resource' => $resource,
-    //                     'Condition' => array(
-    //                         'Greater' => array(
-    //                             '(*int)${DATETIME.U}' => intval($settings['after'])
-    //                         )
-    //                     )
-    //                 );
-    //                 break;
-
-    //             default:
-    //                 do_action(
-    //                     'aam_post_option_to_policy_action',
-    //                     $resource,
-    //                     $option,
-    //                     $effect,
-    //                     $settings,
-    //                     $tree
-    //                 );
-    //                 break;
-    //         }
-
-    //         if ($action !== null) {
-    //             if ($effect === 'allowed') {
-    //                 $tree->allowed[] = $resource . ':' . $action;
-    //             } else {
-    //                 $tree->denied[] = $resource . ':' . $action;
-    //             }
-    //         }
-    //     }
-
-    //     // Finally prepare the consolidated statements
-    //     if (!empty($tree->denied)) {
-    //         $tree->statements[] = array(
-    //             'Effect'   => 'deny',
-    //             'Resource' => $tree->denied
-    //         );
-    //     }
-
-    //     if (!empty($tree->allowed)) {
-    //         $tree->statements[] = array(
-    //             'Effect'   => 'allow',
-    //             'Resource' => $tree->allowed
-    //         );
-    //     }
-
-    //     return $tree->statements;
-    // }
 }

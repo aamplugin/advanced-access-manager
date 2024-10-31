@@ -50,29 +50,58 @@ implements
             $preference
         );
 
-        if (!empty($this->_internal_id)) { // Only one URL is evaluated
-            $result = $this->_merge_permissions(
-                $this->_permissions, $incoming, $preference
+        $base = $this->_permissions;
+
+        // First get the complete list of unique keys
+        $rule_keys = array_unique([
+            ...array_keys($incoming),
+            ...array_keys($base)
+        ]);
+
+        foreach($rule_keys as $rule_key) {
+            $result[$rule_key] = $this->_merge_permissions(
+                isset($base[$rule_key]) ? $base[$rule_key] : null,
+                isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
+                $preference
             );
-        } else { // All URL rules are evaluated
-            $base = $this->_permissions;
-
-            // First get the complete list of unique keys
-            $rule_keys = array_unique([
-                ...array_keys($incoming),
-                ...array_keys($base)
-            ]);
-
-            foreach($rule_keys as $rule_key) {
-                $result[$rule_key] = $this->_merge_permissions(
-                    isset($base[$rule_key]) ? $base[$rule_key] : null,
-                    isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
-                    $preference
-                );
-            }
         }
 
         return $result;
+    }
+
+    /**
+     * Find permission that matches given URL
+     *
+     * @param string $url
+     *
+     * @return array|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_permission_by_url($url)
+    {
+        // Step #1. Let's check if there is a full URL (potentially with query
+        //          params explicitly defined
+        $result = $this->_find_permission_by_url($url);
+
+        // Step #2. Parsing the incoming URL and checking if there is the
+        //          same URL without query params defined
+        if (is_null($result)) {
+            $parsed_url = AAM_Framework_Utility_Misc::parse_url($url);
+
+            if (!empty($parsed_url['path'])) {
+                $result = $this->_find_permission_by_url($parsed_url['path']);
+            }
+        }
+
+        return apply_filters(
+            'aam_get_permission_by_url_filter',
+            $result,
+            $url,
+            $this->_sort_permissions(),
+            $this
+        );
     }
 
     /**
@@ -80,34 +109,48 @@ implements
      *
      * @param string $url
      *
-     * @return boolean|null
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($url = null)
+    public function is_restricted($url)
     {
-        if (!empty($this->_internal_id)
-            && !empty($url)
-            && ($url !== $this->_internal_id)
-        ) {
-            throw new InvalidArgumentException(
-                'The provided URL does not match already initiated resource URL'
-            );
-        }
+        $permission = $this->get_permission_by_url($url);
 
-        // If resource was already initialized with a single URL, then no need to
-        // search for match
-        if ($this->_internal_id) {
-            $rule = $this->_permissions;
-        } else {
-            $rule = $this->_find_matching_rule($url);
-        }
-
-        if (!empty($rule)) {
-            $result = $rule['effect'] !== 'allow';
+        if (!empty($permission)) {
+            $result = $permission['effect'] !== 'allow';
         } else {
             $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get redirect defined for a given URL
+     *
+     * This method will return redirect type if URL permission exists. Otherwise,
+     * `null` is returned.
+     *
+     * @param string $url
+     *
+     * @return array|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_redirect($url)
+    {
+        $match  = $this->get_permission_by_url($url);
+        $result = null;
+
+        if (!empty($match)) {
+            if (array_key_exists('redirect', $match)) {
+                $result = $match['redirect'];
+            } else {
+                $result = [ 'type' => 'default' ];
+            }
         }
 
         return $result;
@@ -120,40 +163,30 @@ implements
      *
      * @return array|null
      *
-     * @access public
+     * @access private
      * @version 7.0.0
      */
-    private function _find_matching_rule($url = null)
+    private function _find_permission_by_url($search_url)
     {
         $result = null;
-        $target = $this->_parse_url(empty($url) ? $this->_internal_id : $url);
+        $target = AAM_Framework_Utility_Misc::parse_url($search_url);
 
-        foreach ($this->_sort_rules() as $url => $rule) {
-            $meta = wp_parse_url($url);
-            $out  = [];
+        foreach ($this->_sort_permissions() as $url => $permission) {
+            $current = AAM_Framework_Utility_Misc::parse_url($url);
 
-            if (!empty($meta['query'])) {
-                parse_str($meta['query'], $out);
+            // Check if two relative paths match
+            $matched = $target['path'] === $current['path'];
+
+            // If yes, we also verify that the query params overlap, if provided
+            if ($matched && !empty($current['params'])) {
+                foreach($current['params'] as $key => $val) {
+                    $matched = $matched && array_key_exists($key, $target['params'])
+                                    && ($target['params'][$key] === $val);
+                }
             }
 
-            // Normalize the target URI
-            $path = rtrim(isset($meta['path']) ? $meta['path'] : '', '/');
-
-            // Check if two URLs are equal
-            $uri_matched = ($target['url'] === $path);
-
-            if ($uri_matched === false) {
-                $uri_matched = apply_filters(
-                    'aam_matching_url_filter', false, $url, $target['url']
-                );
-            }
-
-            // Perform the initial match for the query params if defined
-            $same          = array_intersect_assoc($target['query_params'], $out);
-            $query_matched = empty($out) || (count($same) === count($out));
-
-            if ($uri_matched && $query_matched) {
-                $result = $rule;
+            if ($matched) {
+                $result = $permission;
             }
         }
 
@@ -161,56 +194,25 @@ implements
     }
 
     /**
-     * Parse URL so it can be used for internal evaluations
-     *
-     * @param string $url
+     * Sort all permissions before processing
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _parse_url($url)
-    {
-        $normalized = call_user_func(
-            function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower',
-            is_string($url) ? rtrim($url,  '/') : ''
-        );
-
-        // Parse URL for further processing
-        $parsed       = wp_parse_url($normalized);
-        $query_params = [];
-
-        if (isset($parsed['query'])) {
-            parse_str($parsed['query'], $query_params);
-        }
-
-        return [
-            'url'          => $normalized,
-            'query_params' => $query_params
-        ];
-    }
-
-    /**
-     * Sort rules before processing
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _sort_rules()
+    private function _sort_permissions()
     {
         // Property organize all the settings
         // Place all "allowed" rules in the end of the list to allow the ability to
         // define whitelisted set of conditions
         $denied = $allowed = [];
 
-        foreach ($this->_permissions as $url => $rule) {
-            if ($rule['effect'] === 'allow') {
-                $allowed[$url] = $rule;
+        foreach ($this->_permissions as $url => $permission) {
+            if ($permission['effect'] === 'allow') {
+                $allowed[$url] = $permission;
             } else {
-                $denied[$url] = $rule;
+                $denied[$url] = $permission;
             }
         }
 

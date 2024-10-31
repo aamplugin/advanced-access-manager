@@ -18,18 +18,10 @@
 /**
  * Main plugin's class
  *
- * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/325
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/300
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
- * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/282
- * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
  * @author AAM <support@aamplugin.com>
  *
- * @version 6.9.36
+ * @version 7.0.0
  */
 class AAM
 {
@@ -74,21 +66,9 @@ class AAM
      * @var AAM
      *
      * @access private
-     * @version 6.0.0
+     * @version 7.0.0
      */
     private static $_instance = null;
-
-    /**
-     * Current user (legacy version)
-     *
-     * @var AAM_Core_Subject
-     *
-     * @access private
-     * @version 7.0.0
-     * @deprecated 7.0.0 Replaced with _current_user
-     * @todo Remove in July 2025
-     */
-    private $_legacy_current_user = null;
 
     /**
      * Current user
@@ -105,12 +85,8 @@ class AAM
      *
      * @return void
      *
-     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/286
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.36
+     * @version 7.0.0
      */
     protected function __construct() { }
 
@@ -120,29 +96,11 @@ class AAM
      * @return AAM_Core_Gateway
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
     public static function api()
     {
         return AAM_Core_Gateway::get_instance();
-    }
-
-    /**
-     * Get current user
-     *
-     * @return AAM_Core_Subject
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Replaced with AAM::current_user();
-     */
-    public static function getUser()
-    {
-        if (self::getInstance()->_legacy_current_user === null) {
-            self::getInstance()->_init_legacy_current_user();
-        }
-
-        return self::getInstance()->_legacy_current_user;
     }
 
     /**
@@ -155,11 +113,11 @@ class AAM
      */
     public static function current_user()
     {
-        if (self::getInstance()->_current_user === null) {
-            self::getInstance()->_init_current_user();
+        if (self::get_instance()->_current_user === null) {
+            self::get_instance()->_init_current_user();
         }
 
-        return self::getInstance()->_current_user;
+        return self::get_instance()->_current_user;
     }
 
     /**
@@ -193,36 +151,6 @@ class AAM
         AAM::api()->setup([
             'access_level' => $this->_current_user
         ]);
-    }
-
-    /**
-     * Initialize legacy current user
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     * @deprecated 7.0.0
-     * @todo Remove in July 2025 legacy subject implementation
-     */
-    private function _init_legacy_current_user($user = null)
-    {
-        global $current_user;
-
-        // Important! Do not use WP core function to avoid loop
-        if (is_a($user, 'WP_User')) {
-            $id = $user->ID;
-        } else {
-            $id = (is_a($current_user, 'WP_User') ? $current_user->ID : null);
-        }
-
-        // Set current user
-        if (is_numeric($id) && $id > 0) {
-            $this->_legacy_current_user = new AAM_Core_Subject_User($id);
-            $this->_legacy_current_user->initialize();
-        } else {
-            $this->_legacy_current_user = new AAM_Core_Subject_Visitor();
-        }
     }
 
     /**
@@ -261,7 +189,7 @@ class AAM
         do_action('aam_services_loaded');
 
         // Load AAM
-        AAM::getInstance();
+        self::get_instance();
     }
 
     /**
@@ -270,9 +198,9 @@ class AAM
      * @return void
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public static function onInit()
+    public static function on_init()
     {
         if (is_admin()) {
             AAM_Backend_Manager::bootstrap();
@@ -284,13 +212,10 @@ class AAM
      *
      * @return AAM
      *
-     * @since 6.9.36 https://github.com/aamplugin/advanced-access-manager/issues/407
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.36
+     * @version 7.0.0
      */
-    public static function getInstance()
+    public static function get_instance()
     {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
@@ -402,7 +327,7 @@ if (defined('ABSPATH')) {
 
     // The highest priority (higher the core)
     // this is important to have to catch events like register core post types
-    add_action('init', 'AAM::onInit', -1);
+    add_action('init', 'AAM::on_init', -1);
 
     // Activation & deactivation hooks
     register_activation_hook(__FILE__, array('AAM', 'activate'));

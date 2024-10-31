@@ -69,7 +69,7 @@ class AAM_Framework_Service_Identities
     {
         try {
             $result   = [];
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             foreach($resource->get_permissions() as $id => $permission) {
                 array_push($result, $this->_prepare_permission(
@@ -97,7 +97,7 @@ class AAM_Framework_Service_Identities
     public function get_permission_by_id($id, $inline_context = null)
     {
         try {
-            $resource    = $this->get_resource(true, $inline_context);
+            $resource    = $this->get_resource($inline_context);
             $permissions = $resource->get_permissions();
 
             if (!array_key_exists($id, $permissions)) {
@@ -131,7 +131,7 @@ class AAM_Framework_Service_Identities
             // Validating that incoming data is correct and normalize is for storage
             $this->_validate_permission($permission);
 
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Creating a permission key
             $key = uniqid('id_');
@@ -163,7 +163,7 @@ class AAM_Framework_Service_Identities
     public function update_permission($id, $effect, $inline_context = null)
     {
         try {
-            $resource   = $this->get_resource(false, $inline_context);
+            $resource   = $this->get_resource($inline_context);
             $permission = $this->get_permission_by_id($id, $inline_context);
 
             // Update permission's effect
@@ -207,7 +207,7 @@ class AAM_Framework_Service_Identities
     public function delete_permission($id, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
             $permissions = $resource->get_permissions(true);
@@ -282,11 +282,11 @@ class AAM_Framework_Service_Identities
                     $identity, $permission, $inline_context
                 );
             } elseif ($identity_type === 'user_role') {
-                $result = $this->get_resource(false, $inline_context)->is_allowed_to(
+                $result = $this->get_resource($inline_context)->is_allowed_to(
                     'user_role', $identity, $permission
                 );
             } elseif ($identity_type === 'role_level') {
-                $result = $this->get_resource(false, $inline_context)->is_allowed_to(
+                $result = $this->get_resource($inline_context)->is_allowed_to(
                     'role_level', $identity, $permission
                 );
             } elseif ($identity_type === 'user') {
@@ -294,7 +294,7 @@ class AAM_Framework_Service_Identities
                     $identity, $permission, $inline_context
                 );
             } elseif ($identity_type === 'user_level') {
-                $result = $this->get_resource(false, $inline_context)->is_allowed_to(
+                $result = $this->get_resource($inline_context)->is_allowed_to(
                     'user_level', $identity, $permission
                 );
             } else {
@@ -405,12 +405,12 @@ class AAM_Framework_Service_Identities
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null)
+    public function get_resource($inline_context = null)
     {
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::IDENTITIES, null, $reload
+                AAM_Framework_Type_Resource::IDENTITIES
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -433,7 +433,7 @@ class AAM_Framework_Service_Identities
      */
     private function _is_role_allowed_to($role_slug, $permission, $inline_context)
     {
-        $resource = $this->get_resource(false, $inline_context);
+        $resource = $this->get_resource($inline_context);
 
         // Step #1. Determine if access controls for the role are explicitly defined
         //          and if so, use it
@@ -468,7 +468,7 @@ class AAM_Framework_Service_Identities
      */
     private function _is_user_allowed_to($user_id, $permission, $inline_context)
     {
-        $resource = $this->get_resource(false, $inline_context);
+        $resource = $this->get_resource($inline_context);
 
         // Check #1. Do we have access controls defined for a give user explicitly?
         $result = $resource->is_allowed_to('user', $user_id, $permission);

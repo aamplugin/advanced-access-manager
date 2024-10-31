@@ -39,7 +39,7 @@ class AAM_Framework_Service_ApiRoutes
     {
         try {
             $result   = [];
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Iterating over the list of all registered API routes and compile the
             // list
@@ -117,7 +117,7 @@ class AAM_Framework_Service_ApiRoutes
         $is_restricted, $endpoint, $method = 'GET', $inline_context = null
     ) {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Compile the permission model
             $permission = [ 'effect' => $is_restricted ? 'deny' : 'allow' ];
@@ -196,7 +196,7 @@ class AAM_Framework_Service_ApiRoutes
     public function reset($inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Reset settings to default
             $resource->reset();
@@ -212,20 +212,19 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Get resource
      *
-     * @param boolean $reload
-     * @param array   $inline_context
+     * @param array$inline_context
      *
      * @return AAM_Framework_Resource_ApiRoutes
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null)
+    public function get_resource($inline_context = null)
     {
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTES, null, $reload
+                AAM_Framework_Type_Resource::API_ROUTES
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -258,7 +257,7 @@ class AAM_Framework_Service_ApiRoutes
                 throw new InvalidArgumentException('Invalid route endpoint');
             }
 
-            $result = $this->get_resource(true, $inline_context)->is_restricted(
+            $result = $this->get_resource($inline_context)->is_restricted(
                 $endpoint, $method
             );
         } catch (Exception $e) {

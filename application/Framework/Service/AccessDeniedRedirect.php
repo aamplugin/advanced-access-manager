@@ -59,7 +59,7 @@ implements
     public function get_redirect($area = null, $inline_context = null)
     {
         try {
-            $resource  = $this->get_resource(true, $inline_context);
+            $resource  = $this->get_resource($inline_context);
             $redirects = $this->_prepare_redirects(
                 $resource->get_preferences(),
                 !$resource->is_overwritten()
@@ -106,7 +106,7 @@ implements
     public function set_redirect($area, array $redirect, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
             $result   = $resource->set_preference($area, $redirect);
 
             if (!$result) {
@@ -138,7 +138,7 @@ implements
     public function reset($area = null, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             if (empty($area)) {
                 $success = $resource->reset();
@@ -167,18 +167,17 @@ implements
     /**
      * Get preference resource
      *
-     * @param boolean $reload
-     * @param array   $inline_context
+     * @param array $inline_context
      *
      * @return AAM_Framework_Resource_AccessDeniedRedirect
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null) {
+    public function get_resource($inline_context = null) {
         try {
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null, $reload
+                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

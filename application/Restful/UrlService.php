@@ -271,10 +271,9 @@ class AAM_Restful_UrlService
             $service = $this->_get_service($request);
 
             // Grab all the necessary permission attributes
-            $url = $request->get_param('url');
-
+            $url      = $request->get_param('url');
             $effect   = strtolower($request->get_param('effect'));
-            $redirect = $this->_sanitize_redirect($request->get_param('redirect'));
+            $redirect = $request->get_param('redirect');
 
             // Persist the permission
             if ($effect === 'allow') {
@@ -332,12 +331,9 @@ class AAM_Restful_UrlService
 
             // Get all the necessary attributes
             $original_url = base64_decode($request->get_param('id'));
-            $new_url      = AAM_Framework_Utility_Misc::sanitize_url(
-                $request->get_param('url')
-            );
-
-            $redirect = $this->_sanitize_redirect($request->get_param('redirect'));
-            $effect   = strtolower($request->get_param('effect'));
+            $new_url      = $request->get_param('url');
+            $redirect     = $request->get_param('redirect');
+            $effect       = strtolower($request->get_param('effect'));
 
             // If we are updating URL, then first, let's delete the original rule
             if (!empty($new_url) && ($original_url !== $new_url)) {
@@ -548,29 +544,6 @@ class AAM_Restful_UrlService
         }
 
         return $response;
-    }
-
-    /**
-     * Sanitize the redirect values
-     *
-     * @param array|null $redirect
-     *
-     * @return array|null
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _sanitize_redirect($redirect)
-    {
-        if (is_array($redirect) && !empty($redirect)) {
-            if ($redirect['type'] === 'url_redirect') {
-                $redirect['url'] = AAM_Framework_Utility_Misc::sanitize_url(
-                    $redirect['redirect_url']
-                );
-            }
-        }
-
-        return $redirect;
     }
 
     /**

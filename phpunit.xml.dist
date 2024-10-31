@@ -11,6 +11,7 @@
     </testsuites>
     <php>
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
+        <const name="AAM_UNITTEST_DEFAULT_ADMIN_PASS" value="123456" />
         <ini name="display_errors" value="On" />
         <ini name="display_startup_errors" value="On" />
     </php>

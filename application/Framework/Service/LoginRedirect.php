@@ -48,7 +48,7 @@ implements
     public function get_redirect($inline_context = null)
     {
         try {
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
             $result   = $this->_prepare_redirect(
                 $resource->get_preferences(),
                 !$resource->is_overwritten()
@@ -75,7 +75,7 @@ implements
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $resource    = $this->get_resource(false, $inline_context);
+            $resource    = $this->get_resource($inline_context);
             $preferences = $this->_convert_to_redirect($redirect);
 
             if (!$resource->set_preferences($preferences)) {
@@ -103,7 +103,7 @@ implements
     public function reset($inline_context = null)
     {
         try {
-            $this->get_resource(false, $inline_context)->reset();
+            $this->get_resource($inline_context)->reset();
 
             $result = $this->get_redirect($inline_context);
         } catch (Exception $e) {
@@ -116,19 +116,18 @@ implements
     /**
      * Get Login Redirect preference resource
      *
-     * @param boolean $reload
-     * @param array   $inline_context
+     * @param array $inline_context
      *
      * @return AAM_Framework_Resource_LoginRedirect
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null)
+    public function get_resource($inline_context = null)
     {
         try {
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::LOGIN_REDIRECT, null, $reload
+                AAM_Framework_Type_Resource::LOGIN_REDIRECT
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

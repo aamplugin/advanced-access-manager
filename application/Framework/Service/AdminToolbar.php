@@ -55,7 +55,7 @@ implements
     {
         try {
             $result   = [];
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Getting the admin toolbar cache so we can build the list
             $cache = $this->_get_raw_menu();
@@ -120,7 +120,7 @@ implements
         $item_id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $resource   = $this->get_resource(false, $inline_context);
+            $resource   = $this->get_resource($inline_context);
             $permission = [ 'effect' => $is_hidden ? 'deny' : 'allow' ];
 
             if (!$resource->set_permission($item_id, $permission)) {
@@ -149,7 +149,7 @@ implements
     public function delete_item_permission($item_id, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
             $item     = $this->get_item_by_id($item_id);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
@@ -205,7 +205,7 @@ implements
     {
         try {
             // Resetting settings to default
-            $this->get_resource(false, $inline_context)->reset();
+            $this->get_resource($inline_context)->reset();
 
             $result = $this->get_item_list($inline_context);
         } catch (Exception $e) {
@@ -218,19 +218,18 @@ implements
     /**
      * Get Admin Toolbar resource
      *
-     * @param boolean $reload
-     * @param array   $inline_context
+     * @param array $inline_context
      *
      * @return AAM_Framework_Resource_AdminToolbar
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null)
+    public function get_resource($inline_context = null)
     {
         try {
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR, null, $reload
+                AAM_Framework_Type_Resource::TOOLBAR
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -253,7 +252,7 @@ implements
     public function is_hidden($item_id, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Step #1. Checking if provided item has any access controls defined
             $result = $resource->is_hidden($item_id);

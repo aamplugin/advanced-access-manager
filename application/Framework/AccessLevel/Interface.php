@@ -32,7 +32,6 @@ interface AAM_Framework_AccessLevel_Interface
      *
      * @param string     $resource_type
      * @param string|int $resource_id
-     * @param boolean    $reload
      * @param boolean    $skip_inheritance
      *
      * @return AAM_Framework_Resource_PermissionInterface|AAM_Framework_Resource_PreferenceInterface|null
@@ -43,7 +42,6 @@ interface AAM_Framework_AccessLevel_Interface
     public function get_resource(
         $resource_type,
         $resource_id = null,
-        $reload = false,
         $skip_inheritance = false
     );
 
@@ -120,125 +118,5 @@ interface AAM_Framework_AccessLevel_Interface
      * @version 7.0.0
      */
     public function get_parent();
-
-    /**
-     * Get URLs service
-     *
-     * @return AAM_Framework_Service_Urls
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function urls();
-
-    /**
-     * Get Login Redirect service
-     *
-     * @return AAM_Framework_Service_LoginRedirect
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function login_redirect();
-
-    /**
-     * Get Logout Redirect service
-     *
-     * @return AAM_Framework_Service_LogoutRedirect
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function logout_redirect();
-
-    /**
-     * Get Access Denied Redirect service
-     *
-     * @return AAM_Framework_Service_AccessDeniedRedirect
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function access_denied_redirect();
-
-    /**
-     * Get Not Found Redirect service
-     *
-     * @return AAM_Framework_Service_NotFoundRedirect
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function not_found_redirect();
-
-    /**
-     * Get Content service
-     *
-     * @return AAM_Framework_Service_Content
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function content();
-
-    /**
-     * Get Backend Menu service
-     *
-     * @return AAM_Framework_Service_BackendMenu
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function backend_menu();
-
-    /**
-     * Get Backend Menu service
-     *
-     * @return AAM_Framework_Service_Toolbar
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function admin_toolbar();
-
-    /**
-     * Get Metaboxes service
-     *
-     * @return AAM_Framework_Service_Metaboxes
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function metaboxes();
-
-    /**
-     * Get Widgets service
-     *
-     * @return AAM_Framework_Service_Widgets
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function widgets();
-
-    /**
-     * Get API Routes service
-     *
-     * @return AAM_Framework_Service_ApiRoutes
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function api_routes();
-
-    /**
-     * Get Identity service
-     *
-     * @return AAM_Framework_Service_Identities
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function identities();
 
 }

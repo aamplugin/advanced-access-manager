@@ -48,7 +48,7 @@ implements
     {
         try {
             $result      = [];
-            $resource    = $this->_get_resource(true, $inline_context);
+            $resource    = $this->_get_resource($inline_context);
             $permissions = $resource->get_permissions();
 
             foreach($permissions as $url => $permission) {
@@ -92,9 +92,9 @@ implements
     public function get_url($url, $inline_context = null)
     {
         try {
-            $resource    = $this->_get_resource(true, $inline_context);
+            $resource    = $this->_get_resource($inline_context);
             $permissions = $resource->get_permissions();
-            $url         = AAM_Framework_Utility_Misc::sanitize_url($url);
+            $url         = $this->_sanitize_url($url);
 
             if (!array_key_exists($url, $permissions)) {
                 throw new OutOfRangeException(sprintf(
@@ -218,7 +218,7 @@ implements
         $result = true;
 
         try {
-            $resource = $this->_get_resource(false, $inline_context);
+            $resource = $this->_get_resource($inline_context);
 
             if (!empty($url)) {
                 foreach((array)$url as $u) {
@@ -246,7 +246,7 @@ implements
      * @param string $url
      * @param array  $inline_context
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error|null
      *
      * @access public
      * @version 7.0.0
@@ -254,29 +254,16 @@ implements
     public function is_restricted($url, $inline_context = null)
     {
         try {
-            $resource = $this->_get_resource(false, $inline_context);
-            $url      = AAM_Framework_Utility_Misc::sanitize_url($url);
-
-            // Step #1. Let's check if there is URL with query params explicitly
-            //          defined
-            $result = $resource->is_restricted($url);
-
-            if (is_null($result)) {
-                // Step #2. Parsing the incoming URL and checking if there is the
-                //          same URL without query params defined
-                $parsed_url = wp_parse_url($url);
-
-                if (!empty($parsed_url['path'])) {
-                    $result = $resource->is_restricted($parsed_url['path']);
-                }
-            }
-
-            $result = apply_filters(
+            $resource = $this->_get_resource($inline_context);
+            $result   = apply_filters(
                 'aam_url_is_restricted_filter',
-                $result,
+                $resource->is_restricted($url),
                 $url,
                 $this
             );
+
+            // Finally making sure we are returning correct value
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -332,27 +319,7 @@ implements
     public function get_redirect($url, $inline_context = null)
     {
         try {
-            $resource = $this->_get_resource(false, $inline_context);
-            $url      = AAM_Framework_Utility_Misc::sanitize_url($url);
-
-            // Let's try to get permissions for the URL as is
-            $permission = $resource->get_permission($url);
-
-            if (is_null($permission)) {
-                // Otherwise, parse the URL by removing query params and try to get
-                // permissions just by URL
-                $parsed_url = wp_parse_url($url);
-
-                if (!empty($parsed_url['path'])) {
-                    $permission = $resource->get_permission($parsed_url['path']);
-                }
-            }
-
-            if (!empty($permission['redirect'])) {
-                $result = $permission['redirect'];
-            } else {
-                $result = null;
-            }
+            $result = $this->_get_resource($inline_context)->get_redirect($url);
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -392,7 +359,7 @@ implements
     private function _set_url_permission(
         $url, $effect, $redirect = null, $inline_context = null
     ) {
-        $resource = $this->_get_resource(false, $inline_context);
+        $resource = $this->_get_resource($inline_context);
 
         // Prepare the permission model
         $permission = [ 'effect' => $effect ];
@@ -402,7 +369,7 @@ implements
         }
 
         // Sanitize the incoming URL
-        $url = AAM_Framework_Utility_Misc::sanitize_url($url);
+        $url = $this->_sanitize_url($url);
 
         if (!$resource->set_permission($url, $permission)) {
             throw new RuntimeException('Failed to persist settings');
@@ -424,9 +391,9 @@ implements
      */
     private function _delete_url_permission($url, $inline_context)
     {
-        $resource    = $this->_get_resource(false, $inline_context);
+        $resource    = $this->_get_resource($inline_context);
         $permissions = $resource->get_permissions(true);
-        $url         = AAM_Framework_Utility_Misc::sanitize_url($url);
+        $url         = $this->_sanitize_url($url);
 
         // Note! User can delete only explicitly set rule (overwritten rule)
         if (array_key_exists($url, $permissions)) {
@@ -443,18 +410,17 @@ implements
     /**
      * Get URL resource
      *
-     * @param boolean $reload
-     * @param array   $inline_context
+     * @param array $inline_context
      *
      * @return AAM_Framework_Resource_Urls
      *
      * @access public
      * @version 7.0.0
      */
-    private function _get_resource($reload = false, $inline_context = null)
+    private function _get_resource($inline_context = null)
     {
         return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Resource_Urls::TYPE, null, $reload
+            AAM_Framework_Resource_Urls::TYPE
         );
     }
 
@@ -480,6 +446,31 @@ implements
             'url'          => $url,
             'is_inherited' => $is_inherited
         ]);
+    }
+
+    /**
+     * Sanitize incoming URL
+     *
+     * @param string $url
+     *
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _sanitize_url($url)
+    {
+        $result = apply_filters(
+            'aam_url_sanitize_url_filter',
+            AAM_Framework_Utility_Misc::sanitize_url($url),
+            $url
+        );
+
+        if ($result === false) {
+            throw new InvalidArgumentException('The incoming URL is invalid');
+        }
+
+        return $result;
     }
 
 }

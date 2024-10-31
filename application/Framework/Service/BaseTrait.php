@@ -18,17 +18,6 @@ trait AAM_Framework_Service_BaseTrait
 {
 
     /**
-     * Single instance of itself
-     *
-     * @var static::class
-     *
-     * @access private
-     * @static
-     * @version 7.0.0
-     */
-    private static $_instance = null;
-
-    /**
      * Collection of extended methods
      *
      * @var array
@@ -228,21 +217,21 @@ trait AAM_Framework_Service_BaseTrait
      * Handle error
      *
      * @param Exception $exception
-     * @param array     $runtime_context
+     * @param mixed     $inline_context
      *
      * @return mixed
      *
      * @access private
      * @version 7.0.0
      */
-    private function _handle_error($exception, $runtime_context = null)
+    private function _handle_error($exception, $inline_context = null)
     {
         $response = null;
 
-        if (empty($runtime_context)) {
-            $context = static::$_instance->_runtime_context;
+        if (empty($inline_context)) {
+            $context = $this->_runtime_context;
         } else {
-            $context = $runtime_context;
+            $context = $inline_context;
         }
 
         // Determine what is the proper error handling strategy to pick
@@ -278,13 +267,11 @@ trait AAM_Framework_Service_BaseTrait
      */
     public static function get_instance($runtime_context = [])
     {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
-        }
+        $result = new self;
 
-        self::$_instance->_runtime_context = $runtime_context;
+        $result->_runtime_context = $runtime_context;
 
-        return self::$_instance;
+        return $result;
     }
 
 }

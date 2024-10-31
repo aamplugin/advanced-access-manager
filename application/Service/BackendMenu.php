@@ -100,18 +100,17 @@ class AAM_Service_BackendMenu
         if (is_admin()) {
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
-            if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
-                add_filter('parent_file', function($parent_file) {
-                    $this->filter_menu();
-
-                    return $parent_file;
-                }, PHP_INT_MAX);
-            } elseif (AAM::isAAM() && current_user_can('aam_manage_admin_menu')) {
-                add_filter('parent_file', function() {
-                    // This will rebuild the backend menu cache
+            add_filter('parent_file', function($parent_file) {
+                if (AAM::isAAM() && current_user_can('administrator')) {
                     AAM::api()->backend_menu()->get_items();
-                }, PHP_INT_MAX - 1);
-            }
+                }
+
+                if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
+                    $this->filter_menu();
+                }
+
+                return $parent_file;
+            }, PHP_INT_MAX);
         }
 
         // Control admin area

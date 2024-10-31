@@ -91,8 +91,12 @@ class AAM_Service_Core
                 'core.settings.ui.render_access_metabox'
             );
 
-            if ($metaboxEnabled && current_user_can('aam_manager')) {
-                add_action('edit_user_profile', array($this, 'renderAccessWidget'));
+            if ($metaboxEnabled) {
+                add_action('edit_user_profile', function($user) {
+                    if (current_user_can('aam_manager')) {
+                        $this->renderAccessWidget($user);
+                    }
+                });
             }
 
             // Hook that initialize the AAM UI part of the service
@@ -197,9 +201,7 @@ class AAM_Service_Core
      */
     public function renderAccessWidget($user)
     {
-        if (current_user_can('aam_manage_users')) {
-            echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
-        }
+        echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
     }
 
     /**

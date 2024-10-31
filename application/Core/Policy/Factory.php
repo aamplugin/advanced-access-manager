@@ -48,7 +48,7 @@ final class AAM_Core_Policy_Factory
     public static function get(AAM_Core_Subject $subject = null, $skipInheritance)
     {
         if (is_null($subject)) {
-            $subject = AAM::getUser();
+            $subject = AAM::current_user();
         }
 
         $id   = $subject->getId();

@@ -84,20 +84,20 @@ class AAM_Service_Shortcode_Handler_Content
     {
         // Prepare list of subjects
         if (get_current_user_id()) {
-            $roles = array_merge(AAM::getUser()->roles);
+            $roles = array_merge(AAM::current_user()->roles);
 
             // Build the list of assigned capabilities
             $caps = array();
-            foreach(AAM::getUser()->allcaps as $key => $effect) {
+            foreach(AAM::current_user()->allcaps as $key => $effect) {
                 if (!empty($effect)) {
                     $caps[] = $key;
                 }
             }
 
             if (AAM::api()->configs()->get_config('core.settings.multi_access_levels')) {
-                $parts = array_merge(array((string) AAM::getUser()->ID), $roles);
+                $parts = array_merge(array((string) AAM::current_user()->ID), $roles);
             } else {
-                $parts = array((string) AAM::getUser()->ID, array_shift($roles));
+                $parts = array((string) AAM::current_user()->ID, array_shift($roles));
             }
 
             $parts = array_merge($parts, $caps);

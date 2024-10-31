@@ -133,7 +133,7 @@ class AAM_Service_UserLevelFilter
             $allow_equal_level = current_user_can('aam_manage_same_user_level');
         }
 
-        $user_level = AAM::getUser()->getMaxLevel();
+        $user_level = AAM::current_user()->getMaxLevel();
 
         if ($allow_equal_level) {
             $allowed = $user_level >= $level;

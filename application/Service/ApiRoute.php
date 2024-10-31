@@ -169,44 +169,7 @@ class AAM_Service_ApiRoute
                 return $resource;
             }, 10, 3
         );
-
-        // Policy generation hook
-        // add_filter(
-        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        // );
     }
-
-    /**
-     * Generate API Route policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generatePolicy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Core_Object_Route::OBJECT_TYPE) {
-    //         if (!empty($options)) {
-    //             $normalized = array();
-    //             foreach($options as $id => $effect) {
-    //                 $normalized[str_replace('|', ':', $id)] = !empty($effect);
-    //             }
-
-    //             $policy['Statement'] = array_merge(
-    //                 $policy['Statement'],
-    //                 $generator->generateBasicStatements($normalized, 'Route')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
 
     /**
      * Authorize REST request

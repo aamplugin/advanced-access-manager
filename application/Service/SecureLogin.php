@@ -147,7 +147,6 @@ class AAM_Service_SecureLogin
 
         // AAM UI controls
         add_filter('aam_prepare_user_item_filter', function($user) {
-
             // Move this to the Secure Login Service
             if (current_user_can('edit_user', $user['id'])
                 && current_user_can('aam_toggle_users')

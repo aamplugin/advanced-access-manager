@@ -103,7 +103,8 @@ class TestCase extends PHPUnitTestCase
             'user_email' => 'admin@aamportal.local',
             'first_name' => 'John',
             'last_name'  => 'Smith',
-            'role'       => 'administrator'
+            'role'       => 'administrator',
+            'user_pass'  => constant('AAM_UNITTEST_DEFAULT_ADMIN_PASS')
         ]);
 
         file_put_contents(__DIR__ . '/../../.default.setup.json', json_encode([
@@ -125,13 +126,19 @@ class TestCase extends PHPUnitTestCase
 
         // Clear entire WP cache
         wp_cache_flush();
+
+        // Reset user
+        wp_set_current_user(0);
     }
 
     /**
-     * Undocumented function
+     * Create a test user
      *
      * @param array $user_data
+     *
      * @return array
+     *
+     * @access private
      */
     private static function _createUser(array $user_data) : array
     {

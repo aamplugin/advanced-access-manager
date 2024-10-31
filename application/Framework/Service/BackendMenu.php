@@ -47,7 +47,7 @@ class AAM_Framework_Service_BackendMenu
     {
         try {
             $result   = [];
-            $resource = $this->_get_resource(true, $inline_context);
+            $resource = $this->_get_resource($inline_context);
 
             // Getting the menu cache so we can build the list
             $menu = $this->_get_raw_menu();
@@ -227,7 +227,7 @@ class AAM_Framework_Service_BackendMenu
                 $context = is_null($inline_context) ? $menu_slug : $inline_context;
 
                 // Reset all permissions to default
-                $result = $this->_get_resource(false, $context)->reset();
+                $result = $this->_get_resource($context)->reset();
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -256,7 +256,7 @@ class AAM_Framework_Service_BackendMenu
         $result = null;
 
         try {
-            $resource = $this->_get_resource(false, $inline_context);
+            $resource = $this->_get_resource($inline_context);
 
             // Normalize the input data based on top level flat
             $slug = $this->_get_normalized_item_slug($menu_slug, $is_top_level);
@@ -332,7 +332,7 @@ class AAM_Framework_Service_BackendMenu
         $is_top_level,
         $inline_context
     ) {
-        $resource   = $this->_get_resource(false, $inline_context);
+        $resource   = $this->_get_resource($inline_context);
         $permission = [ 'effect' => $effect ];
         $menu_slug  = $this->_get_normalized_item_slug($menu_slug, $is_top_level);
 
@@ -357,7 +357,7 @@ class AAM_Framework_Service_BackendMenu
      */
     private function _delete_item_permission($slug, $is_top_level, $inline_context)
     {
-        $resource    = $this->_get_resource(false, $inline_context);
+        $resource    = $this->_get_resource($inline_context);
         $permissions = $resource->get_permissions(true);
         $slug        = $this->_get_normalized_item_slug($slug, $is_top_level);
 
@@ -376,18 +376,17 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Get backend menu resource
      *
-     * @param boolean $reload
-     * @param mixed   $inline_context
+     * @param mixed $inline_context
      *
      * @return AAM_Framework_Resource_BackendMenu
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($reload, $inline_context)
+    private function _get_resource($inline_context)
     {
         return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::BACKEND_MENU, null, $reload
+            AAM_Framework_Type_Resource::BACKEND_MENU
         );
     }
 

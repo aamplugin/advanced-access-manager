@@ -234,7 +234,7 @@ class AAM_Core_Policy_Token
     protected static function getUserValue($prop)
     {
         $value = null;
-        $user  = AAM::getUser();
+        $user  = AAM::current_user();
 
         switch (strtolower($prop)) {
             case 'ip':

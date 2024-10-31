@@ -102,7 +102,7 @@ if (defined('AAM_KEY')) { ?>
     <?php } else { ?>
         <div style="display: table; width: 100%;">
             <div style="display:table-cell; width: 30%; text-align: center; vertical-align: middle;">
-                <?php echo get_avatar(AAM::getUser()->ID, 50); ?>
+                <?php echo get_avatar(AAM::current_user()->ID, 50); ?>
             </div>
             <div style="display:table-cell;">
                 <?php if (AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) { ?>

@@ -65,7 +65,7 @@ final class AAM_Core_Gateway
      * @access private
      * @version 7.0.0
      */
-    private $_service_methods = [];
+    private $_registered_services = [];
 
     /**
      * Constructor
@@ -75,7 +75,7 @@ final class AAM_Core_Gateway
      */
     protected function __construct()
     {
-        $this->_service_methods = apply_filters('aam_api_gateway_services_filter', [
+        $this->_registered_services = apply_filters('aam_api_gateway_services_filter', [
             'roles'                  => AAM_Framework_Service_Roles::class,
             'urls'                   => AAM_Framework_Service_Urls::class,
             'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
@@ -114,9 +114,9 @@ final class AAM_Core_Gateway
     {
         $result = null;
 
-        if (array_key_exists($name, $this->_service_methods)) {
+        if (array_key_exists($name, $this->_registered_services)) {
             $result = $this->_return_service(
-                $this->_service_methods[$name], array_shift($args)
+                $this->_registered_services[$name], array_shift($args)
             );
         } else {
             _doing_it_wrong(
@@ -184,9 +184,7 @@ final class AAM_Core_Gateway
      */
     public function visitor()
     {
-        return $this->access_levels()->get(
-            AAM_Framework_Type_AccessLevel::VISITOR
-        );
+        return $this->access_levels()->get(AAM_Framework_Type_AccessLevel::VISITOR);
     }
 
     /**
@@ -225,9 +223,7 @@ final class AAM_Core_Gateway
      */
     public function default()
     {
-        return $this->access_levels()->get(
-            AAM_Framework_Type_AccessLevel::DEFAULT
-        );
+        return $this->access_levels()->get(AAM_Framework_Type_AccessLevel::DEFAULT);
     }
 
     /**
@@ -300,6 +296,19 @@ final class AAM_Core_Gateway
     }
 
     /**
+     * Get list of registered services
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_registered_services()
+    {
+        return $this->_registered_services;
+    }
+
+    /**
      * Return an instance of requested service
      *
      * @param string $service_class_name
@@ -361,7 +370,7 @@ final class AAM_Core_Gateway
         AAM_Core_Subject $subject = null, $skipInheritance = false
     ) {
         if (is_null($subject)) {
-            $subject = AAM::getUser();
+            $subject = AAM::current_user();
         }
 
         if (AAM::api()->configs()->get_config(

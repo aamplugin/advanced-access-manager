@@ -12,14 +12,7 @@
  *
  * @package AAM
  *
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
- * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
- * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/98
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0  Initial implementation of the class
- *
- * @version 6.9.19
+ * @version 7.0.0
  */
 class AAM_Service_LoginRedirect
 {
@@ -29,7 +22,7 @@ class AAM_Service_LoginRedirect
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.login_redirect.enabled';
 
@@ -95,13 +88,8 @@ class AAM_Service_LoginRedirect
      *
      * @return void
      *
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
-     * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.12
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -115,9 +103,6 @@ class AAM_Service_LoginRedirect
 
         // WP Core login redirect hook
         add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
-
-        // Policy generation hook
-        // add_filter('aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4);
 
         // Register the resource
         add_filter(
@@ -140,33 +125,6 @@ class AAM_Service_LoginRedirect
     }
 
     /**
-     * Generate Login Redirect policy params
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generate_policy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT) {
-    //         if (!empty($options)) {
-    //             $policy['Param'] = array_merge(
-    //                 $policy['Param'],
-    //                 $generator->generateRedirectParam($options, 'login')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
-
-    /**
      * Prepare login redirect response
      *
      * This method hooks into the Secure Login redirect service and override the
@@ -178,12 +136,9 @@ class AAM_Service_LoginRedirect
      *
      * @return array
      *
-     * @since 6.6.2 https://github.com/aamplugin/advanced-access-manager/issues/139
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
      * @see AAM_Service_SecureLogin::authenticate
-     * @version 6.6.2
+     * @version 7.0.0
      */
     public function prepare_login_response($response, $request, $user)
     {
@@ -203,11 +158,8 @@ class AAM_Service_LoginRedirect
      *
      * @return string
      *
-     * @since 6.5.0 Fixed the way login redirect is computed
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.5.0
+     * @version 7.0.0
      */
     public function get_login_redirect($redirect, $requested, $user)
     {
@@ -232,11 +184,8 @@ class AAM_Service_LoginRedirect
      *
      * @return string|null
      *
-     * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.19
+     * @version 7.0.0
      */
     protected function get_user_redirect_url($user)
     {

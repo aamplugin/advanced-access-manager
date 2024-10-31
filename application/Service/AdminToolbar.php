@@ -114,11 +114,6 @@ class AAM_Service_AdminToolbar
             }
         }, PHP_INT_MAX);
 
-        // Policy generation hook
-        // add_filter(
-        //     'aam_generated_policy_filter', array($this, 'generatePolicy'), 10, 4
-        // );
-
         if (is_admin()) {
             add_action('aam_initialize_ui_action', function () {
                 AAM_Backend_Feature_Main_AdminToolbar::register();
@@ -185,32 +180,5 @@ class AAM_Service_AdminToolbar
             }
         }
     }
-
-    /**
-     * Generate Toolbar policy statements
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generatePolicy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Core_Object_Toolbar::OBJECT_TYPE) {
-    //         if (!empty($options)) {
-    //             $policy['Statement'] = array_merge(
-    //                 $policy['Statement'],
-    //                 $generator->generateBasicStatements($options, 'Toolbar')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
 
 }

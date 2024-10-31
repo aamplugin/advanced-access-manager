@@ -43,7 +43,7 @@ class AAM_Framework_Service_Widgets
     {
         try {
             $result   = [];
-            $resource = $this->get_resource(true, $inline_context);
+            $resource = $this->get_resource($inline_context);
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
@@ -122,7 +122,7 @@ class AAM_Framework_Service_Widgets
     ) {
         try {
             $widget     = $this->get_item($slug);
-            $resource   = $this->get_resource(false, $inline_context);
+            $resource   = $this->get_resource($inline_context);
             $permission = [
                 'effect' => $is_hidden ? 'deny' : 'allow'
             ];
@@ -153,7 +153,7 @@ class AAM_Framework_Service_Widgets
     public function delete_item_permission($slug, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
             $widget   = $this->get_item($slug);
             $explicit = $resource->get_permissions(true);
 
@@ -191,7 +191,7 @@ class AAM_Framework_Service_Widgets
     public function reset($screen_id = null, $inline_context = null)
     {
         try {
-            $resource = $this->get_resource(false, $inline_context);
+            $resource = $this->get_resource($inline_context);
             $success  = true;
 
             if (empty($screen_id)) {
@@ -227,12 +227,12 @@ class AAM_Framework_Service_Widgets
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($reload = false, $inline_context = null)
+    public function get_resource($inline_context = null)
     {
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::WIDGETS, null, $reload
+                AAM_Framework_Type_Resource::WIDGETS
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

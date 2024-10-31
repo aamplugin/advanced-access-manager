@@ -74,18 +74,17 @@ class AAM_Framework_Utility_Misc
     /**
      * Validate and sanitize URL
      *
-     * @param string  $url
-     * @param boolean $suppress_filters
+     * @param string $url
      *
-     * @return boolean|string
+     * @return bool|string
      *
      * @access private
      * @version 7.0.0
      */
-    public static function sanitize_url($url, $suppress_filters = true)
+    public static function sanitize_url($url)
     {
         $result     = false;
-        $parsed_url = self::_parse_url($url);
+        $parsed_url = self::parse_url($url);
 
         if ($parsed_url !== false) {
             // Compile back the URL as following:
@@ -94,7 +93,7 @@ class AAM_Framework_Utility_Misc
             //   - If URL belongs to a different host, return the absolute path,
             //     however, this may result in failure to validate this URL with
             //     WP core function `wp_validate_redirect` if host is not whitelisted
-            $parsed_site_url = self::_parse_url(site_url());
+            $parsed_site_url = self::parse_url(site_url());
 
             if ($parsed_url['domain'] === $parsed_site_url['domain']) {
                 $result = $parsed_url['relative'];
@@ -106,9 +105,7 @@ class AAM_Framework_Utility_Misc
             $result = wp_validate_redirect($result);
         }
 
-        return $suppress_filters ? $result : apply_filters(
-            'aam_validate_url_filter', $result, $url
-        );
+        return $result;
     }
 
     /**
@@ -121,14 +118,17 @@ class AAM_Framework_Utility_Misc
      *
      * @return array|bool
      *
-     * @access private
+     * @access public
      * @static
      * @version 7.0.0
      */
-    private static function _parse_url($url)
+    public static function parse_url($url)
     {
         $result = false;
-        $parsed = wp_parse_url($url);
+        $parsed = wp_parse_url(call_user_func(
+            function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower',
+            is_string($url) ? rtrim($url,  '/') : ''
+        ));
 
         if ($parsed !== false) {
             // Compile domain
@@ -149,13 +149,18 @@ class AAM_Framework_Utility_Misc
                 ksort($query_params);
 
                 // Finally adding sorted query params to the URL
-                $path = add_query_arg($query_params, $path);
+                $relative = add_query_arg($query_params, $path);
+            } else {
+                $query_params = [];
+                $relative     = $path;
             }
 
             $result = [
                 'domain'   => $domain,
-                'relative' => $path,
-                'absolute' => $domain . $path
+                'relative' => $relative,
+                'path'     => $path,
+                'params'   => $query_params,
+                'absolute' => $domain . $relative
             ];
         }
 

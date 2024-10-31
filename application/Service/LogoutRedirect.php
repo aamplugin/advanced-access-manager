@@ -112,7 +112,7 @@ class AAM_Service_LogoutRedirect
     {
         // Capture currently logging out user settings
         add_action('clear_auth_cookie', function() {
-            $redirect = AAM::api()->user()->logout_redirect()->get_redirect();
+            $redirect = AAM::api()->logout_redirect()->get_redirect();
 
             if (empty($redirect) || $redirect['type'] === 'default') {
                 $this->_last_user_redirect = [
@@ -128,9 +128,6 @@ class AAM_Service_LogoutRedirect
         add_action('wp_logout', function() {
             AAM_Framework_Utility_Redirect::do_redirect($this->_last_user_redirect);
         }, PHP_INT_MAX);
-
-        // Policy generation hook
-        // add_filter('aam_generated_policy_filter', [ $this, 'generate_policy' ], 10, 4);
 
         // Register the resource
         add_filter(
@@ -151,32 +148,5 @@ class AAM_Service_LogoutRedirect
         // Register RESTful API
         AAM_Restful_LogoutRedirectService::bootstrap();
     }
-
-    /**
-     * Generate Logout Redirect policy params
-     *
-     * @param array                     $policy
-     * @param string                    $resource_type
-     * @param array                     $options
-     * @param AAM_Core_Policy_Generator $generator
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.4.0
-     */
-    // public function generate_policy($policy, $resource_type, $options, $generator)
-    // {
-    //     if ($resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT) {
-    //         if (!empty($options)) {
-    //             $policy['Param'] = array_merge(
-    //                 $policy['Param'],
-    //                 $generator->generateRedirectParam($options, 'logout')
-    //             );
-    //         }
-    //     }
-
-    //     return $policy;
-    // }
 
 }

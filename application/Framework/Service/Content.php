@@ -84,8 +84,14 @@ class AAM_Framework_Service_Content
                 );
             }
 
+            // if ($this->_get_access_level($inline_context) === null) {
+            //     var_dump($inline_context);
+            //     var_dump($this->_runtime_context);
+            //     die();
+            // }
+
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::POST_TYPE, $post_type, true
+                AAM_Framework_Type_Resource::POST_TYPE, $post_type
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -154,7 +160,7 @@ class AAM_Framework_Service_Content
             }
 
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::TAXONOMY, $taxonomy, true
+                AAM_Framework_Type_Resource::TAXONOMY, $taxonomy
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -320,7 +326,7 @@ class AAM_Framework_Service_Content
             }
 
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::TERM, $term_id, true
+                AAM_Framework_Type_Resource::TERM, $term_id
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -367,7 +373,7 @@ class AAM_Framework_Service_Content
             }
 
             $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::POST, $post->ID, true
+                AAM_Framework_Type_Resource::POST, $post->ID
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

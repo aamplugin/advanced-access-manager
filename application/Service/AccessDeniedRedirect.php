@@ -89,7 +89,7 @@ class AAM_Service_AccessDeniedRedirect
                     $is_rest = defined('REST_REQUEST') && REST_REQUEST;
 
                     if (!$is_post && !$is_rest) {
-                        $service  = AAM::api()->user()->access_denied_redirect();
+                        $service  = AAM::api()->access_denied_redirect();
                         $redirect = $service->get_redirect(
                             (is_admin() ? 'backend' : 'frontend')
                         );
