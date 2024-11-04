@@ -236,7 +236,7 @@ class AAM_Service_Content_Visibility
                 && !isset($visibility[$resource_type][$resource_id])
             ) {
                 $visibility[$resource_type][$resource_id] = array_merge(
-                    $settings['list'], [ '__is_overwritten' => true ]
+                    $settings['list'], [ '__is_customized' => true ]
                 );
             }
         }

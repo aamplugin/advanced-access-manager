@@ -131,17 +131,17 @@ class AAM_Service_AdminToolbar
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
+            function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
                     && $resource_type === AAM_Framework_Type_Resource::TOOLBAR
                 ) {
                     $resource = new AAM_Framework_Resource_AdminToolbar(
-                        $access_level
+                        $access_level, $resource_id
                     );
                 }
 
                 return $resource;
-            }, 10, 3
+            }, 10, 4
         );
 
         // Register RESTful API endpoints

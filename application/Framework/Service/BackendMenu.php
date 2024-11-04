@@ -36,35 +36,30 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Return the complete backend menu list with permissions
      *
-     * @param mixed $inline_context [optional]
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_items($inline_context = null)
+    public function get_items()
     {
         try {
-            $result   = [];
-            $resource = $this->_get_resource($inline_context);
+            $result = [];
 
             // Getting the menu cache so we can build the list
             $menu = $this->_get_raw_menu();
 
             if (!empty($menu)) {
                 foreach ($menu['menu'] as $item) {
-                    if (preg_match('/^separator/', $item['slug'])) {
+                    if (preg_match('/^separator/', $item[2])) {
                         continue; //skip separator
                     }
 
-                    array_push($result, $this->_prepare_menu_item(
-                        $item, $resource, true, $inline_context
-                    ));
+                    array_push($result, $this->_prepare_menu_item($item));
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -73,38 +68,33 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Alias for the get_items method
      *
-     * @param mixed $inline_context [optional]
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function items($inline_context = null)
+    public function items()
     {
-        return $this->get_items($inline_context);
+        return $this->get_items();
     }
 
     /**
      * Get existing menu by ID
      *
-     * @param string  $menu_slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context [optional]
+     * @param string $menu_slug
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item(
-        $menu_slug, $is_top_level = false, $inline_context = null
-    ) {
+    public function get_item($menu_slug)
+    {
         try {
             $result    = false;
-            $menu_slug = $this->_get_normalized_item_slug($menu_slug, $is_top_level);
+            $menu_slug = $this->_get_normalized_item_slug($menu_slug);
 
-            foreach($this->get_items($inline_context) as $item) {
+            foreach($this->get_items() as $item) {
                 if ($item['slug'] === $menu_slug) {
                     $result = $item;
                 } elseif (isset($item['children'])) {
@@ -123,7 +113,7 @@ class AAM_Framework_Service_BackendMenu
                 throw new OutOfRangeException('Backend menu item does not exist');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -132,43 +122,34 @@ class AAM_Framework_Service_BackendMenu
     /**
      * An alias for the get_item method
      *
-     * @param string  $menu_slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context [optional]
+     * @param string $menu_slug
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function item($menu_slug, $is_top_level = false, $inline_context = null)
+    public function item($menu_slug)
     {
-        return $this->get_item($menu_slug, $is_top_level, $inline_context);
+        return $this->get_item($menu_slug);
     }
 
     /**
      * Restrict access to a given menu item
      *
      * @param string $menu_slug
-     * @param string $is_top_level
-     * @param mixed  $inline_context [optional]
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function restrict(
-        $menu_slug,
-        $is_top_level = false,
-        $inline_context = null
-    ) {
+    public function restrict($menu_slug)
+    {
         try {
-            $result = $this->_set_item_permission(
-                $menu_slug, 'deny', $is_top_level, $inline_context
-            );
+            $result = $this->_set_item_permission($menu_slug, 'deny');
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -177,24 +158,19 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Allow access to a given menu item
      *
-     * @param string  $menu_slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context [optional]
+     * @param string $menu_slug
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function allow(
-        $menu_slug, $is_top_level = false, $inline_context = null
-    ) {
+    public function allow($menu_slug)
+    {
         try {
-            $result = $this->_set_item_permission(
-                $menu_slug, 'allow', $is_top_level, $inline_context
-            );
+            $result = $this->_set_item_permission($menu_slug, 'allow');
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -203,34 +179,25 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Reset all backend menu permissions
      *
-     * @param string  $menu_slug      [optional]
-     * @param boolean $is_top_level   [optional]
-     * @param mixed   $inline_context [optional]
+     * @param string|null $menu_slug [optional]
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset(
-        $menu_slug = null,
-        $is_top_level = false,
-        $inline_context = null
-    ) {
+    public function reset($menu_slug = null)
+    {
         try {
             if (is_string($menu_slug)) {
                 $result = $this->_delete_item_permission(
-                    $menu_slug, $is_top_level, $inline_context
+                    $this->_get_normalized_item_slug($menu_slug)
                 );
             } else {
-                // Determine which argument may contain a context
-                $context = is_null($inline_context) ? $menu_slug : $inline_context;
-
-                // Reset all permissions to default
-                $result = $this->_get_resource($context)->reset();
+                $result = $this->_get_resource()->reset();
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -239,40 +206,34 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Check if menu item is restricted
      *
-     * @param string  $menu_slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context [optional]
+     * @param string $menu_slug
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted(
-        $menu_slug,
-        $is_top_level = false,
-        $inline_context = null
-    ) {
+    public function is_restricted($menu_slug)
+    {
         $result = null;
 
         try {
-            $resource = $this->_get_resource($inline_context);
-
             // Normalize the input data based on top level flat
-            $slug = $this->_get_normalized_item_slug($menu_slug, $is_top_level);
+            $menu_slug = $this->_get_normalized_item_slug($menu_slug);
+            $resource  = $this->_get_resource($menu_slug);
 
             // Step #1. Check if menu is explicitly restricted
-            $result = $resource->is_restricted($slug);
+            $result = $resource->is_restricted();
 
             // Step #2. If menu is not top level item and previous step did not yield
-            //          definite results, assume that this was a submenu item and
+            //          definite results, assume that this is a submenu item and
             //          check if parent menu item is restricted
-            if (!$is_top_level && is_null($result)) {
+            if (is_null($result) && strpos($menu_slug, 'menu/') !== 0) {
                 $parent_menu_slug = $this->_get_parent_slug($menu_slug);
 
-                // If we found a parent menu item, check its access
+                // If we found a parent menu item, check permissions
                 if (!empty($parent_menu_slug)) {
-                    $result = $resource->is_restricted($parent_menu_slug, true);
+                    $result = $this->_get_resource($parent_menu_slug)->is_restricted();
                 }
             }
 
@@ -281,11 +242,13 @@ class AAM_Framework_Service_BackendMenu
                 'aam_backend_menu_is_restricted_filter',
                 $result,
                 $this,
-                $menu_slug,
-                $is_top_level
+                $menu_slug
             );
+
+            // Prepare the final answer
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -294,21 +257,16 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Check if menu item is allowed
      *
-     * @param string  $slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context
+     * @param string $slug
      *
-     * @return boolean|WP_Error|null
+     * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_allowed(
-        $menu_slug,
-        $is_top_level = false,
-        $inline_context = null
-    ) {
-        $result = $this->is_restricted($menu_slug, $is_top_level, $inline_context);
+    public function is_allowed($menu_slug)
+    {
+        $result = $this->is_restricted($menu_slug);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -316,27 +274,25 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Set permissions for a given menu slug
      *
-     * @param string  $menu_slug      Menu item slug
-     * @param string  $effect         Wether allow or deny
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context Inline context
+     * @param string $menu_slug      Menu item slug
+     * @param string $effect         Wether allow or deny
      *
      * @return boolean
      *
      * @access private
      * @version 7.0.0
      */
-    private function _set_item_permission(
-        $menu_slug,
-        $effect,
-        $is_top_level,
-        $inline_context
-    ) {
-        $resource   = $this->_get_resource($inline_context);
-        $permission = [ 'effect' => $effect ];
-        $menu_slug  = $this->_get_normalized_item_slug($menu_slug, $is_top_level);
+    private function _set_item_permission($menu_slug, $effect)
+    {
+        $menu_slug = $this->_get_normalized_item_slug($menu_slug);
+        $resource  = $this->_get_resource($menu_slug);
 
-        if (!$resource->set_permission($menu_slug, $permission)) {
+        // Prepare array of new permissions
+        $perms = array_merge($resource->get_permissions(true), [
+            $menu_slug => [ 'effect' => $effect ]
+        ]);
+
+        if (!$resource->set_permissions($perms)) {
             throw new RuntimeException('Failed to persist settings');
         }
 
@@ -346,24 +302,22 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Delete menu permission
      *
-     * @param string  $slug           Menu item slug
-     * @param boolean $is_top_level
-     * @param mixed   $inline_context Inline context
+     * @param string $menu_slug
      *
-     * @return boolean
+     * @return bool
      *
      * @access private
      * @version 7.0.0
      */
-    private function _delete_item_permission($slug, $is_top_level, $inline_context)
+    private function _delete_item_permission($menu_slug)
     {
-        $resource    = $this->_get_resource($inline_context);
+        $menu_slug   = $this->_get_normalized_item_slug($menu_slug);
+        $resource    = $this->_get_resource($menu_slug);
         $permissions = $resource->get_permissions(true);
-        $slug        = $this->_get_normalized_item_slug($slug, $is_top_level);
 
         // Note! User can delete only explicitly set rule (overwritten rule)
-        if (array_key_exists($slug, $permissions)) {
-            unset($permissions[$slug]);
+        if (array_key_exists($menu_slug, $permissions)) {
+            unset($permissions[$menu_slug]);
 
             if (!$resource->set_permissions($permissions)) {
                 throw new RuntimeException('Failed to persist changes');
@@ -376,17 +330,17 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Get backend menu resource
      *
-     * @param mixed $inline_context
+     * @param string|null $menu_slug
      *
      * @return AAM_Framework_Resource_BackendMenu
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($inline_context)
+    private function _get_resource($menu_slug = null)
     {
-        return $this->_get_access_level($inline_context)->get_resource(
-            AAM_Framework_Type_Resource::BACKEND_MENU
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::BACKEND_MENU, $menu_slug
         );
     }
 
@@ -453,13 +407,7 @@ class AAM_Framework_Service_BackendMenu
 
         if (is_array($items)) {
             foreach($items as $i => $item) {
-                $response[$i] = [
-                    'slug' => $item[2],
-                    'cap'  => $item[1],
-                    'name' => base64_encode(
-                        is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
-                    )
-                ];
+                $response[$i] = $this->_get_menu_item_attributes($item);
             }
         }
 
@@ -485,13 +433,7 @@ class AAM_Framework_Service_BackendMenu
                 $response[$menu_id] = [];
 
                 foreach($sub_level as $i => $item) {
-                    $response[$menu_id][$i] = [
-                        'slug' => $item[2],
-                        'cap'  => $item[1],
-                        'name' => base64_encode(
-                            is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)
-                        )
-                    ];
+                    $response[$menu_id][$i] = $this->_get_menu_item_attributes($item);
                 }
             }
         }
@@ -500,43 +442,58 @@ class AAM_Framework_Service_BackendMenu
     }
 
     /**
-     * Normalize and prepare the menu item model
+     * Get menu item attributes
      *
-     * @param array                              $menu_item
-     * @param AAM_Framework_Resource_BackendMenu $resource,
-     * @param boolean                            $is_top_level
-     * @param mixed                              $inline_context
+     * Return only attributes we are interested in
+     *
+     * @param array $item
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_menu_item(
-        $menu_item, $resource, $is_top_level, $inline_context
-    ) {
-        $slug = $this->_get_normalized_item_slug($menu_item['slug'], $is_top_level);
+    private function _get_menu_item_attributes($item)
+    {
+       return [
+            // Name
+            base64_encode(is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)),
+            // Capability
+            $item[1],
+            // Slug
+            $item[2]
+        ];
+    }
 
-        // Determining if menu item is restricted. The default restriction only
-        // applies for submenu
-        $is_restricted = $this->is_restricted($slug, $inline_context);
+    /**
+     * Normalize and prepare the menu item model
+     *
+     * @param array $menu_item
+     * @param bool  $is_top_level
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_menu_item($menu_item, $is_top_level = true)
+    {
+        $slug = $is_top_level ? 'menu/' . $menu_item[2] : $menu_item[2];
 
         $response = array(
             'slug'          => $slug,
-            'path'          => $this->_prepare_admin_uri($slug),
-            'name'          => $this->_filter_menu_name($menu_item['name']),
-            'capability'    => $menu_item['cap'],
-            'is_restricted' => $is_restricted
+            'path'          => $this->_prepare_admin_uri($menu_item[2]),
+            'name'          => $this->_filter_menu_name($menu_item[0]),
+            'capability'    => $menu_item[1],
+            'is_restricted' => $this->is_restricted($slug)
         );
 
         if ($is_top_level) {
             $menu = $this->_get_raw_menu();
 
             $response['children'] = $this->_get_submenu(
-                $slug,
-                isset($menu['submenu']) ? $menu['submenu'] : [],
-                $resource,
-                $inline_context
+                $menu_item[2],
+                isset($menu['submenu']) ? $menu['submenu'] : []
             );
         }
 
@@ -546,31 +503,36 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Normalize the menu slug
      *
-     * If the menu slug is top level menu item, prepend the "menu/"
-     *
      * @param string  $slug
-     * @param boolean &$is_top_level
      *
      * @return string
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_normalized_item_slug($slug, &$is_top_level)
+    private function _get_normalized_item_slug($slug)
     {
         if (strpos($slug, '.php') !== false) {
             $parsed_url  = wp_parse_url($slug);
             $parsed_slug = $parsed_url['path'];
 
-            // Removing some redundant query params
             if (isset($parsed_url['query'])) {
                 parse_str($parsed_url['query'], $query_params);
 
-                foreach(['return', 'path'] as $to_remove) {
+                // Removing some redundant query params
+                $redundant_params = apply_filters(
+                    'aam_ignored_backend_menu_item_query_params_filter',
+                    ['return', 'path']
+                );
+
+                foreach($redundant_params as $to_remove) {
                     if (array_key_exists($to_remove, $query_params)) {
                         unset($query_params[$to_remove]);
                     }
                 }
+
+                // Sorting query params to ensure exactly the same ordering
+                ksort($query_params);
 
                 if (count($query_params)) {
                     $parsed_slug .= '?' . http_build_query($query_params);
@@ -580,18 +542,7 @@ class AAM_Framework_Service_BackendMenu
             $parsed_slug = trim($slug);
         }
 
-        $slug = urldecode($parsed_slug);
-
-        // Normalize the input data based on top level flat
-        if (strpos($slug , 'menu/') === false) {
-            if ($is_top_level) {
-                $slug = 'menu/' . $slug;
-            }
-        } else {
-            $is_top_level = true;
-        }
-
-        return $slug;
+        return urldecode($parsed_slug);
     }
 
     /**
@@ -625,7 +576,7 @@ class AAM_Framework_Service_BackendMenu
             );
         }
 
-        return is_null($result) ? null : 'menu/' . $result;
+        return $result;
     }
 
     /**
@@ -643,22 +594,17 @@ class AAM_Framework_Service_BackendMenu
     {
         $result = null;
 
-        // Covering scenario when the submenu is also a link to the parent branch
-        if (array_key_exists($search, $array)) {
-            $result = $search;
-        } else {
-            foreach ($array as $parent => $subs) {
-                foreach ($subs as $sub) {
-                    if (isset($sub[2]) && $sub[2] === $search) {
-                        $result = $parent;
-                    } else if (isset($sub['slug']) && $sub['slug'] === $search) {
-                        $result = $parent;
-                    }
-                }
+        foreach ($array as $parent => $subs) {
+            foreach ($subs as $sub) {
+                $slug = $this->_get_normalized_item_slug($sub[2]);
 
-                if ($result !== null) {
-                    break;
+                if ($slug === $search) {
+                    $result = 'menu/' . $parent;
                 }
+            }
+
+            if ($result !== null) {
+                break;
             }
         }
 
@@ -668,19 +614,19 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Prepare admin URI for the menu item
      *
-     * @param string $slug
+     * @param string $menu_slug
      *
      * @return string
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_admin_uri($slug)
+    private function _prepare_admin_uri($menu_slug)
     {
-        if (strpos($slug, '.php') === false) {
-            $uri = admin_url('admin.php?page=' . $slug);
+        if (strpos($menu_slug, '.php') === false) {
+            $uri = admin_url('admin.php?page=' . $menu_slug);
         } else {
-            $uri = '/wp-admin/' . trim($slug, '/');
+            $uri = '/wp-admin/' . trim($menu_slug, '/');
         }
 
         // Only prepare the relative path
@@ -716,26 +662,21 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Prepare filtered submenu
      *
-     * @param string                             $menu
-     * @param array                              $submenu,
-     * @param AAM_Framework_Resource_BackendMenu $resource
-     * @param mixed                              $inline_context
+     * @param string $menu
+     * @param array  $submenu,
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_submenu(
-        $parent_slug, $submenu, $resource, $inline_context = null
-    ) {
+    private function _get_submenu($parent_slug, $submenu)
+    {
         $response = [];
 
         if (array_key_exists($parent_slug, $submenu)) {
             foreach ($submenu[$parent_slug] as $item) {
-                array_push($response, $this->_prepare_menu_item(
-                    $item, $resource, false, $inline_context
-                ));
+                array_push($response, $this->_prepare_menu_item($item, false));
             }
         }
 

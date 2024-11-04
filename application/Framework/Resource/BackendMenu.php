@@ -28,27 +28,39 @@ implements
     /**
      * Check is menu or submenu is restricted
      *
-     * @param string $menu_slug
-     *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($menu_slug)
+    public function is_restricted()
     {
         $result = null;
 
+        if (empty($this->_internal_id)) {
+            throw new InvalidArgumentException(
+                'The Backend Menu resource has to be initialized with valid menu slug'
+            );
+        }
+
         // The default dashboard landing page is always excluded
-        if ($menu_slug !== 'index.php') {
-            if (array_key_exists($menu_slug, $this->_permissions)) {
-                $result = $this->_permissions[$menu_slug]['effect'] === 'deny';
+        if ($this->_internal_id !== 'index.php') {
+            if (array_key_exists($this->_internal_id, $this->_permissions)) {
+                $result = $this->_permissions[$this->_internal_id]['effect'] === 'deny';
             }
         } else {
             $result = false;
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _get_settings_ns()
+    {
+        return self::TYPE;
     }
 
 }

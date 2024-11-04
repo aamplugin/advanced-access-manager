@@ -86,12 +86,12 @@ class AAM_Service_Identity
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
+            function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::IDENTITIES
+                    && $resource_type === AAM_Framework_Type_Resource::IDENTITY
                 ) {
-                    $resource = new AAM_Framework_Resource_Identities(
-                        $access_level
+                    $resource = new AAM_Framework_Resource_Identity(
+                        $access_level, $resource_id
                     );
                 }
 

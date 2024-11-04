@@ -126,13 +126,15 @@ class AAM_Framework_Service_Metaboxes
         $slug, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $metabox    = $this->get_item($slug);
-            $resource   = $this->get_resource($inline_context);
-            $permission = [
-                'effect' => $is_hidden ? 'deny' : 'allow'
-            ];
+            $metabox  = $this->get_item($slug);
+            $resource = $this->get_resource($inline_context);
 
-            if (!$resource->set_permission($metabox['slug'], $permission)) {
+            // Prepare array of new permissions
+            $perms = array_merge($resource->get_permissions(true), [
+                $metabox['slug'] => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
+            ]);
+
+            if (!$resource->set_permissions($perms)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -227,7 +229,7 @@ class AAM_Framework_Service_Metaboxes
      *
      * @param array $inline_context
      *
-     * @return AAM_Framework_Resource_Metaboxes
+     * @return AAM_Framework_Resource_Metabox
      *
      * @access public
      * @version 7.0.0
@@ -237,7 +239,7 @@ class AAM_Framework_Service_Metaboxes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::METABOXES
+                AAM_Framework_Type_Resource::METABOX
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -249,9 +251,9 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Normalize and prepare the metabox model
      *
-     * @param array                            $metabox
-     * @param string                           $post_type
-     * @param AAM_Framework_Resource_Metaboxes $resource
+     * @param array                          $metabox
+     * @param string                         $post_type
+     * @param AAM_Framework_Resource_Metabox $resource
      *
      * @return array
      *

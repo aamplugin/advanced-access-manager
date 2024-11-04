@@ -10,12 +10,8 @@
 /**
  * Content service
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/399
- *               https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.31 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Content
 {
@@ -32,7 +28,7 @@ class AAM_Framework_Service_Content
      * @return array
      *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_post_types(
         array $args = [], $result_type = 'list', $inline_context = null
@@ -84,11 +80,13 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            // if ($this->_get_access_level($inline_context) === null) {
-            //     var_dump($inline_context);
-            //     var_dump($this->_runtime_context);
-            //     die();
-            // }
+            $post_type_instance = get_post_type_object($post_type);
+
+            if (!is_a($post_type_instance, WP_Post_Type::class)) {
+                throw new OutOfBoundsException(
+                    sprintf('The post_type %s does not exist', $post_type)
+                );
+            }
 
             $result = $this->_get_access_level($inline_context)->get_resource(
                 AAM_Framework_Type_Resource::POST_TYPE, $post_type
@@ -109,7 +107,7 @@ class AAM_Framework_Service_Content
      * @return array
      *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_taxonomies(
         array $args = [], $result_type = 'list', $inline_context = null
@@ -178,11 +176,8 @@ class AAM_Framework_Service_Content
      *
      * @return array
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/399
-     * @since 6.9.31 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
     public function get_posts(
         array $args = [],  $result_type = 'list', $inline_context = null
@@ -235,7 +230,7 @@ class AAM_Framework_Service_Content
      * @return array
      *
      * @access public
-     * @version 6.9.31
+     * @version 7.0.0
      */
     public function get_terms(
         array $args = [], $result_type = 'list', $inline_context = null

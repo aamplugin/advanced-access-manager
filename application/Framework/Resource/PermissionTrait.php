@@ -98,7 +98,7 @@ trait AAM_Framework_Resource_PermissionTrait
      * Constructor
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
-     * @param mixed|null                          $internal_id
+     * @param mixed                               $internal_id
      *
      * @return void
      *
@@ -106,7 +106,7 @@ trait AAM_Framework_Resource_PermissionTrait
      * @version 7.0.0
      */
     public function __construct(
-        AAM_Framework_AccessLevel_Interface $access_level, $internal_id = null
+        AAM_Framework_AccessLevel_Interface $access_level, $internal_id
     ) {
         $this->_access_level = $access_level;
         $this->_internal_id  = $internal_id;
@@ -308,44 +308,7 @@ trait AAM_Framework_Resource_PermissionTrait
     /**
      * @inheritDoc
      */
-    public function add_permissions($permissions)
-    {
-        return $this->set_permissions(array_merge(
-            $this->_explicit_permissions,
-            $this->_sanitize_permissions($permissions)
-        ), true);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get_permission($permission_key)
-    {
-        if (array_key_exists($permission_key, $this->_permissions)) {
-            $result = $this->_permissions[$permission_key];
-        } else {
-            $result = null;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set_permission($permission_key, $permission)
-    {
-        return $this->set_permissions(array_merge($this->_explicit_permissions, [
-            $permission_key => $this->_sanitize_permission(
-                $permission, $permission_key
-            )
-        ]));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function is_overwritten()
+    public function is_customized()
     {
         return !empty($this->_explicit_permissions);
     }
@@ -363,10 +326,7 @@ trait AAM_Framework_Resource_PermissionTrait
     }
 
     /**
-     * Merge incoming permissions
-     *
-     * Depending on the resource type, different strategies may be applied to merge
-     * permissions
+     * Merge URL access settings
      *
      * @param array $incoming
      *
@@ -377,7 +337,6 @@ trait AAM_Framework_Resource_PermissionTrait
      */
     public function merge_permissions($incoming)
     {
-        $result = [];
         $config = AAM::api()->configs();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
@@ -390,23 +349,9 @@ trait AAM_Framework_Resource_PermissionTrait
             $preference
         );
 
-        $base = $this->_permissions;
-
-        // First get the complete list of unique keys
-        $rule_keys = array_unique([
-            ...array_keys($incoming),
-            ...array_keys($base)
-        ]);
-
-        foreach($rule_keys as $rule_key) {
-            $result[$rule_key] = $this->_merge_permissions(
-                isset($base[$rule_key]) ? $base[$rule_key] : null,
-                isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
-                $preference
-            );
-        }
-
-        return $result;
+        return $this->_merge_permissions(
+            $this->_permissions, $incoming, $preference
+        );
     }
 
     /**
@@ -469,12 +414,13 @@ trait AAM_Framework_Resource_PermissionTrait
      */
     private function _get_settings_ns()
     {
-        // Determine the namespace for resource settings within all settings
-        $resource_id = $this->get_internal_id();
-
         // Compile the namespace
-        $ns  = constant('static::TYPE');
-        $ns .= (is_null($resource_id) ? '' : ".{$resource_id}");
+        $ns = constant('static::TYPE');
+        $id = $this->get_internal_id();
+
+        if (!empty($id)) {
+            $ns .= '.' . $id;
+        }
 
         return $ns;
     }

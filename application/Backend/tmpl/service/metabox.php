@@ -47,7 +47,7 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($service->get_resource()->is_customized() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
                 </div>

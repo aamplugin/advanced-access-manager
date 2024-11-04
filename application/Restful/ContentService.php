@@ -477,12 +477,12 @@ class AAM_Restful_ContentService
     public function set_post_permission(WP_REST_Request $request)
     {
         try {
-            $post = $this->_get_post($request);
+            $post  = $this->_get_post($request);
+            $perms = array_merge($post->get_permissions(true), [
+                $request->get_param('permission') => $request->get_json_params()
+            ]);
 
-            $post->set_permission(
-                $request->get_param('permission'),
-                $request->get_json_params()
-            );
+            $post->set_permissions($perms);
 
             $result = apply_filters(
                 'aam_rest_prepare_content_item_filter',
@@ -743,8 +743,8 @@ class AAM_Restful_ContentService
             $data['title'] = $item->post_title;
         }
 
-        $data['permissions']    = array_values($item->get_permissions());
-        $data['is_overwritten'] = $item->is_overwritten();
+        $data['permissions']   = array_values($item->get_permissions());
+        $data['is_customized'] = $item->is_customized();
 
         return apply_filters('aam_rest_get_post_filter', $data, $item, $request);
     }

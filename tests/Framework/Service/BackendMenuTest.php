@@ -67,20 +67,14 @@ final class BackendMenuTest extends TestCase
 
         $service = AAM::api()->backend_menu();
 
-        // Find menu item by the slug without prefix
-        $item = $service->get_item('aam', true);
+        // Find top backend menu item by the slug
+        $item = $service->get_item('menu/aam');
 
         // The $menu variable should not be empty
         $this->assertNotEmpty($item);
 
         // Also verifying that we retrieved correct menu item
         $this->assertEquals('menu/aam', $item['slug']);
-
-        // Find menu item by the slug with prefix
-        $item = $service->get_item('menu/aam');
-
-        // The $menu variable should not be empty
-        $this->assertNotEmpty($item);
     }
 
     /**
@@ -95,17 +89,15 @@ final class BackendMenuTest extends TestCase
         );
 
         // Update permission for a single submenu item
-        $result = $service->restrict('edit-tags.php?taxonomy=category');
+        $this->assertTrue($service->restrict('edit-tags.php?taxonomy=category'));
 
-        // Assert the the result of the execution is an array the represents a menu
-        // item
-        $this->assertTrue($result);
+        // Assert that submenu item is actually restricted
         $this->assertTrue($service->is_restricted('edit-tags.php?taxonomy=category'));
 
         // Update the entire menu branch and ensure that all sub items are restricted
-        $service->restrict('upload.php', true);
+        $service->restrict('menu/upload.php');
 
-        $this->assertTrue($service->is_restricted('upload.php', true));
+        $this->assertTrue($service->is_restricted('menu/upload.php'));
         $this->assertTrue($service->is_restricted('upload.php'));
         $this->assertTrue($service->is_restricted('media-new.php'));
     }
@@ -131,7 +123,7 @@ final class BackendMenuTest extends TestCase
         $service->restrict('edit-tags.php?taxonomy=category');
 
         // Update the entire menu branch and ensure that all sub items are restricted
-        $service->restrict('upload.php', true);
+        $service->restrict('menu/upload.php');
 
         // Mocking backend menu
         $this->_mockAdminMenu();

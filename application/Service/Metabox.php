@@ -114,17 +114,17 @@ class AAM_Service_Metabox
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
+            function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::METABOXES
+                    && $resource_type === AAM_Framework_Type_Resource::METABOX
                 ) {
-                    $resource = new AAM_Framework_Resource_Metaboxes(
-                        $access_level
+                    $resource = new AAM_Framework_Resource_Metabox(
+                        $access_level, $resource_id
                     );
                 }
 
                 return $resource;
-            }, 10, 3
+            }, 10, 4
         );
 
         // Register RESTful API endpoints

@@ -68,6 +68,16 @@ final class AAM_Core_Gateway
     private $_registered_services = [];
 
     /**
+     * Collection of shortcut methods
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_shortcut_methods = [];
+
+    /**
      * Constructor
      *
      * @access protected
@@ -97,6 +107,11 @@ final class AAM_Core_Gateway
             'settings'               => AAM_Framework_Service_Settings::class,
             'access_levels'          => AAM_Framework_Service_AccessLevels::class
         ]);
+
+        // Get the list of shortcut methods
+        $this->_shortcut_methods = apply_filters(
+            'aam_api_gateway_shortcuts_filter', []
+        );
     }
 
     /**
@@ -118,6 +133,8 @@ final class AAM_Core_Gateway
             $result = $this->_return_service(
                 $this->_registered_services[$name], array_shift($args)
             );
+        } elseif (array_key_exists($name, $this->_shortcut_methods)) {
+            $result = call_user_func_array($this->_shortcut_methods[$name], $args);
         } else {
             _doing_it_wrong(
                 __CLASS__ . '::' . __METHOD__,

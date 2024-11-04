@@ -147,7 +147,7 @@ trait AAM_Framework_Service_BaseTrait
     public function is_customized($inline_context = null)
     {
         try {
-            $result = $this->_get_resource(true, $inline_context)->is_overwritten();
+            $result = $this->_get_resource(true, $inline_context)->is_customized();
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
         }
@@ -169,9 +169,6 @@ trait AAM_Framework_Service_BaseTrait
     {
         $result = null;
 
-        // Determine if the access level is part of the
-        // inline arguments or runtime context when service is requested through the
-        // framework service manager
         if (is_array($inline_context)) {
             $context = $inline_context;
         } elseif (is_a($inline_context, AAM_Framework_AccessLevel_Interface::class)) {
@@ -217,30 +214,23 @@ trait AAM_Framework_Service_BaseTrait
      * Handle error
      *
      * @param Exception $exception
-     * @param mixed     $inline_context
      *
      * @return mixed
      *
      * @access private
      * @version 7.0.0
      */
-    private function _handle_error($exception, $inline_context = null)
+    private function _handle_error($exception)
     {
         $response = null;
 
-        if (empty($inline_context)) {
-            $context = $this->_runtime_context;
-        } else {
-            $context = $inline_context;
-        }
-
         // Determine what is the proper error handling strategy to pick
-        if (!empty($context['error_handling'])) {
-            $strategy = $context['error_handling'];
+        if (!empty($this->_runtime_context['error_handling'])) {
+            $strategy = $this->_runtime_context['error_handling'];
         } else {
             // Do not rely on WP_DEBUG as many website owners forget to turn off
             // debug mode in production
-            $strategy = 'wp_trigger_error';
+            $strategy = 'wp_error';
         }
 
         if ($strategy === 'exception') {

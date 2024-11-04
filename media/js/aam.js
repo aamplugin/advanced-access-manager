@@ -3931,7 +3931,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_overwritten) {
+                            if (data[4].is_customized) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4040,7 +4040,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_overwritten) {
+                            if (data[4].is_customized) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4150,7 +4150,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_overwritten) {
+                            if (data[4].is_customized) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -4281,7 +4281,7 @@
                         rowCallback: function(row, data) {
                             let overwritten = '';
 
-                            if (data[4].is_overwritten) {
+                            if (data[4].is_customized) {
                                 overwritten = ' aam-access-overwritten';
                             }
 
@@ -5177,16 +5177,16 @@
                 // Clearing all values and resetting the form to default
                 $('.form-clearable', '#uri-model').val('');
                 $('.aam-uri-access-action').hide();
-                $('#url_save_btn').removeAttr('data-original-url');
+                $('#url_save_btn').removeAttr('data-url-id');
                 $('input[type="radio"]', '#uri-model').prop('checked', false);
                 $('#uri-model').modal('show');
 
                 // If rule is provided, populating the values
                 if (rule !== null) {
-                    $('#url_save_btn').attr('data-original-url', encodeURI(rule.url));
+                    $('#url_save_btn').attr('data-url-id', encodeURI(rule.id));
 
                     // Settings edit form attributes
-                    $('#url_rule_url').val(rule.url);
+                    $('#url_rule_url').val(rule.url_schema);
 
                     let restriction_type = rule.effect === 'allow' ? 'allow' : 'deny';
                     let http_status_code = null;
@@ -5280,22 +5280,17 @@
                     $('#url_save_btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const url  = $('#url_rule_url').val();
-                        const code = $('#url_access_http_redirect_code').val();
-                        const type = $('input[name="uri.access.type"]:checked').val();
+                        const url_schema = $('#url_rule_url').val();
+                        const code       = $('#url_access_http_redirect_code').val();
+                        const type       = $('input[name="uri.access.type"]:checked').val();
 
-                        const editing_url = $(this).attr('data-original-url');
+                        const editing_url = $(this).attr('data-url-id');
 
-                        if (url && type) {
+                        if (url_schema && type) {
                             // Preparing the payload
                             const payload = {
-                                effect: type === 'allow' ? 'allow' : 'deny'
-                            }
-
-                            if (editing_url) {
-                                payload.new_url = url;
-                            } else {
-                                payload.url = url;
+                                effect: type === 'allow' ? 'allow' : 'deny',
+                                url_schema
                             }
 
                             if (type === 'custom_message') {
@@ -5331,13 +5326,13 @@
                             if (code
                                 && ['page_redirect', 'url_redirect'].includes(type)
                             ) {
-                                payload.http_status_code = parseInt(code, 10);
+                                payload.redirect.http_status_code = parseInt(code, 10);
                             }
 
                             let endpoint = `/service/url`;
 
                             if (editing_url) {
-                                endpoint += '?url=' + editing_url;
+                                endpoint += '/' + editing_url;
                             } else {
                                 endpoint += 's'
                             }
@@ -5381,9 +5376,9 @@
                     $('#uri-delete-btn').bind('click', function (event) {
                         event.preventDefault();
 
-                        const url = $('#uri-delete-btn').attr('data-url');
+                        const url = $('#uri-delete-btn').attr('data-url-id');
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/url?url=${url}`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/service/url/${url}`), {
                             type: 'POST',
                             dataType: 'json',
                             headers: {
@@ -5400,7 +5395,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', null, {
-                                    request: `aam/v2/service/url?url=${url}`,
+                                    request: `aam/v2/service/url/${url}`,
                                     response
                                 });
                             },
@@ -5452,7 +5447,7 @@
                                     }
 
                                     data.push([
-                                        rule.url,
+                                        rule.url_schema,
                                         restriction_type,
                                         actions,
                                         rule
@@ -5514,7 +5509,7 @@
                                             'class': 'aam-row-action icon-trash-empty text-danger'
                                         }).bind('click', function () {
                                             $('#uri-delete-btn').attr(
-                                                'data-url', encodeURI(data[3].url)
+                                                'data-url-id', encodeURI(data[3].id)
                                             );
                                             $('#uri-delete-model').modal('show');
                                         }).attr({

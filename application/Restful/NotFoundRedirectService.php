@@ -186,7 +186,7 @@ class AAM_Restful_NotFoundRedirectService
     private function _validate_url($value)
     {
         $response = true;
-        $url      = wp_validate_redirect($value);
+        $url      = AAM_Framework_Utility_Misc::sanitize_url($value);
 
         if (empty($url)) {
             $response = new WP_Error(
@@ -244,7 +244,7 @@ class AAM_Restful_NotFoundRedirectService
     {
         $response  = true;
         $rule_type = $request->get_param('type');
-        $url       = wp_validate_redirect($value);
+        $url       = AAM_Framework_Utility_Misc::sanitize_url($value);
 
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(

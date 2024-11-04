@@ -33,7 +33,7 @@ class AAM_Restful_UrlService
             // Get the list of define URL permissions
             $this->_register_route('/urls', [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_urls' ],
+                'callback'            => [ $this, 'get_permissions' ],
                 'permission_callback' => [ $this, 'check_permissions' ]
             ]);
 
@@ -43,8 +43,8 @@ class AAM_Restful_UrlService
                 'callback'            => array($this, 'create_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'url' => array(
-                        'description' => 'Absolute or relative URL',
+                    'url_schema' => array(
+                        'description' => 'URL schema',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -59,12 +59,12 @@ class AAM_Restful_UrlService
                         'required' => false,
                         'properties' => [
                             'type' => [
-                                'description' => 'Rule type',
+                                'description' => 'Redirect type',
                                 'type'        => 'string',
                                 'required'    => true,
                                 'enum'        => apply_filters(
                                     'aam_url_access_allowed_rule_types_filter',
-                                    AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                    AAM_Framework_Service_Urls::ALLOWED_REDIRECT_TYPES
                                 )
                             ],
                             'message' => [
@@ -119,7 +119,7 @@ class AAM_Restful_UrlService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Base64 encoded absolute or relative URL',
+                        'description' => 'Base64 encoded URL schema',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -133,12 +133,12 @@ class AAM_Restful_UrlService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Based64 encoded absolute or relative URL',
+                        'description' => 'Based64 encoded URL schema',
                         'type'        => 'string',
                         'required'    => true
                     ),
-                    'url' => array(
-                        'description' => 'New absolute or relative URL',
+                    'url_schema' => array(
+                        'description' => 'New URL schema',
                         'type'        => 'string',
                         'required'    => false
                     ),
@@ -153,12 +153,12 @@ class AAM_Restful_UrlService
                         'required' => false,
                         'properties' => [
                             'type' => [
-                                'description' => 'Rule type',
+                                'description' => 'Redirect type',
                                 'type'        => 'string',
                                 'required'    => true,
                                 'enum'        => apply_filters(
                                     'aam_url_access_allowed_rule_types_filter',
-                                    AAM_Framework_Service_Urls::ALLOWED_RULE_TYPES
+                                    AAM_Framework_Service_Urls::ALLOWED_REDIRECT_TYPES
                                 )
                             ],
                             'message' => [
@@ -213,7 +213,7 @@ class AAM_Restful_UrlService
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Base64 encoded absolute or relative URL',
+                        'description' => 'Base64 encoded URL schema',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -239,14 +239,14 @@ class AAM_Restful_UrlService
      * @access public
      * @version 7.0.0
      */
-    public function get_urls(WP_REST_Request $request)
+    public function get_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
             $result  = [];
 
-            foreach ($service->get_urls() as $url) {
-                array_push($result, $this->_prepare_url($url));
+            foreach ($service->get_permissions() as $permission) {
+                array_push($result, $this->_prepare_permission($permission));
             }
         } catch(Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -271,19 +271,21 @@ class AAM_Restful_UrlService
             $service = $this->_get_service($request);
 
             // Grab all the necessary permission attributes
-            $url      = $request->get_param('url');
-            $effect   = strtolower($request->get_param('effect'));
-            $redirect = $request->get_param('redirect');
+            $url_schema = $request->get_param('url_schema');
+            $effect     = strtolower($request->get_param('effect'));
+            $redirect   = $request->get_param('redirect');
 
             // Persist the permission
             if ($effect === 'allow') {
-                $service->allow($url);
+                $service->allow($url_schema);
             } else {
-                $service->restrict($url, $redirect);
+                $service->restrict($url_schema, $redirect);
             }
 
             // Prepare the response
-            $result = $this->_prepare_url($service->get_url($url));
+            $result = $this->_prepare_permission(
+                $service->get_permission($url_schema)
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -304,9 +306,13 @@ class AAM_Restful_UrlService
     public function get_permission(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $url     = base64_decode($request->get_param('id'));
-            $result  = $this->_prepare_url($service->get_url($url));
+            $service    = $this->_get_service($request);
+            $url_schema = base64_decode($request->get_param('id'));
+
+            // Prepare result
+            $result = $this->_prepare_permission(
+                $service->get_permission($url_schema)
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -331,7 +337,7 @@ class AAM_Restful_UrlService
 
             // Get all the necessary attributes
             $original_url = base64_decode($request->get_param('id'));
-            $new_url      = $request->get_param('url');
+            $new_url      = $request->get_param('url_schema');
             $redirect     = $request->get_param('redirect');
             $effect       = strtolower($request->get_param('effect'));
 
@@ -341,16 +347,18 @@ class AAM_Restful_UrlService
             }
 
             // Now we are settings permission for the given URL
-            $url = !empty($new_url) ? $new_url : $original_url;
+            $url_schema = !empty($new_url) ? $new_url : $original_url;
 
             if ($effect === 'allow') {
-                $service->allow($url);
+                $service->allow($url_schema);
             } else {
-                $service->restrict($url, $redirect);
+                $service->restrict($url_schema, $redirect);
             }
 
             // Prepare the result
-            $result = $this->_prepare_url($service->get_url($url));
+            $result = $this->_prepare_permission(
+                $service->get_permission($url_schema)
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -371,11 +379,11 @@ class AAM_Restful_UrlService
     public function delete_permission(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $url     = base64_decode($request->get_param('id'));
+            $service    = $this->_get_service($request);
+            $url_schema = base64_decode($request->get_param('id'));
 
             // Reset the permission
-            $service->reset($url);
+            $service->reset($url_schema);
 
             // Prepare the result
             $result = [ 'success' => true ];
@@ -503,7 +511,7 @@ class AAM_Restful_UrlService
         $response  = true;
         $redirect  = $request->get_param('redirect');
         $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
-        $url       = wp_validate_redirect($value);
+        $url       = AAM_Framework_Utility_Misc::sanitize_url($value);
 
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(
@@ -547,25 +555,23 @@ class AAM_Restful_UrlService
     }
 
     /**
-     * Prepare the URL model
+     * Prepare the URL permission model
      *
      * This method prepares the URL model so it can be effectively used by RESTful
      * API
      *
-     * @param array $url
+     * @param array $permission
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_url($url)
+    private function _prepare_permission($permission)
     {
-        if (is_array($url) && !empty($url)) {
-            $url = array_merge([ 'id' => base64_encode($url['url']) ], $url);
-        }
-
-        return $url;
+        return array_merge([
+            'id' => base64_encode($permission['url_schema'])
+        ], $permission);
     }
 
     /**

@@ -30,7 +30,7 @@
                 <div
                     class="aam-overwrite"
                     id="aam_toolbar_overwrite"
-                    style="display: <?php echo ($service->get_resource()->is_overwritten() ? 'block' : 'none'); ?>"
+                    style="display: <?php echo ($service->get_resource()->is_customized() ? 'block' : 'none'); ?>"
                 >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="toolbar_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>

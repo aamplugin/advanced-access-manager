@@ -73,17 +73,17 @@ class AAM_Service_BackendMenu
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
+            function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
                     && $resource_type === AAM_Framework_Type_Resource::BACKEND_MENU
                 ) {
                     $resource = new AAM_Framework_Resource_BackendMenu(
-                        $access_level
+                        $access_level, $resource_id
                     );
                 }
 
                 return $resource;
-            }, 10, 3
+            }, 10, 4
         );
     }
 
@@ -102,7 +102,7 @@ class AAM_Service_BackendMenu
             // does not have the ability to manage admin menu through AAM UI
             add_filter('parent_file', function($parent_file) {
                 if (AAM::isAAM() && current_user_can('administrator')) {
-                    AAM::api()->backend_menu()->get_items();
+                   AAM::api()->backend_menu()->get_items();
                 }
 
                 if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
@@ -143,7 +143,7 @@ class AAM_Service_BackendMenu
 
         foreach ($menu as $id => $item) {
             $menu_slug     = $item[2];
-            $is_restricted = $service->is_restricted($menu_slug, true);
+            $is_restricted = $service->is_restricted('menu/' . $menu_slug);
 
             // If top level menu has submenu items - filter them out as well
             if (!empty($submenu[$menu_slug])) {

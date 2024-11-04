@@ -117,17 +117,17 @@ class AAM_Service_Widget
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
+            function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::WIDGETS
+                    && $resource_type === AAM_Framework_Type_Resource::WIDGET
                 ) {
-                    $resource = new AAM_Framework_Resource_Widgets(
-                        $access_level
+                    $resource = new AAM_Framework_Resource_Widget(
+                        $access_level, $resource_id
                     );
                 }
 
                 return $resource;
-            }, 10, 3
+            }, 10, 4
         );
 
         // Register RESTful API endpoints

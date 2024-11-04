@@ -119,11 +119,14 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $resource = $this->get_resource($inline_context);
 
-            // Compile the permission model
-            $permission = [ 'effect' => $is_restricted ? 'deny' : 'allow' ];
-            $key        = strtolower("{$method} {$endpoint}");
+            // Prepare array of new permissions
+            $perms = array_merge($resource->get_permissions(true), [
+                strtolower("{$method} {$endpoint}") => [
+                    'effect' => $is_restricted ? 'deny' : 'allow'
+                ]
+            ]);
 
-            if (!$resource->set_permission($key, $permission)) {
+            if (!$resource->set_permissions($perms)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -153,7 +156,7 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $resource  = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTES
+                AAM_Framework_Type_Resource::API_ROUTE
             );
 
             // Compile the rule's key
@@ -214,7 +217,7 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @param array$inline_context
      *
-     * @return AAM_Framework_Resource_ApiRoutes
+     * @return AAM_Framework_Resource_ApiRoute
      *
      * @access public
      * @version 7.0.0
@@ -224,7 +227,7 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTES
+                AAM_Framework_Type_Resource::API_ROUTE
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -270,9 +273,9 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Normalize and prepare the route model
      *
-     * @param string                           $endpoint
-     * @param string                           $method
-     * @param AAM_Framework_Resource_ApiRoutes $resource
+     * @param string                          $endpoint
+     * @param string                          $method
+     * @param AAM_Framework_Resource_ApiRoute $resource
      *
      * @return array
      *

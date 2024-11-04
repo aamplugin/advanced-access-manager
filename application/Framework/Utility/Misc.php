@@ -101,8 +101,22 @@ class AAM_Framework_Utility_Misc
                 $result = $parsed_url['absolute'];
             }
 
-            // Finally sanitize the safe URL
-            $result = wp_validate_redirect($result);
+            // If URL has domain (host), also validating that is it safe
+            if (!empty($parsed_url['domain'])) {
+                // Making sure that URL is allowed. Do not use wp_validate_redirect
+                // to avoid adding unnecessary stuff to the URL
+                $parsed_home_url = self::parse_url(home_url());
+                $allowed_hosts   = (array) apply_filters(
+                    'allowed_redirect_hosts',
+                    [ $parsed_home_url['domain'] ],
+                    isset($parsed_url['domain']) ? $parsed_url['domain'] : ''
+                );
+
+                // Finally verifying that URL is safe
+                if (!in_array($parsed_url['domain'], $allowed_hosts, true)) {
+                    $result = false;
+                }
+            }
         }
 
         return $result;

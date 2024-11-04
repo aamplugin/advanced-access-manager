@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Urls
+class AAM_Framework_Resource_Url
 implements
     AAM_Framework_Resource_PermissionInterface
 {
@@ -23,17 +23,10 @@ implements
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::URLS;
+    const TYPE = AAM_Framework_Type_Resource::URL;
 
     /**
-     * Merge URL access settings
-     *
-     * @param array $incoming
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
+     * @inheritDoc
      */
     public function merge_permissions($incoming)
     {
@@ -70,16 +63,76 @@ implements
     }
 
     /**
-     * Find permission that matches given URL
+     * Check whether URL is restricted or not
      *
-     * @param string $url
+     * @return bool|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_restricted()
+    {
+        if (empty($this->_internal_id)) {
+            throw new InvalidArgumentException(
+                'The URL resource has to be initialized with valid URL first'
+            );
+        }
+
+        $permission = $this->_get_permission_by_url($this->_internal_id);
+
+        if (!empty($permission)) {
+            $result = $permission['effect'] !== 'allow';
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get redirect defined for a given URL
+     *
+     * This method will return redirect type if URL permission exists. Otherwise,
+     * `null` is returned.
      *
      * @return array|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_permission_by_url($url)
+    public function get_redirect()
+    {
+        if (empty($this->_internal_id)) {
+            throw new InvalidArgumentException(
+                'The URL resource has to be initialized with valid URL first'
+            );
+        }
+
+        $match  = $this->_get_permission_by_url($this->_internal_id);
+        $result = null;
+
+        if (!empty($match)) {
+            if (array_key_exists('redirect', $match)) {
+                $result = $match['redirect'];
+            } else {
+                $result = [ 'type' => 'default' ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find permission that matches given URL
+     *
+     * @param string $url
+     *
+     * @return array|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_permission_by_url($url)
     {
         // Step #1. Let's check if there is a full URL (potentially with query
         //          params explicitly defined
@@ -102,58 +155,6 @@ implements
             $this->_sort_permissions(),
             $this
         );
-    }
-
-    /**
-     * Check whether URL is restricted or not
-     *
-     * @param string $url
-     *
-     * @return bool|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_restricted($url)
-    {
-        $permission = $this->get_permission_by_url($url);
-
-        if (!empty($permission)) {
-            $result = $permission['effect'] !== 'allow';
-        } else {
-            $result = null;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get redirect defined for a given URL
-     *
-     * This method will return redirect type if URL permission exists. Otherwise,
-     * `null` is returned.
-     *
-     * @param string $url
-     *
-     * @return array|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_redirect($url)
-    {
-        $match  = $this->get_permission_by_url($url);
-        $result = null;
-
-        if (!empty($match)) {
-            if (array_key_exists('redirect', $match)) {
-                $result = $match['redirect'];
-            } else {
-                $result = [ 'type' => 'default' ];
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -217,6 +218,14 @@ implements
         }
 
         return array_merge($denied, $allowed);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _get_settings_ns()
+    {
+        return self::TYPE;
     }
 
 }

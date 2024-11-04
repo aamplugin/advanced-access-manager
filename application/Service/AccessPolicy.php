@@ -356,7 +356,7 @@ class AAM_Service_AccessPolicy
                     break;
 
                 case 'uri':
-                case AAM_Framework_Type_Resource::URLS:
+                case AAM_Framework_Type_Resource::URL:
                     $options = $this->initializeUri($options, $object);
                     break;
 

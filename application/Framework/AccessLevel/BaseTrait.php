@@ -198,7 +198,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
         $resource_id = null,
         $skip_inheritance = false
     ) {
-
         $resource = apply_filters(
             'aam_get_resource_filter',
             null,

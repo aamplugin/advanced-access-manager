@@ -310,40 +310,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     public function generate()
     {
-        $subject   = AAM_Backend_Subject::getInstance()->getSubject();
-        $generator = new AAM_Core_Policy_Generator($subject);
-
-        // Prepare the policy name
-        if ($subject::UID === AAM_Core_Subject_User::UID) {
-            $title = sprintf('Policy for %s user', $subject->display_name);
-        } elseif ($subject::UID === AAM_Core_Subject_Role::UID) {
-            $title = sprintf('Policy for %s role', $subject->getId());
-        } elseif ($subject::UID === AAM_Core_Subject_Visitor::UID) {
-            $title = 'Policy for all visitors';
-        } else {
-            $title = 'Policy for everybody';
-        }
-
-        $create = $this->getFromPost('createNewPolicy', FILTER_VALIDATE_BOOLEAN);
-        $policy = $generator->generate();
-
-        if ($create) {
-            $id = wp_insert_post(array(
-                'post_type'    => AAM_Service_AccessPolicy::POLICY_CPT,
-                'post_content' => $policy,
-                'post_title'   => $title,
-                'post_status'  => 'publish'
-            ));
-
-            $response = array('redirect' => get_edit_post_link($id, 'link'));
-        } else {
-            $response = array(
-                'title'  => $title,
-                'policy' => base64_encode($policy)
-            );
-        }
-
-        return wp_json_encode($response);
+        // TODO: Delete it
     }
 
     /**

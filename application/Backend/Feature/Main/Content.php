@@ -107,7 +107,8 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     protected function is_permission_denied($permission, $resource)
     {
-        $settings = $resource->get_permission($permission);
+        $perms    = $resource->get_permissions();
+        $settings = !empty($perms[$permission]) ? $perms[$permission] : null;
 
         return !empty($settings) && $settings['effect'] === 'deny';
     }

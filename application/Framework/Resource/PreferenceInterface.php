@@ -106,7 +106,7 @@ interface AAM_Framework_Resource_PreferenceInterface
      * @access public
      * @version 7.0.0
      */
-    public function is_overwritten();
+    public function is_customized();
 
     /**
      * Reset all explicitly defined settings to default

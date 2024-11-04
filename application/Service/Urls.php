@@ -13,8 +13,9 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Service_Url
+class AAM_Service_Urls
 {
+
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
 
@@ -76,9 +77,9 @@ class AAM_Service_Url
             'aam_get_resource_filter',
             function($resource, $access_level, $resource_type, $resource_id) {
                 if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::URLS
+                    && $resource_type === AAM_Framework_Type_Resource::URL
                 ) {
-                    $resource = new AAM_Framework_Resource_Urls(
+                    $resource = new AAM_Framework_Resource_Url(
                         $access_level, $resource_id
                     );
                 }
@@ -120,10 +121,10 @@ class AAM_Service_Url
      */
     public function authorize()
     {
-        $service = AAM::api()->urls();
+        $resource = AAM::api()->urls()->url($_SERVER['REQUEST_URI']);
 
-        if ($service->is_restricted($_SERVER['REQUEST_URI'])) {
-            $redirect = $service->get_redirect($_SERVER['REQUEST_URI']);
+        if ($resource->is_restricted()) {
+            $redirect = $resource->get_redirect();
 
             if (empty($redirect) || $redirect['type'] === 'default') {
                 AAM_Framework_Utility_Redirect::do_access_denied_redirect();

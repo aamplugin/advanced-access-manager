@@ -63,7 +63,7 @@ class AAM_Framework_Type_Resource
      *
      * @version 7.0.0
      */
-    const API_ROUTES = 'api_routes';
+    const API_ROUTE = 'api_route';
 
     /**
      * Resource type that represents WordPress backend menu
@@ -80,21 +80,21 @@ class AAM_Framework_Type_Resource
      *
      * @version 7.0.0
      */
-    const METABOXES = 'metaboxes';
+    const METABOX = 'metabox';
 
     /**
      * Resource type that represents all dashboard and frontend widgets
      *
      * @version 7.0.0
      */
-    const WIDGETS = 'widgets';
+    const WIDGET = 'widget';
 
     /**
      * Resource type that represents WordPress identities like roles, users or levels
      *
      * @version 7.0.0
      */
-    const IDENTITIES = 'identities';
+    const IDENTITY = 'identity';
 
     /**
      * Resource type that represents logout redirect preferences
@@ -122,7 +122,7 @@ class AAM_Framework_Type_Resource
      *
      * @version 7.0.0
      */
-    const URLS = 'urls';
+    const URL = 'url';
 
     /**
      * Resource type that represents all JSON access policies

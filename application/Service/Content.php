@@ -362,9 +362,7 @@ class AAM_Service_Content
         }
 
         if (is_a($res, 'WP_Post')) {
-            $result = AAM::api()->get_resource(
-                AAM_Framework_Type_Resource::POST, $res->ID
-            );
+            $result = AAM::api()->content()->get_post($res->ID);
         } else {
             $result = null;
         }
@@ -413,11 +411,9 @@ class AAM_Service_Content
     {
         // Honor the manually set password on the post
         if (($result === false) && is_a($post, 'WP_Post')) {
-            $check = $this->_verify_post_password(AAM::api()->get_resource(
-                AAM_Framework_Type_Resource::POST, $post->ID
-            ));
-
-            $result = is_wp_error($check);
+            $resource = AAM::api()->content()->get_post($post->ID);
+            $check    = $this->_verify_post_password($resource);
+            $result   = is_wp_error($check);
         }
 
         return $result;
@@ -725,19 +721,11 @@ class AAM_Service_Content
             if (is_a($post, AAM_Framework_Resource_Post::class)
                 && $post->has_teaser_message()
             ) {
-                $permission = $post->get_permission('read');
-
-                if (!empty($permission['teaser_message'])) {
-                    $message = $permission['teaser_message'];
-                } else {
-                    $message = __('[No teaser message provided]', AAM_KEY);
-                }
-
                 // Replace the [excerpt] placeholder with posts excerpt and do
                 // short-code evaluation
-                $content = do_shortcode(
-                    str_replace('[excerpt]', $post->post_excerpt, $message)
-                );
+                $content = do_shortcode(str_replace(
+                    '[excerpt]', $post->post_excerpt, $post->get_teaser_message()
+                ));
 
                 // Decorate message
                 $content = apply_filters('the_content', $content);
@@ -967,15 +955,13 @@ class AAM_Service_Content
      */
     private function _map_read_post_caps($caps, $post_id, $password = null)
     {
-        $resource = AAM::api()->content()->get_post($post_id);
+        $post = AAM::api()->content()->get_post($post_id);
 
-        if ($resource->is_password_protected()) {
-            $permission = $resource->get_permission('read');
-
-            if ($permission['password'] !== $password) {
+        if ($post->is_password_protected()) {
+            if ($post->get_password() !== $password) {
                 $caps[] = 'do_not_allow';
             }
-        } elseif ($resource->is_restricted()) {
+        } elseif ($post->is_restricted()) {
             $caps[] = 'do_not_allow';
         }
 

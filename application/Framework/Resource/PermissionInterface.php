@@ -80,43 +80,6 @@ interface AAM_Framework_Resource_PermissionInterface
     public function set_permissions(array $permissions, $explicit_only = true);
 
     /**
-     * Add explicit permissions
-     *
-     * @param array   $permissions
-     *
-     * @return void
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function add_permissions(array $permissions);
-
-    /**
-     * Get an individual permission
-     *
-     * @param string $permission
-     *
-     * @return array|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_permission($permission);
-
-    /**
-     * Set explicitly a permission
-     *
-     * @param string $permission_key
-     * @param mixed  $permission
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_permission($permission_key, $permission);
-
-    /**
      * Merge incoming permissions
      *
      * @param array $incoming_permissions
@@ -136,7 +99,7 @@ interface AAM_Framework_Resource_PermissionInterface
      * @access public
      * @version 7.0.0
      */
-    public function is_overwritten();
+    public function is_customized();
 
     /**
      * Reset all explicitly defined settings to default

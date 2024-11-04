@@ -8,12 +8,12 @@
  */
 
 /**
- * Widgets resource class
+ * Metaboxes resource class
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Widgets
+class AAM_Framework_Resource_Metabox
 implements
     AAM_Framework_Resource_PermissionInterface
 {
@@ -23,7 +23,7 @@ implements
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::WIDGETS;
+    const TYPE = AAM_Framework_Type_Resource::METABOX;
 
     /**
      * Check whether the metabox is hidden or not
@@ -46,7 +46,7 @@ implements
         }
 
         return apply_filters(
-            'aam_widget_is_hidden_filter', $result, $lowercase_slug, $this
+            'aam_metabox_is_hidden_filter', $result, $lowercase_slug, $this
         );
     }
 

@@ -120,10 +120,14 @@ implements
         $item_id, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $resource   = $this->get_resource($inline_context);
-            $permission = [ 'effect' => $is_hidden ? 'deny' : 'allow' ];
+            $resource = $this->get_resource($inline_context);
 
-            if (!$resource->set_permission($item_id, $permission)) {
+            // Prepare array of new permissions
+            $perms = array_merge($resource->get_permissions(true), [
+                $item_id => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
+            ]);
+
+            if (!$resource->set_permissions($perms)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 

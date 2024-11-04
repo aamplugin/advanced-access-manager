@@ -121,13 +121,13 @@ class AAM_Framework_Service_Widgets
         $slug, $is_hidden = true, $inline_context = null
     ) {
         try {
-            $widget     = $this->get_item($slug);
-            $resource   = $this->get_resource($inline_context);
-            $permission = [
-                'effect' => $is_hidden ? 'deny' : 'allow'
-            ];
+            $widget      = $this->get_item($slug);
+            $resource    = $this->get_resource($inline_context);
+            $permissions = array_merge($resource->get_permissions(true), [
+                $widget['slug'] => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
+            ]);
 
-            if (!$resource->set_permission($widget['slug'], $permission)) {
+            if (!$resource->set_permissions($permissions)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -222,7 +222,7 @@ class AAM_Framework_Service_Widgets
      *
      * @param array $inline_context
      *
-     * @return AAM_Framework_Resource_Widgets
+     * @return AAM_Framework_Resource_Widget
      *
      * @access public
      * @version 7.0.0
@@ -232,7 +232,7 @@ class AAM_Framework_Service_Widgets
         try {
             $access_level = $this->_get_access_level($inline_context);
             $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::WIDGETS
+                AAM_Framework_Type_Resource::WIDGET
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -244,9 +244,9 @@ class AAM_Framework_Service_Widgets
     /**
      * Normalize and prepare the widget model
      *
-     * @param array                          $widget
-     * @param string                         $screen_id
-     * @param AAM_Framework_Resource_Widgets $resource
+     * @param array                         $widget
+     * @param string                        $screen_id
+     * @param AAM_Framework_Resource_Widget $resource
      *
      * @return array
      *

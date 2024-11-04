@@ -51,7 +51,7 @@ implements
             $resource = $this->get_resource($inline_context);
             $result   = $this->_prepare_redirect(
                 $resource->get_preferences(),
-                !$resource->is_overwritten()
+                !$resource->is_customized()
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);
@@ -194,7 +194,9 @@ implements
             }
         } elseif ($incoming_data['type'] === 'url_redirect') {
             if (isset($incoming_data['redirect_url'])) {
-                $redirect_url = wp_validate_redirect($incoming_data['redirect_url']);
+                $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
+                    $incoming_data['redirect_url']
+                );
             } else {
                 $redirect_url = null;
             }

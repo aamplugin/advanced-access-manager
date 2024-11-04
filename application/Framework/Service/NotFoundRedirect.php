@@ -52,7 +52,7 @@ implements
             $resource = $this->get_resource($inline_context);
             $result   = $this->_prepare_redirect(
                 $resource->get_preferences(),
-                !$resource->is_overwritten()
+                !$resource->is_customized()
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e, $inline_context);

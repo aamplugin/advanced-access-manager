@@ -30,7 +30,7 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <div class="aam-overwrite<?php echo ($service->get_resource()->is_overwritten() ? '' : ' hidden'); ?>" id="aam-route-overwrite">
+                <div class="aam-overwrite<?php echo ($service->get_resource()->is_customized() ? '' : ' hidden'); ?>" id="aam-route-overwrite">
                     <span><i class="icon-check"></i> <?php echo __('Routes are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="route-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
                 </div>

@@ -251,7 +251,7 @@ trait AAM_Framework_Resource_PreferenceTrait
     /**
      * @inheritDoc
      */
-    public function is_overwritten()
+    public function is_customized()
     {
         return !empty($this->_explicit_preferences);
     }

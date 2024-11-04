@@ -62,7 +62,7 @@ implements
             $resource  = $this->get_resource($inline_context);
             $redirects = $this->_prepare_redirects(
                 $resource->get_preferences(),
-                !$resource->is_overwritten()
+                !$resource->is_customized()
             );
 
             if (!empty($area)) {
@@ -275,7 +275,9 @@ implements
                 $result['redirect_page_id'] = $page_id;
             }
         } elseif ($data['type'] === 'url_redirect') {
-            $redirect_url = wp_validate_redirect($data['redirect_url']);
+            $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
+                $data['redirect_url']
+            );
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(

@@ -36,11 +36,13 @@ final class UrlsTest extends TestCase
         $this->assertTrue($service->restrict('/url-a'));
 
         // Verifying that visitors do not have access to the URL
-        $visitor_urls = AAM::api()->user()->urls();
+        $visitor_urls = AAM::api()->urls();
 
         $this->assertTrue($visitor_urls->is_restricted('/url-a'));
+        $this->assertTrue($visitor_urls->url('/url-a')->is_restricted());
         $this->assertTrue($visitor_urls->is_restricted('/url-a?random-param=2'));
         $this->assertFalse($visitor_urls->is_restricted('/url-amber'));
+        $this->assertNull($visitor_urls->url('/url-amber')->is_restricted());
     }
 
     /**
