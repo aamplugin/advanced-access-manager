@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 7.0.0-alpha.1
+ * Version: 7.0.0-alpha.2
  * Author: VasylTech LLC <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
@@ -34,21 +34,21 @@ class AAM
     const SERVICES = [
         'AAM_Service_Core',
         'AAM_Service_Urls',
-        // 'AAM_Service_LoginRedirect',
-        // 'AAM_Service_LogoutRedirect',
-        // 'AAM_Service_AccessDeniedRedirect',
-        // 'AAM_Service_NotFoundRedirect',
+        'AAM_Service_LoginRedirect',
+        'AAM_Service_LogoutRedirect',
+        'AAM_Service_AccessDeniedRedirect',
+        'AAM_Service_NotFoundRedirect',
         'AAM_Service_BackendMenu',
-        // 'AAM_Service_Metabox',
-        // 'AAM_Service_Widget',
-        // 'AAM_Service_AdminToolbar',
-        // 'AAM_Service_ApiRoute',
-        // 'AAM_Service_Identity',
+        'AAM_Service_Metabox',
+        'AAM_Service_Widget',
+        'AAM_Service_AdminToolbar',
+        'AAM_Service_ApiRoute',
+        'AAM_Service_Identity',
         'AAM_Service_Content',
         'AAM_Service_SecureLogin',
         'AAM_Service_Jwt',
-        // 'AAM_Service_Capability',
-        // 'AAM_Service_SecurityAudit'
+        'AAM_Service_Capability',
+        'AAM_Service_SecurityAudit'
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
         // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
