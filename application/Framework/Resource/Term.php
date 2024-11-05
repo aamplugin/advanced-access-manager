@@ -85,4 +85,18 @@ implements
         }
     }
 
+    /**
+     * Get settings namespace
+     *
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_settings_ns()
+    {
+        // Compile the namespace
+        return constant('static::TYPE') . '.' . $this->get_internal_id(true);
+    }
+
 }

@@ -326,85 +326,6 @@ trait AAM_Framework_Resource_PermissionTrait
     }
 
     /**
-     * Merge URL access settings
-     *
-     * @param array $incoming
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function merge_permissions($incoming)
-    {
-        $config = AAM::api()->configs();
-
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = $config->get_config(
-            'core.settings.merge.preference'
-        );
-
-        $preference = $config->get_config(
-            'core.settings.' . constant('static::TYPE') . '.merge.preference',
-            $preference
-        );
-
-        return $this->_merge_permissions(
-            $this->_permissions, $incoming, $preference
-        );
-    }
-
-    /**
-     * Merge two rules based on provided preference
-     *
-     * @param array|null $base
-     * @param array|null $incoming
-     * @param string     $preference
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _merge_permissions($base, $incoming, $preference = 'deny')
-    {
-        $result   = null;
-        $effect_a = null;
-        $effect_b = null;
-
-        if (!empty($base)) {
-            $effect_a = $base['effect'] === 'allow';
-        }
-
-        if (!empty($incoming)) {
-            $effect_b = $incoming['effect'] === 'allow';
-        }
-
-        if ($preference === 'allow') { // Merging preference is to allow
-            // If at least one set has allowed rule, then allow the URL
-            if (in_array($effect_a, [ true, null ], true)
-                || in_array($effect_b, [ true, null ], true)
-            ) {
-                $result = [ 'effect' => 'allow' ];
-            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
-                $result = $base;
-            } else {
-                $result = $incoming;
-            }
-        } else { // Merging preference is to deny access by default
-            if ($effect_a === false) {
-                $result = $base;
-            } elseif ($effect_b === false) {
-                $result = $incoming;
-            } else {
-                $result = [ 'effect' => 'allow' ];
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * Get settings namespace
      *
      * @return string
@@ -415,14 +336,7 @@ trait AAM_Framework_Resource_PermissionTrait
     private function _get_settings_ns()
     {
         // Compile the namespace
-        $ns = constant('static::TYPE');
-        $id = $this->get_internal_id();
-
-        if (!empty($id)) {
-            $ns .= '.' . $id;
-        }
-
-        return $ns;
+        return constant('static::TYPE');
     }
 
     /**

@@ -238,19 +238,6 @@ trait AAM_Framework_Resource_PreferenceTrait
     /**
      * @inheritDoc
      */
-    public function merge_preferences($incoming_preferences)
-    {
-        return apply_filters(
-            'aam_merged_preferences_filter',
-            $this->_explicit_preferences,
-            $incoming_preferences,
-            $this
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function is_customized()
     {
         return !empty($this->_explicit_preferences);

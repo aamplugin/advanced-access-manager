@@ -44,7 +44,7 @@ class AAM
         // 'AAM_Service_AdminToolbar',
         // 'AAM_Service_ApiRoute',
         // 'AAM_Service_Identity',
-        // 'AAM_Service_Content',
+        'AAM_Service_Content',
         'AAM_Service_SecureLogin',
         'AAM_Service_Jwt',
         // 'AAM_Service_Capability',

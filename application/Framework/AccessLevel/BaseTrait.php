@@ -334,7 +334,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_resource($resource::TYPE, null);
-            $preferences      = $sibling_resource->merge_preferences($preferences);
+            $preferences      = AAM_Framework_Utility_Misc::merge_preferences(
+                $sibling_resource->get_preferences(), $preferences
+            );
         }
 
         // Merge preferences while reading hierarchical chain but only
@@ -364,7 +366,11 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $resource::TYPE, $resource->get_internal_id(false)
             );
 
-            $permissions = $sibling_resource->merge_permissions($permissions);
+            $permissions = AAM_Framework_Utility_Misc::merge_permissions(
+                $sibling_resource->get_permissions(),
+                $permissions,
+                $resource::TYPE
+            );
         }
 
         // Merge permissions while reading hierarchical chain but only

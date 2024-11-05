@@ -182,7 +182,10 @@ class AAM_Service_BackendMenu
 
             // Remove the top level menu item if it is restricted and no other
             // sub menu items are available
-            if ($is_restricted && empty($submenu[$menu_slug])) {
+            if ($is_restricted
+                && empty($submenu[$menu_slug])
+                && $menu_slug !== 'index.php'
+            ) {
                 unset($menu[$id]);
             }
         }

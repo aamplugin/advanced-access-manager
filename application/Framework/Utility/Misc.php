@@ -181,4 +181,115 @@ class AAM_Framework_Utility_Misc
         return $result;
     }
 
+    /**
+     * Merge two sets of access permissions
+     *
+     * @param array  $base
+     * @param array  $incoming
+     * @param string $resource_type
+     *
+     * @return array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function merge_permissions($base, $incoming, $resource_type)
+    {
+        $result = [];
+        $config = AAM::api()->configs();
+
+        // If preference is not explicitly defined, fetch it from the AAM configs
+        $preference = $config->get_config(
+            'core.settings.merge.preference'
+        );
+
+        $preference = $config->get_config(
+            'core.settings.' . $resource_type . '.merge.preference',
+            $preference
+        );
+
+        // First get the complete list of unique keys
+        $permission_keys = array_unique([
+            ...array_keys($incoming),
+            ...array_keys($base)
+        ]);
+
+        foreach($permission_keys as $permission_key) {
+            $result[$permission_key] = self::_merge_permissions(
+                isset($base[$permission_key]) ? $base[$permission_key] : null,
+                isset($incoming[$permission_key]) ? $incoming[$permission_key] : null,
+                $preference
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge to sets of preferences
+     *
+     * @param array $base
+     * @param array $incoming
+     *
+     * @return array
+     *
+     * @access public
+     * @static
+     * @version 7.0.0
+     */
+    public static function merge_preferences($base, $incoming)
+    {
+        return array_replace($incoming, $base);
+    }
+
+    /**
+     * Merge two rules based on provided preference
+     *
+     * @param array|null $base
+     * @param array|null $incoming
+     * @param string     $preference
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private static function _merge_permissions($base, $incoming, $preference = 'deny')
+    {
+        $result   = null;
+        $effect_a = null;
+        $effect_b = null;
+
+        if (!empty($base)) {
+            $effect_a = $base['effect'] === 'allow';
+        }
+
+        if (!empty($incoming)) {
+            $effect_b = $incoming['effect'] === 'allow';
+        }
+
+        if ($preference === 'allow') { // Merging preference is to allow
+            // If at least one set has allowed rule, then allow the URL
+            if (in_array($effect_a, [ true, null ], true)
+                || in_array($effect_b, [ true, null ], true)
+            ) {
+                $result = [ 'effect' => 'allow' ];
+            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
+                $result = $base;
+            } else {
+                $result = $incoming;
+            }
+        } else { // Merging preference is to deny access by default
+            if ($effect_a === false) {
+                $result = $base;
+            } elseif ($effect_b === false) {
+                $result = $incoming;
+            } else {
+                $result = [ 'effect' => 'allow' ];
+            }
+        }
+
+        return $result;
+    }
+
 }

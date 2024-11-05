@@ -23,16 +23,14 @@ class AAM_Framework_Service_Content
      *
      * @param array  $args
      * @param string $result_type
-     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_post_types(
-        array $args = [], $result_type = 'list', $inline_context = null
-    ) {
+    public function get_post_types(array $args = [], $result_type = 'list')
+    {
         try {
             // Get the list of all registered post types based on the provided
             // filters
@@ -49,12 +47,12 @@ class AAM_Framework_Service_Content
                 foreach($raw_list as $post_type) {
                     array_push(
                         $result,
-                        $this->get_post_type($post_type, $inline_context)
+                        $this->get_post_type($post_type)
                     );
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -64,14 +62,13 @@ class AAM_Framework_Service_Content
      * Get a single post type resource
      *
      * @param string $post_type
-     * @param array  $inline_context
      *
      * @return AAM_Framework_Resource_PostType
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_post_type($post_type, $inline_context = null)
+    public function get_post_type($post_type)
     {
         try {
             if (!is_string($post_type)) {
@@ -88,11 +85,11 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            $result = $this->_get_access_level($inline_context)->get_resource(
+            $result = $this->_get_access_level()->get_resource(
                 AAM_Framework_Type_Resource::POST_TYPE, $post_type
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -102,16 +99,14 @@ class AAM_Framework_Service_Content
      * Get list of taxonomies
      *
      * @param array $args
-     * @param array $inline_context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_taxonomies(
-        array $args = [], $result_type = 'list', $inline_context = null
-    ) {
+    public function get_taxonomies(array $args = [], $result_type = 'list')
+    {
         try {
             // Convert the list to models
             $raw_list = get_taxonomies($args, 'names', 'or');
@@ -126,12 +121,12 @@ class AAM_Framework_Service_Content
 
                 foreach($raw_list as $taxonomy) {
                     array_push(
-                        $result, $this->get_taxonomy($taxonomy, $inline_context)
+                        $result, $this->get_taxonomy($taxonomy)
                     );
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -141,14 +136,13 @@ class AAM_Framework_Service_Content
      * Get a single taxonomy resource
      *
      * @param string $taxonomy
-     * @param array  $inline_context
      *
      * @return AAM_Framework_Resource_Taxonomy
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_taxonomy($taxonomy, $inline_context = null)
+    public function get_taxonomy($taxonomy)
     {
         try {
             if (!is_string($taxonomy)) {
@@ -157,11 +151,11 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            $result = $this->_get_access_level($inline_context)->get_resource(
+            $result = $this->_get_access_level()->get_resource(
                 AAM_Framework_Type_Resource::TAXONOMY, $taxonomy
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -172,16 +166,14 @@ class AAM_Framework_Service_Content
      *
      * @param array  $args
      * @param string $result_type
-     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_posts(
-        array $args = [],  $result_type = 'list', $inline_context = null
-    ) {
+    public function get_posts(array $args = [],  $result_type = 'list')
+    {
         try {
             // The minimum required attribute is post_type. If it is not defined,
             // throw an error
@@ -209,12 +201,12 @@ class AAM_Framework_Service_Content
 
                 foreach($raw_list as $id) {
                     array_push(
-                        $result, $this->get_post($id, $inline_context)
+                        $result, $this->get_post($id)
                     );
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -225,16 +217,14 @@ class AAM_Framework_Service_Content
      *
      * @param array  $args
      * @param string $result_type
-     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_terms(
-        array $args = [], $result_type = 'list', $inline_context = null
-    ) {
+    public function get_terms(array $args = [], $result_type = 'list')
+    {
         try {
             // The minimum required attribute is taxonomy. If it is not defined,
             // throw an error
@@ -278,11 +268,11 @@ class AAM_Framework_Service_Content
                         $id['post_type'] = $args['post_type'];
                     }
 
-                    array_push($result, $this->get_term($id, $inline_context));
+                    array_push($result, $this->get_term($id));
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -292,14 +282,13 @@ class AAM_Framework_Service_Content
      * Get a single term resource
      *
      * @param int|array $term_id
-     * @param array     $inline_context
      *
      * @return AAM_Framework_Resource_Term
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_term($term_id, $inline_context = null)
+    public function get_term($term_id)
     {
         try {
             if (is_array($term_id)) {
@@ -320,11 +309,11 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            $result = $this->_get_access_level($inline_context)->get_resource(
+            $result = $this->_get_access_level()->get_resource(
                 AAM_Framework_Type_Resource::TERM, $term_id
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -333,27 +322,22 @@ class AAM_Framework_Service_Content
     /**
      * Get a post
      *
-     * @param int|string   $post_identifier
-     * @param string|array $post_type
-     * @param array|null   $inline_context
+     * @param int|string $post_identifier
+     * @param string     $post_type
      *
      * @return AAM_Framework_Resource_Post
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_post(
-        $post_identifier, $post_type = '', $inline_context = null
-    ) {
+    public function get_post($post_identifier, $post_type = '')
+    {
         try {
             // Determining if we are dealing with post ID or post slug
-            if (is_numeric($post_identifier)) {
-                // If is numeric first arg, assume second as inline context
-                $inline_context = $post_type;
-
+            if (is_numeric($post_identifier) && is_int($post_identifier)) {
                 // Fetching post by ID
                 $post = get_post(intval($post_identifier));
-            } elseif (!is_string($post_type)) {
+            } elseif (!is_string($post_type) || empty($post_type)) {
                 throw new InvalidArgumentException(
                     'The post_type has to be a string value'
                 );
@@ -367,11 +351,11 @@ class AAM_Framework_Service_Content
                 );
             }
 
-            $result = $this->_get_access_level($inline_context)->get_resource(
+            $result = $this->_get_access_level()->get_resource(
                 AAM_Framework_Type_Resource::POST, $post->ID
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -380,18 +364,17 @@ class AAM_Framework_Service_Content
     /**
      * Alias for the get_post method
      *
-     * @param int|string   $post_identifier
-     * @param string|array $post_type
-     * @param array|null   $inline_context
+     * @param int|string $post_identifier
+     * @param string     $post_type
      *
      * @return AAM_Framework_Resource_Post
      *
      * @access public
      * @version 7.0.0
      */
-    public function post($post_id, $post_type = '', $inline_context = null)
+    public function post($post_id, $post_type = '')
     {
-        return $this->get_post($post_id, $post_type, $inline_context);
+        return $this->get_post($post_id, $post_type);
     }
 
     /**

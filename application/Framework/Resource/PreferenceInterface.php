@@ -87,18 +87,6 @@ interface AAM_Framework_Resource_PreferenceInterface
     public function set_preference($preference_key, $value);
 
     /**
-     * Merge incoming preferences
-     *
-     * @param array $incoming_preferences
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function merge_preferences($incoming_preferences);
-
-    /**
      * Check if resource settings are overwritten
      *
      * @return boolean

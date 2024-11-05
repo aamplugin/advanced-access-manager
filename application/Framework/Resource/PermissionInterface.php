@@ -80,18 +80,6 @@ interface AAM_Framework_Resource_PermissionInterface
     public function set_permissions(array $permissions, $explicit_only = true);
 
     /**
-     * Merge incoming permissions
-     *
-     * @param array $incoming_permissions
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function merge_permissions($incoming_permissions);
-
-    /**
      * Check if resource settings are overwritten
      *
      * @return boolean

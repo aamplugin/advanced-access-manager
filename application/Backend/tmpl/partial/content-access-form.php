@@ -26,7 +26,7 @@
         }
     ?>
 
-    <div class="aam-overwrite<?php echo $params->resource() ? '' : ' hidden'; ?>">
+    <div class="aam-overwrite<?php echo $params->resource->is_customized() ? '' : ' hidden'; ?>">
         <span>
             <i class="icon-check"></i>
             <?php echo __('Settings are customized', AAM_KEY); ?>

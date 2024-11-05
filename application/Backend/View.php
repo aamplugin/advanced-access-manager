@@ -402,6 +402,7 @@ class AAM_Backend_View
                     $this->getFromPost('resource_id'),
                     $this->getFromPost('resource_type')
                 );
+                break;
 
             case 'audit':
                 if (current_user_can('aam_trigger_audit')) {

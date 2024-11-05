@@ -55,12 +55,4 @@ implements
         return $result;
     }
 
-    /**
-     * @inheritDoc
-     */
-    private function _get_settings_ns()
-    {
-        return self::TYPE;
-    }
-
 }

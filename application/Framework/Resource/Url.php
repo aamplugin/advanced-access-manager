@@ -26,43 +26,6 @@ implements
     const TYPE = AAM_Framework_Type_Resource::URL;
 
     /**
-     * @inheritDoc
-     */
-    public function merge_permissions($incoming)
-    {
-        $result = [];
-        $config = AAM::api()->configs();
-
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = $config->get_config(
-            'core.settings.merge.preference'
-        );
-
-        $preference = $config->get_config(
-            'core.settings.' . constant('static::TYPE') . '.merge.preference',
-            $preference
-        );
-
-        $base = $this->_permissions;
-
-        // First get the complete list of unique keys
-        $rule_keys = array_unique([
-            ...array_keys($incoming),
-            ...array_keys($base)
-        ]);
-
-        foreach($rule_keys as $rule_key) {
-            $result[$rule_key] = $this->_merge_permissions(
-                isset($base[$rule_key]) ? $base[$rule_key] : null,
-                isset($incoming[$rule_key]) ? $incoming[$rule_key] : null,
-                $preference
-            );
-        }
-
-        return $result;
-    }
-
-    /**
      * Check whether URL is restricted or not
      *
      * @return bool|null
@@ -218,14 +181,6 @@ implements
         }
 
         return array_merge($denied, $allowed);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private function _get_settings_ns()
-    {
-        return self::TYPE;
     }
 
 }

@@ -10,6 +10,8 @@
 /**
  * Post Resource class
  *
+ * @method WP_Post get_core_instance()
+ *
  * @package AAM
  * @version 7.0.0
  */
@@ -341,63 +343,6 @@ implements
     }
 
     /**
-     * @inheritDoc
-     */
-    public function merge_permissions($permissions)
-    {
-        $result           = [];
-        $base_permissions = $this->get_permissions();
-
-        $permission_list = array_unique(
-            [...array_keys($base_permissions), ...array_keys($permissions)]
-        );
-
-        $config = AAM::api()->configs();
-
-        // Determine permissions merging preference
-        $merging_preference = strtolower($config->get_config(
-            'core.settings.' . self::TYPE . '.merge.preference',
-            $config->get_config('core.settings.merge.preference')
-        ));
-        $default_effect = $merging_preference === 'allow' ? 'allow' : 'deny';
-
-        foreach($permission_list as $perm) {
-            $effect_a = null;
-            $effect_b = null;
-
-            if (isset($base_permissions[$perm])) {
-                $effect_a = $base_permissions[$perm]['effect'];
-            }
-
-            if (isset($permissions[$perm])) {
-                $effect_b = $permissions[$perm]['effect'];
-            }
-
-            if ($default_effect === 'allow') { // Merging preference is to allow
-                if (in_array($effect_a, [ 'allow', null ], true)
-                    || in_array($effect_b, [ 'allow', null ], true)
-                ) {
-                    $result[$perm] = [ 'permission' => $perm, 'effect' => 'allow' ];
-                } elseif (!is_null($effect_b)) {
-                    $result[$perm] = $permissions[$perm];
-                } else {
-                    $result[$perm] = $base_permissions[$perm];
-                }
-            } else { // Merging preference is to deny access by default
-                if ($effect_b === 'deny') {
-                    $result[$perm] = $permissions[$perm];
-                } elseif ($effect_a === 'deny') {
-                    $result[$perm] = $base_permissions[$perm];
-                } else {
-                    $result[$perm] = [ 'permission' => $perm, 'effect' => 'allow' ];
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * Initialize additional properties
      *
      * @return void
@@ -442,6 +387,20 @@ implements
         }
 
         return $permission;
+    }
+
+    /**
+     * Get settings namespace
+     *
+     * @return string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_settings_ns()
+    {
+        // Compile the namespace
+        return constant('static::TYPE') . '.' . $this->get_internal_id(true);
     }
 
 }
