@@ -143,6 +143,22 @@ class AAM_Service_SecurityAudit
                 'description' => __('Assigning high-privilege capabilities directly to users or expanding the number of users in high-privilege roles increases the potential attack surface. This check identifies users with elevated access to ensure that roles and capabilities are properly managed, minimizing security risks.', AAM_KEY),
                 'article'     => 'https://aamportal.com/article/security-risks-elevated-user-access-high-privilege-wordpress'
             ),
+            'high_privilege_content_moderator_roles' => array(
+                'title'       => __('Identify High-Privilege Content Moderator Roles', AAM_KEY),
+                'step'        => 'high_privilege_content_moderator_roles',
+                'category'    => 'Access Strategy',
+                'executor'    => AAM_Audit_HighPrivilegeContentModeratorCheck::class,
+                'description' => __('Assigning high-privilege content moderation capabilities in WordPress, poses significant security risks if granted to untrusted roles. These capabilities allow users to manipulate or delete live content, inject malware, and harm SEO performance, potentially leading to data loss and compromised site integrity. By carefully managing user roles and permissions, you can protect your website from potential cyber threats while ensuring content integrity.', AAM_KEY),
+                'article'     => 'https://aamportal.com/article/wordpress-security-risks-high-privilege-roles-content-moderation'
+            ),
+            'high_privilege_users_count' => array(
+                'title'       => __('Identified Elevated Number of High-Privilege Users', AAM_KEY),
+                'step'        => 'high_privilege_users_count',
+                'category'    => 'Access Strategy',
+                'executor'    => AAM_Audit_HighPrivilegeUserCountCheck::class,
+                'description' => __('Having too many Administrator or high-privilege content moderation accounts on a WordPress site can seriously compromise security, as such account increases the risk of unauthorized access. Administrator accounts, with unrestricted control over the site, pose a significant threat if compromised, enabling attackers to install malware, alter site content, or hijack accounts. Even Editor accounts, though less powerful, allow users to modify and publish all posts, insert HTML and JavaScript, and upload files, which could lead to vulnerabilities like Cross-Site Scripting (XSS) or malware injection if an account is breached.', AAM_KEY),
+                'article'     => 'https://aamportal.com/article/wordpress-security-risks-too-many-admin-editor-accounts'
+            ),
             'elevated_core_role_caps' => array(
                 'title'       => __('Flag Elevated Privileges for Core Roles', AAM_KEY),
                 'step'        => 'elevated_core_role_caps',
