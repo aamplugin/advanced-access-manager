@@ -188,7 +188,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Detected elevated number of users (%d) with administrator level privileges', AAM_KEY),
                 $sums['website']
-            ), 'danger'));
+            ), 'critical'));
         }
 
         if ($sums['content'] > $suggested_editors) {
