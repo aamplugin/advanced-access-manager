@@ -54,6 +54,52 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Create a test post
+     *
+     * @param array $post_data
+     *
+     * @return integer
+     *
+     * @access public
+     */
+    public function createPost(array $post_data = []) : int
+    {
+        $result = self::_createPost($post_data);
+
+        // Storing this in shared fixtures
+        if (!array_key_exists('posts', $this->fixtures)) {
+            $this->fixtures['posts'] = [];
+        }
+
+        $this->fixtures['posts'][$result['ID']] = $result;
+
+        return $result['ID'];
+    }
+
+    /**
+     * Create a test term
+     *
+     * @param array $term_data
+     *
+     * @return integer
+     *
+     * @access public
+     */
+    public function createTerm(array $term_data = []) : int
+    {
+        $result = self::_createTerm($term_data);
+
+        // Storing this in shared fixtures
+        if (!array_key_exists('terms', $this->fixtures)) {
+            $this->fixtures['terms'] = [];
+        }
+
+        $this->fixtures['terms'][$result['term_id']] = $result;
+
+        return $result['term_id'];
+    }
+
+    /**
      * Get create user data
      *
      * @param int $user_id
@@ -73,6 +119,26 @@ class TestCase extends PHPUnitTestCase
         return $this->fixtures['users'][$user_id];
     }
 
+    /**
+     * Read option from DB
+     *
+     * @param string $option
+     * @param mixed  $default
+     *
+     * @return mixed
+     *
+     * @access public
+     */
+    public function readWpOption($option, $default = null)
+    {
+        if (is_multisite()) {
+            $result = get_blog_option(get_current_blog_id(), $option, $default);
+        } else {
+            $result = get_option($option, $default);
+        }
+
+        return $result;
+    }
     /**
      * Clear all resources
      *
@@ -156,6 +222,50 @@ class TestCase extends PHPUnitTestCase
         $user_id         = wp_insert_user($final_user_data);
 
         return array_merge([ 'id' => $user_id ], $final_user_data);
+    }
+
+    /**
+     * Create a test term
+     *
+     * @param array $term_data
+     *
+     * @return array
+     *
+     * @access private
+     */
+    private static function _createTerm(array $term_data) : array
+    {
+        $default_term_data = [
+            'name'     => 'Test Category',
+            'taxonomy' => 'category'
+        ];
+
+        $final = array_merge($default_term_data, $term_data);
+
+        return wp_insert_term($final['name'], $final['taxonomy'], $final);
+    }
+
+    /**
+     * Create a test post
+     *
+     * @param array $post_data
+     *
+     * @return array
+     *
+     * @access private
+     */
+    private static function _createPost(array $post_data) : array
+    {
+        $default_post_data = [
+            'post_type'   => 'post',
+            'post_status' => 'publish',
+            'post_title'  => 'Test Post: ' . uniqid()
+        ];
+
+        $final_post_data = array_merge($default_post_data, $post_data);
+        $post_id         = wp_insert_post($final_post_data);
+
+        return array_merge([ 'ID' => $post_id ], $default_post_data);
     }
 
 }

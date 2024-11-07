@@ -9,25 +9,15 @@ declare(strict_types=1);
  * ======================================================================
  */
 
-namespace AAM\UnitTest\Framework\Service;
+namespace AAM\UnitTest\Framework\Resource;
 
 use AAM,
     AAM\UnitTest\Utility\TestCase;
 
 /**
- * Test class for the AAM "Content" framework service
+ * Test class for the AAM "Taxonomy" framework resource
  */
-final class ContentTest extends TestCase
+final class TaxonomyTest extends TestCase
 {
-
-    /**
-     * Testing
-     *
-     * @return void
-     */
-    public function test() : void
-    {
-
-    }
 
 }

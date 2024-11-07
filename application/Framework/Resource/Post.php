@@ -27,6 +27,53 @@ implements
      */
     const TYPE = AAM_Framework_Type_Resource::POST;
 
+    const PERMISSION_LIST = 'list';
+    const PERMISSION_HIDDEN = 'list';
+    const PERMISSION_HIDE = 'list';
+
+    /**
+     * Add a single permission
+     *
+     * @param string            $permission_key
+     * @param array|string|null $permission
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function add_permission($permission_key, $permission = null)
+    {
+        $permissions = $this->_explicit_permissions;
+        $permissions[$permission_key] = $this->_sanitize_permission(
+            is_null($permission) ? 'deny' : $permission,
+            $permission_key
+        );
+
+        return $this->set_permissions($permissions, true);
+    }
+
+    /**
+     * Add multiple permissions
+     *
+     * @param array $permissions
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function add_permissions($permissions)
+    {
+        $permissions = $this->_explicit_permissions;
+
+        foreach($permissions as $key => $value) {
+            $permissions[$key] = $this->_sanitize_permission($value, $key);
+        }
+
+        return $this->set_permissions($permissions, true);
+    }
+
     /**
      * Determine if post is hidden on given area
      *

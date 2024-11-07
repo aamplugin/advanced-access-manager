@@ -63,7 +63,7 @@ class AAM_Framework_Service_Content
      *
      * @param string $post_type
      *
-     * @return AAM_Framework_Resource_PostType
+     * @return AAM_Framework_Resource_PostType|WP_Error|null
      *
      * @access public
      * @version 7.0.0
@@ -93,6 +93,21 @@ class AAM_Framework_Service_Content
         }
 
         return $result;
+    }
+
+    /**
+     * Get a single post type resource
+     *
+     * @param string $post_type
+     *
+     * @return AAM_Framework_Resource_PostType|WP_Error|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function post_type($post_type)
+    {
+        return $this->get_post_type($post_type);
     }
 
     /**
@@ -137,7 +152,7 @@ class AAM_Framework_Service_Content
      *
      * @param string $taxonomy
      *
-     * @return AAM_Framework_Resource_Taxonomy
+     * @return AAM_Framework_Resource_Taxonomy|WP_Error|null
      *
      * @access public
      * @version 7.0.0
@@ -159,6 +174,21 @@ class AAM_Framework_Service_Content
         }
 
         return $result;
+    }
+
+    /**
+     * Get a single taxonomy resource
+     *
+     * @param string $taxonomy
+     *
+     * @return AAM_Framework_Resource_Taxonomy|WP_Error|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function taxonomy($taxonomy)
+    {
+        return $this->get_taxonomy($taxonomy);
     }
 
     /**
@@ -281,36 +311,40 @@ class AAM_Framework_Service_Content
     /**
      * Get a single term resource
      *
-     * @param int|array $term_id
+     * @param int|array $term_identifier
      *
-     * @return AAM_Framework_Resource_Term
+     * @return AAM_Framework_Resource_Term|WP_Error|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_term($term_id)
+    public function get_term($term_identifier)
     {
         try {
-            if (is_array($term_id)) {
-                if (!isset($term_id['id']) || !is_numeric($term_id['id'])) {
+            if (is_array($term_identifier)) {
+                if (!isset($term_identifier['id'])
+                    || !is_numeric($term_identifier['id'])
+                ) {
                     throw new InvalidArgumentException(
                         "The term_id has to have a valid numeric id"
                     );
                 }
 
-                if (!isset($term_id['taxonomy']) || !is_string($term_id['taxonomy'])) {
+                if (!isset($term_identifier['taxonomy'])
+                    || !is_string($term_identifier['taxonomy'])
+                ) {
                     throw new InvalidArgumentException(
                         "The term_id has to have a valid string taxonomy"
                     );
                 }
-            } elseif (!is_numeric($term_id)) {
+            } elseif (!is_numeric($term_identifier)) {
                 throw new InvalidArgumentException(
                     "The term_id argument has to be a valid numeric value"
                 );
             }
 
             $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::TERM, $term_id
+                AAM_Framework_Type_Resource::TERM, $term_identifier
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -320,12 +354,27 @@ class AAM_Framework_Service_Content
     }
 
     /**
+     * Get a single term resource
+     *
+     * @param int|array $term_identifier
+     *
+     * @return AAM_Framework_Resource_Term|WP_Error|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function term($term_identifier)
+    {
+        return $this->get_term($term_identifier);
+    }
+
+    /**
      * Get a post
      *
      * @param int|string $post_identifier
      * @param string     $post_type
      *
-     * @return AAM_Framework_Resource_Post
+     * @return AAM_Framework_Resource_Post|WP_Error|null
      *
      * @access public
      * @version 7.0.0
