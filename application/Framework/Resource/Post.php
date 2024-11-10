@@ -27,10 +27,6 @@ implements
      */
     const TYPE = AAM_Framework_Type_Resource::POST;
 
-    const PERMISSION_LIST = 'list';
-    const PERMISSION_HIDDEN = 'list';
-    const PERMISSION_HIDE = 'list';
-
     /**
      * Add a single permission
      *

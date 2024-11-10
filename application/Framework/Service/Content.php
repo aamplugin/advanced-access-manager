@@ -427,6 +427,116 @@ class AAM_Framework_Service_Content
     }
 
     /**
+     * Check if post or term is hidden
+     *
+     * @param mixed $resource
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_hidden($resource)
+    {
+        $resource = $this->_get_resource($resource);
+
+        return $resource->is_hidden();
+    }
+
+    /**
+     * Check if post or term is restricted
+     *
+     * @param mixed $resource
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_restricted($resource)
+    {
+        $resource = $this->_get_resource($resource);
+
+        return $resource->is_restricted();
+    }
+
+    /**
+     * Check if current access level has permission for give post or term
+     *
+     * @param mixed  $resource
+     * @param string $permission
+     *
+     * @return boolean
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_allowed_to($resource, $permission)
+    {
+        $resource = $this->_get_resource($resource);
+
+        return $resource->is_allowed_to($permission);
+    }
+
+    /**
+     * Check if current access level does not have permission for give post or term
+     *
+     * @param mixed  $resource
+     * @param string $permission
+     *
+     * @return boolean
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_denied_to($resource, $permission)
+    {
+        $resource = $this->_get_resource($resource);
+
+        return $resource->is_denied_to($permission);
+    }
+
+    /**
+     * Get proper resource based on input argument
+     *
+     * @param mixed $input
+     *
+     * @return AAM_Framework_Resource_Post|AAM_Framework_Resource_Term
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource($input)
+    {
+        if (is_a($input, AAM_Framework_Resource_PermissionInterface::class)) {
+            $resource = $input;
+        } elseif (is_a($input, WP_Post::class)) {
+            $resource = $this->post($input->ID);
+        } elseif (is_a($input, WP_Term::class)) {
+            $resource = $this->term([
+                'id'       => $input->term_id,
+                'taxonomy' => $input->taxonomy
+            ]);
+        } elseif (is_array($input) && isset($input['resource_type'])) {
+            if ($input['resource_type'] === AAM_Framework_Type_Resource::POST) {
+                if (!empty($input['slug'])) {
+                    $resource = $this->post($input['slug'], $input['post_type']);
+                } else {
+                    $resource = $this->post($input['id']);
+                }
+            } elseif ($input['resource_type'] === AAM_Framework_Type_Resource::TERM) {
+                $resource = $this->term($input);
+            }
+        }
+
+        if (empty($resource)) {
+            throw new InvalidArgumentException(
+                'The input arguments cannot be used to obtain valid resource'
+            );
+        }
+
+        return $resource;
+    }
+
+    /**
      * Get list of posts
      *
      * Perform separate computation for the list of posts based on type and search
