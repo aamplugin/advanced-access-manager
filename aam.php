@@ -312,7 +312,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '7.0.0-alpha.1');
+    define('AAM_VERSION', '7.0.0-alpha.2');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

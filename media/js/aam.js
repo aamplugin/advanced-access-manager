@@ -141,6 +141,15 @@
 
             /**
              *
+             * @param {*} role
+             * @returns
+             */
+            function prepareRoleEndpoint(role) {
+                return getLocal().rest_base + 'aam/v2/service/role/' + encodeURIComponent(role);
+            }
+
+            /**
+             *
              */
             function initialize() {
                 if (!$('#role-list').hasClass('dataTable')) {
@@ -610,7 +619,7 @@
                         });
 
                         if (data.name) {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/role/${$(_this).data('role')}`, {
+                            $.ajax(prepareRoleEndpoint($(_this).data('role')), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -662,7 +671,7 @@
 
                         ResetCache('roles');
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/role/${$(_this).data('role')}`, {
+                        $.ajax(prepareRoleEndpoint($(_this).data('role')), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -2644,7 +2653,7 @@
                 let endpoint = `${getLocal().rest_base}aam/v2/service`;
 
                 if (payload.role_id) {
-                    endpoint += `/role/${payload.role_id}`
+                    endpoint += `/role/` + encodeURIComponent(payload.role_id)
                 } else if (payload.user_id) {
                     endpoint += `/user/${payload.user_id}`
                 }
@@ -3328,8 +3337,7 @@
              * @param {*} resource_type
              * @param {*} resource_id
              */
-            function InitializeAccessForm()
-            {
+            function InitializeAccessForm() {
                 $('[data-toggle="toggle"]', '#aam_access_form_container').bootstrapToggle();
 
                 // Permission toggles
@@ -3397,7 +3405,6 @@
                     // Initialize the redirect type element
                     $('#restricted_redirect_type').bind('change', function() {
                         $('.restricted-redirect-type').addClass('hidden');
-
                         $('.restricted-redirect-type[data-type="' + $(this).val() + '"]').removeClass('hidden')
                     });
 
@@ -3480,7 +3487,7 @@
 
                 // Initialize the Reset to default button
                 $('#content_reset').bind('click', function () {
-                    const resource_type    = $('#content_resource_type').val();
+                    const resource_type    = encodeURIComponent($('#content_resource_type').val());
                     const resource_id      = $('#content_resource_id').val();
                     const permission_scope = JSON.parse(
                         $('#content_permission_scope').val()

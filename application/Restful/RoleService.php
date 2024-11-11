@@ -65,7 +65,7 @@ class AAM_Restful_RoleService
             ));
 
             // Get a specific role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-]+)', array(
+            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_role'),
                 'permission_callback' => function() {
@@ -149,7 +149,7 @@ class AAM_Restful_RoleService
             ));
 
             // Update existing role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-]+)', array(
+            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_role'),
                 'permission_callback' => function () {
@@ -190,7 +190,7 @@ class AAM_Restful_RoleService
             ));
 
             // Delete role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-]+)', array(
+            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_role'),
                 'permission_callback' => function () {
@@ -249,8 +249,9 @@ class AAM_Restful_RoleService
     public function get_role(WP_REST_Request $request)
     {
         try {
-            $result = ($this->prepare_role_output(
-                $this->_get_service()->get_role($request->get_param('role_slug')),
+            $service = $this->_get_service();
+            $result  = ($this->prepare_role_output(
+                $service->get_role(urldecode($request->get_param('role_slug'))),
                 $this->_determine_additional_fields($request)
             ));
         } catch (Exception $ex) {
@@ -342,7 +343,7 @@ class AAM_Restful_RoleService
     {
         try {
             $name        = $request->get_param('name'); // optional
-            $slug        = $request->get_param('role_slug'); // changing role ID
+            $slug        = urldecode($request->get_param('role_slug'));
             $new_slug    = $request->get_param('new_slug'); // optional
             $add_caps    = $request->get_param('add_capabilities'); // optional
             $remove_caps = $request->get_param('remove_capabilities'); // optional
@@ -387,7 +388,9 @@ class AAM_Restful_RoleService
 
             // Delete role
             $result = [
-                'success' => $service->delete_role($request->get_param('role_slug'))
+                'success' => $service->delete_role(urldecode(
+                    $request->get_param('role_slug')
+                ))
             ];
         } catch (Exception $ex) {
             $result = $this->_prepare_error_response($ex);
