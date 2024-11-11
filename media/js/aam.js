@@ -141,6 +141,15 @@
 
             /**
              *
+             * @param {*} role
+             * @returns
+             */
+            function prepareRoleEndpoint(role) {
+                return getLocal().rest_base + 'aam/v2/service/role/' + encodeURIComponent(role);
+            }
+
+            /**
+             *
              */
             function initialize() {
                 if (!$('#role-list').hasClass('dataTable')) {
@@ -610,7 +619,7 @@
                         });
 
                         if (data.name) {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/role/${$(_this).data('role')}`, {
+                            $.ajax(prepareRoleEndpoint($(_this).data('role')), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -662,7 +671,7 @@
 
                         ResetCache('roles');
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/role/${$(_this).data('role')}`, {
+                        $.ajax(prepareRoleEndpoint($(_this).data('role')), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -2514,7 +2523,7 @@
                 let endpoint = `${getLocal().rest_base}aam/v2/service`;
 
                 if (payload.role_id) {
-                    endpoint += `/role/${payload.role_id}`
+                    endpoint += `/role/` + encodeURIComponent(payload.role_id)
                 } else if (payload.user_id) {
                     endpoint += `/user/${payload.user_id}`
                 }
@@ -3229,9 +3238,9 @@
 
                 // Initialize the Reset to default button
                 $('#content-reset').bind('click', function () {
-                    const type   = $(this).attr('data-type');
+                    const type   = encodeURIComponent($(this).attr('data-type'));
                     const id     = $(this).attr('data-id');
-                    const obj_id = id.split('|')[0];
+                    const obj_id = encodeURIComponent(id.split('|')[0]);
 
                     const payload = {};
 

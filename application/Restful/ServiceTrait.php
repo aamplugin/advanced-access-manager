@@ -265,6 +265,7 @@ trait AAM_Restful_ServiceTrait
         $response = true;
 
         try {
+            $slug    = urldecode($slug);
             $service = AAM_Framework_Manager::roles([
                 'error_handling' => 'exception'
             ]);

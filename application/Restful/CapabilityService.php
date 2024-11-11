@@ -208,7 +208,7 @@ class AAM_Restful_CapabilityService
             $role_id       = $request->get_param('role_id');
             $user_id       = $request->get_param('user_id');
             $capability    = urldecode($request->get_param('slug'));
-            $new_slug      = urldecode($request->get_param('new_slug'));
+            $new_slug      = $request->get_param('new_slug');
             $ignore_format = $request->get_param('ignore_format');
 
             if (!$ignore_format && !preg_match('/^[a-z\d-_]+/', $new_slug)) {
