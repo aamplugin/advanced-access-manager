@@ -12,7 +12,8 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework\Service;
 
 use AAM,
-    AAM\UnitTest\Utility\TestCase;
+    AAM\UnitTest\Utility\TestCase,
+    PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Test class for the AAM "Content" framework service
@@ -95,6 +96,104 @@ final class ContentTest extends TestCase
         $this->assertEquals('AAM_Framework_Resource_Term', get_class($term));
         $this->assertEquals('Another Category', $term->get_core_instance()->name);
         $this->assertEquals($term_id . '|category' , $term->get_internal_id(true));
+    }
+
+    /**
+     * Verify that post is hidden
+     *
+     * This test uses shortcut content method is_hidden
+     *
+     * @return void
+     */
+    public function testPostIsHidden()
+    {
+        $post    = get_post($this->createPost());
+        $service = AAM::api()->content();
+
+        // Set post permissions
+        $this->assertTrue($service->post($post->ID)->add_permission('list'));
+
+        // Verify that post is hidden
+        $this->assertTrue($service->is_hidden($post));
+    }
+
+    /**
+     * Verify that post is restricted
+     *
+     * This test uses shortcut content method is_restricted
+     *
+     * @return void
+     */
+    public function testPostIsRestricted()
+    {
+        $post    = get_post($this->createPost());
+        $service = AAM::api()->content();
+
+        // Set post permissions
+        $this->assertTrue($service->post($post->ID)->add_permission('read'));
+
+        // Verify that post is hidden
+        $this->assertTrue($service->is_restricted($post));
+    }
+
+    /**
+     * Verify that post is restricted due to expiration
+     *
+     * @return void
+     */
+    public function testPostAccessExpired()
+    {
+        $post    = get_post($this->createPost());
+        $service = AAM::api()->content();
+
+        // Set post permissions
+        $this->assertTrue($service->post($post->ID)->add_permission('read', [
+            'effect'           => 'deny',
+            'restriction_type' => 'expire',
+            'expires_after'    => time() - 30
+        ]));
+
+        // Verify that post is hidden
+        $this->assertTrue($service->is_restricted($post));
+    }
+
+    /**
+     * Get list of simple post permissions
+     *
+     * @return array
+     *
+     * @access public
+     * @static
+     */
+    public static function getSimplePostPermissions()
+    {
+        return [
+            [ 'comment' ],
+            [ 'edit' ],
+            [ 'delete' ],
+            [ 'publish' ]
+        ];
+    }
+
+    /**
+     * Test simple post permissions
+     *
+     * @param string $permission
+     *
+     * @return void
+     */
+    #[DataProvider('getSimplePostPermissions')]
+    public function testPostPermission($permission)
+    {
+        $post    = get_post($this->createPost());
+        $service = AAM::api()->content();
+
+        // Set post permissions
+        $this->assertTrue($service->post($post->ID)->add_permission($permission));
+
+        // Verify post permission
+        $this->assertTrue($service->is_denied_to($post, $permission));
+        $this->assertFalse($service->is_allowed_to($post, $permission));
     }
 
 }

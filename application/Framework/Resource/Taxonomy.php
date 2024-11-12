@@ -18,7 +18,10 @@ implements
     AAM_Framework_Resource_PermissionInterface
 {
 
-    use AAM_Framework_Resource_PermissionTrait;
+    use AAM_Framework_Resource_ContentTrait, AAM_Framework_Resource_PermissionTrait{
+        AAM_Framework_Resource_ContentTrait::_get_settings_ns insteadof AAM_Framework_Resource_PermissionTrait;
+        AAM_Framework_Resource_ContentTrait::_normalize_permission insteadof AAM_Framework_Resource_PermissionTrait;
+    }
 
     /**
      * @inheritDoc
@@ -44,20 +47,6 @@ implements
                 "Taxonomy {$this->_internal_id} does not exist"
             );
         }
-    }
-
-    /**
-     * Get settings namespace
-     *
-     * @return string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _get_settings_ns()
-    {
-        // Compile the namespace
-        return constant('static::TYPE') . '.' . $this->get_internal_id(true);
     }
 
 }

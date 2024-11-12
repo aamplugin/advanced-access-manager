@@ -11,8 +11,7 @@ declare(strict_types=1);
 
 namespace AAM\UnitTest\Utility;
 
-use AAM,
-    InvalidArgumentException,
+use InvalidArgumentException,
     PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 /**
@@ -236,7 +235,7 @@ class TestCase extends PHPUnitTestCase
     private static function _createTerm(array $term_data) : array
     {
         $default_term_data = [
-            'name'     => 'Test Category',
+            'name'     => 'Test Category ' . uniqid(),
             'taxonomy' => 'category'
         ];
 

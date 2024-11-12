@@ -431,16 +431,22 @@ class AAM_Framework_Service_Content
      *
      * @param mixed $resource
      *
-     * @return boolean
+     * @return boolean|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
     public function is_hidden($resource)
     {
-        $resource = $this->_get_resource($resource);
+        try {
+            $resource  = $this->_get_resource($resource);
+            $is_hidden = $resource->is_hidden();
+            $result    = is_bool($is_hidden) ? $is_hidden : false;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $resource->is_hidden();
+        return $result;
     }
 
     /**
@@ -448,16 +454,22 @@ class AAM_Framework_Service_Content
      *
      * @param mixed $resource
      *
-     * @return boolean
+     * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
     public function is_restricted($resource)
     {
-        $resource = $this->_get_resource($resource);
+        try {
+            $resource      = $this->_get_resource($resource);
+            $is_restricted = $resource->is_restricted();
+            $result        = is_bool($is_restricted) ? $is_restricted : false;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $resource->is_restricted();
+        return $result;
     }
 
     /**
@@ -466,15 +478,21 @@ class AAM_Framework_Service_Content
      * @param mixed  $resource
      * @param string $permission
      *
-     * @return boolean
+     * @return bool|WP_Error
      * @access public
      * @version 7.0.0
      */
     public function is_allowed_to($resource, $permission)
     {
-        $resource = $this->_get_resource($resource);
+        try {
+            $resource   = $this->_get_resource($resource);
+            $is_allowed = $resource->is_allowed_to($permission);
+            $result     = is_bool($is_allowed) ? $is_allowed : true;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $resource->is_allowed_to($permission);
+        return $result;
     }
 
     /**
@@ -489,9 +507,15 @@ class AAM_Framework_Service_Content
      */
     public function is_denied_to($resource, $permission)
     {
-        $resource = $this->_get_resource($resource);
+        try {
+            $resource  = $this->_get_resource($resource);
+            $is_denied = $resource->is_denied_to($permission);
+            $result    = is_bool($is_denied) ? $is_denied : false;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-        return $resource->is_denied_to($permission);
+        return $result;
     }
 
     /**
