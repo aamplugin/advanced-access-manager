@@ -106,7 +106,7 @@ final class PostTest extends TestCase
     /**
      * Test password protected restriction
      *
-     * This method tests to different ways to set password
+     * This method tests three different ways to set password
      *
      * @return void
      */
@@ -136,6 +136,13 @@ final class PostTest extends TestCase
         // Verify that restriction are set correctly
         $this->assertTrue($service->post($post_b)->is_password_protected());
         $this->assertEquals($password, $service->post($post_b)->get_password());
+
+        // Finally create a post with defined password
+        $post_c = $this->createPost([ 'post_password' => $password ]);
+
+        // Verify that restriction are set correctly
+        $this->assertTrue($service->post($post_c)->is_password_protected());
+        $this->assertEquals($password, $service->post($post_c)->get_password());
     }
 
     /**
@@ -171,9 +178,9 @@ final class PostTest extends TestCase
         $this->assertTrue($service->post($post_a)->is_restricted());
         $this->assertTrue($service->post($post_b)->is_restricted());
         $this->assertTrue($service->post($post_c)->is_restricted());
-        $this->assertNull($service->post($post_a)->has_expiration());
-        $this->assertTrue($service->post($post_b)->has_expiration());
-        $this->assertTrue($service->post($post_c)->has_expiration());
+        $this->assertNull($service->post($post_a)->is_expiration_set());
+        $this->assertTrue($service->post($post_b)->is_expiration_set());
+        $this->assertTrue($service->post($post_c)->is_expiration_set());
         $this->assertEquals($expire, $service->post($post_b)->get_expiration());
         $this->assertEquals($expire, $service->post($post_c)->get_expiration());
     }
@@ -205,8 +212,8 @@ final class PostTest extends TestCase
 
         // Validate permissions
         $this->assertNull($service->post($post_a)->is_restricted());
-        $this->assertTrue($service->post($post_a)->has_redirect());
-        $this->assertTrue($service->post($post_b)->has_redirect());
+        $this->assertTrue($service->post($post_a)->is_redirected());
+        $this->assertTrue($service->post($post_b)->is_redirected());
     }
 
     /**
@@ -238,6 +245,93 @@ final class PostTest extends TestCase
         $this->assertFalse($service->post($post_a)->is_allowed_to('publish'));
         $this->assertFalse($service->post($post_a)->is_allowed_to('delete'));
         $this->assertFalse($service->post($post_a)->is_allowed_to('edit'));
+    }
+
+    /**
+     * Test that permission can be added in various ways
+     *
+     * @return void
+     */
+    public function testPostAddPermission()
+    {
+        $post_a  = $this->createPost();
+        $post_b  = $this->createPost();
+        $service = AAM::api()->content();
+
+        // Add permissions to a post in several different ways
+        $post = $service->post($post_a);
+        $this->assertTrue($post->add_permission('edit'));
+        $this->assertTrue($post->add_permission('publish', 'deny'));
+        $this->assertTrue($post->add_permission('delete', 1));
+
+        // In all 3 ways the permissions should be denied
+        $this->assertEquals([
+            'edit' => [
+                'effect' => 'deny'
+            ],
+            'publish' => [
+                'effect' => 'deny'
+            ],
+            'delete' => [
+                'effect' => 'deny'
+            ]
+        ], $post->get_permissions());
+
+        // Add permission with fully defined settings
+        $post = $service->post($post_b);
+        $this->assertTrue($post->add_permission('comment', [
+            'effect' => 'allow'
+        ]));
+
+        // Validate added permission
+        $this->assertEquals([
+            'comment' => [
+                'effect' => 'allow'
+            ]
+        ], $post->get_permissions());
+    }
+
+    /**
+     * Test that permissions can be added in various ways
+     *
+     * @return void
+     */
+    public function testPostAddPermissions()
+    {
+        $post_a  = $this->createPost();
+        $post_b  = $this->createPost();
+        $service = AAM::api()->content();
+
+        // Add permissions to a post in several different ways
+        $post = $service->post($post_a);
+        $this->assertTrue($post->add_permissions([ 'edit', 'publish' ]));
+
+        // Verify saved permissions
+        $this->assertEquals([
+            'edit' => [
+                'effect' => 'deny'
+            ],
+            'publish' => [
+                'effect' => 'deny'
+            ]
+        ], $post->get_permissions());
+
+        // Add permission with fully defined settings
+        $post = $service->post($post_b);
+        $this->assertTrue($post->add_permissions([
+            'edit'    => 'deny',
+            'comment' => 'allow'
+        ]));
+
+        // Validate added permission
+        $this->assertEquals([
+            'edit' => [
+                'effect' => 'deny'
+            ],
+            'comment' => [
+                'effect' => 'allow'
+            ]
+        ], $post->get_permissions());
     }
 
 }

@@ -307,7 +307,7 @@
                                     placeholder="<?php echo __('Enter your teaser message...', AAM_KEY); ?>"
                                     rows="5"
                                     id="aam_teaser_message"
-                                ><?php echo esc_textarea(isset($restriction_settings['teaser_message']) ? $restriction_settings['teaser_message'] : ''); ?></textarea>
+                                ><?php echo esc_textarea(isset($restriction_settings['message']) ? $restriction_settings['message'] : ''); ?></textarea>
                                 <span class="hint text-muted"><?php echo AAM_Backend_View_Helper::preparePhrase('Use [&#91;excerpt&#93;] shortcode to insert post excerpt to the teaser message.', 'strong'); ?></span>
                             </div>
                         </div>

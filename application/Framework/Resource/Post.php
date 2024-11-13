@@ -57,7 +57,7 @@ implements
             }
         }
 
-        return apply_filters('aam_post_is_hidden_on_filter', $result, $this);
+        return apply_filters('aam_post_is_hidden_on_filter', $result, $area, $this);
     }
 
     /**
@@ -91,24 +91,28 @@ implements
      */
     public function is_password_protected()
     {
-        $result     = null;
-        $permission = null;
+        $native_password = $this->post_password;
+        $result          = !empty($native_password) ? true : null;
 
-        // Evaluate if we even have the read permission
-        if (!empty($this->_permissions['read'])) {
-            $permission = $this->_permissions['read'];
-        }
+        if (is_null($result)) {
+            $permission = null;
 
-        if (!is_null($permission)) {
-            if (!empty($permission['restriction_type'])) {
-                $restriction_type = $permission['restriction_type'];
-            } else {
-                $restriction_type = null;
+            // Evaluate if we even have the read permission
+            if (!empty($this->_permissions['read'])) {
+                $permission = $this->_permissions['read'];
             }
 
-            if ($restriction_type === 'password_protected') {
-                $result = $permission['effect'] === 'deny'
-                    && !empty($permission['password']);
+            if (!is_null($permission)) {
+                if (!empty($permission['restriction_type'])) {
+                    $restriction_type = $permission['restriction_type'];
+                } else {
+                    $restriction_type = null;
+                }
+
+                if ($restriction_type === 'password_protected') {
+                    $result = $permission['effect'] === 'deny'
+                        && !empty($permission['password']);
+                }
             }
         }
 
@@ -150,10 +154,8 @@ implements
             }
 
             if ($permission['effect'] === 'deny') {
-                if ($restriction_type === 'default') {
+                if ($restriction_type === 'default' || $this->is_expired()) {
                     $result = true;
-                } elseif ($restriction_type === 'expire') {
-                    $result = time() >= intval($permission['expires_after']);
                 }
             } else {
                 $result = false;
@@ -164,11 +166,24 @@ implements
     }
 
     /**
+     * Determine if current post has redirect defined
+     *
+     * @return boolean|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_redirected()
+    {
+        return $this->_has('redirect');
+    }
+
+    /**
      * Façade function that determines if access level has certain permission
      *
      * @param string $permission
      *
-     * @return boolean|null
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
@@ -186,7 +201,7 @@ implements
      *
      * @param string $permission
      *
-     * @return boolean|null
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
@@ -214,27 +229,27 @@ implements
      *
      * Instead of a post's content, the specified teaser message is displayed
      *
-     * @return boolean|null
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function has_teaser_message()
+    public function is_teaser_message_set()
     {
         return $this->_has('teaser_message');
     }
 
     /**
-     * Determine if current post has redirect defined
+     * Alias to the is_teaser_message_set
      *
-     * @return boolean|null
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function has_redirect()
+    public function is_teased()
     {
-        return $this->_has('redirect');
+        return $this->is_teaser_message_set();
     }
 
     /**
@@ -245,13 +260,33 @@ implements
      * @access public
      * @version 7.0.0
      */
-    public function has_expiration()
+    public function is_expiration_set()
     {
         return $this->_has('expire');
     }
 
     /**
-     * Password protected a post
+     * Determine if post has expiration time defined and access is expired
+     *
+     * @return bool|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_expired()
+    {
+        if ($this->is_expiration_set()) {
+            $permission = $this->_permissions['read'];
+            $result     = time() >= intval($permission['expires_after']);
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Set password to protect a post
      *
      * @param string $password
      *
@@ -280,7 +315,13 @@ implements
     public function get_password()
     {
         if ($this->is_password_protected()) {
-            $result = $this->_permissions['read']['password'];
+            $native_password = $this->post_password;
+
+            if (!empty($native_password)) {
+                $result = $native_password;
+            } else {
+                $result = $this->_permissions['read']['password'];
+            }
         } else {
             $result = null;
         }
@@ -303,7 +344,7 @@ implements
         return $this->add_permission('read', [
             'effect'           => 'deny',
             'restriction_type' => 'teaser_message',
-            'message '         => $message
+            'message'          => $message
         ]);
     }
 
@@ -317,7 +358,7 @@ implements
      */
     public function get_teaser_message()
     {
-        if ($this->has_teaser_message()) {
+        if ($this->is_teased()) {
             $result = $this->_permissions['read']['message'];
         } else {
             $result = null;
@@ -355,7 +396,7 @@ implements
      */
     public function get_redirect()
     {
-        if ($this->has_redirect()) {
+        if ($this->is_redirected()) {
             $result = $this->_permissions['read']['redirect'];
         } else {
             $result = null;
@@ -405,7 +446,7 @@ implements
      */
     public function get_expiration()
     {
-        if ($this->has_expiration()) {
+        if ($this->is_expiration_set()) {
             $result = $this->_permissions['read']['expires_after'];
         } else {
             $result = null;

@@ -197,6 +197,30 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
+     * Capture output
+     *
+     * @param callback $cb
+     *
+     * @return string
+     *
+     * @access public
+     */
+    public function captureOutput($cb)
+    {
+        // Start the buffer
+        ob_start();
+
+        // Execute the callback and trigger output
+        $cb();
+
+        // Capture output and close the buffer
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return trim($content);
+    }
+
+    /**
      * Create a test user
      *
      * @param array $user_data
@@ -258,7 +282,7 @@ class TestCase extends PHPUnitTestCase
         $default_post_data = [
             'post_type'   => 'post',
             'post_status' => 'publish',
-            'post_title'  => 'Test Post: ' . uniqid()
+            'post_title'  => 'UnitTest Sample: ' . uniqid()
         ];
 
         $final_post_data = array_merge($default_post_data, $post_data);

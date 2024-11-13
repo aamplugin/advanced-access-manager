@@ -29,7 +29,7 @@ class AAM_Service_Content
     /**
      * Default configurations
      *
-     * @version 7.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
         'service.content.enabled'               => true,
@@ -58,12 +58,8 @@ class AAM_Service_Content
      *
      * @return void
      *
-     * @since 6.9.9 https://github.com/aamplugin/advanced-access-manager/issues/268
-     * @since 6.5.1 https://github.com/aamplugin/advanced-access-manager/issues/115
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.9
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -147,6 +143,34 @@ class AAM_Service_Content
         if ($enabled) {
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)) {
+                    if ($resource_type === AAM_Framework_Type_Resource::POST) {
+                        $resource = new AAM_Framework_Resource_Post(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::POST_TYPE) {
+                        $resource = new AAM_Framework_Resource_PostType(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::TAXONOMY) {
+                        $resource = new AAM_Framework_Resource_Taxonomy(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::TERM) {
+                        $resource = new AAM_Framework_Resource_Term(
+                            $access_level, $resource_id
+                        );
+                    }
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**
@@ -154,16 +178,8 @@ class AAM_Service_Content
      *
      * @return void
      *
-     * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.1.0  Fixed the bug where `do_not_allow` capability was mapped to the
-     *               list of post type capabilities
-     * @since 6.0.2  Removed invocation for the pseudo-cap mapping for post types
-     * @since 6.0.1  Fixed bug related to enabling commenting on all posts
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.29
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -190,9 +206,9 @@ class AAM_Service_Content
             }, PHP_INT_MAX);
 
             // Filter navigation pages & taxonomies
-            add_filter('get_pages', function($pages) {
-                return $this->_get_pages($pages);
-            }, PHP_INT_MAX);
+            // add_filter('get_pages', function($pages) {
+            //     return $this->_get_pages($pages);
+            // }, PHP_INT_MAX);
 
             // Manage access to frontend posts & pages
             add_action('wp', function() {
@@ -275,42 +291,17 @@ class AAM_Service_Content
             }, 10, 2);
 
             // Populate the collection of post type caps
-            foreach ($obj->cap as $cap) {
-                if (!in_array($cap, $this->_content_capabilities, true)
-                    && ($cap !== 'do_not_allow')
+            foreach ([ 'edit_post', 'read_post', 'delete_post', 'publish_posts' ] as $cap) {
+                $meta_cap = $obj->cap->{$cap};
+
+                if (!empty($meta_cap)
+                    && !in_array($meta_cap, $this->_content_capabilities, true)
+                    && ($meta_cap !== 'do_not_allow')
                 ) {
                     $this->_content_capabilities[] = $cap;
                 }
             }
         }, 10, 2);
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)) {
-                    if ($resource_type === AAM_Framework_Type_Resource::POST) {
-                        $resource = new AAM_Framework_Resource_Post(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::POST_TYPE) {
-                        $resource = new AAM_Framework_Resource_PostType(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::TAXONOMY) {
-                        $resource = new AAM_Framework_Resource_Taxonomy(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::TERM) {
-                        $resource = new AAM_Framework_Resource_Term(
-                            $access_level, $resource_id
-                        );
-                    }
-                }
-
-                return $resource;
-            }, 10, 4
-        );
 
         // Register RESTful API
         AAM_Restful_ContentService::bootstrap();
@@ -387,7 +378,7 @@ class AAM_Service_Content
         if (is_a($post, AAM_Framework_Resource_Post::class)) {
             if ($post->is_restricted()) {
                 AAM_Framework_Utility_Redirect::do_access_denied_redirect();
-            } elseif ($post->has_redirect()) {
+            } elseif ($post->is_redirected()) {
                 AAM_Framework_Utility_Redirect::do_redirect($post->get_redirect());
             }
         }
@@ -542,28 +533,29 @@ class AAM_Service_Content
      *
      * @access private
      * @version 7.0.0
+     * @todo - Potentially delete
      */
-    private function _get_pages($pages)
-    {
-        if (is_array($pages)) {
-            $service = AAM::api()->content();
-            $current = $this->get_current_post();
+    // private function _get_pages($pages)
+    // {
+    //     if (is_array($pages)) {
+    //         $service = AAM::api()->content();
+    //         $current = $this->get_current_post();
 
-            foreach ($pages as $i => $post) {
-                if ($current && ($current->ID === $post->ID)) {
-                    continue;
-                }
+    //         foreach ($pages as $i => $post) {
+    //             if ($current && ($current->ID === $post->ID)) {
+    //                 continue;
+    //             }
 
-                if ($service->get_post($post->ID)->is_hidden()) {
-                    unset($pages[$i]);
-                }
-            }
+    //             if ($service->get_post($post->ID)->is_hidden()) {
+    //                 unset($pages[$i]);
+    //             }
+    //         }
 
-            $pages = array_values($pages);
-        }
+    //         $pages = array_values($pages);
+    //     }
 
-        return $pages;
-    }
+    //     return $pages;
+    // }
 
     /**
      * After post SELECT query
@@ -668,7 +660,7 @@ class AAM_Service_Content
                     'message' => 'The post is password protected. Invalid password provided.'
                 ]);
             }
-        } elseif ($resource->has_redirect()) {
+        } elseif ($resource->is_redirected()) {
             $redirect = $resource->get_redirect();
 
             // Determine redirect HTTP status code and use it if applicable for given
@@ -719,7 +711,7 @@ class AAM_Service_Content
             $post = $this->get_current_post();
 
             if (is_a($post, AAM_Framework_Resource_Post::class)
-                && $post->has_teaser_message()
+                && $post->is_teased()
             ) {
                 // Replace the [excerpt] placeholder with posts excerpt and do
                 // short-code evaluation

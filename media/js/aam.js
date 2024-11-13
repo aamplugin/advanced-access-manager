@@ -3444,7 +3444,7 @@
                         payload.restriction_type = restriction_type;
 
                         if (restriction_type === 'teaser_message') {
-                            payload.teaser_message = $.trim(
+                            payload.message = $.trim(
                                 $('#aam_teaser_message').val()
                             );
                         } else if (restriction_type === 'redirect') {

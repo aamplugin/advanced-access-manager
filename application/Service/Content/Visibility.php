@@ -336,7 +336,9 @@ class AAM_Service_Content_Visibility
     }
 
     /**
-     * Undocumented function
+     * Bootstrap the visibility class
+     *
+     * @param bool $reload
      *
      * @return AAM_Service_Content_Visibility
      *
@@ -344,9 +346,9 @@ class AAM_Service_Content_Visibility
      * @static
      * @version 7.0.0
      */
-    public static function bootstrap()
+    public static function bootstrap($reload = true)
     {
-        if (is_null(self::$_instance)) {
+        if (is_null(self::$_instance) || $reload) {
             self::$_instance = new self;
         }
 

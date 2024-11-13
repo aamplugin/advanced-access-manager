@@ -383,9 +383,9 @@ class AAM_Framework_Service_Content
     {
         try {
             // Determining if we are dealing with post ID or post slug
-            if (is_numeric($post_identifier) && is_int($post_identifier)) {
+            if (is_numeric($post_identifier) || is_int($post_identifier)) {
                 // Fetching post by ID
-                $post = get_post(intval($post_identifier));
+                $post = get_post(intval(intval($post_identifier)));
             } elseif (!is_string($post_type) || empty($post_type)) {
                 throw new InvalidArgumentException(
                     'The post_type has to be a string value'
