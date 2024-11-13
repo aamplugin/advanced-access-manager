@@ -39,7 +39,7 @@ implements
         if (is_array($this->_internal_id) && $serialize) {
             $parts = [];
 
-            foreach([ 'id', 'taxonomy', 'post_type' ] as $prop) {
+            foreach([ 'id', 'slug', 'taxonomy', 'post_type' ] as $prop) {
                 if (array_key_exists($prop, $this->_internal_id)) {
                     array_push($parts, $this->_internal_id[$prop]);
                 }
@@ -73,10 +73,17 @@ implements
             // that the table wp_term_relationships is the one that actually associate
             // terms with other content types (e.g. posts) and this table uses
             // term_taxonomy_id for associations.
-            $term = get_term(
-                $this->_internal_id['id'],
-                $this->_internal_id['taxonomy']
-            );
+            if (isset($this->_internal_id['taxonomy'])) {
+                $taxonomy = $this->_internal_id['taxonomy'];
+            } else {
+                $taxonomy = '';
+            }
+
+            if (isset($this->_internal_id['slug'])) {
+                $term = get_term_by('slug', $this->_internal_id['slug'], $taxonomy);
+            } else {
+                $term = get_term($this->_internal_id['id'], $taxonomy);
+            }
         }
 
         if (is_a($term, 'WP_Term')) {

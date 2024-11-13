@@ -322,24 +322,22 @@ class AAM_Framework_Service_Content
     {
         try {
             if (is_array($term_identifier)) {
-                if (!isset($term_identifier['id'])
-                    || !is_numeric($term_identifier['id'])
-                ) {
-                    throw new InvalidArgumentException(
-                        "The term_id has to have a valid numeric id"
-                    );
-                }
-
-                if (!isset($term_identifier['taxonomy'])
-                    || !is_string($term_identifier['taxonomy'])
-                ) {
-                    throw new InvalidArgumentException(
-                        "The term_id has to have a valid string taxonomy"
-                    );
+                if (isset($term_identifier['id'])) {
+                    if (!is_numeric($term_identifier['id'])) {
+                        throw new InvalidArgumentException(
+                            'The id has to have a valid numeric value'
+                        );
+                    }
+                } elseif (isset($term_identifier['slug'])) {
+                    if (!is_string($term_identifier['slug'])) {
+                        throw new InvalidArgumentException(
+                            'The slug has to have a valid string'
+                        );
+                    }
                 }
             } elseif (!is_numeric($term_identifier)) {
                 throw new InvalidArgumentException(
-                    "The term_id argument has to be a valid numeric value"
+                    'The term_identifier argument is not valid'
                 );
             }
 
@@ -371,8 +369,8 @@ class AAM_Framework_Service_Content
     /**
      * Get a post
      *
-     * @param int|string $post_identifier
-     * @param string     $post_type
+     * @param int|string|array $post_identifier
+     * @param string           $post_type
      *
      * @return AAM_Framework_Resource_Post|WP_Error|null
      *
@@ -382,21 +380,31 @@ class AAM_Framework_Service_Content
     public function get_post($post_identifier, $post_type = '')
     {
         try {
+            $post = null;
+
             // Determining if we are dealing with post ID or post slug
-            if (is_numeric($post_identifier) || is_int($post_identifier)) {
+            if (is_numeric($post_identifier)) {
                 // Fetching post by ID
-                $post = get_post(intval(intval($post_identifier)));
-            } elseif (!is_string($post_type) || empty($post_type)) {
-                throw new InvalidArgumentException(
-                    'The post_type has to be a string value'
-                );
-            } else {
+                $post = get_post(intval($post_identifier));
+            } elseif (is_string($post_identifier) && !empty($post_type)) {
                 $post = get_page_by_path($post_identifier, OBJECT, $post_type);
+            } elseif (is_array($post_identifier)) {
+                if (isset($post_identifier['id'])) {
+                    $post = get_post($post_identifier['id']);
+                } elseif(isset($post_identifier['slug'])
+                    && isset($post_identifier['post_type'])
+                ) {
+                    $post = get_page_by_path(
+                        $post_identifier['slug'],
+                        OBJECT,
+                        $post_identifier['post_type']
+                    );
+                }
             }
 
             if (!is_a($post, 'WP_Post')) {
                 throw new OutOfRangeException(
-                    "Post '{$post_identifier}' does not exist"
+                    "Cannot get WP_Post instance based on provided post identifier"
                 );
             }
 
@@ -413,17 +421,17 @@ class AAM_Framework_Service_Content
     /**
      * Alias for the get_post method
      *
-     * @param int|string $post_identifier
-     * @param string     $post_type
+     * @param int|string|array $post_identifier
+     * @param string           $post_type
      *
      * @return AAM_Framework_Resource_Post
      *
      * @access public
      * @version 7.0.0
      */
-    public function post($post_id, $post_type = '')
+    public function post($post_identifier, $post_type = '')
     {
-        return $this->get_post($post_id, $post_type);
+        return $this->get_post($post_identifier, $post_type);
     }
 
     /**
@@ -539,14 +547,12 @@ class AAM_Framework_Service_Content
                 'id'       => $input->term_id,
                 'taxonomy' => $input->taxonomy
             ]);
-        } elseif (is_array($input) && isset($input['resource_type'])) {
-            if ($input['resource_type'] === AAM_Framework_Type_Resource::POST) {
-                if (!empty($input['slug'])) {
-                    $resource = $this->post($input['slug'], $input['post_type']);
-                } else {
-                    $resource = $this->post($input['id']);
-                }
-            } elseif ($input['resource_type'] === AAM_Framework_Type_Resource::TERM) {
+        } elseif (is_array($input)) {
+            $resource_type = $this->_determine_resource_type($input);
+
+            if ($resource_type === AAM_Framework_Type_Resource::POST) {
+                $resource = $this->post($input);
+            } elseif ($resource_type === AAM_Framework_Type_Resource::TERM) {
                 $resource = $this->term($input);
             }
         }
@@ -558,6 +564,35 @@ class AAM_Framework_Service_Content
         }
 
         return $resource;
+    }
+
+    /**
+     * Determine resource type based on provide resource identifier
+     *
+     * @param array $input
+     *
+     * @return string|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _determine_resource_type($input)
+    {
+        if (isset($input['resource_type'])) {
+            $result = $input['resource_type'];
+        } elseif (isset($input['taxonomy']) && !isset($input['post_type'])) {
+            $result = AAM_Framework_Type_Resource::TERM;
+        } elseif (isset($input['post_type']) && !isset($input['taxonomy'])) {
+            $result = AAM_Framework_Type_Resource::POST;
+        } else {
+            $result = null;
+        }
+
+        return in_array(
+            $result,
+            [ AAM_Framework_Type_Resource::TERM, AAM_Framework_Type_Resource::POST ],
+            true
+        ) ? $result : null;
     }
 
     /**
