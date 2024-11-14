@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Service;
 
 use AAM,
+    AAM_Framework_Resource_Post,
+    AAM_Framework_Resource_Term,
     AAM\UnitTest\Utility\TestCase;
 
 /**
@@ -194,6 +196,80 @@ final class ContentTest extends TestCase
         $this->assertFalse(current_user_can('edit_post', $post_a));
         $this->assertFalse(current_user_can('publish_post', $post_a));
         $this->assertFalse(current_user_can('delete_post', $post_a));
+    }
+
+    /**
+     * Test that we can obtain Post resource
+     *
+     * @return void
+     */
+    public function testGetPost()
+    {
+        $post_a  = $this->createPost([ 'post_name' => 'sample-post' ]);
+        $service = AAM::api()->content();
+
+        // Test that we can obtain Post resource with just providing ID
+        $post = $service->post($post_a);
+
+        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
+        $this->assertEquals($post_a, $post->ID);
+
+        // Test we can obtain Post resource with slug and post type
+        $post = $service->post('sample-post', 'post');
+
+        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
+        $this->assertEquals($post_a, $post->ID);
+
+        // Test we can obtain Post resource with array and ID
+        $post = $service->post([ 'id' => $post_a, 'post_type' => 'post' ]);
+
+        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
+        $this->assertEquals($post_a, $post->ID);
+
+        // Test we can obtain Post resource with array and slug
+        $post = $service->post([ 'slug' => 'sample-post', 'post_type' => 'post' ]);
+
+        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
+        $this->assertEquals($post_a, $post->ID);
+    }
+
+    /**
+     * Test that we can obtain Term resource
+     *
+     * @return void
+     */
+    public function testTermPost()
+    {
+        $term_a  = $this->createTerm([ 'slug' => 'sample-term' ]);
+        $service = AAM::api()->content();
+
+        // Test that we can obtain Term resource with just providing ID
+        $term = $service->term($term_a);
+
+        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
+        $this->assertEquals($term_a, $term->term_id);
+        $this->assertEquals((string) $term_a, $term->get_internal_id());
+
+        // Test we can obtain Term resource with slug and taxonomy
+        $term = $service->term('sample-term', 'category');
+
+        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
+        $this->assertEquals($term_a, $term->term_id);
+        $this->assertEquals('sample-term|category', $term->get_internal_id());
+
+        // Test we can obtain Term resource with array and ID
+        $term = $service->term([ 'id' => $term_a, 'taxonomy' => 'category' ]);
+
+        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
+        $this->assertEquals($term_a, $term->term_id);
+        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
+
+        // Test we can obtain Term resource with array and slug
+        $term = $service->term([ 'slug' => 'sample-term', 'taxonomy' => 'category' ]);
+
+        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
+        $this->assertEquals($term_a, $term->term_id);
+        $this->assertEquals('sample-term|category', $term->get_internal_id());
     }
 
 }

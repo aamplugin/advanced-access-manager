@@ -311,14 +311,15 @@ class AAM_Framework_Service_Content
     /**
      * Get a single term resource
      *
-     * @param int|array $term_identifier
+     * @param int|string|array $term_identifier
+     * @param string           $taxonomy         [optional]
      *
-     * @return AAM_Framework_Resource_Term|WP_Error|null
+     * @return AAM_Framework_Resource_Term|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_term($term_identifier)
+    public function get_term($term_identifier, $taxonomy = '')
     {
         try {
             if (is_array($term_identifier)) {
@@ -335,10 +336,20 @@ class AAM_Framework_Service_Content
                         );
                     }
                 }
-            } elseif (!is_numeric($term_identifier)) {
-                throw new InvalidArgumentException(
-                    'The term_identifier argument is not valid'
-                );
+            } elseif (is_scalar($term_identifier)) {
+                if (is_numeric($term_identifier)) {
+                    $term_identifier = [ 'id' => $term_identifier ];
+                } elseif (is_string($term_identifier)) {
+                    $term_identifier = [ 'slug' => $term_identifier ];
+                } else {
+                    throw new InvalidArgumentException('Invalid term identifier');
+                }
+
+                if (!empty($taxonomy) && is_string($taxonomy)) {
+                    $term_identifier['taxonomy'] = $taxonomy;
+                }
+            } else {
+                throw new InvalidArgumentException('Invalid term identifier');
             }
 
             $result = $this->_get_access_level()->get_resource(
@@ -354,16 +365,17 @@ class AAM_Framework_Service_Content
     /**
      * Get a single term resource
      *
-     * @param int|array $term_identifier
+     * @param int|string|array $term_identifier
+     * @param string           $taxonomy        [optional]
      *
-     * @return AAM_Framework_Resource_Term|WP_Error|null
+     * @return AAM_Framework_Resource_Term|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function term($term_identifier)
+    public function term($term_identifier, $taxonomy = '')
     {
-        return $this->get_term($term_identifier);
+        return $this->get_term($term_identifier, $taxonomy);
     }
 
     /**
