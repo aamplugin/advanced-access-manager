@@ -238,7 +238,7 @@ final class ContentTest extends TestCase
      *
      * @return void
      */
-    public function testTermPost()
+    public function testGetTerm()
     {
         $term_a  = $this->createTerm([ 'slug' => 'sample-term' ]);
         $service = AAM::api()->content();

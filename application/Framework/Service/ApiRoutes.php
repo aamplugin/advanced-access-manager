@@ -59,7 +59,7 @@ class AAM_Framework_Service_ApiRoutes
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -94,7 +94,7 @@ class AAM_Framework_Service_ApiRoutes
                 $result = array_shift($found);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -132,7 +132,7 @@ class AAM_Framework_Service_ApiRoutes
 
             $result = $this->get_route($endpoint, $method);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -177,7 +177,7 @@ class AAM_Framework_Service_ApiRoutes
 
             $result = true;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -206,7 +206,7 @@ class AAM_Framework_Service_ApiRoutes
 
             $result = $this->get_route_list($inline_context);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -230,7 +230,7 @@ class AAM_Framework_Service_ApiRoutes
                 AAM_Framework_Type_Resource::API_ROUTE
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -264,7 +264,7 @@ class AAM_Framework_Service_ApiRoutes
                 $endpoint, $method
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

@@ -70,7 +70,7 @@ class AAM_Restful_MuService
         );
 
         // Register a common AAM, access level aware RESTful API endpoint
-        add_action('aam_rest_register_route', [$this, 'register_route'], 10, 2);
+        add_action('aam_rest_register_route', [$this, 'register_route'], 10, 4);
     }
 
     /**
@@ -123,15 +123,18 @@ class AAM_Restful_MuService
      *
      * @param string $route
      * @param array  $args
+     * @param bool   $access_level_aware
+     * @param string $ns
      *
      * @return void
      *
      * @access public
      * @version 6.9.33
      */
-    public function register_route($route, $args)
-    {
-        $this->_register_route($route, $args);
+    public function register_route(
+        $route, $args, $access_level_aware = true, $ns = null
+    ) {
+        $this->_register_route($route, $args, $access_level_aware, $ns);
     }
 
 }

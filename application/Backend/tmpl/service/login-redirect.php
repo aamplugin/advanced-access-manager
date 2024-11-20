@@ -23,7 +23,7 @@
                     </p>
                 <?php } ?>
 
-                <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($service->get_resource()->is_customized() ? 'block' : 'none'); ?>">
+                <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="login-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>

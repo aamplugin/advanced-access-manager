@@ -445,7 +445,7 @@ implements
     private function _get_resource($url = null)
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Resource_Url::TYPE, $url
+            AAM_Framework_Type_Resource::URL, $url
         );
     }
 

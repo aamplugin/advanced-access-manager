@@ -8,12 +8,13 @@
  */
 
 /**
- * Base trait to represents AAM resource preference concept
+ * Common preference container
  *
  * @package AAM
  * @version 7.0.0
  */
-trait AAM_Framework_Resource_PreferenceTrait
+class AAM_Framework_Preference_Container
+implements AAM_Framework_Preference_Interface
 {
 
     /**
@@ -25,6 +26,18 @@ trait AAM_Framework_Resource_PreferenceTrait
      * @version 7.0.0
      */
     private $_access_level = null;
+
+    /**
+     * Preference namespace
+     *
+     * The preferences' namespace
+     *
+     * @var string
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_ns = null;
 
     /**
      * Collection of extended methods
@@ -67,6 +80,7 @@ trait AAM_Framework_Resource_PreferenceTrait
      * Constructor
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @para
      *
      * @return void
      *
@@ -74,12 +88,20 @@ trait AAM_Framework_Resource_PreferenceTrait
      * @version 7.0.0
      */
     public function __construct(
-        AAM_Framework_AccessLevel_Interface $access_level
+        AAM_Framework_AccessLevel_Interface $access_level, $ns
     ) {
         $this->_access_level = $access_level;
+        $this->_ns           = $ns;
 
-        // Initialize resource settings & extend with additional methods
-        $this->initialize_resource($access_level);
+        // Making sure that namespace is defined
+        if (empty($ns) || !is_string($ns)) {
+            throw new InvalidArgumentException(
+                'Preference namespace has to be provided'
+            );
+        }
+
+        // Initialize preference container & extend with additional methods
+        $this->initialize_container($access_level);
 
         if (method_exists($this, 'initialize_hook')) {
             $this->initialize_hook();
@@ -87,7 +109,7 @@ trait AAM_Framework_Resource_PreferenceTrait
     }
 
     /**
-     * Initialize the resource settings and extend it with additional methods
+     * Initialize the container and extend it with additional methods
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
      *
@@ -96,13 +118,13 @@ trait AAM_Framework_Resource_PreferenceTrait
      * @access protected
      * @version 7.0.0
      */
-    protected function initialize_resource(
+    protected function initialize_container(
         AAM_Framework_AccessLevel_Interface $access_level
     ) {
         // Read explicitly defined settings from DB
         $settings = AAM::api()->settings([
             'access_level' => $access_level
-        ])->get_setting(constant('static::TYPE'), []);
+        ])->get_setting($this->get_ns(), []);
 
         if (!empty($settings)) {
             $this->_explicit_preferences = $settings;
@@ -110,18 +132,20 @@ trait AAM_Framework_Resource_PreferenceTrait
 
         // Allow other implementations to modify defined settings
         $this->_preferences = apply_filters(
-            'aam_initialize_resource_settings_filter',
+            'aam_initialize_preference_filter',
             $settings,
             $this
         );
 
         // Extend access level with more methods
         $closures = apply_filters(
-            'aam_framework_resource_methods_filter', [], $this
+            'aam_framework_preference_methods_filter',
+            [],
+            $this
         );
 
         if (is_array($closures)) {
-            foreach($closures as $name => $closure) {
+            foreach ($closures as $name => $closure) {
                 $closures[$name] = $closure->bindTo($this, $this);
             }
 
@@ -130,16 +154,19 @@ trait AAM_Framework_Resource_PreferenceTrait
     }
 
     /**
-     * Get access level this resource is tight to
-     *
-     * @return AAM_Framework_AccessLevel_Interface
-     *
-     * @access public
-     * @version 7.0.0
+     * @inheritDoc
      */
     public function get_access_level()
     {
         return $this->_access_level;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_ns()
+    {
+        return $this->_ns;
     }
 
     /**
@@ -159,7 +186,8 @@ trait AAM_Framework_Resource_PreferenceTrait
 
         if (array_key_exists($name, $this->_extended_methods)) {
             $response = call_user_func_array(
-                $this->_extended_methods[$name], $arguments
+                $this->_extended_methods[$name],
+                $arguments
             );
         } else {
             _doing_it_wrong(
@@ -201,7 +229,7 @@ trait AAM_Framework_Resource_PreferenceTrait
             // Store changes in DB
             $result = AAM::api()->settings([
                 'access_level' => $this->get_access_level()
-            ])->set_setting(constant('static::TYPE'), $preferences);
+            ])->set_setting($this->get_ns(), $preferences);
         } else {
             $this->_preferences = $preferences;
             $result             = true;
@@ -252,7 +280,7 @@ trait AAM_Framework_Resource_PreferenceTrait
 
         return AAM::api()->settings([
             'access_level' => $this->get_access_level()
-        ])->delete_setting(constant('static::TYPE'));
+        ])->delete_setting($this->get_ns());
     }
 
 }

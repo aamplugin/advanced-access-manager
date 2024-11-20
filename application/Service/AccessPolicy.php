@@ -364,7 +364,7 @@ class AAM_Service_AccessPolicy
                     $options = $this->initializeRoute($options, $object);
                     break;
 
-                case AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT:
+                case AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT:
                     $options = $this->initializeAccessDeniedRedirect($options);
                     break;
 

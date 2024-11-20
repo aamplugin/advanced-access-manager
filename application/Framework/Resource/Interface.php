@@ -16,18 +16,8 @@
  * @package AAM
  * @version 7.0.0
  */
-interface AAM_Framework_Resource_PermissionInterface
+interface AAM_Framework_Resource_Interface
 {
-
-    /**
-     * Resource type
-     *
-     * Resource type is just an alias that refers to the instance of resource. It is
-     * used to better understand how to work with resource and merge settings
-     *
-     * @version 7.0.0
-     */
-    const TYPE = null;
 
     /**
      * Get resource internal ID
@@ -43,6 +33,19 @@ interface AAM_Framework_Resource_PermissionInterface
      * @version 7.0.0
      */
     public function get_internal_id($serialize = true);
+
+    /**
+     * Get resource type
+     *
+     * The resource type is just an alias for the resource itself. The alias is a
+     * concise way to refer to any resource.
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_resource_type();
 
     /**
      * Get access level this resource is tight to

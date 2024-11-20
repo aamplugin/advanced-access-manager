@@ -311,15 +311,16 @@ class AAM_Framework_Service_Content
     /**
      * Get a single term resource
      *
-     * @param int|string|array $term_identifier
-     * @param string           $taxonomy         [optional]
+     * @param mixed  $term_identifier
+     * @param string $taxonomy         [optional]
+     * @param string $post_type        [optional]
      *
      * @return AAM_Framework_Resource_Term|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_term($term_identifier, $taxonomy = '')
+    public function get_term($term_identifier, $taxonomy = '', $post_type = '')
     {
         try {
             if (is_array($term_identifier)) {
@@ -348,6 +349,20 @@ class AAM_Framework_Service_Content
                 if (!empty($taxonomy) && is_string($taxonomy)) {
                     $term_identifier['taxonomy'] = $taxonomy;
                 }
+
+                if (!empty($post_type) && is_string($post_type)) {
+                    $term_identifier['post_type'] = $post_type;
+                }
+            } elseif (is_a($term_identifier, WP_Term::class)) {
+                $term_identifier = [
+                    'id'       => $term_identifier->term_id,
+                    'taxonomy' => $term_identifier->taxonomy
+                ];
+
+                // Assume the second argument to be post type scope
+                if (!empty($taxonomy) && is_string($taxonomy)) {
+                    $term_identifier['post_type'] = $taxonomy;
+                }
             } else {
                 throw new InvalidArgumentException('Invalid term identifier');
             }
@@ -365,24 +380,25 @@ class AAM_Framework_Service_Content
     /**
      * Get a single term resource
      *
-     * @param int|string|array $term_identifier
-     * @param string           $taxonomy        [optional]
+     * @param mixed  $term_identifier
+     * @param string $taxonomy        [optional]
+     * @param string $post_type       [optional]
      *
      * @return AAM_Framework_Resource_Term|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function term($term_identifier, $taxonomy = '')
+    public function term($term_identifier, $taxonomy = '', $post_type = '')
     {
-        return $this->get_term($term_identifier, $taxonomy);
+        return $this->get_term($term_identifier, $taxonomy, $post_type);
     }
 
     /**
      * Get a post
      *
-     * @param int|string|array $post_identifier
-     * @param string           $post_type
+     * @param mixed  $post_identifier
+     * @param string $post_type
      *
      * @return AAM_Framework_Resource_Post|WP_Error|null
      *
@@ -412,6 +428,8 @@ class AAM_Framework_Service_Content
                         $post_identifier['post_type']
                     );
                 }
+            } elseif (is_a($post_identifier, WP_Post::class)) {
+                $post = $post_identifier;
             }
 
             if (!is_a($post, 'WP_Post')) {
@@ -433,8 +451,8 @@ class AAM_Framework_Service_Content
     /**
      * Alias for the get_post method
      *
-     * @param int|string|array $post_identifier
-     * @param string           $post_type
+     * @param mixed  $post_identifier
+     * @param string $post_type
      *
      * @return AAM_Framework_Resource_Post
      *
@@ -550,7 +568,7 @@ class AAM_Framework_Service_Content
      */
     private function _get_resource($input)
     {
-        if (is_a($input, AAM_Framework_Resource_PermissionInterface::class)) {
+        if (is_a($input, AAM_Framework_Resource_Interface::class)) {
             $resource = $input;
         } elseif (is_a($input, WP_Post::class)) {
             $resource = $this->post($input->ID);

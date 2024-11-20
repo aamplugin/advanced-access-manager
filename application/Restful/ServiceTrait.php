@@ -70,14 +70,16 @@ trait AAM_Restful_ServiceTrait
      * @param string  $route
      * @param array   $args
      * @param boolean $access_level_aware
+     * @param string  $ns
      *
      * @return void
      *
      * @access private
      * @version 6.9.10
      */
-    private function _register_route($route, $args, $access_level_aware = true)
-    {
+    private function _register_route(
+        $route, $args, $access_level_aware = true, $ns = null
+    ) {
         // Add the common arguments to all routes if needed
         if ($access_level_aware) {
             $args = array_merge_recursive(array(
@@ -113,12 +115,12 @@ trait AAM_Restful_ServiceTrait
             ), $args);
         }
 
+        $ns = is_null($ns) ? 'aam/v2/service' : $ns;
+
         register_rest_route(
-            'aam/v2/service',
+            $ns,
             $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, 'aam/v2/service'
-            )
+            apply_filters('aam_rest_route_args_filter', $args, $route, $ns)
         );
     }
 

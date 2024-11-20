@@ -97,11 +97,7 @@ trait AAM_Framework_Service_BaseTrait
                 throw new BadMethodCallException("Method {$name} does not exist");
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error(
-                $e,
-                // The last argument in any framework method call is context, always!
-                is_array($args) ? array_pop($args) : null
-            );
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -149,7 +145,7 @@ trait AAM_Framework_Service_BaseTrait
         try {
             $result = $this->_get_resource(true, $inline_context)->is_customized();
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

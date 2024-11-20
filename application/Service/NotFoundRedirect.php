@@ -104,22 +104,6 @@ class AAM_Service_NotFoundRedirect
             }
         });
 
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT
-                ) {
-                    $resource = new AAM_Framework_Resource_NotFoundRedirect(
-                        $access_level
-                    );
-                }
-
-                return $resource;
-            }, 10, 3
-        );
-
         // Register the RESTful API
         AAM_Restful_NotFoundRedirectService::bootstrap();
     }

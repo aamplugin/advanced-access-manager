@@ -19,20 +19,27 @@ trait AAM_Framework_Resource_ContentTrait
     /**
      * Add a single permission
      *
-     * @param string            $permission_key
-     * @param array|string|null $permission
+     * @param string $permission_key
+     * @param mixed  $permission      [optional]
+     * @param bool   $exclude_authors [Premium Feature!]
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function add_permission($permission_key, $permission = null)
+    public function add_permission($permission_key, ...$args)
     {
         $permissions = $this->_explicit_permissions;
-        $permissions[$permission_key] = $this->_sanitize_permission(
-            is_null($permission) ? 'deny' : $permission,
-            $permission_key
+
+        // Determine if $permission argument was provided
+        $permission = array_shift($args);
+        $permission = !is_null($permission) ? $permission : 'deny';
+
+        $permissions[$permission_key] = apply_filters(
+            'aam_framework_resource_add_permission_filter',
+            $this->_sanitize_permission($permission, $permission_key),
+            $args
         );
 
         return $this->set_permissions($permissions, true);
@@ -42,21 +49,30 @@ trait AAM_Framework_Resource_ContentTrait
      * Add multiple permissions
      *
      * @param array $permissions
+     * @param bool  $exclude_authors [Premium Feature!]
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function add_permissions($permissions)
+    public function add_permissions($permissions, ...$args)
     {
         $normalized = [];
 
         foreach($permissions as $key => $value) {
             if (is_numeric($key) && is_string($value)) {
-                $normalized[$value] = $this->_sanitize_permission(true, $value);
+                $normalized[$value] = apply_filters(
+                    'aam_framework_resource_add_permission_filter',
+                    $this->_sanitize_permission(true, $value),
+                    $args
+                );
             } elseif (is_string($key)) {
-                $normalized[$key] = $this->_sanitize_permission($value, $key);
+                $normalized[$key] = apply_filters(
+                    'aam_framework_resource_add_permission_filter',
+                    $this->_sanitize_permission($value, $key),
+                    $args
+                );
             }
         }
 

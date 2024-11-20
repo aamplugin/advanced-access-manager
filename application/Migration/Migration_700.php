@@ -55,7 +55,7 @@ final class AAM_Migration_700
         // Convert Login Redirect settings to new format
         $this->_transform_legacy_settings(
             AAM_Core_Object_LoginRedirect::OBJECT_TYPE,
-            AAM_Framework_Type_Resource::LOGIN_REDIRECT,
+            AAM_Framework_Type_Preference::LOGIN_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_login_redirect($data);
             }
@@ -64,7 +64,7 @@ final class AAM_Migration_700
         // Convert Logout Redirect settings to new format
         $this->_transform_legacy_settings(
             AAM_Core_Object_LogoutRedirect::OBJECT_TYPE,
-            AAM_Framework_Type_Resource::LOGOUT_REDIRECT,
+            AAM_Framework_Type_Preference::LOGOUT_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_logout_redirect($data);
             }
@@ -73,7 +73,7 @@ final class AAM_Migration_700
         // Convert Access Denied Redirect settings to new format
         $this->_transform_legacy_settings(
             AAM_Core_Object_Redirect::OBJECT_TYPE,
-            AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT,
+            AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_access_denied_redirect($data);
             }
@@ -82,7 +82,7 @@ final class AAM_Migration_700
         // Convert 404 Redirect settings to new format
         $this->_transform_legacy_settings(
             AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE,
-            AAM_Framework_Type_Resource::NOT_FOUND_REDIRECT,
+            AAM_Framework_Type_Preference::NOT_FOUND_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_not_found_redirect($data);
             }

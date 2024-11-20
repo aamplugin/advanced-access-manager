@@ -3,11 +3,12 @@
 <?php if (defined('AAM_KEY')) { ?>
     <?php
         $params           = isset($params) ? $params : (object) [];
-        $internal_id      = $params->resource->get_internal_id(false);
+        $resource         = $params->resource;
+        $internal_id      = $resource->get_internal_id(false);
         $permission_scope = []; // Additional attributes to add
 
         // Determine the correct resource ID. Terms typically have compound ID
-        if ($params->resource::TYPE === AAM_Framework_Type_Resource::TERM) {
+        if ($resource->get_resource_type() === AAM_Framework_Type_Resource::TERM) {
             if (is_array($internal_id)) {
                 $id = $internal_id['id'];
 
@@ -26,7 +27,7 @@
         }
     ?>
 
-    <div class="aam-overwrite<?php echo $params->resource->is_customized() ? '' : ' hidden'; ?>">
+    <div class="aam-overwrite<?php echo $resource->is_customized() ? '' : ' hidden'; ?>">
         <span>
             <i class="icon-check"></i>
             <?php echo __('Settings are customized', AAM_KEY); ?>
@@ -42,7 +43,7 @@
 
     <input
         type="hidden"
-        value="<?php echo esc_attr($params->resource::TYPE); ?>"
+        value="<?php echo esc_attr($resource->get_resource_type()); ?>"
         id="content_resource_type"
     />
     <input
@@ -55,7 +56,7 @@
         value="<?php echo esc_attr(json_encode($permission_scope)); ?>"
         id="content_permission_scope"
     />
-    <div id="content_resource_settings" class="hidden"><?php echo json_encode($params->resource->get_permissions()); ?></div>
+    <div id="content_resource_settings" class="hidden"><?php echo json_encode($resource->get_permissions()); ?></div>
 
     <table class="table table-striped table-bordered" id="permission_toggles">
         <tbody>
@@ -102,15 +103,15 @@
                     <div class="col-xs-12">
                         <p class="aam-notification">
                             <?php
-                                if ($params->resource::TYPE === AAM_Framework_Type_Resource::POST_TYPE) {
+                                if ($resource->get_resource_type() === AAM_Framework_Type_Resource::POST_TYPE) {
                                     $resource_type = __('post type', AAM_KEY);
-                                    $resource_name = $params->resource->label;
-                                } elseif ($params->resource::TYPE === AAM_Framework_Type_Resource::TAXONOMY) {
+                                    $resource_name = $resource->label;
+                                } elseif ($resource->get_resource_type() === AAM_Framework_Type_Resource::TAXONOMY) {
                                     $resource_type = __('taxonomy', AAM_KEY);
-                                    $resource_name = $params->resource->label;
-                                } elseif ($params->resource::TYPE === AAM_Framework_Type_Resource::TERM) {
+                                    $resource_name = $resource->label;
+                                } elseif ($resource->get_resource_type() === AAM_Framework_Type_Resource::TERM) {
                                     $resource_type = __('term', AAM_KEY);
-                                    $resource_name = $params->resource->name;
+                                    $resource_name = $resource->name;
                                 }
 
                                 echo sprintf(
@@ -162,7 +163,7 @@
                                         name="frontend"
                                         id="hidden_frontend"
                                         type="checkbox"
-                                        <?php echo ($params->resource->is_hidden_on('frontend') ? 'checked' : ''); ?>
+                                        <?php echo ($resource->is_hidden_on('frontend') ? 'checked' : ''); ?>
                                         data-on="<?php echo __('Hidden', AAM_KEY); ?>"
                                         data-off="<?php echo __('Visible', AAM_KEY); ?>"
                                         data-size="small"
@@ -185,7 +186,7 @@
                                         name="backend"
                                         id="hidden_backend"
                                         type="checkbox"
-                                        <?php echo ($params->resource->is_hidden_on('backend') ? 'checked' : ''); ?>
+                                        <?php echo ($resource->is_hidden_on('backend') ? 'checked' : ''); ?>
                                         data-on="<?php echo __('Hidden', AAM_KEY); ?>"
                                         data-off="<?php echo __('Visible', AAM_KEY); ?>"
                                         data-size="small"
@@ -208,7 +209,7 @@
                                         name="api"
                                         id="hidden_api"
                                         type="checkbox"
-                                        <?php echo ($params->resource->is_hidden_on('api') ? 'checked' : ''); ?>
+                                        <?php echo ($resource->is_hidden_on('api') ? 'checked' : ''); ?>
                                         data-on="<?php echo __('Hidden', AAM_KEY); ?>"
                                         data-off="<?php echo __('Visible', AAM_KEY); ?>"
                                         data-size="small"
@@ -238,6 +239,7 @@
         </div>
     </div>
 
+    <?php if (!empty($params->access_controls['read'])) { ?>
     <div class="modal fade" data-backdrop="false" id="modal_content_restriction" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -258,7 +260,7 @@
                     <?php } ?>
 
                     <?php
-                        $restriction_settings = $this->get_permission_settings('read', $params->resource);
+                        $restriction_settings = $this->get_permission_settings('read', $resource);
 
                         $restriction_type     = isset($restriction_settings['restriction_type']) ? $restriction_settings['restriction_type'] : 'default';
                         $restriction_types    = apply_filters('aam_ui_content_restriction_types_filter', [
@@ -277,7 +279,7 @@
                             'expire' => [
                                 'title' => __('Deny direct access after defined date/time', AAM_KEY)
                             ],
-                        ], $params->resource);
+                        ], $resource);
                     ?>
                     <div id="restriction_types">
                         <?php foreach($restriction_types as $type => $settings) { ?>
@@ -434,6 +436,7 @@
             </div>
         </div>
     </div>
+    <?php } ?>
 
     <?php do_action('aam_ui_append_content_access_form_action', $params); ?>
 <?php }

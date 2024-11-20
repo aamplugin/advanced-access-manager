@@ -3525,10 +3525,10 @@
 
                             // Manually update the data in a table because both
                             // Post Types & Taxonomies are static tables
-                            if (['type', 'taxonomy'].includes(type)) {
+                            if (['type', 'taxonomy'].includes(resource_type)) {
                                 let row = null;
 
-                                if (type === 'type') {
+                                if (resource_type === 'type') {
                                     row = cache.post_types.data.filter(
                                         t => t[0] === resource_id
                                     ).pop();
@@ -4360,7 +4360,7 @@
                                         break;
 
                                     default:
-                                        getAAM().triggerHook('post-action', {
+                                        getAAM().triggerHook('term-item-action', {
                                             container: container,
                                             action: action,
                                             data: data

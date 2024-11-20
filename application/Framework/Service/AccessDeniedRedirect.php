@@ -49,20 +49,19 @@ implements
      * Get the access denied redirect
      *
      * @param string $area
-     * @param array  $inline_context Context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_redirect($area = null, $inline_context = null)
+    public function get_redirect($area = null)
     {
         try {
-            $resource  = $this->get_resource($inline_context);
+            $container = $this->_get_preference();
             $redirects = $this->_prepare_redirects(
-                $resource->get_preferences(),
-                !$resource->is_customized()
+                $container->get_preferences(),
+                !$container->is_customized()
             );
 
             if (!empty($area)) {
@@ -71,7 +70,7 @@ implements
                 $result = array_values($redirects);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -93,9 +92,8 @@ implements
      *    "http_status_code": "numeric"
      * }
      *
-     * @param string $area           Redirect area: frontend, backend or restful
-     * @param array  $redirect       Redirect settings
-     * @param array  $inline_context Runtime context
+     * @param string $area     Redirect area: frontend, backend or restful
+     * @param array  $redirect Redirect settings
      *
      * @return array
      *
@@ -103,19 +101,19 @@ implements
      * @version 7.0.0
      * @todo Potentially implement the $redirect validation
      */
-    public function set_redirect($area, array $redirect, $inline_context = null)
+    public function set_redirect($area, array $redirect)
     {
         try {
-            $resource = $this->get_resource($inline_context);
-            $result   = $resource->set_preference($area, $redirect);
+            $container = $this->_get_preference();
+            $result    = $container->set_preference($area, $redirect);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
             } else {
-                $result = $resource->get_preference($area);
+                $result = $container->get_preference($area);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -125,62 +123,75 @@ implements
      * Reset the redirect rule
      *
      * @param string $area
-     * @param array  $inline_context Runtime context
      *
      * @return boolean
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.14 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
-    public function reset($area = null, $inline_context = null)
+    public function reset($area = null)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $container = $this->_get_preference();
 
             if (empty($area)) {
-                $success = $resource->reset();
+                $success = $container->reset();
             } else {
-                $preferences = $resource->get_preferences(true);
+                $preferences = $container->get_preferences(true);
 
                 if (array_key_exists($area, $preferences)) {
                     unset($preferences[$area]);
                 }
 
-                $success = $resource->set_preferences($preferences);
+                $success = $container->set_preferences($preferences);
             }
 
             if ($success) {
-                $result = $this->get_redirect($area, $inline_context);
+                $result = $this->get_redirect($area);
             } else {
                 throw new RuntimeException('Failed to reset settings');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Get preference resource
+     * Check if access denied redirect preferences are customized
      *
-     * @param array $inline_context
-     *
-     * @return AAM_Framework_Resource_AccessDeniedRedirect
+     * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null) {
+    public function is_customized()
+    {
         try {
-            $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::ACCESS_DENIED_REDIRECT, null
+            $result = $this->_get_preference()->is_customized();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get access denied preference container
+     *
+     * @return AAM_Framework_Preference_Interface
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_preference() {
+        try {
+            $result = $this->_get_access_level()->get_preference(
+                AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

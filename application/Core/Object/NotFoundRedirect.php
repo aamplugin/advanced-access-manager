@@ -16,7 +16,7 @@
  * @since 6.4.0  Initial implementation of the class
  *
  * @version 6.9.31
- * @deprecated 7.0.0 Replaced with the AAM_Framework_Resource_NotFoundRedirect
+ * @deprecated 7.0.0 Replaced with the AAM_Framework_Preference_Container
  */
 class AAM_Core_Object_NotFoundRedirect extends AAM_Core_Object
 {

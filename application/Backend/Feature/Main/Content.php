@@ -116,8 +116,8 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Get specific permission's settings
      *
-     * @param string                                     $permission
-     * @param AAM_Framework_Resource_PermissionInterface $resource
+     * @param string                           $permission
+     * @param AAM_Framework_Resource_Interface $resource
      *
      * @return array
      *
@@ -160,7 +160,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Prepare list of access controls for currently managed resource
      *
-     * @param AAM_Framework_Resource_PermissionInterface $resource
+     * @param AAM_Framework_Resource_Interface $resource
      *
      * @return array
      *
@@ -171,7 +171,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     {
         $result = [];
 
-        if ($resource::TYPE === AAM_Framework_Type_Resource::POST) {
+        if ($resource->get_resource_type() === AAM_Framework_Type_Resource::POST) {
             $result = $this->_prepare_post_access_controls($resource);
         } else {
             $result = $this->_prepare_other_access_controls($resource);
@@ -274,7 +274,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Prepare access controls for other resources
      *
-     * @param AAM_Framework_Resource_PermissionInterface $resource
+     * @param AAM_Framework_Resource_Interface $resource
      *
      * @return array
      *

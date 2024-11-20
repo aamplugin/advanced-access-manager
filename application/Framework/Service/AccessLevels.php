@@ -73,7 +73,7 @@ implements
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $runtime_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -120,7 +120,7 @@ implements
                 $result = $this->_access_levels[$cache_key];
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $runtime_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -168,7 +168,7 @@ implements
                 $result = $this->_access_levels[$cache_key];
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $runtime_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -205,7 +205,7 @@ implements
                 $result = $this->_access_levels[$cache_key];
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $runtime_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -242,7 +242,7 @@ implements
                 $result = $this->_access_levels[$cache_key];
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $runtime_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

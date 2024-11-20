@@ -66,7 +66,7 @@ class AAM_Framework_Service_Widgets
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -99,7 +99,7 @@ class AAM_Framework_Service_Widgets
                 throw new OutOfRangeException('Widget does not exist');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -133,7 +133,7 @@ class AAM_Framework_Service_Widgets
 
             $result = $this->get_item($slug);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -171,7 +171,7 @@ class AAM_Framework_Service_Widgets
 
             $result = $this->get_item($slug);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -211,7 +211,7 @@ class AAM_Framework_Service_Widgets
                 throw new RuntimeException('Failed to reset settings');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -235,7 +235,7 @@ class AAM_Framework_Service_Widgets
                 AAM_Framework_Type_Resource::WIDGET
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

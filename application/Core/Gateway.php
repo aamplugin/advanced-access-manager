@@ -30,6 +30,7 @@
  * @method AAM_Framework_Service_Configs configs(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
  * @method AAM_Framework_Service_AccessLevels access_levels(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Utility utility(string $utility = null)
  *
  * @package AAM
  * @version 7.0.0
@@ -95,7 +96,8 @@ final class AAM_Core_Gateway
             'caps'                   => AAM_Framework_Service_Capabilities::class,
             'configs'                => AAM_Framework_Service_Configs::class,
             'settings'               => AAM_Framework_Service_Settings::class,
-            'access_levels'          => AAM_Framework_Service_AccessLevels::class
+            'access_levels'          => AAM_Framework_Service_AccessLevels::class,
+            'utility'                => AAM_Framework_Service_Utility::class
         ]);
     }
 
@@ -340,15 +342,21 @@ final class AAM_Core_Gateway
                 } elseif ($access_level === 'user') {
                     $new_context = [ 'access_level' => $this->user($id) ];
                 }
+            } else {
+                $new_context = $context;
             }
         } elseif (is_array($context)) {
             $new_context = $context;
         }
 
-        return call_user_func(
-            "{$service_class_name}::get_instance",
-            array_merge($this->_default_context, $new_context)
-        );
+        // Compile the final context that is passed to the service
+        if (is_array($new_context)) {
+            $context = array_merge($this->_default_context, $new_context);
+        } else {
+            $context = $new_context;
+        }
+
+        return call_user_func("{$service_class_name}::get_instance", $context);
     }
 
     /**

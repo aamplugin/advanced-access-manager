@@ -20,7 +20,7 @@
  * @package AAM
  * @version 7.0.0
  */
-trait AAM_Framework_Resource_PermissionTrait
+trait AAM_Framework_Resource_BaseTrait
 {
 
     /**
@@ -150,7 +150,7 @@ trait AAM_Framework_Resource_PermissionTrait
 
         // Extend access level with more methods
         $closures = apply_filters(
-            'aam_framework_resource_methods_filter', [], $this
+            'aam_framework_resource_methods_filter', $this->_extended_methods, $this
         );
 
         if (is_array($closures)) {
@@ -194,16 +194,16 @@ trait AAM_Framework_Resource_PermissionTrait
             $response = call_user_func_array(
                 $this->_extended_methods[$name], $arguments
             );
-        } elseif (is_object($this->_core_instance)) {
+        } elseif (is_object($this->_core_instance)
+            && method_exists($this->_core_instance, $name)
+        ) {
             $response = call_user_func_array(
                 array($this->_core_instance, $name), $arguments
             );
         } else {
-            _doing_it_wrong(
-                static::class . '::' . $name,
-                'Method does not exist',
-                AAM_VERSION
-            );
+            throw new BadMethodCallException(sprintf(
+                'Method %s does not exist in %s resource', $name, static::class
+            ));
         }
 
         return $response;
@@ -250,6 +250,14 @@ trait AAM_Framework_Resource_PermissionTrait
         }
 
         return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_resource_type()
+    {
+        return constant('static::TYPE');
     }
 
     /**
@@ -389,7 +397,7 @@ trait AAM_Framework_Resource_PermissionTrait
                 'effect' => intval($permission) > 0 ? 'deny' : 'allow'
             ];
         } elseif (is_array($permission)) {
-            $result = $permission;
+            $result = array_merge([ 'effect' => 'deny' ], $permission);
         } else {
             $result = [ 'effect' => 'deny' ];
         }

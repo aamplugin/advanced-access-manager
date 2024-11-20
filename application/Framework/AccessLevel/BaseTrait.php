@@ -209,11 +209,11 @@ trait AAM_Framework_AccessLevel_BaseTrait
         if (is_object($resource)) {
             if ($skip_inheritance !== true) {
                 // Kick in the inheritance chain if needed
-                $this->_inherit_from_parent($resource);
+                $this->_inherit_from_parent_resource($resource);
 
                 // Trigger initialized action only when we are at the bottom of
                 // the inheritance chain
-                if (in_array(get_class($resource->get_access_level()), [
+                if (in_array(get_class($this), [
                     AAM_Framework_AccessLevel_User::class,
                     AAM_Framework_AccessLevel_Visitor::class
                 ], true)) {
@@ -225,6 +225,33 @@ trait AAM_Framework_AccessLevel_BaseTrait
         }
 
         return $resource;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function get_preference(
+        $preference_ns,
+        $skip_inheritance = false
+    ) {
+        $preference = new AAM_Framework_Preference_Container($this, $preference_ns);
+
+        if ($skip_inheritance !== true) {
+            // Kick in the inheritance chain if needed
+            $this->_inherit_from_parent_preference($preference);
+
+            // Trigger initialized action only when we are at the bottom of
+            // the inheritance chain
+            if (in_array(get_class($this), [
+                AAM_Framework_AccessLevel_User::class,
+                AAM_Framework_AccessLevel_Visitor::class
+            ], true)) {
+                do_action('aam_init_preference_action', $preference, $preference_ns);
+            }
+        }
+
+        return $preference;
     }
 
     /**
@@ -270,19 +297,16 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * Inherit settings from parent access level (if any)
      *
-     * @param object $resource
+     * @param AAM_Framework_Resource_Interface $resource
      *
      * @return array
      *
      * @access protected
      * @version 7.0.0
      */
-    private function _inherit_from_parent($resource)
+    private function _inherit_from_parent_resource($resource)
     {
-        $parent        = $this->get_parent();
-        $is_permission = is_a(
-            $resource, AAM_Framework_Resource_PermissionInterface::class
-        );
+        $parent = $this->get_parent();
 
         if (is_object($parent)) {
             // Merge access settings if multi access levels config is enabled
@@ -296,31 +320,57 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $siblings = [];
             }
 
-            if ($is_permission) {
-                $resource->set_permissions($this->_prepare_permissions(
-                    $resource,
-                    $parent->get_resource(
-                        $resource::TYPE,
-                        $resource->get_internal_id(false)
-                    ),
-                    $siblings
-                ), false);
+            $resource->set_permissions($this->_prepare_permissions(
+                $resource,
+                $parent->get_resource(
+                    $resource->get_resource_type(),
+                    $resource->get_internal_id(false)
+                ),
+                $siblings
+            ), false);
+        }
+    }
+
+    /**
+     * Inherit preferences from parent access level (if any)
+     *
+     * @param AAM_Framework_Preference_Container $preference
+     *
+     * @return array
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    private function _inherit_from_parent_preference($preference)
+    {
+        $parent = $this->get_parent();
+
+        if (is_object($parent)) {
+            // Merge access settings if multi access levels config is enabled
+            $multi_support = AAM::api()->configs()->get_config(
+                'core.settings.multi_access_levels'
+            );
+
+            if ($multi_support && $parent->has_siblings()) {
+                $siblings = $parent->get_siblings();
             } else {
-                $resource->set_preferences($this->_prepare_preferences(
-                    $resource,
-                    $parent->get_resource($resource::TYPE, null),
-                    $siblings
-                ), false);
+                $siblings = [];
             }
+
+            $preference->set_preferences($this->_prepare_preferences(
+                $preference,
+                $parent->get_preference($preference->get_ns()),
+                $siblings
+            ), false);
         }
     }
 
     /**
      * Prepare resource's preferences
      *
-     * @param AAM_Framework_Resource_PreferenceInterface $resource
-     * @param AAM_Framework_Resource_PreferenceInterface $parent_resource
-     * @param array                                      $siblings
+     * @param AAM_Framework_Preference_Container $preference
+     * @param AAM_Framework_Preference_Container $parent_preference
+     * @param array                              $siblings
      *
      * @return array
      *
@@ -328,12 +378,12 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @version 7.0.0
      */
     private function _prepare_preferences(
-        $resource, $parent_resource, $siblings = []
+        $preference, $parent_preference, $siblings = []
     ) {
-        $preferences = $parent_resource->get_preferences();
+        $preferences = $parent_preference->get_preferences();
 
         foreach ($siblings as $sibling) {
-            $sibling_resource = $sibling->get_resource($resource::TYPE, null);
+            $sibling_resource = $sibling->get_preference($preference->get_ns());
             $preferences      = AAM_Framework_Utility_Misc::merge_preferences(
                 $sibling_resource->get_preferences(), $preferences
             );
@@ -341,15 +391,15 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         // Merge preferences while reading hierarchical chain but only
         // replace the top keys. Do not replace recursively
-        return array_replace($preferences, $resource->get_preferences());
+        return array_replace($preferences, $preference->get_preferences());
     }
 
     /**
      * Prepare resource's permissions
      *
-     * @param AAM_Framework_Resource_PermissionInterface $resource
-     * @param AAM_Framework_Resource_PermissionInterface $parent_resource
-     * @param array                                      $siblings
+     * @param AAM_Framework_Resource_Interface $resource
+     * @param AAM_Framework_Resource_Interface $parent_resource
+     * @param array                            $siblings
      *
      * @return array
      *
@@ -363,13 +413,13 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_resource(
-                $resource::TYPE, $resource->get_internal_id(false)
+                $resource->get_resource_type(), $resource->get_internal_id(false)
             );
 
             $permissions = AAM_Framework_Utility_Misc::merge_permissions(
                 $sibling_resource->get_permissions(),
                 $permissions,
-                $resource::TYPE
+                $resource->get_resource_type()
             );
         }
 

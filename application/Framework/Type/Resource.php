@@ -45,13 +45,6 @@ class AAM_Framework_Type_Resource
     const TERM = 'term';
 
     /**
-     * Resource type that represents access denied redirect preferences
-     *
-     * @version 7.0.0
-     */
-    const ACCESS_DENIED_REDIRECT = 'denied_redirect';
-
-    /**
      * Resource type that represents WordPress admin toolbar
      *
      * @version 7.0.0
@@ -95,27 +88,6 @@ class AAM_Framework_Type_Resource
      * @version 7.0.0
      */
     const IDENTITY = 'identity';
-
-    /**
-     * Resource type that represents logout redirect preferences
-     *
-     * @version 7.0.0
-     */
-    const LOGOUT_REDIRECT = 'logout_redirect';
-
-    /**
-     * Resource type that represents login redirect preferences
-     *
-     * @version 7.0.0
-     */
-    const LOGIN_REDIRECT = 'login_redirect';
-
-    /**
-     * Resource type that represents 404 (Not Found) redirect preferences
-     *
-     * @version 7.0.0
-     */
-    const NOT_FOUND_REDIRECT = 'not_found_redirect';
 
     /**
      * Resource type that represents all URLs on a WordPress website

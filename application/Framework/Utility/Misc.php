@@ -199,9 +199,7 @@ class AAM_Framework_Utility_Misc
         $config = AAM::api()->configs();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = $config->get_config(
-            'core.settings.merge.preference'
-        );
+        $preference = $config->get_config('core.settings.merge.preference');
 
         $preference = $config->get_config(
             'core.settings.' . $resource_type . '.merge.preference',
@@ -254,8 +252,9 @@ class AAM_Framework_Utility_Misc
      * @access private
      * @version 7.0.0
      */
-    private static function _merge_permissions($base, $incoming, $preference = 'deny')
-    {
+    private static function _merge_permissions(
+        $base, $incoming, $preference = 'deny'
+    ) {
         $result   = null;
         $effect_a = null;
         $effect_b = null;

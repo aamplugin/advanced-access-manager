@@ -1,16 +1,4 @@
-<?php
-/**
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/359
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
- * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/252
- * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
- * @since 6.0.0  Initial implementation of the templates
- *
- * @version 6.9.26
- *
- */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -31,7 +19,7 @@
                 <div
                     class="aam-overwrite"
                     id="aam-redirect-overwrite"
-                    style="display: <?php echo ($service->get_resource()->is_customized() ? 'block' : 'none'); ?>"
+                    style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
                     <span><a href="#" id="redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>

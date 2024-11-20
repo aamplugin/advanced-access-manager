@@ -71,7 +71,7 @@ class AAM_Framework_Service_Metaboxes
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -104,7 +104,7 @@ class AAM_Framework_Service_Metaboxes
                 throw new OutOfRangeException('Metabox does not exist');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -140,7 +140,7 @@ class AAM_Framework_Service_Metaboxes
 
             $result = $this->get_item($slug);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -178,7 +178,7 @@ class AAM_Framework_Service_Metaboxes
 
             $result = $this->get_item($slug);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -218,7 +218,7 @@ class AAM_Framework_Service_Metaboxes
                 throw new RuntimeException('Failed to reset settings');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -242,7 +242,7 @@ class AAM_Framework_Service_Metaboxes
                 AAM_Framework_Type_Resource::METABOX
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

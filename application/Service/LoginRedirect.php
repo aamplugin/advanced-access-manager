@@ -104,22 +104,6 @@ class AAM_Service_LoginRedirect
         // WP Core login redirect hook
         add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
 
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::LOGIN_REDIRECT
-                ) {
-                    $resource = new AAM_Framework_Resource_LoginRedirect(
-                        $access_level
-                    );
-                }
-
-                return $resource;
-            }, 10, 3
-        );
-
         // Register RESTful API
         AAM_Restful_LoginRedirectService::bootstrap();
     }

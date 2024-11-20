@@ -10,15 +10,10 @@
 /**
  * AAM service Login Redirect manager
  *
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.12 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.26
+ * @version 7.0.0
  */
-class AAM_Framework_Service_LoginRedirect
-implements
-    AAM_Framework_Service_Interface
+class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -38,23 +33,21 @@ implements
     /**
      * Get the login redirect
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_redirect($inline_context = null)
+    public function get_redirect()
     {
         try {
-            $resource = $this->get_resource($inline_context);
-            $result   = $this->_prepare_redirect(
-                $resource->get_preferences(),
-                !$resource->is_customized()
+            $container = $this->_get_preference();
+            $result    = $this->_prepare_redirect(
+                $container->get_preferences(),
+                !$container->is_customized()
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -63,28 +56,27 @@ implements
     /**
      * Set the login redirect
      *
-     * @param array $redirect       Redirect settings
-     * @param array $inline_context Runtime context
+     * @param array $redirect Redirect settings
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function set_redirect(array $redirect, $inline_context = null)
+    public function set_redirect(array $redirect)
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $resource    = $this->get_resource($inline_context);
+            $container   = $this->_get_preference();
             $preferences = $this->_convert_to_redirect($redirect);
 
-            if (!$resource->set_preferences($preferences)) {
+            if (!$container->set_preferences($preferences)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->_prepare_redirect($resource->get_preferences(), false);
+            $result = $this->_prepare_redirect($container->get_preferences(), false);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -93,44 +85,59 @@ implements
     /**
      * Reset the redirect rule
      *
-     * @param array $inline_context Runtime context
-     *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
-            $this->get_resource($inline_context)->reset();
+            $this->_get_preference()->reset();
 
-            $result = $this->get_redirect($inline_context);
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Get Login Redirect preference resource
+     * Check if login redirect preferences are customized
      *
-     * @param array $inline_context
-     *
-     * @return AAM_Framework_Resource_LoginRedirect
+     * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    public function is_customized()
     {
         try {
-            $result = $this->_get_access_level($inline_context)->get_resource(
-                AAM_Framework_Type_Resource::LOGIN_REDIRECT
+            $result = $this->_get_preference()->is_customized();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get login redirect preference container
+     *
+     * @return AAM_Framework_Preference_Interface
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_preference()
+    {
+        try {
+            $result = $this->_get_access_level()->get_preference(
+                AAM_Framework_Type_Preference::LOGIN_REDIRECT
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

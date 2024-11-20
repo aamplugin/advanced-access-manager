@@ -39,7 +39,7 @@ class AAM_Framework_Service_Jwts
                 array_push($result, $this->_prepare_token($token));
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -72,7 +72,7 @@ class AAM_Framework_Service_Jwts
                 throw new OutOfRangeException('Token does not exist');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -111,7 +111,7 @@ class AAM_Framework_Service_Jwts
 
             $result = $this->_prepare_token($token->token);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -145,7 +145,7 @@ class AAM_Framework_Service_Jwts
                 throw new RuntimeException('Failed to revoke the token');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -173,7 +173,7 @@ class AAM_Framework_Service_Jwts
                 $result = $this->get_token_list($inline_context);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

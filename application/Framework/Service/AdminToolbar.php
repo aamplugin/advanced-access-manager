@@ -68,7 +68,7 @@ implements
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -98,7 +98,7 @@ implements
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -133,7 +133,7 @@ implements
 
             $result = $this->get_item_by_id($item_id);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -186,7 +186,7 @@ implements
 
             $result = $this->get_item_by_id($id);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -213,7 +213,7 @@ implements
 
             $result = $this->get_item_list($inline_context);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -236,7 +236,7 @@ implements
                 AAM_Framework_Type_Resource::TOOLBAR
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -276,7 +276,7 @@ implements
                 $result = $resource->is_hidden($parent_id);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

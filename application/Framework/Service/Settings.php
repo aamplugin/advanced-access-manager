@@ -52,19 +52,17 @@ class AAM_Framework_Service_Settings
     /**
      * Return list of all explicitly defined settings
      *
-     * @param array $inline_context Context
-     *
      * @return array|null
      *
      * @access public
      * @version 6.9.34
      */
-    public function get_settings($inline_context = null)
+    public function get_settings()
     {
         try {
-            $result = $this->_get_settings_pointer($inline_context);
+            $result = $this->_get_settings_pointer();
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -73,17 +71,17 @@ class AAM_Framework_Service_Settings
     /**
      * Set bulk of settings at once
      *
-     * @param array $inline_context Context
+     * @param array $settings
      *
      * @return array
      *
      * @access public
      * @version 6.9.34
      */
-    public function set_settings(array $settings, $inline_context = null)
+    public function set_settings(array $settings)
     {
         try {
-            $placement = &$this->_set_settings_pointer($inline_context);
+            $placement = &$this->_set_settings_pointer();
             $placement = $settings;
 
             if ($this->_save_option(self::DB_OPTION, $this->_settings)) {
@@ -92,7 +90,7 @@ class AAM_Framework_Service_Settings
                 throw new RuntimeException('Failed to persist configurations');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -103,17 +101,16 @@ class AAM_Framework_Service_Settings
      *
      * @param string $key
      * @param mixed  $default
-     * @param array  $inline_context
      *
      * @return mixed
      *
      * @access public
      * @version 6.9.34
      */
-    public function get_setting($key, $default = null, $inline_context = null)
+    public function get_setting($key, $default = null)
     {
         try {
-            $value = $this->_get_settings_pointer($inline_context);
+            $value = $this->_get_settings_pointer();
 
             foreach (explode('.', $key) as $ns) {
                 if (isset($value[$ns])) {
@@ -126,7 +123,7 @@ class AAM_Framework_Service_Settings
 
             $result = (is_null($value) ? $default : $value);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -137,17 +134,16 @@ class AAM_Framework_Service_Settings
      *
      * @param string $key
      * @param mixed  $value
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 6.9.34
      */
-    public function set_setting($key, $value, $inline_context = null)
+    public function set_setting($key, $value)
     {
         try {
-            $settings = &$this->_set_settings_pointer($inline_context);
+            $settings = &$this->_set_settings_pointer();
 
             foreach (explode('.', $key) as $ns) {
                 if (!isset($settings[$ns])) {
@@ -164,7 +160,7 @@ class AAM_Framework_Service_Settings
                 throw new RuntimeException('Failed to persist settings');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -174,17 +170,16 @@ class AAM_Framework_Service_Settings
      * Delete specific setting
      *
      * @param string $key
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 6.9.34
      */
-    public function delete_setting($key, $inline_context = null)
+    public function delete_setting($key)
     {
         try {
-            $settings = &$this->_set_settings_pointer($inline_context);
+            $settings = &$this->_set_settings_pointer();
             $path     = explode('.', $key);
 
             for($i = 0; $i < count($path); $i++) {
@@ -203,7 +198,7 @@ class AAM_Framework_Service_Settings
                 throw new RuntimeException('Failed to persist settings');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -212,18 +207,16 @@ class AAM_Framework_Service_Settings
     /**
      * Reset/delete a single configuration
      *
-     * @param array $inline_context
-     *
      * @return boolean
      *
      * @access public
      * @version 6.9.34
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
             $result       = [];
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $type         = is_null($access_level) ? null : $access_level::TYPE;
 
             if (is_null($type)) { // Return all settings
@@ -245,7 +238,7 @@ class AAM_Framework_Service_Settings
             }
 
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -254,17 +247,15 @@ class AAM_Framework_Service_Settings
     /**
      * Get access settings pointer
      *
-     * @param array $inline_context
-     *
      * @return null|array
      *
      * @access private
      * @version 6.9.34
      */
-    private function _get_settings_pointer($inline_context)
+    private function _get_settings_pointer()
     {
         $result       = null;
-        $access_level = $this->_get_access_level($inline_context);
+        $access_level = $this->_get_access_level();
         $type         = is_null($access_level) ? null : $access_level::TYPE;
 
         if (is_null($type)) { // Return all settings
@@ -287,17 +278,15 @@ class AAM_Framework_Service_Settings
     /**
      * Set access settings pointer
      *
-     * @param array $inline_context
-     *
      * @return &array|null
      *
      * @access private
      * @version 6.9.34
      */
-    private function &_set_settings_pointer($inline_context)
+    private function &_set_settings_pointer()
     {
         $result       = null;
-        $access_level = $this->_get_access_level($inline_context);
+        $access_level = $this->_get_access_level();
         $type         = is_null($access_level) ? null : $access_level::TYPE;
 
         if (is_null($type)) { // Return all settings

@@ -129,22 +129,6 @@ class AAM_Service_LogoutRedirect
             AAM_Framework_Utility_Redirect::do_redirect($this->_last_user_redirect);
         }, PHP_INT_MAX);
 
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::LOGOUT_REDIRECT
-                ) {
-                    $resource = new AAM_Framework_Resource_LogoutRedirect(
-                        $access_level
-                    );
-                }
-
-                return $resource;
-            }, 10, 3
-        );
-
         // Register RESTful API
         AAM_Restful_LogoutRedirectService::bootstrap();
     }

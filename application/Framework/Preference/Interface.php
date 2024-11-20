@@ -13,18 +13,8 @@
  * @package AAM
  * @version 7.0.0
  */
-interface AAM_Framework_Resource_PreferenceInterface
+interface AAM_Framework_Preference_Interface
 {
-
-    /**
-     * Resource type
-     *
-     * Resource type is just an alias that refers to the instance of resource. It is
-     * used to better understand how to work with resource and merge settings
-     *
-     * @version 7.0.0
-     */
-    const TYPE = null;
 
     /**
      * Get access level this resource is tight to
@@ -35,6 +25,16 @@ interface AAM_Framework_Resource_PreferenceInterface
      * @version 7.0.0
      */
     public function get_access_level();
+
+    /**
+     * Get preferences' namespace
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_ns();
 
     /**
      * Get the collection of resource preferences

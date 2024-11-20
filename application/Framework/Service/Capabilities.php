@@ -38,7 +38,7 @@ class AAM_Framework_Service_Capabilities
                 $result[$slug] = $this->_prepare_capability($slug);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -86,7 +86,7 @@ class AAM_Framework_Service_Capabilities
                 throw new OutOfRangeException("Role {$role_slug} does not exist");
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -128,7 +128,7 @@ class AAM_Framework_Service_Capabilities
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -181,7 +181,7 @@ class AAM_Framework_Service_Capabilities
 
             $result = in_array($capability, $all_caps, true);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -239,7 +239,7 @@ class AAM_Framework_Service_Capabilities
                     break;
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -308,7 +308,7 @@ class AAM_Framework_Service_Capabilities
                 );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -365,7 +365,7 @@ class AAM_Framework_Service_Capabilities
 
             $result = true;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -401,7 +401,7 @@ class AAM_Framework_Service_Capabilities
 
             $result = $this->_prepare_capability($capability, true, true);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -429,7 +429,7 @@ class AAM_Framework_Service_Capabilities
 
             $result = $this->_prepare_capability($capability, true, true);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

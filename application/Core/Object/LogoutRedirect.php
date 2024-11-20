@@ -17,7 +17,7 @@
  *
  * @package AAM
  * @version 6.9.31
- * @deprecated 7.0.0 Replaced with AAM_Framework_Resource_LogoutRedirect
+ * @deprecated 7.0.0 Replaced with AAM_Framework_Preference_Container
  */
 class AAM_Core_Object_LogoutRedirect extends AAM_Core_Object
 {

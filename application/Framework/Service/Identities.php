@@ -77,7 +77,7 @@ class AAM_Framework_Service_Identities
                 ));
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -108,7 +108,7 @@ class AAM_Framework_Service_Identities
                 $permissions[$id], $id, $resource
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -145,7 +145,7 @@ class AAM_Framework_Service_Identities
 
             $result = $this->get_permission_by_id($key);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -190,7 +190,7 @@ class AAM_Framework_Service_Identities
 
             $result = $this->get_permission_by_id($id, $inline_context);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -229,7 +229,7 @@ class AAM_Framework_Service_Identities
                 throw new RuntimeException('Failed to persist changes');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -257,7 +257,7 @@ class AAM_Framework_Service_Identities
                 throw new RuntimeException('Failed to reset permissions');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -304,7 +304,7 @@ class AAM_Framework_Service_Identities
                 throw new InvalidArgumentException('The identity type is incorrect');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -392,7 +392,7 @@ class AAM_Framework_Service_Identities
                 $result['meta_type']    = 'NUMERIC';
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -416,7 +416,7 @@ class AAM_Framework_Service_Identities
                 AAM_Framework_Type_Resource::IDENTITY
             );
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;

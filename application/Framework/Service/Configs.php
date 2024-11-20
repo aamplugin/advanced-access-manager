@@ -59,7 +59,7 @@ class AAM_Framework_Service_Configs
      * @return void
      *
      * @access protected
-     * @version 6.9.34
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -77,19 +77,17 @@ class AAM_Framework_Service_Configs
     /**
      * Return list of all explicitly defined configurations
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function get_configs($inline_context = null)
+    public function get_configs()
     {
         try {
             $result = $this->_configs;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -98,14 +96,12 @@ class AAM_Framework_Service_Configs
     /**
      * Set bulk of configurations at once
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function set_configs(array $configs, $inline_context = null)
+    public function set_configs(array $configs)
     {
         try {
             $this->_configs = $configs;
@@ -116,7 +112,7 @@ class AAM_Framework_Service_Configs
                 throw new RuntimeException('Failed to persist configurations');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -127,14 +123,13 @@ class AAM_Framework_Service_Configs
      *
      * @param string $key
      * @param mixed  $default
-     * @param array  $inline_context
      *
      * @return mixed
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function get_config($key, $default = null, $inline_context = null)
+    public function get_config($key, $default = null)
     {
         try {
             if (array_key_exists($key, $this->_configs)) {
@@ -143,10 +138,26 @@ class AAM_Framework_Service_Configs
                 $result = apply_filters('aam_get_config_filter', $default, $key);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
+    }
+
+    /**
+     * Get configuration - alias for the get_config method
+     *
+     * @param string $key
+     * @param mixed  $default [optional]
+     *
+     * @return mixed
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function config($key, $default = null)
+    {
+        return $this->get_config($key, $default);
     }
 
     /**
@@ -154,14 +165,13 @@ class AAM_Framework_Service_Configs
      *
      * @param string $key
      * @param mixed  $value
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function set_config($key, $value, $inline_context = null)
+    public function set_config($key, $value)
     {
         try {
             $this->_configs[$key] = $value;
@@ -172,7 +182,7 @@ class AAM_Framework_Service_Configs
                 throw new RuntimeException('Failed to persist configurations');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -182,14 +192,13 @@ class AAM_Framework_Service_Configs
      * Reset/delete a single configuration
      *
      * @param string $key
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function reset_config($key, $inline_context = null)
+    public function reset_config($key)
     {
         try {
             if (array_key_exists($key, $this->_configs)) {
@@ -202,7 +211,7 @@ class AAM_Framework_Service_Configs
                 throw new RuntimeException('Failed to persist configurations');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -211,19 +220,17 @@ class AAM_Framework_Service_Configs
     /**
      * Get ConfigPress raw INI
      *
-     * @param array $inline_context
-     *
      * @return string|null
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function get_configpress($inline_context = null)
+    public function get_configpress()
     {
         try {
             $result = $this->_configpress;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -233,18 +240,17 @@ class AAM_Framework_Service_Configs
      * Set/save ConfigPress INI
      *
      * @param string $ini
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 6.9.34
      */
-    public function set_configpress($ini, $inline_context = null)
+    public function set_configpress($ini)
     {
         try {
             // Validate the provided INI
-            $parsed = $this->_parse_configpress($ini, $inline_context);
+            $parsed = $this->_parse_configpress($ini);
 
             if (is_array($parsed)) {
                 $result = $this->_save_option(self::DB_CONFIGPRESS_OPTION, $ini);
@@ -256,7 +262,7 @@ class AAM_Framework_Service_Configs
                 $this->_configpress = $ini;
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -265,14 +271,12 @@ class AAM_Framework_Service_Configs
     /**
      * Reset ConfigPress
      *
-     * @param array $inline_context
-     *
      * @return string
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    public function reset_configpress($inline_context = null)
+    public function reset_configpress()
     {
         try {
             $this->_configpress = '';
@@ -284,7 +288,7 @@ class AAM_Framework_Service_Configs
 
             $result = $this->_configpress;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -293,14 +297,12 @@ class AAM_Framework_Service_Configs
     /**
      * Reset configurations
      *
-     * @param array $inline_context
-     *
      * @return boolean
      *
      * @access public
      * @version 6.9.34
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
             $this->_configs = [];
@@ -308,12 +310,10 @@ class AAM_Framework_Service_Configs
             // Ignore result because if you are trying to delete the same option
             // twice, the second attempt will return false as the option is no longer
             // in the DB
-            $this->_delete_option(self::DB_OPTION);
-            $this->_delete_option(self::DB_CONFIGPRESS_OPTION);
-
-            $result = $this->get_configs($inline_context);
+            $result = $this->_delete_option(self::DB_OPTION);
+            $result = $result && $this->_delete_option(self::DB_CONFIGPRESS_OPTION);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -323,23 +323,18 @@ class AAM_Framework_Service_Configs
      * Parse INI config
      *
      * @param string $ini
-     * @param array  $inline_context
      *
      * @return array
-     *
-     * @throws Exception
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    private function _parse_configpress($ini, $inline_context = null)
+    private function _parse_configpress($ini)
     {
         $result = [];
 
         if (!empty($ini) && is_string($ini)) {
             // Parse the string & handle any warnings or errors properly
-            set_error_handler(function($_, $message) use ($inline_context) {
-                $this->_handle_error(
-                    new InvalidArgumentException($message), $inline_context
-                );
+            set_error_handler(function($_, $message) {
+                $this->_handle_error(new InvalidArgumentException($message));
             });
 
             $result = parse_ini_string($ini, true, INI_SCANNER_TYPED);

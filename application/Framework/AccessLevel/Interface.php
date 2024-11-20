@@ -34,7 +34,7 @@ interface AAM_Framework_AccessLevel_Interface
      * @param string|int $resource_id
      * @param boolean    $skip_inheritance
      *
-     * @return AAM_Framework_Resource_PermissionInterface|AAM_Framework_Resource_PreferenceInterface|null
+     * @return AAM_Framework_Resource_Interface|null
      *
      * @access public
      * @version 7.0.0
@@ -44,6 +44,19 @@ interface AAM_Framework_AccessLevel_Interface
         $resource_id = null,
         $skip_inheritance = false
     );
+
+    /**
+     * Get preference container
+     *
+     * @param string  $ns
+     * @param boolean $skip_inheritance
+     *
+     * @return AAM_Framework_Preference_Interface|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_preference($ns, $skip_inheritance = false);
 
     /**
      * Get AAM proxy instance to the WP core instance (if applicable)

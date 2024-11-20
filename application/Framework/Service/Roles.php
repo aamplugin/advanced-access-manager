@@ -53,7 +53,7 @@ class AAM_Framework_Service_Roles
                 ));
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -86,7 +86,7 @@ class AAM_Framework_Service_Roles
                 ));
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -119,7 +119,7 @@ class AAM_Framework_Service_Roles
 
             $result = array_shift($match);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -140,7 +140,7 @@ class AAM_Framework_Service_Roles
         try {
             $result = $this->_get_wp_roles()->is_role($slug);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -176,7 +176,7 @@ class AAM_Framework_Service_Roles
             $slugs  = array_map('trim', array_keys($editable_roles));
             $result = in_array($slug, $slugs, true);
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -261,7 +261,7 @@ class AAM_Framework_Service_Roles
                 throw new InvalidArgumentException('Role name is invalid');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -289,7 +289,7 @@ class AAM_Framework_Service_Roles
                 throw new RuntimeException('Failed to persist changes');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -325,7 +325,7 @@ class AAM_Framework_Service_Roles
                 throw new RuntimeException('Failed to delete role');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
