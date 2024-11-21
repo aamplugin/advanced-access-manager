@@ -344,7 +344,7 @@ trait AAM_Framework_Resource_BaseTrait
     private function _get_settings_ns()
     {
         // Compile the namespace
-        return constant('static::TYPE');
+        return $this->get_resource_type();
     }
 
     /**

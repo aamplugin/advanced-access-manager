@@ -52,46 +52,6 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
     }
 
     /**
-     * Get array of posts associated with the term
-     *
-     * @param array $args [optional]
-     *
-     * @return Generator
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function posts(array $args = []) {
-        if (empty($this->_internal_id['post_type'])) {
-            throw new RuntimeException('Term is not initialized with post_type');
-        }
-
-        // Get list of all posts associated with the current term
-        $posts = get_posts(array_merge_recursive([
-            'numberposts' => -1,
-            'fields'      => 'ids',
-            'post_type'   => $this->_internal_id['post_type'],
-            'tax_query'   => [
-                [
-                    'taxonomy' => $this->taxonomy,
-                    'field'    => 'slug',
-                    'terms'    => $this->slug
-                ]
-            ]
-        ]), $args);
-
-        $result = function () use ($posts) {
-            foreach ($posts as $post_id) {
-                yield $this->get_access_level()->get_resource(
-                    AAM_Framework_Type_Resource::POST, $post_id
-                );
-            }
-        };
-
-        return $result();
-    }
-
-    /**
      * Initialize the core instance
      *
      * @return void

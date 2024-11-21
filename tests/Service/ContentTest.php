@@ -205,7 +205,7 @@ final class ContentTest extends TestCase
      */
     public function testGetPost()
     {
-        $post_a  = $this->createPost([ 'post_name' => 'sample-post' ]);
+        $post_a  = $this->createPost([ 'post_name' => 'sample-test' ]);
         $service = AAM::api()->content();
 
         // Test that we can obtain Post resource with just providing ID
@@ -215,7 +215,7 @@ final class ContentTest extends TestCase
         $this->assertEquals($post_a, $post->ID);
 
         // Test we can obtain Post resource with slug and post type
-        $post = $service->post('sample-post', 'post');
+        $post = $service->post('sample-test', 'post');
 
         $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
         $this->assertEquals($post_a, $post->ID);
@@ -227,7 +227,7 @@ final class ContentTest extends TestCase
         $this->assertEquals($post_a, $post->ID);
 
         // Test we can obtain Post resource with array and slug
-        $post = $service->post([ 'slug' => 'sample-post', 'post_type' => 'post' ]);
+        $post = $service->post([ 'slug' => 'sample-test', 'post_type' => 'post' ]);
 
         $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
         $this->assertEquals($post_a, $post->ID);

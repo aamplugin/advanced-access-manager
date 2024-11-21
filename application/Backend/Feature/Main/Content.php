@@ -192,11 +192,14 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     private function _prepare_post_access_controls($resource)
     {
+        $permissions = $resource->get_permissions();
+
         return apply_filters('aam_ui_content_access_controls_filter', [
             'list' => array(
                 'title'       => __('Hidden', AAM_KEY),
                 'modal'       => 'modal_content_visibility',
                 'is_denied'   => $this->is_permission_denied('list', $resource),
+                'areas'       => isset($permissions['list']) ? $permissions['list']['on'] : [],
                 'customize'   => __('Customize visibility', AAM_KEY),
                 'tooltip'     => sprintf(
                     __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', AAM_KEY),

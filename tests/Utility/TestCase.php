@@ -63,7 +63,35 @@ class TestCase extends PHPUnitTestCase
      */
     public function createPost(array $post_data = []) : int
     {
-        $result = self::_createPost($post_data);
+        $result = $this->_createPost($post_data);
+
+        // If the input data contains terms, it means, we are assigning this post
+        // to either existing terms or creating new terms
+        if (!empty($post_data['terms'])) {
+            $terms    = [];
+            $taxonomy = null;
+
+            foreach((array) $post_data['terms'] as $term_identifier) {
+                if(is_numeric($term_identifier)) {
+                    $term = get_term($term_identifier, '', ARRAY_A);
+                } else {
+                    $term = get_term_by('slug', $term_identifier, '', ARRAY_A);
+                }
+
+                // If term does not exist - create one
+                if ($term === false) {
+                    $term = $this->_createTerm([ 'slug' => $term_identifier ]);
+                }
+
+                // Capture term
+                array_push($terms, $term['term_id']);
+                $taxonomy = $term['taxonomy'];
+            }
+
+            if (!empty($terms)) {
+                wp_set_post_terms($result['ID'], $terms, $taxonomy);
+            }
+        }
 
         // Storing this in shared fixtures
         if (!array_key_exists('posts', $this->fixtures)) {
@@ -148,6 +176,48 @@ class TestCase extends PHPUnitTestCase
      */
     public static function tearDownAfterClass(): void
     {
+        // Reset DB tables
+        self::resetTables();
+
+        // Re-building default user & content
+        $user_result = self::_createUser([
+            'user_login' => 'admin',
+            'user_email' => 'admin@aamportal.local',
+            'first_name' => 'John',
+            'last_name'  => 'Smith',
+            'role'       => 'administrator',
+            'user_pass'  => constant('AAM_UNITTEST_DEFAULT_ADMIN_PASS')
+        ]);
+
+        // Create a default term
+        self::_createTerm([
+            'name' => 'Uncategorized'
+        ]);
+
+        // Create sample post & page
+        self::_createPost([
+            'post_title' => 'Sample Post'
+        ]);
+        self::_createPost([
+            'post_title' => 'Sample Page',
+            'post_type'  => 'page'
+        ]);
+
+        file_put_contents(__DIR__ . '/../../.default.setup.json', json_encode([
+            'admin_user' => $user_result
+        ]));
+    }
+
+    /**
+     * Reset DB tables
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
+    public static function resetTables()
+    {
         global $wpdb;
 
         // Resetting all users
@@ -161,20 +231,6 @@ class TestCase extends PHPUnitTestCase
         $wpdb->query("TRUNCATE TABLE {$wpdb->termmeta}");
         $wpdb->query("TRUNCATE TABLE {$wpdb->term_taxonomy}");
         $wpdb->query("TRUNCATE TABLE {$wpdb->term_relationships}");
-
-        // Re-building default user & content
-        $user_result = self::_createUser([
-            'user_login' => 'admin',
-            'user_email' => 'admin@aamportal.local',
-            'first_name' => 'John',
-            'last_name'  => 'Smith',
-            'role'       => 'administrator',
-            'user_pass'  => constant('AAM_UNITTEST_DEFAULT_ADMIN_PASS')
-        ]);
-
-        file_put_contents(__DIR__ . '/../../.default.setup.json', json_encode([
-            'admin_user' => $user_result
-        ]));
     }
 
     /**
@@ -259,7 +315,7 @@ class TestCase extends PHPUnitTestCase
     private static function _createTerm(array $term_data) : array
     {
         $default_term_data = [
-            'name'     => 'Test Category ' . uniqid(),
+            'name'     => 'Test Term: ' . uniqid(),
             'taxonomy' => 'category'
         ];
 
