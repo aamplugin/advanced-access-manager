@@ -291,4 +291,25 @@ class AAM_Framework_Utility_Misc
         return $result;
     }
 
+    /**
+     * Get currently viewed website area
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function get_current_area()
+    {
+        if (is_admin()) {
+            $result = 'backend';
+        } elseif (wp_is_json_request()) {
+            $result = 'api';
+        } else {
+            $result = 'frontend';
+        }
+
+        return $result;
+    }
+
 }

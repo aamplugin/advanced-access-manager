@@ -21,14 +21,12 @@ class AAM_Framework_Service_Capabilities
     /**
      * Get all capabilities
      *
-     * @param array $inline_context
-     *
      * @return array
      *
      * @access public
      * @version 6.9.33
      */
-    public function get_all_capabilities(array $inline_context = [])
+    public function get_all_capabilities()
     {
         try {
             // Now, just get capability slugs and prepare capability models
@@ -49,16 +47,14 @@ class AAM_Framework_Service_Capabilities
      *
      * @param string  $role_slug
      * @param boolean $return_all
-     * @param array   $inline_context
      *
      * @return array
      *
      * @access public
      * @version 6.9.33
      */
-    public function get_role_capabilities(
-        $role_slug, $return_all = false, array $inline_context = []
-    ) {
+    public function get_role_capabilities($role_slug, $return_all = false)
+    {
         try {
             $roles = wp_roles()->role_objects;
 
@@ -72,7 +68,7 @@ class AAM_Framework_Service_Capabilities
                             'is_assigned' => false,
                             'is_granted'  => false
                         ]);
-                    }, $this->get_all_capabilities($inline_context));
+                    }, $this->get_all_capabilities());
                 } else {
                     $result = [];
                 }
@@ -97,16 +93,14 @@ class AAM_Framework_Service_Capabilities
      *
      * @param mixed   $user_identifier
      * @param boolean $return_all
-     * @param array   $inline_context
      *
      * @return array
      *
      * @access public
      * @version 6.9.33
      */
-    public function get_user_capabilities(
-        $user_identifier, $return_all = false, array $inline_context = []
-    ) {
+    public function get_user_capabilities($user_identifier, $return_all = false)
+    {
         try {
             $user = $this->_get_user_by_identifier($user_identifier);
 
@@ -117,7 +111,7 @@ class AAM_Framework_Service_Capabilities
                         'is_assigned' => false,
                         'is_granted'  => false
                     ]);
-                }, $this->get_all_capabilities($inline_context));
+                }, $this->get_all_capabilities());
             } else {
                 $result = [];
             }
@@ -140,19 +134,14 @@ class AAM_Framework_Service_Capabilities
      * @param string     $capability
      * @param string     $assignee_type
      * @param string|int $assignee_id
-     * @param array      $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 6.9.33
      */
-    public function exists(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
+    public function exists($capability, $assignee_type = null, $assignee_id = null)
+    {
         try {
             // If there no assignee type, combine all the role capabilities + current
             // user capabilities
@@ -196,19 +185,14 @@ class AAM_Framework_Service_Capabilities
      * @param string     $capability
      * @param string     $assignee_type
      * @param string|int $assignee_id
-     * @param array      $inline_context
      *
      * @return string
      *
      * @access public
      * @version 6.9.33
      */
-    public function create(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
+    public function create($capability, $assignee_type = null, $assignee_id = null)
+    {
         try {
             $slug = trim($capability);
 
@@ -218,21 +202,15 @@ class AAM_Framework_Service_Capabilities
                 );
             }
 
-            $result = $this->add_to_role(
-                'administrator', $slug, $inline_context
-            );
+            $result = $this->add_to_role('administrator', $slug);
 
             switch ($assignee_type) {
                 case 'role':
-                    $result = $this->add_to_role(
-                        $assignee_id, $slug, $inline_context
-                    );
+                    $result = $this->add_to_role($assignee_id, $slug);
                     break;
 
                 case 'user':
-                    $result = $this->add_to_user(
-                        $assignee_id, $slug, $inline_context
-                    );
+                    $result = $this->add_to_user($assignee_id, $slug);
                     break;
 
                 default:
@@ -252,7 +230,6 @@ class AAM_Framework_Service_Capabilities
      * @param string     $new_capability
      * @param string     $assignee_type
      * @param string|int $assignee_id
-     * @param array      $inline_context
      *
      * @return string
      *
@@ -263,8 +240,7 @@ class AAM_Framework_Service_Capabilities
         $old_capability,
         $new_capability,
         $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
+        $assignee_id = null
     ) {
         try {
             $slug = trim($new_capability);
@@ -273,9 +249,7 @@ class AAM_Framework_Service_Capabilities
                 throw new InvalidArgumentException(
                     "The capability slug {$new_capability} is not valid"
                 );
-            } elseif ($this->exists(
-                $slug, $assignee_type, $assignee_id, $inline_context
-            )) {
+            } elseif ($this->exists($slug, $assignee_type, $assignee_id)) {
                 throw new InvalidArgumentException(
                     "The {$slug} capability already exists"
                 );
@@ -320,19 +294,14 @@ class AAM_Framework_Service_Capabilities
      * @param string     $capability
      * @param string     $assignee_type
      * @param string|int $assignee_id
-     * @param array      $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 6.9.33
      */
-    public function delete(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
+    public function delete($capability, $assignee_type = null, $assignee_id = null)
+    {
         try {
             if (empty($capability)) {
                 throw new InvalidArgumentException(
@@ -376,16 +345,14 @@ class AAM_Framework_Service_Capabilities
      *
      * @param string $role_slug
      * @param string $capability
-     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 6.9.33
      */
-    public function add_to_role(
-        $role_slug, $capability, array $inline_context = []
-    ) {
+    public function add_to_role($role_slug, $capability)
+    {
         try {
             $roles = wp_roles();
 
@@ -412,16 +379,14 @@ class AAM_Framework_Service_Capabilities
      *
      * @param mixed  $user_identifier
      * @param string $capability
-     * @param array  $inline_context
      *
      * @return array
      *
      * @access public
      * @version 6.9.33
      */
-    public function add_to_user(
-        $user_identifier, $capability, array $inline_context = []
-    ) {
+    public function add_to_user($user_identifier, $capability)
+    {
         try {
             $user = $this->_get_user_by_identifier($user_identifier);
 

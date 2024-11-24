@@ -21,18 +21,16 @@ class AAM_Framework_Service_Jwts
     /**
      * Return list of tokens
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
      * @version 6.9.10
      */
-    public function get_token_list($inline_context = null)
+    public function get_token_list()
     {
         try {
             $result = [];
-            $user   = $this->_get_access_level($inline_context);
+            $user   = $this->_get_access_level();
             $tokens = AAM_Service_Jwt::getInstance()->getTokenRegistry($user->ID);
 
             foreach($tokens as $token) {
@@ -48,8 +46,7 @@ class AAM_Framework_Service_Jwts
     /**
      * Get existing token by ID
      *
-     * @param string $id             Token ID
-     * @param array  $inline_context Runtime context
+     * @param string $id Token ID
      *
      * @return array
      *
@@ -57,12 +54,12 @@ class AAM_Framework_Service_Jwts
      * @version 6.9.10
      * @throws OutOfRangeException If token does not exist
      */
-    public function get_token_by_id($id, $inline_context = null)
+    public function get_token_by_id($id)
     {
         try {
             $result = false;
 
-            foreach($this->get_token_list($inline_context) as $token) {
+            foreach($this->get_token_list() as $token) {
                 if ($token['id'] === $id) {
                     $result = $token;
                 }
@@ -81,18 +78,17 @@ class AAM_Framework_Service_Jwts
     /**
      * Create new token
      *
-     * @param array $claims         Token claims
-     * @param array $inline_context Runtime context
+     * @param array $claims Token claims
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function create_token(array $claims, $inline_context = null)
+    public function create_token(array $claims)
     {
         try {
-            $user = $this->_get_access_level($inline_context);
+            $user = $this->_get_access_level();
 
             // Adding user ID to the list of claims
             $claims['userId'] = $user->ID;
@@ -120,8 +116,7 @@ class AAM_Framework_Service_Jwts
     /**
      * Delete token
      *
-     * @param string $id             Token ID
-     * @param array  $inline_context Runtime context
+     * @param string $id Token ID
      *
      * @return array
      *
@@ -129,12 +124,12 @@ class AAM_Framework_Service_Jwts
      * @version 6.9.10
      * @throws RuntimeException If fails to revoke a token
      */
-    public function delete_token($id, $inline_context = null)
+    public function delete_token($id)
     {
         try {
             // Find the token that we are deleting
-            $found = $this->get_token_by_id($id, $inline_context);
-            $user  = $this->_get_access_level($inline_context);
+            $found = $this->get_token_by_id($id);
+            $user  = $this->_get_access_level();
 
             // Revoking the token
             $result = AAM_Service_Jwt::getInstance()->revokeUserToken(
@@ -154,23 +149,21 @@ class AAM_Framework_Service_Jwts
     /**
      * Reset all tokens
      *
-     * @param array $inline_context Runtime context
-     *
      * @return array
      *
      * @access public
      * @version 6.9.10
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
-            $user = $this->_get_access_level($inline_context);
+            $user = $this->_get_access_level();
 
             // Reset
             if (!AAM_Service_Jwt::getInstance()->resetTokenRegistry($user->ID)) {
                 throw new RuntimeException('Failed to reset tokens');
             } else {
-                $result = $this->get_token_list($inline_context);
+                $result = $this->get_token_list();
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);

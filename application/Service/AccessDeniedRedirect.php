@@ -85,33 +85,28 @@ class AAM_Service_AccessDeniedRedirect
         add_action('aam_access_denied_redirect_handler_filter', function($handler) {
             if (is_null($handler)) {
                 $handler = function() {
-                    $is_post = $_SERVER['REQUEST_METHOD'] === 'POST';
-                    $is_rest = defined('REST_REQUEST') && REST_REQUEST;
+                    $service  = AAM::api()->access_denied_redirect();
+                    $redirect = $service->get_redirect(
+                        AAM_Framework_Utility_Misc::get_current_area()
+                    );
 
-                    if (!$is_post && !$is_rest) {
-                        $service  = AAM::api()->access_denied_redirect();
-                        $redirect = $service->get_redirect(
-                            (is_admin() ? 'backend' : 'frontend')
-                        );
-
-                        if ($redirect['type'] === 'default') {
-                            if (isset($redirect['http_status_code'])) {
-                                $status_code = $redirect['http_status_code'];
-                            } else {
-                                $status_code = 401;
-                            }
-
-                            wp_die(
-                                __('The access is denied.', AAM_KEY),
-                                __('Access Denied', AAM_KEY),
-                                apply_filters('aam_wp_die_args_filter', [
-                                    'exit'     => true,
-                                    'response' => $status_code
-                                ])
-                            );
+                    if ($redirect['type'] === 'default') {
+                        if (isset($redirect['http_status_code'])) {
+                            $status_code = $redirect['http_status_code'];
                         } else {
-                            AAM_Framework_Utility_Redirect::do_redirect($redirect);
+                            $status_code = 401;
                         }
+
+                        wp_die(
+                            __('The access is denied.', AAM_KEY),
+                            __('Access Denied', AAM_KEY),
+                            apply_filters('aam_wp_die_args_filter', [
+                                'exit'     => true,
+                                'response' => $status_code
+                            ])
+                        );
+                    } else {
+                        AAM_Framework_Utility_Redirect::do_redirect($redirect);
                     }
                 };
             }

@@ -68,15 +68,7 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
      */
     public function is_hidden()
     {
-        if (is_admin()) {
-            $area = 'backend';
-        } elseif (defined('REST_REQUEST') && REST_REQUEST) {
-            $area = 'api';
-        } else {
-            $area = 'frontend';
-        }
-
-        return $this->is_hidden_on($area);
+        return $this->is_hidden_on(AAM_Framework_Utility_Misc::get_current_area());
     }
 
     /**

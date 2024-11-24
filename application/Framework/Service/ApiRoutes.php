@@ -25,8 +25,6 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Return list of permissions
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
@@ -35,11 +33,11 @@ class AAM_Framework_Service_ApiRoutes
      * @access public
      * @version 6.9.13
      */
-    public function get_route_list($inline_context = null)
+    public function get_route_list()
     {
         try {
             $result   = [];
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Iterating over the list of all registered API routes and compile the
             // list
@@ -70,17 +68,16 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @param string      $endpoint       Route endpoint
      * @param string|null $method         HTTP method
-     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_route($endpoint, $method = 'GET', $inline_context = null)
+    public function get_route($endpoint, $method = 'GET')
     {
         try {
-            $routes = $this->get_route_list($inline_context);
+            $routes = $this->get_route_list();
             $found  = array_filter($routes, function($r) use ($endpoint, $method) {
                 return $r['endpoint'] === strtolower($endpoint)
                             && $r['method'] === strtoupper($method);
@@ -106,7 +103,6 @@ class AAM_Framework_Service_ApiRoutes
      * @param bool        $is_restricted  Is restricted or not
      * @param string      $endpoint       API endpoint
      * @param string|null $method         HTTP method
-     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
@@ -114,10 +110,10 @@ class AAM_Framework_Service_ApiRoutes
      * @version 7.0.0
      */
     public function update_route_permission(
-        $is_restricted, $endpoint, $method = 'GET', $inline_context = null
+        $is_restricted, $endpoint, $method = 'GET'
     ) {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Prepare array of new permissions
             $perms = array_merge($resource->get_permissions(true), [
@@ -143,7 +139,6 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @param string      $endpoint       API endpoint
      * @param string|null $method         HTTP method
-     * @param array|null  $inline_context Runtime context
      *
      * @return array
      *
@@ -151,10 +146,10 @@ class AAM_Framework_Service_ApiRoutes
      * @version 7.0.0
      */
     public function delete_route_permission(
-        $endpoint, $method = 'GET', $inline_context = null
+        $endpoint, $method = 'GET'
     ) {
         try {
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $resource  = $access_level->get_resource(
                 AAM_Framework_Type_Resource::API_ROUTE
             );
@@ -186,8 +181,6 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Reset all routes
      *
-     * @param array $inline_context Runtime context
-     *
      * @return array
      *
      * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
@@ -196,15 +189,15 @@ class AAM_Framework_Service_ApiRoutes
      * @access public
      * @version 6.9.35
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Reset settings to default
             $resource->reset();
 
-            $result = $this->get_route_list($inline_context);
+            $result = $this->get_route_list();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -215,17 +208,15 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Get resource
      *
-     * @param array$inline_context
-     *
      * @return AAM_Framework_Resource_ApiRoute
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    public function get_resource()
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $result       = $access_level->get_resource(
                 AAM_Framework_Type_Resource::API_ROUTE
             );
@@ -241,14 +232,13 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @param string|WP_REST_Request $route
      * @param string|null            $method
-     * @param array|null             $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($route, $method = 'GET', $inline_context = null)
+    public function is_restricted($route, $method = 'GET')
     {
         try {
             if (is_a($route, WP_REST_Request::class)) {
@@ -260,7 +250,7 @@ class AAM_Framework_Service_ApiRoutes
                 throw new InvalidArgumentException('Invalid route endpoint');
             }
 
-            $result = $this->get_resource($inline_context)->is_restricted(
+            $result = $this->get_resource()->is_restricted(
                 $endpoint, $method
             );
         } catch (Exception $e) {

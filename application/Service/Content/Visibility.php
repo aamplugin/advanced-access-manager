@@ -179,13 +179,7 @@ class AAM_Service_Content_Visibility
      */
     private function _is_hidden($control)
     {
-        if (is_admin()) {
-            $area = 'backend';
-        } elseif (defined('REST_REQUEST') && REST_REQUEST) {
-            $area = 'api';
-        } else {
-            $area = 'frontend';
-        }
+        $area = AAM_Framework_Utility_Misc::get_current_area();
 
         return in_array($area, $control['on'], true) && $control['effect'] == 'deny';
     }

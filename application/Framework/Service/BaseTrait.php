@@ -40,16 +40,6 @@ trait AAM_Framework_Service_BaseTrait
     private $_runtime_context = null;
 
     /**
-     * Context subject
-     *
-     * @var AAM_Core_Subject
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_access_level = null;
-
-    /**
      * Instantiate the service
      *
      * @return void
@@ -135,15 +125,13 @@ trait AAM_Framework_Service_BaseTrait
      * access level. Permissions are considered customized if there is at least one
      * admin menu item explicitly allowed or denied.
      *
-     * @param mixed $inline_context
-     *
      * @return boolean
      * @version 7.0.0
      */
-    public function is_customized($inline_context = null)
+    public function is_customized()
     {
         try {
-            $result = $this->_get_resource(true, $inline_context)->is_customized();
+            $result = $this->_get_resource()->is_customized();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -154,22 +142,16 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Get current subject
      *
-     * @param mixed $inline_context Runtime context
-     *
      * @return AAM_Framework_AccessLevel_Interface
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_access_level($inline_context = null)
+    private function _get_access_level()
     {
         $result = null;
 
-        if (is_array($inline_context)) {
-            $context = $inline_context;
-        } elseif (is_a($inline_context, AAM_Framework_AccessLevel_Interface::class)) {
-            $context = [ 'access_level' => $inline_context ];
-        } elseif (is_array($this->_runtime_context)) {
+        if (is_array($this->_runtime_context)) {
             $context = $this->_runtime_context;
         } else {
             throw new BadMethodCallException('No context provided');
@@ -183,9 +165,6 @@ trait AAM_Framework_Service_BaseTrait
                 isset($context['access_level_id']) ? $context['access_level_id'] : null
             );
         }
-
-        // Persist the current access level so it can be assessed as property
-        $this->_access_level = $result;
 
         return $result;
     }

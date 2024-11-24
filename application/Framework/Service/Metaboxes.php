@@ -227,17 +227,15 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Get metabox resource
      *
-     * @param array $inline_context
-     *
      * @return AAM_Framework_Resource_Metabox
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    public function get_resource()
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $result       = $access_level->get_resource(
                 AAM_Framework_Type_Resource::METABOX
             );

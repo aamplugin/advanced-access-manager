@@ -36,19 +36,14 @@ implements
      * @param string  $type
      * @param mixed   $identifier
      * @param boolean $reload
-     * @param array   $runtime_context
      *
      * @return AAM_Framework_AccessLevel_Interface
      *
      * @access public
      * @version 7.0.0
      */
-    public function get(
-        $type,
-        $identifier = null,
-        $reload = false,
-        array $runtime_context = null
-    ) {
+    public function get($type, $identifier = null, $reload = false)
+    {
         try {
             if ($type === AAM_Framework_Type_AccessLevel::ROLE) {
                 $result = $this->get_role($identifier, $reload);
@@ -84,16 +79,14 @@ implements
      *
      * @param string  $role_slug
      * @param boolean $reload
-     * @param array   $runtime_context
      *
      * @return AAM_Framework_AccessLevel_Role
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_role(
-        $role_slug, $reload = false, array $runtime_context = null
-    ) {
+    public function get_role($role_slug, $reload = false)
+    {
         try {
             $cache_key = $this->_determine_cache_key(
                 AAM_Framework_Type_AccessLevel::ROLE, $role_slug
@@ -131,16 +124,14 @@ implements
      *
      * @param int|string|WP_User $identifier
      * @param boolean            $reload
-     * @param array              $runtime_context
      *
      * @return AAM_Framework_AccessLevel_User
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_user(
-        $identifier, $reload = false, array $runtime_context = null
-    ) {
+    public function get_user($identifier, $reload = false)
+    {
         try {
             $cache_key = $this->_determine_cache_key(
                 AAM_Framework_Type_AccessLevel::USER, $identifier
@@ -178,14 +169,13 @@ implements
      * Get visitor access level
      *
      * @param boolean $reload
-     * @param array   $runtime_context
      *
      * @return AAM_Framework_AccessLevel_Visitor
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_visitor($reload = false, array $runtime_context = null)
+    public function get_visitor($reload = false)
     {
         try {
             $cache_key = $this->_determine_cache_key(
@@ -215,14 +205,13 @@ implements
      * Get default access level
      *
      * @param boolean $reload
-     * @param array   $runtime_context
      *
      * @return AAM_Framework_AccessLevel_Default
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_default($reload = false, array $runtime_context = null)
+    public function get_default($reload = false)
     {
         try {
             $cache_key = $this->_determine_cache_key(

@@ -6,7 +6,7 @@
         $service           = $access_level->access_denied_redirect();
         $frontend_redirect = $service->get_redirect('frontend');
         $backend_redirect  = $service->get_redirect('backend');
-        $restful_redirect  = $service->get_redirect('restful');
+        $api_redirect      = $service->get_redirect('api');
     ?>
 
     <div class="aam-feature" id="redirect-content">
@@ -28,7 +28,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
                     <?php if (!$access_level->is_visitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
-                    <li role="presentation"><a href="#restful-redirect" aria-controls="restful" role="tab" data-toggle="tab"><i class="icon-exchange"></i> <?php echo __('RESTful Redirect', AAM_KEY); ?></a></li>
+                    <li role="presentation"><a href="#api-redirect" aria-controls="api" role="tab" data-toggle="tab"><i class="icon-exchange"></i> <?php echo __('RESTful Redirect', AAM_KEY); ?></a></li>
                 </ul>
 
                 <div class="tab-content">
@@ -360,63 +360,63 @@
                         </div>
                     </div>
 
-                    <div role="tabpanel" class="tab-pane" id="restful-redirect">
+                    <div role="tabpanel" class="tab-pane" id="api-redirect">
                         <div class="radio">
                             <input
                                 type="radio"
-                                name="restful.redirect.type"
-                                id="restful-redirect-default"
-                                data-action="#restful-default"
+                                name="api.redirect.type"
+                                id="api-redirect-default"
+                                data-action="#api-default"
                                 value="default"
-                                data-group="restful"
-                                <?php echo ($restful_redirect['type'] === 'default' ? ' checked' : ''); ?>
+                                data-group="api"
+                                <?php echo ($api_redirect['type'] === 'default' ? ' checked' : ''); ?>
                             />
-                            <label for="restful-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [(HTTP Status Code 404)]', 'small'); ?></label>
+                            <label for="api-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [(HTTP Status Code 401)]', 'small'); ?></label>
                         </div>
                         <div class="radio">
                             <input
                                 type="radio"
-                                name="restful.redirect.type"
-                                id="restful-redirect-message"
-                                data-action="#restful-message"
+                                name="api.redirect.type"
+                                id="api-redirect-message"
+                                data-action="#api-message"
                                 value="custom_message"
-                                data-group="restful"
-                                <?php echo ($restful_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
+                                data-group="api"
+                                <?php echo ($api_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
                             />
-                            <label for="restful-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message', 'small'); ?></label>
+                            <label for="api-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message', 'small'); ?></label>
                         </div>
                         <div class="radio">
                             <input
                                 type="radio"
-                                name="restful.redirect.type"
-                                id="restful-redirect-callback"
-                                data-action="#restful-callback-action"
+                                name="api.redirect.type"
+                                id="api-redirect-callback"
+                                data-action="#api-callback-action"
                                 value="trigger_callback"
-                                data-group="restful"
-                                <?php echo ($restful_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
+                                data-group="api"
+                                <?php echo ($api_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
                             />
-                            <label for="restful-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
+                            <label for="api-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
 
                         <div
-                            class="form-group aam-redirect-action restful"
-                            id="restful-message"
-                            style="display: <?php echo ($restful_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
+                            class="form-group aam-redirect-action api"
+                            id="api-message"
+                            style="display: <?php echo ($api_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="restful-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
-                            <?php $redirect_message = isset($restful_redirect['message']) ? $restful_redirect['message'] : ''; ?>
+                            <label for="api-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <?php $redirect_message = isset($api_redirect['message']) ? $api_redirect['message'] : ''; ?>
                             <textarea
                                 class="form-control"
                                 rows="3"
-                                data-group="restful"
+                                data-group="api"
                                 placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"
-                                name="restful.redirect.message"
+                                name="api.redirect.message"
                             ><?php echo esc_textarea($redirect_message); ?></textarea>
 
                             <div class="aam-mt-1">
-                                <label for="restful-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
-                                <?php $redirect_code = isset($restful_redirect['http_status_code']) ? $restful_redirect['http_status_code'] : 401; ?>
-                                <select class="form-control form-clearable" name="restful.redirect.message.code" id="restful-message-status-code" data-group="restful">
+                                <label for="api-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <?php $redirect_code = isset($api_redirect['http_status_code']) ? $api_redirect['http_status_code'] : 401; ?>
+                                <select class="form-control form-clearable" name="api.redirect.message.code" id="api-message-status-code" data-group="api">
                                     <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
                                     <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
                                     <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
@@ -427,18 +427,18 @@
                         </div>
 
                         <div
-                            class="form-group aam-redirect-action restful"
-                            id="restful-callback-action"
-                            style="display: <?php echo ($restful_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
+                            class="form-group aam-redirect-action api"
+                            id="api-callback-action"
+                            style="display: <?php echo ($api_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
-                                data-group="restful"
+                                data-group="api"
                                 placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
-                                name="restful.redirect.callback"
-                                value="<?php echo stripslashes(esc_js(isset($restful_redirect['callback']) ? $restful_redirect['callback'] : '')); ?>"
+                                name="api.redirect.callback"
+                                value="<?php echo stripslashes(esc_js(isset($api_redirect['callback']) ? $api_redirect['callback'] : '')); ?>"
                             />
                         </div>
                     </div>

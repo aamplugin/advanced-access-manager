@@ -10,16 +10,10 @@
 /**
  * AAM service for Admin Toolbar
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
- * @since 6.9.13 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
-class AAM_Framework_Service_AdminToolbar
-implements
-    AAM_Framework_Service_Interface
+class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
@@ -44,18 +38,16 @@ implements
     /**
      * Return the complete admin toolbar item list with permissions
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
      * @version 6.9.13
      */
-    public function get_item_list($inline_context = null)
+    public function get_item_list()
     {
         try {
             $result   = [];
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
 
             // Getting the admin toolbar cache so we can build the list
             $cache = $this->_get_raw_menu();
@@ -77,19 +69,18 @@ implements
     /**
      * Get existing menu by ID
      *
-     * @param string $item_id        Menu item ID
-     * @param array  $inline_context Runtime context
+     * @param string $item_id Menu item ID
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item_by_id($item_id, $inline_context = null)
+    public function get_item_by_id($item_id)
     {
         try {
             $result = $this->_find_item_by_id(
-                $item_id, $this->get_item_list($inline_context)
+                $item_id, $this->get_item_list()
             );
 
             if ($result === null) {
@@ -107,20 +98,18 @@ implements
     /**
      * Update existing item permission
      *
-     * @param string $item_id        Menu item ID
-     * @param bool   $is_hidden      Is hidden or not
-     * @param array  $inline_context Runtime context
+     * @param string $item_id   Menu item ID
+     * @param bool   $is_hidden Is hidden or not
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function update_item_permission(
-        $item_id, $is_hidden = true, $inline_context = null
-    ) {
+    public function update_item_permission($item_id, $is_hidden = true)
+    {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
 
             // Prepare array of new permissions
             $perms = array_merge($resource->get_permissions(true), [
@@ -142,18 +131,17 @@ implements
     /**
      * Delete item permission
      *
-     * @param string $item_id        Menu item id
-     * @param array  $inline_context Runtime context
+     * @param string $item_id Menu item id
      *
      * @return array
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    public function delete_item_permission($item_id, $inline_context = null)
+    public function delete_item_permission($item_id)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
             $item     = $this->get_item_by_id($item_id);
 
             // Note! User can delete only explicitly set rule (overwritten rule)
@@ -195,23 +183,18 @@ implements
     /**
      * Reset all permissions
      *
-     * @param array $inline_context Runtime context
-     *
      * @return array
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.13 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
             // Resetting settings to default
-            $this->get_resource($inline_context)->reset();
+            $this->_get_resource()->reset();
 
-            $result = $this->get_item_list($inline_context);
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -222,17 +205,15 @@ implements
     /**
      * Get Admin Toolbar resource
      *
-     * @param array $inline_context
-     *
      * @return AAM_Framework_Resource_AdminToolbar
      *
-     * @access public
+     * @access private
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    private function _get_resource()
     {
         try {
-            $result = $this->_get_access_level($inline_context)->get_resource(
+            $result = $this->_get_access_level()->get_resource(
                 AAM_Framework_Type_Resource::TOOLBAR
             );
         } catch (Exception $e) {
@@ -246,17 +227,16 @@ implements
      * Check if toolbar item is hidden
      *
      * @param string $item_id
-     * @param array  $inline_context
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_hidden($item_id, $inline_context = null)
+    public function is_hidden($item_id)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
 
             // Step #1. Checking if provided item has any access controls defined
             $result = $resource->is_hidden($item_id);

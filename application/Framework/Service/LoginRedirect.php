@@ -41,11 +41,11 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     public function get_redirect()
     {
         try {
-            $container = $this->_get_preference();
-            $result    = $this->_prepare_redirect(
-                $container->get_preferences(),
-                !$container->is_customized()
-            );
+            $result = $this->_get_container()->get_preferences();
+
+            if (empty($result)) {
+                $result = [ 'type' => 'default' ];
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -67,16 +67,39 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $container   = $this->_get_preference();
-            $preferences = $this->_convert_to_redirect($redirect);
+            $sanitized = AAM_Framework_Utility_Redirect::sanitize_redirect(
+                $redirect,
+                self::ALLOWED_REDIRECT_TYPES
+            );
 
-            if (!$container->set_preferences($preferences)) {
+            if (!$this->_get_container()->set_preferences($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
-            $result = $this->_prepare_redirect($container->get_preferences(), false);
+            $result = $this->get_redirect();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get or set login redirect
+     *
+     * @param array $redirect [optional]
+     *
+     * @return bool|array
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function redirect($redirect = null)
+    {
+        if (is_null($redirect)) {
+            $result = $this->get_redirect();
+        } else {
+            $result = $this->set_redirect($redirect);
         }
 
         return $result;
@@ -93,7 +116,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     public function reset()
     {
         try {
-            $this->_get_preference()->reset();
+            $this->_get_container()->reset();
 
             $result = [ 'success' => true ];
         } catch (Exception $e) {
@@ -114,7 +137,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     public function is_customized()
     {
         try {
-            $result = $this->_get_preference()->is_customized();
+            $result = $this->_get_container()->is_customized();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -130,103 +153,11 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
      * @access private
      * @version 7.0.0
      */
-    private function _get_preference()
+    private function _get_container()
     {
-        try {
-            $result = $this->_get_access_level()->get_preference(
-                AAM_Framework_Type_Preference::LOGIN_REDIRECT
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Normalize and prepare the redirect details
-     *
-     * @param array $settings
-     * @param bool  $is_inherited
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _prepare_redirect($settings, $is_inherited = false)
-    {
-        return array_merge(
-            [ 'type' => 'default' ],
-            $settings,
-            [ 'is_inherited' => $is_inherited ]
+        return $this->_get_access_level()->get_preference(
+            AAM_Framework_Type_Preference::LOGIN_REDIRECT
         );
-    }
-
-    /**
-     * Validate and normalize the incoming login redirect data
-     *
-     * @param array $incoming_data
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _convert_to_redirect(array $incoming_data)
-    {
-        // First, let's validate tha the rule type is correct
-        if (!in_array($incoming_data['type'], self::ALLOWED_REDIRECT_TYPES, true)) {
-            throw new InvalidArgumentException('The valid `type` is required');
-        }
-
-        $result = [
-            'type' => $incoming_data['type']
-        ];
-
-        if ($incoming_data['type'] === 'page_redirect') {
-            if (isset($incoming_data['redirect_page_id'])) {
-                $page_id = intval($incoming_data['redirect_page_id']);
-            } else {
-                $page_id = 0;
-            }
-
-            if ($page_id === 0) {
-                throw new InvalidArgumentException(
-                    'The `redirect_page_id` is required'
-                );
-            } else {
-                $result['redirect_page_id'] = $page_id;
-            }
-        } elseif ($incoming_data['type'] === 'url_redirect') {
-            if (isset($incoming_data['redirect_url'])) {
-                $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
-                    $incoming_data['redirect_url']
-                );
-            } else {
-                $redirect_url = null;
-            }
-
-            if (empty($redirect_url)) {
-                throw new InvalidArgumentException(
-                    'The valid `redirect_url` is required'
-                );
-            } else {
-                $result['redirect_url'] = $redirect_url;
-            }
-        } elseif ($incoming_data['type'] === 'trigger_callback') {
-            if (isset($incoming_data['callback'])
-                && is_callable($incoming_data['callback'], true)
-            ) {
-                $result['callback'] = $incoming_data['callback'];
-            } else {
-                throw new InvalidArgumentException(
-                    'The valid `callback` is required'
-                );
-            }
-        }
-
-        return $result;
     }
 
 }

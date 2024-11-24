@@ -121,7 +121,13 @@ class AAM_Framework_Utility_Redirect
                 wp_login_url($_SERVER['REQUEST_URI'])
             );
         } elseif ($redirect['type'] === 'page_redirect') {
-            $result = get_page_link($redirect['redirect_page_id']);
+            if (!empty($redirect['redirect_page_id'])) {
+                $result = get_page_link($redirect['redirect_page_id']);
+            } elseif (!empty($redirect['redirect_page_slug'])) {
+                $result = get_page_link(
+                    get_page_by_path($redirect['redirect_page_slug'])
+                );
+            }
         } elseif ($redirect['type'] === 'url_redirect') {
             $result = AAM_Framework_Utility_Misc::sanitize_url(
                 $redirect['redirect_url']
@@ -135,6 +141,97 @@ class AAM_Framework_Utility_Redirect
         }
 
         return $result ? $result : $default;
+    }
+
+    /**
+     * Sanitize the redirect data
+     *
+     * @param array $redirect
+     * @param array $allowed_types [optional]
+     *
+     * @return array
+     *
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function sanitize_redirect(array $redirect, $allowed_types = [])
+    {
+        // First, let's validate tha the rule type is correct
+        if (!in_array($redirect['type'], $allowed_types, true)) {
+            throw new InvalidArgumentException('The redirect type is not valid');
+        }
+
+        $result = [ 'type' => $redirect['type'] ];
+
+        if ($redirect['type'] === 'custom_message') {
+            $message = wp_kses_post($redirect['message']);
+
+            if (empty($message)) {
+                throw new InvalidArgumentException('The custom message is required');
+            } else {
+                $result['message'] = $message;
+            }
+        } elseif ($redirect['type'] === 'page_redirect') {
+            if (array_key_exists('redirect_page_id', $redirect)) {
+                $attribute = 'redirect_page_id';
+                $value     = intval($redirect['redirect_page_id']);
+            } elseif(array_key_exists('redirect_page_slug', $redirect)) {
+                $attribute = 'redirect_page_slug';
+                $value     = trim($redirect['redirect_page_slug']);
+            } else {
+                throw new InvalidArgumentException(
+                    'Redirected page ID or slug is not provided'
+                );
+            }
+
+            $result[$attribute] = $value;
+        } elseif ($redirect['type'] === 'url_redirect') {
+            $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
+                $redirect['redirect_url']
+            );
+
+            if (empty($redirect_url)) {
+                throw new InvalidArgumentException(
+                    'The valid redirect URL is required'
+                );
+            } else {
+                $result['redirect_url'] = $redirect_url;
+            }
+        } elseif ($redirect['type'] === 'trigger_callback') {
+            if (!is_callable($redirect['callback'], true)) {
+                throw new InvalidArgumentException(
+                    'The valid callback is required'
+                );
+            } else {
+                $result['callback'] = $redirect['callback'];
+            }
+        }
+
+        if (!empty($redirect['http_status_code'])) {
+            $type  = $redirect['type'];
+            $code  = intval($redirect['http_status_code']);
+            $valid = false;
+
+            if (in_array($type, ['default', 'custom_message'], true)) {
+                $valid = ($code >= 400 && $code <= 599);
+            } elseif (in_array($type, ['page_redirect', 'url_redirect'], true)) {
+                $valid = $code >= 300 && $code <= 399;
+            } elseif ($type === 'trigger_callback') {
+                $valid = $code >= 300 && $code <= 599;
+            }
+
+            if ($valid) {
+                $result['http_status_code'] = $code;
+            } else {
+                throw new InvalidArgumentException(
+                    'The HTTP status code is not valid for given redirect type'
+                );
+            }
+        }
+
+        return $result;
     }
 
 }

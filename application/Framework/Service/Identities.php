@@ -58,18 +58,16 @@ class AAM_Framework_Service_Identities
     /**
      * Return list of permissions for give subject
      *
-     * @param array $inline_context Context
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_permissions($inline_context = null)
+    public function get_permissions()
     {
         try {
             $result   = [];
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             foreach($resource->get_permissions() as $id => $permission) {
                 array_push($result, $this->_prepare_permission(
@@ -86,18 +84,17 @@ class AAM_Framework_Service_Identities
     /**
      * Get existing permission by ID
      *
-     * @param string     $id             Permission ID
-     * @param array|null $inline_context Runtime context
+     * @param string $id Permission ID
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_permission_by_id($id, $inline_context = null)
+    public function get_permission_by_id($id)
     {
         try {
-            $resource    = $this->get_resource($inline_context);
+            $resource    = $this->get_resource();
             $permissions = $resource->get_permissions();
 
             if (!array_key_exists($id, $permissions)) {
@@ -117,21 +114,20 @@ class AAM_Framework_Service_Identities
     /**
      * Create new permission
      *
-     * @param array $permission     Permission data
-     * @param array $inline_context Runtime context
+     * @param array $permission Permission data
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function create_permission(array $permission, $inline_context = null)
+    public function create_permission(array $permission)
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
             $this->_validate_permission($permission);
 
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Prepare array of new permissions
             $key   = uniqid('id_');
@@ -154,20 +150,19 @@ class AAM_Framework_Service_Identities
     /**
      * Update existing permission
      *
-     * @param string     $id             Permission ID
-     * @param string     $effect         Either allow or deny
-     * @param array|null $inline_context Runtime context
+     * @param string $id     Permission ID
+     * @param string $effect Either allow or deny
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function update_permission($id, $effect, $inline_context = null)
+    public function update_permission($id, $effect)
     {
         try {
-            $resource   = $this->get_resource($inline_context);
-            $permission = $this->get_permission_by_id($id, $inline_context);
+            $resource   = $this->get_resource();
+            $permission = $this->get_permission_by_id($id);
 
             // Update permission's effect
             if (in_array($effect, self::EFFECT_TYPES, true)) {
@@ -188,7 +183,7 @@ class AAM_Framework_Service_Identities
                 throw new RuntimeException('Failed to update permissions');
             }
 
-            $result = $this->get_permission_by_id($id, $inline_context);
+            $result = $this->get_permission_by_id($id);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -199,18 +194,17 @@ class AAM_Framework_Service_Identities
     /**
      * Delete permission
      *
-     * @param string     $id             Permission ID
-     * @param array|null $inline_context Runtime context
+     * @param string $id Permission ID
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function delete_permission($id, $inline_context = null)
+    public function delete_permission($id)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Note! User can delete only explicitly set rule (overwritten rule)
             $permissions = $resource->get_permissions(true);
@@ -238,21 +232,19 @@ class AAM_Framework_Service_Identities
     /**
      * Reset all permissions
      *
-     * @param array $inline_context Runtime context
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
             // Reset settings to default
             $success = $this->get_resource()->reset();
 
             if ($success) {
-                $result = $this->get_permissions($inline_context);
+                $result = $this->get_permissions();
             } else {
                 throw new RuntimeException('Failed to reset permissions');
             }
@@ -269,7 +261,6 @@ class AAM_Framework_Service_Identities
      * @param string     $identity_type  Can be one of the self::IDENTITY_TYPE
      * @param string|int $identity       Identity ID - role slug, user ID or level ID
      * @param string     $permission     Ca be one of the self::PERMISSION_TYPES
-     * @param array|null $inline_context Inline context
      *
      * @return boolean
      *
@@ -277,27 +268,23 @@ class AAM_Framework_Service_Identities
      * @version 7.0.0
      */
     public function is_allowed_to(
-        $identity_type, $identity, $permission, $inline_context = null
+        $identity_type, $identity, $permission
     ) {
         try {
             if ($identity_type === 'role') {
-                $result = $this->_is_role_allowed_to(
-                    $identity, $permission, $inline_context
-                );
+                $result = $this->_is_role_allowed_to($identity, $permission);
             } elseif ($identity_type === 'user_role') {
-                $result = $this->get_resource($inline_context)->is_allowed_to(
+                $result = $this->get_resource()->is_allowed_to(
                     'user_role', $identity, $permission
                 );
             } elseif ($identity_type === 'role_level') {
-                $result = $this->get_resource($inline_context)->is_allowed_to(
+                $result = $this->get_resource()->is_allowed_to(
                     'role_level', $identity, $permission
                 );
             } elseif ($identity_type === 'user') {
-                $result = $this->_is_user_allowed_to(
-                    $identity, $permission, $inline_context
-                );
+                $result = $this->_is_user_allowed_to($identity, $permission);
             } elseif ($identity_type === 'user_level') {
-                $result = $this->get_resource($inline_context)->is_allowed_to(
+                $result = $this->get_resource()->is_allowed_to(
                     'user_level', $identity, $permission
                 );
             } else {
@@ -316,19 +303,15 @@ class AAM_Framework_Service_Identities
      * @param string     $identity_type  Can be one of the self::IDENTITY_TYPE
      * @param string|int $identity       Identity ID - role slug, user ID or level ID
      * @param string     $permission     Ca be one of the self::PERMISSION_TYPES
-     * @param array|null $inline_context Inline context
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_denied_to(
-        $identity_type, $identity, $permission, $inline_context = null
-    ) {
-        $result = $this->is_allowed_to(
-            $identity_type, $identity, $permission, $inline_context
-        );
+    public function is_denied_to($identity_type, $identity, $permission)
+    {
+        $result = $this->is_allowed_to($identity_type, $identity, $permission);
 
         return is_bool($result) ? !$result : null;
     }
@@ -336,14 +319,12 @@ class AAM_Framework_Service_Identities
     /**
      * Based on existing access controls return WP_User_Query filters
      *
-     * @param array|null $inline_context
-     *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_user_query_filters($inline_context = null)
+    public function get_user_query_filters()
     {
         global $wpdb;
 
@@ -401,17 +382,15 @@ class AAM_Framework_Service_Identities
     /**
      * Get identity resource
      *
-     * @param array $inline_context
-     *
      * @return AAM_Framework_Resource_Identity
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    public function get_resource()
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $result       = $access_level->get_resource(
                 AAM_Framework_Type_Resource::IDENTITY
             );
@@ -427,16 +406,15 @@ class AAM_Framework_Service_Identities
      *
      * @param string $role_slug
      * @param string $permission
-     * @param array  $inline_context
      *
      * @return boolean|null
      *
      * @access private
      * @version 7.0.0
      */
-    private function _is_role_allowed_to($role_slug, $permission, $inline_context)
+    private function _is_role_allowed_to($role_slug, $permission)
     {
-        $resource = $this->get_resource($inline_context);
+        $resource = $this->get_resource();
 
         // Step #1. Determine if access controls for the role are explicitly defined
         //          and if so, use it
@@ -460,18 +438,17 @@ class AAM_Framework_Service_Identities
     /**
      * Determine if current user has permission over provided user
      *
-     * @param int        $user_id
-     * @param string     $permission
-     * @param array|null $inline_context
+     * @param int    $user_id
+     * @param string $permission
      *
      * @return boolean|null
      *
      * @access private
      * @version 7.0.0
      */
-    private function _is_user_allowed_to($user_id, $permission, $inline_context)
+    private function _is_user_allowed_to($user_id, $permission)
     {
-        $resource = $this->get_resource($inline_context);
+        $resource = $this->get_resource();
 
         // Check #1. Do we have access controls defined for a give user explicitly?
         $result = $resource->is_allowed_to('user', $user_id, $permission);

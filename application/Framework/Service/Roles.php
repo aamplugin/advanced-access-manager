@@ -40,7 +40,7 @@ class AAM_Framework_Service_Roles
      * @access public
      * @version 6.9.6
      */
-    public function get_all_roles(array $inline_context = [])
+    public function get_all_roles()
     {
         try {
             $result = [];
@@ -67,7 +67,7 @@ class AAM_Framework_Service_Roles
      * @access public
      * @version 6.9.6
      */
-    public function get_editable_roles(array $inline_context = [])
+    public function get_editable_roles()
     {
         try {
             $result = array();
@@ -95,7 +95,7 @@ class AAM_Framework_Service_Roles
     /**
      * Get role by slug
      *
-     * @param string  $slug  Unique role slug (aka ID)
+     * @param string $slug Unique role slug (aka ID)
      *
      * @return AAM_Framework_Proxy_Role|null
      *
@@ -103,7 +103,7 @@ class AAM_Framework_Service_Roles
      * @throws OutOfRangeException
      * @version 6.9.6
      */
-    public function get_role($slug, array $inline_context = [])
+    public function get_role($slug)
     {
         try {
             $all   = $this->get_all_roles();
@@ -135,7 +135,7 @@ class AAM_Framework_Service_Roles
      * @access public
      * @version 6.9.33
      */
-    public function is_role($slug, array $inline_context = [])
+    public function is_role($slug)
     {
         try {
             $result = $this->_get_wp_roles()->is_role($slug);
@@ -150,7 +150,6 @@ class AAM_Framework_Service_Roles
      * Check if role is editable
      *
      * @param string $slug
-     * @param array  $inline_context
      *
      * @return boolean
      *
@@ -160,7 +159,7 @@ class AAM_Framework_Service_Roles
      * @access public
      * @version 6.9.35
      */
-    public function is_editable_role($slug, array $inline_context = [])
+    public function is_editable_role($slug)
     {
         try {
             $roles = $this->_get_wp_roles();
@@ -209,8 +208,7 @@ class AAM_Framework_Service_Roles
     public function create_role(
         $display_name,
         $slug = null,
-        array $capabilities = [],
-        array $inline_context = []
+        array $capabilities = []
     ) {
         try {
             $name  = sanitize_text_field($display_name);
@@ -277,11 +275,10 @@ class AAM_Framework_Service_Roles
      * @access public
      * @version 6.9.6
      */
-    public function update_role(
-        $slug, array $data = [], array $inline_context = []
-    ) {
+    public function update_role($slug, array $data = [])
+    {
         try {
-            $role = $this->get_role($slug, $inline_context);
+            $role = $this->get_role($slug);
 
             if ($role->update($data)) {
                 $result = $role;
@@ -306,11 +303,11 @@ class AAM_Framework_Service_Roles
      * @throws LogicException
      * @version 6.9.6
      */
-    public function delete_role($slug, array $inline_context = []
-    ) {
+    public function delete_role($slug)
+    {
         try {
             $roles = $this->_get_wp_roles();
-            $role  = $this->get_role($slug, $inline_context);
+            $role  = $this->get_role($slug);
 
             // Verifying that role has not users assigned. Otherwise reject
             if ($role->user_count > 0) {

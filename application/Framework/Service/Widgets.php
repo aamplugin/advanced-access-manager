@@ -32,18 +32,17 @@ class AAM_Framework_Service_Widgets
      * Return the complete list of all indexed widgets
      *
      * @param string $screen_id
-     * @param array  $inline_context Context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item_list($screen_id = null, $inline_context = null)
+    public function get_item_list($screen_id = null)
     {
         try {
             $result   = [];
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
@@ -75,19 +74,18 @@ class AAM_Framework_Service_Widgets
     /**
      * Get existing widget by slug
      *
-     * @param string $slug           Sudo-id for the metabox
-     * @param array  $inline_context Runtime context
+     * @param string $slug Sudo-id for the metabox
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item($slug, $inline_context = null)
+    public function get_item($slug)
     {
         try {
             $matches = array_filter(
-                $this->get_item_list($inline_context),
+                $this->get_item_list(),
                 function($m) use ($slug) {
                     return $m['slug'] === $slug;
                 }
@@ -110,19 +108,17 @@ class AAM_Framework_Service_Widgets
      *
      * @param string $slug           Sudo-id for the metabox
      * @param bool   $is_hidden      Is hidden or not
-     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function update_item_permission(
-        $slug, $is_hidden = true, $inline_context = null
-    ) {
+    public function update_item_permission($slug, $is_hidden = true)
+    {
         try {
             $widget      = $this->get_item($slug);
-            $resource    = $this->get_resource($inline_context);
+            $resource    = $this->get_resource();
             $permissions = array_merge($resource->get_permissions(true), [
                 $widget['slug'] => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
             ]);
@@ -142,18 +138,17 @@ class AAM_Framework_Service_Widgets
     /**
      * Delete widget permission
      *
-     * @param string $slug           Sudo-id for the widget
-     * @param array  $inline_context Runtime context
+     * @param string $slug Sudo-id for the widget
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function delete_item_permission($slug, $inline_context = null)
+    public function delete_item_permission($slug)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
             $widget   = $this->get_item($slug);
             $explicit = $resource->get_permissions(true);
 
@@ -181,17 +176,16 @@ class AAM_Framework_Service_Widgets
      * Reset all permissions
      *
      * @param string $screen_id
-     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($screen_id = null, $inline_context = null)
+    public function reset($screen_id = null)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->get_resource();
             $success  = true;
 
             if (empty($screen_id)) {
@@ -220,17 +214,15 @@ class AAM_Framework_Service_Widgets
     /**
      * Get widget resource
      *
-     * @param array $inline_context
-     *
      * @return AAM_Framework_Resource_Widget
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource($inline_context = null)
+    public function get_resource()
     {
         try {
-            $access_level = $this->_get_access_level($inline_context);
+            $access_level = $this->_get_access_level();
             $result       = $access_level->get_resource(
                 AAM_Framework_Type_Resource::WIDGET
             );

@@ -30,19 +30,19 @@ class AAM_Restful_AccessDeniedRedirectService
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            $a = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_AREAS;
+            $a = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_AREAS;
             $t = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_TYPES;
 
-            // Get current access denied redirect rules
+            // Get current access denied redirect rule
             $this->_register_route('/redirect/access-denied', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'get_redirect' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
                     'area' => [
-                        'description' => 'Access area (frontend or backend)',
+                        'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
-                        'required'    => false,
+                        'required'    => true,
                         'enum'        => $a
                     ]
                 ]
@@ -55,7 +55,7 @@ class AAM_Restful_AccessDeniedRedirectService
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
                     'area' => [
-                        'description' => 'Access area (frontend or backend)',
+                        'description' => 'Access area (frontend,  backend or api)',
                         'type'        => 'string',
                         'required'    => true,
                         'enum'        => $a
@@ -125,7 +125,7 @@ class AAM_Restful_AccessDeniedRedirectService
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
                     'area' => [
-                        'description' => 'Access area (frontend or backend)',
+                        'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
                         'required'    => false,
                         'enum'        => $a
@@ -175,44 +175,10 @@ class AAM_Restful_AccessDeniedRedirectService
             $data    = $request->get_params();
 
             // Preparing the proper array of properties to store
-            $redirect = [ 'type' => $data['type'] ];
-
-            if ($data['type'] === 'page_redirect') {
-                if (array_key_exists('redirect_page_id', $data)) {
-                    $redirect['page_id'] = intval($data['redirect_page_id']);
-                } elseif (array_key_exists('redirect_page_slug', $data)) {
-                    $redirect['page_slug'] = trim($data['redirect_page_slug']);
-                } else {
-                    throw new InvalidArgumentException(
-                        'Either redirect_page_id or redirect_page_slug is required'
-                    );
-                }
-            } elseif ($data['type'] === 'url_redirect') {
-                if (array_key_exists('redirect_page_id', $data)) {
-                    $redirect['url'] = $data['redirect_url'];
-                } else {
-                    throw new InvalidArgumentException('redirect_url is required');
-                }
-            } elseif ($data['type'] === 'trigger_callback') {
-                if (array_key_exists('callback', $data)) {
-                    $redirect['callback'] = $data['callback'];
-                } else {
-                    throw new InvalidArgumentException('callback is required');
-                }
-            } elseif ($data['type'] === 'custom_message') {
-                if (array_key_exists('message', $data)) {
-                    $redirect['message'] = $data['message'];
-                } else {
-                    throw new InvalidArgumentException('message is required');
-                }
-            }
-
-            if (array_key_exists('http_status_code', $data)) {
-                $redirect['http_status_code'] = $data['http_status_code'];
-            }
+            unset($data['area']);
 
             // Finally set the redirect
-            $service->set_redirect($area, $redirect);
+            $service->set_redirect($area, $data);
 
             $result = $service->get_redirect($area);
         } catch (Exception $e) {
