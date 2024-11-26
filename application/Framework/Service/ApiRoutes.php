@@ -37,7 +37,7 @@ class AAM_Framework_Service_ApiRoutes
     {
         try {
             $result   = [];
-            $resource = $this->get_resource();
+            $resource = $this->_get_resource();
 
             // Iterating over the list of all registered API routes and compile the
             // list
@@ -113,7 +113,7 @@ class AAM_Framework_Service_ApiRoutes
         $is_restricted, $endpoint, $method = 'GET'
     ) {
         try {
-            $resource = $this->get_resource();
+            $resource = $this->_get_resource();
 
             // Prepare array of new permissions
             $perms = array_merge($resource->get_permissions(true), [
@@ -149,10 +149,7 @@ class AAM_Framework_Service_ApiRoutes
         $endpoint, $method = 'GET'
     ) {
         try {
-            $access_level = $this->_get_access_level();
-            $resource  = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
-            );
+            $resource = $this->_get_resource();
 
             // Compile the rule's key
             $key = strtolower("{$method} {$endpoint}");
@@ -192,34 +189,10 @@ class AAM_Framework_Service_ApiRoutes
     public function reset()
     {
         try {
-            $resource = $this->get_resource();
-
             // Reset settings to default
-            $resource->reset();
+            $this->_get_resource()->reset();
 
-            $result = $this->get_route_list();
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get resource
-     *
-     * @return AAM_Framework_Resource_ApiRoute
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_resource()
-    {
-        try {
-            $access_level = $this->_get_access_level();
-            $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::API_ROUTE
-            );
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -250,8 +223,30 @@ class AAM_Framework_Service_ApiRoutes
                 throw new InvalidArgumentException('Invalid route endpoint');
             }
 
-            $result = $this->get_resource()->is_restricted(
+            $result = $this->_get_resource()->is_restricted(
                 $endpoint, $method
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+     /**
+     * Get resource
+     *
+     * @return AAM_Framework_Resource_ApiRoute
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        try {
+            $access_level = $this->_get_access_level();
+            $result       = $access_level->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);

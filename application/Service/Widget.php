@@ -201,7 +201,7 @@ class AAM_Service_Widget
     {
         global $wp_meta_boxes;
 
-        $resource = AAM::api()->widgets()->get_resource();
+        $service = AAM::api()->widgets();
 
         if (isset($wp_meta_boxes['dashboard'])) {
             foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
@@ -209,7 +209,7 @@ class AAM_Service_Widget
                     foreach($widgets as $widget) {
                         $slug = $this->_get_widget_slug($widget);
 
-                        if ($resource->is_hidden($slug)) {
+                        if ($service->is_hidden($slug)) {
                             remove_meta_box($slug, 'dashboard', $priority);
                         }
                     }
@@ -230,13 +230,13 @@ class AAM_Service_Widget
     {
         global $wp_registered_widgets;
 
-        $resource = AAM::api()->widgets()->get_resource();
+        $service = AAM::api()->widgets();
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
                 $slug = $this->_get_widget_slug($widget, true);
 
-                if ($resource->is_hidden($slug)) {
+                if ($service->is_hidden($slug)) {
                     unregister_widget($this->_get_widget_callback($widget));
 
                     // Remove it from registered widget global var!!

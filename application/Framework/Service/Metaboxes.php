@@ -31,20 +31,19 @@ class AAM_Framework_Service_Metaboxes
      * Return the complete list of all indexed metaboxes
      *
      * @param string $post_type
-     * @param array  $inline_context Context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item_list($post_type = null, $inline_context = null)
+    public function get_item_list($post_type = null)
     {
         global $wp_post_types;
 
         try {
             $result   = [];
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
@@ -80,19 +79,18 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Get existing metabox by slug
      *
-     * @param string $slug           Sudo-id for the metabox
-     * @param array  $inline_context Runtime context
+     * @param string $slug
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item($slug, $inline_context = null)
+    public function get_item($slug)
     {
         try {
             $matches = array_filter(
-                $this->get_item_list($inline_context),
+                $this->get_item_list(),
                 function($m) use ($slug) {
                     return $m['slug'] === $slug;
                 }
@@ -115,19 +113,17 @@ class AAM_Framework_Service_Metaboxes
      *
      * @param string $slug           Sudo-id for the metabox
      * @param bool   $is_hidden      Is hidden or not
-     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function update_item_permission(
-        $slug, $is_hidden = true, $inline_context = null
-    ) {
+    public function update_item_permission($slug, $is_hidden = true)
+    {
         try {
             $metabox  = $this->get_item($slug);
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
 
             // Prepare array of new permissions
             $perms = array_merge($resource->get_permissions(true), [
@@ -149,18 +145,17 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Delete metabox permission
      *
-     * @param string $slug           Sudo-id for the metabox
-     * @param array  $inline_context Runtime context
+     * @param string $slug
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function delete_item_permission($slug, $inline_context = null)
+    public function delete_item_permission($slug)
     {
         try {
-            $resource  = $this->get_resource($inline_context);
+            $resource  = $this->_get_resource();
             $metabox   = $this->get_item($slug);
             $explicit  = $resource->get_permissions(true);
 
@@ -188,17 +183,16 @@ class AAM_Framework_Service_Metaboxes
      * Reset all permissions
      *
      * @param string $post_type
-     * @param array  $inline_context Runtime context
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($post_type = null, $inline_context = null)
+    public function reset($post_type = null)
     {
         try {
-            $resource = $this->get_resource($inline_context);
+            $resource = $this->_get_resource();
             $success  = true;
 
             if (empty($post_type)) {
@@ -225,14 +219,35 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Get metabox resource
+     * Determine if metabox is hidden
      *
-     * @return AAM_Framework_Resource_Metabox
+     * @param string $slug
+     *
+     * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource()
+    public function is_hidden($slug)
+    {
+        try {
+            $result = $this->_get_resource()->is_hidden($slug);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get metabox resource
+     *
+     * @return AAM_Framework_Resource_Metabox
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource()
     {
         try {
             $access_level = $this->_get_access_level();

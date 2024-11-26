@@ -235,12 +235,12 @@ class AAM_Service_Metabox
      */
     private function _filter_zones($zones, $post_type)
     {
+        $service = AAM::api()->metaboxes();
+
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
-                $resource = AAM::api()->metaboxes()->get_resource();
-
                 foreach (array_keys($metaboxes) as $id) {
-                    if ($resource->is_hidden($post_type . '_' . $id)) {
+                    if ($service->is_hidden($post_type . '_' . $id)) {
                         remove_meta_box($id, $post_type, $zone);
                     }
                 }

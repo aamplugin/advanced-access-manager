@@ -2536,7 +2536,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/widgets`), {
+                            $.ajax(getAAM().prepareApiEndpoint('/service/widgets'), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2616,22 +2616,6 @@
 
             /**
              *
-             * @param {*} attr
-             * @returns
-             */
-            function PreparePayload(attr = {}) {
-                const payload = Object.assign({}, attr);
-
-                if (getAAM().getSubject().type === 'role') {
-                    payload.role_id = getAAM().getSubject().id;
-                } else if (getAAM().getSubject().type === 'user') {
-                    payload.user_id = getAAM().getSubject().id;
-                }
-
-                return payload;
-            }
-            /**
-             *
              * @param {type} capability
              * @param {type} btn
              * @returns {undefined}
@@ -2643,23 +2627,23 @@
                 $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
                 // Prepare request payload
-                const payload = PreparePayload({
+                const payload = {
                     [granted ? 'add_capabilities' : 'remove_capabilities'] : [
                         capability
                     ]
-                });
+                };
 
                 // Determine endpoint
-                let endpoint = `${getLocal().rest_base}aam/v2/service`;
+                let endpoint = '/service';
 
-                if (payload.role_id) {
-                    endpoint += `/role/` + encodeURIComponent(payload.role_id)
-                } else if (payload.user_id) {
-                    endpoint += `/user/${payload.user_id}`
+                if (getAAM().getSubject().type === 'role') {
+                    endpoint += '/role/' + encodeURIComponent(getAAM().getSubject().id);
+                } else if (getAAM().getSubject().type === 'user') {
+                    endpoint += '/user/' + getAAM().getSubject().id;
                 }
 
                 getAAM().queueRequest(function () {
-                    $.ajax(endpoint, {
+                    $.ajax(getAAM().prepareApiEndpoint(endpoint), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2695,21 +2679,17 @@
              * Delete capability
              *
              * @param {String}  capability
-             * @param {Boolean} subjectOnly
              * @param {Object}  btn
              */
-            function deleteCapability(capability, btn, scoped = false) {
+            function deleteCapability(capability, btn) {
                 getAAM().queueRequest(function () {
-                    const payload = (scoped ? PreparePayload() : {});
-
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/capability/${encodeURIComponent(capability)}`, {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/capability/${encodeURIComponent(capability)}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'DELETE'
                         },
                         dataType: 'json',
-                        data: payload,
                         beforeSend: function () {
                             $(btn).attr('data-original', $(btn).text());
                             $(btn).text(getAAM().__('Deleting...')).attr('disabled', true);
@@ -2719,7 +2699,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/capability/${encodeURIComponent(capability)}`,
+                                request: `/service/capability/${encodeURIComponent(capability)}`,
                                 payload,
                                 response
                             });
@@ -2742,15 +2722,9 @@
             function initialize() {
                 if ($('#capability-content').length) {
                     const data = {
-                        fields: 'description,permissions,is_granted,is_assigned',
+                        fields: 'description,permissions,is_granted',
                         list_all: true
                     };
-
-                    if (getAAM().getSubject().type === 'role') {
-                        data.role_id = getAAM().getSubject().id;
-                    } else if (getAAM().getSubject().type === 'user') {
-                        data.user_id = getAAM().getSubject().id;
-                    }
 
                     // Initialize the capability list table
                     const capTable = $('#capability-list').DataTable({
@@ -2759,7 +2733,7 @@
                         pagingType: 'simple',
                         serverSide: false,
                         ajax: {
-                            url: `${getLocal().rest_base}aam/v2/service/capabilities`,
+                            url: getAAM().prepareApiEndpoint('/service/capabilities'),
                             type: 'GET',
                             data,
                             headers: {
@@ -2976,13 +2950,13 @@
                         const ignore = $('#ignore_capability_format').is(':checked');
 
                         if (slug && (/^[a-z0-9_\-]+$/.test(slug) || ignore)) {
-                            const payload = PreparePayload({
+                            const payload = {
                                 slug,
                                 ignore_format: ignore
-                            });
+                            };
 
                             getAAM().queueRequest(function () {
-                                $.ajax(`${getLocal().rest_base}aam/v2/service/capabilities`, {
+                                $.ajax(getAAM().prepareApiEndpoint('/service/capabilities'), {
                                     type: 'POST',
                                     headers: {
                                         'X-WP-Nonce': getLocal().rest_nonce
@@ -3016,18 +2990,18 @@
                     $('#update-capability-btn').bind('click', function () {
                         const btn      = this;
                         const old_slug = $(this).attr('data-cap');
-                        const new_slug = $.trim($('#update-capability-slug').val());
+                        const slug     = $.trim($('#update-capability-slug').val());
                         const ignore   = $('#ignore_update_capability_format').is(':checked');
 
-                        if (new_slug && (/^[a-z0-9_\-]+$/.test(new_slug) || ignore)) {
+                        if (slug && (/^[a-z0-9_\-]+$/.test(slug) || ignore)) {
                             // Prepare request payload
                             const payload = {
-                                new_slug,
+                                slug,
                                 ignore_format: ignore
                             };
 
                             getAAM().queueRequest(function () {
-                                $.ajax(`${getLocal().rest_base}aam/v2/service/capability/${encodeURIComponent(old_slug)}`, {
+                                $.ajax(getAAM().prepareApiEndpoint(`/service/capability/${encodeURIComponent(old_slug)}`), {
                                     type: 'POST',
                                     headers: {
                                         'X-WP-Nonce': getLocal().rest_nonce,
@@ -3062,7 +3036,7 @@
 
                     $('#delete-capability-btn').bind('click', function () {
                         if (getAAM().getSubject().type === 'user') {
-                            deleteCapability($(this).attr('data-cap'), $(this), true);
+                            deleteCapability($(this).attr('data-cap'), $(this));
                         }
 
                         deleteCapability($(this).attr('data-cap'), $(this));

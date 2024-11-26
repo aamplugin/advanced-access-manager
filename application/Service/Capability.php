@@ -10,9 +10,6 @@
 /**
  * Capability service
  *
- * @since 7.0.0 Major release
- * @since 6.0.0 Initial implementation of the class
- *
  * @package AAM
  * @version 7.0.0
  */
@@ -43,7 +40,7 @@ class AAM_Service_Capability
      * @var array
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private $_capabilities = [];
 
@@ -53,7 +50,7 @@ class AAM_Service_Capability
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -100,7 +97,7 @@ class AAM_Service_Capability
      * @return void
      *
      * @access protected
-     * @version 6.9.33
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -208,7 +205,7 @@ class AAM_Service_Capability
      * @return string
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function get_cap_description($description, $slug)
     {

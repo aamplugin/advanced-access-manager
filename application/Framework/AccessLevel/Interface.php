@@ -28,6 +28,19 @@ interface AAM_Framework_AccessLevel_Interface
     const TYPE = null;
 
     /**
+     * Proxy methods to WordPress core instance
+     *
+     * @param string $name
+     * @param array  $arguments
+     *
+     * @return mixed
+     *
+     * @access public
+     * @since 7.0.0
+     */
+    public function __call($name, $arguments);
+
+    /**
      * Get resource by its type and internal ID
      *
      * @param string     $resource_type

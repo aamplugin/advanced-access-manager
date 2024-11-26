@@ -42,7 +42,7 @@ class AAM_Framework_Service_Widgets
     {
         try {
             $result   = [];
-            $resource = $this->get_resource();
+            $resource = $this->_get_resource();
 
             // Getting the menu cache so we can build the list
             $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
@@ -106,8 +106,8 @@ class AAM_Framework_Service_Widgets
     /**
      * Update existing metabox permission
      *
-     * @param string $slug           Sudo-id for the metabox
-     * @param bool   $is_hidden      Is hidden or not
+     * @param string $slug
+     * @param bool   $is_hidden [optional]
      *
      * @return array
      *
@@ -118,7 +118,7 @@ class AAM_Framework_Service_Widgets
     {
         try {
             $widget      = $this->get_item($slug);
-            $resource    = $this->get_resource();
+            $resource    = $this->_get_resource();
             $permissions = array_merge($resource->get_permissions(true), [
                 $widget['slug'] => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
             ]);
@@ -148,7 +148,7 @@ class AAM_Framework_Service_Widgets
     public function delete_item_permission($slug)
     {
         try {
-            $resource = $this->get_resource();
+            $resource = $this->_get_resource();
             $widget   = $this->get_item($slug);
             $explicit = $resource->get_permissions(true);
 
@@ -185,7 +185,7 @@ class AAM_Framework_Service_Widgets
     public function reset($screen_id = null)
     {
         try {
-            $resource = $this->get_resource();
+            $resource = $this->_get_resource();
             $success  = true;
 
             if (empty($screen_id)) {
@@ -212,14 +212,35 @@ class AAM_Framework_Service_Widgets
     }
 
     /**
-     * Get widget resource
+     * Determine if widget is hidden
      *
-     * @return AAM_Framework_Resource_Widget
+     * @param string $slug
+     *
+     * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_resource()
+    public function is_hidden($slug)
+    {
+        try {
+            $result = $this->_get_resource()->is_hidden($slug);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get widget resource
+     *
+     * @return AAM_Framework_Resource_Widget
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _get_resource()
     {
         try {
             $access_level = $this->_get_access_level();
