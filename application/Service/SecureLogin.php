@@ -12,23 +12,8 @@ use Vectorface\Whip\Whip;
 /**
  * Secure Login service
  *
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/284
- *               https://github.com/aamplugin/advanced-access-manager/issues/244
- * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
- * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/139
- * @since 6.6.1  https://github.com/aamplugin/advanced-access-manager/issues/136
- * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/91
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/16
- *               https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.3.1  Fixed bug with not being able to lock user
- * @since 6.1.0  Enriched error response with more details
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.19
+ * @version 7.0.0
  */
 class AAM_Service_SecureLogin
 {
@@ -38,35 +23,23 @@ class AAM_Service_SecureLogin
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    const FEATURE_FLAG = 'core.service.secure-login.enabled';
+    const FEATURE_FLAG = 'service.secure_login.enabled';
 
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'core.service.secure-login.enabled'             => true,
-        'service.secureLogin.feature.singleSession'     => false,
-        'service.secureLogin.feature.bruteForceLockout' => false,
-        'service.secure_login.time_window'              => '+20 minutes',
-        'service.secure_login.login_attempts'           => 8
+        'service.secure_login.enabled'             => true,
+        'service.secure_login.single_session'      => false,
+        'service.secure_login.brute_force_lockout' => false,
+        'service.secure_login.time_window'         => '+20 minutes',
+        'service.secure_login.login_attempts'      => 8,
+        'service.secure_login.login_message'       => 'Login to get access.'
     ];
-
-    /**
-     * Config options aliases
-     *
-     * The option names changed, but to stay backward compatible, we need to support
-     * legacy names.
-     *
-     * @version 6.9.11
-     */
-    const OPTION_ALIAS = array(
-        'service.secure_login.time_window'    => 'service.secureLogin.settings.attemptWindow',
-        'service.secure_login.login_attempts' => 'service.secureLogin.settings.loginAttempts'
-    );
 
     /**
      * Constructor
@@ -74,7 +47,7 @@ class AAM_Service_SecureLogin
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -111,7 +84,7 @@ class AAM_Service_SecureLogin
         }
 
         if ($enabled) {
-            $this->initializeHooks();
+            $this->initialize_hooks();
         }
     }
 
@@ -120,14 +93,10 @@ class AAM_Service_SecureLogin
      *
      * @return void
      *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/71
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    protected function initializeHooks()
+    protected function initialize_hooks()
     {
         // Register custom frontend Login widget
         add_action('widgets_init', function () {
@@ -138,12 +107,23 @@ class AAM_Service_SecureLogin
         AAM_Restful_SecureLogin::bootstrap();
 
         // Redefine the wp-login.php header message
-        add_filter('login_message', array($this, 'loginMessage'));
+        add_filter('login_message', function($message) {
+            return $this->_login_message($message);
+        });
 
         // Security controls
-        add_filter('authenticate', array($this, 'enhanceAuthentication'), PHP_INT_MAX);
-        add_filter('auth_cookie', array($this, 'manageAuthCookie'), 10, 5);
-        add_action('wp_login_failed', array($this, 'trackFailedLoginAttempt'));
+        add_filter('authenticate', function($response) {
+            return $this->_authenticate($response);
+        }, PHP_INT_MAX);
+        add_filter(
+            'auth_cookie',
+            function($cookie, $user_id, $_, $__, $token) {
+                return $this->_auth_cookie($cookie, $user_id, $token);
+            }, 10, 5
+        );
+        add_action('wp_login_failed', function() {
+            $this->_wp_login_failed();
+        });
 
         // AAM UI controls
         add_filter('aam_prepare_user_item_filter', function($user) {
@@ -166,10 +146,10 @@ class AAM_Service_SecureLogin
         });
 
         // AAM Core integration
-        add_action('aam_initialize_user_action', function(AAM_Core_Subject_User $user) {
-            $currentId = get_current_user_id();
+        add_action('aam_initialize_user_action', function($user) {
+            $user_id = get_current_user_id();
 
-            if ($currentId === $user->ID) {
+            if ($user_id === $user->ID) {
                 $status = get_user_meta($user->ID, 'aam_user_status', true);
 
                 if ($status === 'locked') {
@@ -187,21 +167,19 @@ class AAM_Service_SecureLogin
      *
      * @param string $cookie     Authentication cookie.
      * @param int    $user_id    User ID.
-     * @param int    $expiration The time the cookie expires as a UNIX timestamp.
-     * @param string $scheme     Cookie scheme used. Accepts 'auth', 'secure_auth', or 'logged_in'.
      * @param string $token      User's session token used.
      *
      * @return string
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public function manageAuthCookie($cookie, $user_id, $expiration, $scheme, $token)
+    private function _auth_cookie($cookie, $user_id, $token)
     {
+        $configs = AAM::api()->configs();
+
         // Remove all other sessions if single session feature is enabled
-        if (AAM::api()->configs()->get_config(
-            'service.secureLogin.feature.singleSession'
-        )) {
+        if ($configs->get_config('service.secure_login.single_session')) {
             $sessions = WP_Session_Tokens::get_instance($user_id);
 
             if (count($sessions->get_all()) > 1) {
@@ -219,69 +197,31 @@ class AAM_Service_SecureLogin
      *
      * @return void
      *
-     * @access public
-     * @version 6.0.0
-     */
-    public function trackFailedLoginAttempt()
-    {
-        // Track failed attempts only if Brute Force Lockout is enabled
-        if (AAM::api()->configs()->get_config(
-            'service.secureLogin.feature.bruteForceLockout'
-        )) {
-            $this->updateLoginAttemptsTransient(1);
-        }
-    }
-
-    /**
-     * Increment/Decrement failed login attempts transient
-     *
-     * @param int $counter
-     *
-     * @return void
-     *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.9.17
-     */
-    protected function updateLoginAttemptsTransient($counter)
-    {
-        $name     = $this->_getLoginAttemptKeyName();
-        $attempts = AAM_Framework_Utility_Cache::get($name);
-
-        if ($attempts !== false) {
-            $attempts = intval($attempts) + $counter;
-
-            AAM_Framework_Utility_Cache::update($name, $attempts);
-        } else {
-            $timeout  = strtotime(
-                $this->_getConfigOption(
-                    'service.secure_login.time_window', '+20 minutes'
-                )
-            );
-
-            AAM_Framework_Utility_Cache::set($name, 1, $timeout - time());
-        }
-    }
-
-    /**
-     * Get login attempts transient name
-     *
-     * @return string
-     *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/244
-     * @since 6.0.0  Initial implementation of method
-     *
      * @access private
-     * @version 6.9.17
+     * @version 7.0.0
      */
-    private function _getLoginAttemptKeyName()
+    private function _wp_login_failed()
     {
-        $whip = new Whip();
+        $configs = AAM::api()->configs();
+        $enabled = $configs->get_config('service.secure_login.brute_force_lockout');
 
-        return 'failed_login_attempts_' . $whip->getValidIpAddress();
+        // Track failed attempts only if Brute Force Lockout is enabled
+        if ($enabled) {
+            $name     = $this->_get_login_attempt_key();
+            $attempts = AAM_Framework_Utility_Cache::get($name);
+
+            if ($attempts !== false) {
+                $attempts = intval($attempts) + 1;
+
+                AAM_Framework_Utility_Cache::update($name, $attempts);
+            } else {
+                $timeout = strtotime($configs->get_config(
+                    'service.secure_login.time_window'
+                ));
+
+                AAM_Framework_Utility_Cache::set($name, 1, $timeout - time());
+            }
+        }
     }
 
     /**
@@ -293,28 +233,25 @@ class AAM_Service_SecureLogin
      *
      * @return mixed
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
      * @see wp_authenticate
-     * @version 6.9.17
+     * @version 7.0.0
      */
-    public function enhanceAuthentication($response)
+    private function _authenticate($response)
     {
+        $configs = AAM::api()->configs();
+
         // Brute Force Lockout
-        if (AAM::api()->configs()->get_config(
-            'service.secureLogin.feature.bruteForceLockout'
-        )) {
-            $attempts  = AAM_Framework_Utility_Cache::get($this->_getLoginAttemptKeyName());
-            $threshold = $this->_getConfigOption(
-                'service.secure_login.login_attempts', 8
+        if ($configs->get_config('service.secure_login.brute_force_lockout')) {
+            $threshold = $configs->get_config('service.secure_login.login_attempts');
+            $attempts  = AAM_Framework_Utility_Cache::get(
+                $this->_get_login_attempt_key()
             );
 
             if ($attempts >= $threshold) {
                 $response = new WP_Error(
                     405,
-                    __('Exceeded maximum number for authentication attempts. Try again later.', AAM_KEY)
+                    __('Exceeded maximum number for login attempts.', AAM_KEY)
                 );
             }
         }
@@ -329,51 +266,35 @@ class AAM_Service_SecureLogin
      *
      * @return string
      *
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/284
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.12
+     * @version 7.0.0
      */
-    public function loginMessage($message)
+    private function _login_message($message)
     {
         if (empty($message) && ($this->getFromQuery('reason') === 'restricted')) {
-            $str = $this->_getConfigOption(
-                'service.secure_login.login_message',
-                __('Access is restricted. Login to get access.', AAM_KEY)
+            $str = AAM::api()->configs()->get_config(
+                'service.secure_login.login_message'
             );
 
-            $message = '<p class="message">' . $str . '</p>';
+            $message = '<p class="message">' . esc_js(__($str, AAM_KEY)) . '</p>';
         }
 
         return $message;
     }
 
     /**
-     * Get configuration option
+     * Get login attempts counter key name
      *
-     * @param string $option
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
-     * @since 6.9.11 Initial implementation of the method
+     * @return string
      *
      * @access private
-     * @version 6.9.12
+     * @version 7.0.0
      */
-    private function _getConfigOption($option, $default = null)
+    private function _get_login_attempt_key()
     {
-        $value = AAM::api()->configs()->get_config($option);
+        $whip = new Whip();
 
-        if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM::api()->configs()->get_config(
-                self::OPTION_ALIAS[$option]
-            );
-        }
-
-        return is_null($value) ? $default : $value;
+        return 'failed_login_attempts_' . $whip->getValidIpAddress();
     }
 
 }

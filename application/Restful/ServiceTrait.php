@@ -267,12 +267,9 @@ trait AAM_Restful_ServiceTrait
         $response = true;
 
         try {
-            $slug    = urldecode($slug);
-            $service = AAM::api()->roles([
-                'error_handling' => 'exception'
-            ]);
+            $slug = urldecode($slug);
 
-            if (!$service->is_editable_role($slug)) {
+            if (!AAM_Framework_Utility_Roles::is_editable_role($slug)) {
                 $response = new WP_Error(
                     'rest_not_found',
                     "Role {$slug} is not editable to current user",

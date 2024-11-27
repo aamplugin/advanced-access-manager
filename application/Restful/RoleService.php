@@ -10,14 +10,8 @@
 /**
  * RESTful API for role management
  *
- * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/419
- * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
- * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
- * @since 6.9.6  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.41
+ * @version 7.0.0
  */
 class AAM_Restful_RoleService
 {
@@ -34,12 +28,8 @@ class AAM_Restful_RoleService
      *
      * @return void
      *
-     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
-     * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/259
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.38
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -216,20 +206,20 @@ class AAM_Restful_RoleService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.6
+     * @version 7.0.0
      */
     public function get_role_list(WP_REST_Request $request)
     {
         try {
-            $result = array();
+            $result = [];
 
             // Determine the list of additional fields to return
             $fields = $this->_determine_additional_fields($request);
 
             // Fetch the complete list of editable roles and transform then into the
             // response array
-            foreach($this->_get_service()->get_editable_roles() as $role) {
-                array_push($result, $this->prepare_role_output($role, $fields));
+            foreach(AAM_Framework_Utility_Roles::get_editable_roles() as $role) {
+                array_push($result, $this->_prepare_output($role, $fields));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -244,16 +234,15 @@ class AAM_Restful_RoleService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.6
+     * @version 7.0.0
      */
     public function get_role(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service();
-            $result  = ($this->prepare_role_output(
-                $service->get_role(urldecode($request->get_param('role_slug'))),
+            $result = $this->_prepare_output(
+                AAM::api()->role(urldecode($request->get_param('role_slug'))),
                 $this->_determine_additional_fields($request)
-            ));
+            );
         } catch (Exception $ex) {
             $result = $this->_prepare_error_response($ex);
         }
@@ -266,18 +255,12 @@ class AAM_Restful_RoleService
      *
      * @param WP_REST_Request $request
      *
-     * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/419
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @return WP_REST_Response
-     * @version 6.9.41
+     * @version 7.0.0
      */
     public function create_role(WP_REST_Request $request)
     {
         try {
-            // Get the role service
-            $service = $this->_get_service();
-
             // Prepare the basic data attributes for new role: id, name and list of
             // capabilities
             $name                = $request->get_param('name');
@@ -292,10 +275,12 @@ class AAM_Restful_RoleService
             // If clone role is specified, verify that role exists and current user
             // can manage it
             if (is_string($clone_role) && strlen($clone_role) > 0) {
-                $cloning_role = $service->get_role($clone_role);
-                $cloning_caps = array_filter($cloning_role->capabilities, function($effect) {
-                    return !empty($effect);
-                });
+                $cloning_role = AAM::api()->role($clone_role);
+                $cloning_caps = array_filter(
+                    $cloning_role->capabilities, function($effect) {
+                        return !empty($effect);
+                    }
+                );
 
                 $capabilities = array_merge(
                     $capabilities,
@@ -306,7 +291,7 @@ class AAM_Restful_RoleService
                 );
             }
 
-            $role = $service->create_role($name, $slug, $capabilities);
+            $role = AAM_Framework_Utility_Roles::create($name, $slug, $capabilities);
 
             // Cloning settings
             if ($clone_role_settings === true && !empty($cloning_role)) {
@@ -316,7 +301,7 @@ class AAM_Restful_RoleService
             // Inform any other processes about new role creation event
             do_action('aam_role_created_action', $role, $request);
 
-            $result = $this->prepare_role_output(
+            $result = $this->_prepare_output(
                 $role,
                 $this->_determine_additional_fields($request)
             );
@@ -334,35 +319,31 @@ class AAM_Restful_RoleService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
-     * @since 6.9.6  Initial implementation of the method
-     *
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function update_role(WP_REST_Request $request)
     {
         try {
-            $name        = $request->get_param('name'); // optional
-            $slug        = urldecode($request->get_param('role_slug'));
-            $new_slug    = $request->get_param('new_slug'); // optional
-            $add_caps    = $request->get_param('add_capabilities'); // optional
-            $remove_caps = $request->get_param('remove_capabilities'); // optional
-
-            // Get role service
-            $service = $this->_get_service();
+            $name         = $request->get_param('name'); // optional
+            $slug         = urldecode($request->get_param('role_slug'));
+            $new_slug     = $request->get_param('new_slug'); // optional
+            $add_caps     = $request->get_param('add_capabilities'); // optional
+            $deprive_caps = $request->get_param('deprive_capabilities'); // optional
+            $remove_caps  = $request->get_param('remove_capabilities'); // optional
 
             // Update role
-            $role = $service->update_role($slug, [
-                'name'        => $name,
-                'slug'        => $new_slug,
-                'add_caps'    => $add_caps,
-                'remove_caps' => $remove_caps
+            $role = AAM_Framework_Utility_Roles::update($slug, [
+                'name'         => $name,
+                'slug'         => $new_slug,
+                'add_caps'     => $add_caps,
+                'deprive_caps' => $deprive_caps,
+                'remove_caps'  => $remove_caps
             ]);
 
             // Inform any other processes about role updated event
             do_action('aam_rest_update_role_action', $role, $request);
 
-            $result = $this->prepare_role_output(
+            $result = $this->_prepare_output(
                 $role,
                 $this->_determine_additional_fields($request)
             );
@@ -379,16 +360,14 @@ class AAM_Restful_RoleService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.6
+     * @version 7.0.0
      */
     public function delete_role(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service();
-
             // Delete role
             $result = [
-                'success' => $service->delete_role(urldecode(
+                'success' => AAM_Framework_Utility_Roles::delete(urldecode(
                     $request->get_param('role_slug')
                 ))
             ];
@@ -408,7 +387,7 @@ class AAM_Restful_RoleService
      * @return boolean
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _clone_settings($role, $parent)
     {
@@ -429,15 +408,14 @@ class AAM_Restful_RoleService
     /**
      * Prepare role model for response
      *
-     * @param AAM_Framework_Proxy_Role $role
-     * @param array                    $fields
+     * @param AAM_Framework_AccessLevel_Role $role
+     * @param array                         $fields
      *
      * @return array
-     * @version 6.9.6
+     * @version 7.0.0
      */
-    protected function prepare_role_output(
-        AAM_Framework_Proxy_Role $role, $fields = array()
-    ) {
+    private function _prepare_output($role, $fields = [])
+    {
         $response = array(
             'slug' => $role->slug,
             'name' => translate_user_role($role->display_name),
@@ -448,7 +426,7 @@ class AAM_Restful_RoleService
             if ($field === 'capabilities') {
                 $response[$field] = $role->capabilities;
             } elseif ($field === 'permissions') {
-                $response[$field] = $this->get_role_permissions($role);
+                $response[$field] = $this->_get_role_permissions($role);
             } elseif ($field === 'user_count') {
                 $response[$field] = $role->user_count;
             } else {
@@ -468,12 +446,12 @@ class AAM_Restful_RoleService
     /**
      * Get list of actions user can perform upon role
      *
-     * @param AAM_Framework_Proxy_Role $role
+     * @param AAM_Framework_AccessLevel_Role $role
      *
      * @return array
-     * @version 6.9.6
+     * @version 7.0.0
      */
-    protected function get_role_permissions(AAM_Framework_Proxy_Role $role)
+    private function _get_role_permissions($role)
     {
         $permissions = array('allow_manage');
         $user_count   = $role->user_count;
@@ -505,7 +483,7 @@ class AAM_Restful_RoleService
      * @return array
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _determine_additional_fields(WP_REST_Request $request)
     {
@@ -532,7 +510,7 @@ class AAM_Restful_RoleService
      * @return void
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _register_route($route, $args)
     {
@@ -553,7 +531,7 @@ class AAM_Restful_RoleService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _validate_fields_input($value)
     {
@@ -592,7 +570,7 @@ class AAM_Restful_RoleService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _validate_role_slug_uniqueness($value, WP_REST_Request $request)
     {
@@ -604,7 +582,7 @@ class AAM_Restful_RoleService
             if ($slug === $request->get_param('slug')) {
                 $response = true; // do nothing, we do not update the slug
             } elseif (strlen($slug) > 0) {
-                if ($this->_get_service()->is_role($slug)) {
+                if (wp_roles()->is_role($slug)) {
                     $response = new WP_Error(
                         'rest_invalid_param',
                         sprintf(
@@ -637,7 +615,7 @@ class AAM_Restful_RoleService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.6
+     * @version 7.0.0
      */
     private function _validate_keys_array_input($value)
     {
@@ -665,21 +643,6 @@ class AAM_Restful_RoleService
         }
 
         return $response;
-    }
-
-    /**
-     * Get role service
-     *
-     * @return AAM_Framework_Service_Roles
-     *
-     * @access private
-     * @version 6.9.33
-     */
-    private function _get_service()
-    {
-        return AAM::api()->roles([
-            'error_handling' => 'exception'
-        ]);
     }
 
 }

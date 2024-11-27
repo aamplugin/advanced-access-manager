@@ -50,18 +50,18 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
     {
         $service  = AAM::api()->configs();
         $settings = array(
-            'service.secureLogin.feature.singleSession' => array(
+            'service.secure_login.single_session' => array(
                 'title'       => __('One Session Per User', AAM_KEY),
                 'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically destroy all other sessions for a user if he/she tries to login from different location. For more information refer to the %sOne Session Per User%s page.', 'strong', 'strong'), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/one-session-per-user?ref=plugin" target="_blank">', '</a>'),
                 'value'       => $service->get_config(
-                    'service.secureLogin.feature.singleSession'
+                    'service.secure_login.single_session'
                 )
             ),
-            'service.secureLogin.feature.bruteForceLockout' => array(
+            'service.secure_login.brute_force_lockout' => array(
                 'title'       => __('Brute Force Lockout', AAM_KEY),
                 'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically reject login request if number of unsuccessful attempts exceeds 20 over the period of 2 minutes (both values are configurable). For more information refer to the %sBrute Force Lockout%s page.', 'strong', 'strong'), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/bruteforce-lockout?ref=plugin" target="_blank">', '</a>'),
                 'value'       => $service->get_config(
-                    'service.secureLogin.feature.bruteForceLockout'
+                    'service.secure_login.brute_force_lockout'
                 )
             ),
         );

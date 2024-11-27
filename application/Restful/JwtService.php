@@ -133,6 +133,21 @@ class AAM_Restful_JwtService
                 'callback'            => array($this, 'reset_tokens'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
+
+            // Register a few stand-alone endpoints that are used already by many
+            // apps that a built on-top of AAM
+            // Validate JWT token
+            register_rest_route('aam/v2', '/jwt/validate', array(
+                'methods'             => 'POST',
+                'callback'            => [ $this, 'validate_token' ],
+                'permission_callback' => '__return_true',
+                'args'                => array(
+                    'jwt' => array(
+                        'description' => __('JWT token.', AAM_KEY),
+                        'type'        => 'string',
+                    )
+                ),
+            ));
         });
     }
 

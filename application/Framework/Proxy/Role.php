@@ -108,19 +108,24 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
         }
 
         // Adding the list of capabilities
-        if (isset($attributes['add_caps']) && is_array($attributes['add_caps'])) {
-            array_walk($attributes['add_caps'], function($cap) {
-                $this->add_capability($cap);
-            });
+        if (isset($attributes['add_caps'])) {
+            foreach($attributes['add_caps'] as $capability) {
+                $this->_role->add_cap($capability, true);
+            }
+        }
+
+        // Depriving the list of capabilities
+        if (isset($attributes['deprive_caps'])) {
+            foreach($attributes['deprive_caps'] as $capability) {
+                $this->_role->add_cap($capability, false);
+            }
         }
 
         // Removing the list of capabilities
-        if (isset($attributes['remove_caps'])
-            && is_array($attributes['remove_caps'])
-        ) {
-            array_walk($attributes['remove_caps'], function($cap) {
-                $this->remove_capability($cap);
-            });
+        if (isset($attributes['remove_caps'])) {
+            foreach($attributes['add_caps'] as $capability) {
+                $this->_role->remove_cap($capability);
+            }
         }
 
         $roles = wp_roles()->roles;

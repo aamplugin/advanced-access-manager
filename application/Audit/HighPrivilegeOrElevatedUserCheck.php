@@ -70,27 +70,24 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         ], $params);
 
         try {
-            $service = AAM::api()->users();
-
             // Step #1. Let's determine how many users are on the site, but only if
             // it is the first iteration of the check and fetch the batch of users
             // for further processing
             if ($response['progress'] === 0) {
-                $result = $service->get_user_list([
+                $result = AAM_Framework_Utility_Users::get_list([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID'
-                ]);
+                ], 'full');
 
                 // Capture the total number of users
                 $response['total_count'] = $result['summary']['total_count'];
                 $user_list               = $result['list'];
             } else {
-                $user_list = $service->get_user_list([
-                    'number'      => self::ITERATION_LIMIT,
-                    'orderby'     => 'ID',
-                    'offset'      => $response['offset'],
-                    'result_type' => 'list'
-                ]);
+                $user_list = AAM_Framework_Utility_Users::get_list([
+                    'number'  => self::ITERATION_LIMIT,
+                    'orderby' => 'ID',
+                    'offset'  => $response['offset']
+                ], 'list');
             }
 
             // Increment the offset and move on

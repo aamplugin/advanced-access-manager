@@ -423,8 +423,8 @@ class AAM_Framework_Service_Identities
         // Step #2. If the result is null, then it means that also would like to
         //          check role level
         if (is_null($result)) {
-            $max_user_level = AAM_Framework_Utility_Capability::get_max_user_level(
-                AAM::api()->roles()->get_role($role_slug)->capabilities
+            $max_user_level = AAM_Framework_Utility_Capabilities::get_max_user_level(
+                AAM::api()->role($role_slug)->capabilities
             );
 
             $result = $resource->is_allowed_to(
@@ -613,9 +613,7 @@ class AAM_Framework_Service_Identities
      */
     private function _validate_role($slug)
     {
-        $roles = AAM::api()->roles();
-
-        if (!$roles->is_role($slug)
+        if (!wp_roles()->is_role($slug)
             && !apply_filters('aam_validate_role_identifier_filter', true, $slug)
         ) {
             throw new OutOfRangeException(

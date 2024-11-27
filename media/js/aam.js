@@ -2628,7 +2628,7 @@
 
                 // Prepare request payload
                 const payload = {
-                    [granted ? 'add_capabilities' : 'remove_capabilities'] : [
+                    [granted ? 'add_capabilities' : 'deprive_capabilities'] : [
                         capability
                     ]
                 };

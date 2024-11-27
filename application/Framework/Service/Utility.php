@@ -30,9 +30,12 @@ class AAM_Framework_Service_Utility
      * @version 7.0.0
      */
     private $_utility_map = [
-        'cache'    => AAM_Framework_Utility_Cache::class,
-        'misc'     => AAM_Framework_Utility_Misc::class,
-        'redirect' => AAM_Framework_Utility_Redirect::class
+        'cache'        => AAM_Framework_Utility_Cache::class,
+        'misc'         => AAM_Framework_Utility_Misc::class,
+        'redirect'     => AAM_Framework_Utility_Redirect::class,
+        'capabilities' => AAM_Framework_Utility_Capabilities::class,
+        'caps'         => AAM_Framework_Utility_Capabilities::class,
+        'roles'        => AAM_Framework_Utility_Roles::class
     ];
 
     /**

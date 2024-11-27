@@ -10,7 +10,6 @@
 /**
  * AAM core API gateway
  *
- * @method AAM_Framework_Service_Roles roles(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Urls urls(mixed $runtime_context = null)
  * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Jwts jwts(mixed $runtime_context = null)
@@ -24,7 +23,6 @@
  * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Content content(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Users users(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Configs configs(mixed $runtime_context = null)
@@ -77,7 +75,6 @@ final class AAM_Core_Gateway
     protected function __construct()
     {
         $this->_registered_services = apply_filters('aam_api_gateway_services_filter', [
-            'roles'                  => AAM_Framework_Service_Roles::class,
             'urls'                   => AAM_Framework_Service_Urls::class,
             'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
             'jwts'                   => AAM_Framework_Service_Jwts::class,
@@ -91,7 +88,6 @@ final class AAM_Core_Gateway
             'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
             'identities'             => AAM_Framework_Service_Identities::class,
             'content'                => AAM_Framework_Service_Content::class,
-            'users'                  => AAM_Framework_Service_Users::class,
             'capabilities'           => AAM_Framework_Service_Capabilities::class,
             'caps'                   => AAM_Framework_Service_Capabilities::class,
             'configs'                => AAM_Framework_Service_Configs::class,
@@ -678,7 +674,8 @@ final class AAM_Core_Gateway
      * @deprecated
      */
     public function getAccessPolicyManager(
-        AAM_Core_Subject $subject = null, $skipInheritance = false
+        $subject = null,
+        $skipInheritance = false
     ) {
         if (is_null($subject)) {
             $subject = AAM::current_user();
@@ -708,117 +705,6 @@ final class AAM_Core_Gateway
     public function reset()
     {
         AAM_Core_API::clearSettings();
-    }
-
-    /**
-     * Merge two set of access settings into one
-     *
-     * The merging method also takes in consideration the access settings preference
-     * defined in ConfigPress
-     *
-     * @param array  $set1
-     * @param array  $set2
-     * @param string $objectType
-     * @param string $preference
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.0.0
-     * @deprecated 7.0.0 Moved to resource abstract
-     */
-    public function mergeSettings($set1, $set2, $objectType, $preference = null)
-    {
-        $merged = array();
-
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        if (is_null($preference)) {
-            $default_preference = $this->configs()->get_config(
-                'core.settings.merge.preference'
-            );
-
-            $preference = $this->configs()->get_config(
-                "core.settings.{$objectType}.merge.preference",
-                $default_preference
-            );
-        }
-
-        // First get the complete list of unique keys
-        $keys = array_keys($set1);
-        foreach (array_keys($set2) as $key) {
-            if (!in_array($key, $keys, true)) {
-                $keys[] = $key;
-            }
-        }
-
-        foreach ($keys as $key) {
-            // There can be only two types of preferences: "deny" or "allow". Based
-            // on that, choose access settings that have proper effect as following:
-            //
-            //   - If set1 and set2 have two different preferences, get the one that
-            //     has correct preference;
-            //   - If set1 and set2 have two the same preferences, choose the set2
-            //   - If only set1 has access settings, use set1 as-is
-            //   - If only set2 has access settings, use set2 as-is
-            //   - If set1 and set2 have different effect than preference, choose
-            //     set2
-            $effect1 = $this->computeAccessOptionEffect($set1, $key);
-            $effect2 = $this->computeAccessOptionEffect($set2, $key);
-            $effect  = ($preference === 'deny');
-
-            // Access Option is either boolean true or array with "enabled" key
-            // set as boolean true
-            if ($effect1 === $effect2) { // both equal
-                $merged[$key] = $set2[$key];
-            } elseif ($effect1 === $effect) { // set1 matches preference
-                $merged[$key] = $set1[$key];
-            } elseif ($effect2 === $effect) { // set2 matches preference
-                $merged[$key] = $set2[$key];
-            } else {
-                if ($preference === 'allow') {
-                    $option = isset($set2[$key]) ? $set2[$key] : $set1[$key];
-                    if (is_array($option)) {
-                        $option['enabled'] = false;
-                    } else {
-                        $option = false;
-                    }
-                    $merged[$key] = $option;
-                } elseif (is_null($effect1)) {
-                    $merged[$key] = $set2[$key];
-                } elseif (is_null($effect2)) {
-                    $merged[$key] = $set1[$key];
-                }
-            }
-        }
-
-        return $merged;
-    }
-
-    /**
-     * Determine correct access option effect
-     *
-     * There can be two possible types of the access settings: straight boolean and
-     * array with "enabled" flag. If provided key is not a part of the access options,
-     * the null is returned, otherwise boolean true of false.
-     *
-     * @param array  $opts
-     * @param string $key
-     *
-     * @return null|boolean
-     *
-     * @access protected
-     * @version 6.0.0
-     * @deprecated 7.0.0
-     */
-    protected function computeAccessOptionEffect($opts, $key)
-    {
-        $effect = null; // nothing is defined
-
-        if (isset($opts[$key])) {
-            $effect = is_array($opts[$key]) ? $opts[$key]['enabled'] : $opts[$key];
-        }
-
-        return $effect;
     }
 
     /**

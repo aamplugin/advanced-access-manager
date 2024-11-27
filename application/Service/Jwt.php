@@ -33,17 +33,6 @@ class AAM_Service_Jwt
     const DB_OPTION = 'aam_jwt_registry';
 
     /**
-     * Options aliases
-     *
-     * @version 7.0.0
-     */
-    const OPTION_ALIAS = array(
-        'service.jwt.registry_size' => 'authentication.jwt.registryLimit',
-        'service.jwt.bearer'        => 'authentication.jwt.container',
-        'service.jwt.header_name'   => 'authentication.jwt.header'
-    );
-
-    /**
      * Default configurations
      *
      * @version 7.0.0
@@ -163,12 +152,14 @@ class AAM_Service_Jwt
         );
 
         // WP Core current user definition
-        add_filter(
-            'determine_current_user', array($this, 'determineUser'), PHP_INT_MAX
-        );
+        add_filter('determine_current_user', function($user_id){
+            return $this->_determine_current_user($user_id);
+        }, PHP_INT_MAX);
 
         // Fetch specific claim from the JWT token if present
-        add_filter('aam_get_jwt_claim', array($this, 'getJwtClaim'), 20, 2);
+        add_filter('aam_get_jwt_claim', function($value, $prop) {
+            return $this->_aam_get_jwt_claim($value, $prop);
+        }, 20, 2);
     }
 
     /**
@@ -455,7 +446,7 @@ class AAM_Service_Jwt
     public function registerToken($userId, $token, $replaceExisting = false)
     {
         $registry = $this->getTokenRegistry($userId);
-        $limit    = $this->_getConfigOption('service.jwt.registry_size', 10);
+        $limit    = AAM::api()->configs()->get_config('service.jwt.registry_size');
 
         if ($replaceExisting) {
             // First let's delete existing token
@@ -565,34 +556,29 @@ class AAM_Service_Jwt
      *
      * @return int
      *
-     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
-     * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/238
-     * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.11
+     * @access private
+     * @version 7.0.0
      */
-    public function determineUser($userId)
+    private function _determine_current_user($userId)
     {
         if (empty($userId)) {
-            $token = $this->extractToken();
+            $token = $this->_extract_token();
 
             if (!empty($token)) {
                 $result = $this->validate($token->jwt);
 
                 if (!is_wp_error($result)) {
                     // Verify that user is can be logged in
-                    $user = AAM::api()->users([
-                        'error_handling' => 'wp_error'
-                    ])->verify_user_state($result->userId);
+                    $check = $this->_verify_user_status($result->userId);
 
-                    if (!is_wp_error($user)) {
+                    if (!is_wp_error($check)) {
                         $userId = $result->userId;
 
                         if (in_array(
-                            $token->method, array('get', 'query', 'query_param'), true)
-                        ) {
+                            $token->method,
+                            [ 'get', 'query', 'query_param' ],
+                            true
+                        )) {
                             // Also authenticate user if token comes from query param
                             add_action('init', array($this, 'authenticateUser'), 1);
                         }
@@ -618,16 +604,12 @@ class AAM_Service_Jwt
      *
      * @return mixed
      *
-     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/238
-     * @since 6.9.0 https://github.com/aamplugin/advanced-access-manager/issues/221
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.4
+     * @access private
+     * @version 7.0.0
      */
-    public function getJwtClaim($value, $prop)
+    private function _aam_get_jwt_claim($value, $prop)
     {
-        $token   = $this->extractToken();
+        $token   = $this->_extract_token();
         $from_db = false;
 
         // If token is not found, try to fetch it from DB, but only if user is already
@@ -670,17 +652,12 @@ class AAM_Service_Jwt
      */
     public function authenticateUser()
     {
-        $token  = $this->extractToken();
+        $token  = $this->_extract_token();
         $claims = $this->validate($token->jwt);
 
-        if (!is_wp_error($claims)) {
-            // Check if account is active
-            $user = AAM::api()->users([
-                'error_handling' => 'wp_error'
-            ])->verify_user_state($claims->userId);
-        }
-
-        if (isset($user) && !is_wp_error($user)) {
+        if (!is_wp_error($claims)
+            && $this->_verify_user_status($claims->userId) === true
+        ) {
             wp_set_current_user($claims->userId);
             wp_set_auth_cookie($claims->userId);
 
@@ -695,7 +672,9 @@ class AAM_Service_Jwt
                 ];
             }
 
-            AAM::api()->users()->update($claims->userId, $data);
+            $user = AAM::api()->user($claims->userId);
+
+            $user->update($data);
 
             do_action('wp_login', $user->user_login, $user->get_wp_user());
 
@@ -728,19 +707,13 @@ class AAM_Service_Jwt
      *
      * @return object|null
      *
-     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
-     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/99
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.11
+     * @version 7.0.0
      */
-    protected function extractToken()
+    private function _extract_token()
     {
-        $container = explode(',', $this->_getConfigOption(
-            'service.jwt.bearer',
-            'header,query_param,post_param,cookie'
-        ));
+        $configs   = AAM::api()->configs();
+        $container = wp_parse_list($configs->get_config('service.jwt.bearer'));
 
         foreach ($container as $method) {
             switch (strtolower(trim($method))) {
@@ -749,9 +722,7 @@ class AAM_Service_Jwt
                     $possibles = array(
                         'HTTP_AUTHORIZATION',
                         'REDIRECT_HTTP_AUTHORIZATION',
-                        $this->_getConfigOption(
-                            'service.jwt.header_name', 'HTTP_AUTHENTICATION'
-                        )
+                        $configs->get_config('service.jwt.header_name')
                     );
 
                     foreach($possibles as $h) {
@@ -764,23 +735,23 @@ class AAM_Service_Jwt
                     break;
 
                 case 'cookie':
-                    $jwt = $this->getFromCookie($this->_getConfigOption(
-                        'service.jwt.cookie_name', 'aam_jwt_token'
+                    $jwt = $this->getFromCookie($configs->get_config(
+                        'service.jwt.cookie_name'
                     ));
                     break;
 
                 case 'post':
                 case 'post_param':
-                    $jwt = $this->getFromPost($this->_getConfigOption(
-                        'service.jwt.post_param_name', 'aam-jwt'
+                    $jwt = $this->getFromPost($configs->get_config(
+                        'service.jwt.post_param_name'
                     ));
                     break;
 
                 case 'get':
                 case 'query':
                 case 'query_param':
-                    $jwt = $this->getFromQuery($this->_getConfigOption(
-                        'service.jwt.query_param_name', 'aam-jwt'
+                    $jwt = $this->getFromQuery($configs->get_config(
+                        'service.jwt.query_param_name'
                     ));
                     break;
 
@@ -844,30 +815,37 @@ class AAM_Service_Jwt
     }
 
     /**
-     * Get configuration option
+     * Verify user's status
      *
-     * @param string $option
-     * @param mixed  $default
+     * @param int $user_id
      *
-     * @return mixed
-     *
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/287
-     * @since 6.9.11 Initial implementation of the method
+     * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.12
+     * @version 7.0.0
      */
-    private function _getConfigOption($option, $default = null)
+    private function _verify_user_status($user_id)
     {
-        $value = AAM::api()->configs()->get_config($option);
+        $result = true;
+        $user   = AAM::api()->user($user_id);
 
-        if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = AAM::api()->configs()->get_config(
-                self::OPTION_ALIAS[$option]
+        // Step #1. Verify that user is active
+        if (!$user->is_user_active()) {
+            $result = new WP_Error(
+                'inactive_user',
+                '[ERROR]: User is inactive. Contact the administrator.'
             );
         }
 
-        return is_null($value) ? $default : $value;
+        // Step #2. Verify that user is not expired
+        if ($user->is_user_access_expired()) {
+            $result = new WP_Error(
+                'inactive_user',
+                '[ERROR]: User access is expired. Contact the administrator.'
+            );
+        }
+
+        return $result;
     }
 
 }

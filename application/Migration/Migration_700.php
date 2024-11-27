@@ -45,7 +45,7 @@ final class AAM_Migration_700
 
         // Convert URL Access rules to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_Uri::OBJECT_TYPE,
+            'uri',
             AAM_Framework_Type_Resource::URL,
             function($data) {
                 return $this->_convert_legacy_url_rules($data);
@@ -54,7 +54,7 @@ final class AAM_Migration_700
 
         // Convert Login Redirect settings to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_LoginRedirect::OBJECT_TYPE,
+            'loginRedirect',
             AAM_Framework_Type_Preference::LOGIN_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_login_redirect($data);
@@ -63,7 +63,7 @@ final class AAM_Migration_700
 
         // Convert Logout Redirect settings to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_LogoutRedirect::OBJECT_TYPE,
+            'logoutRedirect',
             AAM_Framework_Type_Preference::LOGOUT_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_logout_redirect($data);
@@ -72,7 +72,7 @@ final class AAM_Migration_700
 
         // Convert Access Denied Redirect settings to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_Redirect::OBJECT_TYPE,
+            'redirect',
             AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_access_denied_redirect($data);
@@ -81,7 +81,7 @@ final class AAM_Migration_700
 
         // Convert 404 Redirect settings to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE,
+            'notFoundRedirect',
             AAM_Framework_Type_Preference::NOT_FOUND_REDIRECT,
             function($data) {
                 return $this->_convert_legacy_not_found_redirect($data);
@@ -90,7 +90,7 @@ final class AAM_Migration_700
 
         // Convert Post settings to new format
         $this->_transform_legacy_settings(
-            AAM_Core_Object_Post::OBJECT_TYPE,
+            'post',
             AAM_Framework_Type_Resource::POST,
             function($data) {
                 return $this->_convert_legacy_post_settings($data);
@@ -141,34 +141,37 @@ final class AAM_Migration_700
 
         // The list of changes
         $changes = [
-            'core.settings.multiSubject'               => 'core.settings.multi_access_levels',
-            'core.service.login-redirect.enabled'      => 'service.log_redirect.enabled',
-            'core.service.logout-redirect.enabled'     => 'service.logout_redirect.enabled',
-            'core.service.denied-redirect.enabled'     => 'service.access_denied_redirect.enabled',
-            'core.service.404-redirect.enabled'        => 'service.not_found_redirect.enabled',
-            'core.service.content.enabled'             => 'service.content.enabled',
-            'core.service.content.manageAllPostTypes'  => 'service.content.manage_all_post_types',
-            'core.service.content.manageAllTaxonomies' => 'service.content.manage_all_taxonomies',
-            'core.settings.tips'                       => 'core.settings.ui.tips',
-            'ui.settings.renderAccessMetabox'          => 'core.settings.ui.render_access_metabox',
-            'core.settings.inheritParentPost'          => 'service.content.inherit_from_parent_post',
-            'core.service.content.exclude.taxonomies'  => 'service.content.exclude.taxonomies',
-            'feature.post.password.expires'            => 'service.content.password_ttl',
-            'geoapi.adapter'                           => 'service.geo_lookup.geoapi.adapter',
-            'ipstack.license'                          => 'service.geo_lookup.geoapi.api_key',
-            'geoapi.api_key'                           => 'service.geo_lookup.geoapi.api_key',
-            'geoapi.test_ip'                           => 'service.geo_lookup.geoapi.test_ip',
-            'ipstack.schema'                           => 'service.geo_lookup.ipstack.schema',
-            'ipstack.fields'                           => 'service.geo_lookup.ipstack.fields',
-            'service.uri.enabled'                      => 'service.url.enabled',
-            'core.service.admin-menu.enabled'          => 'service.backend_menu.enabled',
-            'core.service.metabox.enabled'             => 'service.metabox.enabled',
-            'core.service.toolbar.enabled'             => 'service.admin_toolbar.enabled',
-            'core.service.route.enabled'               => 'service.api_route.enabled',
-            'core.service.identity-governance.enabled' => 'service.identity.enabled',
-            'core.service.jwt.enabled'                 => 'service.jwt.enabled',
-            'core.service.capability.enabled'          => 'service.capability.enabled',
-            'core.settings.editCapabilities'           => 'service.capability.edit_caps'
+            'core.settings.multiSubject'                => 'core.settings.multi_access_levels',
+            'core.service.login-redirect.enabled'       => 'service.log_redirect.enabled',
+            'core.service.logout-redirect.enabled'      => 'service.logout_redirect.enabled',
+            'core.service.denied-redirect.enabled'      => 'service.access_denied_redirect.enabled',
+            'core.service.404-redirect.enabled'         => 'service.not_found_redirect.enabled',
+            'core.service.content.enabled'              => 'service.content.enabled',
+            'core.service.content.manageAllPostTypes'   => 'service.content.manage_all_post_types',
+            'core.service.content.manageAllTaxonomies'  => 'service.content.manage_all_taxonomies',
+            'core.settings.tips'                        => 'core.settings.ui.tips',
+            'ui.settings.renderAccessMetabox'           => 'core.settings.ui.render_access_metabox',
+            'core.settings.inheritParentPost'           => 'service.content.inherit_from_parent_post',
+            'core.service.content.exclude.taxonomies'   => 'service.content.exclude.taxonomies',
+            'feature.post.password.expires'             => 'service.content.password_ttl',
+            'geoapi.adapter'                            => 'service.geo_lookup.geoapi.adapter',
+            'ipstack.license'                           => 'service.geo_lookup.geoapi.api_key',
+            'geoapi.api_key'                            => 'service.geo_lookup.geoapi.api_key',
+            'geoapi.test_ip'                            => 'service.geo_lookup.geoapi.test_ip',
+            'ipstack.schema'                            => 'service.geo_lookup.ipstack.schema',
+            'ipstack.fields'                            => 'service.geo_lookup.ipstack.fields',
+            'service.uri.enabled'                       => 'service.url.enabled',
+            'core.service.admin-menu.enabled'           => 'service.backend_menu.enabled',
+            'core.service.metabox.enabled'              => 'service.metabox.enabled',
+            'core.service.toolbar.enabled'              => 'service.admin_toolbar.enabled',
+            'core.service.route.enabled'                => 'service.api_route.enabled',
+            'core.service.identity-governance.enabled'  => 'service.identity.enabled',
+            'core.service.jwt.enabled'                  => 'service.jwt.enabled',
+            'core.service.capability.enabled'           => 'service.capability.enabled',
+            'core.settings.editCapabilities'            => 'service.capability.edit_caps',
+            'core.service.secure-login.enabled'         => 'service.secure_login.enabled',
+            'service.secureLogin.feature.singleSession' => 'service.secure_login.single_session',
+            'service.secureLogin.feature.bruteForceLockout' => 'service.secure_login.brute_force_lockout',
         ];
 
         foreach($changes as $legacy => $new) {

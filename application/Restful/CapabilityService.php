@@ -128,7 +128,7 @@ class AAM_Restful_CapabilityService
             $service = $this->_get_service($request);
 
             if ($request->get_param('list_all')) {
-                $caps = AAM_Framework_Utility_Capability::get_all_caps();
+                $caps = AAM_Framework_Utility_Capabilities::get_all_caps();
             } else {
                 $caps = array_keys($service->get_all());
             }

@@ -492,12 +492,6 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
             'title'      => __('Access Policies', AAM_KEY),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_Role::UID,
-                AAM_Core_Subject_User::UID,
-                AAM_Core_Subject_Visitor::UID,
-                AAM_Core_Subject_Default::UID
-            ),
             'view'       => __CLASS__
         ));
     }

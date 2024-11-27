@@ -11,7 +11,7 @@
  * RESTful API for user management
  *
  * @package AAM
- * @version 6.9.32
+ * @version 7.0.0
  */
 class AAM_Restful_UserService
 {
@@ -21,7 +21,7 @@ class AAM_Restful_UserService
     /**
      * The namespace for the collection of endpoints
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     const API_NAMESPACE = 'aam/v2';
 
@@ -31,7 +31,7 @@ class AAM_Restful_UserService
      * @return void
      *
      * @access protected
-     * @version 6.9.32
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -157,12 +157,19 @@ class AAM_Restful_UserService
                             'type'    => 'string'
                         )
                     ),
+                    'deprive_capabilities' => array(
+                        'description' => 'List of capabilities to deprive',
+                        'type'        => 'array',
+                        'items'       => [
+                            'type'    => 'string'
+                        ]
+                    ),
                     'remove_capabilities' => array(
                         'description' => 'List of capabilities to remove',
                         'type'        => 'array',
                         'items'       => array(
                             'type'    => 'string'
-                        ),
+                        )
                     ),
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -207,13 +214,11 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.32
+     * @version 7.0.0
      */
     public function get_user_list(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service();
-
             // Prepare the list of filters
             $filters = [
                 'number'   => $request->get_param('per_page'),
@@ -234,11 +239,11 @@ class AAM_Restful_UserService
 
             // Iterate over the list of all users and enrich it with additional
             // attributes
-            $result = $service->get_user_list($filters);
-            $fields   = $this->_determine_additional_fields($request);
+            $result = AAM_Framework_Utility_Users::get_list($filters, 'full');
+            $fields = $this->_determine_additional_fields($request);
 
-            foreach($result['list'] as &$user) {
-                $user = $this->_prepare_user_item($user, $fields);
+            foreach($result['list'] as $i => $user) {
+                $result['list'][$i] = $this->_prepare_output($user, $fields);
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -253,14 +258,13 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.32
+     * @version 7.0.0
      */
     public function get_user(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service();
-            $result  = $this->_prepare_user_item(
-                $service->get_user($request->get_param('id'), false),
+            $result = $this->_prepare_output(
+                AAM::api()->user($request->get_param('id')),
                 $this->_determine_additional_fields($request)
             );
         } catch (Exception $e) {
@@ -276,17 +280,17 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.32
+     * @version 7.0.0
      */
     public function update_user(WP_REST_Request $request)
     {
         try {
-            $service     = $this->_get_service();
-            $expiration  = $request->get_param('expiration');
-            $status      = $request->get_param('status');
-            $add_caps    = $request->get_param('add_capabilities');
-            $remove_caps = $request->get_param('remove_capabilities');
-            $data        = [];
+            $expiration   = $request->get_param('expiration');
+            $status       = $request->get_param('status');
+            $add_caps     = $request->get_param('add_capabilities');
+            $remove_caps  = $request->get_param('remove_capabilities');
+            $deprive_caps = $request->get_param('deprive_capabilities');
+            $data         = [];
 
             if (!empty($expiration)) {
                 $data['expiration'] = $expiration;
@@ -304,9 +308,17 @@ class AAM_Restful_UserService
                 $data['remove_caps'] = $remove_caps;
             }
 
-            $result = $this->_prepare_user_item(
-                $service->update($request->get_param('id'), $data, false),
-                $this->_determine_additional_fields($request)
+            if (!empty($deprive_caps)) {
+                $data['deprive_caps'] = $deprive_caps;
+            }
+
+            $user = AAM::api()->user($request->get_param('id'));
+
+            // Update user data
+            $user->update($data);
+
+            $result = $this->_prepare_output(
+                $user, $this->_determine_additional_fields($request)
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -321,15 +333,18 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.32
+     * @version 7.0.0
      */
     public function reset_user(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service();
-            $result  = $this->_prepare_user_item(
-                $service->reset($request->get_param('id'), false),
-                $this->_determine_additional_fields($request)
+            $user = AAM::api()->user($request->get_param('id'));
+
+            // Reset user
+            $user->reset();
+
+            $result = $this->_prepare_output(
+                $user, $this->_determine_additional_fields($request)
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -344,7 +359,7 @@ class AAM_Restful_UserService
      * @return bool
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function check_permissions()
     {
@@ -360,7 +375,7 @@ class AAM_Restful_UserService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private function _validate_fields_input($value)
     {
@@ -391,35 +406,83 @@ class AAM_Restful_UserService
     }
 
     /**
-     * Prepare user item
+     * Prepare user data
      *
-     * @param array $item
-     * @param array $fields
+     * @param AAM_Framework_AccessLevel_User $user
+     * @param array                          $fields
      *
      * @return array
      *
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
-    private function _prepare_user_item($item, $fields = [])
+    private function _prepare_output($user, $fields = [])
     {
-        // Addition list of actions that current user can perform upon given user
-        $item['permissions'] = [];
+        $response = [
+            'id'                    => $user->ID,
+            'user_login'            => $user->user_login,
+            'display_name'          => $user->display_name,
+            'user_level'            => intval($user->user_level),
+            'roles'                 => $this->_prepare_user_roles($user->roles),
+            'assigned_capabilities' => $user->caps,
+            'all_capabilities'      => $user->allcaps,
+            'status'                => $user->status
+        ];
 
-        if (current_user_can('edit_user', $item['id'])) {
-            array_push($item['permissions'], 'allow_manage', 'allow_edit');
+        $expires_at = $user->expires_at;
+
+        if (!empty($expires_at)) {
+            $response['expiration'] = [
+                'expires_at'           => $expires_at->format(DateTime::RFC3339),
+                'expires_at_timestamp' => $expires_at->getTimestamp(),
+                'trigger'              => $user->expiration_trigger
+            ];
         }
 
-        $item = apply_filters('aam_prepare_user_item_filter', $item);
+        // Addition list of actions that current user can perform upon given user
+        $response['permissions'] = [];
+
+        if (current_user_can('edit_user', $response['id'])) {
+            array_push($response['permissions'], 'allow_manage', 'allow_edit');
+        }
+
+        $response = apply_filters('aam_prepare_user_item_filter', $response);
 
         // Finally, return only fields that were requested
-        $response = apply_filters('aam_user_rest_field_filter', [
-            'id' => $item['id']
-        ], $item, $fields);
+        // $response = apply_filters('aam_user_rest_field_filter', [
+        //     'id' => $response['id']
+        // ], $response, $fields);
 
         foreach($fields as $field) {
             if (!isset($response[$field]) && isset($item[$field])) {
                 $response[$field] = $item[$field];
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Prepare list of roles
+     *
+     * @param array $roles
+     *
+     * @return array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_user_roles($roles)
+    {
+        $response = [];
+
+        $names = wp_roles()->get_names();
+
+        if (is_array($roles)) {
+            foreach ($roles as $role) {
+                if (array_key_exists($role, $names)) {
+                    $response[] = translate_user_role($names[$role]);
+                }
             }
         }
 
@@ -434,7 +497,7 @@ class AAM_Restful_UserService
      * @return array
      *
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private function _determine_additional_fields(WP_REST_Request $request)
     {
@@ -461,7 +524,7 @@ class AAM_Restful_UserService
      * @return void
      *
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private function _register_route($route, $args)
     {
@@ -472,19 +535,6 @@ class AAM_Restful_UserService
                 'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
             )
         );
-    }
-
-    /**
-     * Get service
-     *
-     * @return AAM_Framework_Service_Users
-     *
-     * @access private
-     * @version 6.9.33
-     */
-    private function _get_service()
-    {
-        return AAM::api()->users();
     }
 
 }

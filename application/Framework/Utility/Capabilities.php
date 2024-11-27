@@ -14,7 +14,7 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Capability
+class AAM_Framework_Utility_Capabilities
 {
 
     /**

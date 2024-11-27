@@ -12,23 +12,8 @@ use Vectorface\Whip\Whip;
 /**
  * AAM core service
  *
- * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
- * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/265
- * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/236
- * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/173
- * @since 6.5.3  https://github.com/aamplugin/advanced-access-manager/issues/126
- * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/82
- * @since 6.4.0  Added "Manage Access" toolbar item to single & multi-site network
- * @since 6.0.5  Making sure that only if user is allowed to manage other users
- * @since 6.0.4  Bug fixing. Unwanted "Access Denied" metabox on the Your Profile page
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.33
+ * @version 7.0.0
  */
 class AAM_Service_Core
 {
@@ -38,14 +23,14 @@ class AAM_Service_Core
     /**
      * URI that is used to check for plugin updates
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const PLUGIN_CHECK_URI = 'api.wordpress.org/plugins/update-check';
 
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
         'core.settings.ui.tips'                  => true,
@@ -60,21 +45,8 @@ class AAM_Service_Core
      *
      * @access protected
      *
-     * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/276
-     * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/268
-     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
-     * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/236
-     * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/82
-     * @since 6.4.0  Added "Manage Access" toolbar item
-     * @since 6.0.5  Fixed bug when Access Manager metabox is rendered for users that
-     *               have ability to manage other users
-     * @since 6.0.4  Fixed bug when Access Manager metabox is rendered on profile edit
-     *               page
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @return void
-     * @version 6.9.32
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -282,16 +254,26 @@ class AAM_Service_Core
      * @access public
      * @version 6.9.10
      */
-    public function authenticate_user($user)
+    public function authenticate_user($result)
     {
         // Check if user is blocked
-        if (is_a($user, 'WP_User')) {
-            $result = AAM::api()->users([
-                'error_handling' => 'wp_error'
-            ])->verify_user_state($user);
+        if (is_a($result, 'WP_User')) {
+            $user = AAM::api()->user($result->ID);
 
-            if (is_wp_error($result)) {
-                $user = $result;
+            // Step #1. Verify that user is active
+            if (!$user->is_user_active()) {
+                $result = new WP_Error(
+                    'inactive_user',
+                    __('[ERROR]: User is inactive. Contact the administrator.', AAM_KEY)
+                );
+            }
+
+            // Step #2. Verify that user is not expired
+            if ($user->is_user_access_expired()) {
+                $result = new WP_Error(
+                    'inactive_user',
+                    __('[ERROR]: User access is expired. Contact the administrator.', AAM_KEY)
+                );
             }
         }
 
@@ -310,9 +292,7 @@ class AAM_Service_Core
     public function verify_user_status()
     {
         if (is_user_logged_in()) {
-            $user = AAM::api()->users()->get_user(
-                get_current_user_id()
-            );
+            $user = AAM::api()->user(get_current_user_id());
 
             // If user status is inactive - immediately logout user
             if ($user->is_user_active() === false) {
