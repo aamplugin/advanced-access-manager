@@ -58,7 +58,7 @@
             global $wp_post_types;
 
             $first = false;
-            $list  = $service->get_item_list();
+            $list  = $service->get_items();
 
             // Group all the metaboxes by post type
             $grouped = array();
@@ -113,7 +113,7 @@
                                                 </a></small>
                                             </div>
 
-                                            <?php if ($metabox['is_hidden']) { ?>
+                                            <?php if ($metabox['is_restricted']) { ?>
                                                 <i
                                                     class="aam-accordion-action icon-lock text-danger"
                                                     id="metabox_<?php echo esc_attr($metabox['slug']); ?>"
@@ -130,7 +130,7 @@
                                             <label
                                                 for="metabox_<?php echo esc_attr($metabox['slug']); ?>"
                                                 data-toggle="tooltip"
-                                                title="<?php echo ($metabox['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
+                                                title="<?php echo ($metabox['is_restricted'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
                                             ></label>
                                         </div>
                                     <?php } ?>

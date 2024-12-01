@@ -32,10 +32,12 @@ class AAM_Framework_Service_Utility
     private $_utility_map = [
         'cache'        => AAM_Framework_Utility_Cache::class,
         'misc'         => AAM_Framework_Utility_Misc::class,
+        'config'       => AAM_Framework_Utility_Config::class,
         'redirect'     => AAM_Framework_Utility_Redirect::class,
         'capabilities' => AAM_Framework_Utility_Capabilities::class,
         'caps'         => AAM_Framework_Utility_Capabilities::class,
-        'roles'        => AAM_Framework_Utility_Roles::class
+        'roles'        => AAM_Framework_Utility_Roles::class,
+        'users'        => AAM_Framework_Utility_Users::class
     ];
 
     /**

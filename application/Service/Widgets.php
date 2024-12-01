@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Service_Widget
+class AAM_Service_Widgets
 {
 
     use AAM_Core_Contract_ServiceTrait;
@@ -65,54 +65,6 @@ class AAM_Service_Widget
 
             $this->initialize_hooks();
         }
-    }
-
-    /**
-     * Initialize Widgets hooks
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 7.0.0
-     */
-    protected function initialize_hooks()
-    {
-        if (is_admin()) {
-            // Manager WordPress metaboxes
-            add_action('in_admin_header', function () {
-                if (AAM_Core_Request::get('init') === 'widget') {
-                    $screen = get_current_screen();
-
-                    if ($screen && $screen->id === 'dashboard') {
-                        $this->_initialize_widgets();
-
-                        exit; // No need to load the rest of the site
-                    }
-                }
-            }, 999);
-
-            // Manage the list of widgets rendered on the "Appearance -> Widgets"
-            // page
-            add_action('widgets_admin_page', function() {
-                $this->_filter_frontend_widgets();
-            }, 999);
-
-            // Manager widget's visibility on the Dashboard ->  Home page
-            add_action('in_admin_header', function() {
-                $screen = get_current_screen();
-
-                if ($screen && $screen->id === 'dashboard') {
-                    $this->_filter_dashboard_widgets();
-                }
-            }, 1000);
-        } else {
-            // Widget filters
-            add_filter('sidebars_widgets', function($widgets) {
-                $this->_filter_frontend_widgets();
-
-                return $widgets;
-            }, 999);
-        }
 
         // Register the resource
         add_filter(
@@ -129,6 +81,47 @@ class AAM_Service_Widget
                 return $resource;
             }, 10, 4
         );
+    }
+
+    /**
+     * Initialize Widgets hooks
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize_hooks()
+    {
+        if (is_admin()) {
+            // Manager WordPress metaboxes
+            add_action('in_admin_header', function () {
+                $screen = get_current_screen();
+
+                if (AAM_Core_Request::get('init') === 'widget') {
+                    if ($screen && $screen->id === 'dashboard') {
+                        $this->_initialize_widgets();
+
+                        exit; // No need to load the rest of the site
+                    }
+                } elseif ($screen && $screen->id === 'dashboard') {
+                    $this->_filter_dashboard_widgets();
+                }
+            }, PHP_INT_MAX);
+
+            // Manage the list of widgets rendered on the "Appearance -> Widgets"
+            // page
+            add_action('widgets_admin_page', function() {
+                $this->_filter_frontend_widgets();
+            }, 999);
+        } else {
+            // Widget filters
+            add_filter('sidebars_widgets', function($widgets) {
+                $this->_filter_frontend_widgets();
+
+                return $widgets;
+            }, 999);
+        }
 
         // Register RESTful API endpoints
         AAM_Restful_WidgetService::bootstrap();
@@ -154,7 +147,7 @@ class AAM_Service_Widget
         // Collect all registered frontend widgets
         foreach ((array)$wp_registered_widgets as $widget) {
             // Extracting class name from the registered widget
-            $slug = $this->_get_widget_slug($widget, true);
+            $slug = $this->_get_widget_slug($widget, 'frontend', true);
 
             if (!empty($slug) && !isset($cache['frontend'][$slug])) {
                 $cache['frontend'][$slug] = array(
@@ -169,7 +162,7 @@ class AAM_Service_Widget
             foreach ((array) $wp_meta_boxes['dashboard'] as $levels) {
                 foreach ((array) $levels as $boxes) {
                     foreach ((array) $boxes as $data) {
-                        $slug = $this->_get_widget_slug($data);
+                        $slug = $this->_get_widget_slug($data, 'dashboard');
 
                         if (!empty($slug) && !isset($cache['dashboard'][$slug])) {
                             $cache['dashboard'][$slug] = array(
@@ -207,10 +200,10 @@ class AAM_Service_Widget
             foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
                 foreach($groups as $widgets) {
                     foreach($widgets as $widget) {
-                        $slug = $this->_get_widget_slug($widget);
+                        $slug = $this->_get_widget_slug($widget, 'dashboard');
 
-                        if ($service->is_hidden($slug)) {
-                            remove_meta_box($slug, 'dashboard', $priority);
+                        if ($service->is_restricted($slug)) {
+                            remove_meta_box($widget['id'], 'dashboard', $priority);
                         }
                     }
                 }
@@ -234,9 +227,9 @@ class AAM_Service_Widget
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
-                $slug = $this->_get_widget_slug($widget, true);
+                $slug = $this->_get_widget_slug($widget, 'frontend', true);
 
-                if ($service->is_hidden($slug)) {
+                if ($service->is_restricted($slug)) {
                     unregister_widget($this->_get_widget_callback($widget));
 
                     // Remove it from registered widget global var!!
@@ -253,6 +246,7 @@ class AAM_Service_Widget
      * The callback is used as unique widget identifier
      *
      * @param mixed   $widget
+     * @param string  $screen_id
      * @param boolean $use_cb
      *
      * @return string
@@ -260,22 +254,22 @@ class AAM_Service_Widget
      * @access private
      * @version 7.0.0
      */
-    private function _get_widget_slug($widget, $use_cb = false)
+    private function _get_widget_slug($widget, $screen_id, $use_cb = false)
     {
-        $result = null;
+        $slug = null;
 
         if (!empty($widget['id']) && !$use_cb) {
-            $result = str_replace('-', '_', strtolower($widget['id']));
+            $slug = str_replace('-', '_', strtolower($widget['id']));
         } else {
             $cb = $this->_get_widget_callback($widget);
 
             if (!is_null($cb)) { // Exclude any junk
                 // Normalizing the "widget ID"
-                $result = str_replace('\\', '_', strtolower($cb));
+                $slug = str_replace('\\', '_', strtolower($cb));
             }
         }
 
-        return $result;
+        return !empty($slug) ? $screen_id . '_' . $slug : $slug;
     }
 
     /**

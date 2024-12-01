@@ -180,19 +180,14 @@ class AAM_Framework_Service_ApiRoutes
      *
      * @return array
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
     public function reset()
     {
         try {
             // Reset settings to default
-            $this->_get_resource()->reset();
-
-            $result = [ 'success' => true ];
+            $result = $this->_get_resource()->reset();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

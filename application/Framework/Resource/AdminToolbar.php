@@ -24,35 +24,30 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
     const TYPE = AAM_Framework_Type_Resource::TOOLBAR;
 
     /**
-     * Check whether the toolbar item is hidden or not
-     *
-     * This method check if toolbar item is hidden or its parent item is.
-     * Additionally, it uses the "aam_admin_toolbar_is_hidden_filter" filter to allow
-     * third-party implementation to influence the decision
-     *
-     * @param string $item_id
+     * Check whether the toolbar item is restricted/hidden or not
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_hidden($item_id)
+    public function is_restricted()
     {
-        // If there is a direct setting for given item, use it and ignore everything
-        // else
-        if (array_key_exists($item_id, $this->_permissions)) {
-            $hidden = $this->_permissions[$item_id]['effect'] !== 'allow';
-        } else {
-            $hidden = null;
+        $result = null;
+
+        if (empty($this->_internal_id)) {
+            throw new InvalidArgumentException(
+                'The Admin Toolbar resource has to be initialized with valid item id'
+            );
         }
 
-        return apply_filters(
-            'aam_admin_toolbar_is_hidden_filter',
-            $hidden,
-            $this,
-            $item_id
-        );
+        // If there is a direct setting for given item, use it and ignore everything
+        // else
+        if (array_key_exists($this->_internal_id, $this->_permissions)) {
+            $result = $this->_permissions[$this->_internal_id]['effect'] !== 'allow';
+        }
+
+        return $result;
     }
 
 }

@@ -10,32 +10,26 @@
 /**
  * Toolbar service
  *
- * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
- * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
- * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/223
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.27
+ * @version 7.0.0
  */
 class AAM_Service_AdminToolbar
 {
+
     use AAM_Core_Contract_RequestTrait,
         AAM_Core_Contract_ServiceTrait;
 
     /**
      * DB option name for cache
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const CACHE_DB_OPTION = 'aam_toolbar_cache';
 
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.admin_toolbar.enabled';
 
@@ -45,7 +39,7 @@ class AAM_Service_AdminToolbar
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -84,12 +78,8 @@ class AAM_Service_AdminToolbar
      *
      * @return array
      *
-     * @since 6.9.17 https://github.com/aamplugin/advanced-access-manager/issues/319
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/297
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.17
+     * @version 7.0.0
      */
     public function getToolbarCache()
     {
@@ -123,7 +113,7 @@ class AAM_Service_AdminToolbar
             add_action('wp_after_admin_bar_render', function() {
                 // Rebuild the cache
                 if (current_user_can('aam_manage_admin_toolbar') && AAM::isAAM()) {
-                    AAM::api()->admin_toolbar()->get_item_list();
+                    AAM::api()->admin_toolbar()->get_items();
                 }
             });
         }
@@ -164,7 +154,7 @@ class AAM_Service_AdminToolbar
         $nodes   = $wp_admin_bar->get_nodes();
 
         foreach ((is_array($nodes) ? $nodes : []) as $id => $node) {
-            if (!$node->group && $service->is_hidden($id)) {
+            if (!$node->group && $service->is_restricted($id)) {
                 if (!empty($node->parent)) { // update parent node with # link
                     $parent = $wp_admin_bar->get_node($node->parent);
 

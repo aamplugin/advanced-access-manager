@@ -69,10 +69,11 @@ class AAM_Restful_WidgetService
                         'type'        => 'string',
                         'required'    => true
                     ),
-                    'is_hidden' => array(
-                        'description' => 'Either metabox is hidden or not',
-                        'type'        => 'boolean',
-                        'default'     => true
+                    'effect' => array(
+                        'description' => 'Either metabox is restricted or not',
+                        'type'        => 'string',
+                        'default'     => 'deny',
+                        'enum'        => [ 'allow', 'deny' ]
                     )
                 )
             ));
@@ -121,7 +122,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_list($request->get_param('screen_id'));
+            $result  = $service->get_items($request->get_param('screen_id'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -143,9 +144,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item(
-                base64_decode($request->get_param('slug'))
-            );
+            $result  = $service->item(base64_decode($request->get_param('slug')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -167,10 +166,15 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_item_permission(
-                base64_decode($request->get_param('slug')),
-                $request->get_param('is_hidden')
-            );
+            $slug    = base64_decode($request->get_param('slug'));
+
+            if ($request->get_param('effect') === 'allow') {
+                $service->allow($slug);
+            } else {
+                $service->restrict($slug);
+            }
+
+            $result = $service->item($slug);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -192,9 +196,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_item_permission(
-                base64_decode($request->get_param('slug'))
-            );
+            $result  = $service->reset(base64_decode($request->get_param('slug')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

@@ -1,15 +1,4 @@
-<?php
-/**
- * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
- *               https://github.com/aamplugin/advanced-access-manager/issues/302
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/289
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.33
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -43,7 +32,7 @@
         <div class="panel-group" id="toolbar_list" role="tablist" aria-multiselectable="true">
             <?php
             $first   = false;
-            $toolbar = $service->get_item_list();
+            $toolbar = $service->get_items();
 
             if (!empty($toolbar)) { ?>
                 <?php foreach ($toolbar as $branch) { ?>
@@ -64,7 +53,7 @@
                                 >
                                     <?php echo esc_js($branch['name']); ?> <small class="aam-menu-capability"><?php echo esc_js($branch['uri']); ?></small>
                                 </a>
-                                <?php if ($branch['is_hidden']) { ?>
+                                <?php if ($branch['is_restricted']) { ?>
                                     <i class="aam-panel-title-icon icon-lock text-danger"></i>
                                 <?php } ?>
                             </h4>
@@ -103,7 +92,7 @@
                                                     </small>
                                                 </div>
 
-                                                <?php if ($child['is_hidden']) { ?>
+                                                <?php if ($child['is_restricted']) { ?>
                                                     <i
                                                         class="aam-accordion-action icon-lock text-danger"
                                                         data-toolbar="<?php echo esc_attr($child['id']); ?>"
@@ -118,7 +107,7 @@
                                                 <label
                                                     for="toolbar_<?php echo esc_attr($child['id']); ?>"
                                                     data-toggle="tooltip"
-                                                    title="<?php echo ($child['is_hidden'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"
+                                                    title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"
                                                 ></label>
                                             </div>
                                         <?php } ?>
@@ -128,7 +117,7 @@
 
                                 <div class="row aam-margin-top-xs">
                                     <div class="col-xs-10 col-md-6 col-xs-offset-1 col-md-offset-3">
-                                        <?php if ($branch['is_hidden']) { ?>
+                                        <?php if ($branch['is_restricted']) { ?>
                                             <a
                                                 href="#"
                                                 class="btn btn-primary btn-sm btn-block aam-restrict-toolbar"

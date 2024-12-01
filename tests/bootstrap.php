@@ -25,4 +25,4 @@ spl_autoload_register(function ($class_name) {
 
 // Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
-require_once ABSPATH . '/wp-admin/includes/user.php';
+require_once ABSPATH . 'wp-admin/includes/admin.php';

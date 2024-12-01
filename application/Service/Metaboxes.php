@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Service_Metabox
+class AAM_Service_Metaboxes
 {
 
     use AAM_Core_Contract_ServiceTrait;
@@ -65,51 +65,6 @@ class AAM_Service_Metabox
 
             $this->initialize_hooks();
         }
-    }
-
-    /**
-     * Initialize Metaboxes & Widgets hooks
-     *
-     * @return void
-     *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/315
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.0.0  Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.9.16
-     */
-    protected function initialize_hooks()
-    {
-        if (is_admin()) {
-            // Manager WordPress metaboxes
-            add_action('in_admin_header', function () {
-                global $post;
-
-                if (AAM_Core_Request::get('init') === 'metabox') {
-                    // Make sure that nobody is playing with screen options
-                    if (is_a($post, 'WP_Post')) {
-                        $this->_initialize_metaboxes($post->post_type);
-
-                        exit; // No need to load the rest of the site
-                    }
-                }
-            }, 999);
-
-            // Manage Navigation Menu page to support
-            add_filter('nav_menu_meta_box_object', function ($obj) {
-                if (is_object($obj)) {
-                    $obj->_default_query['suppress_filters'] = false;
-                }
-
-                return $obj;
-            });
-
-            // Manager WordPress metaboxes - Classic Editor
-            add_action('in_admin_header', function(){
-                $this->_filter_metaboxes();
-            }, PHP_INT_MAX);
-        }
 
         // Register the resource
         add_filter(
@@ -126,6 +81,42 @@ class AAM_Service_Metabox
                 return $resource;
             }, 10, 4
         );
+    }
+
+    /**
+     * Initialize hooks
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize_hooks()
+    {
+        // Manager WordPress metaboxes
+        add_action('in_admin_header', function () {
+            global $post;
+
+            if (AAM_Core_Request::get('init') === 'metabox') {
+                // Make sure that nobody is playing with screen options
+                if (is_a($post, 'WP_Post')) {
+                    $this->_initialize_metaboxes($post->post_type);
+
+                    exit; // No need to load the rest of the site
+                }
+            } else {
+                $this->_filter_metaboxes();
+            }
+        }, PHP_INT_MAX);
+
+        // Manage Navigation Menu page to support
+        add_filter('nav_menu_meta_box_object', function ($obj) {
+            if (is_object($obj)) {
+                $obj->_default_query['suppress_filters'] = false;
+            }
+
+            return $obj;
+        });
 
         // Register RESTful API endpoints
         AAM_Restful_MetaboxService::bootstrap();
@@ -184,7 +175,7 @@ class AAM_Service_Metabox
      * @return string
      *
      * @access private
-     * @version 6.9.13
+     * @version 7.0.0
      */
     private function _prepare_metabox_name($item)
     {
@@ -215,9 +206,7 @@ class AAM_Service_Metabox
             $post_type = ($screen ? $screen->id : null);
         }
 
-        if (filter_input(INPUT_GET, 'init') !== 'metabox'
-            && !empty($wp_meta_boxes[$post_type])
-        ) {
+        if (!empty($wp_meta_boxes[$post_type])) {
             $this->_filter_zones($wp_meta_boxes[$post_type], $post_type);
         }
     }
@@ -240,7 +229,7 @@ class AAM_Service_Metabox
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
                 foreach (array_keys($metaboxes) as $id) {
-                    if ($service->is_hidden($post_type . '_' . $id)) {
+                    if ($service->is_restricted($post_type . '_' . $id)) {
                         remove_meta_box($id, $post_type, $zone);
                     }
                 }

@@ -130,7 +130,7 @@ implements
      *
      * @param string $area
      *
-     * @return boolean
+     * @return bool
      *
      * @access public
      * @version 7.0.0
@@ -141,18 +141,18 @@ implements
             $container = $this->_get_container();
 
             if (empty($area)) {
-                $container->reset();
+                $result = $container->reset();
             } else {
                 $preferences = $container->get_preferences(true);
 
                 if (array_key_exists($area, $preferences)) {
                     unset($preferences[$area]);
 
-                    $container->set_preferences($preferences);
+                    $result = $container->set_preferences($preferences);
+                } else {
+                    $result = true;
                 }
             }
-
-            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

@@ -38,7 +38,7 @@
 
         <?php
             $first = false;
-            $list  = $service->get_item_list();
+            $list  = $service->get_items();
 
             // Group all the components by screen
             $grouped = array();

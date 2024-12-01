@@ -1,18 +1,4 @@
-<?php
-/**
- * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
- * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
- *               https://github.com/aamplugin/advanced-access-manager/issues/293
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/288
- * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/114
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.34
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php

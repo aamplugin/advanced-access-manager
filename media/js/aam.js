@@ -2114,7 +2114,7 @@
              */
             function save(item, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    const payload  = { is_hidden };
+                    const payload  = { effect: is_hidden ? 'deny' : 'allow' };
                     const endpoint = getAAM().prepareApiEndpoint(
                         `/service/admin-toolbar/${btoa(item)}`
                     );
@@ -2296,7 +2296,7 @@
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: { is_hidden },
+                        data: { effect: is_hidden ? 'deny' : 'allow' },
                         success: function (response) {
                             cb(response);
                         },
@@ -2340,6 +2340,9 @@
                 if ($('#metabox-content').length) {
                     //init refresh list button
                     $('#refresh-metabox-list').bind('click', function () {
+                        $('i', '#refresh-metabox-list').attr(
+                            'class', 'icon-spin4 animate-spin icon-arrows-cw'
+                        );
                         fetchData(
                             JSON.parse($('#aam_screen_list').text()),
                             0,
@@ -2472,14 +2475,14 @@
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: { is_hidden },
+                        data: { effect : is_hidden ? 'deny' : 'allow' },
                         success: function (response) {
                             cb(response);
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
                                 request: `aam/v2/service/widget/${btoa(slug)}`,
-                                payload: { is_hidden },
+                                payload: { effect : is_hidden ? 'deny' : 'allow' },
                                 response
                             });
                         }
@@ -2516,10 +2519,13 @@
                 if ($('#widget-content').length) {
                     //init refresh list button
                     $('#refresh_widget_list').bind('click', function () {
+                        $('i', '#refresh_widget_list').attr(
+                            'class', 'icon-spin4 animate-spin icon-arrows-cw'
+                        );
                         fetchData(
                             JSON.parse($('#aam_widget_screen_list').text()),
                             0,
-                            $('i', '#refresh-metabox-list')
+                            $('i', '#refresh_widget_list')
                         );
                     });
 

@@ -11,7 +11,7 @@
  * RESTful API for the Admin Toolbar service
  *
  * @package AAM
- * @version 6.9.13
+ * @version 7.0.0
  */
 class AAM_Restful_AdminToolbarService
 {
@@ -24,7 +24,7 @@ class AAM_Restful_AdminToolbarService
      * @return void
      *
      * @access protected
-     * @version 6.9.13
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -62,10 +62,11 @@ class AAM_Restful_AdminToolbarService
                         'type'        => 'string',
                         'required'    => true
                     ),
-                    'is_hidden' => array(
-                        'description' => 'Either menu is hidden or not',
-                        'type'        => 'boolean',
-                        'default'     => true
+                    'effect' => array(
+                        'description' => 'Either menu is restricted or not',
+                        'type'        => 'string',
+                        'default'     => 'deny',
+                        'enum'        => [ 'allow', 'deny' ]
                     )
                 )
             ));
@@ -101,13 +102,13 @@ class AAM_Restful_AdminToolbarService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_list();
+            $result  = $service->get_items();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -123,15 +124,13 @@ class AAM_Restful_AdminToolbarService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_by_id(
-                base64_decode($request->get_param('id'))
-            );
+            $result  = $service->get_item(base64_decode($request->get_param('id')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -147,16 +146,19 @@ class AAM_Restful_AdminToolbarService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function update_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_item_permission(
-                base64_decode($request->get_param('id')),
-                $request->get_param('is_hidden')
-            );
+            $item_id = base64_decode($request->get_param('id'));
+
+            if ($request->get_param('effect') === 'allow') {
+                $result = $service->allow($item_id);
+            } else {
+                $result = $service->restrict($item_id);
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -172,15 +174,13 @@ class AAM_Restful_AdminToolbarService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function delete_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_item_permission(
-                base64_decode($request->get_param('id'))
-            );
+            $result  = $service->reset(base64_decode($request->get_param('id')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -196,13 +196,12 @@ class AAM_Restful_AdminToolbarService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = $service->reset();
+            $result  = $this->_get_service($request)->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -216,7 +215,7 @@ class AAM_Restful_AdminToolbarService
      * @return bool
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function check_permissions()
     {
@@ -232,7 +231,7 @@ class AAM_Restful_AdminToolbarService
      * @return AAM_Framework_Service_AdminToolbar
      *
      * @access private
-     * @version 6.9.13
+     * @version 7.0.0
      */
     private function _get_service($request)
     {

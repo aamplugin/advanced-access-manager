@@ -24,7 +24,7 @@ class AAM_Restful_MetaboxService
      * @return void
      *
      * @access protected
-     * @version 6.9.13
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -68,10 +68,11 @@ class AAM_Restful_MetaboxService
                         'type'        => 'string',
                         'required'    => true
                     ),
-                    'is_hidden' => array(
-                        'description' => 'Either metabox is hidden or not',
-                        'type'        => 'boolean',
-                        'default'     => true
+                    'effect' => array(
+                        'description' => 'Either metabox is restricted or not',
+                        'type'        => 'string',
+                        'default'     => 'deny',
+                        'enum'        => [ 'allow', 'deny' ]
                     )
                 )
             ));
@@ -106,20 +107,20 @@ class AAM_Restful_MetaboxService
     }
 
     /**
-     * Get a list of components grouped by screen
+     * Get a list of metaboxes for given post type
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_items(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item_list($request->get_param('post_type'));
+            $result  = $service->get_items($request->get_param('post_type'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -135,15 +136,13 @@ class AAM_Restful_MetaboxService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item(
-                base64_decode($request->get_param('slug'))
-            );
+            $result  = $service->item(base64_decode($request->get_param('slug')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -159,16 +158,21 @@ class AAM_Restful_MetaboxService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function update_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->update_item_permission(
-                base64_decode($request->get_param('slug')),
-                $request->get_param('is_hidden')
-            );
+            $slug    = base64_decode($request->get_param('slug'));
+
+            if ($request->get_param('effect') === 'allow') {
+                $service->allow($slug);
+            } else {
+                $service->restrict($slug);
+            }
+
+            $result = $service->item($slug);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -184,15 +188,13 @@ class AAM_Restful_MetaboxService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function delete_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->delete_item_permission(
-                base64_decode($request->get_param('slug'))
-            );
+            $result  = $service->reset(base64_decode($request->get_param('slug')));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -208,7 +210,7 @@ class AAM_Restful_MetaboxService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
     {
@@ -228,7 +230,7 @@ class AAM_Restful_MetaboxService
      * @return bool
      *
      * @access public
-     * @version 6.9.13
+     * @version 7.0.0
      */
     public function check_permissions()
     {

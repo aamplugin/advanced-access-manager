@@ -116,9 +116,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     public function reset()
     {
         try {
-            $this->_get_container()->reset();
-
-            $result = [ 'success' => true ];
+            $result = $this->_get_container()->reset();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
