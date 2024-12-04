@@ -1,30 +1,14 @@
-<?php
-/**
- * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
- * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/301
- *               https://github.com/aamplugin/advanced-access-manager/issues/298
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/290
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.34
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php
-        $access_level = AAM_Backend_AccessLevel::getInstance();
-        $service      = $access_level->metaboxes();
-    ?>
+    <?php $service = AAM_Backend_AccessLevel::getInstance()->metaboxes(); ?>
     <div class="aam-feature" id="metabox-content">
         <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
                         <?php echo AAM_Backend_View::replace_aam_urls(
-                            __('Manage access to WordPress classical metaboxes on post-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.', AAM_KEY),
+                            __('Manage access to WordPress classical metaboxes on the content-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.', AAM_KEY),
                             '/premium'
                         ); ?>
                     </p>
@@ -61,41 +45,42 @@
             $list  = $service->get_items();
 
             // Group all the metaboxes by post type
-            $grouped = array();
-            foreach($list as $item) {
-                $post_type = $item['post_type'];
+            $grouped = [];
 
-                if (!isset($grouped[$post_type])) {
-                    $grouped[$post_type] = array();
+            foreach($list as $item) {
+                $screen_id = $item['screen_id'];
+
+                if (!isset($grouped[$screen_id])) {
+                    $grouped[$screen_id] = [];
                 }
 
-                array_push($grouped[$post_type], $item);
+                array_push($grouped[$screen_id], $item);
             }
         ?>
 
         <?php if (!empty($list)) { ?>
             <div class="panel-group" id="metabox-list" role="tablist">
-                <?php foreach ($grouped as $post_type => $metaboxes) { ?>
+                <?php foreach ($grouped as $screen_id => $metaboxes) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="group_<?php echo esc_attr($post_type); ?>_heading">
+                        <div class="panel-heading" role="tab" id="group_<?php echo esc_attr($screen_id); ?>_heading">
                             <h4 class="panel-title">
                                 <a
                                     role="button"
                                     data-toggle="collapse"
                                     data-parent="#metabox-list"
-                                    href="#group_<?php echo esc_attr($post_type); ?>"
-                                    aria-controls="group_<?php echo esc_attr($post_type); ?>"
+                                    href="#group_<?php echo esc_attr($screen_id); ?>"
+                                    aria-controls="group_<?php echo esc_attr($screen_id); ?>"
                                     <?php if (!$first) { echo 'aria-expanded="true"'; } ?>
                                 >
-                                    <?php echo $wp_post_types[$post_type]->labels->name; ?>
+                                    <?php echo $wp_post_types[$screen_id]->labels->name; ?>
                                 </a>
                             </h4>
                         </div>
                         <div
-                            id="group_<?php echo esc_attr($post_type); ?>"
+                            id="group_<?php echo esc_attr($screen_id); ?>"
                             class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>"
                             role="tabpanel"
-                            aria-labelledby="group_<?php echo esc_js($post_type); ?>_heading"
+                            aria-labelledby="group_<?php echo esc_js($screen_id); ?>_heading"
                         >
                             <div class="panel-body">
                                 <div class="row">
@@ -107,7 +92,7 @@
                                                     href="#metabox-details-modal"
                                                     data-toggle="modal"
                                                     data-title="<?php echo esc_attr($metabox['title']); ?>"
-                                                    data-screen="<?php echo esc_attr($post_type); ?>"
+                                                    data-screen="<?php echo esc_attr($screen_id); ?>"
                                                     data-id="<?php echo esc_attr($metabox['slug']); ?>"
                                                     class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?>
                                                 </a></small>
@@ -118,12 +103,14 @@
                                                     class="aam-accordion-action icon-lock text-danger"
                                                     id="metabox_<?php echo esc_attr($metabox['slug']); ?>"
                                                     data-metabox="<?php echo esc_attr($metabox['slug']); ?>"
+                                                    data-screen="<?php echo esc_attr($metabox['screen_id']); ?>"
                                                 ></i>
                                             <?php } else { ?>
                                                 <i
                                                     class="aam-accordion-action icon-lock-open text-success"
                                                     id="metabox_<?php echo esc_attr($metabox['slug']); ?>"
                                                     data-metabox="<?php echo esc_attr($metabox['slug']); ?>"
+                                                    data-screen="<?php echo esc_attr($metabox['screen_id']); ?>"
                                                 ></i>
                                             <?php } ?>
 
@@ -137,10 +124,10 @@
                                 </div>
 
                                 <?php echo apply_filters(
-                                    'aam_ui_metaboxes_post_type_mode_filter',
+                                    'aam_ui_metaboxes_screen_mode_filter',
                                     '',
                                     AAM_Backend_AccessLevel::getInstance()->metaboxes(),
-                                    $post_type
+                                    $screen_id
                                 ); ?>
                             </div>
                         </div>
@@ -198,11 +185,11 @@
                                     <td id="metabox-title"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Post Type', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Screen ID', AAM_KEY); ?></th>
                                     <td id="metabox-screen-id"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Metabox ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Metabox Slug', AAM_KEY); ?></th>
                                     <td id="metabox-id"></td>
                                 </tr>
                             </tbody>

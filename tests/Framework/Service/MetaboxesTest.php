@@ -21,28 +21,82 @@ final class MetaboxesTest extends TestCase
 {
 
     /**
-     * Test we can set permissions for metaboxes
+     * Test managing metabox permissions by slug
      *
      * @return void
      */
-    public function testSettingPermissions()
+    public function testSettingPermissionsWithSlug()
     {
         $service = AAM::api()->metaboxes('role:author');
 
+        // Set permission for a single metabox
+        $this->assertTrue($service->restrict('post_submit_meta_box'));
+
+        // Assert metabox permissions
+        $this->assertTrue($service->is_restricted('post_submit_meta_box'));
+        $this->assertTrue($service->is_restricted('post_submit_meta_box', 'page'));
+
         // Set permission
-        $this->assertTrue($service->restrict('page_postimagediv'));
+        $this->assertTrue($service->restrict('post_thumbnail_meta_box', 'page'));
 
-        // Assert that the metabox is restricted
-        $this->assertTrue($service->is_restricted('page_postimagediv'));
-        $this->assertFalse($service->is_allowed('page_postimagediv'));
+        // Assert metabox permissions
+        $this->assertTrue($service->is_restricted('post_thumbnail_meta_box', 'page'));
+        $this->assertTrue($service->is_restricted('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_allowed('post_thumbnail_meta_box', 'post'));
+
+        // Set allow permission
+        $this->assertTrue($service->allow('post_custom_meta_box', 'page'));
+
+        // Assert metabox permissions
+        $this->assertTrue($service->is_allowed('post_custom_meta_box', 'page'));
+    }
+
+     /**
+     * Test managing metabox permissions with metabox array
+     *
+     * @return void
+     */
+    public function testSettingPermissionsWithArray()
+    {
+        $service = AAM::api()->metaboxes('role:editor');
+
+        // Defining test metaboxes
+        $post_submit_meta_box = [
+            'id'       => 'submitdiv',
+            'title'    => 'Publish',
+            'callback' => 'post_submit_meta_box'
+        ];
+        $post_thumbnail_meta_box = [
+            'id'       => 'postimagediv',
+            'title'    => 'Featured image',
+            'callback' => 'post_thumbnail_meta_box'
+        ];
+        $post_custom_meta_box = [
+            'id'       => 'postcustom',
+            'title'    => 'Custom Fields',
+            'callback' => 'post_custom_meta_box'
+        ];
+
+        // Set permission for a single metabox
+        $this->assertTrue($service->restrict($post_submit_meta_box));
+
+        // Assert metabox permissions
+        $this->assertTrue($service->is_restricted($post_submit_meta_box));
+        $this->assertTrue($service->is_restricted($post_submit_meta_box, 'page'));
 
         // Set permission
-        $this->assertTrue($service->allow('page_pageparentdiv'));
+        $this->assertTrue($service->restrict($post_thumbnail_meta_box, 'page'));
 
-        // Assert that the metabox is restricted
-        $this->assertFalse($service->is_restricted('page_pageparentdiv'));
-        $this->assertTrue($service->is_allowed('page_pageparentdiv'));
+        // Assert metabox permissions
+        $this->assertTrue($service->is_restricted($post_thumbnail_meta_box, 'page'));
+        $this->assertTrue($service->is_restricted('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_allowed($post_thumbnail_meta_box, 'post'));
 
+        // Set allow permission
+        $this->assertTrue($service->allow($post_custom_meta_box, 'page'));
+
+        // Assert metabox permissions
+        $this->assertTrue($service->is_allowed($post_custom_meta_box, 'page'));
     }
 
 }

@@ -36,37 +36,48 @@ class AAM_Restful_MetaboxService
                 'callback'            => array($this, 'get_list'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
-                    'post_type' => array(
-                        'description' => 'Registered post type',
-                        'type'        => 'string'
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox are rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
 
             // Get a metabox
-            $this->_register_route('/metabox/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded metabox unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
 
             // Update a metabox's permission
-            $this->_register_route('/metabox/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded metabox unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     ),
                     'effect' => array(
                         'description' => 'Either metabox is restricted or not',
@@ -78,15 +89,20 @@ class AAM_Restful_MetaboxService
             ));
 
             // Delete a metabox's permission
-            $this->_register_route('/metabox/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded metabox unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
@@ -97,9 +113,10 @@ class AAM_Restful_MetaboxService
                 'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
-                    'post_type' => array(
-                        'description' => 'Registered post type',
-                        'type'        => 'string'
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metaboxes are rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
@@ -120,7 +137,7 @@ class AAM_Restful_MetaboxService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_items($request->get_param('post_type'));
+            $result  = $service->get_items($request->get_param('screen_id'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -142,7 +159,10 @@ class AAM_Restful_MetaboxService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->item(base64_decode($request->get_param('slug')));
+            $result  = $service->item(
+                $request->get_param('slug'),
+                $request->get_param('screen_id')
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -163,16 +183,17 @@ class AAM_Restful_MetaboxService
     public function update_item_permission(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $slug    = base64_decode($request->get_param('slug'));
+            $service   = $this->_get_service($request);
+            $slug      = $request->get_param('slug');
+            $screen_id = $request->get_param('screen_id');
 
             if ($request->get_param('effect') === 'allow') {
-                $service->allow($slug);
+                $service->allow($slug, $screen_id);
             } else {
-                $service->restrict($slug);
+                $service->restrict($slug, $screen_id);
             }
 
-            $result = $service->item($slug);
+            $result = $service->item($slug, $screen_id);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -194,7 +215,10 @@ class AAM_Restful_MetaboxService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset(base64_decode($request->get_param('slug')));
+            $result  = $service->reset(
+                $request->get_param('slug'),
+                $request->get_param('screen_id')
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -216,7 +240,7 @@ class AAM_Restful_MetaboxService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset($request->get_param('post_type'));
+            $result  = $service->reset($request->get_param('screen_id'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

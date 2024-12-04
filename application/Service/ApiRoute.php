@@ -20,14 +20,14 @@ class AAM_Service_ApiRoute
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const FEATURE_FLAG = 'service.api_route.enabled';
 
     /**
      * Default configurations
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
         self::FEATURE_FLAG      => true,
@@ -41,7 +41,7 @@ class AAM_Service_ApiRoute
      * @return void
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -80,6 +80,22 @@ class AAM_Service_ApiRoute
         if ($enabled) {
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::API_ROUTE
+                ) {
+                    $resource = new AAM_Framework_Resource_ApiRoute(
+                        $access_level, $resource_id
+                    );
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**
@@ -134,9 +150,8 @@ class AAM_Service_ApiRoute
             function ($response) {
                 if (!current_user_can('aam_manager')
                     && !is_wp_error($response)
-                    && !AAM::api()->configs()->get_config(
-                            'core.settings.restful'
-                )) {
+                    && !AAM::api()->configs()->get_config('core.settings.restful')
+                ) {
                     $response = new WP_Error(
                         'rest_access_disabled',
                         __('RESTful API is disabled', AAM_KEY),
@@ -153,22 +168,6 @@ class AAM_Service_ApiRoute
         add_filter('rest_pre_dispatch', function($response, $_, $request) {
             return $this->_rest_pre_dispatch($response, $request);
         }, PHP_INT_MAX, 3);
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::API_ROUTE
-                ) {
-                    $resource = new AAM_Framework_Resource_ApiRoute(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
     }
 
     /**

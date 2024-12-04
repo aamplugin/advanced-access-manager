@@ -45,13 +45,13 @@ class AAM_Restful_WidgetService
             ));
 
             // Get a widget
-            $this->_register_route('/widget/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded widget unique slug',
+                        'description' => 'Widget unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -59,13 +59,13 @@ class AAM_Restful_WidgetService
             ));
 
             // Update a widget's permission
-            $this->_register_route('/widget/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded widget unique slug',
+                        'description' => 'Widget unique slug',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -79,13 +79,13 @@ class AAM_Restful_WidgetService
             ));
 
             // Delete a widget's permission
-            $this->_register_route('/widget/(?P<slug>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Base64 encoded widget unique slug',
+                        'description' => 'Widget unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -144,7 +144,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->item(base64_decode($request->get_param('slug')));
+            $result  = $service->item($request->get_param('slug'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -166,7 +166,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $slug    = base64_decode($request->get_param('slug'));
+            $slug    = $request->get_param('slug');
 
             if ($request->get_param('effect') === 'allow') {
                 $service->allow($slug);
@@ -196,7 +196,7 @@ class AAM_Restful_WidgetService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset(base64_decode($request->get_param('slug')));
+            $result  = $service->reset($request->get_param('slug'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

@@ -28,16 +28,21 @@ class AAM_Framework_Service_Metaboxes
     const CACHE_DB_OPTION = 'aam_metaboxes_cache';
 
     /**
-     * Return the complete list of all indexed metaboxes
+     * Return the list of all indexed metaboxes
      *
-     * @param string $post_type
+     * If `$screen_id` is provided, the method returns only metaboxes that are
+     * rendered on this screen. In WordPress, it appears that screen_id directly
+     * correlates to the post type, so when you edit let's say page, the screen id is
+     * `page` or if you edit a post, the screen id is `post`.
+     *
+     * @param string $screen_id
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_items($post_type = null)
+    public function get_items($screen_id = null)
     {
         global $wp_post_types;
 
@@ -53,18 +58,16 @@ class AAM_Framework_Service_Metaboxes
                     // exist
                     if (array_key_exists($type, $wp_post_types)) {
                         foreach($metaboxes as $metabox) {
-                            array_push($result, $this->_prepare_metabox(
-                                $metabox, $type
-                            ));
+                            array_push($result, $this->_prepare_metabox($metabox));
                         }
                     }
                 }
             }
 
-            if (!empty($post_type)) {
+            if (!empty($screen_id)) {
                 $result = array_values(
-                    array_filter($result, function($c) use ($post_type) {
-                        return $c['post_type'] === $post_type;
+                    array_filter($result, function($c) use ($screen_id) {
+                        return $c['screen_id'] === $screen_id;
                     })
                 );
             }
@@ -78,34 +81,41 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Alias for the get_items method
      *
-     * @param string $post_type [optional]
+     * @param string $screen_id [Optional]
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function items($post_type = null)
+    public function items($screen_id = null)
     {
-        return $this->get_items($post_type);
+        return $this->get_items($screen_id);
     }
 
     /**
-     * Get existing metabox by slug
+     * Get existing metabox by slug for given screen id
+     *
+     * If screen id is not provided, AAM assumes that we are trying to get global
+     * access controls to the metabox.
      *
      * @param string $slug
+     * @param string $screen_id [Optional]
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_item($slug)
+    public function get_item($slug, $screen_id = null)
     {
         try {
-            $matches = array_filter($this->get_items(), function($m) use ($slug) {
-                return $m['slug'] === $slug;
-            });
+            $matches = array_filter(
+                $this->get_items($screen_id),
+                function($metabox) use ($slug) {
+                    return $metabox['slug'] === $slug;
+                }
+            );
 
             $result = array_shift($matches);
 
@@ -123,31 +133,37 @@ class AAM_Framework_Service_Metaboxes
      * Alias for the get_item method
      *
      * @param string $slug
+     * @param string $screen_id [Optional]
      *
      * @return array
      *
      * @access public
      * @version 7.0.0
      */
-    public function item($slug)
+    public function item($slug, $screen_id = null)
     {
-        return $this->get_item($slug);
+        return $this->get_item($slug, $screen_id);
     }
 
     /**
      * Restrict/hide metabox
      *
-     * @param string $slug
+     * @param string|array $metabox
+     * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function restrict($slug)
+    public function restrict($metabox, $screen_id = null)
     {
         try {
-            $result = $this->_update_item_permission($slug, true);
+            $slug   = $this->_prepare_metabox_slug($metabox);
+            $result = $this->_update_item_permission(
+                is_null($screen_id) ? $slug : $screen_id . '_' . $slug,
+                true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -158,17 +174,22 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Allow metabox
      *
-     * @param string $slug
+     * @param string|array $metabox
+     * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function allow($slug)
+    public function allow($metabox, $screen_id = null)
     {
         try {
-            $result = $this->_update_item_permission($slug, false);
+            $slug   = $this->_prepare_metabox_slug($metabox);
+            $result = $this->_update_item_permission(
+                is_null($screen_id) ? $slug : $screen_id . '_' . $slug,
+                false
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -179,39 +200,51 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Reset permissions
      *
-     * This method resets all permissions if no $prefix is provided. Otherwise, if
-     * the $prefix contains metabox slug, only explicit settings for given metabox
-     * will be reset, otherwise, all the metabox slugs that start with given prefix
-     * will be reset.
+     * This method resets all permissions. If no `$metabox` provided, all
+     * permissions are reset. If only `$metabox` metabox provided - the specific
+     * settings for that metabox are reset. Otherwise the scoped metabox settings are
+     * reset.
      *
-     * @param string $prefix [optional] Either metabox slug or post type
+     * @param string|array $metabox   [Optional]
+     * @param string       $screen_id [Optional]
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($prefix = null)
+    public function reset($metabox = null, $screen_id = null)
     {
         try {
             $resource = $this->_get_resource();
 
-            if (empty($post_type)) {
+            // If neither metabox nor screen id provided, assume that we would like
+            // to reset all metabox settings
+            if (is_null($metabox) && is_null($screen_id)) {
                 $result = $resource->reset();
             } else {
                 $settings = $resource->get_permissions(true);
+                $slug     = $this->_prepare_metabox_slug($metabox);
 
-                if (array_key_exists($prefix, $settings)) {
-                    unset($settings[$prefix]);
+                // Check if we have any permissions defined just for a given slug.
+                // Keep in mind that the $slug can be also a screen id because the
+                // reset method has two overloads
+                if (array_key_exists($slug, $settings)) {
+                    unset($settings[$slug]);
+                } elseif(array_key_exists("{$screen_id}_{$slug}", $settings))  {
+                    unset($settings["{$screen_id}_{$slug}"]);
                 } else {
-                    $settings = array_filter($settings, function($k) use ($prefix) {
-                        return strpos($k, $prefix) !== 0;
-                    }, ARRAY_FILTER_USE_KEY);
+                    $settings = apply_filters(
+                        'aam_reset_metaboxes_permissions_filter',
+                        $settings,
+                        $slug,
+                        $screen_id,
+                        $resource
+                    );
                 }
 
                 $result = $resource->set_permissions($settings, true);
             }
-
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -222,26 +255,47 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Determine if metabox is restricted/hidden
      *
-     * @param string $slug
+     * @param string|array $metabox
+     * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($slug)
+    public function is_restricted($metabox, $screen_id = null)
     {
         try {
-            $resource = $this->_get_resource($slug);
-            $result   = $resource->is_restricted();
+            $result = null;
+
+            // Determining metabox slug
+            $slug = $this->_prepare_metabox_slug($metabox);
+
+            // Getting resource
+            $resource = $this->_get_resource();
+
+            // Step #1. Check if there are any settings for metabox and specific
+            // screen ID
+            $screen_id = $this->_prepare_screen_id($screen_id);
+
+            if (!is_null($screen_id)) {
+                $result = $resource->is_restricted($screen_id . '_'. $slug);
+            }
+
+            // Step #2. If there are no scoped access controls defined to a given
+            // metabox, check if there are any settings for it by the slug as-is
+            if (is_null($result)) {
+                $result = $resource->is_restricted($slug);
+            }
 
             // Allow third-party implementations to integrate with the
             // decision making process
             $result = apply_filters(
                 'aam_metabox_is_restricted_filter',
                 $result,
-                $slug,
-                $resource->get_permissions()
+                $resource,
+                $screen_id,
+                $slug
             );
 
             // Prepare the final answer
@@ -256,16 +310,17 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Determine if metabox is allowed
      *
-     * @param string $slug
+     * @param string|array $metabox
+     * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_allowed($slug)
+    public function is_allowed($metabox, $screen_id = null)
     {
-        $result = $this->is_restricted($slug);
+        $result = $this->is_restricted($metabox, $screen_id);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -291,6 +346,61 @@ class AAM_Framework_Service_Metaboxes
 
         return $result;
     }
+
+    /**
+     * Prepare metabox slug
+     *
+     * @param string|array $metabox
+     *
+     * @return string
+     *
+     * @access private
+     */
+    private function _prepare_metabox_slug($metabox)
+    {
+        // Determining metabox slug
+        if (is_array($metabox) && isset($metabox['callback'])) {
+            $result = AAM_Framework_Utility_Misc::callable_to_slug(
+                $metabox['callback']
+            );
+        } elseif (is_string($metabox)) {
+            $result = AAM_Framework_Utility_Misc::sanitize_slug($metabox);
+        } else {
+            throw new InvalidArgumentException('Invalid metabox provided');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Prepare screen ID
+     *
+     * @param string|null $screen_id
+     *
+     * @return string|null
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private function _prepare_screen_id($screen_id)
+    {
+        $result = null;
+
+        if (is_null($screen_id)) {
+            if (function_exists('get_current_screen')) {
+                $screen = get_current_screen();
+
+                if (is_a($screen, WP_Screen::class)) {
+                    $result = $screen->id;
+                }
+            }
+        } elseif (is_string($screen_id)) {
+            $result = $screen_id;
+        }
+
+        return $result;
+    }
+
 
     /**
      * Update existing metabox permission
@@ -323,28 +433,23 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Normalize and prepare the metabox model
      *
-     * @param array  $metabox
-     * @param string $post_type
+     * @param array $metabox
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_metabox($metabox, $post_type)
+    private function _prepare_metabox($metabox)
     {
-        $resource = $this->_get_resource($metabox['slug']);
-        $explicit = $resource->get_permissions(true);
-
-        $response = array(
+        return [
             'slug'          => $metabox['slug'],
-            'post_type'     => $post_type,
+            'screen_id'     => $metabox['screen_id'],
             'title'         => base64_decode($metabox['title']),
-            'is_restricted' => $this->is_restricted($metabox['slug']),
-            'is_inherited'  => !array_key_exists($metabox['slug'], $explicit)
-        );
-
-        return $response;
+            'is_restricted' => $this->is_restricted(
+                $metabox['slug'], $metabox['screen_id']
+            )
+        ];
     }
 
 }

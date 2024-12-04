@@ -26,35 +26,27 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
     /**
      * Check whether the RESTful API route is restricted
      *
-     * This method check checks if the RESTful API route by HTTP method is
-     * restricted. Additionally, it uses the "aam_api_route_is_restricted_filter" to
-     * find a possible match.
-     *
-     * @param string $endpoint API endpoint
-     * @param string $method   HTTP method
+     * @param string $route [Optional]
      *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($endpoint, $method)
+    public function is_restricted($route = null)
     {
-        $id = strtolower("{$method} {$endpoint}");
+        $result = null;
+        $route  = empty($route) ? $this->_internal_id : $route;
 
-        if (array_key_exists($id, $this->_permissions)) {
-            $result = $this->_permissions[$id]['effect'] !== 'allow';
-        } else {
-            $result = null;
+        if (empty($route)) {
+            throw new InvalidArgumentException('Non-empty route has to be provided');
         }
 
-        return apply_filters(
-            'aam_api_route_is_restricted_filter',
-            $result,
-            $endpoint,
-            $method,
-            $this
-        );
+        if (array_key_exists($route, $this->_permissions)) {
+            $result = $this->_permissions[$route]['effect'] !== 'allow';
+        }
+
+        return $result;
     }
 
 }

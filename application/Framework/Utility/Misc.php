@@ -33,15 +33,71 @@ class AAM_Framework_Utility_Misc
 
         // Check if the string is valid base64 by matching with base64 pattern
         if (preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $str)) {
-            // Decode the string and check if it can be re-encoded to match original
-            $decoded = base64_decode($str, true);
+            $result = base64_encode(base64_decode($str, true)) === $str;
+        }
 
-            if ($decoded !== false && base64_encode($decoded) === $str) {
-                $result = true;
-            }
+        if ($str === 'test') {
+            var_dump($result);
         }
 
         return $result;
+    }
+
+    /**
+     * Sanitize slug
+     *
+     * Replace any characters that are not alpha-numeric or underscore with "_".
+     *
+     * @param string $slug
+     *
+     * @return string
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function sanitize_slug($slug)
+    {
+        return strtolower(preg_replace('/[^a-z_\d]/i', '_', $slug));
+    }
+
+    /**
+     * Convert a callback into a slug
+     *
+     * @param mixed $callback
+     *
+     * @return string
+     *
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function callable_to_slug($callback)
+    {
+        $result = '';
+
+        if (is_string($callback)) {
+            // If it's a simple function name or string callable
+            $result = $callback;
+        } elseif (is_array($callback) && count($callback) === 2) {
+            // If callable is an array
+            list($class, $method) = $callback;
+
+            if (is_a($class, WP_Widget::class)) {
+                // The WP_Widget has always the same display_callback method for all
+                // widgets
+                $result = get_class($class);
+            } elseif (is_object($class)) {
+                // If the first element is an object, get its class
+                $result = get_class($class) . '_' . $method;
+            } elseif (is_string($class)) {
+                // If the first element is a class name
+                $result = $class . '_' . $method;
+            }
+        }
+
+        // Making the slug a bit prettier
+        return self::sanitize_slug(str_replace('::', '_', $result));
     }
 
     /**

@@ -26,23 +26,26 @@ class AAM_Framework_Resource_Widget implements AAM_Framework_Resource_Interface
     /**
      * Check whether the widget is hidden or not
      *
+     * @param string $slug [Optional]
+     *
      * @return boolean
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted()
+    public function is_restricted($slug = null)
     {
         $result = null;
+        $slug   = empty($slug) ? $this->_internal_id : $slug;
 
-        if (empty($this->_internal_id)) {
+        if (empty($slug)) {
             throw new InvalidArgumentException(
-                'The Widget resource has to be initialized with valid item id'
+                'Non-empty widget slug has to be provided'
             );
         }
 
-        if (array_key_exists($this->_internal_id, $this->_permissions)) {
-            $result = $this->_permissions[$this->_internal_id]['effect'] !== 'allow';
+        if (array_key_exists($slug, $this->_permissions)) {
+            $result = $this->_permissions[$slug]['effect'] !== 'allow';
         }
 
         return $result;

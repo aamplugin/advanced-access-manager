@@ -2281,29 +2281,33 @@
 
             /**
              *
-             * @param {String}   slug
-             * @param {Boolean}  status
-             * @param {Callback} successCallback
-             *
-             * @returns {Void}
+             * @param {*} slug
+             * @param {*} screen_id
+             * @param {*} is_hidden
+             * @param {*} cb
              */
-            function save(slug, is_hidden, cb) {
+            function SetPermission(slug, screen_id, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/metabox/${btoa(slug)}`), {
+                    const data = {
+                        effect: is_hidden ? 'deny' : 'allow',
+                        screen_id
+                    };
+
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/metabox/${slug}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'PATCH'
                         },
                         dataType: 'json',
-                        data: { effect: is_hidden ? 'deny' : 'allow' },
+                        data,
                         success: function (response) {
                             cb(response);
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/metabox/${btoa(slug)}`,
-                                payload: { is_hidden },
+                                request: `/service/metabox/${slug}`,
+                                payload: data,
                                 response
                             });
                         }
@@ -2396,7 +2400,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', null, {
-                                        request: 'aam/v2/service/metaboxes',
+                                        request: '/service/metaboxes',
                                         response
                                     });
                                 },
@@ -2419,8 +2423,9 @@
                                 'aam-accordion-action icon-spin4 animate-spin'
                             );
 
-                            save(
+                            SetPermission(
                                 $(this).data('metabox'),
+                                $(this).data('screen'),
                                 status,
                                 function () {
                                     $('#aam-metabox-overwrite').show();
@@ -2468,7 +2473,7 @@
              */
             function save(slug, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/widget/${btoa(slug)}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/widget/${slug}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2481,7 +2486,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: `aam/v2/service/widget/${btoa(slug)}`,
+                                request: `aam/v2/service/widget/${slug}`,
                                 payload: { effect : is_hidden ? 'deny' : 'allow' },
                                 response
                             });
@@ -4963,7 +4968,7 @@
                     $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
                     const payload = {
-                        is_restricted
+                        effect: is_restricted ? 'deny' : 'allow'
                     };
 
                     $.ajax(getAAM().prepareApiEndpoint(`/service/api-route/${id}`), {

@@ -21,28 +21,63 @@ final class WidgetsTest extends TestCase
 {
 
     /**
-     * Test we can set permissions for metaboxes
+     * Test settings permissions to widgets with slug
      *
      * @return void
      */
-    public function testSettingPermissions()
+    public function testSettingPermissionsWithSlug()
     {
         $service = AAM::api()->widgets('role:author');
 
         // Set permission
-        $this->assertTrue($service->restrict('dashboard_dashboard_right_now'));
+        $this->assertTrue($service->restrict('wp_dashboard_site_health'));
 
         // Assert that the widget is restricted
-        $this->assertTrue($service->is_restricted('dashboard_dashboard_right_now'));
-        $this->assertFalse($service->is_allowed('dashboard_dashboard_right_now'));
+        $this->assertTrue($service->is_restricted('wp_dashboard_site_health'));
+        $this->assertFalse($service->is_allowed('wp_dashboard_site_health'));
 
         // Set permission
-        $this->assertTrue($service->allow('dashboard_dashboard_activity'));
+        $this->assertTrue($service->allow('wp_dashboard_right_now'));
 
         // Assert that the widget is restricted
-        $this->assertFalse($service->is_restricted('dashboard_dashboard_activity'));
-        $this->assertTrue($service->is_allowed('dashboard_dashboard_activity'));
+        $this->assertFalse($service->is_restricted('wp_dashboard_right_now'));
+        $this->assertTrue($service->is_allowed('wp_dashboard_right_now'));
+    }
 
+    /**
+     * Test settings permissions to widgets with array
+     *
+     * @return void
+     */
+    public function testSettingPermissionsWithArray()
+    {
+        $service = AAM::api()->widgets('role:editor');
+
+        // Defining test widgets
+        $wp_dashboard_site_health = [
+            'id'       => 'dashboard_site_health',
+            'title'    => 'Site Health Status',
+            'callback' => 'wp_dashboard_site_health'
+        ];
+        $wp_dashboard_right_now = [
+            'id'       => 'dashboard_right_now',
+            'title'    => 'At a Glance',
+            'callback' => 'wp_dashboard_right_now',
+        ];
+
+        // Set permission
+        $this->assertTrue($service->restrict($wp_dashboard_site_health));
+
+        // Assert that the widget is restricted
+        $this->assertTrue($service->is_restricted($wp_dashboard_site_health));
+        $this->assertFalse($service->is_allowed($wp_dashboard_site_health));
+
+        // Set permission
+        $this->assertTrue($service->allow($wp_dashboard_right_now));
+
+        // Assert that the widget is restricted
+        $this->assertFalse($service->is_restricted($wp_dashboard_right_now));
+        $this->assertTrue($service->is_allowed($wp_dashboard_right_now));
     }
 
 }

@@ -130,16 +130,17 @@ class AAM_Framework_Service_Widgets
     /**
      * Restrict/hide widget
      *
-     * @param string $slug
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function restrict($slug)
+    public function restrict($widget)
     {
         try {
+            $slug   = $this->_prepare_widget_slug($widget);
             $result = $this->_update_item_permission($slug, true);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -151,16 +152,17 @@ class AAM_Framework_Service_Widgets
     /**
      * Allow widget
      *
-     * @param string $slug
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function allow($slug)
+    public function allow($widget)
     {
         try {
+            $slug   = $this->_prepare_widget_slug($widget);
             $result = $this->_update_item_permission($slug, false);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -172,34 +174,37 @@ class AAM_Framework_Service_Widgets
     /**
      * Reset permissions
      *
-     * This method resets all permissions if no $prefix is provided. Otherwise, if
-     * the $prefix contains widget slug, only explicit settings for given widget
-     * will be reset, otherwise, all the widget slugs that start with given prefix
-     * will be reset.
+     * Resets all permissions if no $widget is provided. Otherwise, try to reset
+     * permissions for a given widget or trigger a filter that invokes third-party
+     * implementation.
      *
-     * @param string $prefix [optional] Either widget slug or screen ID
+     * @param mixed $widget_or_area [Optional]
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function reset($prefix = null)
+    public function reset($widget_or_area = null)
     {
         try {
             $resource = $this->_get_resource();
 
-            if (empty($post_type)) {
+            if (empty($widget_or_area)) {
                 $result = $resource->reset();
             } else {
+                $slug     = $this->_prepare_widget_slug($widget_or_area);
                 $settings = $resource->get_permissions(true);
 
-                if (array_key_exists($prefix, $settings)) {
-                    unset($settings[$prefix]);
+                if (array_key_exists($slug, $settings)) {
+                    unset($settings[$slug]);
                 } else {
-                    $settings = array_filter($settings, function($k) use ($prefix) {
-                        return strpos($k, $prefix) !== 0;
-                    }, ARRAY_FILTER_USE_KEY);
+                    $settings = apply_filters(
+                        'aam_reset_widgets_permissions_filter',
+                        $settings,
+                        $slug,
+                        $resource
+                    );
                 }
 
                 $result = $resource->set_permissions($settings, true);
@@ -215,26 +220,29 @@ class AAM_Framework_Service_Widgets
     /**
      * Determine if metabox is restricted/hidden
      *
-     * @param string $slug
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      *
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($slug)
+    public function is_restricted($widget)
     {
         try {
-            $resource = $this->_get_resource($slug);
-            $result   = $resource->is_restricted();
+            $slug     = $this->_prepare_widget_slug($widget);
+            $resource = $this->_get_resource();
+
+            // Determine if widget is restricted
+            $result = $resource->is_restricted($slug);
 
             // Allow third-party implementations to integrate with the
             // decision making process
             $result = apply_filters(
                 'aam_widget_is_restricted_filter',
                 $result,
-                $slug,
-                $resource->get_permissions()
+                $resource,
+                $widget
             );
 
             // Prepare the final answer
@@ -266,19 +274,16 @@ class AAM_Framework_Service_Widgets
     /**
      * Get widget resource
      *
-     * @param string $slug
-     *
      * @return AAM_Framework_Resource_Widget
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($slug = null)
+    private function _get_resource()
     {
         try {
-            $access_level = $this->_get_access_level();
-            $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::WIDGET, $slug
+            $result = $this->_get_access_level()->get_resource(
+                AAM_Framework_Type_Resource::WIDGET
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -288,14 +293,44 @@ class AAM_Framework_Service_Widgets
     }
 
     /**
+     * Prepare widget slug
+     *
+     * @param mixed $widget
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_widget_slug($widget)
+    {
+        // Determining metabox slug
+        if (is_array($widget) && isset($widget['callback'])) {
+            $result = AAM_Framework_Utility_Misc::callable_to_slug(
+                $widget['callback']
+            );
+        } elseif (is_a($widget, WP_Widget::class)) {
+            $result = $result = AAM_Framework_Utility_Misc::callable_to_slug(
+                $widget
+            );
+        } elseif (is_string($widget)) {
+            $result = AAM_Framework_Utility_Misc::sanitize_slug($widget);
+        } else {
+            throw new InvalidArgumentException('Invalid metabox provided');
+        }
+
+        return $result;
+    }
+
+    /**
      * Update existing widget permission
      *
-     * @param string $slug          Widget slug/id
+     * @param string $slug
      * @param bool   $is_restricted
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _update_item_permission($slug, $is_restricted)
@@ -328,18 +363,12 @@ class AAM_Framework_Service_Widgets
      */
     private function _prepare_widget($widget, $screen_id)
     {
-        $resource = $this->_get_resource($widget['slug']);
-        $explicit = $resource->get_permissions(true);
-
-        $response = array(
-            'slug'         => $widget['slug'],
-            'screen_id'    => $screen_id,
-            'title'        => base64_decode($widget['title']),
-            'is_hidden'    => $this->is_restricted($widget['slug']),
-            'is_inherited' => !array_key_exists($widget['slug'], $explicit)
-        );
-
-        return $response;
+        return [
+            'slug'          => $widget['slug'],
+            'screen_id'     => $screen_id,
+            'title'         => base64_decode($widget['title']),
+            'is_restricted' => $this->is_restricted($widget['slug']),
+        ];
     }
 
 }

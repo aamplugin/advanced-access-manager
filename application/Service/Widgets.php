@@ -113,14 +113,14 @@ class AAM_Service_Widgets
             // page
             add_action('widgets_admin_page', function() {
                 $this->_filter_frontend_widgets();
-            }, 999);
+            }, PHP_INT_MAX);
         } else {
             // Widget filters
             add_filter('sidebars_widgets', function($widgets) {
                 $this->_filter_frontend_widgets();
 
                 return $widgets;
-            }, 999);
+            }, PHP_INT_MAX);
         }
 
         // Register RESTful API endpoints
@@ -147,13 +147,14 @@ class AAM_Service_Widgets
         // Collect all registered frontend widgets
         foreach ((array)$wp_registered_widgets as $widget) {
             // Extracting class name from the registered widget
-            $slug = $this->_get_widget_slug($widget, 'frontend', true);
+            $slug = $this->_get_widget_slug($widget);
 
-            if (!empty($slug) && !isset($cache['frontend'][$slug])) {
-                $cache['frontend'][$slug] = array(
+            if (!empty($slug)) {
+                $cache['frontend'][$slug] = [
                     'title' => base64_encode(wp_strip_all_tags($widget['name'])),
+                    'type'  => 'frontend',
                     'slug'  => $slug
-                );
+                ];
             }
         }
 
@@ -162,15 +163,16 @@ class AAM_Service_Widgets
             foreach ((array) $wp_meta_boxes['dashboard'] as $levels) {
                 foreach ((array) $levels as $boxes) {
                     foreach ((array) $boxes as $data) {
-                        $slug = $this->_get_widget_slug($data, 'dashboard');
+                        $slug = $this->_get_widget_slug($data);
 
-                        if (!empty($slug) && !isset($cache['dashboard'][$slug])) {
-                            $cache['dashboard'][$slug] = array(
+                        if (!empty($slug)) {
+                            $cache['dashboard'][$slug] = [
                                 'slug'  => $slug,
+                                'type'  => 'backend',
                                 'title' => base64_encode(
                                     wp_strip_all_tags($data['title'])
                                 )
-                            );
+                            ];
                         }
                     }
                 }
@@ -200,9 +202,7 @@ class AAM_Service_Widgets
             foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
                 foreach($groups as $widgets) {
                     foreach($widgets as $widget) {
-                        $slug = $this->_get_widget_slug($widget, 'dashboard');
-
-                        if ($service->is_restricted($slug)) {
+                        if ($service->is_restricted($widget)) {
                             remove_meta_box($widget['id'], 'dashboard', $priority);
                         }
                     }
@@ -227,10 +227,16 @@ class AAM_Service_Widgets
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
-                $slug = $this->_get_widget_slug($widget, 'frontend', true);
-
-                if ($service->is_restricted($slug)) {
-                    unregister_widget($this->_get_widget_callback($widget));
+                if ($service->is_restricted($widget)) {
+                    // We do not know if widget was registered with widget instance
+                    // or a class name. This is why we are trying to remove both
+                    // ways
+                    if (is_array($widget['callback'])
+                        && is_object($widget['callback'][0])
+                    ) {
+                        unregister_widget(spl_object_hash($widget['callback'][0]));
+                        unregister_widget(get_class($widget['callback'][0]));
+                    }
 
                     // Remove it from registered widget global var!!
                     // INFORM: Why Unregister Widget does not clear global var?
@@ -245,60 +251,24 @@ class AAM_Service_Widgets
      *
      * The callback is used as unique widget identifier
      *
-     * @param mixed   $widget
-     * @param string  $screen_id
-     * @param boolean $use_cb
+     * @param array $widget
      *
      * @return string
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_widget_slug($widget, $screen_id, $use_cb = false)
+    private function _get_widget_slug($widget)
     {
         $slug = null;
 
-        if (!empty($widget['id']) && !$use_cb) {
-            $slug = str_replace('-', '_', strtolower($widget['id']));
-        } else {
-            $cb = $this->_get_widget_callback($widget);
-
-            if (!is_null($cb)) { // Exclude any junk
-                // Normalizing the "widget ID"
-                $slug = str_replace('\\', '_', strtolower($cb));
-            }
+        if (!empty($widget['callback'])) {
+            $slug = AAM_Framework_Utility_Misc::callable_to_slug(
+                $widget['callback']
+            );
         }
 
-        return !empty($slug) ? $screen_id . '_' . $slug : $slug;
-    }
-
-    /**
-     * Get widget's callback
-     *
-     * @param mixed $widget
-     *
-     * @return mixed
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _get_widget_callback($widget)
-    {
-        $cb = null;
-
-        if (is_array($widget['callback'])) {
-            if (is_object($widget['callback'][0])) {
-                $cb = get_class($widget['callback'][0]);
-            } elseif (is_string($widget['callback'][0])) {
-                $cb = $widget['callback'][0];
-            }
-        }
-
-        if (empty($cb)) {
-            $cb = isset($widget['classname']) ? $widget['classname'] : null;
-        }
-
-        return $cb;
+        return $slug;
     }
 
 }

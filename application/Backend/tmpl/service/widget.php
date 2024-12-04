@@ -106,7 +106,7 @@
                                                 </a></small>
                                             </div>
 
-                                            <?php if ($widget['is_hidden']) { ?>
+                                            <?php if ($widget['is_restricted']) { ?>
                                                 <i
                                                     class="aam-accordion-action icon-lock text-danger"
                                                     id="widget_<?php echo esc_attr($widget['slug']); ?>"
@@ -123,7 +123,7 @@
                                             <label
                                                 for="widget_<?php echo esc_attr($widget['slug']); ?>"
                                                 data-toggle="tooltip"
-                                                title="<?php echo ($widget['is_hidden'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
+                                                title="<?php echo ($widget['is_restricted'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
                                             ></label>
                                         </div>
                                     <?php } ?>
@@ -167,11 +167,11 @@
                                     <td id="widget_title"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Screen ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Area', AAM_KEY); ?></th>
                                     <td id="widget_screen_id"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Widget ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Widget Slug', AAM_KEY); ?></th>
                                     <td id="widget_id"></td>
                                 </tr>
                             </tbody>

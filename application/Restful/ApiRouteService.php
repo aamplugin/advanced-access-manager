@@ -10,11 +10,8 @@
 /**
  * RESTful API for the API route service
  *
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
- * @since 6.9.10 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.13
+ * @version 7.0.0
  */
 class AAM_Restful_ApiRouteService
 {
@@ -26,11 +23,8 @@ class AAM_Restful_ApiRouteService
      *
      * @return void
      *
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/304
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.13
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -74,10 +68,11 @@ class AAM_Restful_ApiRouteService
                             return $this->_validate_base64($value);
                         }
                     ),
-                    'is_restricted' => array(
+                    'effect' => array(
                         'description' => 'Either route is restricted or not',
-                        'type'        => 'boolean',
-                        'default'     => true
+                        'type'        => 'string',
+                        'default'     => 'deny',
+                        'enum'        => [ 'allow', 'deny' ]
                     )
                 )
             ));
@@ -122,7 +117,7 @@ class AAM_Restful_ApiRouteService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_route_list();
+            $result  = $service->get_items();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -149,7 +144,7 @@ class AAM_Restful_ApiRouteService
             // Unserialize the ID - extract HTTP method & endpoint
             list($method, $endpoint) = explode(' ', base64_decode($id));
 
-            $result = $service->get_route($endpoint, $method);
+            $result = $service->get_item($endpoint, $method);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -170,16 +165,20 @@ class AAM_Restful_ApiRouteService
     public function update_item_permissions(WP_REST_Request $request)
     {
         try {
-            $service       = $this->_get_service($request);
-            $id            = $request->get_param('id');
-            $is_restricted = $request->get_param('is_restricted');
+            $service = $this->_get_service($request);
+            $id      = $request->get_param('id');
+            $effect  = $request->get_param('effect');
 
             // Unserialize the ID - extract HTTP method & endpoint
             list($method, $endpoint) = explode(' ', base64_decode($id));
 
-            $result = $service->update_route_permission(
-                $is_restricted, $endpoint, $method
-            );
+            if ($effect === 'allow') {
+                $service->allow($endpoint, $method);
+            } else {
+                $service->restrict($endpoint, $method);
+            }
+
+            $result = $service->item($endpoint, $method);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -206,9 +205,9 @@ class AAM_Restful_ApiRouteService
             // Unserialize the ID - extract HTTP method & endpoint
             list($method, $endpoint) = explode(' ', base64_decode($id));
 
-            $result = [
-                'success' => $service->delete_route_permission($endpoint, $method)
-            ];
+            $service->reset($endpoint, $method);
+
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -244,7 +243,7 @@ class AAM_Restful_ApiRouteService
      * @return bool
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function check_permissions()
     {
@@ -260,7 +259,7 @@ class AAM_Restful_ApiRouteService
      * @return AAM_Framework_Service_ApiRoutes
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _get_service($request)
     {
