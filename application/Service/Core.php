@@ -36,6 +36,8 @@ class AAM_Service_Core
         'core.settings.ui.tips'                  => true,
         'core.settings.multi_access_levels'      => false,
         'core.settings.ui.render_access_metabox' => false,
+        'core.settings.xmlrpc'                   => true,
+        'core.settings.restful'                  => true,
         'core.settings.merge.preference'         => 'deny',
         'core.export.groups'                     => [ 'settings', 'config', 'roles' ]
     ];
@@ -148,6 +150,37 @@ class AAM_Service_Core
         // User authentication control
         add_filter(
             'wp_authenticate_user', array($this, 'authenticate_user'), 1, 2
+        );
+
+        // Disable XML-RPC if needed
+        add_filter('xmlrpc_enabled', function($enabled) {
+            if (AAM::api()->configs()->get_config(
+                'core.settings.xmlrpc') === false
+            ) {
+                $enabled = false;
+            }
+
+            return $enabled;
+        }, PHP_INT_MAX);
+
+        // Disable RESTful API if needed
+        add_filter(
+            'rest_authentication_errors',
+            function ($response) {
+                if (!current_user_can('aam_manager')
+                    && !is_wp_error($response)
+                    && !AAM::api()->configs()->get_config('core.settings.restful')
+                ) {
+                    $response = new WP_Error(
+                        'rest_access_disabled',
+                        __('RESTful API is disabled', AAM_KEY),
+                        array('status' => 403)
+                    );
+                }
+
+                return $response;
+            },
+            PHP_INT_MAX
         );
 
         // Run upgrades if available

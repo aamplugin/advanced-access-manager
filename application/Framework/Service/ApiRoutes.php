@@ -10,6 +10,9 @@
 /**
  * AAM service for RESTful API routes
  *
+ * @method bool set_access_mode(string $mode, string $endpoint = null) [Premium Method]
+ * @method bool get_access_mode(string $endpoint = null) [Premium Method]
+ *
  * @package AAM
  * @version 7.0.0
  */
@@ -223,6 +226,9 @@ class AAM_Framework_Service_ApiRoutes
                 $route,
                 $method
             );
+
+            // Prepare the final answer
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

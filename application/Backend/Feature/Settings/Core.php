@@ -85,6 +85,16 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'optionOn'    => __('Allow', AAM_KEY),
                 'optionOff'   => __('Deny', AAM_KEY)
             ),
+            'core.settings.xmlrpc' => array(
+                'title'       => __('XML-RPC WordPress API', AAM_KEY),
+                'description' => sprintf(__('Remote procedure call (RPC) interface is used to manage WordPress website content and features. For more information check %sXML-RPC Support%s article.', AAM_KEY), '<a href="https://codex.wordpress.org/XML-RPC_Support">', '</a>'),
+                'value'       => $service->get_config('core.settings.xmlrpc')
+            ),
+            'core.settings.restful' => array(
+                'title'       => __('RESTful WordPress API', AAM_KEY),
+                'description' => sprintf(__('The RESTful interface is used to manage WordPress website content and features. For detail, refer to %sREST API handbook%s.', AAM_KEY), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
+                'value'       => $service->get_config('core.settings.restful')
+            )
         );
 
         return apply_filters('aam_settings_list_filter', $settings, 'core');
