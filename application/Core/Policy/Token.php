@@ -418,7 +418,7 @@ class AAM_Core_Policy_Token
      */
     protected static function getConfig($config)
     {
-        return AAM::api()->configs()->get_config($config);
+        return AAM::api()->config->get($config);
     }
 
     /**

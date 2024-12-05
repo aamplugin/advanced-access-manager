@@ -246,10 +246,10 @@ class AAM_Restful_ContentService
     {
         try {
             $service = $this->_get_service($request);
-            $configs = AAM::api()->configs();
+            $configs = AAM::api()->config;
 
             // Determine the filters
-            $manage_all = $request->get_param('include_all') || $configs->get_config(
+            $manage_all = $request->get_param('include_all') || $configs->get(
                 'service.content.manage_all_post_types'
             );
 
@@ -294,10 +294,10 @@ class AAM_Restful_ContentService
     {
         try {
             $service = $this->_get_service($request);
-            $configs = AAM::api()->configs();
+            $configs = AAM::api()->config;
 
             // Determine the filters
-            $manage_all = $request->get_param('include_all') || $configs->get_config(
+            $manage_all = $request->get_param('include_all') || $configs->get(
                 'service.content.manage_all_taxonomies'
             );
 

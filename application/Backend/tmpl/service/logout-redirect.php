@@ -24,7 +24,7 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
+                <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
                         <?php echo __('Efficiently handle user logouts, ensuring they are securely redirected to the appropriate post-logout destination for a smooth and safe exit.', AAM_KEY); ?>
                     </p>

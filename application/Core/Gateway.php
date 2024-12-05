@@ -25,16 +25,43 @@
  * @method AAM_Framework_Service_Content content(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Configs configs(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
  * @method AAM_Framework_Service_AccessLevels access_levels(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Utility utility(string $utility = null)
+ *
+ * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_Capabilities $caps
+ * @property AAM_Framework_Utility_Capabilities $capabilities
+ * @property AAM_Framework_Utility_Config $config
+ * @property AAM_Framework_Utility_Misc $misc
+ * @property AAM_Framework_Utility_Redirect $redirect
+ * @property AAM_Framework_Utility_Roles $roles
+ * @property AAM_Framework_Utility_Users $users
  *
  * @package AAM
  * @version 7.0.0
  */
 final class AAM_Core_Gateway
 {
+
+    /**
+     * Collection of utilities
+     *
+     * @var array
+     *
+     * @access private
+     * @static
+     * @version 7.0.0
+     */
+    private $_utility_map = [
+        'cache'        => AAM_Framework_Utility_Cache::class,
+        'misc'         => AAM_Framework_Utility_Misc::class,
+        'config'       => AAM_Framework_Utility_Config::class,
+        'redirect'     => AAM_Framework_Utility_Redirect::class,
+        'capabilities' => AAM_Framework_Utility_Capabilities::class,
+        'caps'         => AAM_Framework_Utility_Capabilities::class,
+        'roles'        => AAM_Framework_Utility_Roles::class,
+        'users'        => AAM_Framework_Utility_Users::class
+    ];
 
     /**
      * Single instance of itself
@@ -90,10 +117,8 @@ final class AAM_Core_Gateway
             'content'                => AAM_Framework_Service_Content::class,
             'capabilities'           => AAM_Framework_Service_Capabilities::class,
             'caps'                   => AAM_Framework_Service_Capabilities::class,
-            'configs'                => AAM_Framework_Service_Configs::class,
             'settings'               => AAM_Framework_Service_Settings::class,
-            'access_levels'          => AAM_Framework_Service_AccessLevels::class,
-            'utility'                => AAM_Framework_Service_Utility::class
+            'access_levels'          => AAM_Framework_Service_AccessLevels::class
         ]);
     }
 
@@ -125,6 +150,18 @@ final class AAM_Core_Gateway
         }
 
         return $result;
+    }
+
+    /**
+     * Get utility instance
+     *
+     * @param string $name
+     *
+     * @return AAM_Framework_Utility_Interface
+     */
+    public function __get($name)
+    {
+        return $this->utility($name);
     }
 
     /**
@@ -274,6 +311,26 @@ final class AAM_Core_Gateway
     public function any()
     {
         return $this->default();
+    }
+
+    /**
+     * Return utility instance
+     *
+     * @param string $type
+     *
+     * @return AAM_Framework_Utility_Interface
+     */
+    public function utility($type)
+    {
+        if (array_key_exists($type, $this->_utility_map)) {
+            $result = $this->_utility_map[$type]::bootstrap();
+        } else {
+            throw new BadMethodCallException(sprintf(
+                'There is no utility %s defined', $type
+            ));
+        }
+
+        return $result;
     }
 
     /**
@@ -681,7 +738,7 @@ final class AAM_Core_Gateway
             $subject = AAM::current_user();
         }
 
-        if (AAM::api()->configs()->get_config(
+        if (AAM::api()->config->get(
             AAM_Service_AccessPolicy::FEATURE_FLAG
         )) {
             $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);

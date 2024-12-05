@@ -6,7 +6,7 @@
         $service      = $access_level->backend_menu();
     ?>
     <div class="aam-feature" id="admin_menu-content">
-        <?php if (AAM::api()->configs()->get_config('core.settings.ui.tips')) { ?>
+        <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">

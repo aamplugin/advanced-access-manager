@@ -69,7 +69,7 @@ class AAM_Backend_AccessLevel
                 $access_level_id   = !empty($al['id']) ? $al['id']: null;
             }
         } else { // Persist the last managed access level
-            AAM_Framework_Utility_Cache::set(
+            AAM::api()->cache->set(
                 'managed_access_level_by_' . get_current_user_id(),
                 [
                     'type' => $access_level_type,
@@ -148,14 +148,14 @@ class AAM_Backend_AccessLevel
      */
     private function _get_last_managed_access_level()
     {
-        $level = AAM_Framework_Utility_Cache::get(
+        $level = AAM::api()->cache->get(
             'managed_access_level_by_' . get_current_user_id()
         );
 
         if (!is_null($level)) {
             // Verifying that access level exists and is accessible
             if ($level['type'] === 'role') {
-                if (!AAM_Framework_Utility_Roles::is_editable_role($level['id'])) {
+                if (!AAM::api()->roles->is_editable_role($level['id'])) {
                     $level = null;
                 }
             } elseif ($level['type'] === 'user') {
@@ -218,7 +218,7 @@ class AAM_Backend_AccessLevel
         } elseif (current_user_can('aam_manage_default')) {
             $this->_init_access_level(AAM_Framework_Type_AccessLevel::ALL);
         } else {
-            AAM_Framework_Utility_Redirect::do_redirect([
+            AAM::api()->redirect->do_redirect([
                 'type'    => 'custom_message',
                 'message' => __('You do not have permission to manage any access levels', AAM_KEY)
             ]);

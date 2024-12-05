@@ -108,7 +108,7 @@ implements
             }
 
             // Sanitize the incoming redirect data
-            $sanitized = AAM_Framework_Utility_Redirect::sanitize_redirect(
+            $sanitized = AAM::api()->redirect->sanitize_redirect(
                 $redirect,
                 self::ALLOWED_REDIRECT_TYPES
             );

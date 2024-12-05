@@ -13,340 +13,166 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Config
+class AAM_Framework_Utility_Config implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Core AAM config db option
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
     const DB_OPTION = 'aam_config';
-
-    /**
-     * ConfigPress db option
-     *
-     * @version 6.9.34
-     */
-    const DB_CONFIGPRESS_OPTION = 'aam_configpress';
 
     /**
      * Collection of configurations
      *
      * @var array
-     *
-     * @access protected
-     * @version 6.9.34
-     */
-    private $_configs = [];
-
-    /**
-     * ConfigPress raw INI
-     *
-     * @var string
-     *
      * @access private
-     * @version 6.9.34
-     */
-    private $_configpress = '';
-
-    /**
-     * Load the configuration from DB
      *
-     * @return void
-     *
-     * @access protected
      * @version 7.0.0
      */
-    protected function initialize_hooks()
+    private $_configs = null;
+
+    /**
+     * @inheritDoc
+     */
+    protected function __construct()
     {
-        $this->_configs     = $this->_read_option(self::DB_OPTION, []);
-        $this->_configpress = $this->_read_option(self::DB_CONFIGPRESS_OPTION, '');
-
-        // Parse ConfigPress options & merge them with config
-        $parsed = $this->_parse_configpress($this->_configpress);
-
-        if (!empty($parsed)) {
-            $this->_configs = array_merge($this->_configs, $parsed);
-        }
+        $this->_configs = apply_filters(
+            'aam_initialize_config', $this->_read_config()
+        );
     }
 
     /**
-     * Return list of all explicitly defined configurations
+     * Get all configurations or a very specific one
      *
-     * @return array
+     * @param string $name    [Optional]
+     * @param mixed  $default [Optional]
      *
+     * @return mixed
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_configs()
+    public function get($name = null, $default = null)
     {
-        try {
+        if (!empty($name)) {
+            if (array_key_exists($name, $this->_configs)) {
+                $result = $this->_configs[$name];
+            } else {
+                $result = apply_filters('aam_get_config_filter', $default, $name);
+            }
+        } else {
             $result = $this->_configs;
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Set bulk of configurations at once
+     * Set either a very specific config or all of them at once
      *
-     * @return array
+     * @param string|array $config
+     * @param mixed        $value  [Optional]
      *
+     * @return bool
      * @access public
+     *
      * @version 7.0.0
      */
-    public function set_configs(array $configs)
+    public function set($config, $value = null)
     {
-        try {
-            $this->_configs = $configs;
-
-            if ($this->_save_option(self::DB_OPTION, $this->_configs)) {
-                $result = $configs;
-            } else {
-                throw new RuntimeException('Failed to persist configurations');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
+        if (is_array($config)) {
+            $this->_configs = $config;
+        } elseif (is_string($config)) {
+            $this->_configs[$config] = $value;
+        } else {
+            throw new InvalidArgumentException('The config is invalid');
         }
 
-        return $result;
+        // Saving the configurations in DB
+        return $this->_save_config();
     }
 
     /**
-     * Get configuration
+     * Reset/delete a single configuration or all at once
      *
-     * @param string $key
-     * @param mixed  $default
+     * @param string $name [Optional]
      *
-     * @return mixed
-     *
+     * @return bool
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_config($key, $default = null)
+    public function reset($name = null)
     {
-        try {
-            if (array_key_exists($key, $this->_configs)) {
-                $result = $this->_configs[$key];
-            } else {
-                $result = apply_filters('aam_get_config_filter', $default, $key);
+        if (is_string($name)) {
+            if (array_key_exists($name, $this->_configs)) {
+                unset($this->_configs[$name]);
             }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get configuration - alias for the get_config method
-     *
-     * @param string $key
-     * @param mixed  $default [optional]
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function config($key, $default = null)
-    {
-        return $this->get_config($key, $default);
-    }
-
-    /**
-     * Set configuration
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_config($key, $value)
-    {
-        try {
-            $this->_configs[$key] = $value;
-
-            if ($this->_save_option(self::DB_OPTION, $this->_configs)) {
-                $result = true;
-            } else {
-                throw new RuntimeException('Failed to persist configurations');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Reset/delete a single configuration
-     *
-     * @param string $key
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function reset_config($key)
-    {
-        try {
-            if (array_key_exists($key, $this->_configs)) {
-                unset($this->_configs[$key]);
-            }
-
-            if ($this->_save_option(self::DB_OPTION, $this->_configs)) {
-                $result = true;
-            } else {
-                throw new RuntimeException('Failed to persist configurations');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get ConfigPress raw INI
-     *
-     * @return string|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_configpress()
-    {
-        try {
-            $result = $this->_configpress;
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Set/save ConfigPress INI
-     *
-     * @param string $ini
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public function set_configpress($ini)
-    {
-        try {
-            // Validate the provided INI
-            $parsed = $this->_parse_configpress($ini);
-
-            if (is_array($parsed)) {
-                $result = $this->_save_option(self::DB_CONFIGPRESS_OPTION, $ini);
-            } else {
-                $result = false;
-            }
-
-            if ($result) {
-                $this->_configpress = $ini;
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Reset ConfigPress
-     *
-     * @return string
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function reset_configpress()
-    {
-        try {
-            $this->_configpress = '';
-
-            // Ignore result because if you are trying to delete the same option
-            // twice, the second attempt will return false as the option is no longer
-            // in the DB
-            $this->_delete_option(self::DB_CONFIGPRESS_OPTION);
-
-            $result = $this->_configpress;
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Reset configurations
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public function reset()
-    {
-        try {
+        } else {
             $this->_configs = [];
+        }
 
-            // Ignore result because if you are trying to delete the same option
-            // twice, the second attempt will return false as the option is no longer
-            // in the DB
-            $result = $this->_delete_option(self::DB_OPTION);
-            $result = $result && $this->_delete_option(self::DB_CONFIGPRESS_OPTION);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
+        return $this->_save_config();
+    }
+
+    /**
+     * Read configurations from DB
+     *
+     * @param mixed $default [Optional]
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _read_config($default = [])
+    {
+        if (is_multisite()) {
+            $result = get_blog_option(
+                get_current_blog_id(), self::DB_OPTION, $default
+            );
+        } else {
+            $result = get_option(self::DB_OPTION, $default);
         }
 
         return $result;
     }
 
     /**
-     * Parse INI config
+     * Save configurations to DB
      *
-     * @param string $ini
+     * @return bool
+     * @access private
      *
-     * @return array
      * @version 7.0.0
      */
-    private function _parse_configpress($ini)
+    private function _save_config()
     {
-        $result = [];
+        // Saving the configurations in DB
+        $old_value = $this->_read_config(null);
 
-        if (!empty($ini) && is_string($ini)) {
-            // Parse the string & handle any warnings or errors properly
-            set_error_handler(function($_, $message) {
-                $this->_handle_error(new InvalidArgumentException($message));
-            });
-
-            $result = parse_ini_string($ini, true, INI_SCANNER_TYPED);
-
-            restore_error_handler();
-
-            if ($result !== false) { // Clear error
-                // If we have "aam" key, then AAM ConfigPress is properly formatted
-                // and we take all the values from this section.
-                //
-                // Otherwise - assume that user forgot to add the "[aam]" section
-                if (array_key_exists('aam', $result)) {
-                    $result = $result['aam'];
-                }
+        if ($old_value === null) { // Option does not exist, add it
+            if (is_multisite()) {
+                $result = add_blog_option(
+                    get_current_blog_id(), self::DB_OPTION, $this->_configs
+                );
+            } else {
+                $result = add_option(self::DB_OPTION, $this->_configs, '', true);
             }
+        } elseif (maybe_serialize($old_value) !== maybe_serialize($this->_configs)) {
+            if (is_multisite()) {
+                $result = update_blog_option(
+                    get_current_blog_id(), self::DB_OPTION, $this->_configs
+                );
+            } else {
+                $result = update_option(self::DB_OPTION, $this->_configs, true);
+            }
+        } else{
+            $result = true;
         }
 
         return $result;

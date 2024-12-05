@@ -239,7 +239,7 @@ class AAM_Restful_UserService
 
             // Iterate over the list of all users and enrich it with additional
             // attributes
-            $result = AAM_Framework_Utility_Users::get_list($filters, 'full');
+            $result = AAM::api()->users->get_list($filters, 'full');
             $fields = $this->_determine_additional_fields($request);
 
             foreach($result['list'] as $i => $user) {

@@ -218,7 +218,7 @@ class AAM_Restful_RoleService
 
             // Fetch the complete list of editable roles and transform then into the
             // response array
-            foreach(AAM_Framework_Utility_Roles::get_editable_roles() as $role) {
+            foreach(AAM::api()->roles->get_editable_roles() as $role) {
                 array_push($result, $this->_prepare_output($role, $fields));
             }
         } catch (Exception $e) {
@@ -291,7 +291,7 @@ class AAM_Restful_RoleService
                 );
             }
 
-            $role = AAM_Framework_Utility_Roles::create($name, $slug, $capabilities);
+            $role = AAM::api()->roles->create($name, $slug, $capabilities);
 
             // Cloning settings
             if ($clone_role_settings === true && !empty($cloning_role)) {
@@ -332,7 +332,7 @@ class AAM_Restful_RoleService
             $remove_caps  = $request->get_param('remove_capabilities'); // optional
 
             // Update role
-            $role = AAM_Framework_Utility_Roles::update($slug, [
+            $role = AAM::api()->roles->update($slug, [
                 'name'         => $name,
                 'slug'         => $new_slug,
                 'add_caps'     => $add_caps,
@@ -367,7 +367,7 @@ class AAM_Restful_RoleService
         try {
             // Delete role
             $result = [
-                'success' => AAM_Framework_Utility_Roles::delete(urldecode(
+                'success' => AAM::api()->roles->delete(urldecode(
                     $request->get_param('role_slug')
                 ))
             ];

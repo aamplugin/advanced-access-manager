@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace AAM\UnitTest\Framework\Utility;
 
-use AAM_Framework_Utility_Misc,
+use AAM,
     AAM\UnitTest\Utility\TestCase;
 
 /**
@@ -27,11 +27,11 @@ final class MiscTest extends TestCase
      */
     public function testBase64Encoded()
     {
-        $this->assertTrue(AAM_Framework_Utility_Misc::is_base64_encoded(
+        $this->assertTrue(AAM::api()->misc->is_base64_encoded(
             base64_encode('test')
         ));
 
-        $this->assertFalse(AAM_Framework_Utility_Misc::is_base64_encoded('hello world'));
+        $this->assertFalse(AAM::api()->misc->is_base64_encoded('hello world'));
     }
 
     /**
@@ -42,11 +42,11 @@ final class MiscTest extends TestCase
     public function testSlugSanitization()
     {
         $this->assertEquals(
-            'hello_test', AAM_Framework_Utility_Misc::sanitize_slug('Hello Test')
+            'hello_test', AAM::api()->misc->sanitize_slug('Hello Test')
         );
 
         $this->assertEquals(
-            'another_test', AAM_Framework_Utility_Misc::sanitize_slug('another$Test')
+            'another_test', AAM::api()->misc->sanitize_slug('another$Test')
         );
     }
 
@@ -59,19 +59,19 @@ final class MiscTest extends TestCase
     {
         $this->assertEquals(
             'testclass_run',
-            AAM_Framework_Utility_Misc::callable_to_slug('TestClass::run')
+            AAM::api()->misc->callable_to_slug('TestClass::run')
         );
 
         $this->assertEquals(
             'aam_trigger',
-            AAM_Framework_Utility_Misc::callable_to_slug([
+            AAM::api()->misc->callable_to_slug([
                 'AAM', 'trigger'
             ])
         );
 
         $this->assertEquals(
             'aam_unittest_framework_utility_misctest_test',
-            AAM_Framework_Utility_Misc::callable_to_slug([ $this, 'test' ])
+            AAM::api()->misc->callable_to_slug([ $this, 'test' ])
         );
     }
 

@@ -65,7 +65,7 @@ class AAM_Service_Jwt
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -446,7 +446,7 @@ class AAM_Service_Jwt
     public function registerToken($userId, $token, $replaceExisting = false)
     {
         $registry = $this->getTokenRegistry($userId);
-        $limit    = AAM::api()->configs()->get_config('service.jwt.registry_size');
+        $limit    = AAM::api()->config->get('service.jwt.registry_size');
 
         if ($replaceExisting) {
             // First let's delete existing token
@@ -712,8 +712,8 @@ class AAM_Service_Jwt
      */
     private function _extract_token()
     {
-        $configs   = AAM::api()->configs();
-        $container = wp_parse_list($configs->get_config('service.jwt.bearer'));
+        $configs   = AAM::api()->config;
+        $container = wp_parse_list($configs->get('service.jwt.bearer'));
 
         foreach ($container as $method) {
             switch (strtolower(trim($method))) {
@@ -722,7 +722,7 @@ class AAM_Service_Jwt
                     $possibles = array(
                         'HTTP_AUTHORIZATION',
                         'REDIRECT_HTTP_AUTHORIZATION',
-                        $configs->get_config('service.jwt.header_name')
+                        $configs->get('service.jwt.header_name')
                     );
 
                     foreach($possibles as $h) {
@@ -735,14 +735,14 @@ class AAM_Service_Jwt
                     break;
 
                 case 'cookie':
-                    $jwt = $this->getFromCookie($configs->get_config(
+                    $jwt = $this->getFromCookie($configs->get(
                         'service.jwt.cookie_name'
                     ));
                     break;
 
                 case 'post':
                 case 'post_param':
-                    $jwt = $this->getFromPost($configs->get_config(
+                    $jwt = $this->getFromPost($configs->get(
                         'service.jwt.post_param_name'
                     ));
                     break;
@@ -750,7 +750,7 @@ class AAM_Service_Jwt
                 case 'get':
                 case 'query':
                 case 'query_param':
-                    $jwt = $this->getFromQuery($configs->get_config(
+                    $jwt = $this->getFromQuery($configs->get(
                         'service.jwt.query_param_name'
                     ));
                     break;

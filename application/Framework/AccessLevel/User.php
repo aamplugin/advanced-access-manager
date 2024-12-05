@@ -48,7 +48,7 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
 
             // If multi-role support is enabled & there are multiple roles assigned
             // to user, then fetch them all
-            $mu_role_support = AAM::api()->configs()->get_config(
+            $mu_role_support = AAM::api()->config->get(
                 'core.settings.multi_access_levels'
             );
 

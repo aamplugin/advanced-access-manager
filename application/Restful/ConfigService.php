@@ -11,7 +11,7 @@
  * RESTful API for the Configurations service
  *
  * @package AAM
- * @version 6.9.34
+ * @version 7.0.0
  */
 class AAM_Restful_ConfigService
 {
@@ -24,7 +24,7 @@ class AAM_Restful_ConfigService
      * @return void
      *
      * @access protected
-     * @version 6.9.34
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -110,12 +110,12 @@ class AAM_Restful_ConfigService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function get_configurations()
     {
         try {
-            $result = $this->_get_service()->get_configs();
+            $result = AAM::api()->config->get();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -131,13 +131,15 @@ class AAM_Restful_ConfigService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function get_configuration(WP_REST_Request $request)
     {
         try {
             $key    = $request->get_param('key');
-            $result = [ $key => $this->_get_service()->get_config($key) ];
+            $result = [
+                $key => AAM::api()->config->get($key)
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -156,6 +158,7 @@ class AAM_Restful_ConfigService
     public function get_configpress()
     {
         try {
+            // TODO: Finish ConfigPress
             $result = [
                 'ini' => $this->_get_service()->get_configpress()
             ];
@@ -174,7 +177,7 @@ class AAM_Restful_ConfigService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function set_configuration(WP_REST_Request $request)
     {
@@ -189,10 +192,12 @@ class AAM_Restful_ConfigService
                 $value = intval($value);
             }
 
-            $status = $this->_get_service()->set_config($key, $value);
+            $status = AAM::api()->config->set($key, $value);
 
             if ($status) {
-                $result = [ $key => $this->_get_service()->get_config($key) ];
+                $result = [
+                    $key => AAM::api()->config->get($key)
+                ];
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -216,6 +221,7 @@ class AAM_Restful_ConfigService
         try {
             $ini = $request->get_param('ini');
 
+            // TODO: Finish ConfigPress
             $status = $this->_get_service()->set_configpress($ini);
 
             if ($status) {
@@ -236,12 +242,12 @@ class AAM_Restful_ConfigService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function reset_configurations()
     {
         try {
-            $result = $this->_get_service()->reset();
+            $result = AAM::api()->config->reset();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -255,27 +261,12 @@ class AAM_Restful_ConfigService
      * @return bool
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
             && current_user_can('aam_manage_configs');
-    }
-
-    /**
-     * Get service
-     *
-     * @param WP_REST_Request $request
-     *
-     * @access private
-     * @version 6.9.33
-     */
-    private function _get_service()
-    {
-        return AAM::api()->configs([
-            'error_handling' => 'exception'
-        ]);
     }
 
 }

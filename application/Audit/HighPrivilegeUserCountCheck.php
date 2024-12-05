@@ -167,7 +167,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             }
         }
 
-        $suggested_admins = AAM::api()->configs()->get_config(
+        $suggested_admins = AAM::api()->config->get(
             'service.security_audit.recommended_admins_count', 1
         );
 
@@ -180,7 +180,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
         // Let's be real here. How many articles one senior editor can review per
         // biz day? Let's put an arbitrary number 4 with 250 working days, it may be
         // max 1,000 articles per year.
-        $suggested_editors = AAM::api()->configs()->get_config(
+        $suggested_editors = AAM::api()->config->get(
             'service.security_audit.recommended_editors_count', ceil($total / 1000)
         );
 

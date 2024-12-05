@@ -55,7 +55,7 @@ class AAM_Service_Widgets
             }, 30);
         }
 
-        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->config->get(self::FEATURE_FLAG)) {
             if (is_admin()) {
                 // Hook that initialize the AAM UI part of the service
                 add_action('aam_initialize_ui_action', function () {
@@ -179,7 +179,7 @@ class AAM_Service_Widgets
             }
         }
 
-        AAM_Framework_Utility_Cache::set(
+        AAM::api()->cache->set(
             AAM_Framework_Service_Widgets::CACHE_DB_OPTION, $cache, 31536000
         );
     }
@@ -263,9 +263,7 @@ class AAM_Service_Widgets
         $slug = null;
 
         if (!empty($widget['callback'])) {
-            $slug = AAM_Framework_Utility_Misc::callable_to_slug(
-                $widget['callback']
-            );
+            $slug = AAM::api()->misc->callable_to_slug($widget['callback']);
         }
 
         return $slug;

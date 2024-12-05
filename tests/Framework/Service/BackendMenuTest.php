@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework\Service;
 
 use AAM,
-    AAM_Framework_Utility_Cache,
     AAM\UnitTest\Utility\TestCase,
     AAM_Framework_Service_BackendMenu;
 
@@ -43,7 +42,7 @@ final class BackendMenuTest extends TestCase
         $this->assertNotEmpty($menu);
 
         // Double-checking the cache value itself
-        $cache = AAM_Framework_Utility_Cache::get(
+        $cache = AAM::api()->cache->get(
             AAM_Framework_Service_BackendMenu::CACHE_DB_OPTION
         );
 

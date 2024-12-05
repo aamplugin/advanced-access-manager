@@ -72,7 +72,7 @@ class AAM_Service_SecurityAudit
      */
     public function is_enabled()
     {
-        return AAM::api()->configs()->get_config(self::FEATURE_FLAG)
+        return AAM::api()->config->get(self::FEATURE_FLAG)
             && current_user_can('aam_trigger_audit');
     }
 

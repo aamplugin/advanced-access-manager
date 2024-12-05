@@ -54,7 +54,7 @@ class AAM_Service_LoginRedirect
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -148,7 +148,7 @@ class AAM_Service_LoginRedirect
     public function get_login_redirect($redirect, $requested, $user)
     {
         // Determine if we want to suppress redirect_to URL
-        $suppress = AAM::api()->configs()->get_config(
+        $suppress = AAM::api()->config->get(
             'service.login_redirect.suppress_redirect_to'
         );
 
@@ -182,7 +182,7 @@ class AAM_Service_LoginRedirect
             ];
         }
 
-        return AAM_Framework_Utility_Redirect::to_redirect_url($redirect);
+        return AAM::api()->redirect->to_redirect_url($redirect);
     }
 
 }

@@ -51,7 +51,7 @@ class AAM_Service_AdminToolbar
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -83,7 +83,7 @@ class AAM_Service_AdminToolbar
      */
     public function getToolbarCache()
     {
-        return AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
+        return AAM::api()->cache->get(self::CACHE_DB_OPTION);
     }
 
     /**

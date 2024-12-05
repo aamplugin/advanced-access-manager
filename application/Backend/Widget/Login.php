@@ -63,7 +63,7 @@ class AAM_Backend_Widget_Login extends WP_Widget
     {
         $this->args = array_merge($args, $this->normalize($instance));
 
-        require AAM::api()->configs()->get_config(
+        require AAM::api()->config->get(
             'service.secureLogin.settings.widget.template',
             realpath(dirname(__DIR__) . '/tmpl/widget/login-frontend.php')
         );

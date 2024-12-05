@@ -374,13 +374,11 @@ class AAM_Framework_Service_BackendMenu
             }
 
             if ($persist_cache) {
-                AAM_Framework_Utility_Cache::set(
-                    self::CACHE_DB_OPTION, $result, 31536000
-                ); // Cache for a year
+                AAM::api()->cache->set(self::CACHE_DB_OPTION, $result, 31536000);
             }
 
             if (empty($result)) { // Either AJAX or RESTful API call
-                $result = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION);
+                $result = AAM::api()->cache->get(self::CACHE_DB_OPTION);
             }
 
             $_cache = $result; // Avoid doing the same thing over & over again
@@ -630,9 +628,7 @@ class AAM_Framework_Service_BackendMenu
         }
 
         // Only prepare the relative path
-        $relative_path = AAM_Framework_Utility_Misc::sanitize_url($uri);
-
-        return $relative_path;
+        return AAM::api()->misc->sanitize_url($uri);
     }
 
     /**

@@ -50,7 +50,7 @@ class AAM_Framework_Service_Metaboxes
             $result = [];
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
+            $cache = AAM::api()->cache->get(self::CACHE_DB_OPTION, []);
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $type => $metaboxes) {
@@ -360,11 +360,9 @@ class AAM_Framework_Service_Metaboxes
     {
         // Determining metabox slug
         if (is_array($metabox) && isset($metabox['callback'])) {
-            $result = AAM_Framework_Utility_Misc::callable_to_slug(
-                $metabox['callback']
-            );
+            $result = AAM::api()->misc->callable_to_slug($metabox['callback']);
         } elseif (is_string($metabox)) {
-            $result = AAM_Framework_Utility_Misc::sanitize_slug($metabox);
+            $result = AAM::api()->misc->sanitize_slug($metabox);
         } else {
             throw new InvalidArgumentException('Invalid metabox provided');
         }

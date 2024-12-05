@@ -36,8 +36,8 @@ class AAM_Service_Core
         'core.settings.ui.tips'                  => true,
         'core.settings.multi_access_levels'      => false,
         'core.settings.ui.render_access_metabox' => false,
-        'core.settings.xmlrpc'                   => true,
-        'core.settings.restful'                  => true,
+        'core.settings.xmlrpc_enabled'           => true,
+        'core.settings.restful_enabled'          => true,
         'core.settings.merge.preference'         => 'deny',
         'core.export.groups'                     => [ 'settings', 'config', 'roles' ]
     ];
@@ -61,7 +61,7 @@ class AAM_Service_Core
         }, 10, 2);
 
         if (is_admin()) {
-            $metaboxEnabled = AAM::api()->configs()->get_config(
+            $metaboxEnabled = AAM::api()->config->get(
                 'core.settings.ui.render_access_metabox'
             );
 
@@ -92,7 +92,7 @@ class AAM_Service_Core
 
         // Handle access denied
         add_action('aam_deny_access_action', function() {
-            AAM_Framework_Utility_Redirect::do_access_denied_redirect();
+            AAM::api()->redirect->do_access_denied_redirect();
         });
 
         // Add toolbar "Manage Access" item
@@ -154,8 +154,8 @@ class AAM_Service_Core
 
         // Disable XML-RPC if needed
         add_filter('xmlrpc_enabled', function($enabled) {
-            if (AAM::api()->configs()->get_config(
-                'core.settings.xmlrpc') === false
+            if (AAM::api()->config->get(
+                'core.settings.xmlrpc_enabled') === false
             ) {
                 $enabled = false;
             }
@@ -169,7 +169,7 @@ class AAM_Service_Core
             function ($response) {
                 if (!current_user_can('aam_manager')
                     && !is_wp_error($response)
-                    && !AAM::api()->configs()->get_config('core.settings.restful')
+                    && !AAM::api()->config->get('core.settings.restful_enabled')
                 ) {
                     $response = new WP_Error(
                         'rest_access_disabled',
@@ -241,7 +241,7 @@ class AAM_Service_Core
                 is_string($capability) && (strpos($capability, 'aam_') === 0)
                 && !AAM_Core_API::capExists($capability)
             ) {
-                $caps[$i] = AAM::api()->configs()->get_config(
+                $caps[$i] = AAM::api()->config->get(
                     'page.capability',
                     'administrator'
                 );
@@ -347,7 +347,7 @@ class AAM_Service_Core
 
                         wp_delete_user(
                             $user->ID,
-                            AAM::api()->configs()->get_config(
+                            AAM::api()->config->get(
                                 'core.reasign.ownership.user'
                             )
                         );

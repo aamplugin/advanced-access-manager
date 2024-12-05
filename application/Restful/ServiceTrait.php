@@ -10,11 +10,8 @@
 /**
  * RESTful API service trait
  *
- * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
- * @since 6.9.10 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.37
+ * @version 7.0.0
  */
 trait AAM_Restful_ServiceTrait
 {
@@ -22,7 +19,7 @@ trait AAM_Restful_ServiceTrait
     /**
      * Map of REST & HTTP status codes
      *
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private $_exception_map = [
         InvalidArgumentException::class => [
@@ -58,6 +55,8 @@ trait AAM_Restful_ServiceTrait
      *
      * @access private
      * @static
+     *
+     * @version 7.0.0
      */
     private static $_instance = null;
 
@@ -75,7 +74,7 @@ trait AAM_Restful_ServiceTrait
      * @return void
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _register_route(
         $route, $args, $access_level_aware = true, $ns = null
@@ -132,7 +131,7 @@ trait AAM_Restful_ServiceTrait
      * @return AAM_Framework_AccessLevel_Interface|null
      *
      * @access private
-     * @since 6.9.10
+     * @since 7.0.0
      */
     private function _determine_access_level(WP_REST_Request $request)
     {
@@ -165,7 +164,7 @@ trait AAM_Restful_ServiceTrait
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _validate_access_level($access_level, $request)
     {
@@ -205,7 +204,7 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_role_id($value, $request)
     {
@@ -229,7 +228,7 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_user_id($value, $request)
     {
@@ -256,11 +255,8 @@ trait AAM_Restful_ServiceTrait
      *
      * @return bool|WP_Error
      *
-     * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access private
-     * @version 6.9.37
+     * @version 7.0.0
      */
     private function _validate_role_accessibility($slug)
     {
@@ -269,7 +265,7 @@ trait AAM_Restful_ServiceTrait
         try {
             $slug = urldecode($slug);
 
-            if (!AAM_Framework_Utility_Roles::is_editable_role($slug)) {
+            if (!AAM::api()->roles->is_editable_role($slug)) {
                 $response = new WP_Error(
                     'rest_not_found',
                     "Role {$slug} is not editable to current user",
@@ -299,7 +295,7 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_user_accessibility($user_id, $http_method)
     {
@@ -343,7 +339,7 @@ trait AAM_Restful_ServiceTrait
      * @return WP_REST_Response
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _prepare_error_response($ex, $code = null, $status = null)
     {
@@ -379,7 +375,7 @@ trait AAM_Restful_ServiceTrait
      * @return array
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _determine_response_attributes($exception, $code, $status)
     {
@@ -403,7 +399,7 @@ trait AAM_Restful_ServiceTrait
      * @return static::class
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public static function bootstrap()
     {

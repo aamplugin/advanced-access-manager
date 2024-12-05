@@ -16,8 +16,10 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Cache
+class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Maximum number of keys to keep in cache
@@ -41,139 +43,23 @@ class AAM_Framework_Utility_Cache
      * @access protected
      * @version 7.0.0
      */
-    private static $_cache = null;
+    private $_cache = null;
 
     /**
-     * Get cache value
-     *
-     * @param string $key
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
+     * @inheritDoc
      */
-    public static function get($key, $default = null)
+    protected function __construct()
     {
-        // Lazy bootstrap
-        if (self::$_cache === null) {
-            self::_bootstrap();
-        }
+       $this->_cache = []; // Reset the cache
 
-        if (array_key_exists($key, self::$_cache)) {
-            $response = self::$_cache[$key]['value'];
-        }
-
-        return (empty($response) ? $default : $response);
-    }
-
-    /**
-     * Set cache value
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @param int    $ttl
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public static function set($key, $value, $ttl = 86400)
-    {
-        // Lazy bootstrap
-        if (self::$_cache === null) {
-            self::_bootstrap();
-        }
-
-        self::$_cache[$key] = array(
-            'value' => $value,
-            'ttl'   => time() + $ttl
-        );
-
-        $capacity = AAM::api()->configs()->get_config(
-            'core.settings.cache.capability',
-            self::DEFAULT_CACHE_CAPACITY
-        );
-
-        if (count(self::$_cache) > $capacity) {
-            array_shift(self::$_cache);
-        }
-
-        // Save cache to database
-        return self::_update(self::$_cache);
-    }
-
-    /**
-     * Update cache value & ttl
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @param int    $ttl
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public static function update($key, $value, $ttl = null)
-    {
-        // Lazy bootstrap
-        if (self::$_cache === null) {
-            self::_bootstrap();
-        }
-
-        if (array_key_exists($key, self::$_cache)) {
-            self::$_cache[$key]['value'] = $value;
-
-            if ($ttl !== null) {
-                self::$_cache[$key]['ttl'] = time() + $ttl;
-            }
-        }
-
-        // Save cache to database
-        return self::_update(self::$_cache);
-    }
-
-    /**
-     * Reset cache
-     *
-     * @return void
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public static function reset()
-    {
-        self::$_cache = [];
-
-        if (is_multisite()) {
-            delete_blog_option(get_current_blog_id(), self::DB_OPTION);
-        } else {
-            delete_option(self::DB_OPTION);
-        }
-    }
-
-    /**
-     * Load AAM cache
-     *
-     * @return void
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    private static function _bootstrap()
-    {
-        self::$_cache = [];
-        $cache        = self::_read_cache();
-        $cleared      = false;
+        $cache   = $this->_read_cache();
+        $cleared = false;
 
         // Self-cleaning
         if (is_array($cache)) {
             foreach($cache as $key => $value) {
                 if ($value['ttl'] >= time()) {
-                    self::$_cache[$key] = $value;
+                    $this->_cache[$key] = $value;
                 } else {
                     $cleared = true;
                 }
@@ -181,8 +67,109 @@ class AAM_Framework_Utility_Cache
         }
 
         if ($cleared) {
-            self::_update(self::$_cache);
+            $this->_update($this->_cache);
         }
+    }
+
+    /**
+     * Get cache value
+     *
+     * @param string $key
+     * @param mixed  $default [Optional]
+     *
+     * @return mixed
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get($key, $default = null)
+    {
+        if (array_key_exists($key, $this->_cache)) {
+            $result = $this->_cache[$key]['value'];
+        } else {
+            $result = null;
+        }
+
+        return (is_null($result) ? $default : $result);
+    }
+
+    /**
+     * Set cache value
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $ttl   [Optional]
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function set($key, $value, $ttl = 86400)
+    {
+       $this->_cache[$key] = array(
+            'value' => $value,
+            'ttl'   => time() + $ttl
+        );
+
+        $capacity = AAM::api()->config->get(
+            'core.settings.cache.capability',
+            self::DEFAULT_CACHE_CAPACITY
+        );
+
+        if (count($this->_cache) > $capacity) {
+            array_shift($this->_cache);
+        }
+
+        // Save cache to database
+        return $this->_update($this->_cache);
+    }
+
+    /**
+     * Update cache value & ttl
+     *
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $ttl   [Optional]
+     *
+     * @return boolean
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function update($key, $value, $ttl = null)
+    {
+        if (array_key_exists($key, $this->_cache)) {
+            $this->_cache[$key]['value'] = $value;
+
+            if ($ttl !== null) {
+                $this->_cache[$key]['ttl'] = time() + $ttl;
+            }
+        }
+
+        // Save cache to database
+        return $this->_update($this->_cache);
+    }
+
+    /**
+     * Reset cache
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function reset()
+    {
+        $this->_cache = [];
+
+        if (is_multisite()) {
+            $result = delete_blog_option(get_current_blog_id(), self::DB_OPTION);
+        } else {
+            $result = delete_option(self::DB_OPTION);
+        }
+
+        return $result;
     }
 
     /**
@@ -195,7 +182,7 @@ class AAM_Framework_Utility_Cache
      * @access private
      * @version 7.0.0
      */
-    private static function _read_cache($blog_id = null)
+    private function _read_cache($blog_id = null)
     {
         if (is_multisite()) {
             $result = get_blog_option(
@@ -212,16 +199,16 @@ class AAM_Framework_Utility_Cache
      * Update cache in the DB
      *
      * @param mixed $data
-     * @param int   $blog_id
+     * @param int   $blog_id [Optional]
      *
      * @return bool
      *
      * @access private
      * @version 7.0.0
      */
-    private static function _update($data, $blog_id = null)
+    private function _update($data, $blog_id = null)
     {
-        $old_value = self::_read_cache($blog_id);
+        $old_value = $this->_read_cache($blog_id);
 
         if (maybe_serialize($old_value) !== maybe_serialize($data)) {
             if (is_multisite()) {

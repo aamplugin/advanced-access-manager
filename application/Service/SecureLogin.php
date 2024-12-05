@@ -59,7 +59,7 @@ class AAM_Service_SecureLogin
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -176,10 +176,10 @@ class AAM_Service_SecureLogin
      */
     private function _auth_cookie($cookie, $user_id, $token)
     {
-        $configs = AAM::api()->configs();
+        $configs = AAM::api()->config;
 
         // Remove all other sessions if single session feature is enabled
-        if ($configs->get_config('service.secure_login.single_session')) {
+        if ($configs->get('service.secure_login.single_session')) {
             $sessions = WP_Session_Tokens::get_instance($user_id);
 
             if (count($sessions->get_all()) > 1) {
@@ -202,24 +202,24 @@ class AAM_Service_SecureLogin
      */
     private function _wp_login_failed()
     {
-        $configs = AAM::api()->configs();
-        $enabled = $configs->get_config('service.secure_login.brute_force_lockout');
+        $configs = AAM::api()->config;
+        $enabled = $configs->get('service.secure_login.brute_force_lockout');
 
         // Track failed attempts only if Brute Force Lockout is enabled
         if ($enabled) {
             $name     = $this->_get_login_attempt_key();
-            $attempts = AAM_Framework_Utility_Cache::get($name);
+            $attempts = AAM::api()->cache->get($name);
 
             if ($attempts !== false) {
                 $attempts = intval($attempts) + 1;
 
-                AAM_Framework_Utility_Cache::update($name, $attempts);
+                AAM::api()->cache->update($name, $attempts);
             } else {
-                $timeout = strtotime($configs->get_config(
+                $timeout = strtotime($configs->get(
                     'service.secure_login.time_window'
                 ));
 
-                AAM_Framework_Utility_Cache::set($name, 1, $timeout - time());
+                AAM::api()->cache->set($name, 1, $timeout - time());
             }
         }
     }
@@ -239,14 +239,12 @@ class AAM_Service_SecureLogin
      */
     private function _authenticate($response)
     {
-        $configs = AAM::api()->configs();
+        $configs = AAM::api()->config;
 
         // Brute Force Lockout
-        if ($configs->get_config('service.secure_login.brute_force_lockout')) {
-            $threshold = $configs->get_config('service.secure_login.login_attempts');
-            $attempts  = AAM_Framework_Utility_Cache::get(
-                $this->_get_login_attempt_key()
-            );
+        if ($configs->get('service.secure_login.brute_force_lockout')) {
+            $threshold = $configs->get('service.secure_login.login_attempts');
+            $attempts  = AAM::api()->cache->get($this->_get_login_attempt_key());
 
             if ($attempts >= $threshold) {
                 $response = new WP_Error(
@@ -272,7 +270,7 @@ class AAM_Service_SecureLogin
     private function _login_message($message)
     {
         if (empty($message) && ($this->getFromQuery('reason') === 'restricted')) {
-            $str = AAM::api()->configs()->get_config(
+            $str = AAM::api()->config->get(
                 'service.secure_login.login_message'
             );
 

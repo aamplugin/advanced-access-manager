@@ -135,9 +135,11 @@ final class AAM_Migration_700
      */
     private function _transform_legacy_config_names()
     {
-        $service     = AAM::api()->configs();
-        $configs     = $service->get_configs();
-        $configpress = $service->get_configpress();
+        $service     = AAM::api()->config;
+        $configs     = $service->get();
+
+        // TODO: Finish ConfigPress
+        //$configpress = $service->get_configpress();
 
         // The list of changes
         $changes = [
@@ -172,6 +174,8 @@ final class AAM_Migration_700
             'core.service.secure-login.enabled'         => 'service.secure_login.enabled',
             'service.secureLogin.feature.singleSession' => 'service.secure_login.single_session',
             'service.secureLogin.feature.bruteForceLockout' => 'service.secure_login.brute_force_lockout',
+            'core.settings.xmlrpc' => 'core.settings.xmlrpc_enabled',
+            'core.settings.restful' => 'core.settings.restful_enabled'
         ];
 
         foreach($changes as $legacy => $new) {
@@ -181,11 +185,11 @@ final class AAM_Migration_700
                 unset($configs[$legacy]);
             }
 
-            $configpress = str_replace($legacy, $new, $configpress);
+            // $configpress = str_replace($legacy, $new, $configpress);
         }
 
-        $service->set_configs($configs);
-        $service->set_configpress($configpress);
+        $service->set($configs);
+        // $service->set_configpress($configpress);
     }
 
     /**

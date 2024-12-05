@@ -14,23 +14,23 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Users
+class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Query list of users & return aggregated result
      *
      * @param array  $args
-     * @param string $result_type [optional] Can be "list", "summary" or "full"
+     * @param string $result_type [Optional] Can be "list", "summary" or "full"
      *
      * @return array
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function get_list(array $args = [], $result_type = 'list')
+    public function get_list(array $args = [], $result_type = 'list')
     {
         $args = array_merge([
             'blog_id'        => get_current_blog_id(),

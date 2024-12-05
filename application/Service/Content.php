@@ -71,7 +71,7 @@ class AAM_Service_Content
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -81,7 +81,7 @@ class AAM_Service_Content
                 });
 
                 // Check if Access Manager metabox feature is enabled
-                $metaboxEnabled = AAM::api()->configs()->get_config(
+                $metaboxEnabled = AAM::api()->config->get(
                     'core.settings.ui.render_access_metabox'
                 );
 
@@ -377,9 +377,9 @@ class AAM_Service_Content
 
         if (is_a($post, AAM_Framework_Resource_Post::class)) {
             if ($post->is_restricted()) {
-                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
+                AAM::api()->redirect->do_access_denied_redirect();
             } elseif ($post->is_redirected()) {
-                AAM_Framework_Utility_Redirect::do_redirect($post->get_redirect());
+                AAM::api()->redirect->do_redirect($post->get_redirect());
             }
         }
     }
@@ -462,7 +462,7 @@ class AAM_Service_Content
      */
     private function _post_password_expires($expire)
     {
-        $ttl = AAM::api()->configs()->get_config(
+        $ttl = AAM::api()->config->get(
             'service.content.password_ttl', null
         );
 
@@ -676,7 +676,7 @@ class AAM_Service_Content
                 'code'    => 'rest_redirected',
                 'message' => 'The request is redirected to a different location',
                 'data'    => [
-                    'redirect_url' => AAM_Framework_Utility_Redirect::to_redirect_url(
+                    'redirect_url' => AAM::api()->redirect->to_redirect_url(
                         $redirect
                     )
                 ]

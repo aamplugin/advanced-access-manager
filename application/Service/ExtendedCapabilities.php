@@ -65,7 +65,7 @@ class AAM_Service_ExtendedCapabilities
             }, 1);
         }
 
-        if (AAM::api()->configs()->get_config(self::FEATURE_FLAG)) {
+        if (AAM::api()->config->get(self::FEATURE_FLAG)) {
             $this->initializeHooks();
         }
     }
@@ -119,7 +119,7 @@ class AAM_Service_ExtendedCapabilities
                     // If this is the AJAX call, still allow it because it will break a lot
                     // of frontend stuff that depends on it
                     if (!defined('DOING_AJAX')) {
-                        AAM_Framework_Utility_Redirect::do_access_denied_redirect();
+                        AAM::api()->redirect->do_access_denied_redirect();
                     }
                 }
 

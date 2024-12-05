@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework\Service;
 
 use AAM,
-    AAM_Framework_Utility_Cache,
     AAM\UnitTest\Utility\TestCase,
     AAM_Framework_Service_AdminToolbar;
 
@@ -34,7 +33,7 @@ final class AdminToolbarTest extends TestCase
             __DIR__ . '/../../Mocks/admin-toolbar.mock'
         ));
 
-        AAM_Framework_Utility_Cache::set(
+        AAM::api()->cache->set(
             AAM_Framework_Service_AdminToolbar::CACHE_DB_OPTION, $mock
         );
     }

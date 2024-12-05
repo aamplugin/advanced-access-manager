@@ -166,6 +166,41 @@ class TestCase extends PHPUnitTestCase
 
         return $result;
     }
+
+    /**
+     * Write option to DB
+     *
+     * @param string $option
+     * @param mixed  $value
+     *
+     * @return mixed
+     *
+     * @access public
+     */
+    public function writeWpOption($option, $value)
+    {
+       // Saving the configurations in DB
+       $old_value = $this->readWpOption($option);
+
+       if ($old_value === null) { // Option does not exist, add it
+           if (is_multisite()) {
+               $result = add_blog_option(get_current_blog_id(), $option, $value);
+           } else {
+               $result = add_option($option, $value, '', true);
+           }
+       } elseif (maybe_serialize($old_value) !== maybe_serialize($value)) {
+           if (is_multisite()) {
+               $result = update_blog_option(get_current_blog_id(), $option, $value);
+           } else {
+               $result = update_option($option, $value, true);
+           }
+       } else{
+           $result = true;
+       }
+
+        return $result;
+    }
+
     /**
      * Clear all resources
      *

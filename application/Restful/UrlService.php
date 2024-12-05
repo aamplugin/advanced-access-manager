@@ -511,7 +511,7 @@ class AAM_Restful_UrlService
         $response  = true;
         $redirect  = $request->get_param('redirect');
         $rule_type = !empty($redirect['type']) ? $redirect['type'] : null;
-        $url       = AAM_Framework_Utility_Misc::sanitize_url($value);
+        $url       = AAM::api()->misc->sanitize_url($value);
 
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(

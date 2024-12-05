@@ -43,7 +43,7 @@ class AAM_Service_AccessDeniedRedirect
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -87,7 +87,7 @@ class AAM_Service_AccessDeniedRedirect
                 $handler = function() {
                     $service  = AAM::api()->access_denied_redirect();
                     $redirect = $service->get_redirect(
-                        AAM_Framework_Utility_Misc::get_current_area()
+                        AAM::api()->misc->get_current_area()
                     );
 
                     if ($redirect['type'] === 'default') {
@@ -106,7 +106,7 @@ class AAM_Service_AccessDeniedRedirect
                             ])
                         );
                     } else {
-                        AAM_Framework_Utility_Redirect::do_redirect($redirect);
+                        AAM::api()->redirect->do_redirect($redirect);
                     }
                 };
             }

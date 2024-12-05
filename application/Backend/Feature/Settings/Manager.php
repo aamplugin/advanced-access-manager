@@ -62,7 +62,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
             'dataset'   => array()
         );
 
-        $groups = AAM::api()->configs()->get_config('core.export.groups');
+        $groups = AAM::api()->config->get('core.export.groups');
 
         if (is_string($groups)) {
             $groups = array_map('trim', explode(',', $groups));
@@ -80,9 +80,10 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                     break;
 
                 case 'config':
-                    $configs                = AAM::api()->configs();
-                    $dataset['config']      = $configs->get_configs();
-                    $dataset['configpress'] = $configs->get_configpress();
+                    $configs                = AAM::api()->config;
+                    $dataset['config']      = $configs->get();
+                    // TODO: Finish ConfigPress
+                    //$dataset['configpress'] = $configs->get_configpress();
                     break;
 
                 case 'roles':
@@ -229,11 +230,11 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                             break;
 
                         case 'config':
-                            AAM::api()->configs()->set_configs($settings);
+                            AAM::api()->config->set($settings);
                             break;
 
                         case 'configpress':
-                            AAM::api()->configs()->set_configpress($settings);
+                            // TODO: Finish ConfigPress
                             break;
 
                         case 'roles':

@@ -219,7 +219,7 @@ class AAM_Restful_JwtService
             $is_rev = $request->get_param('is_revocable');
 
             if (!is_bool($is_rev)) {
-                $is_rev = AAM::api()->configs()->get_config(
+                $is_rev = AAM::api()->config->get(
                     'service.jwt.is_revocable', true
                 );
             }

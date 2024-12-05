@@ -179,7 +179,7 @@ class AAM_Service_Content_Visibility
      */
     private function _is_hidden($control)
     {
-        $area = AAM_Framework_Utility_Misc::get_current_area();
+        $area = AAM::api()->misc->get_current_area();
 
         return in_array($area, $control['on'], true) && $control['effect'] == 'deny';
     }
@@ -208,9 +208,7 @@ class AAM_Service_Content_Visibility
         $parent_access_level = $access_level->get_parent();
 
         // Merge access settings if multi access levels config is enabled
-        $multi_support = AAM::api()->configs()->get_config(
-            'core.settings.multi_access_levels'
-        );
+        $multi_support = AAM::api()->config->get('core.settings.multi_access_levels');
 
         if ($multi_support && is_object($parent_access_level)) {
             foreach ($parent_access_level->get_siblings() as $sibling) {
@@ -292,12 +290,10 @@ class AAM_Service_Content_Visibility
             [...array_keys($set_a), ...array_keys($set_b)]
         );
 
-        $config = AAM::api()->configs();
-
         // Determine permissions merging preference
-        $merging_preference = strtolower($config->get_config(
+        $merging_preference = strtolower(AAM::api()->config->get(
             'core.settings.' . $resource_type . '.merge.preference',
-            $config->get_config('core.settings.merge.preference')
+            AAM::api()->config->get('core.settings.merge.preference')
         ));
         $default_effect = $merging_preference === 'allow' ? 'allow' : 'deny';
 

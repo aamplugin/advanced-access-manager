@@ -44,7 +44,7 @@ class AAM_Framework_Service_Widgets
             $result = [];
 
             // Getting the menu cache so we can build the list
-            $cache = AAM_Framework_Utility_Cache::get(self::CACHE_DB_OPTION, []);
+            $cache = AAM::api()->cache->get(self::CACHE_DB_OPTION, []);
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $s_id => $widgets) {
@@ -306,15 +306,11 @@ class AAM_Framework_Service_Widgets
     {
         // Determining metabox slug
         if (is_array($widget) && isset($widget['callback'])) {
-            $result = AAM_Framework_Utility_Misc::callable_to_slug(
-                $widget['callback']
-            );
+            $result = AAM::api()->misc->callable_to_slug($widget['callback']);
         } elseif (is_a($widget, WP_Widget::class)) {
-            $result = $result = AAM_Framework_Utility_Misc::callable_to_slug(
-                $widget
-            );
+            $result = AAM::api()->misc->callable_to_slug($widget);
         } elseif (is_string($widget)) {
-            $result = AAM_Framework_Utility_Misc::sanitize_slug($widget);
+            $result = AAM::api()->misc->sanitize_slug($widget);
         } else {
             throw new InvalidArgumentException('Invalid metabox provided');
         }

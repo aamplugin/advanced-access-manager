@@ -807,11 +807,11 @@ class AAM_Core_Jwt_Manager
      */
     private function _getConfigOption($option, $default = null)
     {
-        $service = AAM::api()->configs();
-        $value   = $service->get_config($option);
+        $configs = AAM::api()->config;
+        $value   = $configs->get($option);
 
         if (is_null($value) && array_key_exists($option, self::OPTION_ALIAS)) {
-            $value = $service->get_config(self::OPTION_ALIAS[$option]);
+            $value = $configs->get(self::OPTION_ALIAS[$option]);
         }
 
         return is_null($value) ? $default : $value;

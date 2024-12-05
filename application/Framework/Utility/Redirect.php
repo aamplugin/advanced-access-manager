@@ -14,8 +14,10 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Redirect
+class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Do redirect
@@ -23,13 +25,11 @@ class AAM_Framework_Utility_Redirect
      * @param array $redirect
      *
      * @return void
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function do_redirect(array $redirect)
+    public function do_redirect(array $redirect)
     {
         // Determine redirect HTTP status code and use it if applicable for given
         // redirect type
@@ -46,7 +46,7 @@ class AAM_Framework_Utility_Redirect
             'trigger_callback'
         ], true)) {
             wp_safe_redirect(
-                self::to_redirect_url($redirect, '/'),
+                $this->to_redirect_url($redirect, '/'),
                 $status_code ? $status_code : 302
             );
         } elseif ($redirect['type'] === 'custom_message') {
@@ -72,13 +72,12 @@ class AAM_Framework_Utility_Redirect
      * function wp_die or handle the actual redirect defined with the "Access Denied
      * Redirect" service (if enabled)
      *
-     * @param string $message
-     * @param string $title
-     * @param int    $status_code
-     *
      * @return void
+     * @access public
+     *
+     * @version 7.0.0
      */
-    public static function do_access_denied_redirect()
+    public function do_access_denied_redirect()
     {
         $handler = apply_filters('aam_access_denied_redirect_handler_filter', null);
 
@@ -102,16 +101,14 @@ class AAM_Framework_Utility_Redirect
      * Convert redirect rule to URL
      *
      * @param array  $redirect
-     * @param string $default
+     * @param string $default  [Optional]
      *
      * @return string
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function to_redirect_url($redirect, $default = '/')
+    public function to_redirect_url($redirect, $default = '/')
     {
         $result = null;
 
@@ -129,13 +126,11 @@ class AAM_Framework_Utility_Redirect
                 );
             }
         } elseif ($redirect['type'] === 'url_redirect') {
-            $result = AAM_Framework_Utility_Misc::sanitize_url(
-                $redirect['redirect_url']
-            );
+            $result = AAM::api()->misc->sanitize_url($redirect['redirect_url']);
         } elseif ($redirect['type'] === 'trigger_callback'
             && is_callable($redirect['callback'])
         ) {
-            $result = AAM_Framework_Utility_Misc::sanitize_url(
+            $result = AAM::api()->misc->sanitize_url(
                 call_user_func($redirect['callback'])
             );
         }
@@ -147,16 +142,14 @@ class AAM_Framework_Utility_Redirect
      * Sanitize the redirect data
      *
      * @param array $redirect
-     * @param array $allowed_types [optional]
+     * @param array $allowed_types [Optional]
      *
      * @return array
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function sanitize_redirect(array $redirect, $allowed_types = [])
+    public function sanitize_redirect(array $redirect, $allowed_types = [])
     {
         // First, let's validate tha the rule type is correct
         if (!in_array($redirect['type'], $allowed_types, true)) {
@@ -188,9 +181,7 @@ class AAM_Framework_Utility_Redirect
 
             $result[$attribute] = $value;
         } elseif ($redirect['type'] === 'url_redirect') {
-            $redirect_url = AAM_Framework_Utility_Misc::sanitize_url(
-                $redirect['redirect_url']
-            );
+            $redirect_url = AAM::api()->misc->sanitize_url($redirect['redirect_url']);
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(

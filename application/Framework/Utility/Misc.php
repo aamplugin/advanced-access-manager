@@ -14,8 +14,10 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Misc
+class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Confirm that provided value is base64 encoded string
@@ -23,11 +25,11 @@ class AAM_Framework_Utility_Misc
      * @param string $str
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function is_base64_encoded($str)
+    public function is_base64_encoded($str)
     {
         $result = false;
 
@@ -51,11 +53,11 @@ class AAM_Framework_Utility_Misc
      * @param string $slug
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function sanitize_slug($slug)
+    public function sanitize_slug($slug)
     {
         return strtolower(preg_replace('/[^a-z_\d]/i', '_', $slug));
     }
@@ -66,13 +68,11 @@ class AAM_Framework_Utility_Misc
      * @param mixed $callback
      *
      * @return string
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function callable_to_slug($callback)
+    public function callable_to_slug($callback)
     {
         $result = '';
 
@@ -97,7 +97,7 @@ class AAM_Framework_Utility_Misc
         }
 
         // Making the slug a bit prettier
-        return self::sanitize_slug(str_replace('::', '_', $result));
+        return $this->sanitize_slug(str_replace('::', '_', $result));
     }
 
     /**
@@ -106,14 +106,14 @@ class AAM_Framework_Utility_Misc
      * @param string $url
      *
      * @return bool|string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    public static function sanitize_url($url)
+    public function sanitize_url($url)
     {
         $result     = false;
-        $parsed_url = self::parse_url($url);
+        $parsed_url = $this->parse_url($url);
 
         if ($parsed_url !== false) {
             // Compile back the URL as following:
@@ -122,7 +122,7 @@ class AAM_Framework_Utility_Misc
             //   - If URL belongs to a different host, return the absolute path,
             //     however, this may result in failure to validate this URL with
             //     WP core function `wp_validate_redirect` if host is not whitelisted
-            $parsed_site_url = self::parse_url(site_url());
+            $parsed_site_url = $this->parse_url(site_url());
 
             if ($parsed_url['domain'] === $parsed_site_url['domain']) {
                 $result = $parsed_url['relative'];
@@ -134,7 +134,7 @@ class AAM_Framework_Utility_Misc
             if (!empty($parsed_url['domain'])) {
                 // Making sure that URL is allowed. Do not use wp_validate_redirect
                 // to avoid adding unnecessary stuff to the URL
-                $parsed_home_url = self::parse_url(home_url());
+                $parsed_home_url = $this->parse_url(home_url());
                 $allowed_hosts   = (array) apply_filters(
                     'allowed_redirect_hosts',
                     [ $parsed_home_url['domain'] ],
@@ -160,12 +160,11 @@ class AAM_Framework_Utility_Misc
      * @param string $url
      *
      * @return array|bool
-     *
      * @access public
-     * @static
+     *
      * @version 7.0.0
      */
-    public static function parse_url($url)
+    public function parse_url($url)
     {
         $result = false;
         $parsed = wp_parse_url(call_user_func(
@@ -218,19 +217,18 @@ class AAM_Framework_Utility_Misc
      * @param string $resource_type
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function merge_permissions($base, $incoming, $resource_type)
+    public function merge_permissions($base, $incoming, $resource_type)
     {
         $result = [];
-        $config = AAM::api()->configs();
 
         // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = $config->get_config('core.settings.merge.preference');
+        $preference = AAM::api()->config->get('core.settings.merge.preference');
 
-        $preference = $config->get_config(
+        $preference = AAM::api()->config->get(
             'core.settings.' . $resource_type . '.merge.preference',
             $preference
         );
@@ -259,12 +257,11 @@ class AAM_Framework_Utility_Misc
      * @param array $incoming
      *
      * @return array
-     *
      * @access public
-     * @static
+     *
      * @version 7.0.0
      */
-    public static function merge_preferences($base, $incoming)
+    public function merge_preferences($base, $incoming)
     {
         return array_replace($incoming, $base);
     }
@@ -277,13 +274,12 @@ class AAM_Framework_Utility_Misc
      * @param string     $preference
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private static function _merge_permissions(
-        $base, $incoming, $preference = 'deny'
-    ) {
+    private function _merge_permissions($base, $incoming, $preference = 'deny')
+    {
         $result   = null;
         $effect_a = null;
         $effect_b = null;
@@ -324,11 +320,11 @@ class AAM_Framework_Utility_Misc
      * Get currently viewed website area
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function get_current_area()
+    public function get_current_area()
     {
         if (is_admin()) {
             $result = 'backend';

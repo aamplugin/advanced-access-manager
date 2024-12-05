@@ -72,7 +72,7 @@ class AAM_Service_AccessPolicy
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service

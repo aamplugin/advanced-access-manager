@@ -14,8 +14,10 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Capabilities
+class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Determine the max user level based on provided array of capabilities
@@ -23,13 +25,11 @@ class AAM_Framework_Utility_Capabilities
      * @param array $caps
      *
      * @return int
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function get_max_user_level($caps)
+    public function get_max_user_level($caps)
     {
         $max = 0;
 
@@ -52,13 +52,11 @@ class AAM_Framework_Utility_Capabilities
      * role level as well as caps for the currently logged in user.
      *
      * @return array
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function get_all_caps()
+    public function get_all_caps()
     {
         $result = [];
 

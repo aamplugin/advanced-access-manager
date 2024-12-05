@@ -173,11 +173,10 @@ class AAM_Backend_Feature
      */
     protected static function isVisible($options)
     {
-        $count   = 0;
-        $service = AAM::api()->configs();
+        $count = 0;
 
         foreach (explode(',', $options) as $option) {
-            $count += $service->get_config($option, true);
+            $count += AAM::api()->config->get($option, true);
         }
 
         return ($count > 0);

@@ -14,20 +14,20 @@
  *
  * @version 7.0.0
  */
-class AAM_Framework_Utility_Roles
+class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Get list of editable roles
      *
      * @return array Array of AAM_Framework_AccessLevel_Role
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function get_editable_roles()
+    public function get_editable_roles()
     {
         $result = [];
         $roles  = wp_roles();
@@ -50,14 +50,12 @@ class AAM_Framework_Utility_Roles
      *
      * @param string $slug
      *
-     * @return boolean
-     *
+     * @return bool
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function is_editable_role($slug)
+    public function is_editable_role($slug)
     {
         if (function_exists('get_editable_roles')) {
             $all = get_editable_roles();
@@ -84,19 +82,16 @@ class AAM_Framework_Utility_Roles
      * random number is generated with `uniqid` function.
      *
      * @param string $display_name
-     * @param string $slug               [optional] Role slug
-     * @param array  $capabilities       [optional] Array of capabilities
-     * @param bool   $ignore_caps_format [optional]
+     * @param string $slug               [Optional] Role slug
+     * @param array  $capabilities       [Optional] Array of capabilities
+     * @param bool   $ignore_caps_format [Optional]
      *
      * @return AAM_Framework_AccessLevel_Role
-     * @throws InvalidArgumentException
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function create(
+    public function create(
         $display_name,
         $slug = null,
         array $capabilities = [],
@@ -151,16 +146,14 @@ class AAM_Framework_Utility_Roles
      * Update role attributes
      *
      * @param string $slug
-     * @parma array  $data
+     * @param array  $data [Optional]
      *
      * @return AAM_Framework_AccessLevel_Role
-     *
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function update($slug, array $data = [])
+    public function update($slug, array $data = [])
     {
         $role = AAM::api()->role($slug);
 
@@ -178,14 +171,12 @@ class AAM_Framework_Utility_Roles
      *
      * @param string $slug
      *
-     * @return boolean
-     *
+     * @return bool
      * @access public
-     * @static
      *
      * @version 7.0.0
      */
-    public static function delete($slug)
+    public function delete($slug)
     {
         $role = AAM::api()->role($slug);
 

@@ -44,7 +44,7 @@ class AAM_Service_Urls
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -127,9 +127,9 @@ class AAM_Service_Urls
             $redirect = $resource->get_redirect();
 
             if (empty($redirect) || $redirect['type'] === 'default') {
-                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
+                AAM::api()->redirect->do_access_denied_redirect();
             } else {
-                AAM_Framework_Utility_Redirect::do_redirect($redirect);
+                AAM::api()->redirect->do_redirect($redirect);
             }
         }
     }

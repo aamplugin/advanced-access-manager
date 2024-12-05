@@ -60,7 +60,7 @@ class AAM_Backend_Manager
         add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
 
         // Alter user edit screen with support for multiple roles
-        if (AAM::api()->configs()->get_config('core.settings.multi_access_levels')) {
+        if (AAM::api()->config->get('core.settings.multi_access_levels')) {
             add_action('edit_user_profile', array($this, 'editUserProfilePage'));
             add_action('user_new_form', array($this, 'addNewUserPage'));
 
@@ -337,7 +337,7 @@ class AAM_Backend_Manager
     {
         $user = get_user_by('ID', $id);
 
-        $is_multirole = AAM::api()->configs()->get_config(
+        $is_multirole = AAM::api()->config->get(
             'core.settings.multi_access_levels'
         );
 

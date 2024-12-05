@@ -128,7 +128,7 @@ class AAM_Restful_CapabilityService
             $service = $this->_get_service($request);
 
             if ($request->get_param('list_all')) {
-                $caps = AAM_Framework_Utility_Capabilities::get_all_caps();
+                $caps = AAM::api()->caps->get_all_caps();
             } else {
                 $caps = array_keys($service->get_all());
             }
@@ -353,7 +353,7 @@ class AAM_Restful_CapabilityService
     {
         $result = [];
 
-        $manage = AAM::api()->configs()->get_config('service.capability.edit_caps');
+        $manage = AAM::api()->config->get('service.capability.edit_caps');
         $update = apply_filters('aam_cap_can_filter', true, $capability, 'update');
         $delete = apply_filters('aam_cap_can_filter', true, $capability, 'delete');
         $toggle = apply_filters('aam_cap_can_filter', true, $capability, 'toggle');

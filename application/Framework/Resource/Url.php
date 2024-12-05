@@ -102,7 +102,7 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
         // Step #2. Parsing the incoming URL and checking if there is the
         //          same URL without query params defined
         if (is_null($result)) {
-            $parsed_url = AAM_Framework_Utility_Misc::parse_url($url);
+            $parsed_url = AAM::api()->misc->parse_url($url);
 
             if (!empty($parsed_url['path'])) {
                 $result = $this->_find_permission_by_url($parsed_url['path']);
@@ -131,10 +131,10 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
     private function _find_permission_by_url($search_url)
     {
         $result = null;
-        $target = AAM_Framework_Utility_Misc::parse_url($search_url);
+        $target = AAM::api()->misc->parse_url($search_url);
 
         foreach ($this->_sort_permissions() as $url => $permission) {
-            $current = AAM_Framework_Utility_Misc::parse_url($url);
+            $current = AAM::api()->misc->parse_url($url);
 
             // Check if two relative paths match
             $matched = $target['path'] === $current['path'];

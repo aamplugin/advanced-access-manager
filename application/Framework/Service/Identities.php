@@ -423,7 +423,7 @@ class AAM_Framework_Service_Identities
         // Step #2. If the result is null, then it means that also would like to
         //          check role level
         if (is_null($result)) {
-            $max_user_level = AAM_Framework_Utility_Capabilities::get_max_user_level(
+            $max_user_level = AAM::api()->caps->get_max_user_level(
                 AAM::api()->role($role_slug)->capabilities
             );
 
@@ -468,18 +468,18 @@ class AAM_Framework_Service_Identities
                 //           determine if access
                 if (is_null($result) && !empty($user->roles)) {
                     // Determine list of roles to check
-                    $multi_support = AAM::api()->configs()->get_config(
+                    $multi_support = AAM::api()->config->get(
                         'core.settings.multi_access_levels'
                     );
 
                     if ($multi_support) {
-                        $configs = AAM::api()->configs();
+                        $configs = AAM::api()->config;
 
                         // If preference is not explicitly defined, fetch it from the
                         // AAM configs
-                        $preference = $configs->get_config(
+                        $preference = $configs->get(
                             'core.settings.' . AAM_Framework_Type_Resource::IDENTITY . '.merge.preference',
-                            $configs->get_config('core.settings.merge.preference')
+                            $configs->get('core.settings.merge.preference')
                         );
 
                         foreach($user->roles as $role) {

@@ -62,7 +62,7 @@ class AAM_Service_LogoutRedirect
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
@@ -126,7 +126,7 @@ class AAM_Service_LogoutRedirect
 
         // Fired after the user has been logged out successfully
         add_action('wp_logout', function() {
-            AAM_Framework_Utility_Redirect::do_redirect($this->_last_user_redirect);
+            AAM::api()->redirect->do_redirect($this->_last_user_redirect);
         }, PHP_INT_MAX);
 
         // Register RESTful API

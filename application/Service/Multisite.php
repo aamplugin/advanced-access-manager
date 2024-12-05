@@ -79,7 +79,7 @@ class AAM_Service_Multisite
         }, 10, 2);
 
 
-        $enabled = AAM::api()->configs()->get_config(self::FEATURE_FLAG);
+        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that returns the detailed information about the nature of the
@@ -146,9 +146,7 @@ class AAM_Service_Multisite
                 }
             }, 10, 3);
 
-            if (AAM::api()->configs()->get_config(
-                'multisite.settings.sync'
-            )) {
+            if (AAM::api()->config->get('multisite.settings.sync')) {
                 add_action('aam_top_right_column_action', function() {
                     echo AAM_Backend_View::loadPartial(
                         'multisite-sync-notification'
@@ -202,9 +200,7 @@ class AAM_Service_Multisite
             $restricted = false;
 
             // Check if the non-member access restriction is on
-            if (AAM::api()->configs()->get_config(
-                'multisite.settings.nonmember'
-            )) {
+            if (AAM::api()->config->get('multisite.settings.nonmember')) {
                 $restricted = !is_user_member_of_blog();
             }
 
@@ -214,7 +210,7 @@ class AAM_Service_Multisite
 
             // If user is restricted, deny access
             if ($restricted) {
-                AAM_Framework_Utility_Redirect::do_access_denied_redirect();
+                AAM::api()->redirect->do_access_denied_redirect();
             }
         }, 999);
     }
@@ -311,7 +307,7 @@ class AAM_Service_Multisite
     protected function getExcludedBlogs()
     {
         $excluded = array();
-        $config   = AAM::api()->configs()->get_config(
+        $config   = AAM::api()->config->get(
             'multisite.sync.exclude.blogs'
         );
 

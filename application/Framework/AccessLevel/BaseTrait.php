@@ -28,7 +28,6 @@
  *
  * @package AAM
  *
- * @method AAM_Framework_Service_Roles roles()
  * @method AAM_Framework_Service_Urls urls()
  * @method AAM_Framework_Service_ApiRoutes api_routes()
  * @method AAM_Framework_Service_Jwts jwts()
@@ -42,10 +41,8 @@
  * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect()
  * @method AAM_Framework_Service_Identities identities()
  * @method AAM_Framework_Service_Content content()
- * @method AAM_Framework_Service_Users users()
  * @method AAM_Framework_Service_Capabilities capabilities()
  * @method AAM_Framework_Service_Capabilities caps()
- * @method AAM_Framework_Service_Configs configs()
  * @method AAM_Framework_Service_Settings settings()
  * @method AAM_Framework_Service_AccessLevels access_levels()
  *
@@ -310,7 +307,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         if (is_object($parent)) {
             // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM::api()->configs()->get_config(
+            $multi_support = AAM::api()->config->get(
                 'core.settings.multi_access_levels'
             );
 
@@ -347,7 +344,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         if (is_object($parent)) {
             // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM::api()->configs()->get_config(
+            $multi_support = AAM::api()->config->get(
                 'core.settings.multi_access_levels'
             );
 
@@ -384,7 +381,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_preference($preference->get_ns());
-            $preferences      = AAM_Framework_Utility_Misc::merge_preferences(
+            $preferences      = AAM::api()->misc->merge_preferences(
                 $sibling_resource->get_preferences(), $preferences
             );
         }
@@ -416,7 +413,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $resource->get_resource_type(), $resource->get_internal_id(false)
             );
 
-            $permissions = AAM_Framework_Utility_Misc::merge_permissions(
+            $permissions = AAM::api()->misc->merge_permissions(
                 $sibling_resource->get_permissions(),
                 $permissions,
                 $resource->get_resource_type()

@@ -54,46 +54,46 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      */
     public static function getList()
     {
-        $service  = AAM::api()->configs();
+        $config   = AAM::api()->config;
         $settings = array(
             'service.capability.edit_caps' => array(
                 'title'       => __('Edit/Delete Capabilities', AAM_KEY),
                 'description' => AAM_Backend_View_Helper::preparePhrase('Allow to edit or delete any existing capability on the Capabilities tab. [Warning!] For experienced users only. Changing or deleting capability may result in loosing access to some features or even the entire website.', 'b'),
-                'value'       => $service->get_config('service.capability.edit_caps')
+                'value'       => $config->get('service.capability.edit_caps')
             ),
             'core.settings.ui.render_access_metabox' => array(
                 'title'       => __('Render Access Manager Metabox', AAM_KEY),
                 'description' => __('Render "Access Manager" metabox on all post, term or user edit pages.', AAM_KEY),
-                'value'       => $service->get_config('core.settings.ui.render_access_metabox'),
+                'value'       => $config->get('core.settings.ui.render_access_metabox'),
             ),
             'core.settings.ui.tips' => array(
                 'title'       => __('Show UI Tooltips', AAM_KEY),
                 'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', AAM_KEY),
-                'value'       => $service->get_config('core.settings.ui.tips')
+                'value'       => $config->get('core.settings.ui.tips')
             ),
             'core.settings.multi_access_levels' => array(
                 'title'       => __('Multiple Roles Support', AAM_KEY),
                 'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', AAM_KEY), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),
-                'value'       => $service->get_config('core.settings.multi_access_levels')
+                'value'       => $config->get('core.settings.multi_access_levels')
             ),
             'core.settings.merge.preference' => array(
                 'title'       => __('Default Access Settings Merging Preference', AAM_KEY),
                 'description' => sprintf(__('Default access settings merging preference when settings ambiguity detected. For more information refer to the %sResolving access control ambiguity in WordPress%s article.', AAM_KEY), '<a href="https://aamportal.com/article/resolving-access-controls-ambiguity-in-wordpress?ref=plugin" target="_blank">', '</a>'),
-                'value'       => $service->get_config('core.settings.merge.preference') === 'allow',
+                'value'       => $config->get('core.settings.merge.preference') === 'allow',
                 'valueOn'     => 'allow',
                 'valueOff'    => 'deny',
                 'optionOn'    => __('Allow', AAM_KEY),
                 'optionOff'   => __('Deny', AAM_KEY)
             ),
-            'core.settings.xmlrpc' => array(
+            'core.settings.xmlrpc_enabled' => array(
                 'title'       => __('XML-RPC WordPress API', AAM_KEY),
                 'description' => sprintf(__('Remote procedure call (RPC) interface is used to manage WordPress website content and features. For more information check %sXML-RPC Support%s article.', AAM_KEY), '<a href="https://codex.wordpress.org/XML-RPC_Support">', '</a>'),
-                'value'       => $service->get_config('core.settings.xmlrpc')
+                'value'       => $config->get('core.settings.xmlrpc_enabled')
             ),
-            'core.settings.restful' => array(
+            'core.settings.restful_enabled' => array(
                 'title'       => __('RESTful WordPress API', AAM_KEY),
                 'description' => sprintf(__('The RESTful interface is used to manage WordPress website content and features. For detail, refer to %sREST API handbook%s.', AAM_KEY), '<a href="https://developer.wordpress.org/rest-api/">', '</a>'),
-                'value'       => $service->get_config('core.settings.restful')
+                'value'       => $config->get('core.settings.restful_enabled')
             )
         );
 
