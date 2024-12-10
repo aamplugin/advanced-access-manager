@@ -239,11 +239,12 @@ class AAM_Restful_UserService
 
             // Iterate over the list of all users and enrich it with additional
             // attributes
-            $result = AAM::api()->users->get_list($filters, 'full');
-            $fields = $this->_determine_additional_fields($request);
+            $user_data = AAM::api()->users->list($filters, 'full');
+            $fields    = $this->_determine_additional_fields($request);
+            $result    = [ 'list' => [], 'summary' => $user_data['summary'] ];
 
-            foreach($result['list'] as $i => $user) {
-                $result['list'][$i] = $this->_prepare_output($user, $fields);
+            foreach($user_data['list'] as $user) {
+                array_push($result['list'], $this->_prepare_output($user, $fields));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);

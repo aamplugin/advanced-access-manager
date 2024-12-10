@@ -11,7 +11,7 @@
  * Settings service
  *
  * @package AAM
- * @version 6.9.34
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Settings
 {
@@ -22,17 +22,17 @@ class AAM_Framework_Service_Settings
     /**
      * Core AAM config db option
      *
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    const DB_OPTION = 'aam_access_settings';
+    const DB_OPTION = 'aam_settings';
 
     /**
      * Collection of settings
      *
      * @var array
-     *
      * @access protected
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     private $_settings = [];
 
@@ -40,9 +40,9 @@ class AAM_Framework_Service_Settings
      * Load the settings from DB
      *
      * @return void
-     *
      * @access protected
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {
@@ -53,9 +53,9 @@ class AAM_Framework_Service_Settings
      * Return list of all explicitly defined settings
      *
      * @return array|null
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function get_settings()
     {
@@ -74,9 +74,9 @@ class AAM_Framework_Service_Settings
      * @param array $settings
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function set_settings(array $settings)
     {
@@ -103,9 +103,9 @@ class AAM_Framework_Service_Settings
      * @param mixed  $default
      *
      * @return mixed
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function get_setting($key, $default = null)
     {
@@ -136,9 +136,9 @@ class AAM_Framework_Service_Settings
      * @param mixed  $value
      *
      * @return boolean
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function set_setting($key, $value)
     {
@@ -172,9 +172,9 @@ class AAM_Framework_Service_Settings
      * @param string $key
      *
      * @return boolean
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function delete_setting($key)
     {
@@ -208,27 +208,26 @@ class AAM_Framework_Service_Settings
      * Reset/delete a single configuration
      *
      * @return boolean
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function reset()
     {
         try {
-            $result       = [];
             $access_level = $this->_get_access_level();
-            $type         = is_null($access_level) ? null : $access_level::TYPE;
+            $type         = $access_level::TYPE;
+            $id           = $access_level->get_id();
 
-            if (is_null($type)) { // Return all settings
-                $this->_settings = [];
-            } elseif ($type === AAM_Framework_Type_AccessLevel::USER
-                && isset($this->_settings[$type][$access_level->ID])
+            if (in_array(
+                $type,
+                [
+                    AAM_Framework_Type_AccessLevel::USER,
+                    AAM_Framework_Type_AccessLevel::ROLE
+                ],
+                true) && isset($this->_settings[$type][$id])
             ) {
-                unset($this->_settings[$type][$access_level->ID]);
-            } elseif ($type === AAM_Framework_Type_AccessLevel::ROLE
-                && isset($this->_settings[$type][$access_level->name])
-            ) {
-                unset($this->_settings[$type][$access_level->name]);
+                unset($this->_settings[$type][$id]);
             } elseif (isset($this->_settings[$type])) {
                 unset($this->_settings[$type]);
             }
@@ -250,24 +249,24 @@ class AAM_Framework_Service_Settings
      * @return null|array
      *
      * @access private
-     * @version 6.9.34
+     * @version 7.0.0
      */
     private function _get_settings_pointer()
     {
         $result       = null;
         $access_level = $this->_get_access_level();
-        $type         = is_null($access_level) ? null : $access_level::TYPE;
+        $type         = $access_level::TYPE;
+        $id           = $access_level->get_id();
 
-        if (is_null($type)) { // Return all settings
-            $result = $this->_settings;
-        } elseif ($type === AAM_Framework_Type_AccessLevel::USER
-            && isset($this->_settings[$type][$access_level->ID])
-        ){
-            $result = $this->_settings[$type][$access_level->ID];
-        } elseif ($type === AAM_Framework_Type_AccessLevel::ROLE
-            && isset($this->_settings[$type][$access_level->name])
-        ){
-            $result = $this->_settings[$type][$access_level->name];
+        if (in_array(
+            $type,
+            [
+                AAM_Framework_Type_AccessLevel::USER,
+                AAM_Framework_Type_AccessLevel::ROLE
+            ],
+            true) && isset($this->_settings[$type][$id])
+        ) {
+            $result = $this->_settings[$type][$id];
         } elseif (isset($this->_settings[$type])) {
             $result = $this->_settings[$type];
         }
@@ -279,19 +278,18 @@ class AAM_Framework_Service_Settings
      * Set access settings pointer
      *
      * @return &array|null
-     *
      * @access private
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     private function &_set_settings_pointer()
     {
         $result       = null;
         $access_level = $this->_get_access_level();
-        $type         = is_null($access_level) ? null : $access_level::TYPE;
+        $type         = $access_level::TYPE;
+        $id           = $access_level->get_id();
 
-        if (is_null($type)) { // Return all settings
-            $result = &$this->_settings;
-        } elseif (in_array($type, [
+        if (in_array($type, [
             AAM_Framework_Type_AccessLevel::USER,
             AAM_Framework_Type_AccessLevel::ROLE
         ], true)) { // User & Role access levels have additional level
@@ -299,17 +297,11 @@ class AAM_Framework_Service_Settings
                 $this->_settings[$type] = [];
             }
 
-            if ($type === AAM_Framework_Type_AccessLevel::USER) {
-                $level_id = $access_level->ID;
-            } else {
-                $level_id = $access_level->name;
+            if (!isset($this->_settings[$type][$id])) {
+                $this->_settings[$type][$id] = [];
             }
 
-            if (!isset($this->_settings[$type][$level_id])) {
-                $this->_settings[$type][$level_id] = [];
-            }
-
-            $result = &$this->_settings[$type][$level_id];
+            $result = &$this->_settings[$type][$id];
         } else {
             if (!isset($this->_settings[$type])) {
                 $this->_settings[$type] = [];

@@ -337,7 +337,7 @@ final class AAM_Core_Gateway
      * Get collection of posts
      *
      * @param AAM_Framework_Resource_Interface $parent_resource
-     * @param array                            $args            [optional]
+     * @param array                            $args            [Optional]
      *
      * @return Generator
      *

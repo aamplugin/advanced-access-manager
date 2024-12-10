@@ -38,7 +38,7 @@ class AAM_Service_Identity
     {
         add_filter('aam_get_config_filter', function($result, $key) {
             if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = false;
+                $result = true;
             }
 
             return $result;
@@ -71,6 +71,30 @@ class AAM_Service_Identity
         if ($enabled) {
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)) {
+                    if ($resource_type === AAM_Framework_Type_Resource::USER) {
+                        $resource = new AAM_Framework_Resource_User(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Framework_Type_Resource::ROLE) {
+                        $resource = new AAM_Framework_Resource_Role(
+                            $access_level, $resource_id
+                        );
+                    } elseif ($resource_type === AAM_Service_Identity_Visibility::TYPE) {
+                        $resource = new AAM_Service_Identity_Visibility(
+                            $access_level, $resource_id
+                        );
+                    }
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**
@@ -83,22 +107,6 @@ class AAM_Service_Identity
      */
     protected function initialize_hooks()
     {
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::IDENTITY
-                ) {
-                    $resource = new AAM_Framework_Resource_Identity(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 3
-        );
-
         // Register RESTful API endpoints
         AAM_Restful_IdentityService::bootstrap();
 
@@ -115,17 +123,17 @@ class AAM_Service_Identity
         // Filter the list of users
         add_action('pre_get_users', function($query) {
             $this->_pre_get_users($query);
-        }, 999);
+        }, PHP_INT_MAX);
 
         // RESTful user querying
         add_filter('rest_user_query', function($args) {
             return $this->_rest_user_query($args);
-        });
+        }, PHP_INT_MAX);
 
         // Check if user has ability to perform certain task on other users
         add_filter('map_meta_cap', function($caps, $cap, $_, $args) {
             return $this->_map_meta_cap($caps, $cap, $args);
-        }, 999, 4);
+        }, PHP_INT_MAX, 4);
 
         // Additionally tap into password management
         add_filter('show_password_fields', function($result, $user) {
@@ -157,9 +165,7 @@ class AAM_Service_Identity
         $service = AAM::api()->identities();
 
         foreach (array_keys($roles) as $slug) {
-            // Filter out all the roles that are explicitly hidden with "Roles" rule
-            // type or implicitly by the specified role level_n capability
-            if ($service->is_denied_to('role', $slug, 'list_role') === true) {
+            if ($service->role($slug)->is_denied_to('list_role')) {
                 unset($roles[$slug]);
             }
         }
@@ -185,7 +191,7 @@ class AAM_Service_Identity
 
         foreach(array_keys($views) as $slug) {
             if ($slug !== 'all'
-                && $service->is_denied_to('role', $slug, 'list_role') === true
+                && $service->role($slug)->is_denied_to('list_role')
             ) {
                 unset($views[$slug]);
             }
@@ -208,10 +214,7 @@ class AAM_Service_Identity
      */
     private function _pre_get_users($query)
     {
-        $query->query_vars = array_merge(
-            $query->query_vars,
-            $this->_prepare_filter_args()
-        );
+        $query->query_vars = $this->_prepare_filter_args($query->query_vars);
     }
 
     /**
@@ -226,22 +229,77 @@ class AAM_Service_Identity
      */
     private function _rest_user_query($args)
     {
-        return array_merge($args, $this->_prepare_filter_args());
+        return $this->_prepare_filter_args($args);
     }
 
     /**
      * Prepare filter arguments for the user query object
      *
-     * @return array
+     * @param array $args
      *
+     * @return array
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _prepare_filter_args()
+    private function _prepare_filter_args($args)
     {
-        $result = AAM::api()->identities()->get_user_query_filters();
+        // Identify the list of users & roles that are hidden
+        $roles = AAM::api()->user()->get_resource(
+            AAM_Service_Identity_Visibility::TYPE,
+            AAM_Framework_Type_Resource::ROLE
+        );
 
-        return is_array($result) ? $result : [];
+        // Extract the list of user roles
+        $roles_not_in = [];
+        $users_not_in = [];
+
+        foreach($roles->get_permissions() as $role_id => $perms) {
+            if (array_key_exists('list_users', $perms)
+                && $perms['list_users']['effect'] === 'deny') {
+                    array_push($roles_not_in, $role_id);
+            }
+        }
+
+        $users = AAM::api()->user()->get_resource(
+            AAM_Service_Identity_Visibility::TYPE,
+            AAM_Framework_Type_Resource::USER
+        );
+
+        foreach($users->get_permissions() as $user_id => $perms) {
+            if (array_key_exists('list_user', $perms)
+                && $perms['list_user']['effect'] === 'deny') {
+                    array_push($users_not_in, $user_id);
+            }
+        }
+
+        if (!empty($args['include'])) {
+            $include         = array_diff($args['include'], $users_not_in);
+            $args['include'] = empty($include) ? [ 0 ] : $include;
+        } elseif (!empty($args['exclude'])) {
+            $args['exclude'] = array_unique(array_merge(
+                $args['exclude'],
+                $users_not_in
+            ));
+        } else {
+            $args['exclude'] = $users_not_in;
+        }
+
+        // Customize the user query accordingly to the permissions defined above
+        if (!empty($args['role__in'])) {
+            // Remove roles that are hidden
+            $role__in         = array_diff($args['role__in'], $roles_not_in);
+            $args['role__in'] = empty($role__in) ? [ uniqid('aam_') ] : $role__in;
+        } elseif (!empty($args['role__not_in'])) {
+            $args['role__not_in'] = array_unique(array_merge(
+                $args['role__not_in'],
+                $roles_not_in
+            ));
+        } else {
+            $args['role__not_in'] = $roles_not_in;
+        }
+
+        return $args;
     }
 
     /**
@@ -265,46 +323,13 @@ class AAM_Service_Identity
         $id = (isset($args[0]) ? $args[0] : null);
 
         // If targeting user ID is not provided, no need to do anything
-        if (!empty($id)) {
-            if ($cap === 'promote_user') {
-                $caps = $this->_authorize_user_action(
-                    'change_user_role', $id, $caps
-                );
-            } elseif ($cap === 'edit_user') {
-                $caps = $this->_authorize_user_action('edit_user', $id, $caps);
-            } elseif ($cap === 'delete_user') {
-                $caps = $this->_authorize_user_action('delete_user', $id, $caps);
-            } elseif ($cap === 'aam_change_password') {
-                $caps = $this->_authorize_user_action(
-                    'change_user_password', $id, $caps
-                );
-            } elseif ($cap === 'aam_list_users') {
-                $caps = $this->_authorize_user_action('list_user', $id, $caps);
-            }
-        }
-
-        return $caps;
-    }
-
-    /**
-     * Determine if current user can perform provide action against other user
-     *
-     * @param string $action
-     * @param int    $user_id
-     * @param array  $caps
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _authorize_user_action($action, $user_id, $caps)
-    {
-        // If do not allow is declared, there is no need to do anything else
-        if (!in_array('do_not_allow', $caps, true)) {
-            $service = AAM::api()->identities();
-
-            if ($service->is_denied_to('user', $user_id, $action)) {
+        if (!empty($id) && in_array(
+            $cap,
+            array_keys(AAM_Framework_Service_Identities::PERMISSION_MAP), true
+        )) {
+            if (AAM::api()->identities()->is_allowed_to(
+                AAM::api()->users->user($id), $cap
+            ) === false) {
                 array_push($caps, 'do_not_allow');
             }
         }
@@ -329,8 +354,13 @@ class AAM_Service_Identity
     {
         $is_profile = $user->ID === get_current_user_id();
 
-        if (!$is_profile && !current_user_can('aam_change_password', $user->ID)) {
-            $result = false;
+        $user->ID;
+
+        if (!$is_profile) {
+            $result = AAM::api()->identities()->is_denied_to(
+                AAM::api()->users->user($user),
+                'change_user_password'
+            ) !== true ;
         }
 
         return $result;
@@ -353,8 +383,11 @@ class AAM_Service_Identity
     {
         $is_profile = $user_id === get_current_user_id();
 
-        if (!$is_profile && !current_user_can('aam_change_password', $user_id)) {
-            $result = false;
+        if (!$is_profile) {
+            $result = AAM::api()->identities()->is_denied_to(
+                AAM::api()->users->user($user_id),
+                'change_user_password'
+            ) !== true ;
         }
 
         return $result;
@@ -380,10 +413,13 @@ class AAM_Service_Identity
         if (is_a($user, 'WP_User')) {
             $is_profile = $user->ID === get_current_user_id();
 
-            if (!$is_profile
-                && !current_user_can('aam_change_password', $user->ID)
-            ) {
-                $password = $password2 = null;
+            if (!$is_profile) {
+                if (AAM::api()->identities()->is_denied_to(
+                    AAM::api()->users->user($user),
+                    'change_user_password'
+                )) {
+                    $password = $password2 = null;
+                }
             }
         }
     }
@@ -407,11 +443,13 @@ class AAM_Service_Identity
         if (is_a($user, 'WP_User')) {
             $is_profile = $user->ID === get_current_user_id();
 
-            if (!$is_profile
-                && !current_user_can('aam_change_password', $user->ID)
-                && property_exists($data, 'user_pass')
-            ) {
-                unset($data->user_pass);
+            if (!$is_profile && property_exists($data, 'user_pass')) {
+                if (AAM::api()->identities()->is_denied_to(
+                    AAM::api()->users->user($user),
+                    'change_user_password'
+                )) {
+                    unset($data->user_pass);
+                }
             }
         }
 

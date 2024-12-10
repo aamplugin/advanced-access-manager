@@ -121,10 +121,10 @@ class AAM_Service_Urls
      */
     public function authorize()
     {
-        $resource = AAM::api()->urls()->url($_SERVER['REQUEST_URI']);
+        $service = AAM::api()->urls();
 
-        if ($resource->is_restricted()) {
-            $redirect = $resource->get_redirect();
+        if ($service->is_restricted($_SERVER['REQUEST_URI'])) {
+            $redirect = $service->get_redirect($_SERVER['REQUEST_URI']);
 
             if (empty($redirect) || $redirect['type'] === 'default') {
                 AAM::api()->redirect->do_access_denied_redirect();

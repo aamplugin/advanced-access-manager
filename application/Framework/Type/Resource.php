@@ -83,11 +83,18 @@ class AAM_Framework_Type_Resource
     const WIDGET = 'widget';
 
     /**
-     * Resource type that represents WordPress identities like roles, users or levels
+     * Resource type that represents WordPress user
      *
      * @version 7.0.0
      */
-    const IDENTITY = 'identity';
+    const USER = 'user';
+
+    /**
+     * Resource type that represents WordPress role
+     *
+     * @version 7.0.0
+     */
+    const ROLE = 'role';
 
     /**
      * Resource type that represents all URLs on a WordPress website

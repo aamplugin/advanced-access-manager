@@ -98,7 +98,7 @@ trait AAM_Framework_Resource_BaseTrait
      * Constructor
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
-     * @param mixed                               $internal_id
+     * @param mixed                               $resource_identifier
      *
      * @return void
      *
@@ -106,51 +106,37 @@ trait AAM_Framework_Resource_BaseTrait
      * @version 7.0.0
      */
     public function __construct(
-        AAM_Framework_AccessLevel_Interface $access_level, $internal_id
+        AAM_Framework_AccessLevel_Interface $access_level, $resource_identifier
     ) {
         $this->_access_level = $access_level;
-        $this->_internal_id  = $internal_id;
 
-        if (method_exists($this, 'initialize_hook')) {
-            $this->initialize_hook();
-        };
+        if (method_exists($this, 'pre_init_hook')) {
+            $this->pre_init_hook($resource_identifier);
+        } elseif (is_scalar($resource_identifier) || is_array($resource_identifier)) {
+            $this->_internal_id = $resource_identifier;
+        }
 
-        // Initialize resource settings & extend with additional methods
-        $this->initialize_resource($access_level);
-    }
-
-    /**
-     * Initialize the resource settings and extend it with additional methods
-     *
-     * @param AAM_Framework_AccessLevel_Interface $access_level
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 7.0.0
-     */
-    protected function initialize_resource(
-        AAM_Framework_AccessLevel_Interface $access_level
-    ) {
         // Read explicitly defined settings from DB
-        $settings = AAM::api()->settings([
+        $permissions = AAM::api()->settings([
             'access_level' => $access_level
         ])->get_setting($this->_get_settings_ns(), []);
 
-        if (!empty($settings)) {
-            $this->_explicit_permissions = $settings;
+        if (!empty($permissions)) {
+            $this->_explicit_permissions = $permissions;
         }
 
         // Allow other implementations to modify defined settings
         $this->_permissions = apply_filters(
-            'aam_initialize_resource_settings_filter',
-            $settings,
+            'aam_initialize_resource_permissions_filter',
+            $permissions,
             $this
         );
 
         // Extend access level with more methods
         $closures = apply_filters(
-            'aam_framework_resource_methods_filter', $this->_extended_methods, $this
+            'aam_framework_resource_methods_filter',
+            $this->_extended_methods,
+            $this
         );
 
         if (is_array($closures)) {
@@ -159,6 +145,10 @@ trait AAM_Framework_Resource_BaseTrait
             }
 
             $this->_extended_methods = $closures;
+        }
+
+        if (method_exists($this, 'post_init_hook')) {
+            $this->post_init_hook();
         }
     }
 
@@ -223,9 +213,7 @@ trait AAM_Framework_Resource_BaseTrait
     {
         $response = null;
 
-        if (is_object($this->_core_instance)
-            && property_exists($this->_core_instance, $name)
-        ) {
+        if (is_object($this->_core_instance)) {
             $response = $this->_core_instance->{$name};
         } else {
             _doing_it_wrong(

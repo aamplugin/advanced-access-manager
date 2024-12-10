@@ -22,7 +22,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
     /**
      * Get list of editable roles
      *
-     * @return array Array of AAM_Framework_AccessLevel_Role
+     * @return array Array of AAM_Framework_Proxy_Role
      * @access public
      *
      * @version 7.0.0
@@ -39,10 +39,61 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
         }
 
         foreach(array_keys($all) as $slug) {
-            array_push($result, AAM::api()->role($slug));
+            array_push($result, $this->get_role($slug));
         }
 
         return $result;
+    }
+
+    /**
+     * Alias for the get_editable_roles method
+     *
+     * @return array Array of AAM_Framework_Proxy_Role
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function editable_roles()
+    {
+        return $this->get_editable_roles();
+    }
+
+    /**
+     * Get role proxy object
+     *
+     * @param string $slug
+     *
+     * @return AAM_Framework_Proxy_Role
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_role($slug)
+    {
+        $roles = wp_roles();
+
+        if (!$roles->is_role($slug)) {
+            throw new OutOfRangeException(sprintf('Role %s does not exist', $slug));
+        }
+
+        return new AAM_Framework_Proxy_Role(
+            $roles->role_names[$slug], $roles->get_role($slug)
+        );
+    }
+
+    /**
+     * Alias for the get_role method
+     *
+     * @param string $slug
+     *
+     * @return AAM_Framework_Proxy_Role
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function role($slug)
+    {
+        return $this->get_role($slug);
     }
 
     /**
@@ -86,7 +137,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
      * @param array  $capabilities       [Optional] Array of capabilities
      * @param bool   $ignore_caps_format [Optional]
      *
-     * @return AAM_Framework_AccessLevel_Role
+     * @return AAM_Framework_Proxy_Role
      * @access public
      *
      * @version 7.0.0
@@ -139,7 +190,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
         // Creating new role
         $roles->add_role($slug, $name, array_fill_keys($caps, true));
 
-        return AAM::api()->role($slug);
+        return $this->role($slug);
     }
 
     /**
@@ -148,14 +199,14 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
      * @param string $slug
      * @param array  $data [Optional]
      *
-     * @return AAM_Framework_AccessLevel_Role
+     * @return AAM_Framework_Proxy_Role
      * @access public
      *
      * @version 7.0.0
      */
     public function update($slug, array $data = [])
     {
-        $role = AAM::api()->role($slug);
+        $role = $this->role($slug);
 
         if ($role->update($data)) {
             $result = $role;
@@ -178,7 +229,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
      */
     public function delete($slug)
     {
-        $role = AAM::api()->role($slug);
+        $role = $this->role($slug);
 
         // Verifying that role has not users assigned. Otherwise reject
         if ($role->user_count > 0) {

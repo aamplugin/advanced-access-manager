@@ -74,7 +74,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             // it is the first iteration of the check and fetch the batch of users
             // for further processing
             if ($response['progress'] === 0) {
-                $result = AAM::api()->users->get_list([
+                $result = AAM::api()->users->list([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID'
                 ], 'full');
@@ -83,11 +83,11 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $response['total_count'] = $result['summary']['total_count'];
                 $user_list               = $result['list'];
             } else {
-                $user_list = AAM::api()->users->get_list([
+                $user_list = AAM::api()->users->list([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID',
                     'offset'  => $response['offset']
-                ], 'list');
+                ]);
             }
 
             // Increment the offset and move on
@@ -145,9 +145,9 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         foreach($user_list as $user) {
             // Exclude current user and assume that they are the only Administrator
             // with high-privilege access
-            if ($user['id'] !== get_current_user_id()) {
+            if ($user->ID !== get_current_user_id()) {
                 $assigned_caps = array_keys(
-                    array_filter($user['all_capabilities'], function($v) {
+                    array_filter($user->allcaps, function($v) {
                         return !empty($v);
                     })
                 );
@@ -157,15 +157,15 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 if (!empty($matched)) {
                     array_push($response, self::_format_issue(sprintf(
                         __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', AAM_KEY),
-                        $user['display_name'],
-                        $user['id'],
+                        $user->get_display_name(),
+                        $user->ID,
                         implode(', ', $matched)
                     ), 'critical'));
                 }
 
                 // Detecting if user has elevated privileges as well
                 $elevated_caps = array_keys(
-                    array_filter($user['assigned_capabilities'], function($v, $k) {
+                    array_filter($user->caps, function($v, $k) {
                         return !empty($v) && !wp_roles()->is_role($k);
                     }, ARRAY_FILTER_USE_BOTH)
                 );
@@ -173,8 +173,8 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 if (!empty($elevated_caps)) {
                     array_push($response, self::_format_issue(sprintf(
                         __('Detected elevated capabilities for user "%s" (ID: %s): %s', AAM_KEY),
-                        $user['display_name'],
-                        $user['id'],
+                        $user->get_display_name(),
+                        $user->ID,
                         implode(', ', $elevated_caps)
                     )));
                 }

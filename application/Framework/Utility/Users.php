@@ -25,7 +25,7 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
      * @param array  $args
      * @param string $result_type [Optional] Can be "list", "summary" or "full"
      *
-     * @return array
+     * @return array|Generator
      * @access public
      *
      * @version 7.0.0
@@ -38,7 +38,6 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
             'number'         => 10,
             'offset'         => 0,
             'search'         => '',
-            'result_type'    => 'full',
             'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
             'orderby'        => 'display_name'
         ], $args);
@@ -47,11 +46,14 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
         $data  = [];
 
         if ($result_type !== 'summary') {
-            $data['list'] = [];
+            // Prepare the generator
+            $generator = function () use ($query) {
+                foreach ($query->get_results() as $user) {
+                    yield $this->get_user($user);
+                }
+            };
 
-            foreach($query->get_results() as $user) {
-                array_push($data['list'], AAM::api()->user($user));
-            }
+            $data['list'] = $generator();
         }
 
         if (in_array($result_type, [ 'full', 'summary' ], true)) {
@@ -70,6 +72,76 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
         }
 
         return $result;
+    }
+
+    /**
+     * Alias for the get_list method
+     *
+     * @param array  $args
+     * @param string $result_type [Optional] Can be "list", "summary" or "full"
+     *
+     * @return array|Generator
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function list(array $args = [], $result_type = 'list')
+    {
+        return $this->get_list($args, $result_type);
+    }
+
+    /**
+     * Get user proxy object
+     *
+     * @param mixed $identifier
+     *
+     * @return AAM_Framework_Proxy_User
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_user($identifier)
+    {
+        if (is_numeric($identifier)) { // Get user by ID
+            $user = get_user_by('id', $identifier);
+        } elseif (is_string($identifier)) {
+            if (strpos($identifier, '@') > 0) { // Email?
+                $user = get_user_by('email', $identifier);
+            } else {
+                $user = get_user_by('login', $identifier);
+            }
+        } elseif (is_a($identifier, 'WP_User')) {
+            $user = $identifier;
+        } elseif (is_a($identifier, AAM_Framework_Proxy_User::class)) {
+            $user = $identifier;
+        } else {
+            throw new InvalidArgumentException('Invalid user identifier');
+        }
+
+        if ($user === false) { // User not found
+            throw new OutOfRangeException(
+                sprintf('Cannot find user by identifier %s', $identifier)
+            );
+        } elseif (!is_a($user, AAM_Framework_Proxy_User::class)) {
+            $user = new AAM_Framework_Proxy_User($user);
+        }
+
+        return $user;
+    }
+
+    /**
+     * Alias for the get_user method
+     *
+     * @param mixed $identifier
+     *
+     * @return AAM_Framework_Proxy_User
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function user($identifier)
+    {
+        return $this->get_user($identifier);
     }
 
 }

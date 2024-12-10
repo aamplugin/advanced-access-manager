@@ -184,7 +184,7 @@ class AAM_Service_Core
         );
 
         // Run upgrades if available
-        AAM_Core_Migration::run();
+        // AAM_Core_Migration::run();
 
         // Bootstrap RESTful API
         AAM_Restful_MuService::bootstrap();

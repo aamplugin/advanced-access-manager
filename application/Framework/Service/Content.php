@@ -230,9 +230,7 @@ class AAM_Framework_Service_Content
                 ], $args, [ 'fields' => 'ids' ]));
 
                 foreach($raw_list as $id) {
-                    array_push(
-                        $result, $this->get_post($id)
-                    );
+                    array_push($result, $this->get_post($id));
                 }
             }
         } catch (Exception $e) {
@@ -312,8 +310,8 @@ class AAM_Framework_Service_Content
      * Get a single term resource
      *
      * @param mixed  $term_identifier
-     * @param string $taxonomy         [optional]
-     * @param string $post_type        [optional]
+     * @param string $taxonomy         [Optional]
+     * @param string $post_type        [Optional]
      *
      * @return AAM_Framework_Resource_Term|WP_Error
      *
@@ -381,8 +379,8 @@ class AAM_Framework_Service_Content
      * Get a single term resource
      *
      * @param mixed  $term_identifier
-     * @param string $taxonomy        [optional]
-     * @param string $post_type       [optional]
+     * @param string $taxonomy        [Optional]
+     * @param string $post_type       [Optional]
      *
      * @return AAM_Framework_Resource_Term|WP_Error
      *

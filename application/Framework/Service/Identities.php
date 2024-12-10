@@ -8,7 +8,7 @@
  */
 
 /**
- * AAM service Users & Roles (aka Identity) Governance
+ * AAM Users & Roles (aka Identity) Governance service
  *
  * @package AAM
  * @version 7.0.0
@@ -19,624 +19,394 @@ class AAM_Framework_Service_Identities
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Identity types
+     * Permissions map between user and role resources
      *
      * @version 7.0.0
      */
-    const IDENTITY_TYPE = array(
-        'role',
-        'user_role',
-        'role_level',
-        'user',
-        'user_level'
-    );
+    const PERMISSION_MAP = [
+        'list_user'            => 'list_users',
+        'edit_user'            => 'edit_users',
+        'delete_user'          => 'delete_users',
+        'promote_user'         => 'promote_users',
+        'change_user_password' => 'change_users_password'
+    ];
 
     /**
-     * Allowed effect types
+     * Get list of users
      *
-     * @version 7.0.0
-     */
-    const EFFECT_TYPES = array(
-        'allow',
-        'deny'
-    );
-
-    /**
-     * Allowed permission types
+     * @param array  $args        [Optional]
+     * @param string $result_type [Optional]
      *
-     * @version 7.0.0
-     */
-    const PERMISSION_TYPES = array(
-        'list_role',
-        'list_user',
-        'edit_user',
-        'delete_user',
-        'change_user_password',
-        'change_user_role'
-    );
-
-    /**
-     * Return list of permissions for give subject
-     *
-     * @return array
+     * @return array|Generator
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_permissions()
+    public function get_users($args = [], $result_type = 'list')
     {
         try {
-            $result   = [];
-            $resource = $this->get_resource();
+            $user_data = AAM::api()->users->list($args, $result_type);
+            $result    = [];
 
-            foreach($resource->get_permissions() as $id => $permission) {
-                array_push($result, $this->_prepare_permission(
-                    $permission, $id, $resource
-                ));
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get existing permission by ID
-     *
-     * @param string $id Permission ID
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_permission_by_id($id)
-    {
-        try {
-            $resource    = $this->get_resource();
-            $permissions = $resource->get_permissions();
-
-            if (!array_key_exists($id, $permissions)) {
-                throw new OutOfRangeException('Permission does not exist');
-            }
-
-            $result = $this->_prepare_permission(
-                $permissions[$id], $id, $resource
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create new permission
-     *
-     * @param array $permission Permission data
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function create_permission(array $permission)
-    {
-        try {
-            // Validating that incoming data is correct and normalize is for storage
-            $this->_validate_permission($permission);
-
-            $resource = $this->get_resource();
-
-            // Prepare array of new permissions
-            $key   = uniqid('id_');
-            $perms = array_merge($resource->get_permissions(true), [
-                $key => $permission
-            ]);
-
-            if (!$resource->set_permissions($perms)) {
-                throw new RuntimeException('Failed to persist settings');
-            }
-
-            $result = $this->get_permission_by_id($key);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Update existing permission
-     *
-     * @param string $id     Permission ID
-     * @param string $effect Either allow or deny
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function update_permission($id, $effect)
-    {
-        try {
-            $resource   = $this->get_resource();
-            $permission = $this->get_permission_by_id($id);
-
-            // Update permission's effect
-            if (in_array($effect, self::EFFECT_TYPES, true)) {
-                $permission['effect'] = $effect;
-            } else {
-                throw new InvalidArgumentException('The effect is invalid');
-            }
-
-            // Note! Getting here all rules (even inherited) to ensure that user can
-            // override the inherited rule
-            $permissions = $resource->get_permissions();
-
-            // Override the permission or create new one
-            $permissions[$id] = $permission;
-            $success          = $resource->set_permissions($permissions);
-
-            if (empty($success)) {
-                throw new RuntimeException('Failed to update permissions');
-            }
-
-            $result = $this->get_permission_by_id($id);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Delete permission
-     *
-     * @param string $id Permission ID
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function delete_permission($id)
-    {
-        try {
-            $resource = $this->get_resource();
-
-            // Note! User can delete only explicitly set rule (overwritten rule)
-            $permissions = $resource->get_permissions(true);
-
-            if (!array_key_exists($id, $permissions)) {
-                throw new OutOfRangeException(
-                    'Permission is not explicitly defined'
-                );
-            } else {
-                unset($permissions[$id]);
-            }
-
-            $result = $resource->set_permissions($permissions);
-
-            if (!$result) {
-                throw new RuntimeException('Failed to persist changes');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Reset all permissions
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function reset()
-    {
-        try {
-            // Reset settings to default
-            $success = $this->get_resource()->reset();
-
-            if ($success) {
-                $result = $this->get_permissions();
-            } else {
-                throw new RuntimeException('Failed to reset permissions');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Determine if specific action is allowed to given identity
-     *
-     * @param string     $identity_type  Can be one of the self::IDENTITY_TYPE
-     * @param string|int $identity       Identity ID - role slug, user ID or level ID
-     * @param string     $permission     Ca be one of the self::PERMISSION_TYPES
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_allowed_to(
-        $identity_type, $identity, $permission
-    ) {
-        try {
-            if ($identity_type === 'role') {
-                $result = $this->_is_role_allowed_to($identity, $permission);
-            } elseif ($identity_type === 'user_role') {
-                $result = $this->get_resource()->is_allowed_to(
-                    'user_role', $identity, $permission
-                );
-            } elseif ($identity_type === 'role_level') {
-                $result = $this->get_resource()->is_allowed_to(
-                    'role_level', $identity, $permission
-                );
-            } elseif ($identity_type === 'user') {
-                $result = $this->_is_user_allowed_to($identity, $permission);
-            } elseif ($identity_type === 'user_level') {
-                $result = $this->get_resource()->is_allowed_to(
-                    'user_level', $identity, $permission
-                );
-            } else {
-                throw new InvalidArgumentException('The identity type is incorrect');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Determine if specific action is denied to given identity
-     *
-     * @param string     $identity_type  Can be one of the self::IDENTITY_TYPE
-     * @param string|int $identity       Identity ID - role slug, user ID or level ID
-     * @param string     $permission     Ca be one of the self::PERMISSION_TYPES
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_denied_to($identity_type, $identity, $permission)
-    {
-        $result = $this->is_allowed_to($identity_type, $identity, $permission);
-
-        return is_bool($result) ? !$result : null;
-    }
-
-    /**
-     * Based on existing access controls return WP_User_Query filters
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_user_query_filters()
-    {
-        global $wpdb;
-
-        $result = [];
-
-        try {
-            $resource    = $this->get_resource();
-            $permissions = $resource->get_permissions();
-
-            // Making sure that query var properties are properly initialized
-            $role__not_in  = [];
-            $login__not_in = [];
-            $target_levels = [];
-
-            foreach($permissions as $permission) {
-                if ($permission['permission'] === 'list_user'
-                    && $permission['effect'] === 'deny'
-                ) {
-                    if ($permission['identity_type'] === 'user_role') {
-                        array_push($role__not_in, $permission['identity']);
-                    } elseif ($permission['identity_type'] === 'user') {
-                        // Get user by ID
-                        $user = get_user_by('ID', $permission['identity']);
-
-                        if (is_a($user, WP_User::class)) {
-                            array_push($login__not_in, $user->user_login);
-                        }
-                    } elseif ($permission['identity_type'] === 'user_level') {
-                        array_push($target_levels, intval($permission['identity']));
+            if ($result_type !== 'summary') {
+                // Prepare the generator
+                $generator = function () use ($user_data) {
+                    foreach ($user_data['list'] as $user) {
+                        yield $this->_get_resource(
+                            AAM_Framework_Type_Resource::USER, $user
+                        );
                     }
-                }
+                };
+
+                $result['list'] = $generator();
             }
 
-            if (count($role__not_in)) {
-                $result['role__not_in'] = $role__not_in;
+            if (in_array($result_type, [ 'full', 'summary' ], true)) {
+                $result['summary'] = $user_data['summary'];
             }
-
-            if (count($login__not_in)) {
-                $result['login__not_in'] = $login__not_in;
-            }
-
-            if (count($target_levels) > 0) {
-                $result['meta_key']     = $wpdb->get_blog_prefix() . 'user_level';
-                $result['meta_value']   = $target_levels;
-                $result['meta_compare'] = 'NOT IN';
-                $result['meta_type']    = 'NUMERIC';
-            }
-        } catch (Exception $e) {
+        }  catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
 
         return $result;
+    }
+
+    /**
+     * Alias for the get_users method
+     *
+     * @param array $args [Optional]
+     *
+     * @return Generator
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function users($args = [])
+    {
+        return $this->get_users($args);
+    }
+
+    /**
+     * Get list of roles
+     *
+     * @return Generator
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_roles()
+    {
+        try {
+            $generator = function() {
+                foreach(AAM::api()->roles->get_editable_roles() as $role) {
+                    yield $this->_get_resource(
+                        AAM_Framework_Type_Resource::ROLE, $role
+                    );
+                }
+            };
+
+            $result = $generator();
+        }  catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_roles method
+     *
+     * @return Generator
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function roles()
+    {
+        return $this->get_roles();
+    }
+
+    /**
+     * Get user resource
+     *
+     * @param mixed $identifier
+     *
+     * @return AAM_Framework_Resource_User
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_user($identifier)
+    {
+        try {
+            $user   = AAM::api()->users->user($identifier);
+            $result = $this->_get_resource(
+                AAM_Framework_Type_Resource::USER, $user
+            );
+        }  catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_user method
+     *
+     * @param mixed $identifier
+     *
+     * @return AAM_Framework_Resource_User
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function user($identifier)
+    {
+        return $this->get_user($identifier);
+    }
+
+    /**
+     * Get role resource
+     *
+     * @param string $role_slug
+     *
+     * @return AAM_Framework_Resource_Role
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function get_role($role_slug)
+    {
+        try {
+            $role   = AAM::api()->roles->role($role_slug);
+            $result = $this->_get_resource(
+                AAM_Framework_Type_Resource::ROLE, $role
+            );
+        }  catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_role method
+     *
+     * @param string $role_slug
+     *
+     * @return AAM_Framework_Resource_Role
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function role($role_slug)
+    {
+        return $this->get_role($role_slug);
+    }
+
+    /**
+     * Reset either all identity rules or for a specific identity type
+     *
+     * @param string $identity_type [Optional] Allowed either "user" or "role"
+     *
+     * @return bool
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function reset($identity_type = null, $identity_id = null)
+    {
+        try {
+            if (!empty($identity_type) && !in_array($identity_type, [
+                AAM_Framework_Type_Resource::USER,
+                AAM_Framework_Type_Resource::ROLE
+            ], true)) {
+                throw new InvalidArgumentException('Invalid identity type');
+            }
+
+            // If identifier is not provided, assume that we are trying either to
+            // reset permissions for specific identity type of all permissions
+            if (empty($identity_id)) {
+                $service = AAM::api()->settings($this->_get_access_level());
+
+                if (empty($identity_type)) {
+                    // Resetting both resources
+                    $result = $service->delete_setting(
+                        AAM_Framework_Type_Resource::USER
+                    );
+
+                    $result = $result && $service->delete_setting(
+                        AAM_Framework_Type_Resource::ROLE
+                    );
+                } else {
+                    $result = $service->delete_setting($identity_type);
+                }
+            } else {
+                $identity = $this->_get_access_level()->get_resource(
+                    $identity_type, $identity_id
+                );
+
+                $result = $identity->reset();
+            }
+        }  catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if current access level is restricted for given permission
+     *
+     * @param mixed  $identity
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_denied_to($identity, $permission)
+    {
+        try {
+            // If $identity is the user or role proxy, take into considerations all
+            // the necessary relationships and determine if permission is denied or
+            // not
+            if (is_a($identity, AAM_Framework_Proxy_Interface::class)) {
+                $result = $this->_determine_instance_access($identity, $permission);
+            } elseif (is_a($identity, AAM_Framework_Resource_Interface::class)) {
+                $result = $this->_determine_resource_access($identity, $permission);
+            } else {
+                throw new InvalidArgumentException('Invalid identity provided');
+            }
+        }  catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if current access level has given permission
+     *
+     * @param mixed  $identity
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_allowed_to($identity, $permission)
+    {
+        $result = $this->is_denied_to($identity, $permission);
+
+        return is_bool($result) ? !$result : $result;
     }
 
     /**
      * Get identity resource
      *
-     * @return AAM_Framework_Resource_Identity
+     * @param string $type
+     * @param mixed  $identifier
      *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_resource()
-    {
-        try {
-            $access_level = $this->_get_access_level();
-            $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::IDENTITY
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check if permission is allowed for given role
-     *
-     * @param string $role_slug
-     * @param string $permission
-     *
-     * @return boolean|null
+     * @return AAM_Framework_Resource_Role|AAM_Framework_Resource_User
      *
      * @access private
      * @version 7.0.0
      */
-    private function _is_role_allowed_to($role_slug, $permission)
+    private function _get_resource($type, $identifier)
     {
-        $resource = $this->get_resource();
-
-        // Step #1. Determine if access controls for the role are explicitly defined
-        //          and if so, use it
-        $result = $resource->is_allowed_to('role', $role_slug, $permission);
-
-        // Step #2. If the result is null, then it means that also would like to
-        //          check role level
-        if (is_null($result)) {
-            $max_user_level = AAM::api()->caps->get_max_user_level(
-                AAM::api()->role($role_slug)->capabilities
-            );
-
-            $result = $resource->is_allowed_to(
-                'role_level', $max_user_level, $permission
-            );
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource($type, $identifier);
     }
 
     /**
-     * Determine if current user has permission over provided user
+     * Determine if current access level has denied permission for given role or
+     * user
      *
-     * @param int    $user_id
-     * @param string $permission
+     * This method also takes into consideration inheritance mechanism and properly
+     * merged access controls to determine the correct permissions
      *
-     * @return boolean|null
+     * @param AAM_Framework_Proxy_User|AAM_Framework_Proxy_Role $identity
+     * @param string                                            $permission
      *
+     * @return bool|null
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _is_user_allowed_to($user_id, $permission)
+    private function _determine_instance_access($identity, $permission)
     {
-        $resource = $this->get_resource();
+        if (is_a($identity, AAM_Framework_Proxy_User::class)) {
+            // Step #1. Checking if there are any explicit settings defined for a
+            // given user and if so use only them
+            $result = $this->user($identity)->is_denied_to($permission);
 
-        // Check #1. Do we have access controls defined for a give user explicitly?
-        $result = $resource->is_allowed_to('user', $user_id, $permission);
-
-        if (is_null($result)) {
-            $user = get_user_by('ID', $user_id);
-
-            // Making sure that user actually exists
-            if (is_a($user, WP_User::class)) {
-                // Check #2. Do we have access controls defined for user's access
-                //           level?
-                $result = $resource->is_allowed_to(
-                    'user_level', $user->user_level, $permission
+            // Iterate over the list of all user roles and merge access controls
+            // accordingly
+            if (is_null($result)) {
+                $multi_support = AAM::api()->config->get(
+                    'core.settings.multi_access_levels'
                 );
 
-                // Check #3. Finally, iterate over the list of user's roles and
-                //           determine if access
-                if (is_null($result) && !empty($user->roles)) {
-                    // Determine list of roles to check
-                    $multi_support = AAM::api()->config->get(
-                        'core.settings.multi_access_levels'
-                    );
-
-                    if ($multi_support) {
-                        $configs = AAM::api()->config;
-
-                        // If preference is not explicitly defined, fetch it from the
-                        // AAM configs
-                        $preference = $configs->get(
-                            'core.settings.' . AAM_Framework_Type_Resource::IDENTITY . '.merge.preference',
-                            $configs->get('core.settings.merge.preference')
-                        );
-
-                        foreach($user->roles as $role) {
-                            $res = $resource->is_allowed_to(
-                                'user_role', $role, $permission
-                            );
-
-                            if ($res === false) { // Denied
-                                if ($preference === 'deny') {
-                                    $result = false;
-                                    break; // Break immediately
-                                } else {
-                                    $result = $result || $res;
-                                }
-                            } elseif ($res !== null) {
-                                $result = $res;
-                            }
-                        }
-                    } else {
-                        $result = $resource->is_allowed_to(
-                            'user_role', array_values($user->roles)[0], $permission
-                        );
-                    }
+                if ($multi_support) {
+                    $roles = $identity->roles;
+                } else {
+                    $user_roles = array_values($identity->roles);
+                    $roles = !empty($user_roles) ? [ array_shift($user_roles) ] : [];
                 }
-            } else {
-                throw new OutOfBoundsException(
-                    sprintf('User with ID %d does not exist', $user_id)
-                );
+
+                $permissions = [];
+
+                foreach($roles as $role) {
+                    $permissions = AAM::api()->misc->merge_permissions(
+                        $permissions,
+                        $this->role($role)->get_permissions(),
+                        AAM_Framework_Type_Resource::ROLE
+                    );
+                }
+
+                $role_permission = self::PERMISSION_MAP[$permission];
+
+                if (array_key_exists($role_permission, $permissions)) {
+                    $result = $permissions[$role_permission]['effect'] !== 'allow';
+                }
             }
+        } elseif (is_a($identity, AAM_Framework_Proxy_Role::class)) {
+            $result = $this->role($identity->slug)->is_denied_to($permission);
+        } else {
+            throw new InvalidArgumentException('Invalid proxy instance');
         }
 
         return $result;
     }
 
     /**
-     * Prepare permission model
+     * Determine if current access level has denied permission for a given resource
      *
-     * @param array                           $permissions
-     * @param string                          $id
-     * @param AAM_Framework_Resource_Identity $resource
+     * @param AAM_Framework_Resource_User|AAM_Framework_Resource_Role $resource
+     * @param string                                                  $permission
      *
-     * @return array
-     *
+     * @return bool|null
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _prepare_permission($permission, $id, $resource)
+    private function _determine_resource_access($resource, $permission)
     {
-        $explicit = $resource->get_permissions(true);
+        $result = null;
 
-        return array_merge([
-            'id'           => $id,
-            'is_inherited' => !array_key_exists($id, $explicit),
-        ], $permission);
-    }
-
-    /**
-     * Validate the permission's incoming data
-     *
-     * @param array $permission Incoming permission's data
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_permission(array $permission)
-    {
-        if (isset($permission['identity_type'])) {
-            $identity_type = $permission['identity_type'];
+        if (is_object($resource) && in_array(get_class($resource), [
+                AAM_Framework_Resource_User::class,
+                AAM_Framework_Resource_Role::class
+            ], true)
+        ) {
+            $result = $resource->is_denied_to($permission);
         } else {
-            $identity_type = null;
+            throw new InvalidArgumentException('Invalid identity provided');
         }
 
-        if (!in_array($identity_type, self::IDENTITY_TYPE, true)) {
-            throw new InvalidArgumentException('Invalid identity type');
-        }
-
-        // Do some additional validate
-        if ($identity_type === 'user') {
-            $this->_validate_user($permission['identity']);
-        } elseif (in_array($identity_type, ['role', 'user_role'], true)) {
-            $this->_validate_role($permission['identity']);
-        } elseif (in_array($identity_type, ['role_level', 'user_level'], true)) {
-            $this->_validate_level($permission['identity']);
-        }
-    }
-
-    /**
-     * Validate user identifier
-     *
-     * @param string|int $id
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_user($id)
-    {
-        $user = null;
-
-        if (is_numeric($id)) { // Get user by ID
-            $user = get_user_by('id', $id);
-        } elseif (is_string($id)) {
-            if (strpos($id, '@') > 0) { // Email?
-                $user = get_user_by('email', $id);
-            } elseif (strlen(sanitize_user($id))) {
-                $user = get_user_by('login', $id);
-            }
-        }
-
-        if (!is_a($user, 'WP_User')
-            && !apply_filters('aam_validate_user_identifier_filter', true, $id)
-        ) {
-            throw new OutOfRangeException(
-                'Invalid user identifier or user does not exist'
-            );
-        }
-    }
-
-    /**
-     * Validate role
-     *
-     * @param string $slug
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_role($slug)
-    {
-        if (!wp_roles()->is_role($slug)
-            && !apply_filters('aam_validate_role_identifier_filter', true, $slug)
-        ) {
-            throw new OutOfRangeException(
-                'Invalid role identifier or role does not exist'
-            );
-        }
-    }
-
-    /**
-     * Validate level
-     *
-     * @param string|int $level
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _validate_level($level)
-    {
-        if (!is_numeric($level)) {
-            throw new InvalidArgumentException('Invalid user level identifier');
-        }
+        return $result;
     }
 
 }

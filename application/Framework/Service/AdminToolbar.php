@@ -251,7 +251,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Get Admin Toolbar resource
      *
-     * @param string $item_id [optional]
+     * @param string $item_id [Optional]
      *
      * @return AAM_Framework_Resource_AdminToolbar
      *
@@ -274,8 +274,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Update existing item permission
      *
-     * @param string $item_id   Menu item ID
-     * @param bool   $is_hidden Is hidden or not
+     * @param string $item_id
+     * @param bool   $is_hidden [Optional]
      *
      * @return array
      *

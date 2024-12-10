@@ -30,109 +30,184 @@ class AAM_Restful_IdentityService
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get the list of rules
-            $this->_register_route('/identities', array(
+            // Get the list of roles with permissions
+            $this->_register_route('/identity/roles', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_permissions'),
+                'callback'            => array($this, 'get_role_list'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
 
-            // Create a new permissions
-            $this->_register_route('/identity', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'create_permissions'),
+            // Get a specific role with permissions
+            $this->_register_route('/identity/role/(?P<slug>.+)', array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array($this, 'get_role'),
                 'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'args'                => [
+                    'slug' => array(
+                        'description' => 'Role slug',
+                        'type'        => 'string',
+                        'required'    => true
+                    )
+                ]
+            ));
+
+            // Get the list of users with permissions
+            $this->_register_route('/identity/users', array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array($this, 'get_user_list'),
+                'permission_callback' => array($this, 'check_permissions'),
+                'args'                => [
+                    'search' => array(
+                        'description' => 'Search string',
+                        'type'        => 'string'
+                    ),
+                    'offset' => array(
+                        'description' => 'Pagination offset',
+                        'type'        => 'number',
+                        'default'     => 0
+                    ),
+                    'per_page' => array(
+                        'description' => 'Pagination limit per page',
+                        'type'        => 'number',
+                        'default'     => 10
+                    ),
+                    'role'   => array(
+                        'description' => 'Return users only for given role',
+                        'type'        => 'string'
+                    )
+                ]
+            ));
+
+            // Get a specific role with permissions
+            $this->_register_route('/identity/user/(?P<id>[\d]+)', array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array($this, 'get_user'),
+                'permission_callback' => array($this, 'check_permissions'),
+                'args'                => [
+                    'id' => array(
+                        'description' => 'User id',
+                        'type'        => 'number',
+                        'required'    => true
+                    )
+                ]
+            ));
+
+            // Set identity permissions
+            $this->_register_route('/identity/(?P<type>[\w]+)/(?P<id>[^/]+)', array(
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => array($this, 'update_identity_permissions'),
+                'permission_callback' => array($this, 'check_permissions'),
+                'args'                => [
+                    'type' => [
+                        'description' => 'Identity type: either role or user',
+                        'type'        => 'string',
+                        'required'    => true,
+                        'enum'        => [ 'role', 'user' ]
+                    ],
+                    'id' => [
+                        'description' => 'Identity identifier',
+                        'type'        => [ 'string', 'number' ],
+                        'required'    => true
+                    ],
                     'permissions' => array(
-                        'description'       => 'Collection of permissions',
-                        'type'              => 'array',
-                        'required'          => true,
-                        'items'             => array(
-                            'type'       => 'object',
+                        'description' => 'Collection of permissions',
+                        'type'        => 'array',
+                        'required'    => true,
+                        'items'       => array(
+                            'type' => 'object',
                             'properties' => array(
                                 'permission' => array(
-                                    'type' => 'string',
-                                    'required' => true,
-                                    'enum' => AAM_Framework_Service_Identities::PERMISSION_TYPES
+                                    'type'     => 'string',
+                                    'required' => true
                                 ),
                                 'effect' => array(
-                                    'type' => 'string',
-                                    'required' => true,
-                                    'enum' => AAM_Framework_Service_Identities::EFFECT_TYPES
-                                ),
-                                'identity_type' => [
                                     'type'     => 'string',
-                                    'required' => true,
-                                    'enum'     => AAM_Framework_Service_Identities::IDENTITY_TYPE
-                                ],
-                                'identity' => [
-                                    'type'     => [ 'string', 'number' ],
-                                    'required' => true
-                                ]
+                                    'default'  => 'deny',
+                                    'enum'     => [ 'allow', 'deny' ]
+                                )
                             )
                         )
                     )
-                )
+                ]
             ));
 
-            // Get existing permission by ID
-            $this->_register_route('/identity/(?P<id>[\w_]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
-                    'id' => array(
-                        'description' => __('Permission unique ID', AAM_KEY),
-                        'type'        => 'string',
-                        'required'    => true
-                    )
-                )
-            ));
-
-            // Update an existing permission by ID
-            $this->_register_route('/identity/(?P<id>[\w_]+)', array(
+            // Set a single identity permission
+            $this->_register_route('/identity/(?P<type>[\w]+)/(?P<id>.+)/(?P<permission>[\w-]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_permission'),
+                'callback'            => array($this, 'update_identity_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
-                    'id' => array(
-                        'description' => __('Permission unique ID', AAM_KEY),
+                'args'                => [
+                    'type' => [
+                        'description' => 'Identity type: either role or user',
+                        'type'        => 'string',
+                        'required'    => true,
+                        'enum'        => [ 'role', 'user' ]
+                    ],
+                    'id' => [
+                        'description' => 'Identity identifier',
+                        'type'        => [ 'string', 'number' ],
+                        'required'    => true
+                    ],
+                    'permission' => [
+                        'description' => 'Permission',
                         'type'        => 'string',
                         'required'    => true
-                    ),
-                    'effect' => array(
-                        'type' => 'string',
-                        'required' => true,
-                        'enum' => AAM_Framework_Service_Identities::EFFECT_TYPES
+                    ],
+                    'effect' => [
+                        'type'     => 'string',
+                        'default'  => 'deny',
+                        'enum'     => [ 'allow', 'deny' ]
+                    ]
+                ]
+            ]);
+
+
+            // Reset permissions for all identities with specific type
+            $this->_register_route('/identity/(?P<type>[\w]+)', array(
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => array($this, 'reset_permissions'),
+                'permission_callback' => array($this, 'check_permissions'),
+                'args'                => array(
+                    'type' => array(
+                        'description' => __('Identity type', AAM_KEY),
+                        'type'        => 'string',
+                        'required'    => true,
+                        'enum'        => [ 'role', 'user' ]
                     )
                 )
             ));
 
-            // Delete permission
-            $this->_register_route('/identity/(?P<id>[\w_]+)', array(
+            // Reset identity permissions
+            $this->_register_route('/identity/(?P<type>[\w]+)/(?P<id>.+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_permission'),
+                'callback'            => array($this, 'reset_identity_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
-                        'description' => __('Permission unique ID', AAM_KEY),
+                    'type' => array(
+                        'description' => __('Identity type', AAM_KEY),
                         'type'        => 'string',
+                        'required'    => true,
+                        'enum'        => [ 'role', 'user' ]
+                    ),
+                    'id' => [
+                        'description' => 'Identity identifier',
+                        'type'        => [ 'string', 'number' ],
                         'required'    => true
-                    )
+                    ]
                 )
             ));
 
             // Reset all permissions
-            $this->_register_route('/identity', array(
+            $this->_register_route('/identities', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
+                'callback'            => array($this, 'reset_all_permissions'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
         });
     }
 
     /**
-     * Get list of all permissions
+     * Get list of roles with permissions
      *
      * @param WP_REST_Request $request
      *
@@ -141,14 +216,14 @@ class AAM_Restful_IdentityService
      * @access public
      * @version 7.0.0
      */
-    public function get_permissions(WP_REST_Request $request)
+    public function get_role_list(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
             $result  = [];
 
-            foreach($service->get_permissions() as $permission) {
-                array_push($result, $this->_enrich_model($permission));
+            foreach($service->get_roles() as $role) {
+                array_push($result, $this->_prepare_role_output($role));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -158,7 +233,7 @@ class AAM_Restful_IdentityService
     }
 
     /**
-     * Create new permissions
+     * Get a specific role with permissions
      *
      * @param WP_REST_Request $request
      *
@@ -167,65 +242,12 @@ class AAM_Restful_IdentityService
      * @access public
      * @version 7.0.0
      */
-    public function create_permissions(WP_REST_Request $request)
+    public function get_role(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = [];
-
-            foreach($request->get_param('permissions') as $permission) {
-                array_push($result, $this->_enrich_model(
-                    $service->create_permission($permission)
-                ));
-            }
-        } catch (Exception $e) {
-            $result = $this->_prepare_error_response($e);
-        }
-
-        return rest_ensure_response($result);
-    }
-
-    /**
-     * Get permission by ID
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_permission(WP_REST_Request $request)
-    {
-        try {
-            $service = $this->_get_service($request);
-            $result  = $this->_enrich_model($service->get_permission_by_id(
-                $request->get_param('id')
-            ));
-        } catch (Exception $e) {
-            $result = $this->_prepare_error_response($e);
-        }
-
-        return rest_ensure_response($result);
-    }
-
-    /**
-     * Update permission
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function update_permission(WP_REST_Request $request)
-    {
-        try {
-            $service = $this->_get_service($request);
-            $result  = $service->update_permission(
-                $request->get_param('id'),
-                $request->get_param('effect')
+            $result  = $this->_prepare_role_output(
+                $service->role($request->get_param('slug'))
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -235,7 +257,53 @@ class AAM_Restful_IdentityService
     }
 
     /**
-     * Delete existing permission
+     * Get paginated list of users with permissions
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_user_list(WP_REST_Request $request)
+    {
+        try {
+            // Prepare the list of filters
+            $filters = [
+                'number'   => $request->get_param('per_page'),
+                'search'   => $request->get_param('search'),
+                'offset'   => $request->get_param('offset')
+            ];
+
+            $role_filter = $request->get_param('role');
+
+            if (!empty($role_filter)) {
+                $filters['role__in'] = $role_filter;
+            }
+
+            // Modify the search, if not empty
+            if (!empty($filters['search'])) {
+                $filters['search'] .= '*';
+            }
+
+            // Iterate over the list of all users and enrich it with additional
+            // attributes
+            $user_data = $this->_get_service($request)->get_users($filters, 'full');
+            $result    = [ 'list' => [], 'summary' => $user_data['summary'] ];
+
+            foreach($user_data['list'] as $user) {
+                array_push($result['list'], $this->_prepare_user_output($user));
+            }
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Get a specific user with permissions
      *
      * @param WP_REST_Request $request
      *
@@ -244,12 +312,117 @@ class AAM_Restful_IdentityService
      * @access public
      * @version 7.0.0
      */
-    public function delete_permission(WP_REST_Request $request)
+    public function get_user(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = [
-                'success' => $service->delete_permission($request->get_param('id'))
+            $result  = $this->_prepare_user_output(
+                $service->user($request->get_param('id'))
+            );
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Update identity's permissions
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function update_identity_permissions(WP_REST_Request $request)
+    {
+        try {
+            $service = $this->_get_service($request);
+            $type    = $request->get_param('type');
+
+            if ($type === AAM_Framework_Type_Resource::ROLE) {
+                $identity = $service->role($request->get_param('id'));
+            } else {
+                $identity = $service->user($request->get_param('id'));
+            }
+
+            $normalized = [];
+
+            // Normalize the array of permissions
+            foreach($request->get_param('permissions') as $permission) {
+                $normalized[$permission['permission']] = [
+                    'effect' => $permission['effect']
+                ];
+            }
+
+            $identity->set_permissions($normalized, true);
+
+            $result = $identity->get_permissions();
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Update identity's single permission
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function update_identity_permission(WP_REST_Request $request)
+    {
+        try {
+            $service    = $this->_get_service($request);
+            $permission = $request->get_param('permission');
+            $effect     = $request->get_param('effect');
+            $type       = $request->get_param('type');
+
+            if ($type === AAM_Framework_Type_Resource::ROLE) {
+                $identity = $service->role($request->get_param('id'));
+            } else {
+                $identity = $service->user($request->get_param('id'));
+            }
+
+            if ($effect !== 'allow') {
+                $identity->deny($permission);
+            } else {
+                $identity->allow($permission);
+            }
+
+            $permissions = $identity->get_permissions();
+            $result      = $permissions[$permission];
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Reset permissions by identity type
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function reset_permissions(WP_REST_Request $request)
+    {
+        try {
+            $result = [
+                'success' => $this->_get_service($request)->reset(
+                    $request->get_param('type')
+                )
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -268,11 +441,38 @@ class AAM_Restful_IdentityService
      * @access public
      * @version 7.0.0
      */
-    public function reset_permissions(WP_REST_Request $request)
+    public function reset_all_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = $service->reset();
+            $result = [
+                'success' => $this->_get_service($request)->reset()
+            ];
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Reset specific identity permissions
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset_identity_permissions(WP_REST_Request $request)
+    {
+        try {
+            $result = [
+                'success' => $this->_get_service($request)->reset(
+                    $request->get_param('type'),
+                    $request->get_param('id')
+                )
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -295,57 +495,43 @@ class AAM_Restful_IdentityService
     }
 
     /**
-     * Enrich the identity model with additional information
+     * Prepare the role output
      *
-     * @param array $data
+     * @param AAM_Framework_Resource_Role $role
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _enrich_model($data)
+    private function _prepare_role_output($role)
     {
-        $type = $data['identity_type'];
+        return [
+            'id'            => $role->slug,
+            'name'          => $role->display_name,
+            'permissions'   => $role->get_permissions(),
+            'is_customized' => $role->is_customized()
+        ];
+    }
 
-        // Adding also display name
-        if ($type === 'user') {
-            if (is_numeric($data['identity'])) {
-                $user = get_user_by('ID', $data['identity']);
-
-                if (is_a($user, 'WP_User')) {
-                    $data['identity_title'] = $user->display_name;
-                } else {
-                    $data['identity_title'] = __('User does not exist', AAM_KEY);
-                }
-            } else {
-                $data['identity_title'] = apply_filters(
-                    'aam_rest_identity_identity_title_filter',
-                    __('Unknown user name', AAM_KEY),
-                    $data
-                );
-            }
-        } elseif (in_array($type, ['role', 'user_role'], true)) {
-            $names = wp_roles()->get_names();
-
-            if (array_key_exists($data['identity'], $names)) {
-                $data['identity_title'] = translate_user_role(
-                    $names[$data['identity']]
-                );
-            } else {
-                $data['identity_title'] = apply_filters(
-                    'aam_rest_identity_identity_title_filter',
-                    __('Unknown role name', AAM_KEY),
-                    $data
-                );
-            }
-        } elseif (in_array($type, ['role_level', 'user_level'], true)) {
-            $data['identity_title'] = sprintf(
-                __('Access Level %s', AAM_KEY), $data['identity']
-            );
-        }
-
-        return apply_filters('aam_rest_identity_model_filter', $data);
+    /**
+     * Prepare the user output
+     *
+     * @param AAM_Framework_Resource_User $user
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_user_output($user)
+    {
+        return [
+            'id'            => $user->ID,
+            'display_name'  => $user->display_name,
+            'permissions'   => $user->get_permissions(),
+            'is_customized' => $user->is_customized()
+        ];
     }
 
     /**

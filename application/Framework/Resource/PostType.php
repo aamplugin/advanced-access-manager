@@ -29,20 +29,23 @@ class AAM_Framework_Resource_PostType implements AAM_Framework_Resource_Interfac
     /**
      * Initialize the core instance
      *
+     * @param mixed $resource_identifier
+     *
      * @return void
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function initialize_hook()
+    protected function pre_init_hook($resource_identifier)
     {
-        $post_type = get_post_type_object($this->_internal_id);
+        $post_type = get_post_type_object($resource_identifier);
 
-        if (is_a($post_type, 'WP_Post_Type')) {
+        if (is_a($post_type, WP_Post_Type::class)) {
             $this->_core_instance = $post_type;
+            $this->_internal_id   = $resource_identifier;
         } else {
             throw new OutOfRangeException(
-                "Post Type '{$this->_internal_id}' does not exist"
+                'The post type resource identifier is invalid'
             );
         }
     }

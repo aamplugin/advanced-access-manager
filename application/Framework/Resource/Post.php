@@ -171,23 +171,6 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     }
 
     /**
-     * Façade function that determines if access level has certain permission
-     *
-     * @param string $permission
-     *
-     * @return bool|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_allowed_to($permission)
-    {
-        $decision = $this->is_denied_to($permission);
-
-        return is_bool($decision) ? !$decision : $decision;
-    }
-
-    /**
      * Façade function that determines if access level does not have certain
      * permission
      *
@@ -214,6 +197,23 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
             $permission,
             $this
         );
+    }
+
+    /**
+     * Façade function that determines if access level has certain permission
+     *
+     * @param string $permission
+     *
+     * @return bool|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_allowed_to($permission)
+    {
+        $decision = $this->is_denied_to($permission);
+
+        return is_bool($decision) ? !$decision : $decision;
     }
 
     /**
@@ -450,21 +450,25 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     /**
      * Initialize additional properties
      *
+     * @param mixed $resource_identifier
+     *
      * @return void
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function initialize_hook()
+    protected function pre_init_hook($resource_identifier)
     {
-        $post = get_post($this->_internal_id);
+        if (is_a($resource_identifier, WP_Post::class)) {
+            $this->_core_instance = $resource_identifier;
+        } elseif (is_numeric($resource_identifier)) {
+            $this->_core_instance = get_post($resource_identifier);
+        }
 
-        if (is_a($post, 'WP_Post')) {
-            $this->_core_instance = $post;
+        if (is_a($this->_core_instance, WP_Post::class)) {
+            $this->_internal_id = $this->_core_instance->ID;
         } else {
-            throw new OutOfRangeException(
-                "Post with ID {$this->_internal_id} does not exist"
-            );
+            throw new OutOfRangeException('The post resource identifier is invalid');
         }
     }
 
@@ -508,4 +512,5 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
             $this
         );
     }
+
 }

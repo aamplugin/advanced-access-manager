@@ -307,7 +307,7 @@ trait AAM_Restful_ServiceTrait
 
         // Now, depending on the HTTP Method, do additional check
         if ($http_method === WP_REST_Server::READABLE) {
-            $cap = 'aam_list_users';
+            $cap = 'list_users';
         } else {
             $cap = 'edit_user';
         }

@@ -29,20 +29,23 @@ class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interfac
     /**
      * Initialize the core instance
      *
+     * @param mixed $resource_identifier
+     *
      * @return void
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function initialize_hook()
+    protected function pre_init_hook($resource_identifier)
     {
-        $taxonomy = get_taxonomy($this->_internal_id);
+        $taxonomy = get_taxonomy($resource_identifier);
 
-        if (is_a($taxonomy, 'WP_Taxonomy')) {
+        if (is_a($taxonomy, WP_Taxonomy::class)) {
             $this->_core_instance = $taxonomy;
+            $this->_internal_id   = $resource_identifier;
         } else {
             throw new OutOfRangeException(
-                "Taxonomy {$this->_internal_id} does not exist"
+                'The taxonomy resource identifier is invalid'
             );
         }
     }

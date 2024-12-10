@@ -46,6 +46,48 @@ trait AAM_Framework_Resource_ContentTrait
     }
 
     /**
+     * Restrict one or more permissions
+     *
+     * @param string|array $permission
+     * @param array        $permission_settings [Optional]
+     * @param bool         $exclude_authors     [Premium Feature]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function restrict($permission, ...$args)
+    {
+        $permissions = $this->_explicit_permissions;
+        $settings    = $args[0];
+
+        if (is_string($permission)) {
+            if (is_array($settings)) { // Do we have settings for permission?
+                $data = array_merge([ 'effect' => 'deny' ], $settings);
+            } else {
+                $data = 'deny';
+            }
+
+            $permissions[$permission] = apply_filters(
+                'aam_framework_resource_restrict_filter',
+                $this->_sanitize_permission($data, $permission),
+                $args
+            );
+        } elseif (is_array($permission)) {
+            foreach($permission as $perm) {
+                $permissions[$perm] = apply_filters(
+                    'aam_framework_resource_restrict_filter',
+                    $this->_sanitize_permission('deny', $perm),
+                    $args
+                );
+            }
+        }
+
+        return $this->set_permissions($permissions, true);
+    }
+
+    /**
      * Add multiple permissions
      *
      * @param array $permissions

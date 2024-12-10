@@ -333,7 +333,25 @@ class TestCase extends PHPUnitTestCase
         ];
 
         $final_user_data = array_merge($default_user_data, $user_data);
-        $user_id         = wp_insert_user($final_user_data);
+
+        // Covering multi-role case
+        if (is_array($final_user_data['role'])) {
+            $roles                   = $final_user_data['role'];
+            $final_user_data['role'] = array_shift($roles);
+        } else {
+            $roles = [];
+        }
+
+        $user_id = wp_insert_user($final_user_data);
+
+        // If we have additional roles to add, do so
+        if (!empty($roles)) {
+            $user = get_user($user_id);
+
+            foreach($roles as $role) {
+                $user->add_role($role);
+            }
+        }
 
         return array_merge([ 'id' => $user_id ], $final_user_data);
     }
