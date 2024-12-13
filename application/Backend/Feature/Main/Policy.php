@@ -71,7 +71,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
 
         add_filter('aam_visitor_subject_tab_filter', function ($content, $params) {
             if ($this->getFromQuery('aamframe') === 'principal') {
-                $content = AAM_Backend_View::getInstance()->loadPartial(
+                $content = AAM_Backend_View::get_instance()->loadPartial(
                     'visitor-principal-subject-tab',
                     $params
                 );
@@ -82,7 +82,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
 
         add_filter('aam_default_subject_tab_filter', function ($content, $params) {
             if ($this->getFromQuery('aamframe') === 'principal') {
-                $content = AAM_Backend_View::getInstance()->loadPartial(
+                $content = AAM_Backend_View::get_instance()->loadPartial(
                     'default-principal-subject-tab',
                     $params
                 );
@@ -240,7 +240,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     protected function preparePolicyActionList($record)
     {
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
 
         $policy  = $subject->getObject(AAM_Core_Object_Policy::OBJECT_TYPE);
         $post    = $subject->getObject(AAM_Core_Object_Post::OBJECT_TYPE, $record->ID);
@@ -266,7 +266,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
      */
     public function save()
     {
-        $subject = AAM_Backend_Subject::getInstance();
+        $subject = AAM_Backend_Subject::get_instance();
 
         $id      = $this->getFromPost('id');
         $effect  = $this->getFromPost('effect', FILTER_VALIDATE_BOOLEAN);

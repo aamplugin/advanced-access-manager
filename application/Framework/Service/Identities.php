@@ -45,8 +45,10 @@ class AAM_Framework_Service_Identities
     public function get_users($args = [], $result_type = 'list')
     {
         try {
-            $user_data = AAM::api()->users->list($args, $result_type);
             $result    = [];
+            $user_data = AAM_Framework_Manager::_()->users->list(
+                $args, $result_type
+            );
 
             if ($result_type !== 'summary') {
                 // Prepare the generator
@@ -98,7 +100,7 @@ class AAM_Framework_Service_Identities
     {
         try {
             $generator = function() {
-                foreach(AAM::api()->roles->get_editable_roles() as $role) {
+                foreach(AAM_Framework_Manager::_()->roles->get_editable_roles() as $role) {
                     yield $this->_get_resource(
                         AAM_Framework_Type_Resource::ROLE, $role
                     );
@@ -139,9 +141,8 @@ class AAM_Framework_Service_Identities
     public function get_user($identifier)
     {
         try {
-            $user   = AAM::api()->users->user($identifier);
             $result = $this->_get_resource(
-                AAM_Framework_Type_Resource::USER, $user
+                AAM_Framework_Type_Resource::USER, $identifier
             );
         }  catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -178,9 +179,8 @@ class AAM_Framework_Service_Identities
     public function get_role($role_slug)
     {
         try {
-            $role   = AAM::api()->roles->role($role_slug);
             $result = $this->_get_resource(
-                AAM_Framework_Type_Resource::ROLE, $role
+                AAM_Framework_Type_Resource::ROLE, $role_slug
             );
         }  catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -227,7 +227,9 @@ class AAM_Framework_Service_Identities
             // If identifier is not provided, assume that we are trying either to
             // reset permissions for specific identity type of all permissions
             if (empty($identity_id)) {
-                $service = AAM::api()->settings($this->_get_access_level());
+                $service = AAM_Framework_Manager::_()->settings(
+                    $this->_get_access_level()
+                );
 
                 if (empty($identity_type)) {
                     // Resetting both resources
@@ -345,7 +347,7 @@ class AAM_Framework_Service_Identities
             // Iterate over the list of all user roles and merge access controls
             // accordingly
             if (is_null($result)) {
-                $multi_support = AAM::api()->config->get(
+                $multi_support = AAM_Framework_Manager::_()->config->get(
                     'core.settings.multi_access_levels'
                 );
 
@@ -359,7 +361,7 @@ class AAM_Framework_Service_Identities
                 $permissions = [];
 
                 foreach($roles as $role) {
-                    $permissions = AAM::api()->misc->merge_permissions(
+                    $permissions = AAM_Framework_Manager::_()->misc->merge_permissions(
                         $permissions,
                         $this->role($role)->get_permissions(),
                         AAM_Framework_Type_Resource::ROLE

@@ -10,7 +10,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
         $service      = $access_level->login_redirect();
         $settings     = $service->get_redirect();
     ?>

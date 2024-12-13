@@ -29,8 +29,8 @@ final class IdentityTest extends TestCase
     public function testManageResourcePermissions()
     {
         $user_a  = $this->createUser([ 'role' => 'subscriber' ]);
-        $user_b  = $this->createUser([ 'role' => 'administrator' ]);
-        $service = AAM::api()->identities('role:administrator');
+        $user_b  = $this->createUser([ 'role' => 'subadmin' ]);
+        $service = AAM::api()->identities('role:subadmin');
 
         $role_identity = $service->role('editor');
         $user_identity = $service->user($user_a);
@@ -47,7 +47,6 @@ final class IdentityTest extends TestCase
 
         // Verify that permissions are properly inherited
         $service = AAM::api()->identities('user:' . $user_b);
-
         $this->assertTrue($service->role('editor')->is_denied_to('edit_users'));
         $this->assertFalse($service->role('editor')->is_allowed_to('edit_users'));
         $this->assertTrue($service->user($user_a)->is_denied_to('promote_user'));
@@ -63,8 +62,8 @@ final class IdentityTest extends TestCase
     public function testManageIdentityPermissions()
     {
         $user_a  = $this->createUser([ 'role' => 'subscriber' ]);
-        $user_b  = $this->createUser([ 'role' => 'administrator' ]);
-        $service = AAM::api()->identities('role:administrator');
+        $user_b  = $this->createUser([ 'role' => 'subadmin' ]);
+        $service = AAM::api()->identities('role:subadmin');
 
         $role_identity = $service->role('editor');
         $user_identity = $service->user($user_a);

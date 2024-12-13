@@ -37,13 +37,19 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
     {
         if (is_a($resource_identifier, AAM_Framework_Proxy_User::class)) {
             $this->_core_instance = $resource_identifier;
+            $this->_internal_id   = $resource_identifier->ID;
         } else {
-            $this->_core_instance = AAM::api()->users->user($resource_identifier);
+            $user = AAM_Framework_Manager::_()->users->user($resource_identifier);
+
+            if (is_a($user, AAM_Framework_Proxy_User::class)) {
+                $this->_core_instance = $user;
+                $this->_internal_id   = $user->ID;
+            } elseif (is_scalar($resource_identifier)) {
+                $this->_internal_id = $resource_identifier;
+            }
         }
 
-        if (is_a($this->_core_instance, AAM_Framework_Proxy_User::class)) {
-            $this->_internal_id = $this->_core_instance->ID;
-        } else {
+        if (empty($this->_internal_id)) {
             throw new OutOfRangeException('The user resource identifier is invalid');
         }
     }

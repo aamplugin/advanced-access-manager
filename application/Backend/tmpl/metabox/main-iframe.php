@@ -179,9 +179,9 @@
                     </div>
                 <?php } ?>
 
-                <?php $licenses = AAM_Addon_Repository::getInstance()->getRegisteredLicenseList(); ?>
+                <?php $license = AAM_Addon_Repository::get_instance()->get_premium_license_key(); ?>
 
-                <?php if (count($licenses) > 0) { ?>
+                <?php if (!empty($license)) { ?>
                     <div class="metabox-holder extensions-metabox" style="display:none;">
                         <div class="postbox">
                             <div class="inside">
@@ -189,39 +189,19 @@
                                     <table class="table table-striped table-bordered dataTable no-footer">
                                         <thead>
                                             <tr>
-                                                <th><?php echo __('Registered Licenses', AAM_KEY); ?></th>
+                                                <th><?php echo __('Registered License', AAM_KEY); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($licenses as $i => $licenseId) { ?>
-                                                <tr class="<?php echo ($i % 2 === 0 ? 'odd' : 'even'); ?>">
-                                                    <td>
-                                                        <a href="https://aamportal.com/license/<?php echo esc_attr($licenseId); ?>?ref=plugin" target="_blank" class="aam-license-key"><?php echo esc_js($licenseId); ?></a>
-                                                    </td>
-                                                </tr>
-                                            <?php } ?>
+                                            <tr>
+                                                <td>
+                                                    <a href="https://aamportal.com/license/<?php echo esc_attr($license); ?>?ref=plugin" target="_blank" class="aam-license-key">
+                                                        <?php echo esc_js($license); ?>
+                                                    </a>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal fade" id="clear-licenses-modal" tabindex="-1" role="dialog">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title"><?php echo __('Clear all licenses', AAM_KEY); ?></h4>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="text-left alert alert-danger text-larger">
-                                        <?php echo __('You are about to clear all registered licenses on this WordPress instance. Please confirm this operation.', AAM_KEY); ?>
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-danger" id="clear-licenses"><?php echo __('Clear', AAM_KEY); ?></button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
                                 </div>
                             </div>
                         </div>

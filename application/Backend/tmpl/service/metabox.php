@@ -1,7 +1,7 @@
 <?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php $service = AAM_Backend_AccessLevel::getInstance()->metaboxes(); ?>
+    <?php $service = AAM_Backend_AccessLevel::get_instance()->metaboxes(); ?>
     <div class="aam-feature" id="metabox-content">
         <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
             <div class="row">
@@ -33,7 +33,7 @@
             <div class="col-xs-12">
                 <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
+                    <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
                                 <?php echo apply_filters(
                                     'aam_ui_metaboxes_screen_mode_filter',
                                     '',
-                                    AAM_Backend_AccessLevel::getInstance()->metaboxes(),
+                                    AAM_Backend_AccessLevel::get_instance()->metaboxes(),
                                     $screen_id
                                 ); ?>
                             </div>

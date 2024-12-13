@@ -69,6 +69,9 @@ class AAM_Service_Urls
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_UrlService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -99,9 +102,6 @@ class AAM_Service_Urls
      */
     protected function initialize_hooks()
     {
-        // Register RESTful API endpoints
-        AAM_Restful_UrlService::bootstrap();
-
         // Authorize request
         add_action('init', function() {
             $this->authorize();

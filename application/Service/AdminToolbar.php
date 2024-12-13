@@ -69,8 +69,38 @@ class AAM_Service_AdminToolbar
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_AdminToolbarService::bootstrap();
+
+            // Cache admin toolbar
+            if (AAM::isAAM()) {
+                add_action('wp_after_admin_bar_render', function() {
+                    AAM::api()->admin_toolbar()->get_items();
+                });
+
+                add_action('aam_initialize_ui_action', function () {
+                    AAM_Backend_Feature_Main_AdminToolbar::register();
+                });
+            }
+
             $this->initialize_hooks();
         }
+
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)
+                    && $resource_type === AAM_Framework_Type_Resource::TOOLBAR
+                ) {
+                    $resource = new AAM_Framework_Resource_AdminToolbar(
+                        $access_level, $resource_id
+                    );
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**
@@ -96,46 +126,9 @@ class AAM_Service_AdminToolbar
      */
     protected function initialize_hooks()
     {
-        add_action('wp_before_admin_bar_render', function () {
-            $can = current_user_can('aam_manage_admin_toolbar') && AAM::isAAM();
-
-            if (!$can) {
-                $this->_filter_admin_toolbar();
-            }
-        }, PHP_INT_MAX);
-
-        if (is_admin()) {
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_AdminToolbar::register();
-            });
-
-            // Cache admin toolbar
-            add_action('wp_after_admin_bar_render', function() {
-                // Rebuild the cache
-                if (current_user_can('aam_manage_admin_toolbar') && AAM::isAAM()) {
-                    AAM::api()->admin_toolbar()->get_items();
-                }
-            });
-        }
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::TOOLBAR
-                ) {
-                    $resource = new AAM_Framework_Resource_AdminToolbar(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
-
-        // Register RESTful API endpoints
-        AAM_Restful_AdminToolbarService::bootstrap();
+        $this->_register_action('wp_before_admin_bar_render', function () {
+            $this->_filter_admin_toolbar();
+        }, PHP_INT_MAX, 0, true);
     }
 
     /**

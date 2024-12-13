@@ -96,10 +96,10 @@ class AAM_Restful_SecurityAuditService
 
         try {
             if ($should_reset) {
-                AAM_Core_API::deleteOption('aam_security_audit_result');
+                AAM::api()->db->delete('aam_security_audit_result');
                 $result = [];
             } else {
-                $result = AAM_Core_API::getOption('aam_security_audit_result', []);
+                $result = AAM::api()->db->read('aam_security_audit_result', []);
             }
 
             if (array_key_exists($current_step, $result)) {
@@ -138,7 +138,7 @@ class AAM_Restful_SecurityAuditService
                     $result[$current_step] = array_merge($current_result, $response);
                     $result[$current_step]['issues'] = $issues;
 
-                    AAM_Core_API::updateOption(
+                    AAM::api()->db->write(
                         'aam_security_audit_result', $result, false
                     );
                 }
@@ -194,7 +194,7 @@ class AAM_Restful_SecurityAuditService
         $report = fopen('php://output', 'w');
         fputcsv($report, [ 'Issue', 'Type', 'Category' ]);
 
-        $data   = AAM_Core_API::getOption('aam_security_audit_result', []);
+        $data   = AAM::api()->db->read('aam_security_audit_result', []);
         $checks = AAM_Service_SecurityAudit::bootstrap()->get_steps();
 
         foreach($data as $check_id => $check_result) {
@@ -226,7 +226,7 @@ class AAM_Restful_SecurityAuditService
     private function _generate_json_report()
     {
         $report = [];
-        $data   = AAM_Core_API::getOption('aam_security_audit_result', []);
+        $data   = AAM::api()->db->read('aam_security_audit_result', []);
         $checks = AAM_Service_SecurityAudit::bootstrap()->get_steps();
 
         foreach($data as $check_id => $check_result) {

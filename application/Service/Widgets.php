@@ -63,6 +63,9 @@ class AAM_Service_Widgets
                 });
             }
 
+            // Register RESTful API endpoints
+            AAM_Restful_WidgetService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -122,9 +125,6 @@ class AAM_Service_Widgets
                 return $widgets;
             }, PHP_INT_MAX);
         }
-
-        // Register RESTful API endpoints
-        AAM_Restful_WidgetService::bootstrap();
     }
 
     /**

@@ -11,7 +11,7 @@
  * RESTful API for the Settings service
  *
  * @package AAM
- * @version 6.9.34
+ * @version 7.0.0
  */
 class AAM_Restful_SettingService
 {
@@ -24,7 +24,7 @@ class AAM_Restful_SettingService
      * @return void
      *
      * @access protected
-     * @version 6.9.34
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -68,12 +68,18 @@ class AAM_Restful_SettingService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.34
+     * @version 7.0.0
      */
     public function get_settings(WP_REST_Request $request)
     {
         try {
-            $result = $this->_get_service($request)->get_settings();
+            if ($this->_has_access_level($request)) {
+                $result = $this->_get_service($request)->get_settings();
+            } else {
+                $result = AAM::api()->db->read(
+                    AAM_Framework_Service_Settings::DB_OPTION, []
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -87,16 +93,23 @@ class AAM_Restful_SettingService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function set_settings(WP_REST_Request $request)
     {
         try {
-            $result = $this->_get_service($request)->set_settings(
-                $request->get_param('settings')
-            );
+            if ($this->_has_access_level($request)) {
+                $result = $this->_get_service($request)->set_settings(
+                    $request->get_param('settings')
+                );
+            } else {
+                $result = AAM::api()->db->write(
+                    AAM_Framework_Service_Settings::DB_OPTION,
+                    $request->get_param('settings')
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -110,14 +123,20 @@ class AAM_Restful_SettingService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function reset_settings(WP_REST_Request $request)
     {
         try {
-            $result = $this->_get_service($request)->reset();
+            if ($this->_has_access_level($request)) {
+                $result = $this->_get_service($request)->reset();
+            } else {
+                $result = AAM::api()->db->delete(
+                    AAM_Framework_Service_Settings::DB_OPTION
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -129,9 +148,9 @@ class AAM_Restful_SettingService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function check_permissions()
     {
@@ -143,9 +162,9 @@ class AAM_Restful_SettingService
      * Get service
      *
      * @param WP_REST_Request $request
-     *
      * @access private
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)
     {
@@ -153,6 +172,23 @@ class AAM_Restful_SettingService
             'access_level'   => $this->_determine_access_level($request),
             'error_handling' => 'exception'
         ]);
+    }
+
+    /**
+     * Determine if access level is provided
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _has_access_level($request)
+    {
+        $access_level = $this->_determine_access_level($request);
+
+        return !is_null($access_level);
     }
 
 }

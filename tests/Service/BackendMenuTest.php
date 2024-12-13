@@ -33,9 +33,9 @@ final class BackendMenuTest extends TestCase
     {
         global $menu, $submenu;
 
-        $user_id = $this->createUser([ 'role' => 'administrator' ]);
+        $user_id = $this->createUser([ 'role' => 'editor' ]);
         $service = AAM::api()->backend_menu([
-            'access_level' => AAM::api()->role('administrator')
+            'access_level' => AAM::api()->role('editor')
         ]);
 
         // Update permission for a single submenu item
@@ -51,7 +51,7 @@ final class BackendMenuTest extends TestCase
         wp_set_current_user($user_id);
 
         // Trigger the admin menu filtering process
-        AAM_Service_BackendMenu::getInstance()->filter_menu();
+        AAM_Service_BackendMenu::get_instance()->filter_menu();
 
         // Asserting that submenu does not contain restricted branch
         $this->assertNotContains('upload.php', array_keys($submenu));

@@ -30,7 +30,7 @@ final class ApiGatewayTest extends TestCase
      */
     public function testDefaultContext() : void
     {
-        $user_id = $this->createUser([ 'role' => 'administrator' ]);
+        $user_id = $this->createUser([ 'role' => 'subadmin' ]);
 
         // Setting current user
         wp_set_current_user($user_id);

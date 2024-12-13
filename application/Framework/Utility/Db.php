@@ -8,13 +8,15 @@
  */
 
 /**
- * Trait with methods to work with DB
+ * AAM Database utility
  *
  * @package AAM
- * @version 6.9.34
+ * @version 7.0.0
  */
-trait AAM_Framework_Service_DbTrait
+class AAM_Framework_Utility_Db implements AAM_Framework_Utility_Interface
 {
+
+    use AAM_Framework_Utility_BaseTrait;
 
     /**
      * Read option from DB
@@ -23,11 +25,11 @@ trait AAM_Framework_Service_DbTrait
      * @param mixed  $default
      *
      * @return mixed
-     *
      * @access private
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
-    private function _read_option($option, $default = null)
+    public function read($option, $default = null)
     {
         if (is_multisite()) {
             $result = get_blog_option(get_current_blog_id(), $option, $default);
@@ -39,31 +41,32 @@ trait AAM_Framework_Service_DbTrait
     }
 
     /**
-     * Save configuration option to DB
+     * Save option to DB
      *
      * @param string $option
      * @param mixed  $value
+     * @param bool   $autoload [Optional]
      *
      * @return boolean
+     * @access public
      *
-     * @access private
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    private function _save_option($option, $value)
+    public function write($option, $value, $autoload = true)
     {
-        $old_value = $this->_read_option($option);
+        $old_value = $this->read($option);
 
         if ($old_value === null) { // Option does not exist, add it
             if (is_multisite()) {
                 $result = add_blog_option(get_current_blog_id(), $option, $value);
             } else {
-                $result = add_option($option, $value, '', true);
+                $result = add_option($option, $value, '', $autoload);
             }
         } elseif (maybe_serialize($old_value) !== maybe_serialize($value)) {
             if (is_multisite()) {
                 $result = update_blog_option(get_current_blog_id(), $option, $value);
             } else {
-                $result = update_option($option, $value, true);
+                $result = update_option($option, $value, $autoload);
             }
         } else{
             $result = true;
@@ -78,11 +81,11 @@ trait AAM_Framework_Service_DbTrait
      * @param string $option
      *
      * @return boolean
+     * @access public
      *
-     * @access private
-     * @version 6.9.34
+     * @version 7.0.0
      */
-    private function _delete_option($option)
+    public function delete($option)
     {
         if (is_multisite()) {
             $result = delete_blog_option(get_current_blog_id(), $option);

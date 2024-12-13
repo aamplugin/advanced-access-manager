@@ -3143,7 +3143,7 @@
                                     $('.aam-type-taxonomy-filter').val('type_list');
                                 }
 
-                                $('.aam-access-form').removeClass('active');
+                                $('#aam_content_access_form').removeClass('active');
 
                                 RenderBreadcrumb();
                             }).text(level.label)
@@ -3256,7 +3256,7 @@
              */
             function RenderAccessForm(target = null, callback = null) {
                 //reset the form first
-                var container = $('.aam-access-form');
+                var container = $('#aam_content_access_form');
 
                 //show overlay if present
                 $('.aam-overlay', container).show();
@@ -5578,38 +5578,89 @@
          */
          (function ($) {
 
-            function UpdateIdentityPermission(id, effect, btn) {
-                getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/identity/${id}`), {
-                        type: 'POST',
-                        contentType: 'application/json',
-                        dataType: 'json',
-                        data: JSON.stringify({
-                            effect
-                        }),
-                        headers: {
-                            'X-WP-Nonce': getLocal().rest_nonce
-                        },
-                        beforeSend: function () {
-                            btn.attr(
-                                'class', 'aam-row-action icon-spin4 animate-spin'
-                            ).attr('disabled', true);
-                        },
-                        success: function () {
-                            $('#identity_list').DataTable().ajax.reload();
-                        },
-                        error: function (response) {
-                            getAAM().notification('danger', null, {
-                                request: `aam/v2/service/identity/${id}`,
-                                payload: { effect },
-                                response
-                            });
-                        },
-                        complete: function () {
-                            btn.attr('disabled', false);
-                        }
+            const current_selections = {
+                identity_type: 'role',
+                identity_id: null,
+                re_init: false
+            };
+
+            /**
+             *
+             * @param {*} permission
+             * @param {*} is_denied
+             */
+            function SavePermission(permission, is_denied) {
+                if (current_selections.re_init === false) {
+                    getAAM().queueRequest(function () {
+                        const endpoint = `/service/identity/${current_selections.identity_type}/${current_selections.identity_id}/${permission}`;
+
+                        $.ajax(getAAM().prepareApiEndpoint(endpoint), {
+                            type: 'POST',
+                            contentType: 'application/json',
+                            dataType: 'json',
+                            data: JSON.stringify({
+                                effect: is_denied ? 'deny' : 'allow'
+                            }),
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            success: function (response) {
+                                $(`#aam_${current_selections.identity_type}_identity_overwrite`).removeClass('hidden');
+                                $(`#${current_selections.identity_type}_identity_list`).DataTable().ajax.reload(null, false);
+
+                                getAAM().triggerHook('identity-permission-saved', {
+                                    current_selections,
+                                    permissions: response
+                                });
+                            },
+                            error: function (response) {
+                                getAAM().notification('danger', null, {
+                                    request: endpoint,
+                                    payload: {
+                                        effect: is_denied ? 'deny' : 'allow'
+                                    },
+                                    response
+                                });
+                            }
+                        });
                     });
+                }
+            }
+
+            /**
+             *
+             * @param {*} type
+             * @param {*} id
+             * @param {*} permissions
+             */
+            function InitializePermissionForm(type, id, permissions, is_customized) {
+                // Initialize the permissions
+                current_selections.re_init       = true;
+                current_selections.identity_type = type;
+                current_selections.identity_id   = id;
+
+                $(`#aam_${type}_permissions_form input[type="checkbox"]`).prop(
+                    'checked', false
+                ).trigger('change');
+
+                $.each(permissions, function(permission, c) {
+                    if (c.effect === 'deny') {
+                        $(`#aam_${type}_permissions_form input[name="${permission}"]`).prop(
+                            'checked', true
+                        ).trigger('change');
+                    }
                 });
+
+                if (is_customized) {
+                    $(`#aam_${type}_identity_overwrite`).removeClass('hidden');
+                } else {
+                    $(`#aam_${type}_identity_overwrite`).addClass('hidden');
+                }
+
+                current_selections.re_init = false;
+
+                $(`#${type}_identity_list_wrapper`).addClass('hidden');
+                $(`#aam_${type}_permissions_form`).addClass('active');
             }
 
             /**
@@ -5619,7 +5670,243 @@
                 const container = '#identity-content';
 
                 if ($(container).length) {
+                    $('[data-toggle="toggle"]', '#identity-content').bootstrapToggle();
 
+                    $('#role_identity_go_back').bind('click', function() {
+                        $('#role_identity_list_wrapper').removeClass('hidden');
+                        $('#aam_role_permissions_form').removeClass('active');
+                    });
+
+                    $('#user_identity_go_back').bind('click', function() {
+                        $('#user_identity_list_wrapper').removeClass('hidden');
+                        $('#aam_user_permissions_form').removeClass('active');
+                    });
+
+                    const identity_types_filter = $('<select>').attr({
+                        'class': 'form-control input-sm aam-ml-1 aam-max-width aam-identity-type'
+                    }).bind('change', function () {
+                        $('#identity_list_container > .dataTables_wrapper').addClass('hidden');
+
+                        current_selections.identity_type = $(this).val();
+
+                        if ($(this).val() === 'roles') {
+                            $('#role_identity_list_wrapper').removeClass('hidden');
+                        } else if ($(this).val() === 'users') {
+                            $('#user_identity_list_wrapper').removeClass('hidden');
+                        } else if ($(this).val() === '') {
+                            $('#role_identity_list_wrapper').removeClass('hidden');
+                        } else {
+                            getAAM().triggerHook('aam-identity-types-change', {
+                                type: $(this).val()
+                            });
+                        }
+
+                        $('.aam-identity-type').val(current_selections.identity_type);
+                    });
+
+                    const types = getAAM().applyFilters('aam-identity-types', [
+                        { key: '', label: getAAM().__('Identity Types') },
+                        { key: 'roles', label: getAAM().__('Roles') },
+                        { key: 'users', label: getAAM().__('Users') },
+                    ]);
+
+                    $.each(types, (_, type) => {
+                        identity_types_filter.append(
+                            `<option value="${type.key}">${type.label}</option>`
+                        );
+                    });
+
+                    $('#user_identity_list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        stateSave: true,
+                        pagingType: 'simple',
+                        serverSide: true,
+                        processing: true,
+                        ajax: function(filters, cb) {
+                            $.ajax({
+                                url: getAAM().prepareApiEndpoint('/service/identity/users'),
+                                type: 'GET',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce
+                                },
+                                data: {
+                                    search: filters.search.value,
+                                    per_page: filters.length,
+                                    offset: filters.start
+                                },
+                                success: function (response) {
+                                    const result = {
+                                        data: [],
+                                        recordsTotal: 0,
+                                        recordsFiltered: 0
+                                    };
+
+                                    $.each(response.list, (_, user) => {
+                                        result.data.push([
+                                            user.id,
+                                            user.display_name,
+                                            '',
+                                            user
+                                        ]);
+                                    });
+
+                                    result.recordsTotal    = response.summary.total_count;
+                                    result.recordsFiltered = response.summary.filtered_count;
+
+                                    cb(result);
+                                }
+                            });
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 3] }
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search user'),
+                            info: getAAM().__('_TOTAL_ user(s)'),
+                            infoFiltered: '',
+                            lengthMenu: '_MENU_'
+                        },
+                        initComplete: function () {
+                            $('#user_identity_list_length').append(
+                                $(identity_types_filter).clone(true)
+                            );
+
+                            $('#user_identity_list_wrapper > .row:eq(0)').after(`
+                                <div class="row"><div class="col-sm-12"><table class="table table-bordered no-margin-bottom">
+                                    <tbody>
+                                        <tr class="aam-info">
+                                            <td class="text-left"><b>Premium Feature.</b> Set default permissions for all users effortlessly. Each user will automatically inherit these predefined permissions, with the flexibility to customize and override them individually as needed.</td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-xs btn-primary" disabled id="set_default_user_permissions">Set Permissions</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table></div></div>
+                            `);
+
+                            getAAM().triggerHook('user-identity-table-initialized', {
+                                current_selections,
+                                api: {
+                                    InitializePermissionForm
+                                }
+                            });
+                        },
+                        createdRow: function (row, data) {
+                            var container = $('<div/>', { 'class': 'aam-row-actions' });
+
+                            $(container).append($('<i/>', {
+                                'class': 'aam-row-action icon-cog ' + (data[3].is_customized ? 'aam-access-overwritten' : 'text-info')
+                            }).bind('click', function () {
+                                // Initialize the permissions
+                                InitializePermissionForm(
+                                    'user', data[0], data[3].permissions
+                                );
+                            }).attr({
+                                'data-toggle': "tooltip",
+                                'title': getAAM().__('Manage User Permissions')
+                            }));
+
+                            $('td:eq(1)', row).html(container);
+                        }
+                    });
+
+                    $('#role_identity_list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        pagingType: 'simple',
+                        processing: true,
+                        stateSave: true,
+                        serverSide: false,
+                        ajax: {
+                            url: getAAM().prepareApiEndpoint('/service/identity/roles'),
+                            type: 'GET',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            dataType: 'json',
+                            dataSrc: function (json) {
+                                // Transform the received data into DT format
+                                const data = [];
+
+                                $.each(json, (_, role) => {
+                                    data.push([
+                                        role.id,
+                                        role.name,
+                                        '',
+                                        role
+                                    ])
+                                });
+
+                                return data;
+                            },
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 3] },
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search role'),
+                            info: getAAM().__('_TOTAL_ role(s)'),
+                            infoFiltered: '',
+                            lengthMenu: '_MENU_'
+                        },
+                        initComplete: function () {
+                            $('#role_identity_list_length').append(
+                                $(identity_types_filter).clone(true)
+                            );
+
+                            $('#role_identity_list_wrapper > .row:eq(0)').after(`
+                                <div class="row"><div class="col-sm-12"><table class="table table-bordered no-margin-bottom">
+                                    <tbody>
+                                        <tr class="aam-info">
+                                            <td class="text-left"><b>Premium Feature.</b> Set default permissions for all roles effortlessly. Roles will automatically inherit these predefined permissions, with the flexibility to customize and override them individually as needed.</td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-xs btn-primary" disabled id="set_default_role_permissions">Set Permissions</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table></div></div>
+                            `);
+
+                            getAAM().triggerHook('role-identity-table-initialized', {
+                                current_selections,
+                                api: {
+                                    InitializePermissionForm
+                                }
+                            });
+                        },
+                        createdRow: function (row, data) {
+                            var container = $('<div/>', { 'class': 'aam-row-actions' });
+
+                            $(container).append($('<i/>', {
+                                'class': 'aam-row-action icon-cog ' + (data[3].is_customized ? 'aam-access-overwritten' : 'text-info')
+                            }).bind('click', function () {
+                                InitializePermissionForm(
+                                    'role', data[0], data[3].permissions
+                                );
+                            }).attr({
+                                'data-toggle': "tooltip",
+                                'title': getAAM().__('Manage Role Permissions')
+                            }));
+
+                            $('td:eq(1)', row).html(container);
+                        }
+                    });
+
+                    $('#identity_list_container > .dataTables_wrapper').addClass('hidden');
+                    $('#role_identity_list_wrapper').removeClass('hidden');
+
+                    // Initialize the permission settings
+                    $('#identity_list_container input[type="checkbox"]').each(function() {
+                        $(this).bind('change', function() {
+                            SavePermission(
+                                $(this).attr('name'),
+                                $(this).prop('checked')
+                            );
+                        });
+                    });
                 }
             }
 

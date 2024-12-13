@@ -11,7 +11,7 @@
  * Reusable elements for singletons
  *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 trait AAM_Core_Contract_SingletonTrait
 {
@@ -20,8 +20,9 @@ trait AAM_Core_Contract_SingletonTrait
      * Single instance of itself
      *
      * @var object
-     *
      * @access private
+     *
+     * @version 7.0.0
      */
     private static $_instance = null;
 
@@ -29,10 +30,9 @@ trait AAM_Core_Contract_SingletonTrait
      * Constructor
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    protected function __construct()
-    { }
+    protected function __construct() { }
 
     /**
      * Bootstrap the object
@@ -40,7 +40,7 @@ trait AAM_Core_Contract_SingletonTrait
      * @return self
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
     public static function bootstrap()
     {
@@ -57,9 +57,9 @@ trait AAM_Core_Contract_SingletonTrait
      * @return self
      *
      * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public static function getInstance()
+    public static function get_instance()
     {
         return self::bootstrap();
     }

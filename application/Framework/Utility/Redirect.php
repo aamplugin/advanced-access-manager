@@ -126,11 +126,13 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
                 );
             }
         } elseif ($redirect['type'] === 'url_redirect') {
-            $result = AAM::api()->misc->sanitize_url($redirect['redirect_url']);
+            $result = AAM_Framework_Manager::_()->misc->sanitize_url(
+                $redirect['redirect_url']
+            );
         } elseif ($redirect['type'] === 'trigger_callback'
             && is_callable($redirect['callback'])
         ) {
-            $result = AAM::api()->misc->sanitize_url(
+            $result = AAM_Framework_Manager::_()->misc->sanitize_url(
                 call_user_func($redirect['callback'])
             );
         }
@@ -181,7 +183,9 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
 
             $result[$attribute] = $value;
         } elseif ($redirect['type'] === 'url_redirect') {
-            $redirect_url = AAM::api()->misc->sanitize_url($redirect['redirect_url']);
+            $redirect_url = AAM_Framework_Manager::_()->misc->sanitize_url(
+                $redirect['redirect_url']
+            );
 
             if (empty($redirect_url)) {
                 throw new InvalidArgumentException(

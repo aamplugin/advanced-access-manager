@@ -2,7 +2,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
-        $access_level      = AAM_Backend_AccessLevel::getInstance();
+        $access_level      = AAM_Backend_AccessLevel::get_instance();
         $service           = $access_level->access_denied_redirect();
         $frontend_redirect = $service->get_redirect('frontend');
         $backend_redirect  = $service->get_redirect('backend');

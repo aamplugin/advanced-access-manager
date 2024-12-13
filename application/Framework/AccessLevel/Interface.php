@@ -14,6 +14,7 @@
  * is strongly recommended to adhere to this interface and periodically check if it
  * changed.
  *
+ *
  * @package AAM
  * @version 7.0.0
  */

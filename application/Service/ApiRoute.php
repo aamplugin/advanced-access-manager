@@ -76,6 +76,9 @@ class AAM_Service_ApiRoute
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_ApiRouteService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -106,12 +109,9 @@ class AAM_Service_ApiRoute
      */
     protected function initialize_hooks()
     {
-        // Register RESTful API endpoints
-        AAM_Restful_ApiRouteService::bootstrap();
-
         // Register API manager is applicable
-        add_filter('rest_pre_dispatch', function($response, $_, $request) {
-            return $this->_rest_pre_dispatch($response, $request);
+        $this->_register_filter('rest_pre_dispatch', function($result, $_, $request) {
+            return $this->_rest_pre_dispatch($result, $request);
         }, PHP_INT_MAX, 3);
     }
 

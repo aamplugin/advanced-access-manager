@@ -95,7 +95,7 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
      *
      * @param mixed $identifier
      *
-     * @return AAM_Framework_Proxy_User
+     * @return AAM_Framework_Proxy_User|null
      * @access public
      *
      * @version 7.0.0
@@ -118,15 +118,15 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
             throw new InvalidArgumentException('Invalid user identifier');
         }
 
-        if ($user === false) { // User not found
-            throw new OutOfRangeException(
-                sprintf('Cannot find user by identifier %s', $identifier)
-            );
-        } elseif (!is_a($user, AAM_Framework_Proxy_User::class)) {
-            $user = new AAM_Framework_Proxy_User($user);
+        $result = null;
+
+        if (is_a($user, AAM_Framework_Proxy_User::class)) {
+            $result = $user;
+        } elseif (is_a($user, WP_User::class)) {
+            $result = new AAM_Framework_Proxy_User($user);
         }
 
-        return $user;
+        return $result;
     }
 
     /**

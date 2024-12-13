@@ -60,7 +60,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      */
     public function render_content_access_form($resource_id, $resource_type)
     {
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
 
         // Making sure we are dealing with correct resource ID
         if ($resource_type === AAM_Framework_Type_Resource::TERM) {
@@ -83,7 +83,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             'resource'        => $resource,
             'access_controls' => $this->_prepare_access_controls($resource),
             // TODO: Consider removing the Backend Access Level
-            'access_level'    => AAM_Backend_AccessLevel::getInstance()
+            'access_level'    => AAM_Backend_AccessLevel::get_instance()
         ];
 
         // Do the SSR for the access form

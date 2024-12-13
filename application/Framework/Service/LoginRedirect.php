@@ -67,7 +67,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $sanitized = AAM::api()->redirect->sanitize_redirect(
+            $sanitized = AAM_Framework_Manager::_()->redirect->sanitize_redirect(
                 $redirect,
                 self::ALLOWED_REDIRECT_TYPES
             );

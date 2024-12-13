@@ -206,7 +206,7 @@ class AAM_Service_Core
      */
     public function renderAccessWidget($user)
     {
-        echo AAM_Backend_View::getInstance()->renderUserMetabox($user);
+        echo AAM_Backend_View::get_instance()->renderUserMetabox($user);
     }
 
     /**

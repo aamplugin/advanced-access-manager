@@ -226,9 +226,11 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         $result = [];
 
         // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = AAM::api()->config->get('core.settings.merge.preference');
+        $preference = AAM_Framework_Manager::_()->config->get(
+            'core.settings.merge.preference'
+        );
 
-        $preference = AAM::api()->config->get(
+        $preference = AAM_Framework_Manager::_()->config->get(
             'core.settings.' . $resource_type . '.merge.preference',
             $preference
         );
@@ -332,6 +334,46 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
             $result = 'api';
         } else {
             $result = 'frontend';
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if given user is super admin
+     *
+     * The super admin user is determined by the following conditions:
+     * - If multi-site, user has to be listed in the site option "site_admins"
+     * - User has to have the administrator role
+     *
+     * @param int $user_id
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_super_admin($user_id = null)
+    {
+        $result = false;
+        $user   = empty($user_id) ? wp_get_current_user() : get_userdata($user_id);
+
+        if (is_a($user, WP_User::class) && $user->exists()) {
+            // Determine if current user is natively a super admin.
+            // Note! We are deviating from WP core definition of super admin when it
+            // it not a multi-site. We believe the capability delete_users does not
+            // define anyone as super admin
+            if (is_multisite()) {
+                $super_admins = get_super_admins();
+
+                if (is_array($super_admins)
+                    && in_array($user->user_login, $super_admins, true)
+                ) {
+                    $result = true;
+                }
+            } elseif (in_array('administrator', $user->roles, true)) {
+                $result = true;
+            }
         }
 
         return $result;

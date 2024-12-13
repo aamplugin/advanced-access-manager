@@ -220,7 +220,7 @@ class AAM_Backend_Manager
      */
     protected function checkForPremiumAddonUpdate()
     {
-        $premium = AAM_Addon_Repository::getInstance()->getPremiumData();
+        $premium = AAM_Addon_Repository::get_instance()->get_premium_data();
 
         if (!is_null($premium['version']) && $premium['hasUpdate']) {
             AAM_Core_Console::add(
@@ -246,7 +246,7 @@ class AAM_Backend_Manager
     public function printFooterJavascript()
     {
         if (AAM::isAAM()) {
-            $access_level = AAM_Backend_AccessLevel::getInstance()->get_access_level();
+            $access_level = AAM_Backend_AccessLevel::get_instance()->get_access_level();
 
             // Prepare the JS locals
             $locals   = apply_filters('aam_js_localization_filter', array(
@@ -382,7 +382,7 @@ class AAM_Backend_Manager
         $frame = $this->getFromQuery('aamframe');
 
         if ($frame) {
-            AAM_Backend_View::getInstance()->renderIFrame($frame);
+            AAM_Backend_View::get_instance()->renderIFrame($frame);
         }
     }
 
@@ -440,7 +440,7 @@ class AAM_Backend_Manager
             ($hasManagerCap ? 'aam_manager' : 'administrator'),
             'aam',
             function() {
-                echo AAM_Backend_View::getInstance()->renderPage();
+                echo AAM_Backend_View::get_instance()->renderPage();
             },
             file_get_contents(AAM_BASEDIR . '/media/active-menu.data')
         );
@@ -463,7 +463,7 @@ class AAM_Backend_Manager
 
         // Process ajax request
         if (current_user_can('aam_manager')) {
-            echo AAM_Backend_View::getInstance()->processAjax();
+            echo AAM_Backend_View::get_instance()->processAjax();
         } else {
             echo -1;
         }

@@ -68,7 +68,9 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
      */
     public function is_hidden()
     {
-        return $this->is_hidden_on(AAM::api()->misc->get_current_area());
+        return $this->is_hidden_on(
+            AAM_Framework_Manager::_()->misc->get_current_area()
+        );
     }
 
     /**

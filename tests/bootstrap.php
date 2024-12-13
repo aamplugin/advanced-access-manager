@@ -26,3 +26,12 @@ spl_autoload_register(function ($class_name) {
 // Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+// Create a somewhat a clone of the administrator role to test functionality that
+// can be restricted to not super admin user
+if (!wp_roles()->is_role('subadmin')) {
+    wp_roles()->add_role(
+        'subadmin',
+        'Sub Administrator', wp_roles()->get_role('administrator')->capabilities
+    );
+}

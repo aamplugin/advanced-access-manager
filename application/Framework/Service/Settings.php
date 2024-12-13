@@ -16,8 +16,7 @@
 class AAM_Framework_Service_Settings
 {
 
-    use AAM_Framework_Service_DbTrait,
-        AAM_Framework_Service_BaseTrait;
+    use AAM_Framework_Service_BaseTrait;
 
     /**
      * Core AAM config db option
@@ -46,7 +45,7 @@ class AAM_Framework_Service_Settings
      */
     protected function initialize_hooks()
     {
-        $this->_settings = $this->_read_option(self::DB_OPTION, []);
+        $this->_settings = AAM_Framework_Manager::_()->db->read(self::DB_OPTION, []);
     }
 
     /**
@@ -83,8 +82,9 @@ class AAM_Framework_Service_Settings
         try {
             $placement = &$this->_set_settings_pointer();
             $placement = $settings;
+            $db        = AAM_Framework_Manager::_()->db;
 
-            if ($this->_save_option(self::DB_OPTION, $this->_settings)) {
+            if ($db->write(self::DB_OPTION, $this->_settings)) {
                 $result = $placement;
             } else {
                 throw new RuntimeException('Failed to persist configurations');
@@ -153,8 +153,9 @@ class AAM_Framework_Service_Settings
             }
 
             $settings = $value;
+            $db       = AAM_Framework_Manager::_()->db;
 
-            if ($this->_save_option(self::DB_OPTION, $this->_settings)) {
+            if ($db->write(self::DB_OPTION, $this->_settings)) {
                 $result = true;
             } else {
                 throw new RuntimeException('Failed to persist settings');
@@ -192,7 +193,9 @@ class AAM_Framework_Service_Settings
                 }
             }
 
-            $result = $this->_save_option(self::DB_OPTION, $this->_settings);
+            $result = AAM_Framework_Manager::_()->db->write(
+                self::DB_OPTION, $this->_settings
+            );
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
@@ -218,6 +221,7 @@ class AAM_Framework_Service_Settings
             $access_level = $this->_get_access_level();
             $type         = $access_level::TYPE;
             $id           = $access_level->get_id();
+            $db           = AAM_Framework_Manager::_()->db;
 
             if (in_array(
                 $type,
@@ -232,7 +236,7 @@ class AAM_Framework_Service_Settings
                 unset($this->_settings[$type]);
             }
 
-            if (!$this->_save_option(self::DB_OPTION, $this->_settings)) {
+            if (!$db->write(self::DB_OPTION, $this->_settings)) {
                 throw new RuntimeException('Failed to persist configurations');
             }
 

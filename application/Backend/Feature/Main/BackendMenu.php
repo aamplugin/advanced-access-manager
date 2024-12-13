@@ -48,7 +48,7 @@ class AAM_Backend_Feature_Main_BackendMenu extends AAM_Backend_Feature_Abstract
     {
         // Customize the user experience
         add_filter('aam_ui_backend_menu_mode_panel_filter', function() {
-            return AAM_Backend_View::getInstance()->loadPartial('backend-menu-mode');
+            return AAM_Backend_View::get_instance()->loadPartial('backend-menu-mode');
         });
     }
 

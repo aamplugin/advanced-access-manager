@@ -2915,6 +2915,14 @@ ul.tab li a:focus,
   margin-left: 1rem;
 }
 
+.aam-max-width {
+  width: auto !important;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0 !important;
+}
+
 .aam-mt-1 {
   margin-top: 1rem;
 }

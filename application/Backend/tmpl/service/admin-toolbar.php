@@ -2,7 +2,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
         $service      = $access_level->admin_toolbar();
     ?>
     <div class="aam-feature" id="toolbar-content">
@@ -22,7 +22,7 @@
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="toolbar_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
+                    <span><a href="#" id="toolbar_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>
             </div>
         </div>

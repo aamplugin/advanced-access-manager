@@ -63,6 +63,9 @@ class AAM_Service_Metaboxes
                 });
             }
 
+            // Register RESTful API endpoints
+            AAM_Restful_MetaboxService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -117,9 +120,6 @@ class AAM_Service_Metaboxes
 
             return $obj;
         });
-
-        // Register RESTful API endpoints
-        AAM_Restful_MetaboxService::bootstrap();
     }
 
     /**

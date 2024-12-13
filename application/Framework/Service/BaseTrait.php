@@ -160,7 +160,7 @@ trait AAM_Framework_Service_BaseTrait
         if (isset($context['access_level'])) {
             $result = $context['access_level'];
         } elseif (!empty($context['access_level_type'])) {
-            $result = AAM::api()->access_levels()->get(
+            $result = AAM_Framework_Manager::_()->access_levels->get(
                 $context['access_level_type'],
                 isset($context['access_level_id']) ? $context['access_level_id'] : null
             );

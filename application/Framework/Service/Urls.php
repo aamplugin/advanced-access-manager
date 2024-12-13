@@ -89,7 +89,9 @@ implements
         try {
             $resource    = $this->_get_resource();
             $permissions = $resource->get_permissions();
-            $url_schema  = AAM::api()->misc->sanitize_url($url_schema);
+            $url_schema  = AAM_Framework_Manager::_()->misc->sanitize_url(
+                $url_schema
+            );
 
             if (!array_key_exists($url_schema, $permissions)) {
                 throw new OutOfRangeException(sprintf(
@@ -237,7 +239,9 @@ implements
     public function get_url($url)
     {
         try {
-            $result = $this->_get_resource(AAM::api()->misc->sanitize_url($url));
+            $result = $this->_get_resource(
+                AAM_Framework_Manager::_()->misc->sanitize_url($url)
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -273,7 +277,9 @@ implements
     public function is_restricted($url)
     {
         try {
-            $resource = $this->_get_resource(AAM::api()->misc->sanitize_url($url));
+            $resource = $this->_get_resource(
+                AAM_Framework_Manager::_()->misc->sanitize_url($url)
+            );
 
             $result = apply_filters(
                 'aam_url_is_restricted_filter',
@@ -338,7 +344,7 @@ implements
     {
         try {
             $result = $this->_get_resource(
-                AAM::api()->misc->sanitize_url($url)
+                AAM_Framework_Manager::_()->misc->sanitize_url($url)
             )->get_redirect();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -386,7 +392,7 @@ implements
         }
 
         // Sanitize the incoming URL
-        $url_schema = AAM::api()->misc->sanitize_url($url_schema);
+        $url_schema = AAM_Framework_Manager::_()->misc->sanitize_url($url_schema);
 
         // Prepare array of new permissions
         $perms = array_merge($resource->get_permissions(true), [
@@ -414,7 +420,7 @@ implements
     {
         $resource    = $this->_get_resource();
         $permissions = $resource->get_permissions(true);
-        $url_schema  = AAM::api()->misc->sanitize_url($url_schema);
+        $url_schema  = AAM_Framework_Manager::_()->misc->sanitize_url($url_schema);
 
         // Note! User can delete only explicitly set permissions (customized)
         if (array_key_exists($url_schema, $permissions)) {
@@ -483,7 +489,7 @@ implements
     {
         $result = apply_filters(
             'aam_url_sanitize_url_filter',
-            AAM::api()->misc->sanitize_url($url_schema),
+            AAM_Framework_Manager::_()->misc->sanitize_url($url_schema),
             $url_schema
         );
 

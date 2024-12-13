@@ -31,7 +31,7 @@ class AAM_Framework_Service_Jwts
         try {
             $result = [];
             $user   = $this->_get_access_level();
-            $tokens = AAM_Service_Jwt::getInstance()->getTokenRegistry($user->ID);
+            $tokens = AAM_Service_Jwt::get_instance()->getTokenRegistry($user->ID);
 
             foreach($tokens as $token) {
                 array_push($result, $this->_prepare_token($token));
@@ -94,10 +94,10 @@ class AAM_Framework_Service_Jwts
             $claims['userId'] = $user->ID;
 
             // Generating token
-            $token = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
+            $token = AAM_Core_Jwt_Manager::get_instance()->encode($claims);
 
             // Register token
-            $result = AAM_Service_Jwt::getInstance()->registerToken(
+            $result = AAM_Service_Jwt::get_instance()->registerToken(
                 $user->ID, $token->token
             );
 
@@ -132,7 +132,7 @@ class AAM_Framework_Service_Jwts
             $user  = $this->_get_access_level();
 
             // Revoking the token
-            $result = AAM_Service_Jwt::getInstance()->revokeUserToken(
+            $result = AAM_Service_Jwt::get_instance()->revokeUserToken(
                 $user->ID, $found['token']
             );
 
@@ -160,7 +160,7 @@ class AAM_Framework_Service_Jwts
             $user = $this->_get_access_level();
 
             // Reset
-            if (!AAM_Service_Jwt::getInstance()->resetTokenRegistry($user->ID)) {
+            if (!AAM_Service_Jwt::get_instance()->resetTokenRegistry($user->ID)) {
                 throw new RuntimeException('Failed to reset tokens');
             } else {
                 $result = $this->get_token_list();
@@ -186,7 +186,7 @@ class AAM_Framework_Service_Jwts
     {
         $response = array();
 
-        $manager = AAM_Core_Jwt_Manager::getInstance();
+        $manager = AAM_Core_Jwt_Manager::get_instance();
         $claims  = $manager->validate($token);
 
         if (!is_wp_error($claims)) {

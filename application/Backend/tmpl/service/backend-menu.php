@@ -2,7 +2,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
         $service      = $access_level->backend_menu();
     ?>
     <div class="aam-feature" id="admin_menu-content">
@@ -24,18 +24,18 @@
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="menu-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
+                    <span><a href="#" id="menu-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>
             </div>
         </div>
 
-        <?php echo apply_filters('aam_ui_backend_menu_mode_panel_filter', '', AAM_Backend_AccessLevel::getInstance()->backend_menu()); ?>
+        <?php echo apply_filters('aam_ui_backend_menu_mode_panel_filter', '', AAM_Backend_AccessLevel::get_instance()->backend_menu()); ?>
 
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
             $first = false;
             $menu  = AAM::api()->backend_menu(array(
-                'access_level' => AAM_Backend_AccessLevel::getInstance()->get_access_level()
+                'access_level' => AAM_Backend_AccessLevel::get_instance()->get_access_level()
             ))->get_items();
 
             if (!empty($menu)) {
@@ -43,7 +43,7 @@
             ?>
                     <div
                         class="panel panel-default"
-                        style="opacity: <?php echo AAM_Backend_AccessLevel::getInstance()->has_cap($top_menu_item['capability']) ? 1 : '0.5'; ?>"
+                        style="opacity: <?php echo AAM_Backend_AccessLevel::get_instance()->has_cap($top_menu_item['capability']) ? 1 : '0.5'; ?>"
                     >
                         <div class="panel-heading" role="tab" id="menu-<?php echo $i; ?>-heading">
                             <h4 class="panel-title">

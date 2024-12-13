@@ -117,7 +117,7 @@ trait AAM_Framework_Resource_BaseTrait
         }
 
         // Read explicitly defined settings from DB
-        $permissions = AAM::api()->settings([
+        $permissions = AAM_Framework_Manager::_()->settings([
             'access_level' => $access_level
         ])->get_setting($this->_get_settings_ns(), []);
 
@@ -290,7 +290,7 @@ trait AAM_Framework_Resource_BaseTrait
             $this->_permissions = array_merge($this->_permissions, $permissions);
 
             // Store changes in DB
-            $result = AAM::api()->settings([
+            $result = AAM_Framework_Manager::_()->settings([
                 'access_level' => $this->get_access_level()
             ])->set_setting($this->_get_settings_ns(), $permissions);
         } else {
@@ -316,7 +316,7 @@ trait AAM_Framework_Resource_BaseTrait
     {
         $this->_explicit_permissions = [];
 
-        return AAM::api()->settings([
+        return AAM_Framework_Manager::_()->settings([
             'access_level' => $this->get_access_level()
         ])->delete_setting($this->_get_settings_ns());
     }

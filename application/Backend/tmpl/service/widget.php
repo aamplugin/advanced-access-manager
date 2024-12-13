@@ -2,7 +2,7 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
         $service      = $access_level->widgets();
     ?>
     <div class="aam-feature" id="widget-content">
@@ -31,7 +31,7 @@
             <div class="col-xs-12">
                 <div class="aam-overwrite" id="aam-widget-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="widget_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a>
+                    <span><a href="#" id="widget_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                 </div>
             </div>
         </div>
@@ -132,7 +132,7 @@
                                 <?php echo apply_filters(
                                     'aam_ui_widgets_screen_mode_filter',
                                     '',
-                                    AAM_Backend_AccessLevel::getInstance()->widgets(),
+                                    AAM_Backend_AccessLevel::get_instance()->widgets(),
                                     $screen_id
                                 ); ?>
                             </div>

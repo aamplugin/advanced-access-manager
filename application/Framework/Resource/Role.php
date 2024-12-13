@@ -42,13 +42,19 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     {
         if (is_a($resource_identifier, AAM_Framework_Proxy_Role::class)) {
             $this->_core_instance = $resource_identifier;
+            $this->_internal_id   = $resource_identifier->slug;
         } elseif (is_string($resource_identifier)) {
-            $this->_core_instance = AAM::api()->roles->role($resource_identifier);
+            $roles = AAM_Framework_Manager::_()->roles;
+
+            if ($roles->is_role($resource_identifier)) {
+                $this->_core_instance = $roles->role($resource_identifier);
+                $this->_internal_id   = $this->_core_instance->slug;
+            } else {
+                $this->_internal_id = $resource_identifier;
+            }
         }
 
-        if (is_a($this->_core_instance, AAM_Framework_Proxy_Role::class)) {
-            $this->_internal_id = $this->_core_instance->slug;
-        } else {
+        if (empty($this->_internal_id)){
             throw new OutOfRangeException('The role resource identifier is invalid');
         }
     }

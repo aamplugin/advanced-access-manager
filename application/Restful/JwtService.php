@@ -477,7 +477,7 @@ class AAM_Restful_JwtService
      */
     private function _get_service($request)
     {
-        $access_level = AAM::api()->access_levels()->get(
+        $access_level = AAM::api()->access_levels->get(
             AAM_Framework_Type_AccessLevel::USER, $request->get_param('user_id')
         );
 

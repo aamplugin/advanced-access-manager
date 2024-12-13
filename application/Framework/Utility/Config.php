@@ -131,15 +131,7 @@ class AAM_Framework_Utility_Config implements AAM_Framework_Utility_Interface
      */
     private function _read_config($default = [])
     {
-        if (is_multisite()) {
-            $result = get_blog_option(
-                get_current_blog_id(), self::DB_OPTION, $default
-            );
-        } else {
-            $result = get_option(self::DB_OPTION, $default);
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->db->read(self::DB_OPTION, $default);
     }
 
     /**
@@ -152,30 +144,9 @@ class AAM_Framework_Utility_Config implements AAM_Framework_Utility_Interface
      */
     private function _save_config()
     {
-        // Saving the configurations in DB
-        $old_value = $this->_read_config(null);
-
-        if ($old_value === null) { // Option does not exist, add it
-            if (is_multisite()) {
-                $result = add_blog_option(
-                    get_current_blog_id(), self::DB_OPTION, $this->_configs
-                );
-            } else {
-                $result = add_option(self::DB_OPTION, $this->_configs, '', true);
-            }
-        } elseif (maybe_serialize($old_value) !== maybe_serialize($this->_configs)) {
-            if (is_multisite()) {
-                $result = update_blog_option(
-                    get_current_blog_id(), self::DB_OPTION, $this->_configs
-                );
-            } else {
-                $result = update_option(self::DB_OPTION, $this->_configs, true);
-            }
-        } else{
-            $result = true;
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->db->write(
+            self::DB_OPTION, $this->_configs
+        );
     }
 
 }

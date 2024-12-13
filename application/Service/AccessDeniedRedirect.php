@@ -68,6 +68,9 @@ class AAM_Service_AccessDeniedRedirect
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_AccessDeniedRedirectService::bootstrap();
+
             $this->initialize_hooks();
         }
     }
@@ -113,9 +116,6 @@ class AAM_Service_AccessDeniedRedirect
 
             return $handler;
         });
-
-        // Register RESTful API endpoints
-        AAM_Restful_AccessDeniedRedirectService::bootstrap();
     }
 
 }

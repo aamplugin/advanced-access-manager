@@ -41,7 +41,7 @@ class AAM_Backend_View
         do_action(
             'aam_initialize_ui_action',
             function($feature) { AAM_Backend_Feature::registerFeature($feature); },
-            AAM_Backend_AccessLevel::getInstance()
+            AAM_Backend_AccessLevel::get_instance()
         );
     }
 
@@ -148,7 +148,7 @@ class AAM_Backend_View
 
         $action       = $this->getFromPost('sub_action');
         $parts        = explode('.', $action);
-        $access_level = AAM_Backend_AccessLevel::getInstance();
+        $access_level = AAM_Backend_AccessLevel::get_instance();
 
         if (count($parts) === 2) {
             $id = 'AAM_Backend_Feature_' . $parts[0];

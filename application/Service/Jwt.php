@@ -107,7 +107,7 @@ class AAM_Service_Jwt
         if (AAM::isAAM()) {
             add_action('aam_post_edit_user_modal_action', function () {
                 if (current_user_can('aam_manage_jwt')) {
-                    echo AAM_Backend_View::getInstance()->loadPartial('jwt-login-url');
+                    echo AAM_Backend_View::get_instance()->loadPartial('jwt-login-url');
                 }
             });
         }
@@ -420,7 +420,7 @@ class AAM_Service_Jwt
             $claims['exp'] = $expires->getTimestamp();
         }
 
-        $result = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
+        $result = AAM_Core_Jwt_Manager::get_instance()->encode($claims);
 
         // Finally register token so it can be revoked
         $this->registerToken($userId, $result->token, $replace);
@@ -793,7 +793,7 @@ class AAM_Service_Jwt
     {
         // First level of validation - making sure that the token is properly signed
         // and not expired
-        $result = AAM_Core_Jwt_Manager::getInstance()->validate($token);
+        $result = AAM_Core_Jwt_Manager::get_instance()->validate($token);
 
         if (!is_wp_error($result)) {
             // Second level of validation

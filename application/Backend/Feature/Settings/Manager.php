@@ -47,7 +47,6 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
      * @since 6.7.0  Added `$raw` argument
      * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/130
-     * @since 6.3.0  Optimized AAM_Core_API::getOption call
      * @since 6.2.0  Initial implementation of the method
      *
      * @access public
@@ -87,9 +86,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                     break;
 
                 case 'roles':
-                    $dataset['roles'] = AAM_Core_API::getOption(
-                        wp_roles()->role_key
-                    );
+                    $dataset['roles'] = AAM::api()->db->read(wp_roles()->role_key);
                     break;
 
                 default:
@@ -238,7 +235,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
                             break;
 
                         case 'roles':
-                            AAM_Core_API::updateOption(
+                            AAM::api()->db->write(
                                 wp_roles()->role_key,
                                 $this->_sanitizeRoles($settings)
                             );

@@ -20,6 +20,14 @@ interface AAM_Framework_Resource_Interface
 {
 
     /**
+     * Resource type (aka alias)
+     *
+     * @var string
+     * @version 7.0.0
+     */
+    const TYPE = null;
+
+    /**
      * Get resource internal ID
      *
      * The internal ID represents unique resource identify AAM Framework users to

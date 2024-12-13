@@ -29,11 +29,11 @@ class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Int
      */
     public function get_parent()
     {
-        $levels = AAM::api()->access_levels();
-
         return apply_filters(
             'aam_get_parent_access_level_filter',
-            $levels->get(AAM_Framework_Type_AccessLevel::ALL),
+            AAM_Framework_Manager::_()->access_levels->get(
+                AAM_Framework_Type_AccessLevel::ALL
+            ),
             $this
         );
     }

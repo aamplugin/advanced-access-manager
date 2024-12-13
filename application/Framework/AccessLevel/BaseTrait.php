@@ -28,24 +28,6 @@
  *
  * @package AAM
  *
- * @method AAM_Framework_Service_Urls urls()
- * @method AAM_Framework_Service_ApiRoutes api_routes()
- * @method AAM_Framework_Service_Jwts jwts()
- * @method AAM_Framework_Service_LoginRedirect login_redirect()
- * @method AAM_Framework_Service_LogoutRedirect logout_redirect()
- * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect()
- * @method AAM_Framework_Service_BackendMenu backend_menu()
- * @method AAM_Framework_Service_AdminToolbar admin_toolbar()
- * @method AAM_Framework_Service_Metaboxes metaboxes()
- * @method AAM_Framework_Service_Widgets widgets()
- * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect()
- * @method AAM_Framework_Service_Identities identities()
- * @method AAM_Framework_Service_Content content()
- * @method AAM_Framework_Service_Capabilities capabilities()
- * @method AAM_Framework_Service_Capabilities caps()
- * @method AAM_Framework_Service_Settings settings()
- * @method AAM_Framework_Service_AccessLevels access_levels()
- *
  * @version 7.0.0
  */
 trait AAM_Framework_AccessLevel_BaseTrait
@@ -138,21 +120,15 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $this->_extended_methods[$name], $arguments
             );
         } else {
-            $services = AAM::api()->get_registered_services();
-
-            if (array_key_exists($name, $services)) {
-                $response = call_user_func("{$services[$name]}::get_instance", [
-                    'access_level' => $this
-                ]);
+            if (AAM_Framework_Manager::_()->has_service($name)) {
+                $response = AAM_Framework_Manager::_()->{$name}($this);
             } elseif (is_object($this->_proxy_instance)) {
                 $response = call_user_func_array(
                     array($this->_proxy_instance, $name), $arguments
                 );
             } else {
-                _doing_it_wrong(
-                    static::class . '::' . $name,
-                    'Method does not exist',
-                    AAM_VERSION
+                throw new RuntimeException(
+                    sprintf('Method %s does not exist', $name)
                 );
             }
         }
@@ -307,7 +283,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         if (is_object($parent)) {
             // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM::api()->config->get(
+            $multi_support = AAM_Framework_Manager::_()->config->get(
                 'core.settings.multi_access_levels'
             );
 
@@ -344,7 +320,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         if (is_object($parent)) {
             // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM::api()->config->get(
+            $multi_support = AAM_Framework_Manager::_()->config->get(
                 'core.settings.multi_access_levels'
             );
 
@@ -381,7 +357,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_preference($preference->get_ns());
-            $preferences      = AAM::api()->misc->merge_preferences(
+            $preferences      = AAM_Framework_Manager::_()->misc->merge_preferences(
                 $sibling_resource->get_preferences(), $preferences
             );
         }
@@ -413,7 +389,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $resource->get_resource_type(), $resource->get_internal_id(false)
             );
 
-            $permissions = AAM::api()->misc->merge_permissions(
+            $permissions = AAM_Framework_Manager::_()->misc->merge_permissions(
                 $sibling_resource->get_permissions(),
                 $permissions,
                 $resource->get_resource_type()

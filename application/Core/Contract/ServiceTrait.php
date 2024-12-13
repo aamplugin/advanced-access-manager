@@ -10,12 +10,8 @@
 /**
  * Reusable elements for each service
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
- * @since 6.4.0 Enhancement https://github.com/aamplugin/advanced-access-manager/issues/71
- * @since 6.0.0 Initial implementation of the service
- *
  * @package AAM
- * @version 6.7.9
+ * @version 7.0.0
  */
 trait AAM_Core_Contract_ServiceTrait
 {
@@ -26,9 +22,69 @@ trait AAM_Core_Contract_ServiceTrait
      * @var object
      *
      * @access protected
-     * @version 6.0.0
+     * @version 7.0.0
      */
     protected static $instance = null;
+
+    /**
+     * Register action hook
+     *
+     * @param string   $name
+     * @param callable $cb
+     * @param integer  $priority
+     * @param integer  $params
+     * @param boolean  $exclude_super_admins
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _register_action(
+        $name, $cb, $priority = 10, $params = 0, $exclude_super_admins = true
+    ) {
+        if ($exclude_super_admins) {
+            add_action($name, function(...$args) use ($cb) {
+                if (!AAM::api()->misc->is_super_admin()) {
+                    call_user_func_array($cb, $args);
+                }
+            }, $priority, $params);
+        } else {
+            add_action($name, $cb, $priority, $params);
+        }
+    }
+
+    /**
+     * Register filter hook
+     *
+     * @param string   $name
+     * @param callable $cb
+     * @param integer  $priority
+     * @param integer  $params
+     * @param boolean  $exclude_super_admins
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _register_filter(
+        $name, $cb, $priority = 10, $params = 0, $exclude_super_admins = true
+    ) {
+        if ($exclude_super_admins) {
+            add_filter($name, function(...$args) use ($cb) {
+                if (!AAM::api()->misc->is_super_admin()) {
+                    $result = call_user_func_array($cb, $args);
+                } else {
+                    $result = isset($args[0]) ? $args[0] : null;
+                }
+
+                return $result;
+            }, $priority, $params);
+        } else {
+            add_filter($name, $cb, $priority, $params);
+        }
+    }
 
     /**
      * Bootstrap the service
@@ -37,11 +93,8 @@ trait AAM_Core_Contract_ServiceTrait
      *
      * @param boolean $reload
      *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.7.9
+     * @version 7.0.0
      */
     public static function bootstrap($reload = false)
     {
@@ -59,13 +112,10 @@ trait AAM_Core_Contract_ServiceTrait
      *
      * @param boolean $reload
      *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/193
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.7.9
+     * @version 7.0.0
      */
-    public static function getInstance($reload = false)
+    public static function get_instance($reload = false)
     {
         return self::bootstrap($reload);
     }

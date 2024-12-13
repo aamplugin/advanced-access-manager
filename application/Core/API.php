@@ -25,6 +25,8 @@
  *
  * @package AAM
  * @version 6.9.31
+ * @deprecated Will be removed in 7.0.0
+ * @todo Remove in 7.0.0
  */
 final class AAM_Core_API
 {

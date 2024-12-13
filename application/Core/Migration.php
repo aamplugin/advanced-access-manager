@@ -54,7 +54,6 @@ final class AAM_Core_Migration
      * @return array
      *
      * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/357
-     * @since 6.3.0  Optimized AAM_Core_API::getOption call
      * @since 6.0.0  Initial implementation of the method
      *
      * @access public
@@ -62,7 +61,7 @@ final class AAM_Core_Migration
      */
     public static function getPending()
     {
-        $completed = AAM_Core_API::getOption(self::DB_OPTION);
+        $completed = AAM::api()->db->read(self::DB_OPTION);
         $pending   = array();
         $iterator  = self::getDirectoryIterator();
 
@@ -84,7 +83,6 @@ final class AAM_Core_Migration
      *
      * @return boolean
      *
-     * @since 6.3.0 Optimized AAM_Core_API::getOption call
      * @since 6.0.0 Initial implementation of the method
      *
      * @access public
@@ -92,10 +90,10 @@ final class AAM_Core_Migration
      */
     public static function storeCompletedScript($file_name)
     {
-        $completed   = AAM_Core_API::getOption(self::DB_OPTION);
+        $completed   = AAM::api()->db->read(self::DB_OPTION);
         $completed[] = $file_name;
 
-        return AAM_Core_API::updateOption(self::DB_OPTION, $completed);
+        return AAM::api()->db->write(self::DB_OPTION, $completed);
     }
 
     /**

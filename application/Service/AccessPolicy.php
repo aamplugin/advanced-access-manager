@@ -126,7 +126,7 @@ class AAM_Service_AccessPolicy
                 self::POLICY_CPT,
                 __('Access Policy Document', AAM_KEY),
                 function() {
-                    echo AAM_Backend_View::getInstance()->renderPolicyMetabox();
+                    echo AAM_Backend_View::get_instance()->renderPolicyMetabox();
                 },
                 null,
                 'normal',
@@ -137,7 +137,7 @@ class AAM_Service_AccessPolicy
                 'aam-policy-assignee',
                 __('Access Policy Assignee', AAM_KEY),
                 function() {
-                    echo AAM_Backend_View::getInstance()->renderPolicyPrincipalMetabox();
+                    echo AAM_Backend_View::get_instance()->renderPolicyPrincipalMetabox();
                 },
                 null,
                 'side'

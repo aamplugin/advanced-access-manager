@@ -70,15 +70,30 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
      */
     public function get_role($slug)
     {
-        $roles = wp_roles();
-
-        if (!$roles->is_role($slug)) {
+        if (!$this->is_role($slug)) {
             throw new OutOfRangeException(sprintf('Role %s does not exist', $slug));
         }
+
+        $roles = wp_roles();
 
         return new AAM_Framework_Proxy_Role(
             $roles->role_names[$slug], $roles->get_role($slug)
         );
+    }
+
+    /**
+     * Check if given slug is a role
+     *
+     * @param string $slug
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_role($slug)
+    {
+        return wp_roles()->is_role($slug);
     }
 
     /**
@@ -169,7 +184,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
             $slug = empty($slug) ? strtolower(uniqid()) : $slug;
         }
 
-        if ($roles->is_role($slug)) {
+        if ($this->is_role($slug)) {
             throw new LogicException("Role {$slug} already exists");
         }
 
@@ -239,7 +254,7 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
         // Delete the role
         wp_roles()->remove_role($role->slug);
 
-        return !wp_roles()->is_role($role->slug);
+        return !$this->is_role($role->slug);
     }
 
 }

@@ -26,7 +26,6 @@
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AccessLevels access_levels(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_Capabilities $caps
@@ -36,32 +35,14 @@
  * @property AAM_Framework_Utility_Redirect $redirect
  * @property AAM_Framework_Utility_Roles $roles
  * @property AAM_Framework_Utility_Users $users
+ * @property AAM_Framework_Utility_Db $db
+ * @property AAM_Framework_Utility_AccessLevels $access_levels
  *
  * @package AAM
  * @version 7.0.0
  */
 final class AAM_Core_Gateway
 {
-
-    /**
-     * Collection of utilities
-     *
-     * @var array
-     *
-     * @access private
-     * @static
-     * @version 7.0.0
-     */
-    private $_utility_map = [
-        'cache'        => AAM_Framework_Utility_Cache::class,
-        'misc'         => AAM_Framework_Utility_Misc::class,
-        'config'       => AAM_Framework_Utility_Config::class,
-        'redirect'     => AAM_Framework_Utility_Redirect::class,
-        'capabilities' => AAM_Framework_Utility_Capabilities::class,
-        'caps'         => AAM_Framework_Utility_Capabilities::class,
-        'roles'        => AAM_Framework_Utility_Roles::class,
-        'users'        => AAM_Framework_Utility_Users::class
-    ];
 
     /**
      * Single instance of itself
@@ -74,53 +55,12 @@ final class AAM_Core_Gateway
     private static $_instance = null;
 
     /**
-     * Default context shared by all services
-     *
-     * @var array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_default_context = [];
-
-    /**
-     * Collection of services
-     *
-     * @var array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private $_registered_services = [];
-
-    /**
      * Constructor
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function __construct()
-    {
-        $this->_registered_services = apply_filters('aam_api_gateway_services_filter', [
-            'urls'                   => AAM_Framework_Service_Urls::class,
-            'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
-            'jwts'                   => AAM_Framework_Service_Jwts::class,
-            'login_redirect'         => AAM_Framework_Service_LoginRedirect::class,
-            'logout_redirect'        => AAM_Framework_Service_LogoutRedirect::class,
-            'not_found_redirect'     => AAM_Framework_Service_NotFoundRedirect::class,
-            'backend_menu'           => AAM_Framework_Service_BackendMenu::class,
-            'admin_toolbar'          => AAM_Framework_Service_AdminToolbar::class,
-            'metaboxes'              => AAM_Framework_Service_Metaboxes::class,
-            'widgets'                => AAM_Framework_Service_Widgets::class,
-            'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
-            'identities'             => AAM_Framework_Service_Identities::class,
-            'content'                => AAM_Framework_Service_Content::class,
-            'capabilities'           => AAM_Framework_Service_Capabilities::class,
-            'caps'                   => AAM_Framework_Service_Capabilities::class,
-            'settings'               => AAM_Framework_Service_Settings::class,
-            'access_levels'          => AAM_Framework_Service_AccessLevels::class
-        ]);
-    }
+    protected function __construct() {}
 
     /**
      * Prevent from fatal errors
@@ -128,28 +68,14 @@ final class AAM_Core_Gateway
      * @param string $name
      * @param array  $args
      *
-     * @return void
+     * @return AAM_Framework_Service_Interface
      *
      * @access public
      * @version 7.0.0
      */
     public function __call($name, $args)
     {
-        $result = null;
-
-        if (array_key_exists($name, $this->_registered_services)) {
-            $result = $this->_return_service(
-                $this->_registered_services[$name], array_shift($args)
-            );
-        } else {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                "The method {$name} is not defined in the AAM API",
-                AAM_VERSION
-            );
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->{$name}(array_shift($args));
     }
 
     /**
@@ -158,6 +84,9 @@ final class AAM_Core_Gateway
      * @param string $name
      *
      * @return AAM_Framework_Utility_Interface
+     * @access public
+     *
+     * @version 7.0.0
      */
     public function __get($name)
     {
@@ -179,12 +108,10 @@ final class AAM_Core_Gateway
      */
     public function user($identifier = null)
     {
-        $service = $this->access_levels();
-
         if (is_null($identifier)) {
             $result = AAM::current_user();
         } else {
-            $result = $service->get(
+            $result = $this->access_levels->get(
                 AAM_Framework_Type_AccessLevel::USER, $identifier
             );
         }
@@ -204,7 +131,7 @@ final class AAM_Core_Gateway
      */
     public function role($role_slug)
     {
-        return $this->access_levels()->get(
+        return $this->access_levels->get(
             AAM_Framework_Type_AccessLevel::ROLE, $role_slug
         );
     }
@@ -219,7 +146,7 @@ final class AAM_Core_Gateway
      */
     public function visitor()
     {
-        return $this->access_levels()->get(AAM_Framework_Type_AccessLevel::VISITOR);
+        return $this->access_levels->get(AAM_Framework_Type_AccessLevel::VISITOR);
     }
 
     /**
@@ -258,7 +185,7 @@ final class AAM_Core_Gateway
      */
     public function default()
     {
-        return $this->access_levels()->get(AAM_Framework_Type_AccessLevel::DEFAULT);
+        return $this->access_levels->get(AAM_Framework_Type_AccessLevel::DEFAULT);
     }
 
     /**
@@ -316,21 +243,13 @@ final class AAM_Core_Gateway
     /**
      * Return utility instance
      *
-     * @param string $type
+     * @param string $utility_name
      *
      * @return AAM_Framework_Utility_Interface
      */
-    public function utility($type)
+    public function utility($utility_name)
     {
-        if (array_key_exists($type, $this->_utility_map)) {
-            $result = $this->_utility_map[$type]::bootstrap();
-        } else {
-            throw new BadMethodCallException(sprintf(
-                'There is no utility %s defined', $type
-            ));
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->{$utility_name};
     }
 
     /**
@@ -412,70 +331,8 @@ final class AAM_Core_Gateway
     public function setup(array $default_context = [])
     {
         if (is_array($default_context)) {
-            $this->_default_context = $default_context;
+            AAM_Framework_Manager::load($default_context);
         }
-    }
-
-    /**
-     * Get list of registered services
-     *
-     * @return array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_registered_services()
-    {
-        return $this->_registered_services;
-    }
-
-    /**
-     * Return an instance of requested service
-     *
-     * @param string $service_class_name
-     * @param mixed  $context
-     *
-     * @return AAM_Framework_Service_Interface
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _return_service($service_class_name, $context)
-    {
-        $new_context = [];
-
-        // Parse the incoming context and determine correct access level
-        if (is_a($context, AAM_Framework_AccessLevel_Interface::class)) {
-            $new_context = [ 'access_level' => $context ];
-        } elseif (is_string($context)) {
-            // Trying to parse the context and extract the access level
-            if (in_array($context, [ 'visitor', 'anonymous', 'guest'], true)) {
-                $new_context = [ 'access_level' => $this->visitor() ];
-            } elseif (in_array($context, [ 'default', 'all', 'anyone', 'everyone' ], true)) {
-                $new_context = [ 'access_level' => $this->all() ];
-            } elseif (strpos($context, ':')) {
-                list($access_level, $id) = explode(':', $context, 2);
-
-                if ($access_level === 'role') {
-                    $new_context = [ 'access_level' => $this->role($id) ];
-                } elseif ($access_level === 'user') {
-                    $new_context = [ 'access_level' => $this->user($id) ];
-                }
-            } else {
-                $new_context = $context;
-            }
-        } elseif (is_array($context)) {
-            $new_context = $context;
-        }
-
-        // Compile the final context that is passed to the service
-        if (is_array($new_context)) {
-            $context = array_merge($this->_default_context, $new_context);
-        } else {
-            $context = $new_context;
-        }
-
-        return call_user_func("{$service_class_name}::get_instance", $context);
     }
 
     /**

@@ -5,7 +5,7 @@
         <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
             <?php echo apply_filters(
                 'aam_content_service_tips_filter',
-                AAM_Backend_View::getInstance()->loadPartial('content-service-tips')
+                AAM_Backend_View::get_instance()->loadPartial('content-service-tips')
             ); ?>
         <?php } ?>
 
@@ -63,7 +63,7 @@
                 </table>
             </div>
 
-            <div class="aam-slide-form aam-access-form">
+            <div class="aam-slide-form aam-access-form" id="aam_content_access_form">
                 <a href="#" class="btn btn-xs btn-primary post-back btn-right">
                     &Lt; <?php echo __('Go Back', AAM_KEY); ?>
                 </a>

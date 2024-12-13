@@ -465,7 +465,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                         $response
                     );
 
-                    AAM::api()->cache->set(
+                    AAM_Framework_Manager::_()->cache->set(
                         self::CACHE_DB_OPTION, $response, 31536000
                     );
                 }
@@ -473,7 +473,9 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
         }
 
         if (empty($response)) { // Try to pull it from the cache
-            $response = AAM::api()->cache->get(self::CACHE_DB_OPTION, []);
+            $response = AAM_Framework_Manager::_()->cache->get(
+                self::CACHE_DB_OPTION, []
+            );
         }
 
         return $response;

@@ -186,9 +186,7 @@ class AAM_Backend_AccessLevel
      */
     private function _init_access_level($type, $id = null)
     {
-        $this->_access_level = AAM::api()->access_levels()->get(
-            $type, $id
-        );
+        $this->_access_level = AAM::api()->access_levels->get($type, $id);
     }
 
     /**
@@ -292,7 +290,7 @@ class AAM_Backend_AccessLevel
      * @access public
      * @version 7.0.0
      */
-    public static function getInstance()
+    public static function get_instance()
     {
         return self::bootstrap();
     }

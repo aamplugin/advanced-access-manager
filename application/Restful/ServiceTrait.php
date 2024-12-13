@@ -147,7 +147,7 @@ trait AAM_Restful_ServiceTrait
                 $access_level_id = $request->get_param('user_id');
             }
 
-            $result = AAM::api()->access_levels()->get(
+            $result = AAM::api()->access_levels->get(
                 $access_level, $access_level_id
             );
         }

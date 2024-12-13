@@ -112,7 +112,7 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
             'ttl'   => time() + $ttl
         );
 
-        $capacity = AAM::api()->config->get(
+        $capacity = AAM_Framework_Manager::_()->config->get(
             'core.settings.cache.capability',
             self::DEFAULT_CACHE_CAPACITY
         );
@@ -163,68 +163,35 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
     {
         $this->_cache = [];
 
-        if (is_multisite()) {
-            $result = delete_blog_option(get_current_blog_id(), self::DB_OPTION);
-        } else {
-            $result = delete_option(self::DB_OPTION);
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->db->delete(self::DB_OPTION);
     }
 
     /**
      * Get cache from the database
      *
-     * @param int $blog_id
-     *
      * @return mixed
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _read_cache($blog_id = null)
+    private function _read_cache()
     {
-        if (is_multisite()) {
-            $result = get_blog_option(
-                ($blog_id ? $blog_id : get_current_blog_id()), self::DB_OPTION, []
-            );
-        } else {
-            $result = get_option(self::DB_OPTION, []);
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->db->read(self::DB_OPTION, []);
     }
 
     /**
      * Update cache in the DB
      *
      * @param mixed $data
-     * @param int   $blog_id [Optional]
      *
      * @return bool
      *
      * @access private
      * @version 7.0.0
      */
-    private function _update($data, $blog_id = null)
+    private function _update($data)
     {
-        $old_value = $this->_read_cache($blog_id);
-
-        if (maybe_serialize($old_value) !== maybe_serialize($data)) {
-            if (is_multisite()) {
-                $result = update_blog_option(
-                    ($blog_id ? $blog_id : get_current_blog_id()),
-                    self::DB_OPTION,
-                    $data
-                );
-            } else {
-                $result = update_option(self::DB_OPTION, $data, false);
-            }
-        } else {
-            $result = true;
-        }
-
-        return $result;
+        return AAM_Framework_Manager::_()->db->write(self::DB_OPTION, $data);
     }
 
 }

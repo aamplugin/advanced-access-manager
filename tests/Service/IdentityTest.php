@@ -27,21 +27,21 @@ final class IdentityTest extends TestCase
      */
     public function testRoleVisibility()
     {
-        $user_a = $this->createUser([ 'role' => 'administrator' ]);
+        $user_a = $this->createUser([ 'role' => 'editor' ]);
 
         // Setting new current user
         wp_set_current_user($user_a);
 
         // Making sure that we can see about to be hidden role
-        $this->assertArrayHasKey('editor', get_editable_roles());
+        $this->assertArrayHasKey('subscriber', get_editable_roles());
 
         // Defining permissions and hiding role
         $service = AAM::api()->identities();
 
-        $this->assertTrue($service->role('editor')->deny('list_role'));
+        $this->assertTrue($service->role('subscriber')->deny('list_role'));
 
         // Making sure that we can see about to be hidden role
-        $this->assertArrayNotHasKey('editor', get_editable_roles());
+        $this->assertArrayNotHasKey('subscriber', get_editable_roles());
     }
 
     /**
@@ -54,7 +54,7 @@ final class IdentityTest extends TestCase
      */
     public function testUserVisibility()
     {
-        $user_a = $this->createUser([ 'role' => 'administrator' ]);
+        $user_a = $this->createUser([ 'role' => 'editor' ]);
         $user_b = $this->createUser([ 'role' => 'subscriber' ]);
         $user_c = $this->createUser([ 'role' => 'contributor' ]);
 
@@ -211,15 +211,15 @@ final class IdentityTest extends TestCase
             'core.settings.multi_access_levels', true
         ));
 
-        $user_a = $this->createUser([ 'role' => 'administrator' ]);
+        $user_a = $this->createUser([ 'role' => 'editor' ]);
         $user_b = $this->createUser([ 'role' => [ 'subscriber', 'contributor' ] ]);
 
         // Setting current user
         wp_set_current_user($user_a);
 
         // Setting permissions and hiding users in one role
-        $this->assertTrue(AAM::api()->identities('role:administrator')
-                                    ->role('contributor')->deny('list_users')
+        $this->assertTrue(
+            AAM::api()->identities('role:editor')->role('contributor')->deny('list_users')
         );
 
         $users = array_map('intval', get_users([
@@ -239,7 +239,7 @@ final class IdentityTest extends TestCase
      */
     public function testUserBasicPermissions()
     {
-        $user_a = $this->createUser([ 'role' => 'administrator' ]);
+        $user_a = $this->createUser([ 'role' => 'subadmin' ]);
         $user_b = $this->createUser([ 'role' => 'subscriber' ]);
         $user_c = $this->createUser([ 'role' => 'contributor' ]);
 
@@ -255,7 +255,7 @@ final class IdentityTest extends TestCase
         $this->assertTrue(current_user_can('promote_user', $user_c));
 
         // Set permissions on the role level
-        $this->assertTrue(AAM::api()->identities('role:administrator')
+        $this->assertTrue(AAM::api()->identities('role:subadmin')
                                     ->role('subscriber')
                                     ->deny(['edit_users', 'delete_users', 'promote_users'])
         );
@@ -269,7 +269,7 @@ final class IdentityTest extends TestCase
         $this->assertTrue(current_user_can('promote_user', $user_c));
 
         // Set permission for an individual user
-        $service = AAM::api()->identities('role:administrator')->user($user_c);
+        $service = AAM::api()->identities('role:subadmin')->user($user_c);
 
         $this->assertTrue($service->deny('edit_user'));
         $this->assertTrue($service->deny('delete_user'));
@@ -288,7 +288,7 @@ final class IdentityTest extends TestCase
      */
     public function testPasswordControlsPermissions()
     {
-        $user_a = $this->createUser([ 'role' => 'administrator' ]);
+        $user_a = $this->createUser([ 'role' => 'subadmin' ]);
         $user_b = $this->createUser([ 'role' => 'subscriber' ]);
         $user_c = $this->createUser([ 'role' => 'contributor' ]);
 
@@ -296,7 +296,7 @@ final class IdentityTest extends TestCase
         wp_set_current_user($user_a);
 
         // Set permissions on the role level first
-        $this->assertTrue(AAM::api()->identities('role:administrator')
+        $this->assertTrue(AAM::api()->identities('role:subadmin')
                                     ->role('subscriber')
                                     ->deny('change_users_password')
         );
@@ -327,7 +327,7 @@ final class IdentityTest extends TestCase
         $this->assertObjectNotHasProperty('user_pass', $data);
 
         // Set permissions on the user level
-        $this->assertTrue(AAM::api()->identities('role:administrator')
+        $this->assertTrue(AAM::api()->identities('role:subadmin')
                                     ->user($user_c)
                                     ->deny('change_user_password')
         );

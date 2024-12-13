@@ -204,7 +204,7 @@ class AAM_Service_SecurityAudit
      */
     public function has_report()
     {
-        $report = AAM_Core_API::getOption('aam_security_audit_result', null);
+        $report = AAM::api()->db->read('aam_security_audit_result');
 
         return !empty($report);
     }

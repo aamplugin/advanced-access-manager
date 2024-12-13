@@ -67,6 +67,9 @@ class AAM_Service_BackendMenu
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_BackendMenuService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -101,11 +104,9 @@ class AAM_Service_BackendMenu
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
             add_filter('parent_file', function($parent_file) {
-                if (AAM::isAAM() && current_user_can('administrator')) {
+                if (AAM::isAAM() && AAM::api()->misc->is_super_admin()) {
                    AAM::api()->backend_menu()->get_items();
-                }
-
-                if (!AAM::isAAM() || !current_user_can('aam_manage_admin_menu')) {
+                } else {
                     $this->filter_menu();
                 }
 
@@ -115,13 +116,10 @@ class AAM_Service_BackendMenu
 
         // Control admin area
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
-            add_action('admin_init', function() {
+            $this->_register_action('admin_init', function() {
                 $this->_admin_init();
-            });
+            }, PHP_INT_MAX);
         }
-
-        // Register RESTful API endpoints
-        AAM_Restful_BackendMenuService::bootstrap();
     }
 
     /**

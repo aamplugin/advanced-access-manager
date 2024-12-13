@@ -237,7 +237,7 @@ class AAM
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
 
             // Validate logged in user status
-            AAM_Service_Core::getInstance()->verify_user_status();
+            AAM_Service_Core::get_instance()->verify_user_status();
         }
 
         return self::$_instance;

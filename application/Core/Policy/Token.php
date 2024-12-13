@@ -304,7 +304,7 @@ class AAM_Core_Policy_Token
      */
     protected static function getCurrentPostValue($option_name)
     {
-        $post = AAM_Service_Content::getInstance()->get_current_post();
+        $post = AAM_Service_Content::get_instance()->get_current_post();
 
         return is_object($post) ? $post->{$option_name} : null;
     }
@@ -397,13 +397,7 @@ class AAM_Core_Policy_Token
      */
     protected static function getWPOption($option)
     {
-        if (is_multisite()) {
-            $result = get_blog_option(get_current_blog_id(), $option);
-        } else {
-            $result = get_option($option);
-        }
-
-        return $result;
+        return AAM::api()->db->read($option);
     }
 
     /**

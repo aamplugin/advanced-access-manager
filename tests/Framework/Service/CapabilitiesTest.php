@@ -196,7 +196,7 @@ final class CapabilitiesTest extends TestCase
      */
     public function testExists()
     {
-        $service = AAM::api()->capabilities('role:administrator');
+        $service = AAM::api()->capabilities('role:subadmin');
         $cap_a   = 'test_cap_t';
         $cap_b   = 'test_cap_m';
 

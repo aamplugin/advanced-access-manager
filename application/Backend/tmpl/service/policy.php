@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_AccessLevel::getInstance()->get_display_name(), '<a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
+                    <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Manage access and security policies for [%s]. For more information check %sAccess &amp; Security Policy%s page.', 'b'), AAM_Backend_AccessLevel::get_instance()->get_display_name(), '<a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
                 </p>
             </div>
         </div>
@@ -22,7 +22,7 @@
             <div class="col-xs-12">
                 <div class="aam-overwrite" id="aam-policy-overwrite" style="display: <?php echo ($this->isOverwritten() ? 'block' : 'none'); ?>">
                     <span><i class="icon-check"></i> <?php echo __('Policies are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="policy-reset" class="btn btn-xs btn-primary"><?php echo __('Reset To Default', AAM_KEY); ?></a>
+                    <span><a href="#" id="policy-reset" class="btn btn-xs btn-primary"><?php echo __('Reset To Default', AAM_KEY); ?></a></span>
                 </div>
             </div>
         </div>

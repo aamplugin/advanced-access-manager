@@ -15,7 +15,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-notification">
-                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Be careful!] On this tab, you can manage capabilities for [%s]. Any changes to the list of capabilities is [permanent]. Consider to backup at least your database tables [_options] and [_usermeta] regularly.', 'b', 'b', 'b', 'i', 'i'), AAM_Backend_AccessLevel::getInstance()->get_display_name()); ?>
+                        <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('[Be careful!] On this tab, you can manage capabilities for [%s]. Any changes to the list of capabilities is [permanent]. Consider to backup at least your database tables [_options] and [_usermeta] regularly.', 'b', 'b', 'b', 'i', 'i'), AAM_Backend_AccessLevel::get_instance()->get_display_name()); ?>
                     </p>
                 </div>
             </div>

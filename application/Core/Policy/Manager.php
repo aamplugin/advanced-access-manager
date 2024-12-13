@@ -755,7 +755,7 @@ class AAM_Core_Policy_Manager
         $result = true;
 
         if (!empty($block['Condition']) && is_array($block['Condition'])) {
-            $result = AAM_Core_Policy_Condition::getInstance()->evaluate(
+            $result = AAM_Core_Policy_Condition::get_instance()->evaluate(
                 $block['Condition'], $args
             );
         }

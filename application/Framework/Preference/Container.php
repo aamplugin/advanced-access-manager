@@ -122,7 +122,7 @@ implements AAM_Framework_Preference_Interface
         AAM_Framework_AccessLevel_Interface $access_level
     ) {
         // Read explicitly defined settings from DB
-        $settings = AAM::api()->settings([
+        $settings = AAM_Framework_Manager::_()->settings([
             'access_level' => $access_level
         ])->get_setting($this->get_ns(), []);
 
@@ -227,7 +227,7 @@ implements AAM_Framework_Preference_Interface
             $this->_preferences = array_merge($this->_preferences, $preferences);
 
             // Store changes in DB
-            $result = AAM::api()->settings([
+            $result = AAM_Framework_Manager::_()->settings([
                 'access_level' => $this->get_access_level()
             ])->set_setting($this->get_ns(), $preferences);
         } else {
@@ -278,7 +278,7 @@ implements AAM_Framework_Preference_Interface
     {
         $this->_explicit_preferences = [];
 
-        return AAM::api()->settings([
+        return AAM_Framework_Manager::_()->settings([
             'access_level' => $this->get_access_level()
         ])->delete_setting($this->get_ns());
     }

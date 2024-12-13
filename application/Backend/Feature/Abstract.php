@@ -76,7 +76,7 @@ abstract class AAM_Backend_Feature_Abstract
      */
     public function get_access_level()
     {
-        return AAM_Backend_AccessLevel::getInstance();
+        return AAM_Backend_AccessLevel::get_instance();
     }
 
     /**

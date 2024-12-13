@@ -69,6 +69,9 @@ class AAM_Service_Identity
         }
 
         if ($enabled) {
+            // Register RESTful API endpoints
+            AAM_Restful_IdentityService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -107,47 +110,46 @@ class AAM_Service_Identity
      */
     protected function initialize_hooks()
     {
-        // Register RESTful API endpoints
-        AAM_Restful_IdentityService::bootstrap();
-
         // Control the list of editable roles
-        add_filter('editable_roles', function($roles) {
+        $this->_register_filter('editable_roles', function($roles) {
             return $this->_filter_editable_roles($roles);
-        });
+        }, 10, 1, true);
 
         // Control list of roles that are listed above the Users table
-        add_filter('views_users', function($views) {
-            return $this->_filter_views_users($views);
-        });
+        $this->_register_filter('views_users', function($roles) {
+            return $this->_filter_views_users($roles);
+        }, 10, 1, true);
 
         // Filter the list of users
-        add_action('pre_get_users', function($query) {
+        $this->_register_action('pre_get_users', function($query) {
             $this->_pre_get_users($query);
-        }, PHP_INT_MAX);
+        }, PHP_INT_MAX, 1, true);
 
         // RESTful user querying
-        add_filter('rest_user_query', function($args) {
+        $this->_register_filter('rest_user_query', function($args) {
             return $this->_rest_user_query($args);
-        }, PHP_INT_MAX);
+        }, PHP_INT_MAX, 1, true);
 
         // Check if user has ability to perform certain task on other users
-        add_filter('map_meta_cap', function($caps, $cap, $_, $args) {
+        $this->_register_filter('map_meta_cap', function($caps, $cap, $_, $args) {
             return $this->_map_meta_cap($caps, $cap, $args);
-        }, PHP_INT_MAX, 4);
+        }, PHP_INT_MAX, 4, true);
 
         // Additionally tap into password management
-        add_filter('show_password_fields', function($result, $user) {
+        $this->_register_filter('show_password_fields', function($result, $user) {
             return $this->_show_password_fields($result, $user);
-        }, 10, 2);
-        add_filter('allow_password_reset', function($result, $user_id) {
+        }, 10, 2, true);
+        $this->_register_filter('allow_password_reset', function($result, $user_id) {
             return $this->_allow_password_reset($result, $user_id);
-        }, 10, 2);
-        add_action('check_passwords', function($login, &$password, &$password2) {
-            $this->_check_passwords($login, $password, $password2);
+        }, 10, 2, true);
+        add_action('check_passwords', function($login, &$pwd1, &$pwd2) {
+            if (!AAM::api()->misc->is_super_admin()) {
+                $this->_check_passwords($login, $pwd1, $pwd2);
+            }
         }, 10, 3);
-        add_filter('rest_pre_insert_user', function($data, $request) {
+        $this->_register_filter('rest_pre_insert_user', function($data, $request) {
             return $this->_rest_pre_insert_user($data, $request);
-        }, 10, 2);
+        }, 10, 2, true);
     }
 
     /**

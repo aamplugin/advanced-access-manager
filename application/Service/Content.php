@@ -94,7 +94,7 @@ class AAM_Service_Content
                                 if (is_a($term, 'WP_Term')
                                     && current_user_can('aam_manage_content')
                                 ) {
-                                    $view = AAM_Backend_View::getInstance();
+                                    $view = AAM_Backend_View::get_instance();
 
                                     echo $view->renderTermMetabox($term);
                                 }
@@ -108,7 +108,7 @@ class AAM_Service_Content
                             "{$taxonomy}_edit_form_fields",
                             function($term) {
                                 if (is_a($term, 'WP_Term')) {
-                                    $view = AAM_Backend_View::getInstance();
+                                    $view = AAM_Backend_View::get_instance();
 
                                     echo $view->renderTermMetabox($term);
                                 }
@@ -141,6 +141,9 @@ class AAM_Service_Content
         }
 
         if ($enabled) {
+            // Register RESTful API
+            AAM_Restful_ContentService::bootstrap();
+
             $this->initialize_hooks();
         }
 
@@ -185,30 +188,19 @@ class AAM_Service_Content
     {
         if (!is_admin()) {
             // Password protected filter
-            add_filter(
-                'post_password_required',
-                function($result, $post) {
-                    return $this->_is_password_protected($result, $post);
-                }, 10, 2
-            );
+            add_filter('post_password_required', function($result, $post) {
+                return $this->_is_password_protected($result, $post);
+            }, 10, 2);
 
             // Manage password check expiration
-            add_filter(
-                'post_password_expires',
-                function($result) {
-                    return $this->_post_password_expires($result);
-                }
-            );
+            add_filter('post_password_expires', function($result) {
+                return $this->_post_password_expires($result);
+            });
 
             // Filter navigation pages & taxonomies
             add_filter('wp_get_nav_menu_items', function($pages) {
                 return $this->_get_nav_menu_items($pages);
             }, PHP_INT_MAX);
-
-            // Filter navigation pages & taxonomies
-            // add_filter('get_pages', function($pages) {
-            //     return $this->_get_pages($pages);
-            // }, PHP_INT_MAX);
 
             // Manage access to frontend posts & pages
             add_action('wp', function() {
@@ -302,9 +294,6 @@ class AAM_Service_Content
                 }
             }
         }, 10, 2);
-
-        // Register RESTful API
-        AAM_Restful_ContentService::bootstrap();
     }
 
     /**
@@ -523,39 +512,6 @@ class AAM_Service_Content
 
         return $pages;
     }
-
-    /**
-     * Filter posts from the list
-     *
-     * @param array $pages
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     * @todo - Potentially delete
-     */
-    // private function _get_pages($pages)
-    // {
-    //     if (is_array($pages)) {
-    //         $service = AAM::api()->content();
-    //         $current = $this->get_current_post();
-
-    //         foreach ($pages as $i => $post) {
-    //             if ($current && ($current->ID === $post->ID)) {
-    //                 continue;
-    //             }
-
-    //             if ($service->get_post($post->ID)->is_hidden()) {
-    //                 unset($pages[$i]);
-    //             }
-    //         }
-
-    //         $pages = array_values($pages);
-    //     }
-
-    //     return $pages;
-    // }
 
     /**
      * After post SELECT query
