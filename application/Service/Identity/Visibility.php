@@ -105,14 +105,6 @@ class AAM_Service_Identity_Visibility
     /**
      * @inheritDoc
      */
-    public function get_resource_type()
-    {
-        return constant('static::TYPE');
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function get_internal_id()
     {
         return $this->_internal_id;

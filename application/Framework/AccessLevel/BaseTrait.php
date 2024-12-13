@@ -296,7 +296,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
             $resource->set_permissions($this->_prepare_permissions(
                 $resource,
                 $parent->get_resource(
-                    $resource->get_resource_type(),
+                    $resource::TYPE,
                     $resource->get_internal_id(false)
                 ),
                 $siblings
@@ -386,13 +386,13 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
         foreach ($siblings as $sibling) {
             $sibling_resource = $sibling->get_resource(
-                $resource->get_resource_type(), $resource->get_internal_id(false)
+                $resource::TYPE, $resource->get_internal_id(false)
             );
 
             $permissions = AAM_Framework_Manager::_()->misc->merge_permissions(
                 $sibling_resource->get_permissions(),
                 $permissions,
-                $resource->get_resource_type()
+                $resource::TYPE
             );
         }
 

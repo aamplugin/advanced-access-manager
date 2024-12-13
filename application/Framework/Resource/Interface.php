@@ -43,19 +43,6 @@ interface AAM_Framework_Resource_Interface
     public function get_internal_id($serialize = true);
 
     /**
-     * Get resource type
-     *
-     * The resource type is just an alias for the resource itself. The alias is a
-     * concise way to refer to any resource.
-     *
-     * @return string
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_resource_type();
-
-    /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface

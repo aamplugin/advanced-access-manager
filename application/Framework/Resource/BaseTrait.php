@@ -241,14 +241,6 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
-     * @inheritDoc
-     */
-    public function get_resource_type()
-    {
-        return constant('static::TYPE');
-    }
-
-    /**
      * Get WordPress core instance
      *
      * @return mixed
@@ -332,7 +324,7 @@ trait AAM_Framework_Resource_BaseTrait
     private function _get_settings_ns()
     {
         // Compile the namespace
-        return $this->get_resource_type();
+        return constant('static::TYPE');
     }
 
     /**

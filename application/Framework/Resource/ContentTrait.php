@@ -158,7 +158,7 @@ trait AAM_Framework_Resource_ContentTrait
     private function _get_settings_ns()
     {
         // Compile the namespace
-        return $this->get_resource_type() . '.' . $this->get_internal_id(true);
+        return constant('static::TYPE') . '.' . $this->get_internal_id(true);
     }
 
 }
