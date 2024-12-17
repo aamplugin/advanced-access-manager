@@ -38,6 +38,7 @@
  * @property AAM_Framework_Utility_Users $users
  * @property AAM_Framework_Utility_Db $db
  * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
  *
  * @package AAM
  * @version 7.0.0
@@ -83,7 +84,8 @@ final class AAM_Framework_Manager
         'roles'         => AAM_Framework_Utility_Roles::class,
         'users'         => AAM_Framework_Utility_Users::class,
         'db'            => AAM_Framework_Utility_Db::class,
-        'access_levels' => AAM_Framework_Utility_AccessLevels::class
+        'access_levels' => AAM_Framework_Utility_AccessLevels::class,
+        'jwt'           => AAM_Framework_Utility_Jwt::class
     ];
 
     /**
@@ -206,6 +208,21 @@ final class AAM_Framework_Manager
     public function has_service($name)
     {
         return array_key_exists($name, $this->_services);
+    }
+
+    /**
+     * Check if provided utility name is registered
+     *
+     * @param string $name
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_utility($name)
+    {
+        return array_key_exists($name, $this->_utilities);
     }
 
     /**

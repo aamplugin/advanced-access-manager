@@ -465,17 +465,13 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                         $response
                     );
 
-                    AAM_Framework_Manager::_()->cache->set(
-                        self::CACHE_DB_OPTION, $response, 31536000
-                    );
+                    $this->cache->set(self::CACHE_DB_OPTION, $response, 31536000);
                 }
             }
         }
 
         if (empty($response)) { // Try to pull it from the cache
-            $response = AAM_Framework_Manager::_()->cache->get(
-                self::CACHE_DB_OPTION, []
-            );
+            $response = $this->cache->get(self::CACHE_DB_OPTION, []);
         }
 
         return $response;

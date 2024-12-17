@@ -10,11 +10,8 @@
 /**
  * RESTful API for the JWT Token service
  *
- * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
- * @since 6.9.10 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.11
+ * @version 7.0.0
  */
 class AAM_Restful_JwtService
 {
@@ -26,11 +23,8 @@ class AAM_Restful_JwtService
      *
      * @return void
      *
-     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.11
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -39,7 +33,7 @@ class AAM_Restful_JwtService
             // Get the list of tokens
             $this->_register_route('/jwts', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_token_list'),
+                'callback'            => array($this, 'get_tokens'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => [
                     'fields' => array(
@@ -71,7 +65,8 @@ class AAM_Restful_JwtService
                     ),
                     'is_refreshable' => array(
                         'description' => 'Wether issued JWT is refreshable',
-                        'type'        => 'boolean'
+                        'type'        => 'boolean',
+                        'default'     => false
                     ),
                     'is_revocable' => array(
                         'description' => 'Wether issued JWT is revocable',
@@ -80,7 +75,8 @@ class AAM_Restful_JwtService
                     ),
                     'additional_claims' => array(
                         'description' => 'Any additional claims to include in the token',
-                        'type'        => 'object'
+                        'type'        => [ 'string', 'object' ],
+                        'default'     => []
                     ),
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -93,7 +89,7 @@ class AAM_Restful_JwtService
             ));
 
             // Get a token by ID
-            $this->_register_route('/jwt/(?P<id>[\dA-Za-z\-]+)', array(
+            $this->_register_route('/jwt/(?P<id>[\w-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_token'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -101,6 +97,7 @@ class AAM_Restful_JwtService
                     'id' => array(
                         'description' => 'Token unique ID',
                         'type'        => 'string',
+                        'format'      => 'uuid',
                         'required'    => true
                     ),
                     'fields' => array(
@@ -114,7 +111,7 @@ class AAM_Restful_JwtService
             ));
 
             // Delete a token
-            $this->_register_route('/jwt/(?P<id>[\dA-Za-z\-]+)', array(
+            $this->_register_route('/jwt/(?P<id>[\w-]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_token'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -122,6 +119,7 @@ class AAM_Restful_JwtService
                     'id' => array(
                         'description' => 'Token unique ID',
                         'type'        => 'string',
+                        'format'      => 'uuid',
                         'required'    => true
                     )
                 )
@@ -133,45 +131,29 @@ class AAM_Restful_JwtService
                 'callback'            => array($this, 'reset_tokens'),
                 'permission_callback' => array($this, 'check_permissions')
             ));
-
-            // Register a few stand-alone endpoints that are used already by many
-            // apps that a built on-top of AAM
-            // Validate JWT token
-            register_rest_route('aam/v2', '/jwt/validate', array(
-                'methods'             => 'POST',
-                'callback'            => [ $this, 'validate_token' ],
-                'permission_callback' => '__return_true',
-                'args'                => array(
-                    'jwt' => array(
-                        'description' => __('JWT token.', AAM_KEY),
-                        'type'        => 'string',
-                    )
-                ),
-            ));
         });
     }
 
     /**
-     * Get list of all tokens
+     * Get list of all registered tokens
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function get_token_list(WP_REST_Request $request)
+    public function get_tokens(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
             $result  = array();
 
-            foreach($service->get_token_list() as $token) {
-                array_push(
-                    $result,
-                    $this->_prepare_token_output($token, $request)
-                );
+            foreach($service->get_tokens() as $token_data) {
+                array_push($result, $this->_prepare_token_output(
+                    $token_data, $request->get_param('fields')
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -187,56 +169,49 @@ class AAM_Restful_JwtService
      *
      * @return WP_REST_Response
      *
-     * @since 6.9.11 https://github.com/aamplugin/advanced-access-manager/issues/278
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.11
+     * @version 7.0.0
      */
     public function create_token(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
+            $claims  = [];
 
             // Do we have any additional claims to include
-            $claims = (array)$request->get_param('additional_claims');
+            if ($request->has_param('additional_claims')) {
+                $raw_claims = $request->get_param('additional_claims');
+
+                if (is_string($raw_claims)) {
+                    $claims = json_decode($raw_claims, true);
+                } elseif (is_array($raw_claims)) {
+                    $claims = $raw_claims;
+                } else {
+                    throw new InvalidArgumentException('Invalid additional claims');
+                }
+            }
 
             // Determining the token expiration time
             $expires_at = $request->get_param('expires_at');
             $expires_in = $request->get_param('expires_in');
 
             if (!empty($expires_at)) {
-                $claims['exp'] = strtotime($expires_at);
+                $ttl = $expires_at;
             } elseif (!empty($expires_in)) {
-                $claims['exp'] = strtotime($expires_in);
-            }
-
-            // Wether token is refreshable or not
-            $is_ref                = $request->get_param('is_refreshable');
-            $claims['refreshable'] = is_bool($is_ref) ? $is_ref : false;
-
-            // Wether token is revocable or not
-            $is_rev = $request->get_param('is_revocable');
-
-            if (!is_bool($is_rev)) {
-                $is_rev = AAM::api()->config->get(
-                    'service.jwt.is_revocable', true
-                );
-            }
-            $claims['revocable'] = is_bool($is_rev) ? $is_rev : true;
-
-            $token = $service->create_token($claims);
-
-            // Determine the list of fields to return
-            $fields = $request->get_param('fields');
-
-            if (empty($fields)) {
-                $fields = array('id', 'token');
+                $ttl = $expires_in;
             } else {
-                $fields = explode(',', $fields);
+                $ttl = null;
             }
 
-            $result = $this->_prepare_token_output($token, $request);
+            $token_data = $service->issue($claims, [
+                'ttl'         => $ttl,
+                'revocable'   => $request->get_param('is_revocable'),
+                'refreshable' => $request->get_param('is_refreshable')
+            ]);
+
+            $result = $this->_prepare_token_output(
+                $token_data, $request->get_param('fields')
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -252,14 +227,15 @@ class AAM_Restful_JwtService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function get_token(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
             $result  = $this->_prepare_token_output(
-                $service->get_token_by_id($request->get_param('id')), $request
+                $service->get_token_by($request->get_param('id'), 'jti'),
+                $request->get_param('fields')
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -276,16 +252,15 @@ class AAM_Restful_JwtService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function delete_token(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
+            $token   = $service->get_token_by($request->get_param('id'), 'jti');
 
-            $service->delete_token($request->get_param('id'));
-
-            $result = [ 'success' => true ];
+            $result = [ 'success' => $service->revoke($token['token']) ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -301,13 +276,16 @@ class AAM_Restful_JwtService
      * @return WP_REST_Response
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function reset_tokens(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset();
+
+            $service->reset();
+
+            $result = [ 'success' => true ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -321,12 +299,12 @@ class AAM_Restful_JwtService
      * @return bool
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && current_user_can('aam_manage_jwt');
+            && current_user_can('aam_manage_jwts');
     }
 
     /**
@@ -341,7 +319,7 @@ class AAM_Restful_JwtService
      * @return void
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _register_route($route, $args)
     {
@@ -375,7 +353,7 @@ class AAM_Restful_JwtService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_fields_input($value)
     {
@@ -413,7 +391,7 @@ class AAM_Restful_JwtService
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_expires_in_input($value)
     {
@@ -437,29 +415,34 @@ class AAM_Restful_JwtService
     /**
      * Prepare token for the output
      *
-     * @param array           $input
-     * @param WP_REST_Request $request
+     * @param array $token_data
+     * @param array $fields
      *
      * @return array
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    private function _prepare_token_output($input, $request)
+    private function _prepare_token_output($token_data, $fields)
     {
-        $output = [];
+        $output = [
+            'id'       => $token_data['claims']['jti'],
+            'token'    => $token_data['token'],
+            'is_valid' => $token_data['is_valid']
+        ];
 
-        // Determine the list of fields to return
-        $fields = $request->get_param('fields');
-        $fields = array_unique(array_merge(
-            [ 'id', 'token' ],
-            ($fields ? explode(',', $fields) : [])
-        ));
-
-        foreach($fields as $field) {
-            if (array_key_exists($field, $input)) {
-                $output[$field] = $input[$field];
+        if ($token_data['is_valid']) {
+            foreach((!empty($fields) ? wp_parse_list($fields) : []) as $field) {
+                if ($field === 'signed_url') {
+                    $output[$field] = add_query_arg(
+                        'aam-jwt', $token_data['token'], site_url()
+                    );
+                } elseif (array_key_exists($field, $token_data)) {
+                    $output[$field] = $token_data[$field];
+                }
             }
+        } else {
+            $output['error'] = $token_data['error'];
         }
 
         return $output;
@@ -473,7 +456,7 @@ class AAM_Restful_JwtService
      * @return AAM_Framework_Service_Jwts
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _get_service($request)
     {

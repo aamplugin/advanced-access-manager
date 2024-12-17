@@ -76,4 +76,21 @@ class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interf
         return array_unique($result);
     }
 
+    /**
+     * Check if capability exists
+     *
+     * @param string $capability
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function exists($capability)
+    {
+        $all_caps = $this->get_all_caps();
+
+        return array_key_exists($capability, $all_caps);
+    }
+
 }

@@ -108,7 +108,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @return void
      *
      * @access public
-     * @since 6.9.32
+     * @since 7.0.0
      */
     public function __construct(WP_User $user)
     {
@@ -213,9 +213,9 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
     public function reset($attributes = null)
     {
         if (is_null($attributes)) {
-            $attributes = ['expiration', 'status'];
-        } elseif (is_array($attributes)) {
-            $attributes = [$attributes];
+            $attributes = [ 'expiration', 'status' ];
+        } elseif (is_string($attributes)) {
+            $attributes = [ $attributes ];
         }
 
         // Reset user expiration

@@ -128,11 +128,12 @@
                                     ''            => __('Select Action', AAM_KEY),
                                     'logout'      => __('Logout User', AAM_KEY),
                                     'delete'      => __('Delete Account', AAM_KEY),
-                                    'change_role' => __('Change User Role', AAM_KEY)
+                                    'change_role' => __('Change User Role', AAM_KEY),
+                                    'lock'        => __('Lock User Account', AAM_KEY)
                                 );
                             ?>
                             <select class="form-control" id="action-after-expiration">
-                                <?php foreach(apply_filters('aam_user_expiration_actions_filter', $expirationActions) as $key => $label) { ?>
+                                <?php foreach($expirationActions as $key => $label) { ?>
                                 <option value="<?php echo esc_attr($key); ?>"><?php echo esc_js($label); ?></option>
                                 <?php } ?>
                             </select>

@@ -226,7 +226,7 @@ class AAM
 
                 // Reinitialize current user
                 self::$_instance->_init_current_user();
-            });
+            }, 1);
 
             // The same with with after user login. WordPress core has bug with this
             add_action('wp_login', function($_, $user) {
@@ -235,9 +235,6 @@ class AAM
 
             // Load AAM internationalization
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
-
-            // Validate logged in user status
-            AAM_Service_Core::get_instance()->verify_user_status();
         }
 
         return self::$_instance;

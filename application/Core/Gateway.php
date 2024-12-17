@@ -37,6 +37,7 @@
  * @property AAM_Framework_Utility_Users $users
  * @property AAM_Framework_Utility_Db $db
  * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
  *
  * @package AAM
  * @version 7.0.0

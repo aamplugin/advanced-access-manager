@@ -134,7 +134,7 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
      *
      * @param mixed $identifier
      *
-     * @return AAM_Framework_Proxy_User
+     * @return AAM_Framework_Proxy_User|null
      * @access public
      *
      * @version 7.0.0

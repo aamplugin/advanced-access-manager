@@ -115,47 +115,13 @@ class AAM_Service_SecureLogin
         add_filter('authenticate', function($response) {
             return $this->_authenticate($response);
         }, PHP_INT_MAX);
-        add_filter(
-            'auth_cookie',
-            function($cookie, $user_id, $_, $__, $token) {
-                return $this->_auth_cookie($cookie, $user_id, $token);
-            }, 10, 5
-        );
+
+        add_filter('auth_cookie', function($cookie, $user_id, $_, $__, $token) {
+            return $this->_auth_cookie($cookie, $user_id, $token);
+        }, 10, 5);
+
         add_action('wp_login_failed', function() {
             $this->_wp_login_failed();
-        });
-
-        // AAM UI controls
-        add_filter('aam_prepare_user_item_filter', function($user) {
-            // Move this to the Secure Login Service
-            if (current_user_can('edit_user', $user['id'])
-                && current_user_can('aam_toggle_users')
-            ) {
-                array_push(
-                    $user['permissions'],
-                    $user['status'] === 'inactive' ? 'allow_unlock' : 'allow_lock'
-                );
-            }
-
-            return $user;
-        });
-        add_filter('aam_user_expiration_actions_filter', function($actions) {
-            $actions['lock'] = __('Block User Account', AAM_KEY);
-
-            return $actions;
-        });
-
-        // AAM Core integration
-        add_action('aam_initialize_user_action', function($user) {
-            $user_id = get_current_user_id();
-
-            if ($user_id === $user->ID) {
-                $status = get_user_meta($user->ID, 'aam_user_status', true);
-
-                if ($status === 'locked') {
-                    wp_logout();
-                }
-            }
         });
     }
 
@@ -235,6 +201,7 @@ class AAM_Service_SecureLogin
      *
      * @access public
      * @see wp_authenticate
+     *
      * @version 7.0.0
      */
     private function _authenticate($response)

@@ -30,6 +30,10 @@ trait AAM_Restful_ServiceTrait
             'rest_code'   => 'rest_unauthorized',
             'http_status' => 401
         ],
+        UnexpectedValueException::class => [
+            'rest_code'   => 'rest_unauthorized',
+            'http_status' => 406
+        ],
         LogicException::class => [
             'rest_code'   => 'rest_workflow_error',
             'http_status' => 409

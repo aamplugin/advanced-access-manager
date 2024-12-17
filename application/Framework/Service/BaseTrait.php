@@ -42,13 +42,17 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Instantiate the service
      *
-     * @return void
+     * @param array $runtime_context
      *
+     * @return void
      * @access protected
+     *
      * @version 7.0.0
      */
-    protected function __construct()
+    protected function __construct($runtime_context)
     {
+        $this->_runtime_context = $runtime_context;
+
         // Extend the service instance with additional methods
         $closures = apply_filters('aam_framework_service_methods_filter', [], $this);
 
@@ -83,6 +87,8 @@ trait AAM_Framework_Service_BaseTrait
                     $result = call_user_func_array(
                         $this->_extended_methods[$name], $args
                     );
+            } elseif (AAM_Framework_Manager::_()->has_service($name)) {
+                $result = AAM_Framework_Manager::_()->{$name}(...$args);
             } else {
                 throw new BadMethodCallException("Method {$name} does not exist");
             }
@@ -110,6 +116,8 @@ trait AAM_Framework_Service_BaseTrait
         try {
             if ($name === 'access_level') {
                 $result = $this->_get_access_level();
+            } elseif (AAM_Framework_Manager::_()->has_utility($name)) {
+                $result = AAM_Framework_Manager::_()->{$name};
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -160,7 +168,7 @@ trait AAM_Framework_Service_BaseTrait
         if (isset($context['access_level'])) {
             $result = $context['access_level'];
         } elseif (!empty($context['access_level_type'])) {
-            $result = AAM_Framework_Manager::_()->access_levels->get(
+            $result = $this->access_levels->get(
                 $context['access_level_type'],
                 isset($context['access_level_id']) ? $context['access_level_id'] : null
             );
@@ -232,9 +240,7 @@ trait AAM_Framework_Service_BaseTrait
      */
     public static function get_instance($runtime_context = [])
     {
-        $result = new self;
-
-        $result->_runtime_context = $runtime_context;
+        $result = new self($runtime_context);
 
         return $result;
     }

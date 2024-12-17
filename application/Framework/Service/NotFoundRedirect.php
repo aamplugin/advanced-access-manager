@@ -70,7 +70,7 @@ implements
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
-            $sanitized = AAM_Framework_Manager::_()->redirect->sanitize_redirect(
+            $sanitized = $this->redirect->sanitize_redirect(
                 $incoming_data,
                 self::ALLOWED_REDIRECT_TYPES
             );

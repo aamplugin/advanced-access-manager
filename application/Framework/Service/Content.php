@@ -80,7 +80,7 @@ class AAM_Framework_Service_Content
             $post_type_instance = get_post_type_object($post_type);
 
             if (!is_a($post_type_instance, WP_Post_Type::class)) {
-                throw new OutOfBoundsException(
+                throw new OutOfRangeException(
                     sprintf('The post_type %s does not exist', $post_type)
                 );
             }

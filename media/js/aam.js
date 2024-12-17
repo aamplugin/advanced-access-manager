@@ -812,22 +812,22 @@
              */
             function generateJWT() {
                 if ($('#login-url-preview').length === 1) {
-                    const action = $('#action-after-expiration').val();
+                    const type = $('#action-after-expiration').val();
 
                     const payload = {
                         user_id: $('#reset-user-expiration-btn').attr('data-user-id'),
                         expires_at: $('#user-expires').val(),
                     };
 
-                    if (action) {
+                    if (type) {
                         payload.additional_claims = {
                             trigger: {
-                                action
+                                type
                             }
                         }
 
-                        if (action === 'change_role') {
-                            payload.additional_claims.trigger.meta = $('#expiration-change-role').val();
+                        if (type === 'change_role') {
+                            payload.additional_claims.trigger.to_role = $('#expiration-change-role').val();
                         }
                     }
 
@@ -5923,6 +5923,41 @@
         (function ($) {
 
             /**
+             * Delete token
+             *
+             * @param {String}   id
+             * @param {Callback} before_cb
+             * @param {Callback} after_cb
+             *
+             * @returns {Void}
+             */
+            function DeleteToken(id, cb) {
+                const payload = {
+                    user_id: getAAM().getSubject().id
+                };
+
+                $.ajax(`${getLocal().rest_base}aam/v2/service/jwt/${id}`, {
+                    type: 'POST',
+                    dataType: 'json',
+                    data: payload,
+                    headers: {
+                        'X-WP-Nonce': getLocal().rest_nonce,
+                        'X-HTTP-Method-Override': 'DELETE'
+                    },
+                    success: function () {
+                        cb();
+                    },
+                    error: function (response) {
+                        getAAM().notification('danger', null, {
+                            request: `aam/v2/service/jwt/${id}`,
+                            payload,
+                            response
+                        });
+                    }
+                });
+            }
+
+            /**
              *
              */
             function initialize() {
@@ -5945,16 +5980,17 @@
 
                     let jwtClaimsEditor;
 
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+
                     $('#create-jwt-modal').on('show.bs.modal', function () {
                         try {
-                            var tomorrow = new Date();
-                            tomorrow.setDate(tomorrow.getDate() + 1);
                             $('#jwt-expiration-datapicker').data('DateTimePicker').defaultDate(
                                 tomorrow
                             );
-                            $('#jwt-expires').val('');
+                            $('#jwt-expires').val(tomorrow.toISOString());
 
-                            $('#aam-jwt-claims-editor').val('{\n  \n}')
+                            $('#aam-jwt-claims-editor').val('{}');
 
                             if (!$('#aam-jwt-claims-editor').next().hasClass('CodeMirror')) {
                                 jwtClaimsEditor = wp.CodeMirror.fromTextArea(
@@ -5975,7 +6011,7 @@
 
                     // Prepare the URL endpoint
                     let url  = `${getLocal().rest_base}aam/v2/service/jwts`;
-                        url += `?user_id=${getAAM().getSubject().id}&fields=claims,token,id,signed_url,is_valid`;
+                        url += `?user_id=${getAAM().getSubject().id}&fields=claims,signed_url`;
 
                     $('#jwt-list').DataTable({
                         autoWidth: false,
@@ -6002,7 +6038,7 @@
                                     if (token.is_valid) {
                                         details = 'Expires On: ' + (new Date(token.claims.exp * 1000)).toDateString()
                                     } else {
-                                        details = 'Token is no longer valid';
+                                        details = 'Invalid Token: ' + token.error;
                                     }
 
                                     data.push([
@@ -6068,8 +6104,18 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action icon-trash-empty text-danger'
                                         }).bind('click', function () {
-                                            $('#jwt-delete-btn').attr('data-id', data[0]);
-                                            $('#delete-jwt-modal').modal('show');
+                                            if (data[3]) {
+                                                $('#jwt-delete-btn').attr('data-id', data[0]);
+                                                $('#delete-jwt-modal').modal('show');
+                                            } else {
+                                                $(this).attr(
+                                                    'class', 'aam-row-action icon-spin4 animate-spin'
+                                                );
+
+                                                DeleteToken(data[0], () => {
+                                                    $('#jwt-list').DataTable().ajax.reload();
+                                                })
+                                            }
                                         }).attr({
                                             'data-toggle': "tooltip",
                                             'title': getAAM().__('Delete Token')
@@ -6116,7 +6162,7 @@
                             const claims = JSON.parse(jwtClaimsEditor.getValue());
 
                             if (Object.keys(claims).length > 0) {
-                                payload.additional_claims = claims;
+                                payload.additional_claims = JSON.stringify(claims);
                             }
                         } catch (e) {
                             console.log(e);
@@ -6136,6 +6182,8 @@
                                 $('#create-jwt-modal').modal('hide');
                                 $('#jwt-list').DataTable().ajax.reload();
 
+                                jwtClaimsEditor.setValue('{}');
+
                                 $('#view-jwt-token').val(response.token);
                                 $('#view-jwt-url').val(response.signed_url);
                                 $('#view-jwt-modal').modal('show');
@@ -6154,35 +6202,16 @@
                     });
 
                     $('#jwt-delete-btn').bind('click', function () {
-                        const payload = {
-                            user_id: getAAM().getSubject().id
-                        };
+                        $('#jwt-delete-btn').html(getAAM().__('Deleting...')).prop(
+                            'disabled', true
+                        );
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/jwt/${$('#jwt-delete-btn').attr('data-id')}`, {
-                            type: 'POST',
-                            dataType: 'json',
-                            data: payload,
-                            headers: {
-                                'X-WP-Nonce': getLocal().rest_nonce,
-                                'X-HTTP-Method-Override': 'DELETE'
-                            },
-                            beforeSend: function () {
-                                $('#jwt-delete-btn').html(getAAM().__('Deleting...'));
-                            },
-                            success: function () {
-                                $('#delete-jwt-modal').modal('hide');
-                                $('#jwt-list').DataTable().ajax.reload();
-                            },
-                            error: function (response) {
-                                getAAM().notification('danger', null, {
-                                    request: `aam/v2/service/jwt/${$('#jwt-delete-btn').attr('data-id')}`,
-                                    payload,
-                                    response
-                                });
-                            },
-                            complete: function () {
-                                $('#jwt-delete-btn').html(getAAM().__('Delete'));
-                            }
+                        DeleteToken($('#jwt-delete-btn').attr('data-id'), () => {
+                            $('#jwt-delete-btn').html(getAAM().__('Delete')).prop(
+                                'disabled', false
+                            );
+                            $('#delete-jwt-modal').modal('hide');
+                            $('#jwt-list').DataTable().ajax.reload();
                         });
                     });
 

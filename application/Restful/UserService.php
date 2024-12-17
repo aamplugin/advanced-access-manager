@@ -214,6 +214,8 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @access public
+     *
      * @version 7.0.0
      */
     public function get_user_list(WP_REST_Request $request)
@@ -259,13 +261,15 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @access public
+     *
      * @version 7.0.0
      */
     public function get_user(WP_REST_Request $request)
     {
         try {
             $result = $this->_prepare_output(
-                AAM::api()->user($request->get_param('id')),
+                AAM::api()->users->user($request->get_param('id')),
                 $this->_determine_additional_fields($request)
             );
         } catch (Exception $e) {
@@ -281,6 +285,8 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @access public
+     *
      * @version 7.0.0
      */
     public function update_user(WP_REST_Request $request)
@@ -313,7 +319,7 @@ class AAM_Restful_UserService
                 $data['deprive_caps'] = $deprive_caps;
             }
 
-            $user = AAM::api()->user($request->get_param('id'));
+            $user = AAM::api()->users->user($request->get_param('id'));
 
             // Update user data
             $user->update($data);
@@ -334,12 +340,14 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
+     * @access public
+     *
      * @version 7.0.0
      */
     public function reset_user(WP_REST_Request $request)
     {
         try {
-            $user = AAM::api()->user($request->get_param('id'));
+            $user = AAM::api()->users->user($request->get_param('id'));
 
             // Reset user
             $user->reset();
@@ -358,8 +366,8 @@ class AAM_Restful_UserService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -374,8 +382,8 @@ class AAM_Restful_UserService
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_fields_input($value)
@@ -413,8 +421,8 @@ class AAM_Restful_UserService
      * @param array                          $fields
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_output($user, $fields = [])
@@ -445,15 +453,18 @@ class AAM_Restful_UserService
 
         if (current_user_can('edit_user', $response['id'])) {
             array_push($response['permissions'], 'allow_manage', 'allow_edit');
+
+            if(current_user_can('aam_toggle_users')) {
+                array_push(
+                    $response['permissions'],
+                    $response['status'] === 'inactive' ? 'allow_unlock' : 'allow_lock'
+                );
+            }
         }
 
         $response = apply_filters('aam_prepare_user_item_filter', $response);
 
         // Finally, return only fields that were requested
-        // $response = apply_filters('aam_user_rest_field_filter', [
-        //     'id' => $response['id']
-        // ], $response, $fields);
-
         foreach($fields as $field) {
             if (!isset($response[$field]) && isset($item[$field])) {
                 $response[$field] = $item[$field];
@@ -469,8 +480,8 @@ class AAM_Restful_UserService
      * @param array $roles
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_user_roles($roles)
@@ -496,8 +507,8 @@ class AAM_Restful_UserService
      * @param WP_REST_Request $request
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _determine_additional_fields(WP_REST_Request $request)
@@ -523,8 +534,8 @@ class AAM_Restful_UserService
      * @param array  $args
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _register_route($route, $args)

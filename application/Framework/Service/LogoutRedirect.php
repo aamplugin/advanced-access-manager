@@ -68,7 +68,7 @@ implements
     public function set_redirect(array $redirect)
     {
         try {
-            $sanitized = AAM_Framework_Manager::_()->redirect->sanitize_redirect(
+            $sanitized = $this->redirect->sanitize_redirect(
                 $redirect,
                 self::ALLOWED_REDIRECT_TYPES
             );

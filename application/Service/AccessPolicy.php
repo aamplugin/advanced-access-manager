@@ -307,10 +307,6 @@ class AAM_Service_AccessPolicy
         // Enrich the RESTful API
         add_filter('aam_role_rest_field_filter', array($this, 'enrich_role_rest_output'), 1, 3);
         add_filter('aam_user_rest_field_filter', array($this, 'enrich_user_rest_output'), 1, 3);
-
-        add_action('aam_valid_jwt_token_detected_action', function($token, $claims) {
-            update_user_meta($claims->userId, 'aam_auth_token', $token);
-        }, 10, 2);
     }
 
     /**
