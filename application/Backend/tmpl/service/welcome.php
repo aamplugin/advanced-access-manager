@@ -1,17 +1,6 @@
-<?php
-/**
- * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
- * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.34
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
-    <?php global $wpdb; ?>
-
     <div class="aam-feature" id="welcome-content">
         <div class="row">
             <div class="col-xs-12">
@@ -335,48 +324,6 @@
                                 </a>
 
                                 <a href="https://aamportal.com/video/manage-wordpress-jwt-tokens-and-restful-api-authentication" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <span class="aam-common-use-cases aam-mt-4">Need for Guidance?</span>
-
-                <div class="panel-group" id="support-feature" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-support-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#support-feature" href="#menu-support" aria-controls="menu-support">
-                                    <?php echo __('Contact Us', AAM_KEY); ?>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-support" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-support-heading">
-                            <div class="panel-body">
-                                <div class="form-group">
-                                    <label>Your Name (optional)</label>
-                                    <input type="text" id="support-fullname" class="form-control" placeholder="How should we call you?" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Email Address<span class="aam-asterix">*</span></label>
-                                    <input type="email" class="form-control" id="support-email" placeholder="Enter email that we can use to follow-up with you" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Message<span class="aam-asterix">*</span></label>
-                                    <textarea class="form-control" id="support-message" rows="7" placeholder="Enter your message..."></textarea>
-                                    <small class="text-muted">
-                                        <span id="message-countdown">700</span> characters
-                                    </small>
-                                </div>
-
-                                <p>
-                                    <a href="#" class="btn btn-primary" id="send-message-btn" disabled>
-                                        <?php echo __('Send the Message', AAM_KEY); ?>
-                                    </a>
-                                </p>
                             </div>
                         </div>
                     </div>

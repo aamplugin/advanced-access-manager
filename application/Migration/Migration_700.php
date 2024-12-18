@@ -175,7 +175,8 @@ final class AAM_Migration_700
             'service.secureLogin.feature.singleSession' => 'service.secure_login.single_session',
             'service.secureLogin.feature.bruteForceLockout' => 'service.secure_login.brute_force_lockout',
             'core.settings.xmlrpc' => 'core.settings.xmlrpc_enabled',
-            'core.settings.restful' => 'core.settings.restful_enabled'
+            'core.settings.restful' => 'core.settings.restful_enabled',
+            'core.service.welcome.enabled' => 'service.welcome.enabled'
         ];
 
         foreach($changes as $legacy => $new) {

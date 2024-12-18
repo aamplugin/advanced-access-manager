@@ -10,11 +10,8 @@
 /**
  * Introduction/welcome service
  *
- * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.18
+ * @version 7.0.0
  */
 class AAM_Service_Welcome
 {
@@ -23,20 +20,17 @@ class AAM_Service_Welcome
     /**
      * AAM configuration setting that is associated with the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    const FEATURE_FLAG = 'core.service.welcome.enabled';
+    const FEATURE_FLAG = 'service.welcome.enabled';
 
     /**
      * Constructor
      *
      * @return void
-     *
-     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.18
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -71,14 +65,6 @@ class AAM_Service_Welcome
                 return $services;
             }, 1);
         }
-
-        // Keep the support RESTful service enabled at all times because it is used
-        // by issue reporting feature as well
-        AAM_Restful_SupportService::bootstrap();
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_Welcome::bootstrap();
 }
