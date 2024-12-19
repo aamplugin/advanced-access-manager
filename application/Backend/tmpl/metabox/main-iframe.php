@@ -235,11 +235,11 @@
                             <div class="aam-postbox-inside text-center">
                                 <p class="text-larger aam-info text-left">
                                     <strong>Need help interpreting your security scan report and identifying the next steps to address critical issues?</strong>
-                                    Email us your report at <a href="mailto:support@aamplugin.com">support@aamplugin.com</a>, and we'll schedule a video consultation to guide you.
+                                    Contact us and we'll schedule a video consultation to guide you.
                                     Please note, this is a paid service, and we will send an invoice prior to the session.
                                 </p>
                                 <a href="#" class="btn btn-info btn-block download-latest-report""><?php echo __('Download Latest Report', AAM_KEY); ?></a>
-                                <a href="mailto:support@aamplugin.com" class="btn btn-primary btn-block"><?php echo __('Contact Us', AAM_KEY); ?></a>
+                                <a href="https://aamportal.com/contact-us" target="_blank" class="btn btn-primary btn-block"><?php echo __('Contact Us', AAM_KEY); ?></a>
                             </div>
                         </div>
                     </div>

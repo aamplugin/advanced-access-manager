@@ -339,48 +339,6 @@
                         </div>
                     </div>
                 </div>
-
-                <span class="aam-common-use-cases aam-mt-4">Need for Guidance?</span>
-
-                <div class="panel-group" id="support-feature" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-support-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#support-feature" href="#menu-support" aria-controls="menu-support">
-                                    <?php echo __('Contact Us', AAM_KEY); ?>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-support" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-support-heading">
-                            <div class="panel-body">
-                                <div class="form-group">
-                                    <label>Your Name (optional)</label>
-                                    <input type="text" id="support-fullname" class="form-control" placeholder="How should we call you?" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Email Address<span class="aam-asterix">*</span></label>
-                                    <input type="email" class="form-control" id="support-email" placeholder="Enter email that we can use to follow-up with you" />
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Message<span class="aam-asterix">*</span></label>
-                                    <textarea class="form-control" id="support-message" rows="7" placeholder="Enter your message..."></textarea>
-                                    <small class="text-muted">
-                                        <span id="message-countdown">700</span> characters
-                                    </small>
-                                </div>
-
-                                <p>
-                                    <a href="#" class="btn btn-primary" id="send-message-btn" disabled>
-                                        <?php echo __('Send the Message', AAM_KEY); ?>
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

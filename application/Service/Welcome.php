@@ -71,10 +71,6 @@ class AAM_Service_Welcome
                 return $services;
             }, 1);
         }
-
-        // Keep the support RESTful service enabled at all times because it is used
-        // by issue reporting feature as well
-        AAM_Restful_SupportService::bootstrap();
     }
 
 }
