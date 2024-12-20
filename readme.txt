@@ -18,7 +18,7 @@ https://www.youtube.com/watch?v=9oU6wjlSRM8
 
 * **Security Audit:** Service that can quickly identified potential broken access controls, compromised accounts and server misconfigurations.
 * **Unparalleled Flexibility:** The only plugin that offers the freedom to define highly specific access controls across your entire site, with most features available for free.
-* **Proven Reliability:** Trusted by over 150,000 websites, AAM is rigorously tested and [well-documented](https://aamportal.com/support), ensuring top-notch quality with minimal support needed.
+* **Proven Reliability:** Trusted by over 150,000 websites, AAM is rigorously tested and [well-documented](https://aamportal.com/documentation), ensuring top-notch quality with minimal support needed.
 * **Comprehensive Access Management:** Control access for any role, user, or visitor, and configure default permissions for posts, pages, custom post types, categories, and taxonomies.
 * **Developer-Friendly:** Loaded with hooks and configurations, AAM integrates seamlessly with WordPress core, providing a robust framework for custom development.
 * **Ad-Free Interface:** Enjoy a clean, well-crafted UI without any advertisements or promotional content.
@@ -377,7 +377,6 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 = 6.8.0 =
 * Changed: Enhanced security pasture by escaping potentially harmful output, if information was directly modified in the DB or not escaped during storing AAM settings, reported by WordPress Plugin Review Team
 * Fixed: Cleared potentially corrupted data about status of premium add-ons.
-* Changed: Re-opened direct communication with the AAM developer through the Slack channel [https://aamplugin.com/support](https://aamplugin.com/support)
 
 = 6.7.9 =
 * Changed: Enhanced security pasture by escaping potentially harmful input from users that do not have unfiltered_html capability, reported by WordPress Plugin Review Team [https://github.com/aamplugin/advanced-access-manager/issues/192](https://github.com/aamplugin/advanced-access-manager/issues/192)

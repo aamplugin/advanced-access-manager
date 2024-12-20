@@ -40,6 +40,9 @@
             </div>
 
             <div class="col-xs-12 col-md-4 aam-sidebar">
+                <p class="aam-notification">
+                    <strong>AAM version 7 is coming soon!</strong> Please check <a href="https://aamportal.com/announcement/aam7" target="_blank">this article for details</a>.
+                </p>
                 <?php if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) { ?>
                     <div class="metabox-holder shared-metabox aam-notification-metabox">
                         <div class="postbox">
@@ -89,7 +92,7 @@
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Documentation">
+                                    <a href="https://aamportal.com/documentation?ref=plugin" target="_blank" title="Documentation">
                                         <i class="icon-help-circled"></i>
                                         <span><?php echo __('Docs', AAM_KEY); ?></span>
                                     </a>
