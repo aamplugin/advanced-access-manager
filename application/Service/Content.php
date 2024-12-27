@@ -309,40 +309,10 @@ class AAM_Service_Content
      */
     public function get_current_post()
     {
-        global $wp_query, $post;
+        $post = AAM::api()->misc->get_current_post();
 
-        $res = $post;
-
-        if (get_the_ID()) {
-            $res = get_post(get_the_ID());
-        } elseif (!empty($wp_query->queried_object)) {
-            $res = $wp_query->queried_object;
-        } elseif (!empty($wp_query->post)) {
-            $res = $wp_query->post;
-        } elseif (!empty($wp_query->query_vars['p'])) {
-            $res = get_post($wp_query->query_vars['p']);
-        } elseif (!empty($wp_query->query_vars['page_id'])) {
-            $res = get_post($wp_query->query_vars['page_id']);
-        } elseif (!empty($wp_query->query['name'])) {
-            //Important! Cover the scenario of NOT LIST but ALLOW READ
-            if (!empty($wp_query->posts)) {
-                foreach ($wp_query->posts as $p) {
-                    if ($p->post_name === $wp_query->query['name']) {
-                        $res = $p;
-                        break;
-                    }
-                }
-            } elseif (!empty($wp_query->query['post_type'])) {
-                $res = get_page_by_path(
-                    $wp_query->query['name'],
-                    OBJECT,
-                    $wp_query->query['post_type']
-                );
-            }
-        }
-
-        if (is_a($res, 'WP_Post')) {
-            $result = AAM::api()->content()->get_post($res->ID);
+        if (is_a($post, 'WP_Post')) {
+            $result = AAM::api()->content()->get_post($post->ID);
         } else {
             $result = null;
         }

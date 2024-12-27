@@ -28,7 +28,7 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
      *
      * @param string $route [Optional]
      *
-     * @return boolean
+     * @return bool|null
      *
      * @access public
      * @version 7.0.0
@@ -47,6 +47,23 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
         }
 
         return $result;
+    }
+
+    /**
+     * Check whether the RESTful API route is allowed
+     *
+     * @param string $route [Optional]
+     *
+     * @return bool|null
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function is_allowed($route = null)
+    {
+        $result = $this->is_restricted($route);
+
+        return is_bool($result) ? !$result : $result;
     }
 
 }

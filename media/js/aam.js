@@ -6805,52 +6805,6 @@
             });
         })(jQuery);
 
-        /**
-         * Report issue modal
-         */
-        (function ($) {
-            getAAM().addHook('init', function() {
-                $('#send_report_btn').bind('click', () => {
-                    const payload = {
-                        message: $('#sending_info_preview').text()
-                    };
-
-                    const email = $.trim($('#issue_reporter_email').val());
-
-                    if (email) {
-                        payload.email = email;
-                    }
-
-                    $.ajax(`${getLocal().rest_base}aam/v2/support`, {
-                        type: 'POST',
-                        headers: {
-                            'X-WP-Nonce': getLocal().rest_nonce
-                        },
-                        dataType: 'json',
-                        data: payload,
-                        beforeSend: function () {
-                            $('#send_report_btn').text(
-                                getAAM().__('Sending...')
-                            ).attr('disabled', true);
-                        },
-                        success: function () {
-                            getAAM().notification(
-                                'success',
-                                'Issue report submitted successfully!'
-                            );
-
-                            $('#report_issue_modal').modal('hide');
-                        },
-                        complete: function () {
-                            $('#send_report_btn')
-                                .text(getAAM().__('Send Report'))
-                                .attr('disabled', false);
-                        }
-                    });
-                });
-            });
-        })(jQuery);
-
         getAAM().fetchContent('main'); //fetch default AAM content
     }
 
@@ -7373,7 +7327,6 @@
     AAM.prototype.notification = function (status, message, metadata = null) {
         let notification_header;
         let notification_message = message;
-        let allow_reporting = false;
 
         switch (status) {
             case 'success':
@@ -7403,8 +7356,8 @@
                 } else {
                     if (metadata !== null) {
                         metadata.response = metadata.response.responseJSON;
-                        allow_reporting   = true;
                     }
+
                     notification_message = getAAM().__(
                         message || 'An unexpected application issue has arisen. Please feel free to report this issue to us, and we will promptly provide you with a solution.'
                     );
@@ -7414,12 +7367,6 @@
             default:
                 break;
         }
-
-        $('#report_issue_modal').on('show.bs.modal', function (e) {
-            $('#sending_info_preview').text(JSON.stringify(metadata, null, ' '));
-
-            $.toast().reset('all');
-        });
 
         if (status === 'success') {
             $.toast({
@@ -7437,7 +7384,7 @@
             });
         } else {
             $.toast({
-                text: notification_message + (allow_reporting ? ' <a href="#report_issue_modal" data-toggle="modal">' + getAAM().__('Report issue') + '</a>' : ''),
+                text: notification_message,
                 heading: notification_header,
                 icon: 'error',
                 showHideTransition: 'fade',

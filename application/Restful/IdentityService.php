@@ -96,7 +96,7 @@ class AAM_Restful_IdentityService
             ]);
 
             // Set a single permission for a role identity
-            $this->_register_route('/identity/role/(?P<slug>.+)/(?P<permission>[\w-]+)', [
+            $this->_register_route('/identity/role/(?P<slug>.+)/(?P<permission>[\w\-]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [ $this, 'set_role_permission' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
@@ -173,7 +173,7 @@ class AAM_Restful_IdentityService
             ]);
 
             // Set a single permission for a user identity
-            $this->_register_route('/identity/user/(?P<id>[\d*]+)/(?P<permission>[\w-]+)', [
+            $this->_register_route('/identity/user/(?P<id>[\d*]+)/(?P<permission>[\w\-]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [ $this, 'set_user_permission' ],
                 'permission_callback' => [ $this, 'check_permissions' ],

@@ -136,6 +136,16 @@ class AAM_Service_Jwt
         add_filter('determine_current_user', function($user_id){
             return $this->_determine_current_user($user_id);
         }, PHP_INT_MAX);
+
+        // Allow other implementations to work with JWT token
+        add_filter('aam_current_jwt_filter', function($result) {
+            if (empty($result)) {
+                $token  = $this->_extract_token();
+                $result = !empty($token) ? $token->jwt : null;
+            }
+
+            return $result;
+        });
     }
 
     /**

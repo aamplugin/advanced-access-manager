@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * ======================================================================
  * LICENSE: This file is subject to the terms and conditions defined in *
@@ -7,20 +9,14 @@
  * ======================================================================
  */
 
+namespace AAM\UnitTest\Framework\Policy;
+
+use AAM,
+    AAM\UnitTest\Utility\TestCase;
+
 /**
- * Access Policy resource
- *
- * @package AAM
- * @version 7.0.0
+ * Framework policy service test
  */
-class AAM_Framework_Resource_AccessPolicy implements AAM_Framework_Resource_Interface
+final class ServiceTest extends TestCase
 {
-
-    use AAM_Framework_Resource_BaseTrait;
-
-    /**
-     * @inheritDoc
-     */
-    const TYPE = AAM_Framework_Type_Resource::ACCESS_POLICY;
-
 }

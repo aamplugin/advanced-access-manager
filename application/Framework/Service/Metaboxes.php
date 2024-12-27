@@ -335,16 +335,9 @@ class AAM_Framework_Service_Metaboxes
      */
     private function _get_resource($slug = null)
     {
-        try {
-            $access_level = $this->_get_access_level();
-            $result       = $access_level->get_resource(
-                AAM_Framework_Type_Resource::METABOX, $slug
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::METABOX, $slug
+        );
     }
 
     /**

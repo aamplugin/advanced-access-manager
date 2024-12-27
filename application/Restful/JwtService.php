@@ -89,7 +89,7 @@ class AAM_Restful_JwtService
             ));
 
             // Get a token by ID
-            $this->_register_route('/jwt/(?P<id>[\w-]+)', array(
+            $this->_register_route('/jwt/(?P<id>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_token'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -111,7 +111,7 @@ class AAM_Restful_JwtService
             ));
 
             // Delete a token
-            $this->_register_route('/jwt/(?P<id>[\w-]+)', array(
+            $this->_register_route('/jwt/(?P<id>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_token'),
                 'permission_callback' => array($this, 'check_permissions'),

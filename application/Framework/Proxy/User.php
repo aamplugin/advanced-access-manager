@@ -51,7 +51,6 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      */
     const ALLOWED_EXPIRATION_TRIGGERS = [
         'logout',
-        'delete',
         'change_role',
         'lock'
     ];

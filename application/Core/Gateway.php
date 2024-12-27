@@ -26,6 +26,7 @@
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_Capabilities $caps
@@ -565,61 +566,6 @@ final class AAM_Core_Gateway
         };
 
         return $result();
-    }
-
-
-
-
-
-
-
-    /**
-     * Prepare Access Policy manager but only if service is enabled
-     *
-     * @param AAM_Core_Subject $subject
-     * @param boolean          $skipInheritance
-     *
-     * @return AAM_Core_Policy_Manager|null
-     *
-     * @since 6.1.0 Added $skipInheritance flag to insure proper settings inheritance
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.1.0
-     * @deprecated
-     */
-    public function getAccessPolicyManager(
-        $subject = null,
-        $skipInheritance = false
-    ) {
-        if (is_null($subject)) {
-            $subject = AAM::current_user();
-        }
-
-        if (AAM::api()->config->get(
-            AAM_Service_AccessPolicy::FEATURE_FLAG
-        )) {
-            $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
-        } else {
-            $manager = null;
-        }
-
-        return $manager;
-    }
-
-    /**
-     * Reset all AAM settings and configurations
-     *
-     * @return void
-     *
-     * @access public
-     *
-     * @version 6.9.6
-     * @deprecated
-     */
-    public function reset()
-    {
-        AAM_Core_API::clearSettings();
     }
 
     /**

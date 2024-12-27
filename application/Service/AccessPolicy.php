@@ -219,41 +219,6 @@ class AAM_Service_AccessPolicy
      */
     protected function initializeHooks()
     {
-        // Register Access Policy CPT
-        add_action('init', function () {
-            register_post_type('aam_policy', array(
-                'label'        => __('Access Policy', AAM_KEY),
-                'labels'       => array(
-                    'name'          => __('Access Policies', AAM_KEY),
-                    'edit_item'     => __('Edit Policy', AAM_KEY),
-                    'singular_name' => __('Policy', AAM_KEY),
-                    'add_new_item'  => __('Add New Policy', AAM_KEY),
-                    'new_item'      => __('New Policy', AAM_KEY)
-                ),
-                'description'  => __('Access and security policy', AAM_KEY),
-                'public'              => false,
-                'show_ui'             => true,
-                'show_in_rest'        => true,
-                'show_in_menu'        => false,
-                'exclude_from_search' => true,
-                'publicly_queryable'  => false,
-                'hierarchical' => false,
-                'supports'     => array(
-                    'title', 'excerpt', 'revisions', 'custom-fields'
-                ),
-                'delete_with_user' => false,
-                'capabilities' => array(
-                    'edit_post'         => 'aam_edit_policy',
-                    'read_post'         => 'aam_read_policy',
-                    'delete_post'       => 'aam_delete_policy',
-                    'delete_posts'      => 'aam_delete_policies',
-                    'edit_posts'        => 'aam_edit_policies',
-                    'edit_others_posts' => 'aam_edit_others_policies',
-                    'publish_posts'     => 'aam_publish_policies',
-                )
-            ));
-        });
-
         // Can register this only after user object is initialized
         add_action('init', function() {
             AAM_Service_AccessPolicy_HookController::bootstrap();

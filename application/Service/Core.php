@@ -21,11 +21,11 @@ class AAM_Service_Core
     use AAM_Core_Contract_SingletonTrait;
 
     /**
-     * URI that is used to check for plugin updates
+     * ConfigPress DB option
      *
      * @version 7.0.0
      */
-    const PLUGIN_CHECK_URI = 'api.wordpress.org/plugins/update-check';
+    const CONFIGPRESS_DB_OPTION = 'aam_configpress';
 
     /**
      * Default configurations
@@ -59,6 +59,12 @@ class AAM_Service_Core
 
             return $result;
         }, 10, 2);
+
+        // Hook into AAM config initialization and enrich it with ConfigPress
+        // settings
+        add_filter('aam_initialize_config', function($configs) {
+            return $this->_aam_initialize_config($configs);
+        });
 
         if (is_admin()) {
             $metabox_enabled = AAM::api()->config->get(
@@ -191,6 +197,38 @@ class AAM_Service_Core
 
         // Bootstrap RESTful API
         AAM_Restful_MuService::bootstrap();
+    }
+
+    /**
+     * Initialize configurations by adding ConfigPress settings
+     *
+     * @param array $configs
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _aam_initialize_config($configs)
+    {
+        $configpress = AAM::api()->db->read(self::CONFIGPRESS_DB_OPTION);
+
+        if (!empty($configpress) && is_string($configpress)) {
+            $result = parse_ini_string($configpress, true, INI_SCANNER_TYPED);
+
+            if ($result !== false) { // Clear error
+                // If we have "aam" key, then AAM ConfigPress is properly formatted
+                // and we take all the values from this section.
+                // Otherwise - assume that user forgot to add the "[aam]" section
+                if (array_key_exists('aam', $result)) {
+                    $configs = array_merge($configs, $result['aam']);
+                } else {
+                    $configs = array_merge($configs, $result);
+                }
+            }
+        }
+
+        return $configs;
     }
 
     /**
@@ -331,14 +369,7 @@ class AAM_Service_Core
                         $user->reset('expiration');
                         break;
 
-                    case 'delete':
-                        require_once(ABSPATH . 'wp-admin/includes/user.php');
-
-                        wp_delete_user($user->ID, AAM::api()->config->get(
-                            'core.reasign.ownership.user'
-                        ));
-                        break;
-
+                    case 'delete': // For compatibility purposes
                     case 'lock':
                         $user->update(['status' => $user::STATUS_INACTIVE]);
                         $user->reset('expiration');

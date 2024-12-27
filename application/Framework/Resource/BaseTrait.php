@@ -127,7 +127,7 @@ trait AAM_Framework_Resource_BaseTrait
 
         // Allow other implementations to modify defined settings
         $this->_permissions = apply_filters(
-            'aam_initialize_resource_permissions_filter',
+            'aam_framework_resource_init_permissions_filter',
             $permissions,
             $this
         );

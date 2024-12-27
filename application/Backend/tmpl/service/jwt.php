@@ -65,7 +65,6 @@
                             </label>
                             <textarea
                                 id="aam-jwt-claims-editor"
-                                class="configpress-editor"
                                 style="border: 1px solid #CCCCCC; width: 100%"
                                 rows="5"
                             ></textarea>

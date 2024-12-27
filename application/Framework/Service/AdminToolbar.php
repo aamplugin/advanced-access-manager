@@ -260,15 +260,9 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      */
     private function _get_resource($item_id = null)
     {
-        try {
-            $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::TOOLBAR, $item_id
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::TOOLBAR, $item_id
+        );
     }
 
     /**

@@ -112,7 +112,7 @@ class AAM_Restful_ContentService
             ));
 
             // Get post permissions
-            $this->_register_route('/content/post/(?P<id>[\w-]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_post'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -130,7 +130,7 @@ class AAM_Restful_ContentService
             ));
 
             // Update post permissions
-            $this->_register_route('/content/post/(?P<id>[\w-]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_post_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -168,7 +168,7 @@ class AAM_Restful_ContentService
             ));
 
             // Update post permission
-            $this->_register_route('/content/post/(?P<id>[\w-]+)/(?P<permission>[\w]+)', [
+            $this->_register_route('/content/post/(?P<id>[\d]+)/(?P<permission>[\w]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [ $this, 'set_post_permission' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
@@ -197,7 +197,7 @@ class AAM_Restful_ContentService
             ]);
 
             // Delete all permissions
-            $this->_register_route('/content/post/(?P<id>[\w-]+)', array(
+            $this->_register_route('/content/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_post_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),

@@ -103,11 +103,4 @@ class AAM_Framework_Type_Resource
      */
     const URL = 'url';
 
-    /**
-     * Resource type that represents all JSON access policies
-     *
-     * @version 7.0.0
-     */
-    const ACCESS_POLICY = 'policy';
-
 }

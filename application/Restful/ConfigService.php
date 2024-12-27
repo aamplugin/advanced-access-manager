@@ -38,7 +38,7 @@ class AAM_Restful_ConfigService
             ), false);
 
             // Get a single configuration
-            $this->_register_route('/config', array(
+            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_configuration'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -59,7 +59,7 @@ class AAM_Restful_ConfigService
             ), false);
 
             // Set config
-            $this->_register_route('/configs', array(
+            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => array($this, 'set_configuration'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -101,6 +101,13 @@ class AAM_Restful_ConfigService
                 'callback'            => array($this, 'reset_configurations'),
                 'permission_callback' => array($this, 'check_permissions')
             ), false);
+
+            // Reset AAM ConfigPress
+            $this->_register_route('/configpress', array(
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => array($this, 'reset_configpress'),
+                'permission_callback' => array($this, 'check_permissions')
+            ), false);
         });
     }
 
@@ -108,8 +115,8 @@ class AAM_Restful_ConfigService
      * Get all defined configurations
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_configurations()
@@ -129,8 +136,8 @@ class AAM_Restful_ConfigService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_configuration(WP_REST_Request $request)
@@ -151,16 +158,26 @@ class AAM_Restful_ConfigService
      * Get ConfigPress
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function get_configpress()
     {
         try {
-            // TODO: Finish ConfigPress
+            // Read stored ConfigPress from DB
+            $raw = AAM::api()->db->read(AAM_Service_Core::CONFIGPRESS_DB_OPTION);
+
+            if (!empty($raw)) {
+                $parsed = parse_ini_string($raw, true, INI_SCANNER_TYPED);
+                $parsed = !empty($parsed['aam']) ? $parsed['aam'] : [];
+            } else {
+                $parsed = [];
+            }
+
             $result = [
-                'ini' => $this->_get_service()->get_configpress()
+                'ini'    => empty($raw) ? '[aam]' : $raw,
+                'parsed' => $parsed
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -175,8 +192,8 @@ class AAM_Restful_ConfigService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_configuration(WP_REST_Request $request)
@@ -212,21 +229,33 @@ class AAM_Restful_ConfigService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public function set_configpress(WP_REST_Request $request)
     {
         try {
-            $ini = $request->get_param('ini');
+            $raw = $request->get_param('ini');
 
-            // TODO: Finish ConfigPress
-            $status = $this->_get_service()->set_configpress($ini);
+            if (!empty($raw)) {
+                $parsed = parse_ini_string($raw, true, INI_SCANNER_TYPED);
+            } else {
+                $parsed = [];
+            }
 
-            if ($status) {
+            if (empty($parsed)) {
+                throw new InvalidArgumentException('The ConfigPress value is empty');
+            } else {
+                $result = AAM::api()->db->write(
+                    AAM_Service_Core::CONFIGPRESS_DB_OPTION, $raw
+                );
+            }
+
+            if ($result) {
                 $result = [
-                    'ini' => $this->_get_service()->get_configpress()
+                    'ini'    => $raw,
+                    'parsed' => $parsed
                 ];
             }
         } catch (Exception $e) {
@@ -247,7 +276,32 @@ class AAM_Restful_ConfigService
     public function reset_configurations()
     {
         try {
-            $result = AAM::api()->config->reset();
+            $result = [
+                'success' => AAM::api()->config->reset()
+            ];
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Reset all configurations
+     *
+     * @return WP_REST_Response
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public function reset_configpress()
+    {
+        try {
+            $result = [
+                'success' => AAM::api()->db->delete(
+                    AAM_Service_Core::CONFIGPRESS_DB_OPTION
+                )
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

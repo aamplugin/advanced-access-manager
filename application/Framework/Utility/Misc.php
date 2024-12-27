@@ -210,6 +210,57 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     }
 
     /**
+     * Get current post
+     *
+     * @return WP_Post|null
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_current_post()
+    {
+        global $wp_query, $post;
+
+        $res = $post;
+
+        if (get_the_ID()) {
+            $res = get_post(get_the_ID());
+        } elseif (!empty($wp_query->queried_object)) {
+            $res = $wp_query->queried_object;
+        } elseif (!empty($wp_query->post)) {
+            $res = $wp_query->post;
+        } elseif (!empty($wp_query->query_vars['p'])) {
+            $res = get_post($wp_query->query_vars['p']);
+        } elseif (!empty($wp_query->query_vars['page_id'])) {
+            $res = get_post($wp_query->query_vars['page_id']);
+        } elseif (!empty($wp_query->query['name'])) {
+            //Important! Cover the scenario of NOT LIST but ALLOW READ
+            if (!empty($wp_query->posts)) {
+                foreach ($wp_query->posts as $p) {
+                    if ($p->post_name === $wp_query->query['name']) {
+                        $res = $p;
+                        break;
+                    }
+                }
+            } elseif (!empty($wp_query->query['post_type'])) {
+                $res = get_page_by_path(
+                    $wp_query->query['name'],
+                    OBJECT,
+                    $wp_query->query['post_type']
+                );
+            }
+        }
+
+        if (is_a($res, 'WP_Post')) {
+            $result = $res;
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
      * Merge two sets of access permissions
      *
      * @param array  $base
@@ -225,14 +276,11 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     {
         $result = [];
 
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        $preference = AAM_Framework_Manager::_()->config->get(
-            'core.settings.merge.preference'
-        );
-
-        $preference = AAM_Framework_Manager::_()->config->get(
+        // Determine the access controls merging preference
+        $config     = AAM_Framework_Manager::_()->config;
+        $preference = $config->get(
             'core.settings.' . $resource_type . '.merge.preference',
-            $preference
+            $config->get('core.settings.merge.preference') // Default merging pref
         );
 
         // First get the complete list of unique keys
@@ -280,7 +328,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      *
      * @version 7.0.0
      */
-    private function _merge_permissions($base, $incoming, $preference = 'deny')
+    private function _merge_permissions($base, $incoming, $preference)
     {
         $result   = null;
         $effect_a = null;

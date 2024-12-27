@@ -26,7 +26,7 @@
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AccessLevels access_levels(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_Capabilities $caps
@@ -112,7 +112,8 @@ final class AAM_Framework_Manager
         'content'                => AAM_Framework_Service_Content::class,
         'capabilities'           => AAM_Framework_Service_Capabilities::class,
         'caps'                   => AAM_Framework_Service_Capabilities::class,
-        'settings'               => AAM_Framework_Service_Settings::class
+        'settings'               => AAM_Framework_Service_Settings::class,
+        'policies'               => AAM_Framework_Service_Policies::class
     ];
 
     /**
@@ -123,7 +124,41 @@ final class AAM_Framework_Manager
      *
      * @version 7.0.0
      */
-    protected function __construct() {}
+    protected function __construct() {
+        add_action('init', function () {
+            // Register JSON Access Policy CPT
+            register_post_type(AAM_Framework_Service_Policies::CPT, [
+                'label'        => 'Access Policy',
+                'labels'       => [
+                    'name'          => 'Access Policies',
+                    'edit_item'     => 'Edit Policy',
+                    'singular_name' => 'Policy',
+                    'add_new_item'  => 'Add New Policy',
+                    'new_item'      => 'New Policy'
+                ],
+                'public'              => false,
+                'show_ui'             => true,
+                'show_in_rest'        => true,
+                'show_in_menu'        => false,
+                'exclude_from_search' => true,
+                'publicly_queryable'  => false,
+                'hierarchical' => false,
+                'supports'     => [
+                    'title', 'excerpt', 'revisions', 'custom-fields'
+                ],
+                'delete_with_user' => false,
+                'capabilities' => [
+                    'edit_post'         => 'aam_edit_policy',
+                    'read_post'         => 'aam_read_policy',
+                    'delete_post'       => 'aam_delete_policy',
+                    'delete_posts'      => 'aam_delete_policies',
+                    'edit_posts'        => 'aam_edit_policies',
+                    'edit_others_posts' => 'aam_edit_others_policies',
+                    'publish_posts'     => 'aam_publish_policies',
+                ]
+            ]);
+        });
+    }
 
     /**
      * Prevent from fatal errors

@@ -127,7 +127,6 @@
                                 $expirationActions = array(
                                     ''            => __('Select Action', AAM_KEY),
                                     'logout'      => __('Logout User', AAM_KEY),
-                                    'delete'      => __('Delete Account', AAM_KEY),
                                     'change_role' => __('Change User Role', AAM_KEY),
                                     'lock'        => __('Lock User Account', AAM_KEY)
                                 );

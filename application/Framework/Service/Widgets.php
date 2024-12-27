@@ -281,15 +281,9 @@ class AAM_Framework_Service_Widgets
      */
     private function _get_resource()
     {
-        try {
-            $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::WIDGET
-            );
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::WIDGET
+        );
     }
 
     /**

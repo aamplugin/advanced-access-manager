@@ -38,7 +38,7 @@ class TestCase extends PHPUnitTestCase
      *
      * @access public
      */
-    public function createUser(array $user_data) : int
+    public function createUser(array $user_data = []) : int
     {
         $result = self::_createUser($user_data);
 
@@ -314,13 +314,13 @@ class TestCase extends PHPUnitTestCase
     /**
      * Create a test user
      *
-     * @param array $user_data
+     * @param array $user_data [Optional]
      *
      * @return array
      *
      * @access private
      */
-    private static function _createUser(array $user_data) : array
+    private static function _createUser(array $user_data = []) : array
     {
         $user_login        = uniqid();
         $default_user_data = [

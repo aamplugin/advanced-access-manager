@@ -103,17 +103,13 @@ class AAM
     /**
      * Get current user
      *
-     * @return AAM_Framework_AccessLevel_Interface
+     * @return AAM_Framework_AccessLevel_Interface|null
      *
      * @access public
      * @version 7.0.0
      */
     public static function current_user()
     {
-        if (self::get_instance()->_current_user === null) {
-            self::get_instance()->_init_current_user();
-        }
-
         return self::get_instance()->_current_user;
     }
 
@@ -183,8 +179,6 @@ class AAM
             call_user_func("{$service_class}::bootstrap");
         }
 
-        do_action('aam_services_loaded');
-
         // Load AAM
         self::get_instance();
     }
@@ -232,6 +226,9 @@ class AAM
 
             // Load AAM internationalization
             load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
+
+            // Initialize current user
+            self::$_instance->_init_current_user();
         }
 
         return self::$_instance;
@@ -293,7 +290,7 @@ class AAM
      */
     public static function uninstall()
     {
-        //trigger any uninstall hook that is registered by any extension
+        // Trigger any uninstall hook that is registered by any extension
         do_action('aam-uninstall-action');
 
         //clear all AAM settings

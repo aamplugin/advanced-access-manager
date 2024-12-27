@@ -398,7 +398,7 @@ class AAM_Framework_Service_Content
      * @param mixed  $post_identifier
      * @param string $post_type
      *
-     * @return AAM_Framework_Resource_Post|WP_Error|null
+     * @return AAM_Framework_Resource_Post|WP_Error
      *
      * @access public
      * @version 7.0.0
