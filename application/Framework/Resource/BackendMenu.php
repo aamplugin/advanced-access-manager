@@ -53,4 +53,35 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
         return $result;
     }
 
+    /**
+     * @inheritDoc
+     */
+    private function _apply_policy_permissions($permissions)
+    {
+        // Fetch list of statements for the resource BackendMenu
+        $list = AAM_Framework_Manager::_()->policies(
+            $this->get_access_level()
+        )->statements('BackendMenu:*');
+
+        foreach($list as $stm) {
+            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : null;
+
+            // If effect is defined, move forward with the rest
+            if (!empty($effect)) {
+                // Extracting backend menu item ID
+                $parsed = explode(':', $stm['Resource']);
+
+                if (!empty($parsed[1])) {
+                    $permissions = array_merge([
+                        $parsed[1] => [
+                            'effect' => $effect
+                        ]
+                    ], $permissions);
+                }
+            }
+        }
+
+        return $permissions;
+    }
+
 }

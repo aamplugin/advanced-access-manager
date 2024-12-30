@@ -66,4 +66,36 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
         return is_bool($result) ? !$result : $result;
     }
 
+    /**
+     * @inheritDoc
+     */
+    private function _apply_policy_permissions($permissions)
+    {
+        // Fetch list of statements for the resource Route
+        $list = AAM_Framework_Manager::_()->policies(
+            $this->get_access_level()
+        )->statements('Route:*');
+
+        foreach($list as $stm) {
+            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : null;
+
+            // If effect is defined, move forward with the rest
+            if (!empty($effect)) {
+                // Extracting route attributes
+                $parsed = explode(':', $stm['Resource']);
+                $route  = !empty($parsed[1]) ? $parsed[1] : null;
+                $verb   = !empty($parsed[2]) ? $parsed[2] : null;
+
+                if (!empty($route) && !empty($verb)) {
+                    $key         = strtolower($verb . ' ' . $route);
+                    $permissions = array_merge([
+                        $key => [ 'effect' => $effect ]
+                    ], $permissions);
+                }
+            }
+        }
+
+        return $permissions;
+    }
+
 }

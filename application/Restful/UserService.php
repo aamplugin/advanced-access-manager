@@ -427,7 +427,7 @@ class AAM_Restful_UserService
      */
     private function _prepare_output($user, $fields = [])
     {
-        $response = [
+        $item = [
             'id'                    => $user->ID,
             'user_login'            => $user->user_login,
             'display_name'          => $user->display_name,
@@ -441,7 +441,7 @@ class AAM_Restful_UserService
         $expires_at = $user->expires_at;
 
         if (!empty($expires_at)) {
-            $response['expiration'] = [
+            $item['expiration'] = [
                 'expires_at'           => $expires_at->format(DateTime::RFC3339),
                 'expires_at_timestamp' => $expires_at->getTimestamp(),
                 'trigger'              => $user->expiration_trigger
@@ -449,29 +449,30 @@ class AAM_Restful_UserService
         }
 
         // Addition list of actions that current user can perform upon given user
-        $response['permissions'] = [];
+        $item['permissions'] = [];
 
-        if (current_user_can('edit_user', $response['id'])) {
-            array_push($response['permissions'], 'allow_manage', 'allow_edit');
+        if (current_user_can('edit_user', $item['id'])) {
+            array_push($item['permissions'], 'allow_manage', 'allow_edit');
 
             if(current_user_can('aam_toggle_users')) {
                 array_push(
-                    $response['permissions'],
-                    $response['status'] === 'inactive' ? 'allow_unlock' : 'allow_lock'
+                    $item['permissions'],
+                    $item['status'] === 'inactive' ? 'allow_unlock' : 'allow_lock'
                 );
             }
         }
 
-        $response = apply_filters('aam_prepare_user_item_filter', $response);
+        $result = [];
 
-        // Finally, return only fields that were requested
         foreach($fields as $field) {
-            if (!isset($response[$field]) && isset($item[$field])) {
-                $response[$field] = $item[$field];
+            if (!isset($result[$field]) && isset($item[$field])) {
+                $result[$field] = $item[$field];
             }
         }
 
-        return $response;
+        return apply_filters(
+            'aam_rest_user_output_filter', $result, $user, $fields
+        );
     }
 
     /**
@@ -514,14 +515,9 @@ class AAM_Restful_UserService
     private function _determine_additional_fields(WP_REST_Request $request)
     {
         $fields = $request->get_param('fields');
+        $fields = !empty($fields) ? wp_parse_list($fields) : [];
 
-        if (!empty($fields) && is_string($fields)) {
-            $fields = explode(',', $fields);
-        } else {
-            $fields = array();
-        }
-
-        return $fields;
+        return array_unique(array_merge([ 'id' ], $fields));
     }
 
     /**

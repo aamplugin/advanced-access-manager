@@ -35,15 +35,17 @@ class AAM_Framework_Service_Policies
      */
     private $_registered_policies = null;
 
-     /**
-     * Policy tree cache
+    /**
+     * Cache policy tree
+     *
+     * To improve performance, caching parsed policy tree
      *
      * @var array
      * @access private
      *
      * @version 7.0.0
      */
-    private $_policy_tree_cache = null;
+    private $_cached_policy_tree = null;
 
     /**
      * Get list of access policies
@@ -58,27 +60,7 @@ class AAM_Framework_Service_Policies
     public function get_policies($args = [])
     {
         try {
-            $policies = $this->_get_registered_policies($args);
-
-            // Prepare the output result
-            $result    = [];
-            $container = $this->_get_container();
-
-            foreach($policies as $post) {
-                if (array_key_exists($post->ID, $container)) {
-                    $is_attached = $container[$post->ID]['effect'] !== 'detach';
-                } else {
-                    $is_attached = false;
-                }
-
-                array_push($result, [
-                    'id'            => $post->ID,
-                    'status'        => $post->post_status,
-                    'raw_policy'    => $post->post_content,
-                    'parsed_policy' => json_decode($post->post_content, true),
-                    'is_attached'   => $is_attached
-                ]);
-            }
+            $result = $this->_get_registered_policies($args);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -102,6 +84,54 @@ class AAM_Framework_Service_Policies
     }
 
     /**
+     * Get a single registered policy
+     *
+     * @param int $policy_id
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_policy($policy_id)
+    {
+        try {
+            $match = array_filter(
+                $this->_get_registered_policies(), function($p) use ($policy_id) {
+                    return $p['id'] === $policy_id;
+                }
+            );
+
+            if (!empty($match)) {
+                $result = array_shift($match);
+            } else {
+                throw new OutOfRangeException(
+                    sprintf('Policy with ID %d does not exist', $policy_id)
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_policy method
+     *
+     * @param int $policy_id
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function policy($policy_id)
+    {
+        return $this->get_policy($policy_id);
+    }
+
+    /**
      * Attach a policy to the access level
      *
      * @param int $policy_id
@@ -116,6 +146,13 @@ class AAM_Framework_Service_Policies
         try {
             // Attach new policy to the list
             $result = $this->_update($policy_id, 'attach');
+
+            if ($result) {
+                $this->_registered_policies[$policy_id]['status'] = 'attach';
+
+                // Reset internal cache
+                $this->_cached_policy_tree = null;
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -138,6 +175,13 @@ class AAM_Framework_Service_Policies
         try {
             // Detach new policy to the list
             $result = $this->_update($policy_id, 'detach');
+
+            if ($result) {
+                $this->_registered_policies[$policy_id]['status'] = 'detach';
+
+                // Reset internal cache
+                $this->_cached_policy_tree = null;
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -148,11 +192,11 @@ class AAM_Framework_Service_Policies
     /**
      * Create new policy and attach it to current access level if specified
      *
-     * @param mixed  $policy
-     * @param string $status [Optional]
-     * @param bool   $attach [Optional]
+     * @param string|array $policy
+     * @param string       $status [Optional]
+     * @param bool         $attach [Optional]
      *
-     * @return bool
+     * @return int|WP_Error
      * @access public
      *
      * @version 7.0.0
@@ -160,17 +204,29 @@ class AAM_Framework_Service_Policies
     public function create($policy, $status = 'publish', $attach = true)
     {
         try {
+            $post_data = [];
+
             // Let's validate the incoming policy first
             if (is_string($policy)) {
-                $policy = json_decode(
-                    htmlspecialchars_decode(stripslashes($policy)), true
-                );
+                $post_content = $policy;
+            } elseif (is_array($policy) && isset($policy['json']) ) {
+                $post_content = $policy['json'];
+                $post_data    = [
+                    'post_title'   => isset($policy['title']) ? $policy['title']: '',
+                    'post_excerpt' => isset($policy['excerpt']) ? $policy['excerpt']: '',
+                ];
+            } else {
+                throw new InvalidArgumentException('Invalid policy provided');
+            }
 
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    throw new InvalidArgumentException(
-                        'The provided policy is not a valid JSON'
-                    );
-                }
+            $decoded = json_decode(
+                htmlspecialchars_decode(stripslashes($post_content)), true
+            );
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new InvalidArgumentException(
+                    'The provided policy is not a valid JSON'
+                );
             }
 
             if (is_multisite()) {
@@ -178,24 +234,33 @@ class AAM_Framework_Service_Policies
             }
 
             // Insert new policy
-            $policy_id = wp_insert_post([
-                'post_type'    => self::CPT,
-                'status'       => $status,
-                'post_content' => wp_json_encode($policy, JSON_PRETTY_PRINT)
-            ]);
+            $result = wp_insert_post(array_merge(
+                [ 'post_status'  => $status ],
+                $post_data,
+                [
+                    'post_type'    => self::CPT,
+                    'post_content' => wp_json_encode($decoded, JSON_PRETTY_PRINT)
+                ]
+            ));
 
             if (is_multisite()) {
                 restore_current_blog();
             }
 
-            if (is_wp_error($policy_id)) {
-                throw new RuntimeException($policy_id->get_error_message());
+            if (is_wp_error($result)) {
+                throw new RuntimeException($result->get_error_message());
             } elseif ($attach) {
-                $result = $this->_update($policy_id, 'attach');
+                if (!$this->_update($result, 'attach')) {
+                    throw new RuntimeException('Failed to attach created policy');
+                }
 
-                // TODO: Update policy tree
-            } else {
-                $result = true;
+                // Insert policy into the list of registered policies
+                $this->_registered_policies[$result] = $this->_prepare_policy_item(
+                    get_post($result)
+                );
+
+                // Reset internal cache
+                $this->_cached_policy_tree = null;
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -210,22 +275,23 @@ class AAM_Framework_Service_Policies
      * The resource_key can be a full resource name or part of it. RegEx is used
      * to find a match
      *
-     * @param string|array $resource_key [Optional]
-     * @param array        $args         [Optional]
+     * @param string $resource_pattern [Optional]
+     * @param array  $args             [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_statements($resource_key = null, $args = [])
+    public function get_statements($resource_pattern = null, $args = [])
     {
         try {
-            $result = [];
+            $result  = [];
+            $matches = $this->_search('statement', $resource_pattern, $args);
 
-            foreach($this->_search('statement', $resource_key, $args) as $stm) {
-                $result[$stm['Resource']] = array_filter($stm, function($k) {
-                    return !in_array($k, [ 'Resource', 'Condition' ], true);
+            foreach($matches as $key => $stm) {
+                $result[$key] = array_filter($stm, function($k) {
+                    return !in_array($k, [ 'Condition' ], true);
                 }, ARRAY_FILTER_USE_KEY);
             }
         } catch (Exception $e) {
@@ -241,21 +307,66 @@ class AAM_Framework_Service_Policies
      * The param_key can be a full param name or part of it. RegEx is used
      * to find a match
      *
-     * @param string|array $param_key [Optional]
-     * @param array        $args      [Optional]
+     * @param string $key_pattern [Optional]
+     * @param array  $args        [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_params($param_key = null, $args = [])
+    public function get_params($key_pattern = null, $args = [])
     {
         try {
-            $result = [];
+            $result  = [];
+            $matches = $this->_search('param', $key_pattern, $args);
 
-            foreach($this->_search('param', $param_key, $args) as $param) {
-                $result[$param['Key']] = $param['Value'];
+            foreach($matches as $key => $param) {
+                $result[$key] = $param['Value'];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get a single param
+     *
+     * The $key has to be an exact match for the parameter, otherwise the WP_Error is
+     * returned.
+     *
+     * @param string $key
+     * @param array  $args [Optional]
+     *
+     * @return mixed|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_param($key, $args = [])
+    {
+        try {
+            $found = false;
+
+            foreach ($this->_get_processed_params($args) as $param_key => $params) {
+                if ($param_key === $key) {
+                    $candidate = $this->_get_best_candidate($params, $args);
+
+                    if (!is_null($candidate)) {
+                        $found  = true;
+                        $result = $candidate['Value'];
+
+                        break; // No need to search any further
+                    }
+                }
+            }
+
+            if ($found === false) {
+                throw new OutOfRangeException(
+                    sprintf('Failed to find %s param', $key)
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -267,33 +378,52 @@ class AAM_Framework_Service_Policies
     /**
      * Alias for the get_statements method
      *
-     * @param string|array $resource_key [Optional]
-     * @param array        $args         [Optional]
+     * @param string $resource_pattern [Optional]
+     * @param array  $args             [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function statements($resource_key = null, $args = [])
+    public function statements($resource_pattern = null, $args = [])
     {
-        return $this->get_statements($resource_key, $args);
+        return $this->get_statements($resource_pattern, $args);
     }
 
     /**
      * Alias for the get_params method
      *
-     * @param string|array $param_key [Optional]
-     * @param array        $args      [Optional]
+     * @param string $key_pattern [Optional]
+     * @param array  $args        [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function params($param_key = null, $args = [])
+    public function params($key_pattern = null, $args = [])
     {
-        return $this->get_params($param_key, $args);
+        return $this->get_params($key_pattern, $args);
+    }
+
+    /**
+     * Alias for the get_param method
+     *
+     * The $key has to be an exact match for the parameter, otherwise the WP_Error is
+     * returned.
+     *
+     * @param string $key
+     * @param array  $args [Optional]
+     *
+     * @return mixed|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function param($key, $args = [])
+    {
+        return $this->get_param($key, $args);
     }
 
     /**
@@ -310,6 +440,70 @@ class AAM_Framework_Service_Policies
             $result = $this->settings($this->_get_access_level())->delete_setting(
                 'policy'
             );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Are permissions customized for current access level
+     *
+     * Determine if permissions for the resource are customized for the current
+     * access level. Permissions are considered customized if there is at least one
+     * permission explicitly allowed or denied.
+     *
+     * @return boolean
+     * @version 7.0.0
+     */
+    public function is_customized()
+    {
+        try {
+            $container = $this->_get_container();
+            $result    = !empty($container);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if policy is attached to current access level
+     *
+     * @param int $policy_id
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_attached($policy_id)
+    {
+        try {
+            $result = $this->_is_attached($policy_id);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if policy is detached from current access level
+     *
+     * @param int $policy_id
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_detached($policy_id)
+    {
+        try {
+            $result = !$this->_is_attached($policy_id);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -351,12 +545,9 @@ class AAM_Framework_Service_Policies
             ));
 
             foreach($policies as $policy) {
-                $this->_registered_policies[$policy->ID] = [
-                    'id'            => $policy->ID,
-                    'status'        => $policy->post_status,
-                    'raw_policy'    => $policy->post_content,
-                    'parsed_policy' => $this->_parse_policy($policy)
-                ];
+                $this->_registered_policies[$policy->ID] = $this->_prepare_policy_item(
+                    $policy
+                );
             }
 
             if (is_multisite()) {
@@ -379,8 +570,9 @@ class AAM_Framework_Service_Policies
      */
     private function _get_access_level_policy_tree()
     {
-        if (is_null($this->_policy_tree_cache)) {
-            $this->_policy_tree_cache = [
+        if (is_null($this->_cached_policy_tree)) {
+            // Reset policy tree each time we get it
+            $result = [
                 'Statement' => [],
                 'Param'     => []
             ];
@@ -403,22 +595,16 @@ class AAM_Framework_Service_Policies
             // Iterated over the list of all activated policies and prepare the policy
             // tree
             foreach($activated as $policy_id) {
-                $parsed = $registered[$policy_id]['parsed_policy'];
-
-                $this->_policy_tree_cache = [
-                    'Statement' => array_merge(
-                        $this->_policy_tree_cache['Statement'],
-                        $parsed['Statement']
-                    ),
-                    'Param'=> array_merge(
-                        $this->_policy_tree_cache['Param'],
-                        $parsed['Param']
-                    )
-                ];
+                $this->_insert_policy_into_tree($registered[$policy_id], $result);
             }
+
+            // Cache the tree
+            $this->_cached_policy_tree = $result;
+        } else {
+            $result = $this->_cached_policy_tree;
         }
 
-        return $this->_policy_tree_cache;
+        return $result;
     }
 
     /**
@@ -508,23 +694,21 @@ class AAM_Framework_Service_Policies
     /**
      * Search statement of param by given key
      *
-     * @param string       $type
-     * @param string|array $search_key
-     * @param array        $args
+     * @param string $type
+     * @param string $pattern
+     * @param array  $args
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _search($type, $search_key, $args)
+    private function _search($type, $pattern, $args)
     {
         $result = [];
 
-        if (is_array($search_key)) {
-            $regex = '/^(' . implode('|', $search_key) . '):/i';
-        } elseif (is_string($search_key)) {
-            $regex = "/^{$search_key}/i";
+        if (is_string($pattern)) {
+            $regex = '/^' . str_replace('\*', '(.*)', preg_quote($pattern)) .  '/i';
         } else {
             $regex = null;
         }
@@ -540,7 +724,7 @@ class AAM_Framework_Service_Policies
                 $candidate = $this->_get_best_candidate($candidates, $args);
 
                 if (!is_null($candidate)) {
-                    array_push($result, $candidate);
+                    $result[$key] = $candidate;
                 }
             }
         }
@@ -643,8 +827,12 @@ class AAM_Framework_Service_Policies
 
                         // Process the statement
                         $statement = $this->_replace_markers_recursively(
-                            $stm, $args, [ 'Key', 'Action', 'Condition' ]
+                            $stm, $args, [ 'Resource', 'Action', 'Condition' ]
                         );
+
+                        // Making sure we have a single representation of the
+                        // Resource attribute
+                        $statement['Resource'] = $resource;
 
                         // If there is a specific action applied to the statement's
                         // resource, include it in the statement
@@ -862,6 +1050,81 @@ class AAM_Framework_Service_Policies
             $settings->get_setting('policy', []),
             [ $policy_id => [ 'effect' => $effect ] ]
         ), true);
+    }
+
+    /**
+     * Prepare policy item
+     *
+     * @param WP_Post $policy
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_policy_item($policy)
+    {
+        return [
+            'id'          => $policy->ID,
+            'status'      => $policy->post_status,
+            'json'        => $policy->post_content,
+            'parsed'      => $this->_parse_policy($policy),
+            'is_attached' => $this->_is_attached($policy->ID),
+            'ref'         => $policy
+        ];
+    }
+
+    /**
+     * Determine if policy is attached to current access level
+     *
+     * @param int $policy_id
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_attached($policy_id)
+    {
+        $container = $this->_get_container();
+
+        if (array_key_exists($policy_id, $container)) {
+            $result = $container[$policy_id]['effect'] !== 'detach';
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Insert a policy into a policy tree
+     *
+     * The policy tree represents a collection of statements and params from
+     * published policies that are attached to current access level
+     *
+     * @param array $policy
+     * @param array &$policy_tree
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _insert_policy_into_tree($policy, &$policy_tree)
+    {
+        if ($policy['status'] === 'publish') {
+            $policy_tree = [
+                'Statement' => array_merge(
+                    $policy_tree['Statement'],
+                    $policy['parsed']['Statement']
+                ),
+                'Param'=> array_merge(
+                    $policy_tree['Param'],
+                    $policy['parsed']['Param']
+                )
+            ];
+        }
     }
 
     /**

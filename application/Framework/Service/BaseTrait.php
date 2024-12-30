@@ -129,9 +129,9 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Are permissions customized for current access level
      *
-     * Determine if permissions for the backend menu are customized for the current
+     * Determine if permissions for the resource are customized for the current
      * access level. Permissions are considered customized if there is at least one
-     * admin menu item explicitly allowed or denied.
+     * permission explicitly allowed or denied.
      *
      * @return boolean
      * @version 7.0.0

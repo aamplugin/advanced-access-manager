@@ -70,12 +70,12 @@
                         <?php } ?>
                         <?php if (current_user_can('aam_manage_visitors')) { ?>
                             <div role="tabpanel" class="tab-pane<?php echo (!$active++ ? ' active' : ''); ?>" id="visitor">
-                                <?php echo apply_filters('aam_visitor_subject_tab_filter', static::loadPartial('visitor-subject-tab', $params), $params); ?>
+                                <?php echo static::loadPartial('visitor-subject-tab', $params); ?>
                             </div>
                         <?php } ?>
                         <?php if (current_user_can('aam_manage_default')) { ?>
                             <div role="tabpanel" class="tab-pane<?php echo (!$active++ ? ' active' : ''); ?>" id="default">
-                                <?php echo apply_filters('aam_default_subject_tab_filter', static::loadPartial('default-subject-tab', $params), $params); ?>
+                                <?php echo static::loadPartial('default-subject-tab', $params); ?>
                             </div>
                         <?php } ?>
                         <?php if ($active === 0) { ?>

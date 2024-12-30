@@ -124,39 +124,42 @@ final class AAM_Framework_Manager
      *
      * @version 7.0.0
      */
-    protected function __construct() {
+    protected function __construct()
+    {
         add_action('init', function () {
-            // Register JSON Access Policy CPT
-            register_post_type(AAM_Framework_Service_Policies::CPT, [
-                'label'        => 'Access Policy',
-                'labels'       => [
-                    'name'          => 'Access Policies',
-                    'edit_item'     => 'Edit Policy',
-                    'singular_name' => 'Policy',
-                    'add_new_item'  => 'Add New Policy',
-                    'new_item'      => 'New Policy'
-                ],
-                'public'              => false,
-                'show_ui'             => true,
-                'show_in_rest'        => true,
-                'show_in_menu'        => false,
-                'exclude_from_search' => true,
-                'publicly_queryable'  => false,
-                'hierarchical' => false,
-                'supports'     => [
-                    'title', 'excerpt', 'revisions', 'custom-fields'
-                ],
-                'delete_with_user' => false,
-                'capabilities' => [
-                    'edit_post'         => 'aam_edit_policy',
-                    'read_post'         => 'aam_read_policy',
-                    'delete_post'       => 'aam_delete_policy',
-                    'delete_posts'      => 'aam_delete_policies',
-                    'edit_posts'        => 'aam_edit_policies',
-                    'edit_others_posts' => 'aam_edit_others_policies',
-                    'publish_posts'     => 'aam_publish_policies',
-                ]
-            ]);
+            if ($this->config->get('service.policies.enabled', true)) {
+                // Register JSON Access Policy CPT
+                register_post_type(AAM_Framework_Service_Policies::CPT, [
+                    'label'        => 'Access Policy',
+                    'labels'       => [
+                        'name'          => 'Access Policies',
+                        'edit_item'     => 'Edit Policy',
+                        'singular_name' => 'Policy',
+                        'add_new_item'  => 'Add New Policy',
+                        'new_item'      => 'New Policy'
+                    ],
+                    'public'              => false,
+                    'show_ui'             => true,
+                    'show_in_rest'        => true,
+                    'show_in_menu'        => false,
+                    'exclude_from_search' => true,
+                    'publicly_queryable'  => false,
+                    'hierarchical' => false,
+                    'supports'     => [
+                        'title', 'excerpt', 'revisions', 'custom-fields'
+                    ],
+                    'delete_with_user' => false,
+                    'capabilities' => [
+                        'edit_post'         => 'aam_edit_policy',
+                        'read_post'         => 'aam_read_policy',
+                        'delete_post'       => 'aam_delete_policy',
+                        'delete_posts'      => 'aam_delete_policies',
+                        'edit_posts'        => 'aam_edit_policies',
+                        'edit_others_posts' => 'aam_edit_others_policies',
+                        'publish_posts'     => 'aam_publish_policies',
+                    ]
+                ]);
+            }
         });
     }
 
@@ -216,6 +219,9 @@ final class AAM_Framework_Manager
      * @param string $name
      *
      * @return AAM_Framework_Utility_Interface
+     * @access public
+     *
+     * @version 7.0.0
      */
     public function __get($name)
     {
@@ -308,8 +314,9 @@ final class AAM_Framework_Manager
      * @param array $default_context [Optional]
      *
      * @return AAM_Framework_Manager
-     *
      * @access public
+     * @static
+     *
      * @version 7.0.0
      */
     public static function load(array $default_context = [])

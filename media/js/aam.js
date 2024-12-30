@@ -153,19 +153,10 @@
              */
             function initialize() {
                 if (!$('#role-list').hasClass('dataTable')) {
-                    // Query params to the request
-                    let policyId;
-
                     const fields = [
                         'user_count',
                         'permissions'
                     ];
-
-                    if ($('#aam-policy-id').length > 0) {
-                        fields.push('applied_policy_ids');
-
-                        policyId = parseInt($('#aam-policy-id').val(), 10);
-                    }
 
                     getAAM().applyFilters('role-list-fields', fields);
 
@@ -178,7 +169,7 @@
                         url += `&fields=${fields.join(',')}`;
                     }
 
-                    //initialize the role list table
+                    // Initialize the role list table
                     $('#role-list').DataTable({
                         autoWidth: false,
                         ordering: true,
@@ -434,42 +425,6 @@
                                         if (getAAM().isUI('main')) {
                                             $(container).append($('<i/>', {
                                                 'class': 'aam-row-action icon-trash-empty text-muted'
-                                            }));
-                                        }
-                                        break;
-
-                                    case 'attach':
-                                        if (getAAM().isUI('principal')) {
-                                            $(container).append($('<i/>', {
-                                                'class': 'aam-row-action icon-check-empty'
-                                            }).bind('click', function () {
-                                                getAAM().applyPolicy(
-                                                    {
-                                                        type: 'role',
-                                                        id: data[0]
-                                                    },
-                                                    $('#aam-policy-id').val(),
-                                                    ($(this).hasClass('icon-check-empty') ? 1 : 0),
-                                                    this
-                                                );
-                                            }));
-                                        }
-                                        break;
-
-                                    case 'detach':
-                                        if (getAAM().isUI('principal')) {
-                                            $(container).append($('<i/>', {
-                                                'class': 'aam-row-action icon-check text-success'
-                                            }).bind('click', function () {
-                                                getAAM().applyPolicy(
-                                                    {
-                                                        type: 'role',
-                                                        id: data[0]
-                                                    },
-                                                    $('#aam-policy-id').val(),
-                                                    ($(this).hasClass('icon-check') ? 0 : 1),
-                                                    this
-                                                );
                                             }));
                                         }
                                         break;
@@ -1130,66 +1085,6 @@
                                     }
                                     break;
 
-                                // case 'protect':
-                                //     if (getAAM().isUI('main')) {
-                                //         $(container).append($('<i/>', {
-                                //             'class': 'aam-row-action icon-asterisk text-muted'
-                                //         }).bind('click', function () {
-                                //             protectUser(data[0], $(this));
-                                //         }).attr({
-                                //             'data-toggle': "tooltip",
-                                //             'title': getAAM().__('Protect user')
-                                //         }));
-                                //     }
-                                //     break;
-
-                                // case 'no-protect':
-                                //     if (getAAM().isUI('main')) {
-                                //         $(container).append($('<i/>', {
-                                //             'class': 'aam-row-action icon-asterisk text-success'
-                                //         }).attr({
-                                //             'data-toggle': "tooltip",
-                                //             'title': getAAM().__('Release user protection')
-                                //         }));
-                                //     }
-                                //     break;
-
-                                case 'attach':
-                                    if (getAAM().isUI('principal')) {
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-check-empty'
-                                        }).bind('click', function () {
-                                            getAAM().applyPolicy(
-                                                {
-                                                    type: 'user',
-                                                    id: data[0]
-                                                },
-                                                $('#aam-policy-id').val(),
-                                                1,
-                                                this
-                                            );
-                                        }));
-                                    }
-                                    break;
-
-                                case 'detach':
-                                    if (getAAM().isUI('principal')) {
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-check text-success'
-                                        }).bind('click', function () {
-                                            getAAM().applyPolicy(
-                                                {
-                                                    type: 'user',
-                                                    id: data[0]
-                                                },
-                                                $('#aam-policy-id').val(),
-                                                0,
-                                                this
-                                            );
-                                        }));
-                                    }
-                                    break;
-
                                 default:
                                     break;
                             }
@@ -1392,42 +1287,6 @@
                         });
                     }
                 });
-
-                $('#attach-policy-visitor').bind('click', function () {
-                    var has = parseInt($(this).attr('data-has')) ? true : false;
-                    var effect = (has ? 0 : 1);
-                    var btn = $(this);
-
-                    btn.text(getAAM().__('Processing...'));
-
-                    getAAM().applyPolicy(
-                        {
-                            type: 'visitor'
-                        },
-                        $('#aam-policy-id').val(),
-                        effect,
-                        function (response) {
-                            if (response.status === 'success') {
-                                if (effect) {
-                                    btn.text(getAAM().__('Detach Policy From Visitors'));
-                                } else {
-                                    btn.text(getAAM().__('Attach Policy To Visitors'));
-                                }
-                                btn.attr('data-has', effect);
-                            } else {
-                                getAAM().notification(
-                                    'danger',
-                                    getAAM().__('Failed to apply policy changes')
-                                );
-                                if (effect) {
-                                    btn.text(getAAM().__('Attach Policy To Visitors'));
-                                } else {
-                                    btn.text(getAAM().__('Detach Policy From Visitors'));
-                                }
-                            }
-                        }
-                    );
-                });
             });
 
         })(jQuery);
@@ -1467,42 +1326,6 @@
                         });
                     }
                 });
-
-                $('#attach-policy-default').bind('click', function () {
-                    var has = parseInt($(this).attr('data-has')) ? true : false;
-                    var effect = (has ? 0 : 1);
-                    var btn = $(this);
-
-                    btn.text(getAAM().__('Processing...'));
-
-                    getAAM().applyPolicy(
-                        {
-                            type: 'default'
-                        },
-                        $('#aam-policy-id').val(),
-                        effect,
-                        function (response) {
-                            if (response.status === 'success') {
-                                if (effect) {
-                                    btn.text(getAAM().__('Detach Policy From Everybody'));
-                                } else {
-                                    btn.text(getAAM().__('Attach Policy To Everybody'));
-                                }
-                                btn.attr('data-has', effect);
-                            } else {
-                                getAAM().notification(
-                                    'danger',
-                                    getAAM().__('Failed to apply policy changes')
-                                );
-                                if (effect) {
-                                    btn.text(getAAM().__('Attach Policy To Everybody'));
-                                } else {
-                                    btn.text(getAAM().__('Detach Policy From Everybody'));
-                                }
-                            }
-                        }
-                    );
-                });
             });
 
         })(jQuery);
@@ -1518,16 +1341,93 @@
 
             /**
              *
-             * @param {type} subject
              * @param {type} id
              * @param {type} effect
              * @param {type} btn
+             *
              * @returns {undefined}
              */
-            function save(subject, id, effect, btn) {
-                $('#aam-policy-overwrite').show();
+            function TogglePolicy(id, effect, btn) {
+                getAAM().queueRequest(function () {
+                    const payload = {
+                        effect
+                    };
 
-                getAAM().applyPolicy(subject, id, effect, btn);
+                    // Show indicator
+                    $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
+
+                    const endpoint = getAAM().prepareApiEndpoint(
+                        '/service/policy/' + id
+                    );
+
+                    $.ajax(endpoint, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'PUT'
+                        },
+                        dataType: 'json',
+                        data: payload,
+                        success: function () {
+                            $('#aam-policy-overwrite').show();
+
+                            if (effect === 'attach') {
+                                $(btn).attr(
+                                    'class',
+                                    'aam-row-action icon-check'
+                                );
+                            } else {
+                                $(btn).attr(
+                                    'class',
+                                    'aam-row-action icon-check-empty'
+                                );
+                            }
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: '/service/policy/' + id,
+                                payload,
+                                response
+                            });
+                        }
+                    });
+                });
+            }
+
+            /**
+             *
+             * @param {*} al_type
+             * @param {*} al_id
+             * @param {*} policy_id
+             * @param {*} effect
+             * @param {*} cb
+             */
+            function ToggleAccessLevelPolicy(al_type, al_id, policy_id, effect, cb) {
+                getAAM().queueRequest(function () {
+                    const payload = {
+                        effect
+                    };
+
+                    const endpoint = getAAM().prepareApiEndpoint(
+                        '/service/policy/' + policy_id, true, {
+                            type: al_type,
+                            id: al_id
+                        }
+                    );
+
+                    $.ajax(endpoint, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'PUT'
+                        },
+                        dataType: 'json',
+                        data: payload,
+                        success: function () {
+                            cb();
+                        }
+                    });
+                });
             }
 
             /**
@@ -1535,18 +1435,19 @@
              *
              * @param {Int}  id
              */
-            function deletePolicy(id, btn) {
+            function DeletePolicy(id, btn) {
+                const endpoint = getAAM().prepareApiEndpoint(
+                    '/service/policy/' + id
+                );
+
                 getAAM().queueRequest(function () {
-                    $.ajax(`${getLocal().rest_base}wp/v2/aam_policy/${id}`, {
+                    $.ajax(endpoint, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
                             'X-HTTP-Method-Override': 'DELETE'
                         },
                         dataType: 'json',
-                        data: {
-                            force: true
-                        },
                         beforeSend: function () {
                             $(btn).attr('data-original', $(btn).text());
                             $(btn).text(getAAM().__('Deleting...')).attr(
@@ -1554,7 +1455,7 @@
                             );
                         },
                         success: function () {
-                            $('#policy-list').DataTable().ajax.reload();
+                            $('#policy_list').DataTable().ajax.reload();
                         },
                         error: function () {
                             getAAM().notification('danger');
@@ -1572,35 +1473,6 @@
 
             /**
              *
-             */
-            function generatePolicy(cb, create) {
-                $.ajax(getLocal().ajaxurl, {
-                    type: 'POST',
-                    dataType: 'json',
-                    headers: {
-                        "Accept": "application/json"
-                    },
-                    data: {
-                        action: 'aam',
-                        sub_action: 'Main_Policy.generate',
-                        _ajax_nonce: getLocal().nonce,
-                        createNewPolicy: create,
-                        subject: getAAM().getSubject().type,
-                        subjectId: getAAM().getSubject().id
-                    },
-                    beforeSend: function () {
-                    },
-                    success: function (response) {
-                        cb(response);
-                    },
-                    complete: function() {
-                        $('i', '#policy-generator').attr('class', 'icon-file-code')
-                    }
-                });
-            }
-
-            /**
-             *
              * @returns {undefined}
              */
             function initialize() {
@@ -1608,15 +1480,46 @@
 
                 if ($(container).length) {
                     //reset button
-                    $('#policy-reset').bind('click', function () {
-                        getAAM().reset('Main_Policy.reset', $(this));
+                    $('#policy_reset').bind('click', function () {
+                        const btn      = this;
+                        const endpoint = getAAM().prepareApiEndpoint(
+                            '/service/policies'
+                        );
+
+                        getAAM().queueRequest(function () {
+                            $.ajax(endpoint, {
+                                type: 'POST',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce,
+                                    'X-HTTP-Method-Override': 'DELETE'
+                                },
+                                dataType: 'json',
+                                beforeSend: function () {
+                                    $(btn).text(getAAM().__('Resetting...')).attr(
+                                        'disabled', true
+                                    );
+                                },
+                                success: function () {
+                                    $('#policy_list').DataTable().ajax.reload();
+                                },
+                                error: function () {
+                                    getAAM().notification('danger');
+                                },
+                                complete: function () {
+                                    $('#aam-policy-overwrite').hide();
+                                    $(btn).text(getAAM().__('Reset To Default')).attr(
+                                        'disabled', false
+                                    );
+                                }
+                            });
+                        });
                     });
 
                     $('#delete-policy-btn').bind('click', function() {
-                        deletePolicy($(this).attr('data-id'));
+                        DeletePolicy($(this).attr('data-id'));
                     });
 
-                    $('#policy-list').DataTable({
+                    $('#policy_list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         dom: 'ftrip',
@@ -1625,16 +1528,27 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: getLocal().ajaxurl,
-                            type: 'POST',
+                            url: getAAM().prepareApiEndpoint('/service/policies?fields=excerpt,permissions'),
+                            type: 'GET',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
                             dataType: 'json',
-                            data: {
-                                action: 'aam',
-                                sub_action: 'Main_Policy.getTable',
-                                _ajax_nonce: getLocal().nonce,
-                                subject: getAAM().getSubject().type,
-                                subjectId: getAAM().getSubject().id
-                            }
+                            dataSrc: function (json) {
+                                // Transform the received data into DT format
+                                const data = [];
+
+                                $.each(json, (_, policy) => {
+                                    data.push([
+                                        policy.id,
+                                        policy.title,
+                                        policy.permissions,
+                                        policy
+                                    ])
+                                });
+
+                                return data;
+                            },
                         },
                         language: {
                             search: '_INPUT_',
@@ -1643,271 +1557,344 @@
                             infoFiltered: ''
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 3, 4] }
+                            { visible: false, targets: [ 0, 3 ] }
                         ],
                         initComplete: function () {
-                            if (getLocal().caps.manage_policies) {
-                                var create = $('<a/>', {
-                                    'href': '#',
-                                    'class': 'btn btn-sm btn-primary'
-                                }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
-                                    .bind('click', function () {
-                                        window.open(getLocal().url.addPolicy, '_blank');
-                                    });
+                            const create = $('<a/>', {
+                                'href': '#',
+                                'class': 'btn btn-sm btn-primary'
+                            }).html('<i class="icon-plus"></i> ' + getAAM().__('Create'))
+                                .bind('click', function () {
+                                    window.open(getLocal().url.addPolicy, '_blank');
+                                });
 
-                                // var install = $('<a/>', {
-                                //     'href': '#modal-install-policy',
-                                //     'class': 'btn btn-sm btn-success aam-outer-left-xxs',
-                                //     'data-toggle': 'modal'
-                                // }).html('<i class="icon-download-cloud"></i> ' + getAAM().__('Install'));
-
-                                // $('.dataTables_filter', '#policy-list_wrapper').append(install);
-                                $('.dataTables_filter', '#policy-list_wrapper').append(create);
-                            }
+                            $('.dataTables_filter', '#policy_list_wrapper').append(create);
                         },
                         createdRow: function (row, data) {
-                            var actions = data[2].split(',');
+                            const container = $('<div/>', { 'class': 'aam-row-actions' });
+                            const checked   = (data[3].is_attached ? 'icon-check' : 'icon-check-empty');
 
-                            var container = $('<div/>', { 'class': 'aam-row-actions' });
-                            $.each(actions, function (i, action) {
-                                switch (action) {
-                                    case 'attach':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-check-empty'
-                                        }).bind('click', function () {
-                                            save({
-                                                type: getAAM().getSubject().type,
-                                                id: getAAM().getSubject().id
-                                            }, data[0], ($(this).hasClass('icon-check-empty') ? 1 : 0), this);
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Apply Policy')
-                                        }));
-                                        break;
+                            if (data[2].includes('toggle_policy')) {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action ' + checked
+                                }).bind('click', function () {
+                                    TogglePolicy(
+                                        data[0],
+                                        ($(this).hasClass('icon-check-empty') ? 'attach' : 'detach'),
+                                        this
+                                    );
+                                }).attr({
+                                    'data-toggle': "tooltip",
+                                    'title': getAAM().__('Toggle Policy')
+                                }));
+                            } else {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action text-muted ' + checked
+                                }));
+                            }
 
-                                    case 'no-attach':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-check-empty'
-                                        }));
-                                        break;
+                            if (data[2].includes('edit_policy')) {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action icon-pencil text-warning'
+                                }).bind('click', function () {
+                                    window.open(
+                                        getLocal().url.editPost + `?post=${data[0]}&action=edit`,
+                                        '_blank'
+                                    );
+                                }).attr({
+                                    'data-toggle': "tooltip",
+                                    'title': getAAM().__('Edit Policy')
+                                }));
+                            } else {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action text-muted icon-pencil'
+                                }));
+                            }
 
-                                    case 'detach':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-success icon-check'
-                                        }).bind('click', function () {
-                                            save({
-                                                type: getAAM().getSubject().type,
-                                                id: getAAM().getSubject().id
-                                            }, data[0], ($(this).hasClass('icon-check') ? 0 : 1), this);
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Revoke Policy')
-                                        }));
-                                        break;
+                            if (data[2].includes('delete_policy')) {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action icon-trash-empty text-danger'
+                                }).bind('click', function () {
+                                    let message = $(
+                                        '.aam-confirm-message', '#delete-policy-modal'
+                                    ).data('message');
 
-                                    case 'no-detach':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-check'
-                                        }));
-                                        break;
+                                    // replace some dynamic parts
+                                    message = message.replace(
+                                        '%s', '<b>' + data[3].title + '</b>'
+                                    );
+                                    $('.aam-confirm-message', '#delete-policy-modal').html(message);
 
-                                    case 'edit':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-pencil text-warning'
-                                        }).bind('click', function () {
-                                            window.open(data[3], '_blank');
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Edit Policy')
-                                        }));
-                                        break;
-
-                                    case 'no-edit':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-pencil'
-                                        }));
-                                        break;
-
-                                    case 'delete':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action icon-trash-empty text-danger'
-                                        }).bind('click', function () {
-                                            var message = $('.aam-confirm-message', '#delete-policy-modal').data('message');
-
-                                            // replace some dynamic parts
-                                            message = message.replace('%s', '<b>' + data[4] + '</b>');
-                                            $('.aam-confirm-message', '#delete-policy-modal').html(message);
-
-                                            $('#delete-policy-btn').attr('data-id', data[0]);
-                                            $('#delete-policy-modal').modal('show');
-                                        }).attr({
-                                            'data-toggle': "tooltip",
-                                            'title': getAAM().__('Delete Policy')
-                                        }));
-                                        break;
-
-                                    case 'no-delete':
-                                        $(container).append($('<i/>', {
-                                            'class': 'aam-row-action text-muted icon-trash-empty'
-                                        }));
-                                        break;
-
-                                    default:
-                                        break;
-                                }
-                            });
+                                    $('#delete-policy-btn').attr('data-id', data[0]);
+                                    $('#delete-policy-modal').modal('show');
+                                }).attr({
+                                    'data-toggle': "tooltip",
+                                    'title': getAAM().__('Delete Policy')
+                                }));
+                            } else {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action text-muted icon-trash-empty'
+                                }));
+                            }
                             $('td:eq(1)', row).html(container);
 
-                            $('td:eq(0)', row).html(data[1]);
+                            $('td:eq(0)', row).html(
+                                data[3].title + '<br/><small>' + data[3].excerpt + '</small>'
+                            );
                         }
-                    });
-
-                    var policy = null;
-
-                    function reset() {
-                        $('#policy-details').addClass('aam-ghost');
-                        $('#install-policy').prop('disabled', true).text(getAAM().__('Install'));
-                        $('#policy-title,#policy-description,#policy-subjects').empty();
-                        policy = null;
-                    }
-
-                    function buildSubject(subject, effect) {
-                        var response;
-
-                        const badge = effect ? '<span class="badge danger">apply</span>' : '<span class="badge success">exclude</span>';
-
-                        if (subject === 'default') {
-                            response = getAAM().__('Everybody') + ' ' + badge;
-                        } else if (subject === 'visitor') {
-                            response = getAAM().__('Visitors') + ' ' + badge;
-                        } else if (subject.search('role') === 0) {
-                            response = getAAM().__('Role') + ' ' + subject.substr(5) + ' ' + badge;
-                        } else if (subject.search('user') === 0) {
-                            const uid = subject.substr(5);
-
-                            if (uid === 'current') {
-                                response = getAAM().__('Current User') + ' ' + badge;
-                            } else {
-                                response = getAAM().__('User ID') + ' ' + subject.substr(5) + ' ' + badge;
-                            }
-                        }
-
-                        return response;
-                    }
-
-                    $('#policy-id').bind('change', function() {
-                        const id = $.trim($(this).val());
-
-                        // Reset modal
-                        reset();
-
-                        if (id) {
-                            $.ajax(`${getLocal().system.apiEndpoint}/policy/${id}`, {
-                                type: 'GET',
-                                dataType: 'json',
-                                headers: {
-                                    "Accept": "application/json"
-                                },
-                                success: function (response) {
-                                    $('#policy-title').text(response.metadata.title);
-                                    $('#policy-description').text(response.metadata.description);
-                                    $('#policy-details').removeClass('aam-ghost');
-                                    $('#install-policy').prop('disabled', false);
-
-                                    var assignees = [];
-
-                                    // Build the list if assignees
-                                    $.each(response.metadata.assignee, function(i, val) {
-                                        assignees.push(buildSubject(val, true));
-                                    });
-
-                                    $.each(response.metadata.override, function(i, val) {
-                                        assignees.push(buildSubject(val, false));
-                                    });
-
-                                    if (assignees.length) {
-                                        $('#policy-subjects').html(assignees.join(';&nbsp;'));
-                                    } else {
-                                        $('#policy-subjects').html(getAAM().__('Policy is not assigned to anybody'));
-                                    }
-
-                                    policy = response;
-                                },
-                                error: function (response) {
-                                    getAAM().notification('danger', response.responseJSON.reason);
-                                }
-                            });
-                        }
-                    });
-
-                    $('#install-policy').bind('click', function() {
-                        $(this).prop('disabled', true).text(getAAM().__('Installing...'));
-
-                        getAAM().queueRequest(function () {
-                            $.ajax(getLocal().ajaxurl, {
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    action: 'aam',
-                                    sub_action: 'Main_Policy.install',
-                                    _ajax_nonce: getLocal().nonce,
-                                    metadata: JSON.stringify(policy.metadata),
-                                    'aam-policy': JSON.stringify(policy.policy)
-                                },
-                                success: function (response) {
-                                    if (response.status === 'success') {
-                                        getAAM().notification(
-                                            'success',
-                                            getAAM().__('Access Policy was installed successfully')
-                                        );
-                                        $('#policy-list').DataTable().ajax.reload();
-                                        $('#modal-install-policy').modal('hide');
-                                        window.open(response.redirect, '_blank');
-                                    } else {
-                                        getAAM().notification('danger', response.errors);
-                                    }
-                                },
-                                error: function () {
-                                    getAAM().notification('danger');
-                                }
-                            });
-                        });
-                    });
-
-                    $('#modal-install-policy').on('show.bs.modal', function() {
-                        $('#policy-id').val('').focus();
-                        reset();
                     });
                 }
+
+                // Policy Assignee metabox
+                if ($('#policy_principle_selector').length) {
+                    // Query params to the request
+                    const policy_id = parseInt($('#aam-policy-id').val(), 10);
+
+                    const fields = [
+                        'permissions'
+                    ];
+
+                    // Prepare the RESTful API endpoint
+                    let url = `${getLocal().rest_base}aam/v2/service/roles`;
+
+                    if (url.indexOf('rest_route') === -1) {
+                        url += `?fields=${fields.join(',')}`;
+                    } else {
+                        url += `&fields=${fields.join(',')}`;
+                    }
+
+                    url += `&context=policy_assignee&policy_id=${policy_id}`;
+
+                    $('#policy_principle_role_list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        dom: 'ftrip',
+                        pagingType: 'simple',
+                        processing: true,
+                        stateSave: true,
+                        serverSide: false,
+                        ajax: {
+                            url,
+                            type: 'GET',
+                            headers: {
+                                'X-WP-Nonce': getLocal().rest_nonce
+                            },
+                            dataType: 'json',
+                            dataSrc: function (json) {
+                                // Transform the received data into DT format
+                                const data = [];
+
+                                $.each(json, (_, role) => {
+                                    data.push([
+                                        role.slug,
+                                        role.name,
+                                        role.permissions,
+                                        role
+                                    ])
+                                });
+
+                                return data;
+                            },
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 3] },
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search role'),
+                            info: getAAM().__('_TOTAL_ role(s)'),
+                            infoFiltered: ''
+                        },
+                        createdRow: function (row, data) {
+                            $('td:eq(0)', row).html('<span>' + data[1] + '</span>');
+
+                            // Add subtitle
+                            $('td:eq(0)', row).append(
+                                $('<i/>', { 'class': 'aam-row-subtitle' }).html(
+                                    getAAM().applyFilters(
+                                        'role-subtitle',
+                                        'ID: <b>' + data[0] + '</b>',
+                                        data
+                                    )
+                                )
+                            );
+
+                            const checked   = data[3].is_attached ? 'icon-check' : 'icon-check-empty';
+                            const container = $(
+                                '<div/>', { 'class': 'aam-row-actions' }
+                            );
+
+                            if (data[2].includes('toggle_role_policy')) {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action ' + checked
+                                }).bind('click', function () {
+                                    const btn    = $(this);
+                                    const effect = btn.hasClass('icon-check-empty') ? 'attach' : 'detach';
+                                    btn.attr('class', 'aam-row-action icon-spin4 animate-spin');
+
+                                    ToggleAccessLevelPolicy(
+                                        'role',
+                                        data[0],
+                                        policy_id,
+                                        effect,
+                                        () => {
+                                            if (effect === 'attach') {
+                                                btn.attr(
+                                                    'class',
+                                                    'aam-row-action icon-check'
+                                                );
+                                            } else {
+                                                btn.attr(
+                                                    'class',
+                                                    'aam-row-action icon-check-empty'
+                                                );
+                                            }
+                                        }
+                                    );
+                                }));
+                            } else {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action text-muted ' + checked
+                                }));
+                            }
+
+                            $('td:eq(1)', row).html(container);
+                        }
+                    });
+
+                    $('#policy_principle_user_list').DataTable({
+                        autoWidth: false,
+                        ordering: false,
+                        dom: 'ftrip',
+                        stateSave: true,
+                        pagingType: 'simple',
+                        serverSide: true,
+                        processing: true,
+                        ajax: function(filters, cb) {
+                            const fields = [
+                                'display_name',
+                                'permissions'
+                            ];
+
+                            $.ajax({
+                                url: `${getLocal().rest_base}aam/v2/service/users`,
+                                type: 'GET',
+                                headers: {
+                                    'X-WP-Nonce': getLocal().rest_nonce
+                                },
+                                data: {
+                                    search: filters.search.value,
+                                    per_page: filters.length,
+                                    offset: filters.start,
+                                    fields: fields.join(','),
+                                    context: 'policy_assignee',
+                                    policy_id
+                                },
+                                success: function (response) {
+                                    const result = {
+                                        data: [],
+                                        recordsTotal: 0,
+                                        recordsFiltered: 0
+                                    };
+
+                                    $.each(response.list, (_, user) => {
+                                        result.data.push([
+                                            user.id,
+                                            user.display_name,
+                                            user.permissions,
+                                            user
+                                        ]);
+                                    });
+
+                                    result.recordsTotal    = response.summary.total_count;
+                                    result.recordsFiltered = response.summary.filtered_count;
+
+                                    cb(result);
+                                }
+                            });
+                        },
+                        columnDefs: [
+                            { visible: false, targets: [0, 3] }
+                        ],
+                        language: {
+                            search: '_INPUT_',
+                            searchPlaceholder: getAAM().__('Search user'),
+                            info: getAAM().__('_TOTAL_ user(s)'),
+                            infoFiltered: ''
+                        },
+                        createdRow: function (row, data) {
+                            $('td:eq(0)', row).append(
+                                $('<i/>', { 'class': 'aam-row-subtitle' }).html(
+                                    `${getAAM().__('ID')}: <b>${data[0]}</b>`
+                                )
+                            );
+
+                            const checked   = data[3].is_attached ? 'icon-check' : 'icon-check-empty';
+                            const container = $(
+                                '<div/>', { 'class': 'aam-row-actions' }
+                            );
+
+                            if (data[2].includes('toggle_user_policy')) {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action ' + checked
+                                }).bind('click', function () {
+                                    const btn    = $(this);
+                                    const effect = btn.hasClass('icon-check-empty') ? 'attach' : 'detach';
+
+                                    btn.attr('class', 'aam-row-action icon-spin4 animate-spin');
+
+                                    ToggleAccessLevelPolicy(
+                                        'user',
+                                        data[0],
+                                        policy_id,
+                                        effect,
+                                        () => {
+                                            if (effect === 'attach') {
+                                                btn.attr(
+                                                    'class',
+                                                    'aam-row-action icon-check'
+                                                );
+                                            } else {
+                                                btn.attr(
+                                                    'class',
+                                                    'aam-row-action icon-check-empty'
+                                                );
+                                            }
+                                        }
+                                    );
+                                }));
+                            } else {
+                                $(container).append($('<i/>', {
+                                    'class': 'aam-row-action text-muted ' + checked
+                                }));
+                            }
+
+                            $('td:eq(1)', row).html(container);
+                        }
+                    });
+
+                    $('#toggle_visitor_policy').bind('click', function() {
+                        const effect = $(this).data('has') === '1' ? 'detach' : 'attach';
+                        $(this).text(getAAM().__('Processing...')).prop('disabled', true);
+
+                        ToggleAccessLevelPolicy(
+                            'visitor',
+                            null,
+                            policy_id,
+                            effect,
+                            () => {
+                                if (effect === 'attach') {
+                                    $(this).text(getAAM().__('Detach Policy From Visitors')).prop('disabled', false)
+                                } else {
+                                    $(this).text(getAAM().__('Attach Policy To Visitors')).prop('disabled', false)
+                                }
+                            }
+                        );
+
+                    });
+                }
+
             }
-
-            $('#policy-generator').tooltip({
-                container: 'body'
-            });
-
-            // Generate Policy action
-            $('#generate-access-policy').bind('click', function() {
-                const btn = $('i', '#policy-generator');
-
-                btn.attr('class', 'icon-spin4 animate-spin');
-                generatePolicy(function(response) {
-                    getAAM().downloadFile(
-                        response.policy,
-                        response.title + '.json',
-                        'application/json'
-                    )
-                }, false)
-            });
-
-            // Create new Policy action
-            $('#create-access-policy').bind('click', function() {
-                const btn = $('i', '#policy-generator');
-
-                btn.attr('class', 'icon-spin4 animate-spin');
-                generatePolicy(function(response) {
-                    window.open(response.redirect, '_blank');
-                }, true)
-            });
 
             getAAM().addHook('init', initialize);
 
@@ -2634,7 +2621,7 @@
             function toggle(capability, btn) {
                 var granted = $(btn).hasClass('icon-check-empty');
 
-                //show indicator
+                // Show indicator
                 $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
                 // Prepare request payload
@@ -6482,14 +6469,12 @@
              * @param {type} value
              * @returns {undefined}
              */
-            function save(param, value) {
+            function Save(param, value) {
                 getAAM().queueRequest(function () {
-                    const payload = {
-                        key: param,
-                        value
-                    };
+                    const endpoint = `${getLocal().rest_base}aam/v2/service/config/${param}`;
+                    const payload  = { value };
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/configs`, {
+                    $.ajax(endpoint, {
                         type: 'POST',
                         dataType: 'json',
                         data: payload,
@@ -6498,7 +6483,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', null, {
-                                request: 'aam/v2/service/configs',
+                                request: endpoint,
                                 payload,
                                 response
                             });
@@ -6547,7 +6532,7 @@
 
                             $('[data-toggle="toggle"]', row).bootstrapToggle();
                             $('input[type="checkbox"]', row).bind('change', function () {
-                                save(
+                                Save(
                                     $(this).attr('name'),
                                     $(this).prop('checked')
                                 );
@@ -6564,7 +6549,7 @@
                             value = $(this).data('value-off') || false;
                         }
 
-                        save($(this).attr('name'), value);
+                        Save($(this).attr('name'), value);
                     });
 
                     $('#clear-settings').bind('click', function () {
@@ -6866,58 +6851,6 @@
             this.queue.requests.shift().call(this);
         }
     };
-
-    /**
-     *
-     */
-    AAM.prototype.applyPolicy = function (subject, policyId, effect, btn) {
-        //show indicator
-        if (typeof btn !== 'function') {
-            $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
-        }
-
-        getAAM().queueRequest(function () {
-            $.ajax(getLocal().ajaxurl, {
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    action: 'aam',
-                    sub_action: 'Main_Policy.save',
-                    subject: subject.type,
-                    subjectId: subject.id,
-                    _ajax_nonce: getLocal().nonce,
-                    id: policyId,
-                    effect: effect
-                },
-                success: function (response) {
-                    if (typeof btn === 'function') {
-                        btn(response);
-                    } else {
-                        if (response.status === 'success') {
-                            if (effect) {
-                                $(btn).attr('class', 'aam-row-action text-success icon-check');
-                            } else {
-                                $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
-                            }
-                        } else {
-                            if (effect) {
-                                getAAM().notification(
-                                    'danger',
-                                    getAAM().__('Failed to apply policy changes')
-                                );
-                                $(btn).attr('class', 'aam-row-action text-muted icon-check-empty');
-                            } else {
-                                $(btn).attr('class', 'aam-row-action text-success icon-check');
-                            }
-                        }
-                    }
-                },
-                error: function () {
-                    getAAM().notification('danger');
-                }
-            });
-        });
-    }
 
     /**
      *
@@ -7503,21 +7436,26 @@
 
     /**
      *
-     * @param {*} url
-     * @param {*} include_access_level
-     * @returns
+     * @param {String}  url
+     * @param {Boolean} include_access_level
+     * @param {Object}  override
+     *
+     * @returns {String}
      */
-    AAM.prototype.prepareApiEndpoint = function (url, include_access_level = true) {
+    AAM.prototype.prepareApiEndpoint = function (
+        url, include_access_level = true, override = null
+    ) {
         let response = `${getLocal().rest_base}aam/v2${url}`;
 
         if (include_access_level) {
-            const type   = getAAM().getSubject().type;
+            const al     = override || getAAM().getSubject();
+            const type   = al.type;
             const params = [`access_level=${type}`];
 
             if (type === 'role') {
-                params.push(`role_id=${getAAM().getSubject().id}`);
+                params.push(`role_id=${al.id}`);
             } else if (type === 'user') {
-                params.push(`user_id=${getAAM().getSubject().id}`);
+                params.push(`user_id=${al.id}`);
             }
 
             if (response.includes('?')) {

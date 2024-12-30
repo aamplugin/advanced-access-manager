@@ -166,7 +166,7 @@ class AAM_Service_AccessPolicy
 
             if (empty($content)) {
                 if (empty($data['post_content'])) {
-                    $content = AAM_Backend_Feature_Main_Policy::getDefaultPolicy();
+                    $content = AAM_Service_Policies::bootstrap()->get_boilerplate_policy();
                 } else {
                     $content = $data['post_content'];
                 }

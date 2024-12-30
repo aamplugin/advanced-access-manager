@@ -440,15 +440,17 @@ class AAM_Restful_RoleService
             }
         }
 
-        return $response;
+        return apply_filters(
+            'aam_rest_role_output_filter', $response, $role, $fields
+        );
     }
 
     /**
      * Get list of actions user can perform upon role
      *
      * @param AAM_Framework_AccessLevel_Role $role
-     *
      * @return array
+     *
      * @version 7.0.0
      */
     private function _get_role_permissions($role)
@@ -472,7 +474,7 @@ class AAM_Restful_RoleService
             $permissions[] = 'allow_delete';
         }
 
-        return apply_filters('aam_role_permissions_filter', $permissions, $role);
+        return $permissions;
     }
 
     /**
@@ -481,21 +483,15 @@ class AAM_Restful_RoleService
      * @param WP_REST_Request $request
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _determine_additional_fields(WP_REST_Request $request)
     {
         $fields = $request->get_param('fields');
 
-        if (!empty($fields) && is_string($fields)) {
-            $fields = explode(',', $fields);
-        } else {
-            $fields = array();
-        }
-
-        return $fields;
+        return !empty($fields) ? wp_parse_list($fields) : [];
     }
 
     /**

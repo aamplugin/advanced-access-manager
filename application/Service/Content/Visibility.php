@@ -227,9 +227,7 @@ class AAM_Service_Content_Visibility
             if (array_key_exists('list', $settings)
                 && !isset($visibility[$resource_type][$resource_id])
             ) {
-                $visibility[$resource_type][$resource_id] = array_merge(
-                    $settings['list'], [ '__is_customized' => true ]
-                );
+                $visibility[$resource_type][$resource_id] = $settings['list'];
             }
         }
 

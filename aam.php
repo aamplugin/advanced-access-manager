@@ -49,12 +49,12 @@ class AAM
         'AAM_Service_Jwt',
         'AAM_Service_Capability',
         'AAM_Service_SecurityAudit',
-        'AAM_Service_Welcome'
+        'AAM_Service_Welcome',
+        'AAM_Service_Policies'
+
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
         // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
-
-        // 'AAM_Service_AccessPolicy'         => AAM_Service_AccessPolicy::FEATURE_FLAG,
     ];
 
     /**

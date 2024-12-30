@@ -33,7 +33,7 @@ class AAM_Restful_MetaboxService
             // Get the list of all metaboxes grouped by screen
             $this->_register_route('/metaboxes', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_list'),
+                'callback'            => array($this, 'get_items'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
                     'screen_id' => array(

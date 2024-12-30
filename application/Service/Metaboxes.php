@@ -151,6 +151,11 @@ class AAM_Service_Metaboxes
                                 $box['callback']
                             );
 
+                            // If Closure is used for callback, use the ID instead
+                            if (empty($slug)){
+                                $slug = AAM::api()->misc->sanitize_slug($box['id']);
+                            }
+
                             $cache[$post_type][$box['id']] = [
                                 'title'     => $this->_prepare_metabox_name($box),
                                 'screen_id' => $post_type,
@@ -232,7 +237,7 @@ class AAM_Service_Metaboxes
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
                 foreach ($metaboxes as $id => $metabox) {
-                    if ($service->is_restricted($metabox, $screen_id)) {
+                    if ($service->is_restricted($metabox, $screen_id) === true) {
                         remove_meta_box($id, $screen_id, $zone);
                     }
                 }

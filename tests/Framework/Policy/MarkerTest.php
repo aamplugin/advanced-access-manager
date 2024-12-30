@@ -398,20 +398,20 @@ final class MarkerTest extends TestCase
      */
     public function testParamMarker()
     {
-        $this->assertTrue(AAM::api()->policies()->create([
-            'Param' => [
-                [
-                    'Key'   => 'aamTestPropA',
-                    'Value' => true
-                ],
-                [
-                    'Key'   => 'aamTestPropB',
-                    'Value' => (object) [
-                        'prop' => 'hello'
-                    ]
-                ],
+        $this->assertIsInt(AAM::api()->policies()->create('{
+            "Param": [
+                {
+                    "Key": "aamTestPropA",
+                    "Value": true
+                },
+                {
+                    "Key": "aamTestPropB",
+                    "Value": {
+                        "prop": "hello"
+                    }
+                }
             ]
-        ]));
+        }'));
 
         $this->assertTrue(AAM_Framework_Policy_Marker::get_marker_value(
             '${POLICY_PARAM.aamTestPropA}'

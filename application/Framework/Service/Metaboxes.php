@@ -266,40 +266,8 @@ class AAM_Framework_Service_Metaboxes
     public function is_restricted($metabox, $screen_id = null)
     {
         try {
-            $result = null;
-
-            // Determining metabox slug
-            $slug = $this->_prepare_metabox_slug($metabox);
-
-            // Getting resource
-            $resource = $this->_get_resource();
-
-            // Step #1. Check if there are any settings for metabox and specific
-            // screen ID
-            $screen_id = $this->_prepare_screen_id($screen_id);
-
-            if (!is_null($screen_id)) {
-                $result = $resource->is_restricted($screen_id . '_'. $slug);
-            }
-
-            // Step #2. If there are no scoped access controls defined to a given
-            // metabox, check if there are any settings for it by the slug as-is
-            if (is_null($result)) {
-                $result = $resource->is_restricted($slug);
-            }
-
-            // Allow third-party implementations to integrate with the
-            // decision making process
-            $result = apply_filters(
-                'aam_metabox_is_restricted_filter',
-                $result,
-                $resource,
-                $screen_id,
-                $slug
-            );
-
-            // Prepare the final answer
-            $result = is_bool($result) ? $result : false;
+            $restricted = $this->_is_restricted($metabox, $screen_id);
+            $result     = is_bool($restricted) ? $restricted : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -323,6 +291,52 @@ class AAM_Framework_Service_Metaboxes
         $result = $this->is_restricted($metabox, $screen_id);
 
         return is_bool($result) ? !$result : $result;
+    }
+
+    /**
+     * Check if metabox is restricted
+     *
+     * @param string $metabox
+     * @param string $screen_id
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_restricted($metabox, $screen_id)
+    {
+        $result = null;
+
+        // Determining metabox slug
+        $slug = $this->_prepare_metabox_slug($metabox);
+
+        // Getting resource
+        $resource = $this->_get_resource();
+
+        // Step #1. Check if there are any settings for metabox and specific
+        // screen ID
+        $screen_id = $this->_prepare_screen_id($screen_id);
+
+        if (!is_null($screen_id)) {
+            $result = $resource->is_restricted($screen_id . '_'. $slug);
+        }
+
+        // Step #2. If there are no scoped access controls defined to a given
+        // metabox, check if there are any settings for it by the slug as-is
+        if (is_null($result)) {
+            $result = $resource->is_restricted($slug);
+        }
+
+        // Allow third-party implementations to integrate with the
+        // decision making process
+        return apply_filters(
+            'aam_metabox_is_restricted_filter',
+            $result,
+            $resource,
+            $screen_id,
+            $slug
+        );
     }
 
     /**
@@ -354,6 +368,11 @@ class AAM_Framework_Service_Metaboxes
         // Determining metabox slug
         if (is_array($metabox) && isset($metabox['callback'])) {
             $result = $this->misc->callable_to_slug($metabox['callback']);
+
+            // Taking into consideration Closures
+            if (empty($result)) {
+                $result = $this->misc->sanitize_slug($metabox['id']);
+            }
         } elseif (is_string($metabox)) {
             $result = $this->misc->sanitize_slug($metabox);
         } else {
@@ -437,7 +456,7 @@ class AAM_Framework_Service_Metaboxes
             'slug'          => $metabox['slug'],
             'screen_id'     => $metabox['screen_id'],
             'title'         => base64_decode($metabox['title']),
-            'is_restricted' => $this->is_restricted(
+            'is_restricted' => $this->_is_restricted(
                 $metabox['slug'], $metabox['screen_id']
             )
         ];

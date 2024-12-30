@@ -291,7 +291,7 @@ class AAM_Framework_Service_ApiRoutes
             throw new InvalidArgumentException('Invalid route');
         }
 
-        return trim(strtolower("{$method} $endpoint"));
+        return trim(strtolower("{$method} {$endpoint}"));
     }
 
     /**

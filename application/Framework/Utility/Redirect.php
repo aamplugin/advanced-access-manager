@@ -47,7 +47,7 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
         ], true)) {
             wp_safe_redirect(
                 $this->to_redirect_url($redirect, '/'),
-                $status_code ? $status_code : 302
+                $status_code ? $status_code : 307
             );
         } elseif ($redirect['type'] === 'custom_message') {
             wp_die(
