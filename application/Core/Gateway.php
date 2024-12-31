@@ -437,7 +437,7 @@ final class AAM_Core_Gateway
             // Making sure that two critical aspects of querying can't be overwritten
             [
                 'fields'      => 'ids',
-                'post_parent' => $resource->get_internal_id(),
+                'post_parent' => $resource->ID,
                 'post_type'   => $resource->post_type
             ]
         ));

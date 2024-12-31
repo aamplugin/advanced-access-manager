@@ -157,15 +157,6 @@ class AAM_Service_Content
             }, PHP_INT_MAX);
         }
 
-        // Ability to share visibility settings with other solutions
-        add_filter('aam_get_content_visibility_filter', function($result) {
-            if (empty($result)) {
-                $result = AAM_Service_Content_Visibility::bootstrap()->get_settings();
-            }
-
-            return $result;
-        });
-
         // Control post visibility
         add_filter('posts_clauses_request', function($clauses, $query) {
             return $this->_posts_clauses_request($clauses, $query);
@@ -445,20 +436,82 @@ class AAM_Service_Content
         static $executing = false;
 
         if (!$wp_query->is_singular && !$executing) {
-            $executing  = true;
-            $visibility = AAM_Service_Content_Visibility::bootstrap();
+            $executing = true;
+            $aggregate = AAM::api()->user()->get_resource(
+                AAM_Framework_Type_Resource::AGGREGATE,
+                AAM_Framework_Type_Resource::POST
+            );
 
             $clauses['where'] .= apply_filters(
-                'aam_content_visibility_where_clause_filter',
-                $visibility->prepare_post_query($wp_query),
-                $wp_query,
-                $visibility->get_settings()
+                'aam_posts_where_clause_filter',
+                $this->_prepare_post_query($wp_query, $aggregate),
+                $wp_query
             );
 
             $executing = false;
         }
 
         return $clauses;
+    }
+
+    /**
+     * Modify content query to hide posts
+     *
+     * @param WP_Query                         $wp_query
+     * @param AAM_Framework_Resource_Aggregate $aggregate
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_post_query($wp_query, $aggregate)
+    {
+        global $wpdb;
+
+        if (!empty($wp_query->query['post_type'])) {
+            $post_type = $wp_query->query['post_type'];
+        } elseif (!empty($wp_query->query_vars['post_type'])) {
+            $post_type = $wp_query->query_vars['post_type'];
+        } elseif ($wp_query->is_attachment) {
+            $post_type = 'attachment';
+        } elseif ($wp_query->is_page) {
+            $post_type = 'page';
+        } else {
+            $post_type = 'any';
+        }
+
+        if ($post_type === 'any') {
+            $post_type = array_keys(get_post_types(array(), 'names'));
+        }
+
+        $area       = AAM::api()->misc->get_current_area();
+        $post_types = (array) $post_type;
+        $not_in     = [];
+
+        foreach ($aggregate->get_permissions() as $id => $perms) {
+            // Extracting post attributes
+            list($post_id, $post_type) = explode('|', $id);
+
+            // Extracting post LIST permission
+            $perm = isset($perms['list']) ? $perms['list'] : null;
+
+            if (is_array($perm)
+                && (empty($perm['on']) || in_array($area, $perm['on'], true))
+                && ($perm['effect'] !== 'allow')
+                && in_array($post_type, $post_types, true)
+            ) {
+                $not_in[] = $post_id;
+            }
+        }
+
+        if (!empty($not_in)) {
+            $query = " AND {$wpdb->posts}.ID NOT IN (" . implode(',', $not_in) . ")";
+        } else {
+            $query = '';
+        }
+
+        return $query;
     }
 
     /**

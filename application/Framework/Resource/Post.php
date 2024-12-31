@@ -462,13 +462,32 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     protected function pre_init_hook($resource_identifier)
     {
         if (is_a($resource_identifier, WP_Post::class)) {
-            $this->_core_instance = $resource_identifier;
+            $post = $resource_identifier;
         } elseif (is_numeric($resource_identifier)) {
-            $this->_core_instance = get_post($resource_identifier);
+            $post = get_post($resource_identifier);
+         } elseif (is_array($resource_identifier)
+            && isset($resource_identifier['id'])
+        ) {
+            $post = get_post($resource_identifier['id']);
+
+            // Do some additional validation if id & post_type are provided in the
+            // array
+            if (is_a($post, WP_Post::class)
+                && isset($resource_identifier['post_type'])
+                && $resource_identifier['post_type'] !== $post->post_type
+            ) {
+                throw new OutOfRangeException(
+                    'The resource identifier post_type does not match actual post type'
+                );
+            }
         }
 
-        if (is_a($this->_core_instance, WP_Post::class)) {
-            $this->_internal_id = $this->_core_instance->ID;
+        if (is_a($post, WP_Post::class)) {
+            $this->_core_instance = $post;
+            $this->_internal_id   = [
+                'id'        => $post->ID,
+                'post_type' => $post->post_type
+            ];
         } else {
             throw new OutOfRangeException('The post resource identifier is invalid');
         }
@@ -625,7 +644,11 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
                     $result['read']['redirect'] = $redirect;
                 }
             } elseif ($action === 'list') {
-                // Hm? How to handle the areas?
+                if (array_key_exists('On', $stm)) {
+                    $result['list']['on'] = (array) $stm['On'];
+                } else {
+                    $result['list']['on'] = [ 'frontend', 'backend', 'api' ];
+                }
             }
         } else {
             $result = [];

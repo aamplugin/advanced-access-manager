@@ -97,7 +97,8 @@ final class ApiGatewayTest extends TestCase
 
             $this->assertTrue(is_a($post, \AAM_Framework_Resource_Post::class));
             $this->assertContains(
-                $post->get_internal_id(), [ $post_a, $post_b, $post_c ]
+                $post->get_internal_id(),
+                [ "$post_a|post", "$post_b|post", "$post_c|post" ]
             );
         }
 
@@ -121,7 +122,7 @@ final class ApiGatewayTest extends TestCase
 
             $this->assertTrue(is_a($child, \AAM_Framework_Resource_Post::class));
             $this->assertContains(
-                $child->get_internal_id(), [ $page_b, $page_c ]
+                $child->get_internal_id(), [ "$page_b|page", "$page_c|page" ]
             );
         }
 
@@ -146,7 +147,7 @@ final class ApiGatewayTest extends TestCase
 
             $this->assertTrue(is_a($child, \AAM_Framework_Resource_Post::class));
             $this->assertContains(
-                $child->get_internal_id(), [ $post_d, $post_e ]
+                $child->get_internal_id(), [ "$post_d|post", "$post_e|post" ]
             );
         }
 

@@ -61,7 +61,10 @@ final class ContentTest extends TestCase
 
         $this->assertEquals('AAM_Framework_Resource_Post', get_class($post));
         $this->assertEquals('post', $post->get_core_instance()->post_type);
-        $this->assertEquals($post_id, $post->get_internal_id());
+        $this->assertEquals([
+            'id'        => $post_id,
+            'post_type' => 'post'
+        ], $post->get_internal_id(false));
 
         // Making sure we can get a post by slug
         $post_id = $this->createPost([ 'post_name' => 'get-post-resource' ]);
@@ -69,7 +72,7 @@ final class ContentTest extends TestCase
 
         $this->assertEquals('AAM_Framework_Resource_Post', get_class($post));
         $this->assertEquals('get-post-resource', $post->get_core_instance()->post_name);
-        $this->assertEquals($post_id, $post->get_internal_id());
+        $this->assertEquals("$post_id|post", $post->get_internal_id());
     }
 
     /**

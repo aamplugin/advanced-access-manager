@@ -432,7 +432,7 @@ class AAM_Framework_Service_Content
 
             if (!is_a($post, 'WP_Post')) {
                 throw new OutOfRangeException(
-                    "Cannot get WP_Post instance based on provided post identifier"
+                    'Cannot get post instance based on provided post identifier'
                 );
             }
 
