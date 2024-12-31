@@ -32,25 +32,25 @@ class AAM
      * @version 7.0.0
      */
     const SERVICES = [
-        'AAM_Service_Core',
-        'AAM_Service_Urls',
-        'AAM_Service_LoginRedirect',
-        'AAM_Service_LogoutRedirect',
-        'AAM_Service_AccessDeniedRedirect',
-        'AAM_Service_NotFoundRedirect',
-        'AAM_Service_BackendMenu',
-        'AAM_Service_Metaboxes',
-        'AAM_Service_Widgets',
-        'AAM_Service_AdminToolbar',
-        'AAM_Service_ApiRoute',
-        'AAM_Service_Identity',
-        'AAM_Service_Content',
-        'AAM_Service_SecureLogin',
-        'AAM_Service_Jwt',
-        'AAM_Service_Capability',
-        'AAM_Service_SecurityAudit',
-        'AAM_Service_Welcome',
-        'AAM_Service_Policies'
+        AAM_Service_Core::class                 => '__return_true',
+        AAM_Service_Urls::class                 => 'service.urls.enabled',
+        AAM_Service_LoginRedirect::class        => 'service.login_redirect.enabled',
+        AAM_Service_LogoutRedirect::class       => 'service.logout_redirect.enabled',
+        AAM_Service_AccessDeniedRedirect::class => 'service.access_denied_redirect.enabled',
+        AAM_Service_NotFoundRedirect::class     => 'service.not_found_redirect.enabled',
+        AAM_Service_BackendMenu::class          => 'service.backend_menu.enabled',
+        AAM_Service_Metaboxes::class            => 'service.metaboxes.enabled',
+        AAM_Service_Widgets::class              => 'service.widgets.enabled',
+        AAM_Service_AdminToolbar::class         => 'service.admin_toolbar.enabled',
+        AAM_Service_ApiRoute::class             => 'service.api_route.enabled',
+        AAM_Service_Identity::class             => 'service.identity.enabled',
+        AAM_Service_Content::class              => 'service.content.enabled',
+        AAM_Service_SecureLogin::class          => 'service.secure_login.enabled',
+        AAM_Service_Jwt::class                  => 'service.jwt.enabled',
+        AAM_Service_Capability::class           => 'service.capability.enabled',
+        AAM_Service_SecurityAudit::class        => 'service.security_audit.enabled',
+        AAM_Service_Welcome::class              => 'service.welcome.enabled',
+        AAM_Service_Policies::class             => 'service.policies.enabled'
 
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
@@ -168,15 +168,17 @@ class AAM
      * Bootstrap AAM when all plugins are loaded
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function on_plugins_loaded()
     {
         // Load all the defined AAM services
-        foreach(self::SERVICES as $service_class) {
-            call_user_func("{$service_class}::bootstrap");
+        foreach(self::SERVICES as $service_class => $flag) {
+            if (AAM::api()->config->get($flag, true)) {
+                call_user_func("{$service_class}::bootstrap");
+            }
         }
 
         // Load AAM

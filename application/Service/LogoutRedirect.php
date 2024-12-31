@@ -10,27 +10,12 @@
 /**
  * Logout Redirect service
  *
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
- * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
- * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
- *               explicitly selected
- * @since 6.0.5  Fixed the bug with logout redirect
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.26
+ * @version 7.0.0
  */
 class AAM_Service_LogoutRedirect
 {
     use AAM_Core_Contract_ServiceTrait;
-
-    /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 6.0.0
-     */
-    const FEATURE_FLAG = 'service.logout-redirect.enabled';
 
     /**
      * Contains the redirect instructions for just logged out user
@@ -38,8 +23,8 @@ class AAM_Service_LogoutRedirect
      * This property is used to capture logging out user's redirect
      *
      * @var array
-     *
      * @access protected
+     *
      * @since 7.0.0
      */
     private $_last_user_redirect = null;
@@ -48,65 +33,29 @@ class AAM_Service_LogoutRedirect
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_LogoutRedirect::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Logout Redirect', AAM_KEY),
-                    'description' => __('Manage the logout redirect for any group of users or individual users after they have successfully logged out.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 35);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_LogoutRedirect::register();
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize Logout redirect hooks
      *
      * @return void
-     *
-     * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
-     * @since 6.4.0  https://github.com/aamplugin/advanced-access-manager/issues/76
-     * @since 6.1.0  Fixed bug where white screen occurs if "Default" option is
-     *               explicitly selected
-     * @since 6.0.5  Fixed bug where user was not redirected properly after logout
-     *               because AAM was already hooking into `set_current_user`.
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.26
+     *
+     * @version 7.0.0
      */
     protected function initialize_hooks()
     {

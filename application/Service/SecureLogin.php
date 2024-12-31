@@ -17,15 +17,7 @@ use Vectorface\Whip\Whip;
  */
 class AAM_Service_SecureLogin
 {
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_ServiceTrait;
-
-    /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.secure_login.enabled';
+    use AAM_Core_Contract_ServiceTrait;
 
     /**
      * Default configurations
@@ -33,7 +25,6 @@ class AAM_Service_SecureLogin
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.secure_login.enabled'             => true,
         'service.secure_login.single_session'      => false,
         'service.secure_login.brute_force_lockout' => false,
         'service.secure_login.time_window'         => '+20 minutes',
@@ -45,8 +36,8 @@ class AAM_Service_SecureLogin
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -59,41 +50,22 @@ class AAM_Service_SecureLogin
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Secure Login', AAM_KEY),
-                    'description' => __('Enhance default WordPress authentication process with more secure login mechanism. The service registers frontend AJAX Login widget as well as additional endpoints for the RESTful API authentication.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 1);
-
             // Register additional tab for the Settings
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Settings_Security::register();
-                });
-            }
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Settings_Security::register();
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize core hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -136,8 +108,8 @@ class AAM_Service_SecureLogin
      * @param string $token      User's session token used.
      *
      * @return string
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _auth_cookie($cookie, $user_id, $token)
@@ -162,8 +134,8 @@ class AAM_Service_SecureLogin
      * This method is used to enable brute force protection
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _wp_login_failed()
@@ -198,8 +170,7 @@ class AAM_Service_SecureLogin
      * @param mixed $response
      *
      * @return mixed
-     *
-     * @access public
+     * @access private
      * @see wp_authenticate
      *
      * @version 7.0.0
@@ -230,13 +201,15 @@ class AAM_Service_SecureLogin
      * @param string $message
      *
      * @return string
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _login_message($message)
     {
-        if (empty($message) && ($this->getFromQuery('reason') === 'restricted')) {
+        $reason = AAM::api()->misc->get($_GET, 'reason');
+
+        if (empty($message) && ($reason === 'restricted')) {
             $str = AAM::api()->config->get(
                 'service.secure_login.login_message'
             );
@@ -251,8 +224,8 @@ class AAM_Service_SecureLogin
      * Get login attempts counter key name
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_login_attempt_key()

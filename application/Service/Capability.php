@@ -18,19 +18,11 @@ class AAM_Service_Capability
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the feature
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.capability.enabled';
-
-    /**
      * Default configurations
      *
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.capability.enabled'   => true,
         'service.capability.edit_caps' => true
     ];
 
@@ -38,8 +30,8 @@ class AAM_Service_Capability
      * List of capabilities with their descriptions
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_capabilities = [];
@@ -48,8 +40,8 @@ class AAM_Service_Capability
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -62,41 +54,22 @@ class AAM_Service_Capability
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Capability::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function($services) {
-                $services[] = array(
-                    'title'       => __('Capabilities', AAM_KEY),
-                    'description' => __('Manage list of all the registered with WordPress core capabilities for any role or individual user. The service allows to create new or update and delete existing capabilities. Very powerful set of tools for more advanced user/role access management.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 15);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Capability::register();
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize service hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -203,8 +176,8 @@ class AAM_Service_Capability
      * @param string $slug
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_cap_description($description, $slug)

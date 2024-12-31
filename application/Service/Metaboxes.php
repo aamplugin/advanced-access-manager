@@ -19,79 +19,34 @@ class AAM_Service_Metaboxes
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.metabox.enabled';
-
-    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
         if (is_admin()) {
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Metaboxes', AAM_KEY),
-                    'description' => __('Control the visibility of classic backend metaboxes for any role, user, or visitor. This service exclusively hides unwanted metaboxes from the admin screens.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 30);
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Metabox::register();
+            });
         }
 
-        if (AAM::api()->config->get(self::FEATURE_FLAG)) {
-            if (is_admin()) {
-                // Hook that initialize the AAM UI part of the service
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Metabox::register();
-                });
-            }
+        // Register RESTful API endpoints
+        AAM_Restful_MetaboxService::bootstrap();
 
-            // Register RESTful API endpoints
-            AAM_Restful_MetaboxService::bootstrap();
-
-            $this->initialize_hooks();
-        }
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::METABOX
-                ) {
-                    $resource = new AAM_Framework_Resource_Metabox(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -128,8 +83,8 @@ class AAM_Service_Metaboxes
      * @param string $post_type
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _initialize_metaboxes($post_type)
@@ -181,8 +136,8 @@ class AAM_Service_Metaboxes
      * @param object $item
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_metabox_name($item)
@@ -198,8 +153,8 @@ class AAM_Service_Metaboxes
      * Handle metabox initialization process
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_metaboxes()
@@ -226,8 +181,8 @@ class AAM_Service_Metaboxes
      * @param string $screen_id
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_zones($zones, $screen_id)

@@ -382,23 +382,46 @@ trait AAM_Framework_AccessLevel_BaseTrait
     private function _prepare_permissions(
         $resource, $parent_resource, $siblings = []
     ) {
-        $permissions = $parent_resource->get_permissions();
+        $perms   = $parent_resource->get_permissions();
+        $manager = AAM_Framework_Manager::_();
 
         foreach ($siblings as $sibling) {
-            $sibling_resource = $sibling->get_resource(
+            $sib_perms = $sibling->get_resource(
                 $resource::TYPE, $resource->get_internal_id(false)
-            );
+            )->get_permissions();
 
-            $permissions = AAM_Framework_Manager::_()->misc->merge_permissions(
-                $sibling_resource->get_permissions(),
-                $permissions,
-                $resource::TYPE
-            );
+            // Important part. If resource is aggregate, than assume that there is
+            // an additional level in the array of permissions:
+            // [resource_id] => [
+            //      [permission] => [ ... ]
+            // ]
+            if ($resource::TYPE === AAM_Framework_Type_Resource::AGGREGATE) {
+                // Getting the unique list of resource_ids from each aggregate
+                $resource_ids = array_unique([
+                    ...array_keys($perms),
+                    ...array_keys($sib_perms)
+                ]);
+
+                // Iterating over the list of all keys and merge settings accordingly
+                foreach($resource_ids as $id) {
+                    $perms[$id] = $manager->misc->merge_permissions(
+                        array_key_exists($id, $sib_perms) ? $sib_perms[$id] : [],
+                        array_key_exists($id, $perms) ? $perms[$id] : [],
+                        $resource::TYPE
+                    );
+                }
+            } else {
+                $perms = $manager->misc->merge_permissions(
+                    $sib_perms,
+                    $perms,
+                    $resource::TYPE
+                );
+            }
         }
 
         // Merge permissions while reading hierarchical chain but only
         // replace the top keys. Do not replace recursively
-        return array_replace($permissions, $resource->get_permissions());
+        return array_replace($perms, $resource->get_permissions());
     }
 
 }

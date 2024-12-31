@@ -20,19 +20,11 @@ class AAM_Service_LoginRedirect
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.login_redirect.enabled';
-
-    /**
      * Default configurations
      *
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.login_redirect.enabled'              => true,
         'service.login_redirect.suppress_redirect_to' => false
     ];
 
@@ -40,9 +32,9 @@ class AAM_Service_LoginRedirect
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -54,41 +46,22 @@ class AAM_Service_LoginRedirect
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_LoginRedirect::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Login Redirect', AAM_KEY),
-                    'description' => __('Handle login redirects for any user group or individual user upon successful authentication.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 30);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_LoginRedirect::register();
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize service hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -122,6 +95,7 @@ class AAM_Service_LoginRedirect
      *
      * @access public
      * @see AAM_Service_SecureLogin::authenticate
+     *
      * @version 7.0.0
      */
     public function prepare_login_response($response, $request, $user)
@@ -141,8 +115,8 @@ class AAM_Service_LoginRedirect
      * @param WP_User $user
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_login_redirect($redirect, $requested, $user)
@@ -167,8 +141,8 @@ class AAM_Service_LoginRedirect
      * @param WP_User $user
      *
      * @return string|null
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function get_user_redirect_url($user)

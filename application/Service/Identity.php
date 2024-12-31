@@ -16,96 +16,37 @@
 class AAM_Service_Identity
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_ServiceTrait;
-
-    /**
-     * AAM configuration setting that is associated with the feature
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.identity.enabled';
+    use AAM_Core_Contract_ServiceTrait;
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Identity::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Identity Governance', AAM_KEY),
-                    'description' => __('Control how other users and unauthenticated visitors can view and manage the profiles of registered users on the site.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 20);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Identity::register();
+            });
         }
 
-        if ($enabled) {
-            // Register RESTful API endpoints
-            AAM_Restful_IdentityService::bootstrap();
+        // Register RESTful API endpoints
+        AAM_Restful_IdentityService::bootstrap();
 
-            $this->initialize_hooks();
-        }
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)) {
-                    if ($resource_type === AAM_Framework_Type_Resource::USER) {
-                        $resource = new AAM_Framework_Resource_User(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::ROLE) {
-                        $resource = new AAM_Framework_Resource_Role(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Service_Identity_Visibility::TYPE) {
-                        $resource = new AAM_Service_Identity_Visibility(
-                            $access_level, $resource_id
-                        );
-                    }
-                }
-
-                return $resource;
-            }, 10, 4
-        );
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize service hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -158,8 +99,8 @@ class AAM_Service_Identity
      * @param array $roles
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_editable_roles($roles)
@@ -183,8 +124,8 @@ class AAM_Service_Identity
      * @param array $views
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_views_users($views)
@@ -210,8 +151,8 @@ class AAM_Service_Identity
      * @param object $query
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _pre_get_users($query)
@@ -225,8 +166,8 @@ class AAM_Service_Identity
      * @param array $args
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _rest_user_query($args)
@@ -248,7 +189,7 @@ class AAM_Service_Identity
     {
         // Identify the list of users & roles that are hidden
         $roles = AAM::api()->user()->get_resource(
-            AAM_Service_Identity_Visibility::TYPE,
+            AAM_Framework_Type_Resource::AGGREGATE,
             AAM_Framework_Type_Resource::ROLE
         );
 
@@ -264,7 +205,7 @@ class AAM_Service_Identity
         }
 
         $users = AAM::api()->user()->get_resource(
-            AAM_Service_Identity_Visibility::TYPE,
+            AAM_Framework_Type_Resource::AGGREGATE,
             AAM_Framework_Type_Resource::USER
         );
 
@@ -316,8 +257,8 @@ class AAM_Service_Identity
      * @param array  $args
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_meta_cap($caps, $cap, $args)
@@ -348,8 +289,8 @@ class AAM_Service_Identity
      * @param WP_User $user
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _show_password_fields($result, $user)
@@ -377,8 +318,8 @@ class AAM_Service_Identity
      * @param int     $user
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _allow_password_reset($result, $user_id)
@@ -403,8 +344,8 @@ class AAM_Service_Identity
      * @param string $password2
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _check_passwords($login, &$password, &$password2)
@@ -433,8 +374,8 @@ class AAM_Service_Identity
      * @param WP_REST_Request $request
      *
      * @return object
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _rest_pre_insert_user($data, $request)

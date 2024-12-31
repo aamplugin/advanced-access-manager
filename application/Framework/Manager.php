@@ -117,6 +117,30 @@ final class AAM_Framework_Manager
     ];
 
     /**
+     * Collection of resources
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_resources = [
+        AAM_Framework_Type_Resource::TOOLBAR      => AAM_Framework_Resource_AdminToolbar::class,
+        AAM_Framework_Type_Resource::API_ROUTE    => AAM_Framework_Resource_ApiRoute::class,
+        AAM_Framework_Type_Resource::BACKEND_MENU => AAM_Framework_Resource_BackendMenu::class,
+        AAM_Framework_Type_Resource::POST         => AAM_Framework_Resource_Post::class,
+        AAM_Framework_Type_Resource::POST_TYPE    => AAM_Framework_Resource_PostType::class,
+        AAM_Framework_Type_Resource::TAXONOMY     => AAM_Framework_Resource_Taxonomy::class,
+        AAM_Framework_Type_Resource::TERM         => AAM_Framework_Resource_Term::class,
+        AAM_Framework_Type_Resource::AGGREGATE    => AAM_Framework_Resource_Aggregate::class,
+        AAM_Framework_Type_Resource::USER         => AAM_Framework_Resource_User::class,
+        AAM_Framework_Type_Resource::ROLE         => AAM_Framework_Resource_Role::class,
+        AAM_Framework_Type_Resource::METABOX      => AAM_Framework_Resource_Metabox::class,
+        AAM_Framework_Type_Resource::URL          => AAM_Framework_Resource_Url::class,
+        AAM_Framework_Type_Resource::WIDGET       => AAM_Framework_Resource_Widget::class
+    ];
+
+    /**
      * Construct
      *
      * @return void
@@ -161,6 +185,23 @@ final class AAM_Framework_Manager
                 ]);
             }
         });
+
+        // Load list of resources that framework manages
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($resource, $access_level, $resource_type, $resource_id) {
+                if (is_null($resource)
+                    && array_key_exists($resource_type, $this->_resources)
+                ) {
+                    $resource = new $this->_resources[$resource_type](
+                        $access_level, $resource_id
+                    );
+                }
+
+                return $resource;
+            }, 10, 4
+        );
     }
 
     /**

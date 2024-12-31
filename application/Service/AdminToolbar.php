@@ -27,88 +27,40 @@ class AAM_Service_AdminToolbar
     const CACHE_DB_OPTION = 'aam_toolbar_cache';
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.admin_toolbar.enabled';
-
-    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Admin Toolbar', AAM_KEY),
-                    'description' => __('Manage access to the top admin toolbar items for any role or individual user. The service only removes restricted items but does not actually protect from direct access via link.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 10);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_AdminToolbar::register();
+            });
         }
 
-        if ($enabled) {
-            // Register RESTful API endpoints
-            AAM_Restful_AdminToolbarService::bootstrap();
+        // Register RESTful API endpoints
+        AAM_Restful_AdminToolbarService::bootstrap();
 
-            // Cache admin toolbar
-            if (AAM::isAAM()) {
-                add_action('wp_after_admin_bar_render', function() {
-                    AAM::api()->admin_toolbar()->get_items();
-                });
-
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_AdminToolbar::register();
-                });
-            }
-
-            $this->initialize_hooks();
+        // Cache admin toolbar
+        if (AAM::isAAM()) {
+            add_action('wp_after_admin_bar_render', function() {
+                AAM::api()->admin_toolbar()->get_items();
+            });
         }
 
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::TOOLBAR
-                ) {
-                    $resource = new AAM_Framework_Resource_AdminToolbar(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
+        $this->initialize_hooks();
     }
 
     /**
      * Get cached admin toolbar
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function getToolbarCache()
@@ -120,8 +72,8 @@ class AAM_Service_AdminToolbar
      * Initialize Admin Toolbar hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -135,8 +87,8 @@ class AAM_Service_AdminToolbar
      * Filter admin toolbar
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_admin_toolbar()

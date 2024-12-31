@@ -16,15 +16,7 @@
 class AAM_Service_Content
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_ServiceTrait;
-
-    /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.content.enabled';
+    use AAM_Core_Contract_ServiceTrait;
 
     /**
      * Default configurations
@@ -32,7 +24,6 @@ class AAM_Service_Content
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.content.enabled'               => true,
         'service.content.manage_all_post_types' => false,
         'service.content.manage_all_taxonomies' => false
     ];
@@ -45,8 +36,8 @@ class AAM_Service_Content
      * perform
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_content_capabilities = array(
@@ -57,8 +48,8 @@ class AAM_Service_Content
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -71,117 +62,71 @@ class AAM_Service_Content
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
 
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Content::register();
-                });
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Content::register();
+            });
 
-                // Check if Access Manager metabox feature is enabled
-                $metaboxEnabled = AAM::api()->config->get(
-                    'core.settings.ui.render_access_metabox'
-                );
+            // Check if Access Manager metabox feature is enabled
+            $metaboxEnabled = AAM::api()->config->get(
+                'core.settings.ui.render_access_metabox'
+            );
 
-                if ($metaboxEnabled) {
-                    // Make sure that all already registered taxonomies are hooked
-                    foreach(get_taxonomies() as $taxonomy) {
-                        add_action(
-                            "{$taxonomy}_edit_form_fields",
-                            function($term) {
-                                if (is_a($term, 'WP_Term')
-                                    && current_user_can('aam_manage_content')
-                                ) {
-                                    $view = AAM_Backend_View::get_instance();
-
-                                    echo $view->renderTermMetabox($term);
-                                }
-                            }
-                        );
-                    }
-
-                    // Hook into still up-coming taxonomies down the pipeline
-                    add_action('registered_taxonomy', function($taxonomy) {
-                        add_action(
-                            "{$taxonomy}_edit_form_fields",
-                            function($term) {
-                                if (is_a($term, 'WP_Term')) {
-                                    $view = AAM_Backend_View::get_instance();
-
-                                    echo $view->renderTermMetabox($term);
-                                }
-                            }
-                        );
-                    });
-
-                    // Register custom access control metabox
+            if ($metaboxEnabled) {
+                // Make sure that all already registered taxonomies are hooked
+                foreach(get_taxonomies() as $taxonomy) {
                     add_action(
-                        'add_meta_boxes',
-                        function() {
-                            $this->_register_access_manager_metabox();
+                        "{$taxonomy}_edit_form_fields",
+                        function($term) {
+                            if (is_a($term, 'WP_Term')
+                                && current_user_can('aam_manage_content')
+                            ) {
+                                $view = AAM_Backend_View::get_instance();
+
+                                echo $view->renderTermMetabox($term);
+                            }
                         }
                     );
                 }
-            }
 
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Posts & Terms', AAM_KEY),
-                    'description' => __('Manage access to your website content for any user, role or visitor. This include access to posts, pages, media attachment, custom post types, categories, tags, custom taxonomies and terms.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
+                // Hook into still up-coming taxonomies down the pipeline
+                add_action('registered_taxonomy', function($taxonomy) {
+                    add_action(
+                        "{$taxonomy}_edit_form_fields",
+                        function($term) {
+                            if (is_a($term, 'WP_Term')) {
+                                $view = AAM_Backend_View::get_instance();
 
-                return $services;
-            }, 20);
-        }
+                                echo $view->renderTermMetabox($term);
+                            }
+                        }
+                    );
+                });
 
-        if ($enabled) {
-            // Register RESTful API
-            AAM_Restful_ContentService::bootstrap();
-
-            $this->initialize_hooks();
-        }
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)) {
-                    if ($resource_type === AAM_Framework_Type_Resource::POST) {
-                        $resource = new AAM_Framework_Resource_Post(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::POST_TYPE) {
-                        $resource = new AAM_Framework_Resource_PostType(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::TAXONOMY) {
-                        $resource = new AAM_Framework_Resource_Taxonomy(
-                            $access_level, $resource_id
-                        );
-                    } elseif ($resource_type === AAM_Framework_Type_Resource::TERM) {
-                        $resource = new AAM_Framework_Resource_Term(
-                            $access_level, $resource_id
-                        );
+                // Register custom access control metabox
+                add_action(
+                    'add_meta_boxes',
+                    function() {
+                        $this->_register_access_manager_metabox();
                     }
-                }
+                );
+            }
+        }
 
-                return $resource;
-            }, 10, 4
-        );
+        // Register RESTful API
+        AAM_Restful_ContentService::bootstrap();
+
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize Content service hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -305,6 +250,7 @@ class AAM_Service_Content
      *
      * @global WP_Query $wp_query
      * @global WP_Post  $post
+     *
      * @version 7.0.0
      */
     public function get_current_post()
@@ -353,8 +299,8 @@ class AAM_Service_Content
      * @param WP_Post $post
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _is_password_protected($result, $post)
@@ -378,8 +324,8 @@ class AAM_Service_Content
      * @param AAM_Framework_Resource_Post $post
      *
      * @return boolean|WP_Error
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _verify_post_password(AAM_Framework_Resource_Post $post)
@@ -392,9 +338,9 @@ class AAM_Service_Content
             // protected posts/pages
             $is_matched = AAM_Core_API::prepareHasher()->CheckPassword(
                 $post->get_password(),
-                wp_unslash(
-                    $this->getFromCookie('wp-postpass_' . COOKIEHASH)
-                )
+                wp_unslash(AAM::api()->misc->get(
+                    $_COOKIE, 'wp-postpass_' . COOKIEHASH, ''
+                ))
             );
 
             if ($is_matched === false) {
@@ -415,8 +361,8 @@ class AAM_Service_Content
      * @param int $expire
      *
      * @return int
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _post_password_expires($expire)
@@ -432,8 +378,8 @@ class AAM_Service_Content
      * Register Access Manager metabox on post edit screen
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _register_access_manager_metabox()
@@ -462,8 +408,8 @@ class AAM_Service_Content
      * @param array $pages
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_nav_menu_items($pages)
@@ -490,8 +436,8 @@ class AAM_Service_Content
      * @param WP_Query $wpQuery
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _posts_clauses_request($clauses, $wp_query)
@@ -522,8 +468,8 @@ class AAM_Service_Content
      * @param object $request
      *
      * @return mixed
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _rest_request_before_callbacks($response, $request)
@@ -570,6 +516,7 @@ class AAM_Service_Content
      * @param WP_REST_Request  $request
      *
      * @access public
+     *
      * @version 7.0.0
      */
     private function _authorize_post_rest_access($response, $post, $request)
@@ -624,8 +571,8 @@ class AAM_Service_Content
      * @param string $content
      *
      * @return string
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _the_content($content)
@@ -668,8 +615,8 @@ class AAM_Service_Content
      * @param array  $args
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_meta_cap($caps, $cap, $args)
@@ -723,8 +670,8 @@ class AAM_Service_Content
      * @param array        $args
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function __map_post_type_caps(
@@ -799,8 +746,8 @@ class AAM_Service_Content
      * @param int   $post_id
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_publish_post_caps($caps, $post_id)
@@ -821,8 +768,8 @@ class AAM_Service_Content
      * @param int   $post_id
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_edit_post_caps($caps, $post_id)
@@ -844,8 +791,8 @@ class AAM_Service_Content
      * @param int   $post_id
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_delete_post_caps($caps, $post_id)
@@ -867,8 +814,8 @@ class AAM_Service_Content
      * @param string|null $password
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _map_read_post_caps($caps, $post_id, $password = null)

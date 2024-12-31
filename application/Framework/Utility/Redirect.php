@@ -115,7 +115,7 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
         if ($redirect['type'] === 'login_redirect') {
             $result = add_query_arg(
                 [ 'reason' => 'restricted' ],
-                wp_login_url($_SERVER['REQUEST_URI'])
+                wp_login_url(AAM::api()->misc->get($_SERVER, 'REQUEST_URI'))
             );
         } elseif ($redirect['type'] === 'page_redirect') {
             if (!empty($redirect['redirect_page_id'])) {

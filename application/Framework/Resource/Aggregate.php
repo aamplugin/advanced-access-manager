@@ -8,20 +8,21 @@
  */
 
 /**
- * Users & roles visibility controller
+ * Aggregated collection of permissions for all resources of given type
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Service_Identity_Visibility
+class AAM_Framework_Resource_Aggregate
 {
 
     /**
-     * Sudo resource for identity visibility
+     * Resource type that is used to aggregate permissions of all resources of a
+     * given type
      *
      * @version 7.0.0
      */
-    const TYPE = 'identity_visibility';
+    const TYPE = AAM_Framework_Type_Resource::AGGREGATE;
 
     /**
      * Reference to the access level
@@ -60,6 +61,7 @@ class AAM_Service_Identity_Visibility
      * Constructor
      *
      * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param string                              $internal_id
      *
      * @return void
      *
@@ -70,23 +72,12 @@ class AAM_Service_Identity_Visibility
         AAM_Framework_AccessLevel_Interface $access_level, $internal_id
     ) {
         $this->_access_level = $access_level;
-        $this->_internal_id  = $internal_id;
+        $this->_internal_id = $internal_id;
 
-        // Read both role & user permissions and only extract list permission
-        $settings = AAM::api()->settings([ 'access_level' => $access_level ]);
-        $controls = $settings->get_setting($internal_id, []);
-
-        $this->_permissions = [];
-
-        foreach($controls as $id => $perms) {
-            $filtered = array_filter($perms, function($k) {
-                return in_array($k, [ 'list_users', 'list_user' ], true);
-            }, ARRAY_FILTER_USE_KEY);
-
-            if (!empty($filtered)) {
-                $this->_permissions[$id] = $filtered;
-            }
-        }
+        // Read all the permissions for a given resource type
+        $this->_permissions = AAM::api()->settings(
+            [ 'access_level' => $access_level ]
+        )->get_setting($internal_id, []);
     }
 
     /**

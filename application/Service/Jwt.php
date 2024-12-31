@@ -15,15 +15,7 @@
  */
 class AAM_Service_Jwt
 {
-    use AAM_Core_Contract_ServiceTrait,
-        AAM_Core_Contract_RequestTrait;
-
-    /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.jwt.enabled';
+    use AAM_Core_Contract_ServiceTrait;
 
     /**
      * JWT Registry DB option
@@ -38,7 +30,6 @@ class AAM_Service_Jwt
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.jwt.enabled'          => true,
         'service.jwt.bearer'           => 'header,query_param,post_param,cookie',
         'service.jwt.header_name'      => 'HTTP_AUTHENTICATION',
         'service.jwt.cookie_name'      => 'aam_jwt_token',
@@ -50,8 +41,8 @@ class AAM_Service_Jwt
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -64,41 +55,22 @@ class AAM_Service_Jwt
             return $result;
         }, 10, 2);
 
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Jwt::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('JWT Tokens', AAM_KEY),
-                    'description' => __('Manage the website authentication with JWT Bearer token. The service facilitates the ability to manage the list of issued JWT token for any user, revoke them or issue new on demand.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 20);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Jwt::register();
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize service hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -156,8 +128,8 @@ class AAM_Service_Jwt
      * @param WP_User         $user
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     private function _prepare_login_response($response, $request, $user)
@@ -193,8 +165,8 @@ class AAM_Service_Jwt
      * @param int $user_id
      *
      * @return int
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _determine_current_user($user_id)
@@ -248,8 +220,8 @@ class AAM_Service_Jwt
      * Authenticate user with JWT
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _authenticate_user($user_id, $token_claims)
@@ -277,7 +249,7 @@ class AAM_Service_Jwt
 
         // Determine where to redirect user and safely redirect & finally just
         // redirect user to the homepage
-        $redirect_to = $this->getFromQuery('redirect_to');
+        $redirect_to = AAM::api()->misc->get($_GET, 'redirect_to');
 
         wp_safe_redirect(
             apply_filters(
@@ -302,8 +274,8 @@ class AAM_Service_Jwt
      * try to extract the JWT token
      *
      * @return object|null
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     private function _extract_token()
@@ -322,7 +294,7 @@ class AAM_Service_Jwt
                     );
 
                     foreach($possibles as $h) {
-                        $jwt = $this->getFromServer($h);
+                        $jwt = AAM::api()->misc->get($_SERVER, $h);
 
                         if (!empty($jwt)) {
                             break;
@@ -331,24 +303,24 @@ class AAM_Service_Jwt
                     break;
 
                 case 'cookie':
-                    $jwt = $this->getFromCookie($configs->get(
-                        'service.jwt.cookie_name'
-                    ));
+                    $jwt = AAM::api()->misc->get(
+                        $_COOKIE, $configs->get('service.jwt.cookie_name')
+                    );
                     break;
 
                 case 'post':
                 case 'post_param':
-                    $jwt = $this->getFromPost($configs->get(
-                        'service.jwt.post_param_name'
-                    ));
+                    $jwt = AAM::api()->misc->get(
+                        $_POST, $configs->get('service.jwt.post_param_name')
+                    );
                     break;
 
                 case 'get':
                 case 'query':
                 case 'query_param':
-                    $jwt = $this->getFromQuery($configs->get(
-                        'service.jwt.query_param_name'
-                    ));
+                    $jwt = AAM::api()->misc->get(
+                        $_GET, $configs->get('service.jwt.query_param_name')
+                    );
                     break;
 
                 default:
@@ -379,8 +351,8 @@ class AAM_Service_Jwt
      * @param int $user_id
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _verify_user_status($user_id)

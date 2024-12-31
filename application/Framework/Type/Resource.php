@@ -103,4 +103,11 @@ class AAM_Framework_Type_Resource
      */
     const URL = 'url';
 
+    /**
+     * Resource type aggregate
+     *
+     * @version 7.0.0
+     */
+    const AGGREGATE = 'aggregate';
+
 }

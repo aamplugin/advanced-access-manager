@@ -15,15 +15,7 @@
  */
 class AAM_Service_Policies
 {
-    use AAM_Core_Contract_ServiceTrait,
-        AAM_Core_Contract_RequestTrait;
-
-    /**
-     * AAM configuration setting that is associated with the feature
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.policies.enabled';
+    use AAM_Core_Contract_ServiceTrait;
 
     /**
      * Constructor
@@ -35,51 +27,24 @@ class AAM_Service_Policies
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Policy::register();
-                });
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Policy::register();
+            });
 
-                // Register custom access control metabox
-                add_action('add_meta_boxes', function() {
-                    $this->_add_meta_boxes();
-                });
+            // Register custom access control metabox
+            add_action('add_meta_boxes', function() {
+                $this->_add_meta_boxes();
+            });
 
-                // Access policy save
-                add_filter('wp_insert_post_data', function($data) {
-                    return $this->_wp_insert_post_data($data);
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Access Policies', AAM_KEY),
-                    'description' => __('Control website access using thoroughly documented JSON policies for users, roles, and visitors. Maintain a detailed record of all access changes and policy revisions.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 40);
+            // Access policy save
+            add_filter('wp_insert_post_data', function($data) {
+                return $this->_wp_insert_post_data($data);
+            });
         }
 
-        if ($enabled) {
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
@@ -124,9 +89,12 @@ class AAM_Service_Policies
 
         // Override role list permissions
         add_filter('aam_rest_role_output_filter', function($result, $role) {
-            if (isset($_GET['context']) && $_GET['context'] === 'policy_assignee') {
+            $context = AAM::api()->misc->get($_GET, 'context');
+
+            if ($context === 'policy_assignee') {
+                $policy_id   = AAM::api()->misc->get($_GET, 'policy_id');
                 $is_attached = AAM::api()->policies('role:' . $role->slug)->is_attached(
-                    intval($_GET['policy_id'])
+                    intval($policy_id)
                 );
 
                 $result['is_attached'] = $is_attached;
@@ -141,9 +109,12 @@ class AAM_Service_Policies
 
         // Override user list RESTful output
         add_filter('aam_rest_user_output_filter', function($result, $user) {
-            if (isset($_GET['context']) && $_GET['context'] === 'policy_assignee') {
+            $context = AAM::api()->misc->get($_GET, 'context');
+
+            if ($context === 'policy_assignee') {
+                $policy_id   = AAM::api()->misc->get($_GET, 'policy_id');
                 $is_attached = AAM::api()->policies('user:' . $user->ID)->is_attached(
-                    intval($_GET['policy_id'])
+                    intval($policy_id)
                 );
 
                 $result['is_attached'] = $is_attached;
@@ -215,7 +186,7 @@ class AAM_Service_Policies
         if (isset($data['post_type'])
             && ($data['post_type'] === AAM_Framework_Service_Policies::CPT)
         ) {
-            $content = $this->getFromPost('aam-policy');
+            $content = AAM::api()->misc->get($_POST, 'aam-policy');
 
             if (empty($content)) {
                 if (empty($data['post_content'])) {

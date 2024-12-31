@@ -577,7 +577,7 @@ class AAM_Framework_Policy_Marker
      */
     protected static function get_query($xpath)
     {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($_GET, $xpath);
+        return AAM_Framework_Manager::_()->misc->get($_GET, $xpath);
     }
 
     /**
@@ -592,7 +592,7 @@ class AAM_Framework_Policy_Marker
      */
     protected static function get_post($xpath)
     {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($_POST, $xpath);
+        return AAM_Framework_Manager::_()->misc->get($_POST, $xpath);
     }
 
     /**
@@ -607,7 +607,7 @@ class AAM_Framework_Policy_Marker
      */
     protected static function get_cookie($xpath)
     {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($_COOKIE, $xpath);
+        return AAM_Framework_Manager::_()->misc->get($_COOKIE, $xpath);
     }
 
     /**
@@ -622,7 +622,7 @@ class AAM_Framework_Policy_Marker
      */
     protected static function get_server($xpath)
     {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($_SERVER, $xpath);
+        return AAM_Framework_Manager::_()->misc->get($_SERVER, $xpath);
     }
 
     /**

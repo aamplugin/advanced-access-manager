@@ -18,44 +18,18 @@ class AAM_Service_SecurityAudit
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.security_audit.enabled';
-
-    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        if (is_admin()) {
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Security Scan', AAM_KEY),
-                    'description' => __('This automated security scan service conducts a series of checks to verify the integrity of your website\'s configurations and detect any potential elevated privileges for users and roles.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 1);
-        }
+        add_filter('aam_security_scan_enabled_filter', function() {
+            return AAM::api()->config->get(AAM::SERVICES[__CLASS__], true);
+        });
 
         // Keep the support RESTful service enabled at all times because it is used
         // by issue reporting feature as well
@@ -63,25 +37,11 @@ class AAM_Service_SecurityAudit
     }
 
     /**
-     * Determine if service is enabled
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_enabled()
-    {
-        return AAM::api()->config->get(self::FEATURE_FLAG)
-            && current_user_can('aam_trigger_audit');
-    }
-
-    /**
      * Get security audit steps (checks)
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_steps()
@@ -198,8 +158,8 @@ class AAM_Service_SecurityAudit
      * Check if report exists
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function has_report()

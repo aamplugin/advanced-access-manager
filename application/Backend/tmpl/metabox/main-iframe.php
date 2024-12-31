@@ -75,7 +75,7 @@
                                         <span><?php echo __('Settings', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
-                                <?php if (AAM_Service_SecurityAudit::bootstrap()->is_enabled()) { ?>
+                                <?php if (apply_filters('aam_security_scan_enabled_filter', false)) { ?>
                                     <a href="#" title="Security Scan" data-type="audit" class="aam-area">
                                         <i class="icon-eye"></i>
                                         <span><?php echo __('Security Scan', AAM_KEY); ?></span>

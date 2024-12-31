@@ -317,6 +317,72 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     }
 
     /**
+     * Safely get value from the source
+     *
+     * @param mixed  $source
+     * @param string $xpath
+     * @param mixed  $default
+     *
+     * @return mixed
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get($source, $xpath, $default = null)
+    {
+        $value = $source;
+        $found = true;
+
+        // Do we need to parse the xpath? It is possible that the xpath was already
+        // parsed
+        $parsed = is_array($xpath) ? $xpath : $this->_parse_xpath($xpath);
+
+        foreach($parsed as $l) {
+            if (is_object($value)) {
+                if (property_exists($value, $l)) {
+                    $value = $value->{$l};
+                } elseif (method_exists($value, $l)) {
+                    $value = $value->$l();
+                } else {
+                    $found = false;
+                    break;
+                }
+            } else if (is_array($value)) {
+                if (array_key_exists($l, $value)) {
+                    $value = $value[$l];
+                } else {
+                    $found = false;
+                    break;
+                }
+            }
+        }
+
+        return $found ? $value : $default;
+    }
+
+    /**
+     * Parse xpath string into array
+     *
+     * @param string $xpath
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _parse_xpath($xpath)
+    {
+        $result = trim(
+            str_replace(
+                array('["', '[', '"]', ']', '..'), '.', $xpath
+            ),
+            ' .' // white space is important!
+        );
+
+        return explode('.', $result);
+    }
+
+    /**
      * Merge two rules based on provided preference
      *
      * @param array|null $base

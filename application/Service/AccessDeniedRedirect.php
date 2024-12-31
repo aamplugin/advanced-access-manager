@@ -19,68 +19,34 @@ class AAM_Service_AccessDeniedRedirect
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.access_denied_redirect.enabled';
-
-    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
-        $enabled = AAM::api()->config->get(self::FEATURE_FLAG);
-
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
-            if ($enabled) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_AccessDeniedRedirect::register();
-                });
-            }
-
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Access Denied Redirect', AAM_KEY),
-                    'description' => __('Manage the default access-denied redirect separately for the frontend and backend when access to any protected website resource is denied.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 25);
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_AccessDeniedRedirect::register();
+            });
         }
 
-        if ($enabled) {
-            // Register RESTful API endpoints
-            AAM_Restful_AccessDeniedRedirectService::bootstrap();
+        // Register RESTful API endpoints
+        AAM_Restful_AccessDeniedRedirectService::bootstrap();
 
-            $this->initialize_hooks();
-        }
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize Access Denied Redirect hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()

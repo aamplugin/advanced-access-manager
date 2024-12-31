@@ -19,79 +19,34 @@ class AAM_Service_Widgets
     use AAM_Core_Contract_ServiceTrait;
 
     /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 7.0.0
-     */
-    const FEATURE_FLAG = 'service.widget.enabled';
-
-    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
-
-            return $result;
-        }, 10, 2);
-
         if (is_admin()) {
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Widgets', AAM_KEY),
-                    'description' => __('Control the visibility of widgets on the backend and frontend for any role, user, or visitor. This service exclusively hides unwanted widgets.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 30);
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Widget::register();
+            });
         }
 
-        if (AAM::api()->config->get(self::FEATURE_FLAG)) {
-            if (is_admin()) {
-                // Hook that initialize the AAM UI part of the service
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Main_Widget::register();
-                });
-            }
+        // Register RESTful API endpoints
+        AAM_Restful_WidgetService::bootstrap();
 
-            // Register RESTful API endpoints
-            AAM_Restful_WidgetService::bootstrap();
-
-            $this->initialize_hooks();
-        }
-
-        // Register the resource
-        add_filter(
-            'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
-                    && $resource_type === AAM_Framework_Type_Resource::WIDGET
-                ) {
-                    $resource = new AAM_Framework_Resource_Widget(
-                        $access_level, $resource_id
-                    );
-                }
-
-                return $resource;
-            }, 10, 4
-        );
+        $this->initialize_hooks();
     }
 
     /**
      * Initialize Widgets hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -131,8 +86,8 @@ class AAM_Service_Widgets
      * Collect the list of all registered widgets
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _initialize_widgets()
@@ -188,8 +143,8 @@ class AAM_Service_Widgets
      * Filter the Dashboard -> Home widgets
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_dashboard_widgets()
@@ -215,8 +170,8 @@ class AAM_Service_Widgets
      * Filter frontend widgets
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _filter_frontend_widgets()
@@ -254,8 +209,8 @@ class AAM_Service_Widgets
      * @param array $widget
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_widget_slug($widget)
