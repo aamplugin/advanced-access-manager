@@ -29,6 +29,11 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::POST;
 
     /**
+     * @inheritDoc
+     */
+    const AGGREGATABLE = true;
+
+    /**
      * Determine if post is hidden on given area
      *
      * @param string $area Can be either frontend, backend or api
@@ -537,9 +542,10 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    private function _apply_policy_permissions($permissions)
+    private function _apply_policy($permissions)
     {
-        $service = AAM_Framework_Manager::_()->policies($this->get_access_level());
+        $manager = AAM_Framework_Manager::_();
+        $service = $manager->policies($this->get_access_level());
 
         // Fetching all resources that may represent our current post and doing some
         // additional validation as the same post can be targeted by both ID & slug
@@ -555,108 +561,13 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
         }
 
         foreach(array_merge($by_id, $by_slug) as $stm) {
-            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : null;
-
-            // If effect is defined, move forward with the rest
-            if (!empty($effect)) {
-                $permissions = array_replace(
-                    $this->_policy_statement_to_permission($stm), $permissions
-                );
-            }
+            $permissions = array_replace(
+                $manager->policy->statement_to_permission($stm, 'post'),
+                $permissions
+            );
         }
 
-        return $permissions;
-    }
-
-    /**
-     * Convert JSON policy statement to internal permission
-     *
-     * @param array $stm
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _policy_statement_to_permission($stm)
-    {
-        $action = isset($stm['Action']) ? strtolower($stm['Action']) : null;
-
-        if (!empty($action)) {
-            $effect = strtolower($stm['Effect']) !== 'allow' ? 'deny' : 'allow';
-            $result = [
-                $action => [
-                    'effect' => $effect
-                ]
-            ];
-
-            if ($action === 'read') {
-                if (array_key_exists('Password', $stm)) { // Is Password Protected?
-                    $result['read'] = [
-                        'restriction_type' => 'password_protected',
-                        'password'         => $stm['Password']
-                    ];
-                } elseif (array_key_exists('Teaser', $stm)) { // Has Teaser Message?
-                    $result['read'] = [
-                        'restriction_type' => 'teaser_message',
-                        'message'          => $stm['Teaser']
-                    ];
-                } elseif (array_key_exists('Redirect', $stm)) { // Has Redirect?
-                    $result['read'] = [
-                        'restriction_type' => 'redirect'
-                    ];
-
-                    $redirect = [];
-
-                    // Getting redirect type
-                    if (array_key_exists('Type', $stm['Redirect'])) {
-                        $redirect['type'] = $stm['Redirect']['Type'];
-                    }
-
-                    // Getting HTTP status code
-                    if (array_key_exists('StatusCode', $stm['Redirect'])) {
-                        $redirect['http_status_code'] = intval(
-                            $stm['Redirect']['StatusCode']
-                        );
-                    }
-
-                    // Getting additional redirect attributes
-                    if (array_key_exists('Slug', $stm['Redirect'])) {
-                        $redirect['redirect_page_slug'] = $stm['Redirect']['Slug'];
-                    }
-
-                    if (array_key_exists('Id', $stm['Redirect'])) {
-                        $redirect['redirect_page_id'] = $stm['Redirect']['Id'];
-                    }
-
-                    if (array_key_exists('Url', $stm['Redirect'])) {
-                        $redirect['redirect_url'] = $stm['Redirect']['Url'];
-                    }
-
-                    if (array_key_exists('Callback', $stm['Redirect'])) {
-                        $redirect['callback'] = $stm['Redirect']['Callback'];
-                    }
-
-                    if (array_key_exists('Message', $stm['Redirect'])) {
-                        $redirect['message'] = $stm['Redirect']['Message'];
-                    }
-
-                    $result['read']['redirect'] = $redirect;
-                }
-            } elseif ($action === 'list') {
-                if (array_key_exists('On', $stm)) {
-                    $result['list']['on'] = (array) $stm['On'];
-                } else {
-                    $result['list']['on'] = [ 'frontend', 'backend', 'api' ];
-                }
-            }
-        } else {
-            $result = [];
-        }
-
-        return apply_filters(
-            'aam_policy_statement_to_permission_filter', $result, $stm
-        );
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

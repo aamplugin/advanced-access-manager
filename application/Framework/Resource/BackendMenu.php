@@ -56,7 +56,7 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
     /**
      * @inheritDoc
      */
-    private function _apply_policy_permissions($permissions)
+    private function _apply_policy($permissions)
     {
         // Fetch list of statements for the resource BackendMenu
         $list = AAM_Framework_Manager::_()->policies(
@@ -72,7 +72,7 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
                 $parsed = explode(':', $stm['Resource']);
 
                 if (!empty($parsed[1])) {
-                    $permissions = array_merge([
+                    $permissions = array_replace([
                         $parsed[1] => [
                             'effect' => $effect
                         ]
@@ -81,7 +81,7 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
             }
         }
 
-        return $permissions;
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

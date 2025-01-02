@@ -33,12 +33,12 @@ final class ToolbarTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": {
                 "Resource": "Toolbar:documentation",
                 "Effect": "deny"
             }
-        }');
+        }'));
 
         // Verifying that toolbar item is restricted
         $this->assertTrue(

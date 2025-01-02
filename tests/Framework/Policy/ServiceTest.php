@@ -132,9 +132,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // Assert that we can fetch statements with wildcard
         $statements = $service->get_statements('Post:post:*');
@@ -211,9 +209,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // Check that Term statements are properly handled
         $statements = $service->get_statements('Term:*');
@@ -278,9 +274,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // There should be only one statement in return
         $statements = $service->get_statements('Term:*', [ 'test' => 4 ]);
@@ -333,9 +327,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // Make sure we can get all params by wildcard
         $params = $service->params('option:*');
@@ -387,9 +379,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // Test that two exactly the same params are handled properly
         $params = $service->get_params('TestParamA');
@@ -444,9 +434,7 @@ final class ServiceTest extends TestCase
         $service = AAM::api()->policies();
 
         // Create new policy and attach it to current access level
-        $policy_id = $service->create($policy);
-
-        $this->assertIsInt($policy_id);
+        $this->assertIsInt($service->create($policy));
 
         // Test that correct param is returned based
         $params_a = $service->get_params('TestParamA');

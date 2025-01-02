@@ -33,14 +33,14 @@ final class RouteTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Effect": "deny",
                     "Resource": "Route:/oembed/1.0/proxy:get"
                 }
             ]
-        }');
+        }'));
 
         // Verifying that API route is restricted
         $this->assertTrue(

@@ -354,7 +354,7 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_a . '",
@@ -369,7 +369,7 @@ final class PostTest extends TestCase
                     "Password": "pwd2"
                 }
             ]
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -397,7 +397,7 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_a . '",
@@ -406,7 +406,7 @@ final class PostTest extends TestCase
                     "Teaser": "Nope!"
                 }
             ]
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -440,7 +440,7 @@ final class PostTest extends TestCase
         $this->assertNull(AAM::api()->content()->post($post_f)->is_redirected());
 
         // Creating new policies & attaching them to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_a . '",
@@ -453,9 +453,9 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_b . '",
@@ -468,9 +468,9 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_c . '",
@@ -483,9 +483,9 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_d . '",
@@ -497,9 +497,9 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_e . '",
@@ -510,9 +510,9 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_f . '",
@@ -524,7 +524,7 @@ final class PostTest extends TestCase
                     }
                 }
             ]
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -588,7 +588,7 @@ final class PostTest extends TestCase
         $this->assertNull(AAM::api()->content()->post($post_c)->is_hidden());
 
         // Creating new policies & attaching them to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_a . '",
@@ -596,9 +596,9 @@ final class PostTest extends TestCase
                     "Action": "List"
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_b . '",
@@ -607,9 +607,9 @@ final class PostTest extends TestCase
                     "On": "frontend"
                 }
             ]
-        }');
+        }'));
 
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": [
                 {
                     "Resource": "Post:post:' . $post_c . '",
@@ -621,7 +621,7 @@ final class PostTest extends TestCase
                     ]
                 }
             ]
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -652,13 +652,13 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": {
                 "Effect": "deny",
                 "Resource": "Post:post:idea-board",
                 "Action": "Comment"
             }
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -683,13 +683,13 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": {
                 "Effect": "deny",
                 "Resource": "Post:post:' . $post_a . '",
                 "Action": "Edit"
             }
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -714,13 +714,13 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": {
                 "Effect": "deny",
                 "Resource": "Post:post:' . $post_a . '",
                 "Action": "Delete"
             }
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();
@@ -745,13 +745,13 @@ final class PostTest extends TestCase
         );
 
         // Creating a new policy & attaching it to current access level
-        AAM::api()->policies()->create('{
+        $this->assertIsInt(AAM::api()->policies()->create('{
             "Statement": {
                 "Effect": "deny",
                 "Resource": "Post:post:' . $post_a . '",
                 "Action": "Publish"
             }
-        }');
+        }'));
 
         // Get the content service
         $service = AAM::api()->content();

@@ -29,6 +29,11 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::ROLE;
 
     /**
+     * @inheritDoc
+     */
+    const AGGREGATABLE = true;
+
+    /**
      * Initialize the resource
      *
      * @param mixed $resource_identifier

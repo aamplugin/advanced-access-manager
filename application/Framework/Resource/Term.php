@@ -10,6 +10,17 @@
 /**
  * Term Resource class
  *
+ * @method bool is_hidden() **[Premium Feature!]** Available only with
+ *         premium add-on
+ * @method bool is_hidden_on(string $area) **[Premium Feature!]** Available only with
+ *         premium add-on
+ * @method bool|null is_restricted() **[Premium Feature!]** Available only with
+ *         premium add-on
+ * @method bool|null is_allowed_to(string $permission) **[Premium Feature!]** Available
+ *         only with premium add-on
+ * @method bool|null is_denied_to(string $permission) **[Premium Feature!]** Available
+ *         only with premium add-on
+ *
  * @package AAM
  * @version 7.0.0
  */
@@ -25,6 +36,11 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
      * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::TERM;
+
+    /**
+     * @inheritDoc
+     */
+    const AGGREGATABLE = true;
 
     /**
      * @inheritDoc

@@ -39,6 +39,7 @@
  * @property AAM_Framework_Utility_Db $db
  * @property AAM_Framework_Utility_AccessLevels $access_levels
  * @property AAM_Framework_Utility_Jwt $jwt
+ * @property AAM_Framework_Utility_Policy $policy
  *
  * @package AAM
  * @version 7.0.0
@@ -85,7 +86,8 @@ final class AAM_Framework_Manager
         'users'         => AAM_Framework_Utility_Users::class,
         'db'            => AAM_Framework_Utility_Db::class,
         'access_levels' => AAM_Framework_Utility_AccessLevels::class,
-        'jwt'           => AAM_Framework_Utility_Jwt::class
+        'jwt'           => AAM_Framework_Utility_Jwt::class,
+        'policy'        => AAM_Framework_Utility_Policy::class
     ];
 
     /**

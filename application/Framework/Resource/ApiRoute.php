@@ -69,7 +69,7 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
     /**
      * @inheritDoc
      */
-    private function _apply_policy_permissions($permissions)
+    private function _apply_policy($permissions)
     {
         // Fetch list of statements for the resource Route
         $list = AAM_Framework_Manager::_()->policies(
@@ -95,7 +95,7 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
             }
         }
 
-        return $permissions;
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

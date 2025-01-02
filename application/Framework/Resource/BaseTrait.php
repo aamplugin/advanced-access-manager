@@ -125,20 +125,18 @@ trait AAM_Framework_Resource_BaseTrait
             $this->_explicit_permissions = $permissions;
         }
 
+        // JSON Access Policy is deeply embedded in the framework, thus take it into
+        // consideration during resource initialization
+        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
+            $permissions = $this->_apply_policy($permissions);
+        }
+
         // Allow other implementations to modify defined settings
-        $permissions = apply_filters(
+        $this->_permissions = apply_filters(
             'aam_framework_resource_init_permissions_filter',
             $permissions,
             $this
         );
-
-        // JSON Access Policy is deeply embedded in the framework, thus take it into
-        // consideration during resource initialization
-        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
-            $this->_permissions = $this->_apply_policy_permissions($permissions);
-        } else {
-            $this->_permissions = $permissions;
-        }
 
         // Extend access level with more methods
         $closures = apply_filters(
@@ -419,9 +417,9 @@ trait AAM_Framework_Resource_BaseTrait
      *
      * @version 7.0.0
      */
-    private function _apply_policy_permissions($permissions)
+    private function _apply_policy($permissions)
     {
-        return $permissions;
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

@@ -53,7 +53,7 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
     /**
      * @inheritDoc
      */
-    private function _apply_policy_permissions($permissions)
+    private function _apply_policy($permissions)
     {
         // Fetch list of statements for the resource Toolbar
         $list = AAM_Framework_Manager::_()->policies(
@@ -78,7 +78,7 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
             }
         }
 
-        return $permissions;
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }
