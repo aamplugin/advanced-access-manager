@@ -77,21 +77,20 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
         )->statements('Route:*');
 
         foreach($list as $stm) {
-            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : null;
+            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
 
-            // If effect is defined, move forward with the rest
-            if (!empty($effect)) {
-                // Extracting route attributes
-                $parsed = explode(':', $stm['Resource']);
-                $route  = !empty($parsed[1]) ? $parsed[1] : null;
-                $verb   = !empty($parsed[2]) ? $parsed[2] : null;
+            // Extracting route attributes
+            $parsed = explode(':', $stm['Resource']);
+            $route  = !empty($parsed[1]) ? $parsed[1] : null;
+            $verb   = !empty($parsed[2]) ? $parsed[2] : null;
 
-                if (!empty($route) && !empty($verb)) {
-                    $key         = strtolower($verb . ' ' . $route);
-                    $permissions = array_merge([
-                        $key => [ 'effect' => $effect ]
-                    ], $permissions);
-                }
+            if (!empty($route) && !empty($verb)) {
+                $key         = strtolower($verb . ' ' . $route);
+                $permissions = array_merge([
+                    $key => [
+                        'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                    ]
+                ], $permissions);
             }
         }
 

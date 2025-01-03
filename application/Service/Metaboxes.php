@@ -169,7 +169,8 @@ class AAM_Service_Metaboxes
             $screen_id = ($screen ? $screen->id : null);
         }
 
-        if (!empty($wp_meta_boxes[$screen_id])) {
+        // Exclude Dashboard because they are widgets
+        if (!empty($wp_meta_boxes[$screen_id]) && $screen_id !== 'dashboard') {
             $this->_filter_zones($wp_meta_boxes[$screen_id], $screen_id);
         }
     }

@@ -211,6 +211,7 @@ class AAM_Service_Identity
 
         foreach($users->get_permissions() as $user_id => $perms) {
             if (array_key_exists('list_user', $perms)
+                && is_numeric($user_id)
                 && $perms['list_user']['effect'] === 'deny') {
                     array_push($users_not_in, $user_id);
             }
@@ -232,7 +233,7 @@ class AAM_Service_Identity
         if (!empty($args['role__in'])) {
             // Remove roles that are hidden
             $role__in         = array_diff($args['role__in'], $roles_not_in);
-            $args['role__in'] = empty($role__in) ? [ uniqid('aam_') ] : $role__in;
+            $args['role__in'] = empty($role__in) ? [ 'do_not_allow' ] : $role__in;
         } elseif (!empty($args['role__not_in'])) {
             $args['role__not_in'] = array_unique(array_merge(
                 $args['role__not_in'],
@@ -242,7 +243,10 @@ class AAM_Service_Identity
             $args['role__not_in'] = $roles_not_in;
         }
 
-        return $args;
+        return apply_filters('aam_user_query_args_filter', $args, [
+            'users' => $users,
+            'roles' => $roles
+        ]);
     }
 
     /**

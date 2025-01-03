@@ -34,6 +34,10 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
     {
         if ($resource_type === 'post') {
             $result = $this->_post_statement_to_permission($stm);
+        } elseif ($resource_type === 'role') {
+            $result = $this->_role_statement_to_permission($stm);
+        } elseif ($resource_type === 'user') {
+            $result = $this->_user_statement_to_permission($stm);
         }
 
         return apply_filters(
@@ -62,7 +66,7 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
         if (!empty($action)) {
             $result = [
                 $action => [
-                    'effect' => $effect
+                    'effect' => $effect !== 'allow' ? 'deny' : 'allow'
                 ]
             ];
 
@@ -131,6 +135,84 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
         }
 
         return $result;
+    }
+
+    /**
+     * Convert policy statement with role resource to internal permission
+     *
+     * @param array $stm
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _role_statement_to_permission($stm)
+    {
+        $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
+        $action = isset($stm['Action']) ? strtolower($stm['Action']) : 'list';
+
+        // There are two possible representations of Role resource:
+        //   1. Role:<slug>
+        //   2. Role:<slug>:users
+        // Depending on type, different list of actions are supported
+        $bits = explode(':', $stm['Resource']);
+
+        if (count($bits) === 3) {
+            if ($action === 'list') {
+                $action = 'list_users';
+            } elseif ($action === 'edit') {
+                $action = 'edit_users';
+            } elseif ($action === 'changepassword') {
+                $action = 'change_users_password';
+            } elseif (in_array($action, [ 'changerole', 'promote' ], true)) {
+                $action = 'promote_users';
+            } elseif ($action === 'delete') {
+                $action = 'delete_users';
+            }
+        } else {
+            $action = "{$action}_role";
+        }
+
+        return [
+            $action => [
+                'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+            ]
+        ];
+    }
+
+    /**
+     * Convert policy statement with user resource to internal permission
+     *
+     * @param array $stm
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _user_statement_to_permission($stm)
+    {
+        $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
+        $action = isset($stm['Action']) ? strtolower($stm['Action']) : 'list_user';
+
+        if ($action === 'list') {
+            $action = 'list_user';
+        } elseif ($action === 'edit') {
+            $action = 'edit_user';
+        } elseif ($action === 'changepassword') {
+            $action = 'change_user_password';
+        } elseif (in_array($action, [ 'changerole', 'promote' ], true)) {
+            $action = 'promote_user';
+        } elseif ($action === 'delete') {
+            $action = 'delete_user';
+        }
+
+        return [
+            $action => [
+                'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+            ]
+        ];
     }
 
 }

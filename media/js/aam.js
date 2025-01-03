@@ -280,7 +280,7 @@
                                 $('<i/>', { 'class': 'aam-row-subtitle' }).html(
                                     getAAM().applyFilters(
                                         'role-subtitle',
-                                        getAAM().__('Users') + ': <b>' + parseInt(data[1]) + '</b>; ID: <b>' + data[0] + '</b>',
+                                        getAAM().__('Users') + ': <b>' + parseInt(data[1]) + '</b>; Slug: <b>' + data[0] + '</b>',
                                         data
                                     )
                                 )

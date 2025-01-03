@@ -40,11 +40,6 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const AGGREGATABLE = true;
-
-    /**
-     * @inheritDoc
-     */
     public function get_internal_id($serialize = true)
     {
         // Overriding the default serialization method to ensure that term's

@@ -189,7 +189,7 @@
                                     <td id="metabox-screen-id"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Metabox Slug', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Slug', AAM_KEY); ?></th>
                                     <td id="metabox-id"></td>
                                 </tr>
                             </tbody>

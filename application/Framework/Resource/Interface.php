@@ -28,14 +28,6 @@ interface AAM_Framework_Resource_Interface
     const TYPE = null;
 
     /**
-     * Wether resource can be used for aggregation
-     *
-     * @var bool
-     * @version 7.0.0
-     */
-    const AGGREGATABLE = false;
-
-    /**
      * Get resource internal ID
      *
      * The internal ID represents unique resource identify AAM Framework users to

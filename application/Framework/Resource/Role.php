@@ -29,11 +29,6 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::ROLE;
 
     /**
-     * @inheritDoc
-     */
-    const AGGREGATABLE = true;
-
-    /**
      * Initialize the resource
      *
      * @param mixed $resource_identifier
@@ -180,6 +175,39 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     {
         // Compile the namespace
         return constant('static::TYPE') . '.' . $this->get_internal_id(true);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _apply_policy($permissions)
+    {
+        $manager = AAM_Framework_Manager::_();
+        $service = $manager->policies($this->get_access_level());
+
+        // Fetch list of statements for the resource Role
+        $list = $service->statements('Role:' . $this->get_internal_id(true));
+
+        foreach($list as $stm) {
+            $permissions = array_replace(
+                $manager->policy->statement_to_permission($stm, 'role'),
+                $permissions
+            );
+        }
+
+        // Now, if there are any statements defined for role users, parse them too
+        $list = $service->statements(
+            'Role:' . $this->get_internal_id(true) . ':users'
+        );
+
+        foreach($list as $stm) {
+            $permissions = array_replace(
+                $manager->policy->statement_to_permission($stm, 'role'),
+                $permissions
+            );
+        }
+
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

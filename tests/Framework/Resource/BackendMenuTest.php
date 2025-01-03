@@ -27,7 +27,7 @@ final class BackendMenuTest extends TestCase
      */
     public function testBackendMenuResourceInit()
     {
-        // Verifying that toolbar item is allowed
+        // Verifying that backend menu is allowed
         $this->assertFalse(
             AAM::api()->backend_menu()->is_restricted('edit-tags.php?taxonomy=category')
         );
@@ -40,7 +40,7 @@ final class BackendMenuTest extends TestCase
             }
         }'));
 
-        // Verifying that toolbar item is restricted
+        // Verifying that backend menu is restricted
         $this->assertTrue(
             AAM::api()->backend_menu()->is_restricted('edit-tags.php?taxonomy=category')
         );

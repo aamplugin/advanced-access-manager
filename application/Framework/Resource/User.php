@@ -24,11 +24,6 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::USER;
 
     /**
-     * @inheritDoc
-     */
-    const AGGREGATABLE = true;
-
-    /**
      * Initialize the resource
      *
      * @param mixed $resource_identifier
@@ -175,6 +170,35 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
     {
         // Compile the namespace
         return constant('static::TYPE') . '.' . $this->get_internal_id(true);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _apply_policy($permissions)
+    {
+        // Fetch list of statements for the resource User. However, it is possible
+        // that User resource is initialized with non-existing user ID. Example of
+        // such would be a wildcard
+        if (is_a($this->_core_instance, AAM_Framework_Proxy_User::class)) {
+            $manager = AAM_Framework_Manager::_();
+            $service = $manager->policies($this->get_access_level());
+
+            $list = array_merge(
+                $service->statements('User:' . $this->ID),
+                $service->statements('User:' . $this->user_login),
+                $service->statements('User:' . $this->user_email)
+            );
+
+            foreach($list as $stm) {
+                $permissions = array_replace(
+                    $manager->policy->statement_to_permission($stm, 'user'),
+                    $permissions
+                );
+            }
+        }
+
+        return apply_filters('aam_apply_policy_filter', $permissions, $this);
     }
 
 }

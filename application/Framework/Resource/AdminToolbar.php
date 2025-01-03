@@ -61,20 +61,17 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
         )->statements('Toolbar:*');
 
         foreach($list as $stm) {
-            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : null;
+            $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
 
-            // If effect is defined, move forward with the rest
-            if (!empty($effect)) {
-                // Extracting toolbar ID
-                $parsed = explode(':', $stm['Resource']);
+            // Extracting toolbar ID
+            $parsed = explode(':', $stm['Resource']);
 
-                if (!empty($parsed[1])) {
-                    $permissions = array_merge([
-                        $parsed[1] => [
-                            'effect' => $effect
-                        ]
-                    ], $permissions);
-                }
+            if (!empty($parsed[1])) {
+                $permissions = array_merge([
+                    $parsed[1] => [
+                        'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                    ]
+                ], $permissions);
             }
         }
 

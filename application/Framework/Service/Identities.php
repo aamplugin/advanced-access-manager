@@ -328,7 +328,7 @@ class AAM_Framework_Service_Identities
      * @param AAM_Framework_Proxy_User|AAM_Framework_Proxy_Role $identity
      * @param string                                            $permission
      *
-     * @return bool|null
+     * @return bool
      * @access private
      *
      * @version 7.0.0
@@ -376,7 +376,7 @@ class AAM_Framework_Service_Identities
             throw new InvalidArgumentException('Invalid proxy instance');
         }
 
-        return $result;
+        return is_bool($result) ? $result : false;
     }
 
     /**
@@ -385,7 +385,7 @@ class AAM_Framework_Service_Identities
      * @param AAM_Framework_Resource_User|AAM_Framework_Resource_Role $resource
      * @param string                                                  $permission
      *
-     * @return bool|null
+     * @return bool
      * @access private
      *
      * @version 7.0.0
@@ -404,7 +404,7 @@ class AAM_Framework_Service_Identities
             throw new InvalidArgumentException('Invalid identity provided');
         }
 
-        return $result;
+        return is_bool($result) ? $result : false;
     }
 
 }

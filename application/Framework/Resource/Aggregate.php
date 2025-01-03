@@ -154,8 +154,14 @@ class AAM_Framework_Resource_Aggregate
      */
     private function _apply_policy($permissions)
     {
-        if ($this->get_internal_id() === AAM_Framework_Type_Resource::POST) {
+        $resource_type = $this->get_internal_id();
+
+        if ($resource_type === AAM_Framework_Type_Resource::POST) {
             $aggregated = $this->_aggregate_post_policy_resources();
+        } elseif ($resource_type === AAM_Framework_Type_Resource::ROLE) {
+            $aggregated = $this->_aggregate_role_policy_resources();
+        } elseif ($resource_type === AAM_Framework_Type_Resource::USER) {
+            $aggregated = $this->_aggregate_user_policy_resources();
         } else {
             $aggregated = [];
         }
@@ -208,6 +214,75 @@ class AAM_Framework_Resource_Aggregate
                         )
                     );
                 }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Aggregate Role resources
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _aggregate_role_policy_resources()
+    {
+        $result  = [];
+        $manager = AAM_Framework_Manager::_();
+        $service = $manager->policies($this->get_access_level());
+
+        foreach($service->statements('Role:*') as $stm) {
+            $bits        = explode(':', $stm['Resource']);
+            $id          = $bits[1];
+            $result[$id] = isset($result[$id]) ? $result[$id] : [];
+
+            $result[$id] = array_replace(
+                $result[$id],
+                $manager->policy->statement_to_permission(
+                    $stm, $this->get_internal_id()
+                )
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Aggregate User resources
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _aggregate_user_policy_resources()
+    {
+        $result  = [];
+        $manager = AAM_Framework_Manager::_();
+        $service = $manager->policies($this->get_access_level());
+
+        foreach($service->statements('User:*') as $stm) {
+            $bits = explode(':', $stm['Resource']);
+
+            // If user identifier is not numeric, convert it to WP_User::ID for
+            // consistency
+            if (is_numeric($bits[1])) {
+                $id = intval($bits[1]);
+            } else {
+                $user = $manager->users->user($bits[1]);
+                $id   = is_object($user) ? $user->ID : null;
+            }
+
+            if (!empty($id)) {
+                $result[$id] = array_replace(
+                    isset($result[$id]) ? $result[$id] : [],
+                    $manager->policy->statement_to_permission(
+                        $stm, $this->get_internal_id()
+                    )
+                );
             }
         }
 

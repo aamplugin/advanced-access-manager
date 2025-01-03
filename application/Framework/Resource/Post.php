@@ -29,11 +29,6 @@ class AAM_Framework_Resource_Post implements AAM_Framework_Resource_Interface
     const TYPE = AAM_Framework_Type_Resource::POST;
 
     /**
-     * @inheritDoc
-     */
-    const AGGREGATABLE = true;
-
-    /**
      * Determine if post is hidden on given area
      *
      * @param string $area Can be either frontend, backend or api

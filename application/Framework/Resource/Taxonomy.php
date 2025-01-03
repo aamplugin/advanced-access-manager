@@ -27,11 +27,6 @@ class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interfac
     const TYPE = AAM_Framework_Type_Resource::TAXONOMY;
 
     /**
-     * @inheritDoc
-     */
-    const AGGREGATABLE = true;
-
-    /**
      * Initialize the core instance
      *
      * @param mixed $resource_identifier
