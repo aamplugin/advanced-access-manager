@@ -151,7 +151,7 @@ implements
      * Restrict access to a given URL
      *
      * @param string|array $url_schema
-     * @param array        $redirect       [optional]
+     * @param array        $redirect   [optional]
      *
      * @return bool|WP_Error|null
      *

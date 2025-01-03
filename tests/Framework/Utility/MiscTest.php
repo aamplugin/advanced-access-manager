@@ -75,4 +75,21 @@ final class MiscTest extends TestCase
         );
     }
 
+    /**
+     * Test sanitize_url method
+     *
+     * @return void
+     */
+    public function testSanitizeUrl()
+    {
+        $this->assertEquals(
+            '/another-page',
+            AAM::api()->misc->sanitize_url(home_url('/another-page'))
+        );
+
+        $this->assertFalse(
+            AAM::api()->misc->sanitize_url('https://samplesize.xyz/another-page')
+        );
+    }
+
 }
