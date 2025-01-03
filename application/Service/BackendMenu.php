@@ -54,7 +54,10 @@ class AAM_Service_BackendMenu
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
             add_filter('parent_file', function($parent_file) {
-                if (AAM::isAAM() && AAM::api()->misc->is_super_admin()) {
+                if ((is_admin()
+                    && filter_input(INPUT_GET, 'page') === 'aam')
+                    && AAM::api()->misc->is_super_admin()
+                ) {
                    AAM::api()->backend_menu()->get_items();
                 } else {
                     $this->filter_menu();

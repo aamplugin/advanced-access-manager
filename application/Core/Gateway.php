@@ -27,6 +27,7 @@
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_Capabilities $caps

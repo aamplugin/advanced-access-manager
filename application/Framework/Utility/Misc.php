@@ -263,8 +263,8 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     /**
      * Merge two sets of access permissions
      *
-     * @param array  $base
      * @param array  $incoming
+     * @param array  $base
      * @param string $resource_type
      *
      * @return array
@@ -272,7 +272,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      *
      * @version 7.0.0
      */
-    public function merge_permissions($base, $incoming, $resource_type)
+    public function merge_permissions($incoming, $base, $resource_type)
     {
         $result = [];
 
@@ -401,28 +401,32 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         $effect_b = null;
 
         if (!empty($base)) {
-            $effect_a = $base['effect'] === 'allow';
+            $effect_a = $base['effect'] !== 'deny';
         }
 
         if (!empty($incoming)) {
-            $effect_b = $incoming['effect'] === 'allow';
+            $effect_b = $incoming['effect'] !== 'deny';
         }
 
         if ($preference === 'allow') { // Merging preference is to allow
             // If at least one set has allowed rule, then allow the URL
-            if (in_array($effect_a, [ true, null ], true)
-                || in_array($effect_b, [ true, null ], true)
-            ) {
-                $result = [ 'effect' => 'allow' ];
-            } elseif (!is_null($effect_a)) { // Is base rule set has URL defined?
+            if ($effect_a === true) {
+                $result = $base;
+            } elseif ($effect_b === true) {
+                $result = $incoming;
+            } elseif ($effect_a === false && $effect_b === false) {
                 $result = $base;
             } else {
-                $result = $incoming;
+                $result = [ 'effect' => 'allow' ];
             }
         } else { // Merging preference is to deny access by default
             if ($effect_a === false) {
                 $result = $base;
             } elseif ($effect_b === false) {
+                $result = $incoming;
+            } elseif (!empty($base)) {
+                $result = $base;
+            } elseif (!empty($incoming)) {
                 $result = $incoming;
             } else {
                 $result = [ 'effect' => 'allow' ];

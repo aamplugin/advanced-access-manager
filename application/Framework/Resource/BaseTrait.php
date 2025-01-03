@@ -370,9 +370,8 @@ trait AAM_Framework_Resource_BaseTrait
     private function _sanitize_permission($permission, $permission_key)
     {
         if (is_string($permission)) {
-            $effect = strtolower($permission);
             $result = [
-                'effect' => in_array($effect, [ 'allow', 'deny' ]) ? $effect : 'deny'
+                'effect' => strtolower($permission)
             ];
         } elseif (is_bool($permission)) {
             $result = [

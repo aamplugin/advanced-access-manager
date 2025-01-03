@@ -245,7 +245,7 @@ class AAM_Backend_Manager
      */
     public function printFooterJavascript()
     {
-        if (AAM::isAAM()) {
+        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
             $access_level = AAM_Backend_AccessLevel::get_instance()->get_access_level();
 
             // Prepare the JS locals
@@ -398,7 +398,7 @@ class AAM_Backend_Manager
      */
     public function thankYou($text)
     {
-        if (AAM::isAAM()) {
+        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
             $text  = '<span id="footer-thankyou">';
             $text .= AAM_Backend_View_Helper::preparePhrase('[Help us] to be more noticeable and submit your review', 'b');
             $text .= ' <a href="https://wordpress.org/support/plugin/advanced-access-manager/reviews/"';

@@ -219,11 +219,6 @@ class AAM_Service_AccessPolicy
      */
     protected function initializeHooks()
     {
-        // Can register this only after user object is initialized
-        add_action('init', function() {
-            AAM_Service_AccessPolicy_HookController::bootstrap();
-        }, -10);
-
         // Hook into AAM core objects initialization
         add_filter('aam_menu_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);
         add_filter('aam_metabox_object_option_filter', array($this, 'applyAccessPolicyToObject'), 10, 2);

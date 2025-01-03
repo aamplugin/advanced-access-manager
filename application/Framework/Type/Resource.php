@@ -110,4 +110,11 @@ class AAM_Framework_Type_Resource
      */
     const AGGREGATE = 'aggregate';
 
+    /**
+     * Resource type that represents WordPress hook (action or filter)
+     *
+     * @version 7.0.0
+     */
+    const HOOK = 'hook';
+
 }

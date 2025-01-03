@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'license.txt', which is part of this source code package.       *
+ * ======================================================================
+ */
+
+/**
+ * AAM Hooks service
+ *
+ * @package AAM
+ * @version 7.0.0
+ */
+class AAM_Service_Hooks
+{
+
+    use AAM_Core_Contract_SingletonTrait;
+
+    /**
+     * Constructor
+     *
+     * @access protected
+     *
+     * @return void
+     * @version 7.0.0
+     */
+    protected function __construct()
+    {
+        // Can register this only after user object is initialized
+        add_action('init', function() {
+            // AAM_Service_AccessPolicy_HookController::bootstrap();
+        });
+    }
+
+}

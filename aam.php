@@ -50,7 +50,8 @@ class AAM
         AAM_Service_Capability::class           => 'service.capability.enabled',
         AAM_Service_SecurityAudit::class        => 'service.security_audit.enabled',
         AAM_Service_Welcome::class              => 'service.welcome.enabled',
-        AAM_Service_Policies::class             => 'service.policies.enabled'
+        AAM_Service_Policies::class             => 'service.policies.enabled',
+        AAM_Service_Hooks::class                => 'service.hooks.enabled'
 
         // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
         // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
@@ -61,8 +62,8 @@ class AAM
      * Single instance of itself
      *
      * @var AAM
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private static $_instance = null;
@@ -71,8 +72,8 @@ class AAM
      * Current user
      *
      * @var AAM_Framework_AccessLevel_Interface
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_current_user = null;
@@ -81,8 +82,8 @@ class AAM
      * Initialize the AAM Object
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct() { }
@@ -91,8 +92,8 @@ class AAM
      * Get AAM API manager
      *
      * @return AAM_Core_Gateway
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function api()
@@ -104,8 +105,8 @@ class AAM
      * Get current user
      *
      * @return AAM_Framework_AccessLevel_Interface|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function current_user()
@@ -117,8 +118,8 @@ class AAM
      * Initialize current user
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _init_current_user($user = null)
@@ -147,24 +148,6 @@ class AAM
     }
 
     /**
-     * Make sure that AAM UI Page is used
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public static function isAAM()
-    {
-        $page   = filter_input(INPUT_GET, 'page');
-        $action = filter_input(INPUT_POST, 'action');
-
-        $intersect = array_intersect(array('aam', 'aamc'), array($page, $action));
-
-        return (is_admin() && count($intersect));
-    }
-
-    /**
      * Bootstrap AAM when all plugins are loaded
      *
      * @return void
@@ -176,7 +159,7 @@ class AAM
     {
         // Load all the defined AAM services
         foreach(self::SERVICES as $service_class => $flag) {
-            if (AAM::api()->config->get($flag, true)) {
+            if ($flag === '__return_true' || AAM::api()->config->get($flag, true)) {
                 call_user_func("{$service_class}::bootstrap");
             }
         }
@@ -189,8 +172,8 @@ class AAM
      * Hook on WP core init
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function on_init()
@@ -204,8 +187,8 @@ class AAM
      * Initialize the AAM plugin
      *
      * @return AAM
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function get_instance()
@@ -240,8 +223,8 @@ class AAM
      * Activation hook
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function activate()
@@ -265,6 +248,7 @@ class AAM
      *
      * @access public
      * @static
+     *
      * @version 7.0.0
      */
     public static function activated_plugin($plugin)
@@ -286,16 +270,16 @@ class AAM
      * Remove all leftovers from AAM execution
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function uninstall()
     {
         // Trigger any uninstall hook that is registered by any extension
         do_action('aam-uninstall-action');
 
-        //clear all AAM settings
+        // Clear all AAM settings
         AAM_Core_API::clearSettings();
     }
 

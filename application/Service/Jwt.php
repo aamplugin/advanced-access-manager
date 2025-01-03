@@ -60,6 +60,14 @@ class AAM_Service_Jwt
             add_action('aam_initialize_ui_action', function () {
                 AAM_Backend_Feature_Main_Jwt::register();
             });
+
+            add_action('aam_post_edit_user_modal_action', function () {
+                if (current_user_can('aam_manage_jwt')) {
+                    echo AAM_Backend_View::get_instance()->loadPartial(
+                        'jwt-login-url'
+                    );
+                }
+            });
         }
 
         $this->initialize_hooks();
@@ -75,16 +83,6 @@ class AAM_Service_Jwt
      */
     protected function initialize_hooks()
     {
-        if (AAM::isAAM()) {
-            add_action('aam_post_edit_user_modal_action', function () {
-                if (current_user_can('aam_manage_jwt')) {
-                    echo AAM_Backend_View::get_instance()->loadPartial(
-                        'jwt-login-url'
-                    );
-                }
-            });
-        }
-
         add_action('aam_clear_settings_action', function() {
             global $wpdb;
 

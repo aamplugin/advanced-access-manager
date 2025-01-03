@@ -46,7 +46,7 @@ class AAM_Service_AdminToolbar
         AAM_Restful_AdminToolbarService::bootstrap();
 
         // Cache admin toolbar
-        if (AAM::isAAM()) {
+        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
             add_action('wp_after_admin_bar_render', function() {
                 AAM::api()->admin_toolbar()->get_items();
             });

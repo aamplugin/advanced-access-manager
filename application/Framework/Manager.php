@@ -27,6 +27,7 @@
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_Capabilities $caps
@@ -115,7 +116,8 @@ final class AAM_Framework_Manager
         'capabilities'           => AAM_Framework_Service_Capabilities::class,
         'caps'                   => AAM_Framework_Service_Capabilities::class,
         'settings'               => AAM_Framework_Service_Settings::class,
-        'policies'               => AAM_Framework_Service_Policies::class
+        'policies'               => AAM_Framework_Service_Policies::class,
+        'hooks'                  => AAM_Framework_Service_Hooks::class
     ];
 
     /**
@@ -139,7 +141,8 @@ final class AAM_Framework_Manager
         AAM_Framework_Type_Resource::ROLE         => AAM_Framework_Resource_Role::class,
         AAM_Framework_Type_Resource::METABOX      => AAM_Framework_Resource_Metabox::class,
         AAM_Framework_Type_Resource::URL          => AAM_Framework_Resource_Url::class,
-        AAM_Framework_Type_Resource::WIDGET       => AAM_Framework_Resource_Widget::class
+        AAM_Framework_Type_Resource::WIDGET       => AAM_Framework_Resource_Widget::class,
+        AAM_Framework_Type_Resource::HOOK         => AAM_Framework_Resource_Hook::class
     ];
 
     /**
