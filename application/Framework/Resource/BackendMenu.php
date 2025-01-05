@@ -26,25 +26,28 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
     /**
      * Check is menu or submenu is restricted
      *
-     * @return boolean
+     * @param string $slug [Optional]
      *
+     * @return boolean
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_restricted()
+    public function is_restricted($slug = null)
     {
         $result = null;
+        $slug   = is_null($slug) ? $this->_internal_id : $slug;
 
-        if (empty($this->_internal_id)) {
+        if (empty($slug)) {
             throw new InvalidArgumentException(
                 'The Backend Menu resource has to be initialized with valid menu slug'
             );
         }
 
         // The default dashboard landing page is always excluded
-        if ($this->_internal_id !== 'index.php') {
-            if (array_key_exists($this->_internal_id, $this->_permissions)) {
-                $result = $this->_permissions[$this->_internal_id]['effect'] === 'deny';
+        if ($slug !== 'index.php') {
+            if (array_key_exists($slug, $this->_permissions)) {
+                $result = $this->_permissions[$slug]['effect'] === 'deny';
             }
         } else {
             $result = false;

@@ -497,4 +497,37 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         return $result;
     }
 
+    /**
+     * Convert term slug or ID to WP_Term
+     *
+     * This method exists because WP core function get_terms does not pass
+     * suppress_filters flag to query
+     *
+     * @param string $slug
+     * @param string $taxonomy
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_term_by_slug($slug, $taxonomy)
+    {
+        static $cache = []; global $wpdb;
+
+        $cache_key = "{$slug}_{$taxonomy}";
+
+        if (!array_key_exists($cache_key, $cache)) {
+            $query = $wpdb->prepare('SELECT t.term_id FROM ' . $wpdb->terms . ' AS t
+                INNER JOIN ' . $wpdb->term_taxonomy . ' AS tt
+                ON t.term_id = tt.term_id
+                WHERE tt.taxonomy = %s AND t.slug = %s', $taxonomy, $slug);
+
+            $cache[$cache_key] = get_term($wpdb->get_var($query), $taxonomy);
+        }
+
+        return $cache[$cache_key];
+    }
+
+
 }

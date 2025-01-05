@@ -22,7 +22,10 @@
  * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
  * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Content content(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Posts posts(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Terms terms(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
@@ -30,6 +33,7 @@
  * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
  * @property AAM_Framework_Utility_Capabilities $caps
  * @property AAM_Framework_Utility_Capabilities $capabilities
  * @property AAM_Framework_Utility_Config $config
@@ -256,71 +260,71 @@ final class AAM_Core_Gateway
         return AAM_Framework_Manager::_()->{$utility_name};
     }
 
-    /**
-     * Get collection of posts
-     *
-     * @param AAM_Framework_Resource_Interface $parent_resource
-     * @param array                            $args            [Optional]
-     *
-     * @return Generator
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function posts($parent_resource, $args = [])
-    {
-        try {
-            if (is_a($parent_resource, AAM_Framework_Resource_PostType::class)) {
-                $result = $this->_query_post_type_posts($parent_resource, $args);
-            } elseif (is_a($parent_resource, AAM_Framework_Resource_Term::class)) {
-                $result = $this->_query_term_posts($parent_resource, $args);
-            } elseif (is_a($parent_resource, AAM_Framework_Resource_Post::class)) {
-                if (is_post_type_hierarchical($parent_resource->post_type)) {
-                    $result = $this->_query_post_posts($parent_resource, $args);
-                } else {
-                    throw new InvalidArgumentException(
-                        'The post type is not hierarchical'
-                    );
-                }
-            } else {
-                throw new InvalidArgumentException('Invalid parent resource type');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
+    // /**
+    //  * Get collection of posts
+    //  *
+    //  * @param AAM_Framework_Resource_Interface $parent_resource
+    //  * @param array                            $args            [Optional]
+    //  *
+    //  * @return Generator
+    //  *
+    //  * @access public
+    //  * @version 7.0.0
+    //  */
+    // public function posts($parent_resource, $args = [])
+    // {
+    //     try {
+    //         if (is_a($parent_resource, AAM_Framework_Resource_PostType::class)) {
+    //             $result = $this->_query_post_type_posts($parent_resource, $args);
+    //         } elseif (is_a($parent_resource, AAM_Framework_Resource_Term::class)) {
+    //             $result = $this->_query_term_posts($parent_resource, $args);
+    //         } elseif (is_a($parent_resource, AAM_Framework_Resource_Post::class)) {
+    //             if (is_post_type_hierarchical($parent_resource->post_type)) {
+    //                 $result = $this->_query_post_posts($parent_resource, $args);
+    //             } else {
+    //                 throw new InvalidArgumentException(
+    //                     'The post type is not hierarchical'
+    //                 );
+    //             }
+    //         } else {
+    //             throw new InvalidArgumentException('Invalid parent resource type');
+    //         }
+    //     } catch (Exception $e) {
+    //         $result = $this->_handle_error($e);
+    //     }
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
-    /**
-     * Get collection of terms
-     *
-     * @param AAM_Framework_Resource_Interface $parent_resource
-     * @param array                            $args            [optional]
-     *
-     * @return Generator
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function terms($parent_resource, $args = [])
-    {
-        try {
-            if (is_a($parent_resource, AAM_Framework_Resource_PostType::class)) {
-                $result = $this->_query_post_type_terms($parent_resource, $args);
-            } elseif (is_a($parent_resource, AAM_Framework_Resource_Taxonomy::class)) {
-                $result = $this->_query_taxonomy_terms($parent_resource, $args);
-            } elseif (is_a($parent_resource, AAM_Framework_Resource_Term::class)) {
-                $result = $this->_query_term_terms($parent_resource, $args);
-            } else {
-                throw new InvalidArgumentException('Invalid parent resource type');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
+    // /**
+    //  * Get collection of terms
+    //  *
+    //  * @param AAM_Framework_Resource_Interface $parent_resource
+    //  * @param array                            $args            [optional]
+    //  *
+    //  * @return Generator
+    //  *
+    //  * @access public
+    //  * @version 7.0.0
+    //  */
+    // public function terms($parent_resource, $args = [])
+    // {
+    //     try {
+    //         if (is_a($parent_resource, AAM_Framework_Resource_PostType::class)) {
+    //             $result = $this->_query_post_type_terms($parent_resource, $args);
+    //         } elseif (is_a($parent_resource, AAM_Framework_Resource_Taxonomy::class)) {
+    //             $result = $this->_query_taxonomy_terms($parent_resource, $args);
+    //         } elseif (is_a($parent_resource, AAM_Framework_Resource_Term::class)) {
+    //             $result = $this->_query_term_terms($parent_resource, $args);
+    //         } else {
+    //             throw new InvalidArgumentException('Invalid parent resource type');
+    //         }
+    //     } catch (Exception $e) {
+    //         $result = $this->_handle_error($e);
+    //     }
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     /**
      * Setup the framework manager

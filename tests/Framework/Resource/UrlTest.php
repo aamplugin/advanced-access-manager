@@ -28,8 +28,8 @@ final class UrlTest extends TestCase
     public function testUrlResourceInit()
     {
         // Verifying that URL is allowed
-        $this->assertFalse(AAM::api()->urls()->is_restricted('/test-page'));
-        $this->assertFalse(AAM::api()->urls()->is_restricted('/another-page'));
+        $this->assertFalse(AAM::api()->urls()->is_denied('/test-page'));
+        $this->assertFalse(AAM::api()->urls()->is_denied('/another-page'));
 
         // Creating a new policy & attaching it to current access level
         $this->assertIsInt(AAM::api()->policies()->create('{
@@ -49,8 +49,8 @@ final class UrlTest extends TestCase
         $perms = AAM::api()->user()->get_resource('url')->get_permissions();
 
         // Verifying that URLs are restricted
-        $this->assertTrue(AAM::api()->urls()->is_restricted('/test-page'));
-        $this->assertTrue(AAM::api()->urls()->is_restricted('/another-page'));
+        $this->assertTrue(AAM::api()->urls()->is_denied('/test-page'));
+        $this->assertTrue(AAM::api()->urls()->is_denied('/another-page'));
 
         $this->assertEquals([
             '/test-page' => [

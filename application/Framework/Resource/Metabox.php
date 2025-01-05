@@ -29,8 +29,8 @@ class AAM_Framework_Resource_Metabox implements AAM_Framework_Resource_Interface
      * @param string $slug [Optional]
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_restricted($slug = null)

@@ -28,9 +28,7 @@ final class ToolbarTest extends TestCase
     public function testToolbarResourceInit()
     {
         // Verifying that toolbar item is allowed
-        $this->assertFalse(
-            AAM::api()->admin_toolbar()->is_restricted('documentation')
-        );
+        $this->assertFalse(AAM::api()->admin_toolbar()->is_denied('documentation'));
 
         // Creating a new policy & attaching it to current access level
         $this->assertIsInt(AAM::api()->policies()->create('{
@@ -41,9 +39,7 @@ final class ToolbarTest extends TestCase
         }'));
 
         // Verifying that toolbar item is restricted
-        $this->assertTrue(
-            AAM::api()->admin_toolbar()->is_restricted('documentation')
-        );
+        $this->assertTrue(AAM::api()->admin_toolbar()->is_denied('documentation'));
     }
 
 }

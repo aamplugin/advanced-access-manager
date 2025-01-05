@@ -39,8 +39,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * Return the complete admin toolbar item list with permissions
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items()
@@ -67,8 +67,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * Alias for the get_items method
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function items()
@@ -82,8 +82,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id Menu item ID
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item($item_id)
@@ -109,8 +109,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function item($item_id)
@@ -124,11 +124,11 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function restrict($item_id)
+    public function deny($item_id)
     {
         try {
             $result = $this->_update_item_permission($item_id, true);
@@ -186,7 +186,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     }
 
     /**
-     * Check if toolbar item is restricted/hidden
+     * Check if toolbar item is denied
      *
      * @param string $item_id
      *
@@ -195,11 +195,18 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access public
      * @version 7.0.0
      */
-    public function is_restricted($item_id)
+    public function is_denied($item_id)
     {
+        $result = null;
+
         try {
+            // Getting all the defined permissions
+            $permissions = $this->_get_resource()->get_permissions();
+
             // Step #1. Checking if provided item has any access controls defined
-            $result = $this->_get_resource($item_id)->is_restricted();
+            if (isset($permissions[$item_id])) {
+                $result = $permissions[$item_id]['effect'] !== 'allow';
+            }
 
             // Step #2. Checking if item has parent item and if so, determining if
             // parent item is restricted
@@ -209,7 +216,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
 
                 if (!empty($item['parent_id'])) {
                     $parent_id = $item['parent_id'];
-                    $result    = $this->_get_resource($parent_id)->is_restricted();
+
+                    if (isset($permissions[$parent_id])) {
+                        $result = $permissions[$parent_id]['effect'] !== 'allow';
+                    }
                 }
             }
 
@@ -243,7 +253,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      */
     public function is_allowed($item_id)
     {
-        $result = $this->is_restricted($item_id);
+        $result = $this->is_denied($item_id);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -258,10 +268,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($item_id = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::TOOLBAR, $item_id
+            AAM_Framework_Type_Resource::TOOLBAR
         );
     }
 
@@ -381,7 +391,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      */
     private function _prepare_item($item)
     {
-        $resource = $this->_get_resource($item['id']);
+        $resource = $this->_get_resource();
         $response = [
             'id'            => $item['id'],
             'uri'           => $this->_prepare_item_uri($item['href']),

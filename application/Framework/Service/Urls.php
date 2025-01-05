@@ -153,12 +153,12 @@ implements
      * @param string|array $url_schema
      * @param array        $redirect   [optional]
      *
-     * @return bool|WP_Error|null
-     *
+     * @return bool|WP_Error
      * @access public
+     *
      * @version 7.0.0
      */
-    public function restrict($url_schema, $redirect = null)
+    public function deny($url_schema, $redirect = null)
     {
         $result = true;
 
@@ -176,29 +176,13 @@ implements
     }
 
     /**
-     * Alias method for the redirect
-     *
-     * @param string|array $url_schema
-     * @param array        $redirect       [optional]
-     *
-     * @return bool|WP_Error
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function deny($url_schema, $redirect = null)
-    {
-        return $this->restrict($url_schema, $redirect);
-    }
-
-    /**
      * Reset all rules or any given
      *
      * @param string|array|null $url_schema [optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($url_schema = null)
@@ -225,60 +209,31 @@ implements
     }
 
     /**
-     * Get URL resource
-     *
-     * @param string $url
-     *
-     * @return AAM_Framework_Resource_Url
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_url($url)
-    {
-        try {
-            $result = $this->_get_resource($this->misc->sanitize_url($url));
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_url method
-     *
-     * @param string $url
-     *
-     * @return AAM_Framework_Resource_Url
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function url($url)
-    {
-        return $this->get_url($url);
-    }
-
-    /**
-     * Determine if given URL is restricted
+     * Alias method for the is_restricted
      *
      * @param string $url
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_restricted($url)
+    public function is_denied($url)
     {
         try {
-            $resource = $this->_get_resource($this->misc->sanitize_url($url));
-            $result   = apply_filters(
+            $permission = $this->_get_permission_by_url($url);
+
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            } else {
+                $result = null;
+            }
+
+            $result = apply_filters(
                 'aam_url_is_restricted_filter',
-                $resource->is_restricted(),
+                $result,
                 $url,
-                $this
+                $permission
             );
 
             // Finally making sure we are returning correct value
@@ -291,34 +246,18 @@ implements
     }
 
     /**
-     * Alias method for the is_restricted
-     *
-     * @param string $url
-     *
-     * @return bool|WP_Error
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_denied($url)
-    {
-        return $this->is_restricted($url);
-    }
-
-    /**
      * Determine if given URL is allowed
      *
      * @param string $url
-     * @param array  $inline_context
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_allowed($url)
     {
-        $result = $this->is_restricted($url);
+        $result = $this->is_denied($url);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -329,16 +268,26 @@ implements
      * @param string $url
      *
      * @return array|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect($url)
     {
+        $result = null;
+
         try {
-            $result = $this->_get_resource(
+            $permission = $this->_get_permission_by_url(
                 $this->misc->sanitize_url($url)
-            )->get_redirect();
+            );
+
+            if (!empty($permission)) {
+                if (array_key_exists('redirect', $permission)) {
+                    $result = $permission['redirect'];
+                } else {
+                    $result = [ 'type' => 'default' ];
+                }
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -347,18 +296,110 @@ implements
     }
 
     /**
-     * Get redirect for given URL
+     * Find permission that matches given URL
      *
      * @param string $url
      *
      * @return array|null
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
-    public function redirect($url)
+    private function _get_permission_by_url($url)
     {
-        return $this->get_redirect($url);
+        $permissions = $this->_sort_permissions(
+            $this->_get_resource()->get_permissions()
+        );
+
+        // Step #1. Let's check if there is a full URL (potentially with query
+        //          params explicitly defined
+        $result = $this->_find_permission_by_url($url, $permissions);
+
+        // Step #2. Parsing the incoming URL and checking if there is the
+        //          same URL without query params defined
+        if (is_null($result)) {
+            $parsed_url = AAM_Framework_Manager::_()->misc->parse_url($url);
+
+            if (!empty($parsed_url['path'])) {
+                $result = $this->_find_permission_by_url(
+                    $parsed_url['path'], $permissions
+                );
+            }
+        }
+
+        return apply_filters(
+            'aam_get_permission_by_url_filter',
+            $result,
+            $url,
+            $permissions
+        );
+    }
+
+    /**
+     * Get URL access rule that matches given URL
+     *
+     * @param string $url
+     * @param array  $permissions
+     *
+     * @return array|null
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _find_permission_by_url($search_url, $permissions)
+    {
+        $result = null;
+        $target = AAM_Framework_Manager::_()->misc->parse_url($search_url);
+
+        foreach ($permissions as $url => $permission) {
+            $current = AAM_Framework_Manager::_()->misc->parse_url($url);
+
+            // Check if two relative paths match
+            $matched = $target['path'] === $current['path'];
+
+            // If yes, we also verify that the query params overlap, if provided
+            if ($matched && !empty($current['params'])) {
+                foreach($current['params'] as $key => $val) {
+                    $matched = $matched
+                        && array_key_exists($key, $target['params'])
+                        && ($target['params'][$key] === $val);
+                }
+            }
+
+            if ($matched) {
+                $result = $permission;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Sort all permissions before processing
+     *
+     * @param array $permissions
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _sort_permissions($permissions)
+    {
+        // Property organize all the settings
+        // Place all "allowed" rules in the end of the list to allow the ability to
+        // define whitelisted set of conditions
+        $denied = $allowed = [];
+
+        foreach ($permissions as $url => $permission) {
+            if ($permission['effect'] === 'allow') {
+                $allowed[$url] = $permission;
+            } else {
+                $denied[$url] = $permission;
+            }
+        }
+
+        return array_merge($denied, $allowed);
     }
 
     /**
@@ -369,8 +410,8 @@ implements
      * @param array|null $redirect
      *
      * @return bool
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _set_permission($url_schema, $effect, $redirect = null)
@@ -405,8 +446,8 @@ implements
      * @param string $url_schema
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _delete_permission($url_schema)
@@ -433,8 +474,8 @@ implements
      * @param string|null $url
      *
      * @return AAM_Framework_Resource_Url
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _get_resource($url = null)
@@ -452,8 +493,8 @@ implements
      * @param AAM_Framework_Resource_Url $resource
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_url_schema_model($url_schema, $permission, $resource)
@@ -474,17 +515,13 @@ implements
      * @param string $url_schema
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _sanitize_url_schema($url_schema)
     {
-        $result = apply_filters(
-            'aam_url_sanitize_url_filter',
-            $this->misc->sanitize_url($url_schema),
-            $url_schema
-        );
+        $result = $this->misc->sanitize_url($url_schema);
 
         if ($result === false) {
             throw new InvalidArgumentException('The incoming URL schema is invalid');

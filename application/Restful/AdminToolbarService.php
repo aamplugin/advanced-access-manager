@@ -157,7 +157,7 @@ class AAM_Restful_AdminToolbarService
             if ($request->get_param('effect') === 'allow') {
                 $result = $service->allow($item_id);
             } else {
-                $result = $service->restrict($item_id);
+                $result = $service->deny($item_id);
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);

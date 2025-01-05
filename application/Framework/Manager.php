@@ -22,7 +22,10 @@
  * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
  * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Content content(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Posts posts(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Terms terms(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
  * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
@@ -30,6 +33,7 @@
  * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
  *
  * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
  * @property AAM_Framework_Utility_Capabilities $caps
  * @property AAM_Framework_Utility_Capabilities $capabilities
  * @property AAM_Framework_Utility_Config $config
@@ -78,6 +82,7 @@ final class AAM_Framework_Manager
      */
     private $_utilities = [
         'cache'         => AAM_Framework_Utility_Cache::class,
+        'object_cache'  => AAM_Framework_Utility_ObjectCache::class,
         'misc'          => AAM_Framework_Utility_Misc::class,
         'config'        => AAM_Framework_Utility_Config::class,
         'redirect'      => AAM_Framework_Utility_Redirect::class,
@@ -111,8 +116,15 @@ final class AAM_Framework_Manager
         'metaboxes'              => AAM_Framework_Service_Metaboxes::class,
         'widgets'                => AAM_Framework_Service_Widgets::class,
         'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
-        'identities'             => AAM_Framework_Service_Identities::class,
+
+        // TODO: Remove these
         'content'                => AAM_Framework_Service_Content::class,
+        'identities'             => AAM_Framework_Service_Identities::class,
+
+        'posts'                  => AAM_Framework_Service_Posts::class,
+        'terms'                  => AAM_Framework_Service_Terms::class,
+        'post_types'             => AAM_Framework_Service_PostTypes::class,
+        'taxonomies'             => AAM_Framework_Service_Taxonomies::class,
         'capabilities'           => AAM_Framework_Service_Capabilities::class,
         'caps'                   => AAM_Framework_Service_Capabilities::class,
         'settings'               => AAM_Framework_Service_Settings::class,

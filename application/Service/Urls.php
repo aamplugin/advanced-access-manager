@@ -22,8 +22,8 @@ class AAM_Service_Urls
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -46,8 +46,8 @@ class AAM_Service_Urls
      * Initialize URI hooks
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize_hooks()
@@ -65,8 +65,8 @@ class AAM_Service_Urls
      * is denied to the given URL and if so - redirect user accordingly.
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function authorize()
@@ -74,7 +74,7 @@ class AAM_Service_Urls
         $service = AAM::api()->urls();
         $uri     = AAM::api()->misc->get($_SERVER, 'REQUEST_URI');
 
-        if ($service->is_restricted($uri)) {
+        if ($service->is_denied($uri)) {
             $redirect = $service->get_redirect($uri);
 
             if (empty($redirect) || $redirect['type'] === 'default') {

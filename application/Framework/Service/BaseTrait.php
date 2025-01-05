@@ -76,17 +76,17 @@ trait AAM_Framework_Service_BaseTrait
      * @param array  $args
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __call($name, $args)
     {
         try {
             if ($this->_extended_method_exists($name)) {
-                    $result = call_user_func_array(
-                        $this->_extended_methods[$name], $args
-                    );
+                $result = call_user_func_array(
+                    $this->_extended_methods[$name], $args
+                );
             } elseif (AAM_Framework_Manager::_()->has_service($name)) {
                 $result = AAM_Framework_Manager::_()->{$name}(...$args);
             } else {
@@ -105,8 +105,8 @@ trait AAM_Framework_Service_BaseTrait
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __get($name)

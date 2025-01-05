@@ -48,13 +48,13 @@ final class AdminToolbarTest extends TestCase
         $service = AAM::api()->admin_toolbar('role:editor');
 
         // Update permission for the entire branch
-        $this->assertTrue($service->restrict('wp-logo'));
+        $this->assertTrue($service->deny('wp-logo'));
 
         // Assert that the entire branch is restricted
-        $this->assertTrue($service->is_restricted('wp-logo'));
+        $this->assertTrue($service->is_denied('wp-logo'));
 
         // Assert that child item is also restricted
-        $this->assertTrue($service->is_restricted('wporg'));
+        $this->assertTrue($service->is_denied('wporg'));
     }
 
     /**
@@ -68,14 +68,14 @@ final class AdminToolbarTest extends TestCase
         $service = AAM::api()->admin_toolbar('role:editor');
 
         // Update permission for the entire branch
-        $this->assertTrue($service->restrict('aam'));
+        $this->assertTrue($service->deny('aam'));
 
         // Assert that the entire branch is restricted
-        $this->assertTrue($service->is_restricted('aam'));
+        $this->assertTrue($service->is_denied('aam'));
         $this->assertFalse($service->is_allowed('aam'));
 
         // Assert that child item is also restricted
-        $this->assertFalse($service->is_restricted('site-name'));
+        $this->assertFalse($service->is_denied('site-name'));
         $this->assertTrue($service->is_allowed('site-name'));
     }
 

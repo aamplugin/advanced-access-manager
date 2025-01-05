@@ -33,16 +33,14 @@ final class UrlsTest extends TestCase
         $service = AAM::api()->default()->urls();
 
         // Setting access to URL without query params
-        $this->assertTrue($service->restrict('/url-a'));
+        $this->assertTrue($service->deny('/url-a'));
 
         // Verifying that visitors do not have access to the URL
         $visitor_urls = AAM::api()->urls();
 
-        $this->assertTrue($visitor_urls->is_restricted('/url-a'));
-        $this->assertTrue($visitor_urls->url('/url-a')->is_restricted());
-        $this->assertTrue($visitor_urls->is_restricted('/url-a?random-param=2'));
-        $this->assertFalse($visitor_urls->is_restricted('/url-amber'));
-        $this->assertNull($visitor_urls->url('/url-amber')->is_restricted());
+        $this->assertTrue($visitor_urls->is_denied('/url-a'));
+        $this->assertTrue($visitor_urls->is_denied('/url-a?random-param=2'));
+        $this->assertFalse($visitor_urls->is_denied('/url-amber'));
     }
 
     /**
@@ -58,17 +56,17 @@ final class UrlsTest extends TestCase
         $service = AAM::api()->default()->urls();
 
         // Setting access to URL without query params
-        $this->assertTrue($service->restrict('/url-a?test=a'));
+        $this->assertTrue($service->deny('/url-a?test=a'));
 
         // Verifying that visitors do not have access to the URL
         $visitor_urls = AAM::api()->urls();
 
-        $this->assertFalse($visitor_urls->is_restricted('/url-a'));
-        $this->assertTrue($visitor_urls->is_restricted('/url-a?test=a'));
-        $this->assertTrue($visitor_urls->is_restricted('/url-a?test=a&blah=b'));
-        $this->assertFalse($visitor_urls->is_restricted('/url-amber'));
-        $this->assertFalse($visitor_urls->is_restricted('/url-a?test=b'));
-        $this->assertTrue($visitor_urls->is_restricted('/url-a?blah=b&test=a'));
+        $this->assertFalse($visitor_urls->is_denied('/url-a'));
+        $this->assertTrue($visitor_urls->is_denied('/url-a?test=a'));
+        $this->assertTrue($visitor_urls->is_denied('/url-a?test=a&blah=b'));
+        $this->assertFalse($visitor_urls->is_denied('/url-amber'));
+        $this->assertFalse($visitor_urls->is_denied('/url-a?test=b'));
+        $this->assertTrue($visitor_urls->is_denied('/url-a?blah=b&test=a'));
     }
 
 }

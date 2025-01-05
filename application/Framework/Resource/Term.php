@@ -74,12 +74,11 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
      */
     protected function pre_init_hook($resource_identifier)
     {
-        if (is_numeric($resource_identifier)) {
-            $term               = get_term($resource_identifier);
-            $this->_internal_id = $resource_identifier;
-        } elseif (is_array($resource_identifier)) { // Narrowed down with taxonomy?
-            $this->_internal_id = []; // Start building the term internal ID
+        $term = null;
 
+        if (is_numeric($resource_identifier)) {
+            $term = get_term($resource_identifier);
+        } elseif (is_array($resource_identifier)) { // Narrowed down with taxonomy?
             // Based on the WP DB structure, the wp_terms table contains the unique
             // list of all terms, however, the same term can be associated with
             // multiple taxonomies. The table wp_term_taxonomy has the UNIQUE KEY
@@ -87,38 +86,35 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
             // that the table wp_term_relationships is the one that actually associate
             // terms with other content types (e.g. posts) and this table uses
             // term_taxonomy_id for associations.
-            if (isset($resource_identifier['taxonomy'])) {
-                $taxonomy                       = $resource_identifier['taxonomy'];
-                $this->_internal_id['taxonomy'] = $taxonomy;
+            if (!empty($resource_identifier['taxonomy'])) {
+                $taxonomy = $resource_identifier['taxonomy'];
             } else {
                 $taxonomy = '';
             }
 
-            if (isset($resource_identifier['post_type'])) {
-                $this->_internal_id['post_type'] = $resource_identifier['post_type'];
-            }
-
             if (isset($resource_identifier['slug'])) {
-                $term = get_term_by('slug', $resource_identifier['slug'], $taxonomy);
-                $this->_internal_id['slug'] = $resource_identifier['slug'];
-            } else {
+                $term = AAM_Framework_Manager::_()->misc->get_term_by_slug(
+                    $resource_identifier['slug'], $taxonomy
+                );
+            } elseif (!empty($resource_identifier['id'])) {
                 $term = get_term($resource_identifier['id'], $taxonomy);
-                $this->_internal_id['id'] = $resource_identifier['id'];
             }
         } elseif(is_a($resource_identifier, WP_Term::class)) {
             $term = $resource_identifier;
+        }
+
+        if (is_a($term, WP_Term::class)) {
+            $this->_core_instance = $term;
 
             // Preparing the internal ID
             $this->_internal_id = [
                 'id'       => $term->term_id,
                 'taxonomy' => $term->taxonomy
             ];
-        } else {
-            $term = null;
-        }
 
-        if (is_a($term, WP_Term::class)) {
-            $this->_core_instance = $term;
+            if (!empty($resource_identifier['post_type'])) {
+                $this->_internal_id['post_type'] = $resource_identifier['post_type'];
+            }
         } else {
             throw new OutOfRangeException('The term resource identifier is invalid');
         }

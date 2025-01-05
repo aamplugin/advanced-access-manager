@@ -172,11 +172,9 @@ class AAM_Service_Content
 
         // Evaluate if user can comment on a post
         add_filter('comments_open', function ($open, $post_id) {
-            $resource = AAM::api()->content()->get_post($post_id);
-
             // If Leave Comments option is defined then override the default status.
             // Otherwise keep it as-is
-            if ($resource->is_allowed_to('comment') === false) {
+            if (AAM::api()->posts()->is_denied_to($post_id, 'comment')) {
                 $open = false;
             }
 
@@ -204,9 +202,9 @@ class AAM_Service_Content
                 $status = (isset($request['status']) ? $request['status'] : null);
 
                 if (in_array($status, array('publish', 'future'), true)) {
-                    $resource = AAM::api()->content()->get_post($request['id']);
+                    $post_id = intval($request['id']);
 
-                    if ($resource->is_denied_to('publish') === false) {
+                    if (AAM::api()->posts()->is_denied_to($post_id, 'publish')) {
                         $post = new WP_Error(
                             'rest_cannot_publish',
                             __('You are not allowed to publish this content', AAM_KEY),
@@ -233,31 +231,6 @@ class AAM_Service_Content
     }
 
     /**
-     * Get current post
-     *
-     * @return AAM_Framework_Resource_Post|null
-     *
-     * @access public
-     *
-     * @global WP_Query $wp_query
-     * @global WP_Post  $post
-     *
-     * @version 7.0.0
-     */
-    public function get_current_post()
-    {
-        $post = AAM::api()->misc->get_current_post();
-
-        if (is_a($post, 'WP_Post')) {
-            $result = AAM::api()->content()->get_post($post->ID);
-        } else {
-            $result = null;
-        }
-
-        return $result;
-    }
-
-    /**
      * Main frontend access control hook
      *
      * @return void
@@ -269,13 +242,15 @@ class AAM_Service_Content
      */
     private function _authorize_post_access()
     {
-        $post = $this->get_current_post();
+        $post = AAM::api()->misc->get_current_post();
 
-        if (is_a($post, AAM_Framework_Resource_Post::class)) {
-            if ($post->is_restricted()) {
+        if (!empty($post)) {
+            $service = AAM::api()->posts();
+
+            if ($service->is_restricted($post)) {
                 AAM::api()->redirect->do_access_denied_redirect();
-            } elseif ($post->is_redirected()) {
-                AAM::api()->redirect->do_redirect($post->get_redirect());
+            } elseif ($service->is_redirected($post)) {
+                AAM::api()->redirect->do_redirect($service->get_redirect($post));
             }
         }
     }
@@ -298,9 +273,7 @@ class AAM_Service_Content
     {
         // Honor the manually set password on the post
         if (($result === false) && is_a($post, 'WP_Post')) {
-            $resource = AAM::api()->content()->get_post($post->ID);
-            $check    = $this->_verify_post_password($resource);
-            $result   = is_wp_error($check);
+            $result = is_wp_error($this->_verify_post_password($post));
         }
 
         return $result;
@@ -312,23 +285,23 @@ class AAM_Service_Content
      * If post has password set, return WP_Error so the application can do further
      * authorization process.
      *
-     * @param AAM_Framework_Resource_Post $post
+     * @param WP_Post $post
      *
      * @return boolean|WP_Error
      * @access private
      *
      * @version 7.0.0
      */
-    private function _verify_post_password(AAM_Framework_Resource_Post $post)
+    private function _verify_post_password($post)
     {
         $result = true;
 
-        if ($post->is_password_protected()) {
+        if (AAM::api()->posts()->is_password_protected($post)) {
             // If password is empty or not provided, try to read it from the cookie.
             // This is the default WordPress behavior when it comes to password
             // protected posts/pages
             $is_matched = AAM_Core_API::prepareHasher()->CheckPassword(
-                $post->get_password(),
+                AAM::api()->posts()->get_password($post),
                 wp_unslash(AAM::api()->misc->get(
                     $_COOKIE, 'wp-postpass_' . COOKIEHASH, ''
                 ))
@@ -406,11 +379,11 @@ class AAM_Service_Content
     private function _get_nav_menu_items($pages)
     {
         if (is_array($pages)) {
-            $service = AAM::api()->content();
+            $service = AAM::api()->posts();
 
             foreach ($pages as $i => $page) {
                 if (in_array($page->type, array('post_type', 'custom'), true)) {
-                    if ($service->get_post($page->object_id)->is_hidden()) {
+                    if ($service->is_hidden($page->object_id)) {
                         unset($pages[$i]);
                     }
                 }
@@ -569,25 +542,26 @@ class AAM_Service_Content
      * @param WP_REST_Request  $request
      *
      * @access public
+     * @return WP_REST_Response
      *
      * @version 7.0.0
      */
     private function _authorize_post_rest_access($response, $post, $request)
     {
-        $resource = AAM::api()->content()->get_post($post->ID);
+        $service = AAM::api()->posts();
 
-        if ($resource->is_password_protected()) {
+        if ($service->is_password_protected($post)) {
             $password = isset($request['_password']) ? $request['_password'] : null;
 
-            if ($resource->get_password() !== $password) {
+            if ($service->get_password($post) !== $password) {
                 $response->set_status(401);
                 $response->set_data([
                     'code'    => 'rest_unauthorized',
                     'message' => 'The post is password protected. Invalid password provided.'
                 ]);
             }
-        } elseif ($resource->is_redirected()) {
-            $redirect = $resource->get_redirect();
+        } elseif ($service->is_redirected($post)) {
+            $redirect = $service->get_redirect($post);
 
             // Determine redirect HTTP status code and use it if applicable for given
             // redirect type
@@ -607,7 +581,7 @@ class AAM_Service_Content
                     )
                 ]
             ]);
-        } elseif ($resource->is_restricted()) {
+        } elseif ($service->is_restricted($post)) {
             $response->set_status(401);
             $response->set_data([
                 'code'    => 'rest_unauthorized',
@@ -634,19 +608,21 @@ class AAM_Service_Content
 
         if (!$in) {
             $in   = true;
-            $post = $this->get_current_post();
+            $post = AAM::api()->misc->get_current_post();
 
-            if (is_a($post, AAM_Framework_Resource_Post::class)
-                && $post->is_teased()
-            ) {
-                // Replace the [excerpt] placeholder with posts excerpt and do
-                // short-code evaluation
-                $content = do_shortcode(str_replace(
-                    '[excerpt]', $post->post_excerpt, $post->get_teaser_message()
-                ));
+            if (!empty($post)){
+                if (AAM::api()->posts()->is_teaser_message_set($post)) {
+                    // Replace the [excerpt] placeholder with posts excerpt and do
+                    // short-code evaluation
+                    $content = do_shortcode(str_replace(
+                        '[excerpt]',
+                        $post->post_excerpt,
+                        AAM::api()->posts()->get_teaser_message($post)
+                    ));
 
-                // Decorate message
-                $content = apply_filters('the_content', $content);
+                    // Decorate message
+                    $content = apply_filters('the_content', $content);
+                }
             }
 
             $in = false;
@@ -692,17 +668,21 @@ class AAM_Service_Content
             // If post_id is not empty, then, potentially we are checking
             // permission to perform one of the action against a post
             if (!empty($post_id)) {
-                $post = get_post($post_id);
+                if (is_a($post, WP_Post::class) && $post_id === $post->ID) {
+                    $p = $post;
+                } else {
+                    $p = get_post($post_id);
+                }
 
-                if (is_a($post, 'WP_Post')) {
-                    $post_type = get_post_type_object($post->post_type);
+                if (is_a($p, 'WP_Post')) {
+                    $post_type = get_post_type_object($p->post_type);
 
                     if (is_a($post_type, 'WP_Post_Type')) {
                         $caps = $this->__map_post_type_caps(
                             $post_type,
                             $cap,
                             $caps,
-                            $post,
+                            $p,
                             $args
                         );
                     }
@@ -805,9 +785,7 @@ class AAM_Service_Content
      */
     private function _map_publish_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->content()->get_post($post_id);
-
-        if ($resource->is_denied_to('publish') === true) {
+        if (AAM::api()->posts()->is_denied_to($post_id, 'publish')) {
             $caps[] = 'do_not_allow';
         }
 
@@ -827,10 +805,10 @@ class AAM_Service_Content
      */
     private function _map_edit_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->content()->get_post($post_id);
-        $is_draft = $resource->post_status === 'auto-draft';
+        $post     = get_post($post_id);
+        $is_draft = $post->post_status === 'auto-draft';
 
-        if (!$is_draft && ($resource->is_denied_to('edit') === true)) {
+        if (!$is_draft && (AAM::api()->posts()->is_denied_to($post, 'edit'))) {
             $caps[] = 'do_not_allow';
         }
 
@@ -850,9 +828,7 @@ class AAM_Service_Content
      */
     private function _map_delete_post_caps($caps, $post_id)
     {
-        $resource = AAM::api()->content()->get_post($post_id);
-
-        if ($resource->is_denied_to('delete') === true) {
+        if (AAM::api()->posts()->is_denied_to($post_id, 'delete')) {
             $caps[] = 'do_not_allow';
         }
 
@@ -873,13 +849,13 @@ class AAM_Service_Content
      */
     private function _map_read_post_caps($caps, $post_id, $password = null)
     {
-        $post = AAM::api()->content()->get_post($post_id);
+        $service = AAM::api()->posts();
 
-        if ($post->is_password_protected()) {
-            if ($post->get_password() !== $password) {
+        if ($service->is_password_protected($post_id)) {
+            if ($service->get_password($post_id) !== $password) {
                 $caps[] = 'do_not_allow';
             }
-        } elseif ($post->is_restricted()) {
+        } elseif ($service->is_restricted($post_id)) {
             $caps[] = 'do_not_allow';
         }
 

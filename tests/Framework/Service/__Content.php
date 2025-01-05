@@ -50,32 +50,6 @@ final class ContentTest extends TestCase
     }
 
     /**
-     * Get post resource
-     *
-     * @return void
-     */
-    public function testGetPostResource() : void
-    {
-        $post_id = $this->createPost();
-        $post    = AAM::api()->content()->post($post_id);
-
-        $this->assertEquals('AAM_Framework_Resource_Post', get_class($post));
-        $this->assertEquals('post', $post->get_core_instance()->post_type);
-        $this->assertEquals([
-            'id'        => $post_id,
-            'post_type' => 'post'
-        ], $post->get_internal_id(false));
-
-        // Making sure we can get a post by slug
-        $post_id = $this->createPost([ 'post_name' => 'get-post-resource' ]);
-        $post    = AAM::api()->content()->post('get-post-resource', 'post');
-
-        $this->assertEquals('AAM_Framework_Resource_Post', get_class($post));
-        $this->assertEquals('get-post-resource', $post->get_core_instance()->post_name);
-        $this->assertEquals("$post_id|post", $post->get_internal_id());
-    }
-
-    /**
      * Get term resource
      *
      * @return void
@@ -87,7 +61,7 @@ final class ContentTest extends TestCase
 
         $this->assertEquals('AAM_Framework_Resource_Term', get_class($term));
         $this->assertEquals('category', $term->get_core_instance()->taxonomy);
-        $this->assertEquals($term_id, $term->get_internal_id());
+        $this->assertEquals("{$term_id}|category", $term->get_internal_id());
 
         // Try to get term with compound key
         $term_id = $this->createTerm([ 'name' => 'Another Category' ]);

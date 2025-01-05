@@ -14,6 +14,42 @@
  * is strongly recommended to adhere to this interface and periodically check if it
  * changed.
  *
+ * @method AAM_Framework_Service_Urls urls(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Jwts jwts(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Posts posts(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Terms terms(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
+ *
+ * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
+ * @property AAM_Framework_Utility_Capabilities $caps
+ * @property AAM_Framework_Utility_Capabilities $capabilities
+ * @property AAM_Framework_Utility_Config $config
+ * @property AAM_Framework_Utility_Misc $misc
+ * @property AAM_Framework_Utility_Redirect $redirect
+ * @property AAM_Framework_Utility_Roles $roles
+ * @property AAM_Framework_Utility_Users $users
+ * @property AAM_Framework_Utility_Db $db
+ * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
+ * @property AAM_Framework_Utility_Policy $policy
+ *
  *
  * @package AAM
  * @version 7.0.0
@@ -45,8 +81,9 @@ interface AAM_Framework_AccessLevel_Interface
      * Get resource by its type and internal ID
      *
      * @param string     $resource_type
-     * @param string|int $resource_id
-     * @param boolean    $skip_inheritance
+     * @param string|int $resource_id      [Optional]
+     * @param boolean    $skip_inheritance [Optional]
+     * @param boolean    $reload           [Optional]
      *
      * @return AAM_Framework_Resource_Interface|null
      *
@@ -56,21 +93,27 @@ interface AAM_Framework_AccessLevel_Interface
     public function get_resource(
         $resource_type,
         $resource_id = null,
-        $skip_inheritance = false
+        $skip_inheritance = false,
+        $reload = null
     );
 
     /**
      * Get preference container
      *
      * @param string  $ns
-     * @param boolean $skip_inheritance
+     * @param boolean $skip_inheritance [Optional]
+     * @param boolean $reload           [Optional]
      *
      * @return AAM_Framework_Preference_Interface|null
      *
      * @access public
      * @version 7.0.0
      */
-    public function get_preference($ns, $skip_inheritance = false);
+    public function get_preference(
+        $ns,
+        $skip_inheritance = false,
+        $reload = null
+    );
 
     /**
      * Get AAM proxy instance to the WP core instance (if applicable)

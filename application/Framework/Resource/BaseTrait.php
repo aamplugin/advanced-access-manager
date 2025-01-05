@@ -27,8 +27,8 @@ trait AAM_Framework_Resource_BaseTrait
      * Reference to the access level
      *
      * @var AAM_Framework_AccessLevel_Interface
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_access_level = null;
@@ -37,8 +37,8 @@ trait AAM_Framework_Resource_BaseTrait
      * Collection of extended methods
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_extended_methods = [];
@@ -50,8 +50,8 @@ trait AAM_Framework_Resource_BaseTrait
      * properly inherited and merged.
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_permissions = [];
@@ -64,8 +64,8 @@ trait AAM_Framework_Resource_BaseTrait
      * that are explicitly defined for current resource.
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_explicit_permissions = [];
@@ -77,9 +77,9 @@ trait AAM_Framework_Resource_BaseTrait
      * auto-incremented ID, or post type - unique slug. Other resource, like menu,
      * toolbar, do not have unique.
      *
-     * @var int|string|array|null
-     *
+     * @var mixed
      * @access private
+     *
      * @version 7.0.0
      */
     private $_internal_id = null;
@@ -88,8 +88,8 @@ trait AAM_Framework_Resource_BaseTrait
      * WordPress core instance of the resource
      *
      * @var mixed
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_core_instance = null;
@@ -97,17 +97,20 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * Constructor
      *
+     * If $resource_identifier is not provided, the entire resource instance acts as
+     * permissions aggregate. An aggregate is like a container of all explicitly
+     * defined permissions for a given resource type
+     *
      * @param AAM_Framework_AccessLevel_Interface $access_level
-     * @param mixed                               $resource_identifier
+     * @param mixed                               $resource_identifier [Optional]
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function __construct(
-        AAM_Framework_AccessLevel_Interface $access_level, $resource_identifier
-    ) {
+    public function __construct($access_level, $resource_identifier = null)
+    {
         $this->_access_level = $access_level;
 
         if (method_exists($this, 'pre_init_hook')) {
@@ -152,18 +155,14 @@ trait AAM_Framework_Resource_BaseTrait
 
             $this->_extended_methods = $closures;
         }
-
-        if (method_exists($this, 'post_init_hook')) {
-            $this->post_init_hook();
-        }
     }
 
     /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_access_level()
@@ -178,8 +177,8 @@ trait AAM_Framework_Resource_BaseTrait
      * @param array  $arguments
      *
      * @return mixed
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __call($name, $arguments)
@@ -211,8 +210,8 @@ trait AAM_Framework_Resource_BaseTrait
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __get($name)
@@ -250,13 +249,33 @@ trait AAM_Framework_Resource_BaseTrait
      * Get WordPress core instance
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_core_instance()
     {
         return $this->_core_instance;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function is_customized()
+    {
+        return !empty($this->_explicit_permissions);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function reset()
+    {
+        $this->_explicit_permissions = [];
+
+        return AAM_Framework_Manager::_()->settings([
+            'access_level' => $this->get_access_level()
+        ])->delete_setting($this->_get_settings_ns());
     }
 
     /**
@@ -302,35 +321,172 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function is_customized()
+    public function add_permission($permission_key, ...$args)
     {
-        return !empty($this->_explicit_permissions);
+        $permissions = $this->_explicit_permissions;
+
+        // Determine if $permission argument was provided
+        $permission = array_shift($args);
+        $permission = !is_null($permission) ? $permission : 'deny';
+
+        $permissions[$permission_key] = apply_filters(
+            'aam_framework_resource_add_permission_filter',
+            $this->_sanitize_permission($permission, $permission_key),
+            $args
+        );
+
+        return $this->set_permissions($permissions, true);
     }
 
     /**
      * @inheritDoc
      */
-    public function reset()
+    public function add_permissions($permissions, ...$args)
     {
-        $this->_explicit_permissions = [];
+        $normalized = [];
 
-        return AAM_Framework_Manager::_()->settings([
-            'access_level' => $this->get_access_level()
-        ])->delete_setting($this->_get_settings_ns());
+        foreach($permissions as $key => $value) {
+            if (is_numeric($key) && is_string($value)) {
+                $normalized[$value] = apply_filters(
+                    'aam_framework_resource_add_permission_filter',
+                    $this->_sanitize_permission(true, $value),
+                    $args
+                );
+            } elseif (is_string($key)) {
+                $normalized[$key] = apply_filters(
+                    'aam_framework_resource_add_permission_filter',
+                    $this->_sanitize_permission($value, $key),
+                    $args
+                );
+            }
+        }
+
+        return $this->set_permissions($normalized, true);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function remove_permission($permission_key)
+    {
+        $result      = true;
+        $permissions = $this->_explicit_permissions;
+
+        if (array_key_exists($permission_key, $permissions)) {
+            unset($permissions[$permission_key]);
+
+            $result = $this->set_permissions($permissions, true);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function remove_permissions($permission_keys)
+    {
+        $permissions = array_filter(
+            $this->_explicit_permissions,
+            function ($p) use ($permission_keys) {
+                return !in_array($p, $permission_keys, true);
+            }, ARRAY_FILTER_USE_KEY
+        );
+
+        return $this->set_permissions($permissions, true);
+    }
+
+    /**
+     * Check if permission exists
+     *
+     * @param string $permission_key
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetExists($permission_key)
+    {
+        return array_key_exists($permission_key, $this->_permissions);
+    }
+
+    /**
+     * Get specific permission
+     *
+     * @param string $permission_key
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetGet($permission_key)
+    {
+        $result = null;
+
+        if ($this->offsetExists($permission_key)) {
+            $result = $this->_permissions[$permission_key];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Set specific permission
+     *
+     * @param string $permission_key
+     * @param mixed  $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetSet($permission_key, $permission)
+    {
+        return $this->add_permission($permission_key, $permission);
+    }
+
+    /**
+     * Remove specific permission
+     *
+     * @param string $permission_key
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetUnset($permission_key)
+    {
+        return $this->remove_permission($permission_key);
     }
 
     /**
      * Get settings namespace
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_settings_ns()
     {
+        $id = $this->get_internal_id();
+
         // Compile the namespace
-        return constant('static::TYPE');
+        if (empty($id)) {
+            $result = constant('static::TYPE');
+        } else {
+            $result = constant('static::TYPE') . '.' . $id;
+        }
+
+        return $result;
     }
 
     /**
@@ -339,8 +495,8 @@ trait AAM_Framework_Resource_BaseTrait
      * @param array $permissions
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _sanitize_permissions(array $permissions)
@@ -363,8 +519,8 @@ trait AAM_Framework_Resource_BaseTrait
      * @param string $permission_key
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _sanitize_permission($permission, $permission_key)
@@ -397,8 +553,8 @@ trait AAM_Framework_Resource_BaseTrait
      * @param string $permission_key
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _normalize_permission($permission, $permission_key)

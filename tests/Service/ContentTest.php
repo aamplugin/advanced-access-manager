@@ -30,13 +30,13 @@ final class ContentTest extends TestCase
     public function testPostPasswordProtected()
     {
         $post_a  = $this->createPost();
-        $service = AAM::api()->content();
+        $service = AAM::api()->posts();
 
         // Verify that post password is not yet required
         $this->assertFalse(post_password_required($post_a));
 
         // Set password
-        $service->post($post_a)->set_password(uniqid());
+        $service->set_password($post_a, uniqid());
 
         // Verify that post password is required
         $this->assertTrue(post_password_required($post_a));
@@ -47,7 +47,7 @@ final class ContentTest extends TestCase
 
         // Verify password
         $this->assertTrue(post_password_required($post_b));
-        $this->assertEquals($password, $service->post($post_b)->get_password());
+        $this->assertEquals($password, $service->get_password($post_b));
     }
 
     /**
@@ -60,7 +60,7 @@ final class ContentTest extends TestCase
         $post_a  = $this->createPost();
         $post_b  = $this->createPost();
         $post_c  = $this->createPost();
-        $service = AAM::api()->content();
+        $service = AAM::api()->posts();
 
         // Prepare the quiring args
         $args = [
@@ -77,8 +77,8 @@ final class ContentTest extends TestCase
         $this->assertContains($post_c, $posts);
 
         // Hiding Post A & Post C
-        $service->post($post_a)->add_permission('list');
-        $service->post($post_c)->add_permission('list');
+        $service->hide($post_a);
+        $service->hide($post_c);
 
         // Confirming that these posts are no longer visible
         $posts = get_posts($args);
@@ -98,7 +98,7 @@ final class ContentTest extends TestCase
         $page_a  = $this->createPost([ 'post_type' => 'page' ]);
         $page_b  = $this->createPost([ 'post_type' => 'page' ]);
         $page_c  = $this->createPost([ 'post_type' => 'page' ]);
-        $service = AAM::api()->content();
+        $service = AAM::api()->posts();
 
         // Verifying that all 3 pages are visible
         $pages = array_map(function($p) { return $p->ID; }, get_pages());
@@ -108,8 +108,8 @@ final class ContentTest extends TestCase
         $this->assertContains($page_c, $pages);
 
         // Hiding Page A & Page C
-        $service->post($page_a)->add_permission('list');
-        $service->post($page_c)->add_permission('list');
+        $service->hide($page_a);
+        $service->hide($page_c);
 
         // Confirming that these pages are no longer visible
         $pages = array_map(function($p) { return $p->ID; }, get_pages());
@@ -127,7 +127,7 @@ final class ContentTest extends TestCase
     public function testPostTeaserMessage()
     {
         $post_a  = $this->createPost([ 'post_content' => 'Test content' ]);
-        $service = AAM::api()->content();
+        $service = AAM::api()->posts();
 
         // Set current post
         $GLOBALS['post'] = $post_a;
@@ -139,7 +139,7 @@ final class ContentTest extends TestCase
 
         // Set teaser message
         $this->assertTrue(
-            $service->post($post_a)->set_teaser_message('You are not allowed')
+            $service->set_teaser_message($post_a, 'You are not allowed')
         );
 
         // Verify that post content is modified
@@ -188,49 +188,14 @@ final class ContentTest extends TestCase
         $this->assertTrue(current_user_can('delete_post', $post_a));
 
         // Set new permissions
-        AAM::api()->content()->post($post_a)->add_permissions([
+        $this->assertTrue(AAM::api()->posts()->deny($post_a, [
             'edit', 'publish', 'delete'
-        ]);
+        ]));
 
         // Verify that user is no longer allowed to perform actions
         $this->assertFalse(current_user_can('edit_post', $post_a));
         $this->assertFalse(current_user_can('publish_post', $post_a));
         $this->assertFalse(current_user_can('delete_post', $post_a));
-    }
-
-    /**
-     * Test that we can obtain Post resource
-     *
-     * @return void
-     */
-    public function testGetPost()
-    {
-        $post_a  = $this->createPost([ 'post_name' => 'sample-test' ]);
-        $service = AAM::api()->content();
-
-        // Test that we can obtain Post resource with just providing ID
-        $post = $service->post($post_a);
-
-        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
-        $this->assertEquals($post_a, $post->ID);
-
-        // Test we can obtain Post resource with slug and post type
-        $post = $service->post('sample-test', 'post');
-
-        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
-        $this->assertEquals($post_a, $post->ID);
-
-        // Test we can obtain Post resource with array and ID
-        $post = $service->post([ 'id' => $post_a, 'post_type' => 'post' ]);
-
-        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
-        $this->assertEquals($post_a, $post->ID);
-
-        // Test we can obtain Post resource with array and slug
-        $post = $service->post([ 'slug' => 'sample-test', 'post_type' => 'post' ]);
-
-        $this->assertEquals(AAM_Framework_Resource_Post::class, get_class($post));
-        $this->assertEquals($post_a, $post->ID);
     }
 
     /**
@@ -248,14 +213,14 @@ final class ContentTest extends TestCase
 
         $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
         $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals((string) $term_a, $term->get_internal_id());
+        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
 
         // Test we can obtain Term resource with slug and taxonomy
         $term = $service->term('sample-term', 'category');
 
         $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
         $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals('sample-term|category', $term->get_internal_id());
+        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
 
         // Test we can obtain Term resource with array and ID
         $term = $service->term([ 'id' => $term_a, 'taxonomy' => 'category' ]);
@@ -269,7 +234,7 @@ final class ContentTest extends TestCase
 
         $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
         $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals('sample-term|category', $term->get_internal_id());
+        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
     }
 
 }

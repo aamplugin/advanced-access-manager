@@ -78,11 +78,62 @@ interface AAM_Framework_Resource_Interface
     public function set_permissions(array $permissions, $explicit_only = true);
 
     /**
+     * Add a single permission
+     *
+     * @param string $permission_key
+     * @param mixed  $permission      [optional]
+     * @param bool   $exclude_authors [Premium Feature!]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function add_permission($permission_key, ...$args);
+
+    /**
+     * Add multiple permissions
+     *
+     * @param array $permissions
+     * @param bool  $exclude_authors [Premium Feature!]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function add_permissions($permissions, ...$args);
+
+    /**
+     * Remove a single permission
+     *
+     * @param string $permission_key
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function remove_permission($permission_key);
+
+    /**
+     * Remove multiple permissions
+     *
+     * @param array $permission_keys
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function remove_permissions($permission_keys);
+
+    /**
      * Check if resource settings are overwritten
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized();

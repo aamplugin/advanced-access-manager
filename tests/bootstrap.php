@@ -35,3 +35,6 @@ if (!wp_roles()->is_role('subadmin')) {
         'Sub Administrator', wp_roles()->get_role('administrator')->capabilities
     );
 }
+
+// Defining the global constant that disabled AAM internal object cache
+define('AAM_OBJECT_CACHE_ENABLED', false);
