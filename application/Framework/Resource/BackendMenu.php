@@ -13,7 +13,8 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_BackendMenu
+implements AAM_Framework_Resource_Interface, ArrayAccess
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -22,39 +23,6 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
      * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::BACKEND_MENU;
-
-    /**
-     * Check is menu or submenu is restricted
-     *
-     * @param string $slug [Optional]
-     *
-     * @return boolean
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function is_restricted($slug = null)
-    {
-        $result = null;
-        $slug   = is_null($slug) ? $this->_internal_id : $slug;
-
-        if (empty($slug)) {
-            throw new InvalidArgumentException(
-                'The Backend Menu resource has to be initialized with valid menu slug'
-            );
-        }
-
-        // The default dashboard landing page is always excluded
-        if ($slug !== 'index.php') {
-            if (array_key_exists($slug, $this->_permissions)) {
-                $result = $this->_permissions[$slug]['effect'] === 'deny';
-            }
-        } else {
-            $result = false;
-        }
-
-        return $result;
-    }
 
     /**
      * @inheritDoc

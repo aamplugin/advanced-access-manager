@@ -13,7 +13,8 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Hook
+implements AAM_Framework_Resource_Interface, ArrayAccess
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -22,66 +23,6 @@ class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
      * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::HOOK;
-
-    /**
-     * Check is hook is restricted
-     *
-     * @param string $slug [Optional]
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_restricted($slug = null)
-    {
-        $result = null;
-        $slug   = empty($slug) ? $this->_internal_id : $slug;
-
-        if ($slug) {
-            throw new InvalidArgumentException(
-                'The Hook resource has to be initialized with valid slug'
-            );
-        }
-
-        if (array_key_exists($slug, $this->_permissions)) {
-            $result = $this->_permissions[$slug]['effect'] === 'deny';
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check is hook's return value is modified
-     *
-     * @param string $slug [Optional]
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_modified($slug = null)
-    {
-        $result = null;
-        $slug   = empty($slug) ? $this->_internal_id : $slug;
-
-        if ($slug) {
-            throw new InvalidArgumentException(
-                'The Hook resource has to be initialized with valid slug'
-            );
-        }
-
-        if (array_key_exists($slug, $this->_permissions)) {
-            $result = !in_array(
-                $this->_permissions[$slug]['effect'],
-                [ 'deny', 'allow' ],
-                true
-            );
-        }
-
-        return $result;
-    }
 
     /**
      * @inheritDoc

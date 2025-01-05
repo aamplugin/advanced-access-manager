@@ -190,7 +190,7 @@ class AAM_Restful_MetaboxService
             if ($request->get_param('effect') === 'allow') {
                 $service->allow($slug, $screen_id);
             } else {
-                $service->restrict($slug, $screen_id);
+                $service->deny($slug, $screen_id);
             }
 
             $result = $service->item($slug, $screen_id);

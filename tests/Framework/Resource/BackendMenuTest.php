@@ -29,7 +29,7 @@ final class BackendMenuTest extends TestCase
     {
         // Verifying that backend menu is allowed
         $this->assertFalse(
-            AAM::api()->backend_menu()->is_restricted('edit-tags.php?taxonomy=category')
+            AAM::api()->backend_menu()->is_denied('edit-tags.php?taxonomy=category')
         );
 
         // Creating a new policy & attaching it to current access level
@@ -42,7 +42,7 @@ final class BackendMenuTest extends TestCase
 
         // Verifying that backend menu is restricted
         $this->assertTrue(
-            AAM::api()->backend_menu()->is_restricted('edit-tags.php?taxonomy=category')
+            AAM::api()->backend_menu()->is_denied('edit-tags.php?taxonomy=category')
         );
     }
 

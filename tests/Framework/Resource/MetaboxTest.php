@@ -29,7 +29,7 @@ final class MetaboxTest extends TestCase
     {
         // Verifying that toolbar item is allowed
         $this->assertFalse(
-            AAM::api()->metaboxes()->is_restricted('post_excerpt_meta_box')
+            AAM::api()->metaboxes()->is_denied('post_excerpt_meta_box')
         );
 
         // Creating a new policy & attaching it to current access level
@@ -42,7 +42,7 @@ final class MetaboxTest extends TestCase
 
         // Verifying that metabox is restricted
         $this->assertTrue(
-            AAM::api()->metaboxes()->is_restricted('post_excerpt_meta_box')
+            AAM::api()->metaboxes()->is_denied('post_excerpt_meta_box')
         );
     }
 
@@ -56,7 +56,7 @@ final class MetaboxTest extends TestCase
     {
         // Verifying that metabox is allowed
         $this->assertFalse(
-            AAM::api()->metaboxes()->is_restricted('post_author_meta_box')
+            AAM::api()->metaboxes()->is_denied('post_author_meta_box')
         );
 
         // Creating a new policy & attaching it to current access level
@@ -71,9 +71,9 @@ final class MetaboxTest extends TestCase
         $service = AAM::api()->metaboxes();
 
         // Verifying that metabox is property restricted
-        $this->assertFalse($service->is_restricted('post_author_meta_box'));
-        $this->assertFalse($service->is_restricted('post_author_meta_box', 'post'));
-        $this->assertTrue($service->is_restricted('post_author_meta_box', 'page'));
+        $this->assertFalse($service->is_denied('post_author_meta_box'));
+        $this->assertFalse($service->is_denied('post_author_meta_box', 'post'));
+        $this->assertTrue($service->is_denied('post_author_meta_box', 'page'));
     }
 
 }

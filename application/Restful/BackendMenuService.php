@@ -166,7 +166,7 @@ class AAM_Restful_BackendMenuService
             if ($effect === 'allow') {
                 $service->allow($slug);
             } else {
-                $service->restrict($slug);
+                $service->deny($slug);
             }
 
             // Prepare response

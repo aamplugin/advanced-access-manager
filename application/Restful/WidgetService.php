@@ -171,7 +171,7 @@ class AAM_Restful_WidgetService
             if ($request->get_param('effect') === 'allow') {
                 $service->allow($slug);
             } else {
-                $service->restrict($slug);
+                $service->deny($slug);
             }
 
             $result = $service->item($slug);

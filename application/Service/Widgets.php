@@ -157,7 +157,7 @@ class AAM_Service_Widgets
             foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
                 foreach($groups as $widgets) {
                     foreach($widgets as $widget) {
-                        if ($service->is_restricted($widget)) {
+                        if ($service->is_denied($widget)) {
                             remove_meta_box($widget['id'], 'dashboard', $priority);
                         }
                     }
@@ -182,7 +182,7 @@ class AAM_Service_Widgets
 
         if (is_array($wp_registered_widgets)) {
             foreach ($wp_registered_widgets as $id => $widget) {
-                if ($service->is_restricted($widget)) {
+                if ($service->is_denied($widget)) {
                     // We do not know if widget was registered with widget instance
                     // or a class name. This is why we are trying to remove both
                     // ways

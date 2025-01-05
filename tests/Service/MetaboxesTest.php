@@ -45,9 +45,9 @@ final class MetaboxesTest extends TestCase
 
         // Setting permissions for the Editor role
         $service = AAM::api()->metaboxes('role:editor');
-        $service->restrict('post_thumbnail_meta_box', 'page');
-        $service->restrict('page_attributes_meta_box', 'page');
-        $service->restrict('post_custom_meta_box', 'page');
+        $service->deny('post_thumbnail_meta_box', 'page');
+        $service->deny('page_attributes_meta_box', 'page');
+        $service->deny('post_custom_meta_box', 'page');
 
         // Verify that restricted metaboxes are not listed
         do_action('in_admin_header');

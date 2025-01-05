@@ -34,8 +34,8 @@ class AAM_Framework_Service_Widgets
      * @param string $screen_id [optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items($screen_id = null)
@@ -74,8 +74,8 @@ class AAM_Framework_Service_Widgets
      * @param string $screen_id [optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function items($screen_id = null)
@@ -89,8 +89,8 @@ class AAM_Framework_Service_Widgets
      * @param string $slug Sudo-id for the metabox
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item($slug)
@@ -118,8 +118,8 @@ class AAM_Framework_Service_Widgets
      * @param string $slug
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function item($slug)
@@ -130,18 +130,21 @@ class AAM_Framework_Service_Widgets
     /**
      * Restrict/hide widget
      *
-     * @param mixed $widget
+     * @param mixed  $widget
+     * @param string $website_area [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function restrict($widget)
+    public function deny($widget, $website_area = null)
     {
         try {
             $slug   = $this->_prepare_widget_slug($widget);
-            $result = $this->_update_item_permission($slug, true);
+            $result = $this->_update_item_permission(
+                is_null($website_area) ? $slug : $website_area . '_' . $slug, true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -152,18 +155,22 @@ class AAM_Framework_Service_Widgets
     /**
      * Allow widget
      *
-     * @param mixed $widget
+     * @param mixed  $widget
+     * @param string $website_area [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function allow($widget)
+    public function allow($widget, $website_area = null)
     {
         try {
             $slug   = $this->_prepare_widget_slug($widget);
-            $result = $this->_update_item_permission($slug, false);
+            $result = $this->_update_item_permission(
+                is_null($website_area) ? $slug : $website_area . '_' . $slug,
+                false
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -181,8 +188,8 @@ class AAM_Framework_Service_Widgets
      * @param mixed $widget_or_area [Optional]
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($widget_or_area = null)
@@ -209,7 +216,6 @@ class AAM_Framework_Service_Widgets
 
                 $result = $resource->set_permissions($settings, true);
             }
-
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -223,23 +229,27 @@ class AAM_Framework_Service_Widgets
      * @param mixed $widget
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_restricted($widget)
+    public function is_denied($widget)
     {
+        $result = null;
+
         try {
             $slug     = $this->_prepare_widget_slug($widget);
             $resource = $this->_get_resource();
 
             // Determine if widget is restricted
-            $result = $resource->is_restricted($slug);
+            if (isset($resource[$slug])) {
+                $result = $resource[$slug]['effect'] !== 'allow';
+            }
 
             // Allow third-party implementations to integrate with the
             // decision making process
             $result = apply_filters(
-                'aam_widget_is_restricted_filter',
+                'aam_widget_is_denied_filter',
                 $result,
                 $resource,
                 $widget
@@ -260,13 +270,13 @@ class AAM_Framework_Service_Widgets
      * @param string $slug
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_allowed($slug)
     {
-        $result = $this->is_restricted($slug);
+        $result = $this->is_denied($slug);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -275,8 +285,8 @@ class AAM_Framework_Service_Widgets
      * Get widget resource
      *
      * @return AAM_Framework_Resource_Widget
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_resource()
@@ -316,14 +326,14 @@ class AAM_Framework_Service_Widgets
      * Update existing widget permission
      *
      * @param string $slug
-     * @param bool   $is_restricted
+     * @param bool   $is_denied
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _update_item_permission($slug, $is_restricted)
+    private function _update_item_permission($slug, $is_denied)
     {
         try {
             $resource = $this->_get_resource();
@@ -331,7 +341,7 @@ class AAM_Framework_Service_Widgets
             // Prepare array of new permissions and save them
             $result = $resource->set_permissions(array_merge(
                 $resource->get_permissions(true),
-                [ $slug => [ 'effect' => $is_restricted ? 'deny' : 'allow' ] ]
+                [ $slug => [ 'effect' => $is_denied ? 'deny' : 'allow' ] ]
             ));
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -347,9 +357,10 @@ class AAM_Framework_Service_Widgets
      * @param string $screen_id
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
+     * @todo Move this to RESTful class
      */
     private function _prepare_widget($widget, $screen_id)
     {
@@ -357,7 +368,7 @@ class AAM_Framework_Service_Widgets
             'slug'          => $widget['slug'],
             'screen_id'     => $screen_id,
             'title'         => base64_decode($widget['title']),
-            'is_restricted' => $this->is_restricted($widget['slug']),
+            'is_restricted' => $this->is_denied($widget['slug']),
         ];
     }
 

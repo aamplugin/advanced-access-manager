@@ -193,7 +193,7 @@ class AAM_Service_Metaboxes
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
                 foreach ($metaboxes as $id => $metabox) {
-                    if ($service->is_restricted($metabox, $screen_id) === true) {
+                    if ($service->is_denied($metabox, $screen_id) === true) {
                         remove_meta_box($id, $screen_id, $zone);
                     }
                 }

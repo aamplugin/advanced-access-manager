@@ -30,17 +30,17 @@ final class WidgetsTest extends TestCase
         $service = AAM::api()->widgets('role:author');
 
         // Set permission
-        $this->assertTrue($service->restrict('wp_dashboard_site_health'));
+        $this->assertTrue($service->deny('wp_dashboard_site_health'));
 
         // Assert that the widget is restricted
-        $this->assertTrue($service->is_restricted('wp_dashboard_site_health'));
+        $this->assertTrue($service->is_denied('wp_dashboard_site_health'));
         $this->assertFalse($service->is_allowed('wp_dashboard_site_health'));
 
         // Set permission
         $this->assertTrue($service->allow('wp_dashboard_right_now'));
 
         // Assert that the widget is restricted
-        $this->assertFalse($service->is_restricted('wp_dashboard_right_now'));
+        $this->assertFalse($service->is_denied('wp_dashboard_right_now'));
         $this->assertTrue($service->is_allowed('wp_dashboard_right_now'));
     }
 
@@ -66,17 +66,17 @@ final class WidgetsTest extends TestCase
         ];
 
         // Set permission
-        $this->assertTrue($service->restrict($wp_dashboard_site_health));
+        $this->assertTrue($service->deny($wp_dashboard_site_health));
 
         // Assert that the widget is restricted
-        $this->assertTrue($service->is_restricted($wp_dashboard_site_health));
+        $this->assertTrue($service->is_denied($wp_dashboard_site_health));
         $this->assertFalse($service->is_allowed($wp_dashboard_site_health));
 
         // Set permission
         $this->assertTrue($service->allow($wp_dashboard_right_now));
 
         // Assert that the widget is restricted
-        $this->assertFalse($service->is_restricted($wp_dashboard_right_now));
+        $this->assertFalse($service->is_denied($wp_dashboard_right_now));
         $this->assertTrue($service->is_allowed($wp_dashboard_right_now));
     }
 

@@ -175,7 +175,7 @@ class AAM_Restful_ApiRouteService
             if ($effect === 'allow') {
                 $service->allow($endpoint, $method);
             } else {
-                $service->restrict($endpoint, $method);
+                $service->deny($endpoint, $method);
             }
 
             $result = $service->item($endpoint, $method);

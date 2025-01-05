@@ -13,7 +13,8 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Url
+implements AAM_Framework_Resource_Interface, ArrayAccess
 {
 
     use AAM_Framework_Resource_BaseTrait;

@@ -94,7 +94,7 @@ class AAM_Service_BackendMenu
 
         foreach ($menu as $id => $item) {
             $menu_slug     = $item[2];
-            $is_restricted = $service->is_restricted('menu/' . $menu_slug);
+            $is_restricted = $service->is_denied('menu/' . $menu_slug);
 
             // If top level menu has submenu items - filter them out as well
             if (!empty($submenu[$menu_slug])) {
@@ -194,7 +194,7 @@ class AAM_Service_BackendMenu
             }
         }
 
-        if (AAM::api()->backend_menu()->is_restricted($id)) {
+        if (AAM::api()->backend_menu()->is_denied($id)) {
             AAM::api()->redirect->do_access_denied_redirect();
         }
     }
@@ -213,7 +213,7 @@ class AAM_Service_BackendMenu
     private function _filter_submenu($submenus, $service)
     {
         foreach ($submenus as $id => $item) {
-            if ($service->is_restricted($item[2])) {
+            if ($service->is_denied($item[2])) {
                 unset($submenus[$id]);
             }
         }

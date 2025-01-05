@@ -30,18 +30,18 @@ final class MetaboxesTest extends TestCase
         $service = AAM::api()->metaboxes('role:author');
 
         // Set permission for a single metabox
-        $this->assertTrue($service->restrict('post_submit_meta_box'));
+        $this->assertTrue($service->deny('post_submit_meta_box'));
 
         // Assert metabox permissions
-        $this->assertTrue($service->is_restricted('post_submit_meta_box'));
-        $this->assertTrue($service->is_restricted('post_submit_meta_box', 'page'));
+        $this->assertTrue($service->is_denied('post_submit_meta_box'));
+        $this->assertTrue($service->is_denied('post_submit_meta_box', 'page'));
 
         // Set permission
-        $this->assertTrue($service->restrict('post_thumbnail_meta_box', 'page'));
+        $this->assertTrue($service->deny('post_thumbnail_meta_box', 'page'));
 
         // Assert metabox permissions
-        $this->assertTrue($service->is_restricted('post_thumbnail_meta_box', 'page'));
-        $this->assertTrue($service->is_restricted('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_denied('post_thumbnail_meta_box', 'page'));
+        $this->assertTrue($service->is_denied('page_post_thumbnail_meta_box'));
         $this->assertTrue($service->is_allowed('post_thumbnail_meta_box', 'post'));
 
         // Set allow permission
@@ -78,18 +78,18 @@ final class MetaboxesTest extends TestCase
         ];
 
         // Set permission for a single metabox
-        $this->assertTrue($service->restrict($post_submit_meta_box));
+        $this->assertTrue($service->deny($post_submit_meta_box));
 
         // Assert metabox permissions
-        $this->assertTrue($service->is_restricted($post_submit_meta_box));
-        $this->assertTrue($service->is_restricted($post_submit_meta_box, 'page'));
+        $this->assertTrue($service->is_denied($post_submit_meta_box));
+        $this->assertTrue($service->is_denied($post_submit_meta_box, 'page'));
 
         // Set permission
-        $this->assertTrue($service->restrict($post_thumbnail_meta_box, 'page'));
+        $this->assertTrue($service->deny($post_thumbnail_meta_box, 'page'));
 
         // Assert metabox permissions
-        $this->assertTrue($service->is_restricted($post_thumbnail_meta_box, 'page'));
-        $this->assertTrue($service->is_restricted('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_denied($post_thumbnail_meta_box, 'page'));
+        $this->assertTrue($service->is_denied('page_post_thumbnail_meta_box'));
         $this->assertTrue($service->is_allowed($post_thumbnail_meta_box, 'post'));
 
         // Set allow permission

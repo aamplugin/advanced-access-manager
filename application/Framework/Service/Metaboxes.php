@@ -38,8 +38,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string $screen_id
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items($screen_id = null)
@@ -84,8 +84,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string $screen_id [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function items($screen_id = null)
@@ -103,8 +103,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string $screen_id [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item($slug, $screen_id = null)
@@ -136,8 +136,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string $screen_id [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function item($slug, $screen_id = null)
@@ -152,11 +152,11 @@ class AAM_Framework_Service_Metaboxes
      * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function restrict($metabox, $screen_id = null)
+    public function deny($metabox, $screen_id = null)
     {
         try {
             $slug   = $this->_prepare_metabox_slug($metabox);
@@ -178,8 +178,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function allow($metabox, $screen_id = null)
@@ -209,8 +209,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string       $screen_id [Optional]
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($metabox = null, $screen_id = null)
@@ -259,14 +259,14 @@ class AAM_Framework_Service_Metaboxes
      * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_restricted($metabox, $screen_id = null)
+    public function is_denied($metabox, $screen_id = null)
     {
         try {
-            $restricted = $this->_is_restricted($metabox, $screen_id);
+            $restricted = $this->_is_denied($metabox, $screen_id);
             $result     = is_bool($restricted) ? $restricted : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -282,13 +282,13 @@ class AAM_Framework_Service_Metaboxes
      * @param string       $screen_id [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_allowed($metabox, $screen_id = null)
     {
-        $result = $this->is_restricted($metabox, $screen_id);
+        $result = $this->is_denied($metabox, $screen_id);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -304,7 +304,7 @@ class AAM_Framework_Service_Metaboxes
      *
      * @version 7.0.0
      */
-    private function _is_restricted($metabox, $screen_id)
+    private function _is_denied($metabox, $screen_id)
     {
         $result = null;
 
@@ -318,20 +318,20 @@ class AAM_Framework_Service_Metaboxes
         // screen ID
         $screen_id = $this->_prepare_screen_id($screen_id);
 
-        if (!is_null($screen_id)) {
-            $result = $resource->is_restricted($screen_id . '_'. $slug);
+        if (!is_null($screen_id) && isset($resource[$screen_id . '_'. $slug])) {
+            $result = $resource[$screen_id . '_'. $slug]['effect'] !== 'allow';
         }
 
         // Step #2. If there are no scoped access controls defined to a given
         // metabox, check if there are any settings for it by the slug as-is
-        if (is_null($result)) {
-            $result = $resource->is_restricted($slug);
+        if (is_null($result) && isset($resource[$slug])) {
+            $result = $resource[$slug]['effect'] !== 'allow';
         }
 
         // Allow third-party implementations to integrate with the
         // decision making process
         return apply_filters(
-            'aam_metabox_is_restricted_filter',
+            'aam_metabox_is_denied_filter',
             $result,
             $resource,
             $screen_id,
@@ -343,14 +343,14 @@ class AAM_Framework_Service_Metaboxes
      * Get metabox resource
      *
      * @return AAM_Framework_Resource_Metabox
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _get_resource($slug = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::METABOX, $slug
+            AAM_Framework_Type_Resource::METABOX
         );
     }
 
@@ -360,8 +360,9 @@ class AAM_Framework_Service_Metaboxes
      * @param string|array $metabox
      *
      * @return string
-     *
      * @access private
+     *
+     * @version 7.0.0
      */
     private function _prepare_metabox_slug($metabox)
     {
@@ -388,8 +389,8 @@ class AAM_Framework_Service_Metaboxes
      * @param string|null $screen_id
      *
      * @return string|null
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_screen_id($screen_id)
@@ -415,15 +416,15 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Update existing metabox permission
      *
-     * @param string $slug          Sudo-id for the metabox
-     * @param bool   $is_restricted Is hidden or not
+     * @param string $slug      Sudo-id for the metabox
+     * @param bool   $is_denied Is hidden or not
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _update_item_permission($slug, $is_restricted)
+    private function _update_item_permission($slug, $is_denied)
     {
         try {
             $resource = $this->_get_resource();
@@ -431,7 +432,7 @@ class AAM_Framework_Service_Metaboxes
             // Prepare array of new permissions and save them
             $result = $resource->set_permissions(array_merge(
                 $resource->get_permissions(true),
-                [ $slug => [ 'effect' => $is_restricted ? 'deny' : 'allow' ] ]
+                [ $slug => [ 'effect' => $is_denied ? 'deny' : 'allow' ] ]
             ));
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -446,9 +447,10 @@ class AAM_Framework_Service_Metaboxes
      * @param array $metabox
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
+     * @todo Move this to RESTful class
      */
     private function _prepare_metabox($metabox)
     {
@@ -456,7 +458,7 @@ class AAM_Framework_Service_Metaboxes
             'slug'          => $metabox['slug'],
             'screen_id'     => $metabox['screen_id'],
             'title'         => base64_decode($metabox['title']),
-            'is_restricted' => $this->_is_restricted(
+            'is_restricted' => $this->_is_denied(
                 $metabox['slug'], $metabox['screen_id']
             )
         ];

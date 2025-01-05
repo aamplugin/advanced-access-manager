@@ -28,8 +28,8 @@ final class WidgetTest extends TestCase
     public function testWidgetResourceInit()
     {
         // Verifying that widget is allowed
-        $this->assertFalse(AAM::api()->widgets()->is_restricted('wp_dashboard_site_health'));
-        $this->assertFalse(AAM::api()->widgets()->is_restricted('wp_widget_search'));
+        $this->assertFalse(AAM::api()->widgets()->is_denied('wp_dashboard_site_health'));
+        $this->assertFalse(AAM::api()->widgets()->is_denied('wp_widget_search'));
 
         // Creating a new policy & attaching it to current access level
         $this->assertIsInt(AAM::api()->policies()->create('{
@@ -43,8 +43,8 @@ final class WidgetTest extends TestCase
         }'));
 
         // Verifying that widgets are restricted
-        $this->assertTrue(AAM::api()->widgets()->is_restricted('wp_dashboard_site_health'));
-        $this->assertTrue(AAM::api()->widgets()->is_restricted('wp_widget_search'));
+        $this->assertTrue(AAM::api()->widgets()->is_denied('wp_dashboard_site_health'));
+        $this->assertTrue(AAM::api()->widgets()->is_denied('wp_widget_search'));
     }
 
 }

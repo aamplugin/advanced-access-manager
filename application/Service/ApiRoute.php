@@ -72,7 +72,7 @@ class AAM_Service_ApiRoute
     private function _rest_pre_dispatch($response, $request)
     {
         if (!is_wp_error($response)) {
-            if (AAM::api()->api_routes()->is_restricted($request)) {
+            if (AAM::api()->api_routes()->is_denied($request)) {
                 $response = new WP_Error(
                     'rest_access_denied',
                     __('Access Denied', AAM_KEY),

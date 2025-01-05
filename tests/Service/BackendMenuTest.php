@@ -39,10 +39,10 @@ final class BackendMenuTest extends TestCase
         ]);
 
         // Update permission for a single submenu item
-        $service->restrict('edit-tags.php?taxonomy=category');
+        $service->deny('edit-tags.php?taxonomy=category');
 
         // Update the entire menu branch and ensure that all sub items are restricted
-        $service->restrict('menu/upload.php');
+        $service->deny('menu/upload.php');
 
         // Mocking backend menu
         $this->_mockAdminMenu();

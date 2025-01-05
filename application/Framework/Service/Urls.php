@@ -230,7 +230,7 @@ implements
             }
 
             $result = apply_filters(
-                'aam_url_is_restricted_filter',
+                'aam_url_is_denied_filter',
                 $result,
                 $url,
                 $permission

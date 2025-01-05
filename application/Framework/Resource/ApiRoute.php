@@ -13,7 +13,8 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_ApiRoute
+implements AAM_Framework_Resource_Interface, ArrayAccess
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -22,49 +23,6 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
      * @inheritDoc
      */
     const TYPE = AAM_Framework_Type_Resource::API_ROUTE;
-
-    /**
-     * Check whether the RESTful API route is restricted
-     *
-     * @param string $route [Optional]
-     *
-     * @return bool|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_restricted($route = null)
-    {
-        $result = null;
-        $route  = empty($route) ? $this->_internal_id : $route;
-
-        if (empty($route)) {
-            throw new InvalidArgumentException('Non-empty route has to be provided');
-        }
-
-        if (array_key_exists($route, $this->_permissions)) {
-            $result = $this->_permissions[$route]['effect'] !== 'allow';
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check whether the RESTful API route is allowed
-     *
-     * @param string $route [Optional]
-     *
-     * @return bool|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_allowed($route = null)
-    {
-        $result = $this->is_restricted($route);
-
-        return is_bool($result) ? !$result : $result;
-    }
 
     /**
      * @inheritDoc

@@ -34,7 +34,7 @@ final class ApiRoutesTest extends TestCase
         $this->assertTrue(apply_filters('rest_pre_dispatch', true, '__', $request));
 
         // Restrict endpoint and assert that we are getting the WP_Error response
-        $this->assertTrue($service->restrict($request));
+        $this->assertTrue($service->deny($request));
         $this->assertEquals(
             \WP_Error::class,
             get_class(apply_filters('rest_pre_dispatch', true, '__', $request))

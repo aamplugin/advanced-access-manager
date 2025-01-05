@@ -28,9 +28,7 @@ final class RouteTest extends TestCase
     public function testRouteResourceInit()
     {
         // Verifying that toolbar item is allowed
-        $this->assertFalse(
-            AAM::api()->api_routes()->is_restricted('/oembed/1.0/proxy')
-        );
+        $this->assertFalse(AAM::api()->api_routes()->is_denied('/oembed/1.0/proxy'));
 
         // Creating a new policy & attaching it to current access level
         $this->assertIsInt(AAM::api()->policies()->create('{
@@ -43,9 +41,7 @@ final class RouteTest extends TestCase
         }'));
 
         // Verifying that API route is restricted
-        $this->assertTrue(
-            AAM::api()->api_routes()->is_restricted('/oembed/1.0/proxy')
-        );
+        $this->assertTrue(AAM::api()->api_routes()->is_denied('/oembed/1.0/proxy'));
     }
 
 }
