@@ -31,9 +31,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_hidden_on($post_identifier, $website_area)
     {
-        $result = false;
-
         try{
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['list'];
 
@@ -54,6 +53,9 @@ class AAM_Framework_Service_Posts
                 $website_area,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -90,18 +92,17 @@ class AAM_Framework_Service_Posts
      */
     public function is_password_protected($post_identifier)
     {
-        $result = false;
-
         try {
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['read'];
 
             // First, let's check that current post does not have password set
             // natively
             $native_password = $resource->post_password;
-            $result          = !empty($native_password);
+            $result          = !empty($native_password) ? true : null;
 
-            if (!$result && !is_null($permission)) {
+            if (is_null($result) && !is_null($permission)) {
                 if (!empty($permission['restriction_type'])) {
                     $restriction_type = $permission['restriction_type'];
                 } else {
@@ -109,7 +110,7 @@ class AAM_Framework_Service_Posts
                 }
 
                 if ($restriction_type === 'password_protected') {
-                    $result = $permission['effect'] === 'deny'
+                    $result = $permission['effect'] !== 'allow'
                         && !empty($permission['password']);
                 }
             }
@@ -120,6 +121,9 @@ class AAM_Framework_Service_Posts
                 $result,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -144,10 +148,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_restricted($post_identifier)
     {
-        $result = false;
-
         try {
-            $result     = false;
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['read'];
 
@@ -158,7 +160,7 @@ class AAM_Framework_Service_Posts
                     $restriction_type = $permission['restriction_type'];
                 }
 
-                if ($permission['effect'] === 'deny') {
+                if ($permission['effect'] !== 'allow') {
                     if ($restriction_type === 'expire') {
                         $result = $this->_is_post_expired($resource);
                     } elseif ($restriction_type === 'default') {
@@ -173,6 +175,9 @@ class AAM_Framework_Service_Posts
                 $result,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -192,9 +197,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_redirected($post_identifier)
     {
-        $result = false;
-
         try {
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['read'];
 
@@ -205,7 +209,9 @@ class AAM_Framework_Service_Posts
                     $type = $permission['restriction_type'];
                 }
 
-                $result = $permission['effect'] === 'deny' && $type === 'redirect';
+                if ($type === 'redirect') {
+                    $result = $permission['effect'] !== 'allow';
+                }
             }
 
             // Making sure that other implementations can affect the decision
@@ -214,6 +220,9 @@ class AAM_Framework_Service_Posts
                 $result,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -233,9 +242,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_teaser_message_set($post_identifier)
     {
-        $result = false;
-
         try {
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['read'];
 
@@ -246,8 +254,9 @@ class AAM_Framework_Service_Posts
                     $type = $permission['restriction_type'];
                 }
 
-                $result = $permission['effect'] === 'deny'
-                                                && $type === 'teaser_message';
+                if ($type === 'teaser_message') {
+                    $result = $permission['effect'] !== 'allow';
+                }
             }
 
             // Making sure that other implementations can affect the decision
@@ -256,6 +265,9 @@ class AAM_Framework_Service_Posts
                 $result,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -277,9 +289,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_denied_to($post_identifier, $permission)
     {
-        $result = false;
-
         try {
+            $result   = null;
             $resource = $this->_get_resource($post_identifier);
 
             if ($permission === 'read') {
@@ -297,6 +308,9 @@ class AAM_Framework_Service_Posts
                 $permission,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -334,9 +348,8 @@ class AAM_Framework_Service_Posts
      */
     public function is_access_expired($post_identifier)
     {
-        $result = false;
-
         try {
+            $result     = null;
             $resource   = $this->_get_resource($post_identifier);
             $permission = $resource['read'];
 
@@ -347,17 +360,21 @@ class AAM_Framework_Service_Posts
                     $type = $permission['restriction_type'];
                 }
 
-                $result = $permission['effect'] === 'deny'
-                    && $type === 'expire'
-                    && $this->_is_post_expired($resource);
+                if ($type === 'expire') {
+                    $result = $permission['effect'] !== 'allow'
+                        && $this->_is_post_expired($resource);
+                }
             }
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_has_expiration_filter',
+                'aam_post_is_access_expired_filter',
                 $result,
                 $resource
             );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -370,7 +387,7 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed  $post_identifier
      * @param string $password
-     * @param bool   $use_native_pass [Optional]
+     * @param bool   $exclude_authors [Optional] **Premium Feature**
      *
      * @return bool
      * @access public
@@ -380,24 +397,15 @@ class AAM_Framework_Service_Posts
     public function set_password(
         $post_identifier,
         $password,
-        $use_native_pass = false
+        $exclude_authors = false
     ) {
         try {
             $resource = $this->_get_resource($post_identifier);
-
-            if ($use_native_pass) {
-                // Update post record
-                $result = wp_update_post([
-                    'ID'            => $resource->ID,
-                    'post_password' => $password
-                ]);
-            } else {
-                $result = $resource->add_permission('read', [
-                    'effect'           => 'deny',
-                    'restriction_type' => 'password_protected',
-                    'password'         => $password
-                ]);
-            }
+            $result   = $resource->add_permission('read', [
+                'effect'           => 'deny',
+                'restriction_type' => 'password_protected',
+                'password'         => $password
+            ], $exclude_authors);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -411,20 +419,24 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed  $post_identifier
      * @param string $message
+     * @param bool   $exclude_authors [Optional] **Premium Feature**
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function set_teaser_message($post_identifier, $message)
-    {
+    public function set_teaser_message(
+        $post_identifier,
+        $message,
+        $exclude_authors = false
+    ) {
         try {
             $result = $this->_get_resource($post_identifier)->add_permission('read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'teaser_message',
                 'message'          => $message
-            ]);
+            ], $exclude_authors);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -437,20 +449,24 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed $post_identifier
      * @param array $redirect
+     * @param bool  $exclude_authors [Optional] **Premium Feature**
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function set_redirect($post_identifier, $redirect)
-    {
+    public function set_redirect(
+        $post_identifier,
+        $redirect,
+        $exclude_authors = false
+    ) {
         try {
             $result = $this->_get_resource($post_identifier)->add_permission('read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'redirect',
                 'redirect'         => $redirect
-            ]);
+            ], $exclude_authors);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -465,14 +481,18 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed $post_identifier
      * @param int   $timestamp
+     * @param bool  $exclude_authors [Optional] **Premium Feature**
      *
      * @return bool
      *
      * @access public
      * @version 7.0.0
      */
-    public function set_expiration($post_identifier, $timestamp)
-    {
+    public function set_expiration(
+        $post_identifier,
+        $timestamp,
+        $exclude_authors = false
+    ) {
         try {
             if (!is_numeric($timestamp)) {
                 throw new InvalidArgumentException(
@@ -488,7 +508,7 @@ class AAM_Framework_Service_Posts
                 'effect'           => 'deny',
                 'restriction_type' => 'expire',
                 'expires_after'    => intval($timestamp)
-            ]);
+            ], $exclude_authors);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -501,21 +521,26 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed        $post_identifier
      * @param string|array $permission
+     * @param bool         $exclude_authors [Optional] **Premium Feature**
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function deny($post_identifier, $permission)
+    public function deny($post_identifier, $permission, $exclude_authors = false)
     {
         try {
             $resource = $this->_get_resource($post_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission($permission, 'deny');
+                $result = $resource->add_permission(
+                    $permission, 'deny', $exclude_authors
+                );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions($permission, 'deny');
+                $result = $resource->add_permissions(
+                    $permission, 'deny', $exclude_authors
+                );
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -564,14 +589,18 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed        $post_identifier
      * @param string|array $website_area    [Optional]
+     * @param bool         $exclude_authors [Optional] **Premiums Feature**
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function hide($post_identifier, $website_area = null)
-    {
+    public function hide(
+        $post_identifier,
+        $website_area = null,
+        $exclude_authors = false
+    ) {
         try {
             $resource   = $this->_get_resource($post_identifier);
             $permission = [
@@ -585,7 +614,7 @@ class AAM_Framework_Service_Posts
                 $permission['on'] = array_map('trim', $website_area);
             }
 
-            $result = $resource->add_permission('list', $permission);
+            $result = $resource->add_permission('list', $permission, $exclude_authors);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -687,7 +716,7 @@ class AAM_Framework_Service_Posts
      *
      * @version 7.0.0
      */
-    public function get_teaser_message(mixed $post_identifier)
+    public function get_teaser_message($post_identifier)
     {
         $result = null;
 
@@ -764,7 +793,7 @@ class AAM_Framework_Service_Posts
                 && !empty($permission['restriction_type'])
                 && $permission['restriction_type'] === 'expire'
             ) {
-                $result = intval($permission['expire_after']);
+                $result = intval($permission['expires_after']);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -778,60 +807,16 @@ class AAM_Framework_Service_Posts
      *
      * @param mixed $identifier
      *
-     * @return AAM_Framework_Resource_Interface
+     * @return AAM_Framework_Resource_Post
      *
      * @access private
      * @version 7.0.0
      */
     private function _get_resource($identifier)
     {
-        // Allow polymorphism - when other resource type acts like post resource.
-        // This is useful tactic to cover scenarios where resources like Term or
-        // Post Type hold permissions for their child posts
-        if (is_a($identifier, AAM_Framework_Resource_Interface::class)) {
-            $result = $identifier;
-        } else {
-            $post = null;
-
-            // Determining if we are dealing with post ID or post slug
-            if (is_numeric($identifier)) {
-                // Fetching post by ID
-                $post = get_post(intval($identifier));
-            } elseif (is_array($identifier)) {
-                if (isset($identifier['id'])) {
-                    $post = get_post($identifier['id']);
-                } else {
-                    // Let's get post_name
-                    if (isset($identifier['slug'])) {
-                        $post_name = $identifier['slug'];
-                    } elseif (isset($identifier['post_name'])) {
-                        $post_name = $identifier['post_name'];
-                    }
-
-                    if (!empty($post_name) && isset($identifier['post_type'])) {
-                        $post = get_page_by_path(
-                            $post_name,
-                            OBJECT,
-                            $identifier['post_type']
-                        );
-                    }
-                }
-            } elseif (is_a($identifier, WP_Post::class)) {
-                $post = $identifier;
-            }
-
-            if (!is_a($post, 'WP_Post')) {
-                throw new OutOfRangeException(
-                    'Cannot get post instance based on provided post identifier'
-                );
-            }
-
-            $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::POST, $post
-            );
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::POST, $identifier
+        );
     }
 
     /**

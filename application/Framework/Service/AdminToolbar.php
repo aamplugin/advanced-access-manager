@@ -201,11 +201,11 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
 
         try {
             // Getting all the defined permissions
-            $permissions = $this->_get_resource()->get_permissions();
+            $resource = $this->_get_resource();
 
             // Step #1. Checking if provided item has any access controls defined
-            if (isset($permissions[$item_id])) {
-                $result = $permissions[$item_id]['effect'] !== 'allow';
+            if (isset($resource[$item_id])) {
+                $result = $resource[$item_id]['effect'] !== 'allow';
             }
 
             // Step #2. Checking if item has parent item and if so, determining if
@@ -217,8 +217,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                 if (!empty($item['parent_id'])) {
                     $parent_id = $item['parent_id'];
 
-                    if (isset($permissions[$parent_id])) {
-                        $result = $permissions[$parent_id]['effect'] !== 'allow';
+                    if (isset($resource[$parent_id])) {
+                        $result = $resource[$parent_id]['effect'] !== 'allow';
                     }
                 }
             }
@@ -226,10 +226,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             // Step #3. Allow third-party implementations to integrate with the
             // decision making process
             $result = apply_filters(
-                'aam_admin_toolbar_is_restricted_filter',
+                'aam_admin_toolbar_is_denied_filter',
                 $result,
-                $this,
-                $item_id
+                $item_id,
+                $resource
             );
 
             // Prepare the final answer

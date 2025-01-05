@@ -215,21 +215,24 @@ class AAM_Restful_ContentService
             ));
         });
 
-        add_filter('aam_rest_prepare_content_item_filter', function($item, $request) {
-            if (is_a($item, AAM_Framework_Resource_PostType::class)) {
-                $result = $this->_prepare_post_type_item($item, $request);
-            } elseif (is_a($item, AAM_Framework_Resource_Taxonomy::class)) {
-                $result = $this->_prepare_taxonomy_item($item, $request);
-            } elseif (is_a($item, AAM_Framework_Resource_Term::class)) {
-                $result = $this->_prepare_term_item($item, $request);
-            } elseif (is_a($item, AAM_Framework_Resource_Post::class)) {
-                $result = $this->_prepare_post_item($item, $request);
-            } else {
-                $result = null;
-            }
+        add_filter(
+            'aam_rest_prepare_content_item_filter',
+            function($type, $identifier, $acl) {
+                if ($type === AAM_Framework_Type_Resource::POST_TYPE) {
+                    $result = $this->_prepare_post_type_item($identifier, $acl);
+                } elseif ($type === AAM_Framework_Type_Resource::TAXONOMY) {
+                    $result = $this->_prepare_taxonomy_item($identifier, $acl);
+                } elseif ($type === AAM_Framework_Type_Resource::TERM) {
+                    $result = $this->_prepare_term_item($identifier, $acl);
+                } elseif ($type === AAM_Framework_Type_Resource::POST) {
+                    $result = $this->_prepare_post_item($identifier, $acl);
+                } else {
+                    $result = null;
+                }
 
-            return $result;
-        }, 10, 2);
+                return $result;
+            }, 10, 3
+        );
     }
 
     /**
@@ -674,16 +677,17 @@ class AAM_Restful_ContentService
     /**
      * Prepare term item
      *
-     * @param AAM_Framework_Resource_Term $item
-     * @param WP_REST_Request             $request
+     * @param mixed                               $identifier
+     * @param AAM_Framework_AccessLevel_Interface $acl
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_term_item($item, $request)
+    private function _prepare_term_item($item, $acl)
     {
+        $resource = AAM::api()->terms($acl);
         return apply_filters('aam_rest_get_term_filter', [
             'id'              => $item->term_id,
             'title'           => $item->name,

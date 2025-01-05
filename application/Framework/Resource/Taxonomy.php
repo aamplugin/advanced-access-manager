@@ -13,13 +13,11 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Taxonomy
+implements AAM_Framework_Resource_Interface, ArrayAccess
 {
 
-    use AAM_Framework_Resource_ContentTrait, AAM_Framework_Resource_BaseTrait{
-        AAM_Framework_Resource_ContentTrait::_get_settings_ns insteadof AAM_Framework_Resource_BaseTrait;
-        AAM_Framework_Resource_ContentTrait::_normalize_permission insteadof AAM_Framework_Resource_BaseTrait;
-    }
+    use AAM_Framework_Resource_BaseTrait;
 
     /**
      * @inheritDoc
@@ -32,22 +30,50 @@ class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interfac
      * @param mixed $resource_identifier
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function pre_init_hook($resource_identifier)
     {
-        $taxonomy = get_taxonomy($resource_identifier);
+        if (!empty($resource_identifier)) {
+            $taxonomy = get_taxonomy($resource_identifier);
 
-        if (is_a($taxonomy, WP_Taxonomy::class)) {
-            $this->_core_instance = $taxonomy;
-            $this->_internal_id   = $resource_identifier;
-        } else {
-            throw new OutOfRangeException(
-                'The taxonomy resource identifier is invalid'
-            );
+            if (is_a($taxonomy, WP_Taxonomy::class)) {
+                $this->_core_instance = $taxonomy;
+                $this->_internal_id   = $resource_identifier;
+            } else {
+                throw new OutOfRangeException(
+                    'The taxonomy resource identifier is invalid'
+                );
+            }
         }
+    }
+
+    /**
+     * Normalize permission model further
+     *
+     * @param array  $permission
+     * @param string $permission_key
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_permission($permission, $permission_key)
+    {
+        if ($permission_key === 'list'
+            && (!array_key_exists('on', $permission) || !is_array($permission['on']))
+        ) {
+            $permission['on'] = [
+                'frontend',
+                'backend',
+                'api'
+            ];
+        }
+
+        return $permission;
     }
 
 }

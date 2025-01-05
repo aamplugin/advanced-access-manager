@@ -59,7 +59,11 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      */
     public function sanitize_slug($slug)
     {
-        return strtolower(preg_replace('/[^a-z_\d]/i', '_', $slug));
+        return apply_filters(
+            'aam_sanitize_slug',
+            strtolower(preg_replace('/[^a-z_\d]/i', '_', $slug)),
+            $slug
+        );
     }
 
     /**
@@ -506,7 +510,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @param string $slug
      * @param string $taxonomy
      *
-     * @return string
+     * @return int
      * @access public
      *
      * @version 7.0.0

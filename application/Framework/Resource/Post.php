@@ -43,10 +43,25 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
                 $post = $resource_identifier;
             } elseif (is_numeric($resource_identifier)) {
                 $post = get_post($resource_identifier);
-            } elseif (is_array($resource_identifier)
-                && isset($resource_identifier['id'])
-            ) {
-                $post = get_post($resource_identifier['id']);
+            } elseif (is_array($resource_identifier)) {
+                if (isset($resource_identifier['id'])) {
+                    $post = get_post($resource_identifier['id']);
+                } else {
+                    // Let's get post_name
+                    if (isset($resource_identifier['slug'])) {
+                        $post_name = $resource_identifier['slug'];
+                    } elseif (isset($resource_identifier['post_name'])) {
+                        $post_name = $resource_identifier['post_name'];
+                    }
+
+                    if (!empty($post_name) && isset($resource_identifier['post_type'])) {
+                        $post = get_page_by_path(
+                            $post_name,
+                            OBJECT,
+                            $resource_identifier['post_type']
+                        );
+                    }
+                }
 
                 // Do some additional validation if id & post_type are provided in the
                 // array

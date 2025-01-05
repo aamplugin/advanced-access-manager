@@ -235,9 +235,8 @@ class AAM_Framework_Service_Widgets
      */
     public function is_denied($widget)
     {
-        $result = null;
-
         try {
+            $result   = null;
             $slug     = $this->_prepare_widget_slug($widget);
             $resource = $this->_get_resource();
 
@@ -251,8 +250,8 @@ class AAM_Framework_Service_Widgets
             $result = apply_filters(
                 'aam_widget_is_denied_filter',
                 $result,
-                $resource,
-                $widget
+                $widget,
+                $resource
             );
 
             // Prepare the final answer

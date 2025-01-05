@@ -212,15 +212,18 @@ class AAM_Framework_Service_ApiRoutes
     public function is_denied($route, $method = 'GET')
     {
         try {
+            $result   = null;
             $resource = $this->_get_resource();
             $key      = $this->_determine_route_key($route, $method);
 
             // Step #1. Determine if route is explicitly restricted
-            $result = isset($resource[$key]) && $resource[$key]['effect'] !== 'allow';
+            if (isset($resource[$key])) {
+                $result = $resource[$key]['effect'] !== 'allow';
+            }
 
             // Step #2. Allow third-party implementation to influence the decision
             $result = apply_filters(
-                'aam_api_route_is_restricted_filter',
+                'aam_api_route_is_denied_filter',
                 $result,
                 $resource,
                 $route,

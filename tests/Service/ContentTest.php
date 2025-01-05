@@ -158,14 +158,13 @@ final class ContentTest extends TestCase
      */
     public function testPostCommenting()
     {
-        $post_a  = $this->createPost([ 'post_content' => 'Test content' ]);
-        $service = AAM::api()->content();
+        $post_a = $this->createPost([ 'post_content' => 'Test content' ]);
 
         // Verify that commenting is open for the post
         $this->assertTrue(comments_open($post_a));
 
         // Set permission
-        $this->assertTrue($service->get_post($post_a)->add_permission('comment'));
+        $this->assertTrue(AAM::api()->posts()->deny($post_a, 'comment'));
         $this->assertFalse(comments_open($post_a));
     }
 
@@ -196,45 +195,6 @@ final class ContentTest extends TestCase
         $this->assertFalse(current_user_can('edit_post', $post_a));
         $this->assertFalse(current_user_can('publish_post', $post_a));
         $this->assertFalse(current_user_can('delete_post', $post_a));
-    }
-
-    /**
-     * Test that we can obtain Term resource
-     *
-     * @return void
-     */
-    public function testGetTerm()
-    {
-        $term_a  = $this->createTerm([ 'slug' => 'sample-term' ]);
-        $service = AAM::api()->content();
-
-        // Test that we can obtain Term resource with just providing ID
-        $term = $service->term($term_a);
-
-        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
-        $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
-
-        // Test we can obtain Term resource with slug and taxonomy
-        $term = $service->term('sample-term', 'category');
-
-        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
-        $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
-
-        // Test we can obtain Term resource with array and ID
-        $term = $service->term([ 'id' => $term_a, 'taxonomy' => 'category' ]);
-
-        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
-        $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
-
-        // Test we can obtain Term resource with array and slug
-        $term = $service->term([ 'slug' => 'sample-term', 'taxonomy' => 'category' ]);
-
-        $this->assertEquals(AAM_Framework_Resource_Term::class, get_class($term));
-        $this->assertEquals($term_a, $term->term_id);
-        $this->assertEquals("{$term_a}|category", $term->get_internal_id());
     }
 
 }
