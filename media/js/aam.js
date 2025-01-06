@@ -3207,7 +3207,7 @@
                     }
 
                     $.ajax(getAAM().prepareApiEndpoint(
-                        `/service/content/${resource_type}/${resource_id}/${permission}?${query.join('&')}`
+                        `/service/${resource_type}/${resource_id}/${permission}?${query.join('&')}`
                     ), {
                         type: 'POST',
                         headers: {
@@ -3477,7 +3477,7 @@
                     }
 
                     $.ajax(getAAM().prepareApiEndpoint(
-                        `/service/content/${resource_type}/${resource_id}?${query.join('&')}`
+                        `/service/${resource_type}/${resource_id}?${query.join('&')}`
                     ), {
                         type: 'POST',
                         headers: {
@@ -3547,7 +3547,7 @@
             function FetchPostTypeList(cb) {
                 if (cache.post_types === undefined) {
                     // Fetching the list of all registered post types.
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/post_types`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/post_types`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -3589,7 +3589,7 @@
             function FetchTaxonomyList(cb) {
                 // Fetching the list of all registered post types.
                 if (cache.taxonomies === undefined) {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/content/taxonomies`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/taxonomies`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -3629,7 +3629,7 @@
              */
             function FetchPostList(filters, cb) {
                 // Fetching the list of posts
-                $.ajax(getAAM().prepareApiEndpoint(`/service/content/posts`), {
+                $.ajax(getAAM().prepareApiEndpoint(`/service/posts`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
@@ -3685,7 +3685,7 @@
                 }
 
                 // Fetching the list of terms
-                $.ajax(getAAM().prepareApiEndpoint(`/service/content/terms`), {
+                $.ajax(getAAM().prepareApiEndpoint(`/service/terms`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce

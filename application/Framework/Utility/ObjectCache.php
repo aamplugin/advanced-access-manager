@@ -107,6 +107,8 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
                         }
                     } elseif (is_scalar($k)) {
                         array_push($bits, $k);
+                    } elseif (is_array($k)) {
+                        array_push($bits, serialize($k));
                     }
                 }
             }

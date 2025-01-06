@@ -45,6 +45,7 @@
  * @property AAM_Framework_Utility_AccessLevels $access_levels
  * @property AAM_Framework_Utility_Jwt $jwt
  * @property AAM_Framework_Utility_Policy $policy
+ * @property AAM_Framework_Utility_Content $content
  *
  * @package AAM
  * @version 7.0.0
@@ -107,7 +108,8 @@ final class AAM_Framework_Manager
         'db'            => AAM_Framework_Utility_Db::class,
         'access_levels' => AAM_Framework_Utility_AccessLevels::class,
         'jwt'           => AAM_Framework_Utility_Jwt::class,
-        'policy'        => AAM_Framework_Utility_Policy::class
+        'policy'        => AAM_Framework_Utility_Policy::class,
+        'content'       => AAM_Framework_Utility_Content::class
     ];
 
     /**
@@ -132,7 +134,6 @@ final class AAM_Framework_Manager
         'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
 
         // TODO: Remove these
-        'content'                => AAM_Framework_Service_Content::class,
         'identities'             => AAM_Framework_Service_Identities::class,
 
         'posts'                  => AAM_Framework_Service_Posts::class,

@@ -22,6 +22,8 @@
             } else {
                 $id = intval($internal_id);
             }
+        } elseif ($resource::TYPE === AAM_Framework_Type_Resource::POST) {
+            $id = $internal_id['id'];
         } else {
             $id = $internal_id;
         }

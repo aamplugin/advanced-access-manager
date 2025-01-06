@@ -45,6 +45,7 @@
  * @property AAM_Framework_Utility_AccessLevels $access_levels
  * @property AAM_Framework_Utility_Jwt $jwt
  * @property AAM_Framework_Utility_Policy $policy
+ * @property AAM_Framework_Utility_Content $content
  *
  * @package AAM
  * @version 7.0.0

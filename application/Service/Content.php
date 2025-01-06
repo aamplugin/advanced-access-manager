@@ -24,8 +24,8 @@ class AAM_Service_Content
      * @version 7.0.0
      */
     const DEFAULT_CONFIG = [
-        'service.content.manage_all_post_types' => false,
-        'service.content.manage_all_taxonomies' => false
+        'service.post_types.manage_all' => false,
+        'service.taxonomies.manage_all' => false
     ];
 
     /**
@@ -116,7 +116,7 @@ class AAM_Service_Content
         }
 
         // Register RESTful API
-        AAM_Restful_ContentService::bootstrap();
+        AAM_Restful_Content::bootstrap();
 
         $this->initialize_hooks();
     }
