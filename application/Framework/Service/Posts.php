@@ -803,16 +803,63 @@ class AAM_Framework_Service_Posts
     }
 
     /**
+     * Aggregate all posts' permissions
+     *
+     * This method returns all explicitly defined permissions for all the posts. It
+     * also includes permissions defined with JSON access policies, if the service
+     * is enabled.
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function aggregate()
+    {
+        try {
+            $result = $this->_get_resource()->get_permissions();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Reset permissions
+     *
+     * Reset post permissions or permissions to all posts if $post_identifier is not
+     * provided
+     *
+     * @param mixed $post_identifier [Optional]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset($post_identifier = null)
+    {
+        try {
+            $result = $this->_get_resource($post_identifier)->reset();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
      * Get post resource
      *
-     * @param mixed $identifier
+     * @param mixed $identifier [Optional]
      *
      * @return AAM_Framework_Resource_Post
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($identifier)
+    private function _get_resource($identifier = null)
     {
         return $this->_get_access_level()->get_resource(
             AAM_Framework_Type_Resource::POST, $identifier
@@ -831,8 +878,11 @@ class AAM_Framework_Service_Posts
      */
     private function _is_post_expired($post)
     {
-        $perm  = $post['read'];
-        $after = isset($perm['expires_after']) ? intval($perm['expires_after']) : null;
+        if (isset($post['read']['expires_after'])) {
+            $after = intval($post['read']['expires_after']);
+        } else {
+            $after = null;
+        }
 
         return !empty($after) ? time() >= $after : false;
     }

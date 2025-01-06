@@ -156,11 +156,7 @@ class AAM_Framework_Resource_Aggregate
     {
         $resource_type = $this->get_internal_id();
 
-        if ($resource_type === AAM_Framework_Type_Resource::POST) {
-            $aggregated = $this->_aggregate_post_policy_resources();
-        } elseif ($resource_type === AAM_Framework_Type_Resource::ROLE) {
-            $aggregated = $this->_aggregate_role_policy_resources();
-        } elseif ($resource_type === AAM_Framework_Type_Resource::USER) {
+        if ($resource_type === AAM_Framework_Type_Resource::USER) {
             $aggregated = $this->_aggregate_user_policy_resources();
         } else {
             $aggregated = [];
@@ -171,83 +167,6 @@ class AAM_Framework_Resource_Aggregate
             array_replace($aggregated, $permissions),
             $this
         );
-    }
-
-    /**
-     * Aggregate Post resources
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _aggregate_post_policy_resources()
-    {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
-
-        foreach($service->statements('Post:*') as $stm) {
-            $bits = explode(':', $stm['Resource']);
-
-            if (count($bits) === 3) {
-                // Preparing correct internal post ID
-                if (is_numeric($bits[2])) {
-                    $id = "{$bits[2]}|{$bits[1]}";
-                } else {
-                    $post = get_page_by_path($bits[2], OBJECT, $bits[1]);
-
-                    if (is_a($post, WP_Post::class)) {
-                        $id = "{$post->ID}|{$post->post_type}";
-                    } else {
-                        $id = null;
-                    }
-                }
-
-                if (!empty($id)) {
-                    $result[$id] = isset($result[$id]) ? $result[$id] : [];
-
-                    $result[$id] = array_replace(
-                        $result[$id],
-                        $manager->policy->statement_to_permission(
-                            $stm, $this->get_internal_id()
-                        )
-                    );
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Aggregate Role resources
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _aggregate_role_policy_resources()
-    {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
-
-        foreach($service->statements('Role:*') as $stm) {
-            $bits        = explode(':', $stm['Resource']);
-            $id          = $bits[1];
-            $result[$id] = isset($result[$id]) ? $result[$id] : [];
-
-            $result[$id] = array_replace(
-                $result[$id],
-                $manager->policy->statement_to_permission(
-                    $stm, $this->get_internal_id()
-                )
-            );
-        }
-
-        return $result;
     }
 
     /**

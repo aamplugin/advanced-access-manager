@@ -40,12 +40,12 @@ final class PostsTest extends TestCase
         $this->assertTrue($service->deny($post_a, 'list'));
         $this->assertTrue($service->deny($post_b, 'list'));
         $this->assertTrue($service->deny([
-            'id'   => $post_a,
-            'slug' => 'test-post-c'
+            'slug'      => 'test-post-c',
+            'post_type' => 'post'
         ], 'list'));
         $this->assertTrue($service->deny([
-            'id'        => $post_a,
-            'post_name' => 'test-post-d'
+            'post_name' => 'test-post-d',
+            'post_type' => 'post'
         ], 'list'));
 
         // Verify that posts are hidden
@@ -85,7 +85,8 @@ final class PostsTest extends TestCase
         $service = AAM::api()->posts();
 
         // Set raw post permissions
-        $this->assertTrue($service->deny('read', [
+        $resource = AAM::api()->user()->get_resource('post', $post);
+        $this->assertTrue($resource->add_permission('read', [
             'effect'           => 'deny',
             'restriction_type' => 'expire',
             'expires_after'    => time() - 30
@@ -151,13 +152,10 @@ final class PostsTest extends TestCase
         // Hide the post B
         $this->assertTrue($service->deny($post_b, 'list'));
 
-        // Verifying that post B is hidden on all areas
-        $post = $service->post($post_b);
-
-        $this->assertTrue($post->is_hidden_on('frontend'));
-        $this->assertTrue($post->is_hidden_on('backend'));
-        $this->assertTrue($post->is_hidden_on('api'));
-        $this->assertTrue($post->is_hidden());
+        $this->assertTrue($service->is_hidden_on($post_b, 'frontend'));
+        $this->assertTrue($service->is_hidden_on($post_b, 'backend'));
+        $this->assertTrue($service->is_hidden_on($post_b, 'api'));
+        $this->assertTrue($service->is_hidden($post_b));
 
         // Read raw post settings and ensure they are stored properly
         $options = $this->readWpOption(\AAM_Framework_Service_Settings::DB_OPTION);
@@ -233,7 +231,7 @@ final class PostsTest extends TestCase
         // Creating a new post and setting password with shortcut method
         $post_b = $this->createPost();
 
-        $this->assertTrue($service->set_password($post_b, $password, true));
+        $this->assertTrue($service->set_password($post_b, $password));
 
         // Verify that restriction are set correctly
         $this->assertTrue($service->is_password_protected($post_b));
@@ -330,6 +328,116 @@ final class PostsTest extends TestCase
         $this->assertFalse($service->is_allowed_to($post_a, 'publish'));
         $this->assertFalse($service->is_allowed_to($post_a, 'delete'));
         $this->assertFalse($service->is_allowed_to($post_a, 'edit'));
+    }
+
+    /**
+     * Testing aggregation for posts
+     *
+     * @return void
+     */
+    public function testPostPermissionsAggregation()
+    {
+        $post_a = $this->createPost();
+        $post_b = $this->createPost();
+
+        $this->assertTrue(AAM::api()->posts()->hide($post_a));
+        $this->assertTrue(AAM::api()->posts()->hide($post_b, [ 'backend', 'api' ]));
+
+        // Making sure that the aggregator is working as expected
+        $this->assertEquals([
+            "{$post_a}|post" => [
+                'list' => [
+                    'effect' => 'deny',
+                    'on'     => [ 'frontend', 'backend', 'api' ]
+                ]
+            ],
+            "{$post_b}|post" => [
+                'list' => [
+                    'effect' => 'deny',
+                    'on'     => [ 'backend', 'api' ]
+                ]
+            ]
+        ], AAM::api()->posts()->aggregate());
+    }
+
+    /**
+     * Making sure that aggregate take access policies Post resource into
+     * consideration
+     *
+     * @return void
+     */
+    public function testPostAggregationWithPolicy()
+    {
+        $post_a = $this->createPost();
+        $post_b = $this->createPost([ 'post_name' => 'test-post' ]);
+
+        // Create a policy that hides 2 posts
+        $this->assertIsInt(AAM::api()->policies()->create('{
+            "Statement": [
+                {
+                    "Effect": "deny",
+                    "Resource": "Post:post:' . $post_a . '",
+                    "Action": "List"
+                },
+                {
+                    "Effect": "deny",
+                    "Resource": [
+                        "Post:post:test-post"
+                    ],
+                    "Action": "List",
+                    "On": [ "backend", "api" ]
+                }
+            ]
+        }'));
+
+        $this->assertEquals([
+            "{$post_a}|post" => [
+                'list' => [
+                    'effect' => 'deny',
+                    'on'     => [ 'frontend', 'backend', 'api' ]
+                ]
+            ],
+            "{$post_b}|post" => [
+                'list' => [
+                    'effect' => 'deny',
+                    'on'     => [ 'backend', 'api' ]
+                ]
+            ]
+        ], AAM::api()->posts()->aggregate());
+    }
+
+    /**
+     * Making sure that internal post permissions have higher precedence than those
+     * that are set with JSON access policy
+     *
+     * @return void
+     */
+    public function testCorrectAggregationPermissionsMerge()
+    {
+        $post_a = $this->createPost();
+
+        // Setting post permission
+        $this->assertTrue(AAM::api()->posts()->hide($post_a));
+
+        // Create a policy that hides 2 posts
+        $this->assertIsInt(AAM::api()->policies()->create('{
+            "Statement": [
+                {
+                    "Effect": "allow",
+                    "Resource": "Post:post:' . $post_a . '",
+                    "Action": "List"
+                }
+            ]
+        }'));
+
+        $this->assertEquals([
+            "{$post_a}|post" => [
+                'list' => [
+                    'effect' => 'deny',
+                    'on'     => [ 'frontend', 'backend', 'api' ]
+                ]
+            ]
+        ], AAM::api()->posts()->aggregate());
     }
 
 }

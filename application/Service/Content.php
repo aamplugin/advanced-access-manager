@@ -410,14 +410,10 @@ class AAM_Service_Content
 
         if (!$wp_query->is_singular && !$executing) {
             $executing = true;
-            $aggregate = AAM::api()->user()->get_resource(
-                AAM_Framework_Type_Resource::AGGREGATE,
-                AAM_Framework_Type_Resource::POST
-            );
 
             $clauses['where'] .= apply_filters(
                 'aam_posts_where_clause_filter',
-                $this->_prepare_post_query($wp_query, $aggregate),
+                $this->_prepare_post_query($wp_query),
                 $wp_query
             );
 
@@ -430,15 +426,14 @@ class AAM_Service_Content
     /**
      * Modify content query to hide posts
      *
-     * @param WP_Query                         $wp_query
-     * @param AAM_Framework_Resource_Aggregate $aggregate
+     * @param WP_Query $wp_query
      *
      * @return string
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_post_query($wp_query, $aggregate)
+    private function _prepare_post_query($wp_query)
     {
         global $wpdb;
 
@@ -462,7 +457,7 @@ class AAM_Service_Content
         $post_types = (array) $post_type;
         $not_in     = [];
 
-        foreach ($aggregate->get_permissions() as $id => $perms) {
+        foreach (AAM::api()->posts()->aggregate() as $id => $perms) {
             // Extracting post attributes
             list($post_id, $post_type) = explode('|', $id);
 

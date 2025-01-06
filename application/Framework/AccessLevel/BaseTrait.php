@@ -79,8 +79,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * of AAM enhancements
      *
      * @var object
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_proxy_instance = null;
@@ -89,8 +89,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * Collection of extended methods
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_extended_methods = [];
@@ -102,6 +102,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * role can have siblings when user is assigned to multiple roles.
      *
      * @var array
+     * @access private
      *
      * @version 7.0.0
      */
@@ -113,8 +114,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param object $core_instance
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __construct($core_instance = null)
@@ -144,8 +145,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param array  $arguments
      *
      * @return mixed
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __call($name, $arguments)
@@ -179,8 +180,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __get($name)
@@ -335,6 +336,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param bool   $reload
      *
      * @return null|AAM_Framework_Resource_Interface
+     * @access private
+     *
+     * @version 7.0.0
      */
     private function _get_cached_resource(
         $resource_type, $resource_id, $skip_inheritance, $reload
@@ -370,6 +374,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param mixed  $obj
      *
      * @return bool
+     * @access private
+     *
+     * @version 7.0.0
      */
     private function _set_cached_resource(
         $resource_type, $resource_id, $skip_inheritance, $obj
@@ -401,6 +408,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param bool   $reload
      *
      * @return null|AAM_Framework_Preference_Interface
+     * @access private
+     *
+     * @version 7.0.0
      */
     private function _get_cached_preference($ns, $skip_inheritance, $reload)
     {
@@ -432,6 +442,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param mixed  $obj
      *
      * @return bool
+     * @access private
+     *
+     * @version 7.0.0
      */
     private function _set_cached_preference($ns, $skip_inheritance, $obj)
     {
@@ -459,8 +472,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param AAM_Framework_Resource_Interface $resource
      *
      * @return array
+     * @access private
      *
-     * @access protected
      * @version 7.0.0
      */
     private function _inherit_from_parent_resource($resource)
@@ -496,8 +509,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param AAM_Framework_Preference_Container $preference
      *
      * @return array
+     * @access private
      *
-     * @access protected
      * @version 7.0.0
      */
     private function _inherit_from_parent_preference($preference)
@@ -532,8 +545,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param array                              $siblings
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_preferences(
@@ -561,8 +574,8 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * @param array                            $siblings
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_permissions(
@@ -581,7 +594,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
             // [resource_id] => [
             //      [permission] => [ ... ]
             // ]
-            if ($resource::TYPE === AAM_Framework_Type_Resource::AGGREGATE) {
+            if (is_a($resource, AAM_Framework_Resource_AggregateInterface::class)
+                && $resource->is_aggregate()
+            ) {
                 // Getting the unique list of resource_ids from each aggregate
                 $resource_ids = array_unique([
                     ...array_keys($perms),

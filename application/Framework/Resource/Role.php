@@ -18,7 +18,11 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Role
+implements
+    AAM_Framework_Resource_Interface,
+    ArrayAccess,
+    AAM_Framework_Resource_AggregateInterface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -40,7 +44,12 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
      */
     protected function pre_init_hook($resource_identifier)
     {
-        if (is_a($resource_identifier, AAM_Framework_Proxy_Role::class)) {
+        if (is_a($resource_identifier, WP_Role::class)) {
+            $this->_internal_id   = $resource_identifier->name;
+            $this->_core_instance = AAM_Framework_Manager::_()->roles->get_role(
+                $resource_identifier->name
+            );
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_Role::class)) {
             $this->_core_instance = $resource_identifier;
             $this->_internal_id   = $resource_identifier->slug;
         } elseif (is_string($resource_identifier)) {
@@ -60,124 +69,6 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     }
 
     /**
-     * Restrict permission
-     *
-     * @param string|array $permission
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function deny($permission)
-    {
-        return $this->_set_permission($permission, 'deny');
-    }
-
-    /**
-     * Allow permission
-     *
-     * @param string $permission
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function allow($permission)
-    {
-        return $this->_set_permission($permission, 'allow');
-    }
-
-    /**
-     * Check is specific permission is denied
-     *
-     * @param string $permission
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_denied_to($permission)
-    {
-        $decision = null;
-
-        if (array_key_exists($permission, $this->_permissions)) {
-            $decision = $this->_permissions[$permission]['effect'] !== 'allow';
-        }
-
-        return apply_filters(
-            'aam_identity_is_denied_to_filter',
-            is_bool($decision) ? $decision : null,
-            $permission,
-            $this
-        );
-    }
-
-    /**
-     * Determines if access level has certain permission
-     *
-     * @param string $permission
-     *
-     * @return bool|null
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function is_allowed_to($permission)
-    {
-        $decision = $this->is_denied_to($permission);
-
-        return is_bool($decision) ? !$decision : $decision;
-    }
-
-    /**
-     * Set permission(s)
-     *
-     * @param string|array $permission
-     * @param string       $effect
-     *
-     * @return bool
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _set_permission($permission, $effect)
-    {
-        if (is_string($permission)) {
-            $result = $this->set_permissions(array_merge(
-                $this->get_permissions(true),
-                [ $permission => [ 'effect' => $effect ] ]
-            ));
-        } elseif (is_array($permission)) {
-            $permissions = $this->get_permissions(true);
-
-            foreach($permission as $perm) {
-                $permissions[$perm] = [ 'effect' => $effect ];
-            }
-
-            $result = $this->set_permissions($permissions);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get settings namespace
-     *
-     * @return string
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _get_settings_ns()
-    {
-        // Compile the namespace
-        return constant('static::TYPE') . '.' . $this->get_internal_id(true);
-    }
-
-    /**
      * @inheritDoc
      */
     private function _apply_policy($permissions)
@@ -185,26 +76,43 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
         $manager = AAM_Framework_Manager::_();
         $service = $manager->policies($this->get_access_level());
 
-        // Fetch list of statements for the resource Role
-        $list = $service->statements('Role:' . $this->get_internal_id(true));
+        // If resource ID is not provided, assume that we are working with all
+        // roles
+        if (empty($this->_internal_id)) {
+            foreach($service->statements('Role:*') as $stm) {
+                $bits        = explode(':', $stm['Resource']);
+                $id          = $bits[1];
+                $result[$id] = isset($result[$id]) ? $result[$id] : [];
 
-        foreach($list as $stm) {
-            $permissions = array_replace(
-                $manager->policy->statement_to_permission($stm, 'role'),
-                $permissions
+                $result[$id] = array_replace(
+                    $result[$id],
+                    $manager->policy->statement_to_permission(
+                        $stm, $this->get_internal_id()
+                    )
+                );
+            }
+        } else {
+            // Fetch list of statements for the resource Role
+            $list = $service->statements('Role:' . $this->get_internal_id(true));
+
+            foreach($list as $stm) {
+                $permissions = array_replace(
+                    $manager->policy->statement_to_permission($stm, 'role'),
+                    $permissions
+                );
+            }
+
+            // Now, if there are any statements defined for role users, parse them too
+            $list = $service->statements(
+                'Role:' . $this->get_internal_id(true) . ':users'
             );
-        }
 
-        // Now, if there are any statements defined for role users, parse them too
-        $list = $service->statements(
-            'Role:' . $this->get_internal_id(true) . ':users'
-        );
-
-        foreach($list as $stm) {
-            $permissions = array_replace(
-                $manager->policy->statement_to_permission($stm, 'role'),
-                $permissions
-            );
+            foreach($list as $stm) {
+                $permissions = array_replace(
+                    $manager->policy->statement_to_permission($stm, 'role'),
+                    $permissions
+                );
+            }
         }
 
         return apply_filters('aam_apply_policy_filter', $permissions, $this);

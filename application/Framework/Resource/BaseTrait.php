@@ -246,6 +246,14 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
+     * @inheritDoc
+     */
+    public function is_aggregate()
+    {
+        return empty($this->_internal_id);
+    }
+
+    /**
      * Get WordPress core instance
      *
      * @return mixed

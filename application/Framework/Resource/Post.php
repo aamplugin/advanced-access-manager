@@ -16,7 +16,10 @@
  * @version 7.0.0
  */
 class AAM_Framework_Resource_Post
-implements AAM_Framework_Resource_Interface, ArrayAccess
+implements
+    AAM_Framework_Resource_Interface,
+    ArrayAccess,
+    AAM_Framework_Resource_AggregateInterface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -121,27 +124,70 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
         $manager = AAM_Framework_Manager::_();
         $service = $manager->policies($this->get_access_level());
 
-        // Fetching all resources that may represent our current post and doing some
-        // additional validation as the same post can be targeted by both ID & slug
-        $by_id   = $service->statements("Post:{$this->post_type}:{$this->ID}");
-        $by_slug = $service->statements("Post:{$this->post_type}:{$this->post_name}");
+        if (empty($this->_internal_id)) { // Resource acts as container
+            $more   = [];
+            $result = [];
 
-        if (!empty($by_id) && !empty($by_slug)) {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                'Found the same post by ID & slug. May lead to unexpected results.',
-                AAM_VERSION
+            foreach($service->statements('Post:*') as $stm) {
+                $bits = explode(':', $stm['Resource']);
+
+                if (count($bits) === 3) {
+                    // Preparing correct internal post ID
+                    if (is_numeric($bits[2])) {
+                        $id = "{$bits[2]}|{$bits[1]}";
+                    } else {
+                        $post = get_page_by_path($bits[2], OBJECT, $bits[1]);
+
+                        if (is_a($post, WP_Post::class)) {
+                            $id = "{$post->ID}|{$post->post_type}";
+                        } else {
+                            $id = null;
+                        }
+                    }
+
+                    if (!empty($id)) {
+                        $more[$id] = isset($more[$id]) ? $more[$id] : [];
+
+                        $more[$id] = array_replace(
+                            $more[$id],
+                            $manager->policy->statement_to_permission(
+                                $stm, self::TYPE
+                            )
+                        );
+                    }
+                }
+            }
+
+            // Merging all the permissions into one cohesive array
+            $rids = array_unique(array_merge(
+                array_keys($permissions),
+                array_keys($more)
+            ));
+
+            foreach($rids as $rid) {
+                $result[$rid] = array_replace(
+                    isset($more[$rid]) ? $more[$rid] : [],
+                    isset($permissions[$rid]) ? $permissions[$rid] : []
+                );
+            }
+        } else {
+            // Fetching all resources that may represent our current post
+            $posts = array_merge(
+                $service->statements("Post:{$this->post_type}:{$this->ID}"),
+                $service->statements("Post:{$this->post_type}:{$this->post_name}")
             );
+
+            $result = $permissions;
+
+            foreach($posts as $stm) {
+                $result = array_replace(
+                    $manager->policy->statement_to_permission($stm, self::TYPE),
+                    $result
+                );
+            }
         }
 
-        foreach(array_merge($by_id, $by_slug) as $stm) {
-            $permissions = array_replace(
-                $manager->policy->statement_to_permission($stm, 'post'),
-                $permissions
-            );
-        }
-
-        return apply_filters('aam_apply_policy_filter', $permissions, $this);
+        return apply_filters('aam_apply_policy_filter', $result, $this);
     }
 
 }

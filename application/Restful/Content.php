@@ -184,7 +184,7 @@ class AAM_Restful_Content
                 ]
             ]);
 
-            // Reset all permissions
+            // Reset post permissions
             $this->_register_route('/post/(?P<id>[\d]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_post_permissions'),
