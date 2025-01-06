@@ -765,10 +765,10 @@ class AAM_Restful_ContentService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM::api()->content([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->content(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

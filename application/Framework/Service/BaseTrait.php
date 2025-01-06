@@ -28,33 +28,45 @@ trait AAM_Framework_Service_BaseTrait
     private $_extended_methods = [];
 
     /**
-     * The runtime context
-     *
-     * This context typically contains information about current subject
+     * Service's access level
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private $_runtime_context = null;
+    private $_access_level = null;
+
+    /**
+     * Service's runtime settings
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_settings = null;
 
     /**
      * Instantiate the service
      *
-     * @param array $runtime_context
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param array                               $settings
      *
      * @return void
      * @access protected
      *
      * @version 7.0.0
      */
-    protected function __construct($runtime_context)
+    protected function __construct($access_level, $settings)
     {
-        $this->_runtime_context = $runtime_context;
+        $this->_access_level = $access_level;
+        $this->_settings     = $settings;
 
         // Extend the service instance with additional methods
-        $closures = apply_filters('aam_framework_service_methods_filter', [], $this);
+        $closures = apply_filters(
+            'aam_framework_service_methods_filter', [], $this
+        );
 
         if (is_array($closures)) {
             foreach($closures as $name => $closure) {
@@ -90,7 +102,9 @@ trait AAM_Framework_Service_BaseTrait
             } elseif (AAM_Framework_Manager::_()->has_service($name)) {
                 $result = AAM_Framework_Manager::_()->{$name}(...$args);
             } else {
-                throw new BadMethodCallException("Method {$name} does not exist");
+                throw new BadMethodCallException(
+                    "Method {$name} does not exist"
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -115,7 +129,7 @@ trait AAM_Framework_Service_BaseTrait
 
         try {
             if ($name === 'access_level') {
-                $result = $this->_get_access_level();
+                $result = $this->_access_level;
             } elseif (AAM_Framework_Manager::_()->has_utility($name)) {
                 $result = AAM_Framework_Manager::_()->{$name};
             }
@@ -157,24 +171,7 @@ trait AAM_Framework_Service_BaseTrait
      */
     private function _get_access_level()
     {
-        $result = null;
-
-        if (is_array($this->_runtime_context)) {
-            $context = $this->_runtime_context;
-        } else {
-            throw new BadMethodCallException('No context provided');
-        }
-
-        if (isset($context['access_level'])) {
-            $result = $context['access_level'];
-        } elseif (!empty($context['access_level_type'])) {
-            $result = $this->access_levels->get(
-                $context['access_level_type'],
-                isset($context['access_level_id']) ? $context['access_level_id'] : null
-            );
-        }
-
-        return $result;
+        return $this->_access_level;
     }
 
     /**
@@ -199,8 +196,8 @@ trait AAM_Framework_Service_BaseTrait
      * @param Exception $exception
      *
      * @return mixed
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _handle_error($exception)
@@ -208,12 +205,12 @@ trait AAM_Framework_Service_BaseTrait
         $response = null;
 
         // Determine what is the proper error handling strategy to pick
-        if (!empty($this->_runtime_context['error_handling'])) {
-            $strategy = $this->_runtime_context['error_handling'];
+        if (!empty($this->_settings['error_handling'])) {
+            $strategy = $this->_settings['error_handling'];
         } else {
             // Do not rely on WP_DEBUG as many website owners forget to turn off
             // debug mode in production
-            $strategy = 'wp_error';
+            $strategy = 'wp_trigger_error';
         }
 
         if ($strategy === 'exception') {
@@ -230,19 +227,21 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Bootstrap and return an instance of the service
      *
-     * @param array $runtime_context
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param array                               $settings
      *
      * @return static::class
      *
      * @access public
      * @static
+     *
      * @version 7.0.0
      */
-    public static function get_instance($runtime_context = [])
-    {
-        $result = new self($runtime_context);
-
-        return $result;
+    public static function get_instance(
+        AAM_Framework_AccessLevel_Interface$access_level,
+        $settings
+    ) {
+        return new self($access_level, $settings);
     }
 
 }

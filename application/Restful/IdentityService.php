@@ -663,10 +663,10 @@ class AAM_Restful_IdentityService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM::api()->identities([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->identities(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

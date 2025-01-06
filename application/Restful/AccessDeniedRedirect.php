@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_AccessDeniedRedirectService
+class AAM_Restful_AccessDeniedRedirect
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_AccessDeniedRedirectService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -163,8 +163,8 @@ class AAM_Restful_AccessDeniedRedirectService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_redirect(WP_REST_Request $request)
@@ -202,7 +202,9 @@ class AAM_Restful_AccessDeniedRedirectService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset($request->get_param('area'));
+            $result  = [
+                'success' => $service->reset($request->get_param('area'))
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -443,10 +445,10 @@ class AAM_Restful_AccessDeniedRedirectService
      */
     private function _get_service($request)
     {
-        return AAM::api()->access_denied_redirect([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->access_denied_redirect(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

@@ -53,7 +53,7 @@ interface AAM_Framework_Resource_Interface
     public function get_access_level();
 
     /**
-     * Get the collection of resource permissions
+     * Get the collection of raw resource permissions
      *
      * @param boolean $explicit_only
      *
@@ -65,7 +65,7 @@ interface AAM_Framework_Resource_Interface
     public function get_permissions($explicit_only = false);
 
     /**
-     * Set resource permissions
+     * Set raw resource permissions
      *
      * @param array   $permissions
      * @param boolean $explicit_only
@@ -80,29 +80,41 @@ interface AAM_Framework_Resource_Interface
     /**
      * Add a single permission
      *
+     * This method normalizes added permission to ensure it is consistent with
+     * internal permission data model
+     *
      * @param string $permission_key
-     * @param mixed  $permission      [optional]
-     * @param bool   $exclude_authors [Premium Feature!]
+     * @param mixed  $permission     [Optional]
+     * @param bool   ...$args        [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function add_permission($permission_key, ...$args);
+    public function add_permission($permission_key, $permission = 'deny', ...$args);
 
     /**
      * Add multiple permissions
      *
-     * @param array $permissions
-     * @param bool  $exclude_authors [Premium Feature!]
+     * This method normalizes added permissions to ensure their consistency with
+     * internal permission data model.
+     *
+     * Keep in mind that this method assumes that you are passing only array of
+     * permission keys. Examples of this method call:
+     *  ->add_permissions([ 'edit', 'comment', 'delete' ], 'deny');
+     *  ->add_permissions([ 'list', 'read' ], 'allow');
+     *
+     * @param array $permission_keys
+     * @param mixed $effect          [Optional]
+     * @param bool  ...$args         [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function add_permissions($permissions, ...$args);
+    public function add_permissions($permission_keys, $effect = 'deny', ...$args);
 
     /**
      * Remove a single permission

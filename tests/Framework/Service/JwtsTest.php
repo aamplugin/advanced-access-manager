@@ -154,7 +154,9 @@ final class JwtsTest extends TestCase
     public function testValidateToken()
     {
         $user_a  = $this->createUser([ 'role' => 'subscriber' ]);
-        $service = AAM::api()->jwts('user:' . $user_a);
+        $service = AAM::api()->jwts('user:' . $user_a, [
+            'error_handling' => 'wp_error'
+        ]);
 
         // Set the limit
         $this->assertTrue(AAM::api()->config->set('service.jwt.registry_size', 1));

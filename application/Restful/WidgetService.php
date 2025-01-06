@@ -252,10 +252,10 @@ class AAM_Restful_WidgetService
      */
     private function _get_service($request)
     {
-        return AAM::api()->widgets([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->widgets(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

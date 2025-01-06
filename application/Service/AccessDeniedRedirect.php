@@ -36,7 +36,7 @@ class AAM_Service_AccessDeniedRedirect
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_AccessDeniedRedirectService::bootstrap();
+        AAM_Restful_AccessDeniedRedirect::bootstrap();
 
         $this->initialize_hooks();
     }

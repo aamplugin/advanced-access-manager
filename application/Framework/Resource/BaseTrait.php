@@ -120,9 +120,9 @@ trait AAM_Framework_Resource_BaseTrait
         }
 
         // Read explicitly defined settings from DB
-        $permissions = AAM_Framework_Manager::_()->settings([
-            'access_level' => $access_level
-        ])->get_setting($this->_get_settings_ns(), []);
+        $permissions = AAM_Framework_Manager::_()->settings(
+            $access_level
+        )->get_setting($this->_get_settings_ns(), []);
 
         if (!empty($permissions)) {
             $this->_explicit_permissions = $permissions;
@@ -273,9 +273,9 @@ trait AAM_Framework_Resource_BaseTrait
     {
         $this->_explicit_permissions = [];
 
-        return AAM_Framework_Manager::_()->settings([
-            'access_level' => $this->get_access_level()
-        ])->delete_setting($this->_get_settings_ns());
+        return AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->delete_setting($this->_get_settings_ns());
     }
 
     /**
@@ -297,8 +297,6 @@ trait AAM_Framework_Resource_BaseTrait
      */
     public function set_permissions($permissions, $explicit_only = true)
     {
-        $permissions = $this->_sanitize_permissions($permissions);
-
         if ($explicit_only) {
             // First, settings the explicit permissions
             $this->_explicit_permissions = $permissions;
@@ -307,9 +305,9 @@ trait AAM_Framework_Resource_BaseTrait
             $this->_permissions = array_merge($this->_permissions, $permissions);
 
             // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings([
-                'access_level' => $this->get_access_level()
-            ])->set_setting($this->_get_settings_ns(), $permissions);
+            $result = AAM_Framework_Manager::_()->settings(
+                $this->get_access_level()
+            )->set_setting($this->_get_settings_ns(), $permissions);
         } else {
             $this->_permissions = $permissions;
             $result             = true;
@@ -321,17 +319,13 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function add_permission($permission_key, ...$args)
+    public function add_permission($permission_key, $permission = 'deny', ...$args)
     {
         $permissions = $this->_explicit_permissions;
 
-        // Determine if $permission argument was provided
-        $permission = array_shift($args);
-        $permission = !is_null($permission) ? $permission : 'deny';
-
         $permissions[$permission_key] = apply_filters(
             'aam_framework_resource_add_permission_filter',
-            $this->_sanitize_permission($permission, $permission_key),
+            $this->_sanitize_permission($permission_key, $permission),
             $args
         );
 
@@ -341,39 +335,31 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function add_permissions($permissions, ...$args)
+    public function add_permissions($permission_keys, $effect = 'deny', ...$args)
     {
-        $normalized = [];
+        $new_permissions = $this->_explicit_permissions;
 
-        foreach($permissions as $key => $value) {
-            if (is_numeric($key) && is_string($value)) {
-                $normalized[$value] = apply_filters(
-                    'aam_framework_resource_add_permission_filter',
-                    $this->_sanitize_permission(true, $value),
-                    $args
-                );
-            } elseif (is_string($key)) {
-                $normalized[$key] = apply_filters(
-                    'aam_framework_resource_add_permission_filter',
-                    $this->_sanitize_permission($value, $key),
-                    $args
-                );
-            }
+        foreach($permission_keys as $permission) {
+            $new_permissions[$permission] = apply_filters(
+                'aam_framework_resource_add_permission_filter',
+                $this->_sanitize_permission($permission, $effect),
+                $args
+            );
         }
 
-        return $this->set_permissions($normalized, true);
+        return $this->set_permissions($new_permissions, true);
     }
 
     /**
      * @inheritDoc
      */
-    public function remove_permission($permission_key)
+    public function remove_permission($permission)
     {
         $result      = true;
         $permissions = $this->_explicit_permissions;
 
-        if (array_key_exists($permission_key, $permissions)) {
-            unset($permissions[$permission_key]);
+        if (array_key_exists($permission, $permissions)) {
+            unset($permissions[$permission]);
 
             $result = $this->set_permissions($permissions, true);
         }
@@ -384,22 +370,20 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function remove_permissions($permission_keys)
+    public function remove_permissions($permissions)
     {
-        $permissions = array_filter(
+        return $this->set_permissions(array_filter(
             $this->_explicit_permissions,
-            function ($p) use ($permission_keys) {
-                return !in_array($p, $permission_keys, true);
+            function ($p) use ($permissions) {
+                return !in_array($p, $permissions, true);
             }, ARRAY_FILTER_USE_KEY
-        );
-
-        return $this->set_permissions($permissions, true);
+        ), true);
     }
 
     /**
      * Check if permission exists
      *
-     * @param string $permission_key
+     * @param string $permission
      *
      * @return bool
      * @access public
@@ -407,15 +391,15 @@ trait AAM_Framework_Resource_BaseTrait
      * @version 7.0.0
      */
     #[\ReturnTypeWillChange]
-    public function offsetExists($permission_key)
+    public function offsetExists($permission)
     {
-        return array_key_exists($permission_key, $this->_permissions);
+        return array_key_exists($permission, $this->_permissions);
     }
 
     /**
      * Get specific permission
      *
-     * @param string $permission_key
+     * @param string $permission
      *
      * @return array
      * @access public
@@ -423,12 +407,12 @@ trait AAM_Framework_Resource_BaseTrait
      * @version 7.0.0
      */
     #[\ReturnTypeWillChange]
-    public function offsetGet($permission_key)
+    public function offsetGet($permission)
     {
         $result = null;
 
-        if ($this->offsetExists($permission_key)) {
-            $result = $this->_permissions[$permission_key];
+        if ($this->offsetExists($permission)) {
+            $result = $this->_permissions[$permission];
         }
 
         return $result;
@@ -437,8 +421,8 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * Set specific permission
      *
-     * @param string $permission_key
-     * @param mixed  $permission
+     * @param string $permission
+     * @param mixed  $effect
      *
      * @return bool
      * @access public
@@ -446,15 +430,15 @@ trait AAM_Framework_Resource_BaseTrait
      * @version 7.0.0
      */
     #[\ReturnTypeWillChange]
-    public function offsetSet($permission_key, $permission)
+    public function offsetSet($permission, $effect)
     {
-        return $this->add_permission($permission_key, $permission);
+        return $this->add_permission($permission, $effect);
     }
 
     /**
      * Remove specific permission
      *
-     * @param string $permission_key
+     * @param string $permission
      *
      * @return bool
      * @access public
@@ -462,9 +446,9 @@ trait AAM_Framework_Resource_BaseTrait
      * @version 7.0.0
      */
     #[\ReturnTypeWillChange]
-    public function offsetUnset($permission_key)
+    public function offsetUnset($permission)
     {
-        return $this->remove_permission($permission_key);
+        return $this->remove_permission($permission);
     }
 
     /**
@@ -504,7 +488,7 @@ trait AAM_Framework_Resource_BaseTrait
         $response = [];
 
         foreach($permissions as $key => $permission) {
-            $response[$key] = $this->_sanitize_permission($permission, $key);
+            $response[$key] = $this->_sanitize_permission($key, $permission);
         }
 
         return $response;
@@ -515,29 +499,29 @@ trait AAM_Framework_Resource_BaseTrait
      *
      * Take given permission and convert to a standardized permission model
      *
-     * @param mixed  $permission
      * @param string $permission_key
+     * @param mixed  $permission
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _sanitize_permission($permission, $permission_key)
+    private function _sanitize_permission($permission_key, $permission)
     {
-        if (is_string($permission)) {
+        if (is_string($permission)) { // Word like "allow" or "deny"
             $result = [
                 'effect' => strtolower($permission)
             ];
-        } elseif (is_bool($permission)) {
+        } elseif (is_bool($permission)) { // Boolean "true" or "false"
             $result = [
                 'effect' => $permission ? 'deny' : 'allow'
             ];
-        } elseif (is_numeric($permission)) {
+        } elseif (is_numeric($permission)) { // Numeric "1" or "0"
             $result = [
                 'effect' => intval($permission) > 0 ? 'deny' : 'allow'
             ];
-        } elseif (is_array($permission)) {
+        } elseif (is_array($permission)) { // Raw permission data
             $result = array_merge([ 'effect' => 'deny' ], $permission);
         } else {
             $result = [ 'effect' => 'deny' ];

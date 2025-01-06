@@ -33,7 +33,7 @@ class AAM_Framework_Service_Settings
      *
      * @version 7.0.0
      */
-    private $_settings = [];
+    private $_data = [];
 
     /**
      * Load the settings from DB
@@ -45,7 +45,7 @@ class AAM_Framework_Service_Settings
      */
     protected function initialize_hooks()
     {
-        $this->_settings = $this->db->read(self::DB_OPTION, []);
+        $this->_data = $this->db->read(self::DB_OPTION, []);
     }
 
     /**
@@ -83,7 +83,7 @@ class AAM_Framework_Service_Settings
             $placement = &$this->_set_settings_pointer();
             $placement = $settings;
 
-            if ($this->db->write(self::DB_OPTION, $this->_settings)) {
+            if ($this->db->write(self::DB_OPTION, $this->_data)) {
                 $result = $placement;
             } else {
                 throw new RuntimeException('Failed to persist configurations');
@@ -153,7 +153,7 @@ class AAM_Framework_Service_Settings
 
             $settings = $value;
 
-            if ($this->db->write(self::DB_OPTION, $this->_settings)) {
+            if ($this->db->write(self::DB_OPTION, $this->_data)) {
                 $result = true;
             } else {
                 throw new RuntimeException('Failed to persist settings');
@@ -191,7 +191,7 @@ class AAM_Framework_Service_Settings
                 }
             }
 
-            $result = $this->db->write(self::DB_OPTION, $this->_settings);
+            $result = $this->db->write(self::DB_OPTION, $this->_data);
 
             if (!$result) {
                 throw new RuntimeException('Failed to persist settings');
@@ -224,14 +224,14 @@ class AAM_Framework_Service_Settings
                     AAM_Framework_Type_AccessLevel::USER,
                     AAM_Framework_Type_AccessLevel::ROLE
                 ],
-                true) && isset($this->_settings[$type][$id])
+                true) && isset($this->_data[$type][$id])
             ) {
-                unset($this->_settings[$type][$id]);
-            } elseif (isset($this->_settings[$type])) {
-                unset($this->_settings[$type]);
+                unset($this->_data[$type][$id]);
+            } elseif (isset($this->_data[$type])) {
+                unset($this->_data[$type]);
             }
 
-            if (!$this->db->write(self::DB_OPTION, $this->_settings)) {
+            if (!$this->db->write(self::DB_OPTION, $this->_data)) {
                 throw new RuntimeException('Failed to persist configurations');
             }
 
@@ -263,11 +263,11 @@ class AAM_Framework_Service_Settings
                 AAM_Framework_Type_AccessLevel::USER,
                 AAM_Framework_Type_AccessLevel::ROLE
             ],
-            true) && isset($this->_settings[$type][$id])
+            true) && isset($this->_data[$type][$id])
         ) {
-            $result = $this->_settings[$type][$id];
-        } elseif (isset($this->_settings[$type])) {
-            $result = $this->_settings[$type];
+            $result = $this->_data[$type][$id];
+        } elseif (isset($this->_data[$type])) {
+            $result = $this->_data[$type];
         }
 
         return $result;
@@ -292,21 +292,21 @@ class AAM_Framework_Service_Settings
             AAM_Framework_Type_AccessLevel::USER,
             AAM_Framework_Type_AccessLevel::ROLE
         ], true)) { // User & Role access levels have additional level
-            if (!isset($this->_settings[$type])) {
-                $this->_settings[$type] = [];
+            if (!isset($this->_data[$type])) {
+                $this->_data[$type] = [];
             }
 
-            if (!isset($this->_settings[$type][$id])) {
-                $this->_settings[$type][$id] = [];
+            if (!isset($this->_data[$type][$id])) {
+                $this->_data[$type][$id] = [];
             }
 
-            $result = &$this->_settings[$type][$id];
+            $result = &$this->_data[$type][$id];
         } else {
-            if (!isset($this->_settings[$type])) {
-                $this->_settings[$type] = [];
+            if (!isset($this->_data[$type])) {
+                $this->_data[$type] = [];
             }
 
-            $result = &$this->_settings[$type];
+            $result = &$this->_data[$type];
         }
 
         return $result;

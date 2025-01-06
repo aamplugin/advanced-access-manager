@@ -274,10 +274,10 @@ class AAM_Restful_MetaboxService
      */
     private function _get_service($request)
     {
-        return AAM::api()->metaboxes([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->metaboxes(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

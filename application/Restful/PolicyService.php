@@ -395,10 +395,10 @@ class AAM_Restful_PolicyService
      */
     private function _get_service($request)
     {
-        return AAM::api()->policies([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->policies(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
     /**

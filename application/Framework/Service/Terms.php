@@ -54,21 +54,21 @@ class AAM_Framework_Service_Terms
      */
     private function _get_resource($identifier)
     {
-        if (!empty($this->_runtime_context['post_type_scope'])) {
+        if (!empty($this->_settings['scope'])) {
             if (is_array($identifier)) {
                 $identifier = array_replace(
-                    [ 'post_type' => $this->_runtime_context['post_type_scope'] ],
+                    [ 'post_type' => $this->_settings['scope'] ],
                     $identifier
                 );
             } elseif (is_a($identifier, WP_Term::class)) {
                 $identifier = [
                     'term'      => $identifier,
-                    'post_type' => $this->_runtime_context['post_type_scope']
+                    'post_type' => $this->_settings['scope']
                 ];
             } elseif (is_numeric($identifier)) {
                 $identifier = [
                     'id'        => $identifier,
-                    'post_type' => $this->_runtime_context['post_type_scope']
+                    'post_type' => $this->_settings['scope']
                 ];
             }
         }

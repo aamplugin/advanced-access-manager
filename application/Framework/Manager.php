@@ -10,27 +10,27 @@
 /**
  * AAM Framework manager
  *
- * @method AAM_Framework_Service_Urls urls(mixed $runtime_context = null)
- * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Jwts jwts(mixed $runtime_context = null)
- * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Posts posts(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Terms terms(mixed $runtime_context = null)
- * @method AAM_Framework_Service_PostTypes post_types(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Identities identities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_ObjectCache $object_cache
@@ -56,21 +56,35 @@ final class AAM_Framework_Manager
      * Single instance of itself
      *
      * @var AAM_Framework_Manager
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private static $_instance = null;
 
     /**
-     * Default context shared by all services
+     * Default access level
      *
-     * @var array
+     * The access level that is used if non are provided during service invocation
      *
+     * @var AAM_Framework_AccessLevel_Interface
      * @access private
+     *
      * @version 7.0.0
      */
-    private $_default_context = [];
+    private $_default_access_level = null;
+
+    /**
+     * Default settings that are used for all services
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_default_settings = [
+        'error_handling' => 'wp_trigger_error'
+    ];
 
     /**
      * Collection of utilities
@@ -237,31 +251,38 @@ final class AAM_Framework_Manager
         $result = null;
 
         if (array_key_exists($name, $this->_services)) {
-            $runtime_context = array_shift($args);
+            $acl      = array_shift($args);
+            $settings = array_shift($args);
 
             // Parse the incoming context and determine correct access level
-            if (is_a($runtime_context, AAM_Framework_AccessLevel_Interface::class)) {
-                $context = [ 'access_level' => $runtime_context ];
-            } elseif (is_string($runtime_context)) {
-                $context = $this->_string_to_context($runtime_context);
-            } elseif (is_array($runtime_context)) {
-                $context = $runtime_context;
-            } else {
-                $context = [];
+            if (empty($acl)) { // Use default access level
+                $acl = $this->_default_access_level;
+            } elseif (is_string($acl)) {
+                $acl = $this->_string_to_access_level($acl);
             }
 
-            // Compile the final context that is passed to the service
-            if (is_array($context)) {
-                $context = array_merge($this->_default_context, $context);
-            } else {
+            if (!is_a($acl, AAM_Framework_AccessLevel_Interface::class)) {
                 throw new InvalidArgumentException(
-                    'Invalid service context provided'
+                    'Invalid access level provided'
                 );
             }
 
-            $result = call_user_func(
-                "{$this->_services[$name]}::get_instance", $context
-            );
+            if (empty($settings)) {
+                $settings = $this->_default_settings;
+            }
+
+            $cache_key = [ $acl::TYPE, $acl->get_id(), $name, $settings ];
+            $result    = $this->object_cache->get($cache_key);
+
+            if (empty($result)) {
+                $result = call_user_func(
+                    "{$this->_services[$name]}::get_instance",
+                    $acl,
+                    $settings
+                );
+
+                $this->object_cache->set($cache_key, $result);
+            }
         } else {
             throw new BadMethodCallException(sprintf(
                 'There is no service %s defined', $name
@@ -329,47 +350,42 @@ final class AAM_Framework_Manager
      *
      * @param string $str
      *
-     * @return array
+     * @return AAM_Framework_AccessLevel_Interface
      * @access private
      *
      * @version 7.0.0
      */
-    private function _string_to_context($str)
+    private function _string_to_access_level($str)
     {
         // Trying to parse the context and extract the access level
         if (in_array($str, [ 'visitor', 'anonymous', 'guest'], true)) {
-            $context = [
-                'access_level' => $this->access_levels->get_visitor()
-            ];
+            $result = $this->access_levels->get_visitor();
         } elseif (in_array($str, [ 'default', 'all', 'anyone', 'everyone' ], true)) {
-            $context = [
-                'access_level' => $this->access_levels->get_default()
-            ];
+            $result = $this->access_levels->get_default();
         } elseif (strpos($str, ':')) {
-            list($access_level, $id) = explode(':', $str, 2);
+            list($type, $id) = explode(':', $str, 2);
 
-            if ($access_level === 'role') {
-                $context = [
-                    'access_level' => $this->access_levels->get_role($id)
-                ];
-            } elseif ($access_level === 'user') {
-                $context = [
-                    'access_level' => $this->access_levels->get_user($id)
-                ];
+            if ($type === 'role') {
+                $result = $this->access_levels->get_role($id);
+            } elseif ($type === 'user') {
+                $result = $this->access_levels->get_user($id);
             }
-        } else {
+        }
+
+        if (!is_a($result, AAM_Framework_AccessLevel_Interface::class)) {
             throw new InvalidArgumentException(
                 'Unsupported access level string value'
             );
         }
 
-        return $context;
+        return $result;
     }
 
     /**
      * Get single instance of itself
      *
-     * @param array $default_context [Optional]
+     * @param AAM_Framework_AccessLevel_Interface $default_access_level
+     * @param array                               $default_settings     [Optional]
      *
      * @return AAM_Framework_Manager
      * @access public
@@ -377,15 +393,24 @@ final class AAM_Framework_Manager
      *
      * @version 7.0.0
      */
-    public static function load(array $default_context = [])
-    {
+    public static function setup(
+        $default_access_level = null, $default_settings = []
+    ) {
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
         }
 
+        // Capture the default access level
+        if (!empty($default_access_level)) {
+            self::$_instance->_default_access_level = $default_access_level;
+        }
+
         // Set the default context if it is not empty
-        if (!empty($default_context)) {
-            self::$_instance->_default_context = $default_context;
+        if (!empty($default_settings)) {
+            self::$_instance->_default_settings = array_replace(
+                self::$_instance->_default_settings,
+                $default_settings
+            );
         }
 
         return self::$_instance;
@@ -403,7 +428,7 @@ final class AAM_Framework_Manager
      */
     public static function _()
     {
-        return self::load();
+        return self::setup();
     }
 
 }

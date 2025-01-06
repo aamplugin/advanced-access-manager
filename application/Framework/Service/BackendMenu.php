@@ -275,7 +275,7 @@ class AAM_Framework_Service_BackendMenu
      */
     public function is_allowed($menu_slug)
     {
-        $result = $this->is_restricted($menu_slug);
+        $result = $this->is_denied($menu_slug);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -490,7 +490,7 @@ class AAM_Framework_Service_BackendMenu
             'path'          => $this->_prepare_admin_uri($menu_item[2]),
             'name'          => $this->_filter_menu_name($menu_item[0]),
             'capability'    => $menu_item[1],
-            'is_restricted' => $this->is_restricted($slug)
+            'is_restricted' => $this->is_denied($slug)
         );
 
         if ($is_top_level) {

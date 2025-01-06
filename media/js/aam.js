@@ -2103,7 +2103,7 @@
                 getAAM().queueRequest(function () {
                     const payload  = { effect: is_hidden ? 'deny' : 'allow' };
                     const endpoint = getAAM().prepareApiEndpoint(
-                        `/service/admin-toolbar/${btoa(item)}`
+                        `/service/admin-toolbar/${item}`
                     );
 
                     $.ajax(endpoint, {

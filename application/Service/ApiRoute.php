@@ -35,7 +35,7 @@ class AAM_Service_ApiRoute
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_ApiRouteService::bootstrap();
+        AAM_Restful_ApiRoute::bootstrap();
 
         $this->initialize_hooks();
     }

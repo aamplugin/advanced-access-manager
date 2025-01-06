@@ -34,9 +34,9 @@ final class BackendMenuTest extends TestCase
         global $menu, $submenu;
 
         $user_id = $this->createUser([ 'role' => 'editor' ]);
-        $service = AAM::api()->backend_menu([
-            'access_level' => AAM::api()->role('editor')
-        ]);
+        $service = AAM::api()->backend_menu(
+            AAM::api()->role('editor')
+        );
 
         // Update permission for a single submenu item
         $service->deny('edit-tags.php?taxonomy=category');

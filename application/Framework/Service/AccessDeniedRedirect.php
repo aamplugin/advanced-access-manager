@@ -51,8 +51,8 @@ implements
      * @param string $area
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect($area)
@@ -96,8 +96,8 @@ implements
      * @param array  $redirect Redirect settings
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_redirect($area, array $redirect)
@@ -113,11 +113,7 @@ implements
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set_preference($area, $sanitized)) {
-                throw new RuntimeException('Failed to persist settings');
-            } else {
-                $result = $this->get_redirect($area);
-            }
+            $result = $this->_get_container()->set_preference($area, $sanitized);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -131,8 +127,8 @@ implements
      * @param string $area
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($area = null)
@@ -164,8 +160,8 @@ implements
      * Check if access denied redirect preferences are customized
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized()
@@ -183,8 +179,8 @@ implements
      * Get access denied preference container
      *
      * @return AAM_Framework_Preference_Interface
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_container()

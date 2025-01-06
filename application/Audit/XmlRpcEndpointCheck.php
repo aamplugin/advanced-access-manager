@@ -67,7 +67,7 @@ class AAM_Audit_XmlRpcEndpointCheck
         $visitor = AAM::api()->visitor();
 
         // Check if API route "/xmlrpc.php" is enabled
-        $api_url_enabled = !$visitor->urls()->is_restricted('/xmlrpc.php');
+        $api_url_enabled = !$visitor->urls()->is_denied('/xmlrpc.php');
 
         if ($api_url_enabled) {
             array_push($response, self::_format_issue(

@@ -20,14 +20,19 @@ interface AAM_Framework_Service_Interface
     /**
      * Bootstrap and return an instance of the service
      *
-     * @param array $runtime_context
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param array                               $settings
      *
      * @return static::class
      *
      * @access public
      * @static
+     *
      * @version 7.0.0
      */
-    public static function get_instance(array $runtime_context = []);
+    public static function get_instance(
+        AAM_Framework_AccessLevel_Interface $access_level,
+        $settings
+    );
 
 }

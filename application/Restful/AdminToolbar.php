@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_AdminToolbarService
+class AAM_Restful_AdminToolbar
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_AdminToolbarService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -38,13 +38,13 @@ class AAM_Restful_AdminToolbarService
             ));
 
             // Get a menu
-            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Base64 encoded backend menu unique id',
+                        'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -52,13 +52,13 @@ class AAM_Restful_AdminToolbarService
             ));
 
             // Set or update a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Base64 encoded backend menu unique id',
+                        'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
                     ),
@@ -72,13 +72,13 @@ class AAM_Restful_AdminToolbarService
             ));
 
             // Delete a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[A-Za-z0-9\/\+=]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
-                        'description' => 'Base64 encoded backend menu unique id',
+                        'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
                     )
@@ -100,8 +100,8 @@ class AAM_Restful_AdminToolbarService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items(WP_REST_Request $request)
@@ -130,7 +130,7 @@ class AAM_Restful_AdminToolbarService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item(base64_decode($request->get_param('id')));
+            $result  = $service->get_item($request->get_param('id'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -152,13 +152,15 @@ class AAM_Restful_AdminToolbarService
     {
         try {
             $service = $this->_get_service($request);
-            $item_id = base64_decode($request->get_param('id'));
+            $item_id = $request->get_param('id');
 
             if ($request->get_param('effect') === 'allow') {
                 $result = $service->allow($item_id);
             } else {
                 $result = $service->deny($item_id);
             }
+
+            $result = $service->get_item($item_id);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -180,7 +182,9 @@ class AAM_Restful_AdminToolbarService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset(base64_decode($request->get_param('id')));
+            $result  = [
+                'success' => $service->reset($request->get_param('id'))
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -201,7 +205,9 @@ class AAM_Restful_AdminToolbarService
     public function reset_permissions(WP_REST_Request $request)
     {
         try {
-            $result  = $this->_get_service($request)->reset();
+            $result  = [
+                'success' => $this->_get_service($request)->reset()
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -235,10 +241,10 @@ class AAM_Restful_AdminToolbarService
      */
     private function _get_service($request)
     {
-        return AAM::api()->admin_toolbar([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->admin_toolbar(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

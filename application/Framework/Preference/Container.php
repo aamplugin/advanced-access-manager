@@ -122,9 +122,9 @@ implements AAM_Framework_Preference_Interface
         AAM_Framework_AccessLevel_Interface $access_level
     ) {
         // Read explicitly defined settings from DB
-        $settings = AAM_Framework_Manager::_()->settings([
-            'access_level' => $access_level
-        ])->get_setting($this->get_ns(), []);
+        $settings = AAM_Framework_Manager::_()->settings(
+            $access_level
+        )->get_setting($this->get_ns(), []);
 
         if (!empty($settings)) {
             $this->_explicit_preferences = $settings;
@@ -224,12 +224,12 @@ implements AAM_Framework_Preference_Interface
             $this->_explicit_preferences = $preferences;
 
             // Overriding the final set of preferences
-            $this->_preferences = array_merge($this->_preferences, $preferences);
+            $this->_preferences = array_replace($this->_preferences, $preferences);
 
             // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings([
-                'access_level' => $this->get_access_level()
-            ])->set_setting($this->get_ns(), $preferences);
+            $result = AAM_Framework_Manager::_()->settings(
+                $this->get_access_level()
+            )->set_setting($this->get_ns(), $preferences);
         } else {
             $this->_preferences = $preferences;
             $result             = true;
@@ -257,7 +257,7 @@ implements AAM_Framework_Preference_Interface
      */
     public function set_preference($preference, $value)
     {
-        return $this->set_preferences(array_merge(
+        return $this->set_preferences(array_replace(
             $this->_explicit_preferences,
             [ $preference => $value ]
         ));
@@ -278,9 +278,9 @@ implements AAM_Framework_Preference_Interface
     {
         $this->_explicit_preferences = [];
 
-        return AAM_Framework_Manager::_()->settings([
-            'access_level' => $this->get_access_level()
-        ])->delete_setting($this->get_ns());
+        return AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->delete_setting($this->get_ns());
     }
 
 }

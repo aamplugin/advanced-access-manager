@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_BackendMenuService
+class AAM_Restful_BackendMenu
 {
 
     use AAM_Restful_ServiceTrait;
@@ -284,10 +284,10 @@ class AAM_Restful_BackendMenuService
      */
     private function _get_service($request)
     {
-        return AAM::api()->backend_menu([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->backend_menu(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

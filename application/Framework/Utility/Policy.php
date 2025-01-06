@@ -124,20 +124,15 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
 
             if ($action === 'read') {
                 if (array_key_exists('Password', $stm)) { // Is Password Protected?
-                    $result['read'] = [
-                        'restriction_type' => 'password_protected',
-                        'password'         => $stm['Password']
-                    ];
+                    $result['read']['restriction_type'] = 'password_protected';
+                    $result['read']['password']         = $stm['Password'];
                 } elseif (array_key_exists('Teaser', $stm)) { // Has Teaser Message?
-                    $result['read'] = [
-                        'restriction_type' => 'teaser_message',
-                        'message'          => $stm['Teaser']
-                    ];
+                    $result['read']['restriction_type'] = 'teaser_message';
+                    $result['read']['message']          = $stm['Teaser'];
                 } elseif (array_key_exists('Redirect', $stm)) { // Has Redirect?
-                    $result['read'] = [
-                        'restriction_type' => 'redirect'
-                    ];
+                    $result['read']['restriction_type'] = 'redirect';
 
+                    // Convert redirect
                     $result['read']['redirect'] = $this->convert_statement_redirect(
                         $stm
                     );

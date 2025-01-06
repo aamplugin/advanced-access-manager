@@ -289,7 +289,11 @@ class AAM_Framework_Service_ApiRoutes
             $endpoint = $route->get_route();
             $method   = $route->get_method();
         } elseif (is_string($route)) {
-            $endpoint = $route;
+            if (strpos($route, ' ') !== false) {
+                list($method, $endpoint) = explode(' ', $route, 2);
+            } else {
+                $endpoint = $route;
+            }
         } else {
             throw new InvalidArgumentException('Invalid route');
         }

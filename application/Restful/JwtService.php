@@ -464,10 +464,10 @@ class AAM_Restful_JwtService
             AAM_Framework_Type_AccessLevel::USER, $request->get_param('user_id')
         );
 
-        return AAM::api()->jwts([
-            'access_level'   => $access_level,
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->jwts(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

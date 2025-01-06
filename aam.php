@@ -142,9 +142,7 @@ class AAM
 
         // Updating AAM Framework default context. This way we do not have to write
         // code like AAM::api()->user()->...
-        AAM::api()->setup([
-            'access_level' => $this->_current_user
-        ]);
+        AAM::api()->setup($this->_current_user);
     }
 
     /**

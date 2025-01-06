@@ -44,7 +44,9 @@ final class CapabilitiesTest extends TestCase
      */
     public function testAddInvalidCapability()
     {
-        $service = AAM::api()->capabilities('role:subscriber');
+        $service = AAM::api()->capabilities('role:subscriber', [
+            'error_handling' => 'wp_error'
+        ]);
 
         // Adding the invalid capability
         $error = $service->add('Test Capability');

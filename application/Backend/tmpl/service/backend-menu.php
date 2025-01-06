@@ -34,9 +34,9 @@
         <div class="panel-group" id="admin-menu" role="tablist" aria-multiselectable="true">
             <?php
             $first = false;
-            $menu  = AAM::api()->backend_menu(array(
-                'access_level' => AAM_Backend_AccessLevel::get_instance()->get_access_level()
-            ))->get_items();
+            $menu  = AAM::api()->backend_menu(
+                AAM_Backend_AccessLevel::get_instance()->get_access_level()
+            )->get_items();
 
             if (!empty($menu)) {
                 foreach ($menu as $i => $top_menu_item) {

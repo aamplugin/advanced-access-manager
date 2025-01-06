@@ -294,10 +294,10 @@ class AAM_Restful_CapabilityService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM::api()->capabilities([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->capabilities(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
     /**

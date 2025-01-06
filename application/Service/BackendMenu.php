@@ -35,7 +35,7 @@ class AAM_Service_BackendMenu
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_BackendMenuService::bootstrap();
+        AAM_Restful_BackendMenu::bootstrap();
 
         $this->initialize_hooks();
     }

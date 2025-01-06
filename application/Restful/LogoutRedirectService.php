@@ -294,10 +294,10 @@ class AAM_Restful_LogoutRedirectService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM::api()->logout_redirect([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->logout_redirect(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

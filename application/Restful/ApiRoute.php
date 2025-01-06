@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_ApiRouteService
+class AAM_Restful_ApiRoute
 {
 
     use AAM_Restful_ServiceTrait;
@@ -205,9 +205,7 @@ class AAM_Restful_ApiRouteService
             // Unserialize the ID - extract HTTP method & endpoint
             list($method, $endpoint) = explode(' ', base64_decode($id));
 
-            $service->reset($endpoint, $method);
-
-            $result = [ 'success' => true ];
+            $result = [ 'success' => $service->reset($endpoint, $method) ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -229,7 +227,9 @@ class AAM_Restful_ApiRouteService
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset();
+            $result  = [
+                'success' => $service->reset()
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -263,10 +263,10 @@ class AAM_Restful_ApiRouteService
      */
     private function _get_service($request)
     {
-        return AAM::api()->api_routes([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->api_routes(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
     /**

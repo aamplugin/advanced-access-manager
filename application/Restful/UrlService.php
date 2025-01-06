@@ -586,10 +586,10 @@ class AAM_Restful_UrlService
      */
     private function _get_service(WP_REST_Request $request)
     {
-        return AAM::api()->urls([
-            'access_level'   => $this->_determine_access_level($request),
-            'error_handling' => 'exception'
-        ]);
+        return AAM::api()->urls(
+            $this->_determine_access_level($request),
+            [ 'error_handling' => 'exception' ]
+        );
     }
 
 }

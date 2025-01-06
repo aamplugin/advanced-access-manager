@@ -76,7 +76,7 @@ class AAM_Framework_Resource_Aggregate
 
         // Read all the permissions for a given resource type
         $permissions = AAM::api()->settings(
-            [ 'access_level' => $access_level ]
+            $access_level
         )->get_setting($resource_type, []);
 
         // JSON Access Policy is deeply embedded in the framework, thus take it into

@@ -34,12 +34,9 @@ final class AccessDeniedRedirectTest extends TestCase
         ];
 
         // Setting redirect
-        $this->assertEquals(
-            $redirect_a,
-            AAM::api()->access_denied_redirect()->set_redirect(
-                'frontend', $redirect_a
-            )
-        );
+        $this->assertTrue(AAM::api()->access_denied_redirect()->set_redirect(
+            'frontend', $redirect_a
+        ));
 
         // Verifying that we are getting the same redirect back
         $this->assertEquals(
@@ -48,12 +45,9 @@ final class AccessDeniedRedirectTest extends TestCase
         );
 
         // Setting another redirect
-        $this->assertEquals(
-            [ 'type' => 'url_redirect', 'redirect_url' => '/some-page' ],
-            AAM::api()->access_denied_redirect()->set_redirect(
-                'backend', $redirect_b
-            )
-        );
+        $this->assertTrue(AAM::api()->access_denied_redirect()->set_redirect(
+            'backend', $redirect_b
+        ));
 
         // Verifying that we are getting the same redirect back
         $this->assertEquals(

@@ -43,7 +43,7 @@ class AAM_Service_AdminToolbar
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_AdminToolbarService::bootstrap();
+        AAM_Restful_AdminToolbar::bootstrap();
 
         // Cache admin toolbar
         if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
@@ -99,7 +99,7 @@ class AAM_Service_AdminToolbar
         $nodes   = $wp_admin_bar->get_nodes();
 
         foreach ((is_array($nodes) ? $nodes : []) as $id => $node) {
-            if (!$node->group && $service->is_restricted($id)) {
+            if (!$node->group && $service->is_denied($id)) {
                 if (!empty($node->parent)) { // update parent node with # link
                     $parent = $wp_admin_bar->get_node($node->parent);
 

@@ -26,27 +26,27 @@
  * Some ALs have reference to the core instance of the underlying WordPress core user
  * or role.
  *
- * @method AAM_Framework_Service_Urls urls(mixed $runtime_context = null)
- * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Jwts jwts(mixed $runtime_context = null)
- * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Widgets widgets(mixed $runtime_context = null)
- * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Identities identities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Posts posts(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Terms terms(mixed $runtime_context = null)
- * @method AAM_Framework_Service_PostTypes post_types(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Capabilities capabilities(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Capabilities caps(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Settings settings(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Policies policies(mixed $runtime_context = null)
- * @method AAM_Framework_Service_Hooks hooks(mixed $runtime_context = null)
+ * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Identities identities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_ObjectCache $object_cache
@@ -414,7 +414,6 @@ trait AAM_Framework_AccessLevel_BaseTrait
             if (!in_array($ns, $exclude, true)) {
                 $result = AAM_Framework_Manager::_()->object_cache->get([
                     constant('static::TYPE'),
-                    $this->get_id(),
                     $ns,
                     $skip_inheritance ? 'partial' : 'full'
                 ]);

@@ -63,9 +63,9 @@ final class ApiGatewayTest extends TestCase
 
         // Just user any service and do not provide runtime context. This will
         // force the framework to use the default context
-        $service = AAM::api()->access_denied_redirect([
-            'access_level' => AAM::api()->user($user_id_b)
-        ]);
+        $service = AAM::api()->access_denied_redirect(
+            AAM::api()->user($user_id_b)
+        );
 
         $this->assertEquals($service->access_level->ID, $user_id_b);
     }

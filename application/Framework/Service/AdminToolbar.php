@@ -396,7 +396,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             'id'            => $item['id'],
             'uri'           => $this->_prepare_item_uri($item['href']),
             'name'          => base64_decode($item['title']),
-            'is_restricted' => $this->is_restricted($item['id']),
+            'is_restricted' => $this->is_denied($item['id']),
             'is_inherited'  => !array_key_exists(
                 $item['id'], $resource->get_permissions(true)
             )
