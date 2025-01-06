@@ -23,6 +23,9 @@ spl_autoload_register(function ($class_name) {
     }
 });
 
+// Defining the global constant that disabled AAM internal object cache
+define('AAM_OBJECT_CACHE_ENABLED', false);
+
 // Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/admin.php';
@@ -35,6 +38,3 @@ if (!wp_roles()->is_role('subadmin')) {
         'Sub Administrator', wp_roles()->get_role('administrator')->capabilities
     );
 }
-
-// Defining the global constant that disabled AAM internal object cache
-define('AAM_OBJECT_CACHE_ENABLED', false);

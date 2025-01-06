@@ -10,14 +10,6 @@
 /**
  * Framework service to manage access to the backend (admin) menu
  *
- * @method string get_access_mode() **[Premium Feature!]** Available only with
- *         premium add-on
- * @method boolean set_access_mode(string $mode) **[Premium Feature!]** Set current
- *         access mode
- * @method string|boolean access_mode(string $mode = null) **[Premium Feature!]** Set
- *         or get current access mode. If the _$mode_ argument is not provided, the
- *         method returns current access mode. Otherwise it sets specified.
- *
  * @package AAM
  * @version 7.0.0
  */
@@ -215,9 +207,9 @@ class AAM_Framework_Service_BackendMenu
      */
     public function is_denied($menu_slug)
     {
-        $result = null;
-
         try {
+            $result = null;
+
             // Normalize the input data based on top level flat
             $slug = $this->_get_normalized_item_slug($menu_slug);
 
