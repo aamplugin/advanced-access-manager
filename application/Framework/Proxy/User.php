@@ -17,6 +17,11 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
 {
 
     /**
+     * @inheritDoc
+     */
+    const TYPE = 'user';
+
+    /**
      * User status: ACTIVE
      *
      * @version 7.0.0

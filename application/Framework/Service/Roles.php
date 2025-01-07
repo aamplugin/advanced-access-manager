@@ -139,6 +139,51 @@ class AAM_Framework_Service_Roles
     }
 
     /**
+     * Check if role is hidden
+     *
+     * @param mixed $role_identifier
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_hidden($role_identifier)
+    {
+        return $this->is_denied_to($role_identifier, 'list');
+    }
+
+    /**
+     * Hide role
+     *
+     * @param mixed $role_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function hide($role_identifier)
+    {
+        return $this->deny($role_identifier, 'list_role');
+    }
+
+    /**
+     * Show role
+     *
+     * @param mixed $role_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function show($role_identifier)
+    {
+        return $this->allow($role_identifier, 'list_role');
+    }
+
+    /**
      * Reset permissions
      *
      * Reset role permissions or permissions to all roles if $role_identifier is not
@@ -155,6 +200,29 @@ class AAM_Framework_Service_Roles
     {
         try {
             $result = $this->_get_resource($role_identifier)->reset();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Aggregate all roles' permissions
+     *
+     * This method returns all explicitly defined permissions for all the roles. It
+     * also includes permissions defined with JSON access policies, if the service
+     * is enabled.
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function aggregate()
+    {
+        try {
+            $result = $this->_get_resource()->get_permissions();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

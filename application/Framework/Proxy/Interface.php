@@ -13,4 +13,15 @@
  * @package AAM
  * @version 7.0.0
  */
-interface AAM_Framework_Proxy_Interface { }
+interface AAM_Framework_Proxy_Interface {
+
+    /**
+     * Proxy type
+     *
+     * @var string
+     *
+     * @version 7.0.0
+     */
+    const TYPE = null;
+
+}

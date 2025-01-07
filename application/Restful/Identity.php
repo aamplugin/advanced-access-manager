@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_IdentityService
+class AAM_Restful_Identity
 {
 
     use AAM_Restful_ServiceTrait;
@@ -216,18 +216,19 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_roles(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = [];
+            $result = [];
 
-            foreach($service->get_roles() as $role) {
-                array_push($result, $this->_prepare_role_output($role));
+            foreach(AAM::api()->roles->get_editable_roles() as $role) {
+                array_push($result, $this->_prepare_role_output(
+                    $role, $this->_determine_access_level($request)
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -242,16 +243,16 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_role(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
             $result  = $this->_prepare_role_output(
-                $service->role($request->get_param('slug'))
+                AAM::api()->roles->get_role($request->get_param('slug')),
+                $this->_determine_access_level($request)
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -266,17 +267,23 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_role_permissions(WP_REST_Request $request)
     {
         try {
-            $result = $this->_set_identity_permissions(
-                $this->_get_service($request)->role($request->get_param('slug')),
-                $request->get_param('permissions')
+            $role         = AAM::api()->roles->get_role($request->get_param('slug'));
+            $access_level = $this->_determine_access_level($request);
+
+            $this->_set_identity_permissions(
+                $role,
+                $request->get_param('permissions'),
+                $access_level
             );
+
+            $result = $this->_prepare_role_output($role, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -290,18 +297,24 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_role_permission(WP_REST_Request $request)
     {
         try {
+            $role         = AAM::api()->roles->get_role($request->get_param('slug'));
+            $access_level = $this->_determine_access_level($request);
+
             $result = $this->_set_identity_permission(
-                $this->_get_service($request)->role($request->get_param('slug')),
+                $role,
                 $request->get_param('permission'),
-                $request->get_param('effect')
+                $request->get_param('effect'),
+                $access_level
             );
+
+            return $this->_prepare_role_output($role, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -315,15 +328,17 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_roles_permissions(WP_REST_Request $request)
     {
         try {
             $result = [
-                'success' => $this->_get_service($request)->reset('role')
+                'success' => AAM::api()->roles(
+                    $this->_determine_access_level($request)
+                )->reset()
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -338,17 +353,17 @@ class AAM_Restful_IdentityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_role_permissions(WP_REST_Request $request)
     {
         try {
             $result = [
-                'success' => $this->_get_service($request)->reset(
-                    'role', $request->get_param('slug')
-                )
+                'success' => AAM::api()->roles(
+                    $this->_determine_access_level($request)
+                )->reset($request->get_param('slug'))
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -552,8 +567,8 @@ class AAM_Restful_IdentityService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -565,20 +580,25 @@ class AAM_Restful_IdentityService
     /**
      * Prepare the role output
      *
-     * @param AAM_Framework_Resource_Role $role
+     * @param AAM_Framework_Resource_Role         $role
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_role_output($role)
+    private function _prepare_role_output($role, $access_level)
     {
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::ROLE, $role
+        );
+
         return [
             'id'            => $role->slug,
             'name'          => $role->display_name,
-            'permissions'   => $role->get_permissions(),
-            'is_customized' => $role->is_customized()
+            'permissions'   => $resource->get_permissions(),
+            'is_customized' => $resource->is_customized()
         ];
     }
 
@@ -605,16 +625,31 @@ class AAM_Restful_IdentityService
     /**
      * Set identity permissions
      *
-     * @param AAM_Framework_Resource_Interface $identity
-     * @param array                            $permissions
+     * @param AAM_Framework_Proxy_Interface       $identity
+     * @param array                               $permissions
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _set_identity_permissions($identity, $permissions)
-    {
+    private function _set_identity_permissions(
+        $identity, $permissions, $access_level
+    ) {
+        // Prepare proper resource
+        if ($identity::TYPE === 'role') {
+            $resource = $access_level->get_resource(
+                AAM_Framework_Type_Resource::ROLE,
+                $identity
+            );
+        } else {
+            $resource = $access_level->get_resource(
+                AAM_Framework_Type_Resource::USER,
+                $identity
+            );
+        }
+
         $normalized = [];
 
         // Normalize the array of permissions
@@ -624,31 +659,44 @@ class AAM_Restful_IdentityService
             ];
         }
 
-        $identity->set_permissions($normalized, true);
-
-        return $identity->get_permissions();
+        return $resource->set_permissions($normalized);
     }
 
     /**
      * Set a single permission for a given identity
      *
-     * @param AAM_Framework_Resource_Interface $identity
-     * @param string                           $permission
-     * @param string                           $effect
+     * @param AAM_Framework_Proxy_Interface       $identity
+     * @param string                              $permission
+     * @param string                              $effect
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _set_identity_permission($identity, $permission, $effect)
-    {
-        $identity->set_permissions(array_merge(
-            $identity->get_permissions(true),
+    private function _set_identity_permission(
+        $identity, $permission, $effect, $access_level
+    ) {
+        // Prepare proper resource
+        if ($identity::TYPE === 'role') {
+            $resource = $access_level->get_resource(
+                AAM_Framework_Type_Resource::ROLE,
+                $identity
+            );
+        } else {
+            $resource = $access_level->get_resource(
+                AAM_Framework_Type_Resource::USER,
+                $identity
+            );
+        }
+
+        $resource->set_permissions(array_merge(
+            $resource->get_permissions(true),
             [ $permission => [ 'effect' => $effect ] ]
         ));
 
-        return $identity->get_permissions();
+        return $resource->get_permissions();
     }
 
     /**

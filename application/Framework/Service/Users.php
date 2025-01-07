@@ -163,6 +163,74 @@ class AAM_Framework_Service_Users
     }
 
     /**
+     * Check if user is hidden
+     *
+     * @param mixed $user_identifier
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_hidden($user_identifier)
+    {
+        return $this->is_denied_to($user_identifier, 'list_user');
+    }
+
+    /**
+     * Hide user
+     *
+     * @param mixed $user_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function hide($user_identifier)
+    {
+        return $this->deny($user_identifier, 'list_user');
+    }
+
+    /**
+     * Show user
+     *
+     * @param mixed $user_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function show($user_identifier)
+    {
+        return $this->allow($user_identifier, 'list_user');
+    }
+
+    /**
+     * Aggregate all users' permissions
+     *
+     * This method returns all explicitly defined permissions for all the users. It
+     * also includes permissions defined with JSON access policies, if the service
+     * is enabled.
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function aggregate()
+    {
+        try {
+            $result = $this->_get_resource()->get_permissions();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
      * Get user resource
      *
      * @param mixed $identifier

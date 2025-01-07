@@ -175,6 +175,7 @@ class AAM_Service_Jwt
             if (!empty($token)) {
                 $claims = AAM::api()->jwt->decode($token->jwt);
 
+
                 if (!is_wp_error($claims)) {
                     // Backward compatibility
                     if (array_key_exists('userId', $claims)) {
@@ -184,11 +185,11 @@ class AAM_Service_Jwt
                     }
 
                     // Get JWT service and verify that token is valid
-                    $is_valid = AAM::api()->jwts('user:' . $cuid)->validate(
-                        $token->jwt
-                    );
+                    $is_valid = AAM::api()->jwts(
+                        'user:' . $cuid, [ 'error_handling' => 'wp_error' ]
+                    )->validate($token->jwt);
 
-                    if (!is_wp_error($is_valid)) {
+                    if ($is_valid === true) {
                         $is_active = $this->_verify_user_status($cuid);
 
                         if ($is_active === true) {

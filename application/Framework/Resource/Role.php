@@ -62,10 +62,6 @@ implements
                 $this->_internal_id = $resource_identifier;
             }
         }
-
-        if (empty($this->_internal_id)){
-            throw new OutOfRangeException('The role resource identifier is invalid');
-        }
     }
 
     /**

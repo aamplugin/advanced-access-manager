@@ -22,40 +22,30 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
     /**
      * Get list of editable roles
      *
-     * @return array Array of AAM_Framework_Proxy_Role
+     * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
     public function get_editable_roles()
     {
-        $result = [];
-        $roles  = wp_roles();
+        $wp_roles = wp_roles();
 
         if (function_exists('get_editable_roles')) {
             $all = get_editable_roles();
         } else {
-            $all = apply_filters('editable_roles', $roles->roles);
+            $all = apply_filters('editable_roles', $wp_roles->roles);
         }
 
-        foreach(array_keys($all) as $slug) {
-            array_push($result, $this->get_role($slug));
-        }
+        $result = function () use ($all, $wp_roles) {
+            foreach(array_keys($all) as $slug) {
+                yield new AAM_Framework_Proxy_Role(
+                    $wp_roles->role_names[$slug], $wp_roles->get_role($slug)
+                );
+            }
+        };
 
-        return $result;
-    }
-
-    /**
-     * Alias for the get_editable_roles method
-     *
-     * @return array Array of AAM_Framework_Proxy_Role
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function editable_roles()
-    {
-        return $this->get_editable_roles();
+        return $result();
     }
 
     /**

@@ -235,27 +235,31 @@ class AAM_Framework_Service_Jwts
     {
         try {
             // Validating the token first
-            $this->_validate($token);
+            $result = $this->_validate($token);
 
-            $claims = $this->jwt->decode($token);
+            if (!is_wp_error($result)) {
+                $claims = $this->jwt->decode($token);
 
-            if (!empty($claims['refreshable'])) {
-                // Determine tokens ttl
-                $ttl = $claims['exp'] - $claims['iat'];
+                if (!empty($claims['refreshable'])) {
+                    // Determine tokens ttl
+                    $ttl = $claims['exp'] - $claims['iat'];
 
-                // Add time when token was refreshed
-                $claims['rat'] = time();
+                    // Add time when token was refreshed
+                    $claims['rat'] = time();
 
-                // Issue new token with the same duration
-                $result = $this->jwt->issue($claims['user_id'], $claims, $ttl);
+                    // Issue new token with the same duration
+                    $result = $this->jwt->issue($claims['user_id'], $claims, $ttl);
 
-                // Revoke given token && add new one
-                if ($claims['revocable']) {
-                    $this->_remove_from_registry($token);
-                    $this->_add_to_registry($result['token']);
+                    // Revoke given token && add new one
+                    if ($claims['revocable']) {
+                        $this->_remove_from_registry($token);
+                        $this->_add_to_registry($result['token']);
+                    }
+                } else {
+                    throw new LogicException('The given token is not refreshable');
                 }
             } else {
-                throw new LogicException('The given token is not refreshable');
+                throw new RuntimeException($result->get_error_message());
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -334,7 +338,7 @@ class AAM_Framework_Service_Jwts
      *
      * @param string $token
      *
-     * @return bool
+     * @return bool|WP_Error
      * @access private
      *
      * @version 7.0.0

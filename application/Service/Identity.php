@@ -19,6 +19,24 @@ class AAM_Service_Identity
     use AAM_Core_Contract_ServiceTrait;
 
     /**
+     * WordPress core user caps mapped to AAM permissions
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_user_caps_to_listen = [
+        'edit_user'        => 'edit_user',
+        'edit_user_meta'   => 'edit_user',
+        'add_user_meta'    => 'edit_user',
+        'delete_user_meta' => 'edit_user',
+        'promote_user'     => 'promote_user',
+        'delete_user'      => 'delete_user',
+        'remove_user'      => 'delete_user'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -36,7 +54,7 @@ class AAM_Service_Identity
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_IdentityService::bootstrap();
+        AAM_Restful_Identity::bootstrap();
 
         $this->initialize_hooks();
     }
@@ -105,10 +123,10 @@ class AAM_Service_Identity
      */
     private function _filter_editable_roles($roles)
     {
-        $service = AAM::api()->identities();
+        $service = AAM::api()->roles();
 
         foreach (array_keys($roles) as $slug) {
-            if ($service->role($slug)->is_denied_to('list_role')) {
+            if ($service->is_hidden($slug)) {
                 unset($roles[$slug]);
             }
         }
@@ -130,12 +148,10 @@ class AAM_Service_Identity
      */
     private function _filter_views_users($views)
     {
-        $service = AAM::api()->identities();
+        $service = AAM::api()->roles();
 
         foreach(array_keys($views) as $slug) {
-            if ($slug !== 'all'
-                && $service->role($slug)->is_denied_to('list_role')
-            ) {
+            if ($slug !== 'all' && $service->is_hidden($slug)) {
                 unset($views[$slug]);
             }
         }
@@ -187,29 +203,23 @@ class AAM_Service_Identity
      */
     private function _prepare_filter_args($args)
     {
-        // Identify the list of users & roles that are hidden
-        $roles = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::AGGREGATE,
-            AAM_Framework_Type_Resource::ROLE
-        );
+        // Identify the list roles & users that are hidden
+        $role_aggregate = AAM::api()->roles()->aggregate();
 
         // Extract the list of user roles
         $roles_not_in = [];
         $users_not_in = [];
 
-        foreach($roles->get_permissions() as $role_id => $perms) {
+        foreach($role_aggregate as $role_id => $perms) {
             if (array_key_exists('list_users', $perms)
                 && $perms['list_users']['effect'] === 'deny') {
                     array_push($roles_not_in, $role_id);
             }
         }
 
-        $users = AAM::api()->user()->get_resource(
-            AAM_Framework_Type_Resource::AGGREGATE,
-            AAM_Framework_Type_Resource::USER
-        );
+        $user_aggregate = AAM::api()->users()->aggregate();
 
-        foreach($users->get_permissions() as $user_id => $perms) {
+        foreach($user_aggregate as $user_id => $perms) {
             if (array_key_exists('list_user', $perms)
                 && is_numeric($user_id)
                 && $perms['list_user']['effect'] === 'deny') {
@@ -244,8 +254,8 @@ class AAM_Service_Identity
         }
 
         return apply_filters('aam_user_query_args_filter', $args, [
-            'users' => $users,
-            'roles' => $roles
+            'users' => $user_aggregate,
+            'roles' => $roles_not_in
         ]);
     }
 
@@ -267,16 +277,13 @@ class AAM_Service_Identity
      */
     private function _map_meta_cap($caps, $cap, $args)
     {
-        $id = (isset($args[0]) ? $args[0] : null);
+        $user_id = (isset($args[0]) ? $args[0] : null);
 
         // If targeting user ID is not provided, no need to do anything
-        if (!empty($id) && in_array(
-            $cap,
-            array_keys(AAM_Framework_Service_Identities::PERMISSION_MAP), true
-        )) {
-            if (AAM::api()->identities()->is_allowed_to(
-                AAM::api()->users->user($id), $cap
-            ) === false) {
+        if (!empty($user_id)
+            && in_array($cap, array_keys($this->_user_caps_to_listen), true)
+        ) {
+            if (AAM::api()->users()->is_denied_to($user_id, $cap)) {
                 array_push($caps, 'do_not_allow');
             }
         }
@@ -304,10 +311,9 @@ class AAM_Service_Identity
         $user->ID;
 
         if (!$is_profile) {
-            $result = AAM::api()->identities()->is_denied_to(
-                AAM::api()->users->user($user),
-                'change_user_password'
-            ) !== true ;
+            $result = AAM::api()->users()->is_allowed_to(
+                $user, 'change_user_password'
+            );
         }
 
         return $result;
@@ -328,13 +334,12 @@ class AAM_Service_Identity
      */
     private function _allow_password_reset($result, $user_id)
     {
-        $is_profile = $user_id === get_current_user_id();
+        $is_profile = ($user_id === get_current_user_id());
 
         if (!$is_profile) {
-            $result = AAM::api()->identities()->is_denied_to(
-                AAM::api()->users->user($user_id),
-                'change_user_password'
-            ) !== true ;
+            $result = AAM::api()->users()->is_allowed_to(
+                $user_id, 'change_user_password'
+            );
         }
 
         return $result;
@@ -361,10 +366,7 @@ class AAM_Service_Identity
             $is_profile = $user->ID === get_current_user_id();
 
             if (!$is_profile) {
-                if (AAM::api()->identities()->is_denied_to(
-                    AAM::api()->users->user($user),
-                    'change_user_password'
-                )) {
+                if (AAM::api()->users()->is_denied_to($user, 'change_user_password')) {
                     $password = $password2 = null;
                 }
             }
@@ -391,10 +393,7 @@ class AAM_Service_Identity
             $is_profile = $user->ID === get_current_user_id();
 
             if (!$is_profile && property_exists($data, 'user_pass')) {
-                if (AAM::api()->identities()->is_denied_to(
-                    AAM::api()->users->user($user),
-                    'change_user_password'
-                )) {
+                if (AAM::api()->users()->is_denied_to($user, 'change_user_password')) {
                     unset($data->user_pass);
                 }
             }

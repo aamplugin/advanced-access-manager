@@ -21,7 +21,8 @@
  * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Identities identities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Roles roles(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Users users(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
@@ -132,10 +133,8 @@ final class AAM_Framework_Manager
         'metaboxes'              => AAM_Framework_Service_Metaboxes::class,
         'widgets'                => AAM_Framework_Service_Widgets::class,
         'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
-
-        // TODO: Remove these
-        'identities'             => AAM_Framework_Service_Identities::class,
-
+        'roles'                  => AAM_Framework_Service_Roles::class,
+        'users'                  => AAM_Framework_Service_Roles::class,
         'posts'                  => AAM_Framework_Service_Posts::class,
         'terms'                  => AAM_Framework_Service_Terms::class,
         'post_types'             => AAM_Framework_Service_PostTypes::class,

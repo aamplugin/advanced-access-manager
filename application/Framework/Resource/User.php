@@ -53,10 +53,6 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
                 $this->_internal_id = $resource_identifier;
             }
         }
-
-        if (empty($this->_internal_id)) {
-            throw new OutOfRangeException('The user resource identifier is invalid');
-        }
     }
 
     /**

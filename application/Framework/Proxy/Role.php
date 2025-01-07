@@ -17,6 +17,11 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 {
 
     /**
+     * @inheritDoc
+     */
+    const TYPE = 'role';
+
+    /**
      * Role unique slug (aka ID)
      *
      * @var string
