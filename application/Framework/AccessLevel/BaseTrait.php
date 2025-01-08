@@ -426,6 +426,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
             if (!in_array($ns, $exclude, true)) {
                 $result = AAM_Framework_Manager::_()->object_cache->get([
                     constant('static::TYPE'),
+                    $this->get_id(),
                     $ns,
                     $skip_inheritance ? 'partial' : 'full'
                 ]);

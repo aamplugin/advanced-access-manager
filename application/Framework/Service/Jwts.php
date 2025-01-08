@@ -15,7 +15,7 @@
  *
  * @link https://github.com/firebase/php-jwt
  */
-class AAM_Framework_Service_Jwts
+class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;

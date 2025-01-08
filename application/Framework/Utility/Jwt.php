@@ -149,6 +149,23 @@ class AAM_Framework_Utility_Jwt implements AAM_Framework_Utility_Interface
     }
 
     /**
+     * Determine if token is valid
+     *
+     * @param string $token
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_valid($token)
+    {
+        $result = $this->validate($token);
+
+        return is_bool($result) ? $result : false;
+    }
+
+    /**
      * Decode a token and return claims
      *
      * @param string $token

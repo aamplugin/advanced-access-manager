@@ -48,23 +48,28 @@ implements
     /**
      * Get the access denied redirect
      *
-     * @param string $area
+     * @param string $area [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_redirect($area)
+    public function get_redirect($area = null)
     {
         try {
-            if (!in_array($area, self::ALLOWED_AREAS, true)) {
-                throw new InvalidArgumentException('Invalid area argument');
-            }
-
             $preferences = $this->_get_container()->get_preferences();
 
-            if (!empty($preferences[$area])) {
+            if (empty($area)) {
+                $result = array_replace(
+                    [
+                        'frontend' => [ 'type' => 'default' ],
+                        'backend'  => [ 'type' => 'default' ],
+                        'api'      => [ 'type' => 'default' ]
+                    ],
+                    $preferences
+                );
+            } elseif (!empty($preferences[$area])) {
                 $result = $preferences[$area];
             } else {
                 $result = [ 'type' => 'default' ];
@@ -103,8 +108,8 @@ implements
     public function set_redirect($area, array $redirect)
     {
         try {
-            if (!in_array($area, self::ALLOWED_AREAS, true)) {
-                throw new InvalidArgumentException('The area argument is invalid');
+            if (empty($area)) {
+                throw new InvalidArgumentException('Non-empty area is required');
             }
 
             // Sanitize the incoming redirect data

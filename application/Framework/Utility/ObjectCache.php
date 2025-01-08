@@ -10,6 +10,9 @@
 /**
  * In-memory object cache
  *
+ * Implementing its own cache because WP core cache clones object and this causes
+ * data integrity issue between objects
+ *
  * @package AAM
  * @version 7.0.0
  */
@@ -17,6 +20,23 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
 {
 
     use AAM_Framework_Utility_BaseTrait;
+
+    /**
+     * Default object cache capacity
+     *
+     * @version 7.0.0
+     */
+    const DEFAULT_CAPACITY = 250;
+
+    /**
+     * Internal cache
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_cache = [];
 
     /**
      * @inheritDoc
@@ -35,9 +55,9 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
      */
     public function get($key)
     {
-        $result = wp_cache_get($this->_prepare_cache_key($key), 'aam');
+        $cache_key = $this->_prepare_cache_key($key);
 
-        return !empty($result) ? $result : null;
+        return !empty($this->_cache[$cache_key]) ? $this->_cache[$cache_key] : null;
     }
 
     /**
@@ -53,8 +73,6 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
      */
     public function set($key, $obj)
     {
-        $result = true;
-
         // Determine if we can use cache
         $enabled = AAM_Framework_Manager::_()->config->get(
             'core.settings.object_cache.enabled',
@@ -62,10 +80,16 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
         );
 
         if ($enabled) {
-            $result = wp_cache_set($this->_prepare_cache_key($key), $obj, 'aam');
+            $cache_key = $this->_prepare_cache_key($key);
+
+            $this->_cache[$cache_key] = $obj;
+
+            if (count($this->_cache) > self::DEFAULT_CAPACITY) {
+                array_shift($this->_cache);
+            }
         }
 
-        return $result;
+        return true;
     }
 
     /**
@@ -78,7 +102,9 @@ class AAM_Framework_Utility_ObjectCache implements AAM_Framework_Utility_Interfa
      */
     public function reset()
     {
-        return wp_cache_flush_group('aam');
+        $this->_cache = [];
+
+        return true;
     }
 
     /**

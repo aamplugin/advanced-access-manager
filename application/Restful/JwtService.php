@@ -465,7 +465,7 @@ class AAM_Restful_JwtService
         );
 
         return AAM::api()->jwts(
-            $this->_determine_access_level($request),
+            $access_level,
             [ 'error_handling' => 'exception' ]
         );
     }

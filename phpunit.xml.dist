@@ -23,6 +23,9 @@
         <testsuite name="Service">
             <directory suffix="Test.php">./tests/Service</directory>
         </testsuite>
+        <testsuite name="Rest">
+            <directory suffix="Test.php">./tests/Rest</directory>
+        </testsuite>
     </testsuites>
     <php>
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />

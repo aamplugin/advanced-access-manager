@@ -30,6 +30,24 @@ define('AAM_OBJECT_CACHE_ENABLED', false);
 require_once dirname(__DIR__) . '/../../../wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/admin.php';
 
+// This will hook up to RESTful API dispatch to properly authenticate user
+add_filter('rest_pre_dispatch', function($result, $server, $request) {
+    $headers = $request->get_headers();
+
+    if (array_key_exists('authorization', $headers)) {
+        $token = str_replace('Bearer ', '', $headers['authorization'][0]);
+
+        if (AAM::api()->jwt->is_valid($token)) {
+            $claims = AAM::api()->jwt->decode($token);
+
+            // Setting current user
+            wp_set_current_user($claims['user_id']);
+        }
+    }
+
+    return $result;
+}, 10, 3);
+
 // Create a somewhat a clone of the administrator role to test functionality that
 // can be restricted to not super admin user
 if (!wp_roles()->is_role('subadmin')) {

@@ -30,9 +30,6 @@ class AAM_Restful_AccessDeniedRedirect
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            $a = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_AREAS;
-            $t = AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_REDIRECT_TYPES;
-
             // Get current access denied redirect rule
             $this->_register_route('/redirect/access-denied', array(
                 'methods'             => WP_REST_Server::READABLE,
@@ -42,8 +39,7 @@ class AAM_Restful_AccessDeniedRedirect
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
-                        'required'    => true,
-                        'enum'        => $a
+                        'required'    => false
                     ]
                 ]
             ));
@@ -57,14 +53,12 @@ class AAM_Restful_AccessDeniedRedirect
                     'area' => [
                         'description' => 'Access area (frontend,  backend or api)',
                         'type'        => 'string',
-                        'required'    => true,
-                        'enum'        => $a
+                        'required'    => true
                     ],
                     'type' => [
                         'description' => 'Redirect type',
                         'type'        => 'string',
-                        'required'    => true,
-                        'enum'        => array_values($t)
+                        'required'    => true
                     ],
                     'http_status_code' => [
                         'description'       => 'HTTP Status Code',
@@ -127,9 +121,8 @@ class AAM_Restful_AccessDeniedRedirect
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
-                        'required'    => false,
-                        'enum'        => $a
-                    ],
+                        'required'    => false
+                    ]
                 ]
             ]);
         });
@@ -141,8 +134,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect(WP_REST_Request $request)
