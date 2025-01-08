@@ -71,6 +71,7 @@ implements
      */
     private function _apply_policy($permissions)
     {
+        $result  = [];
         $manager = AAM_Framework_Manager::_();
         $service = $manager->policies($this->get_access_level());
 
@@ -92,14 +93,18 @@ implements
             );
 
             foreach($list as $stm) {
-                $permissions = array_replace(
-                    $manager->policy->statement_to_permission($stm, self::TYPE),
-                    $permissions
+                $result = array_replace(
+                    $result,
+                    $manager->policy->statement_to_permission($stm, self::TYPE)
                 );
             }
         }
 
-        return apply_filters('aam_apply_policy_filter', $permissions, $this);
+        return apply_filters(
+            'aam_apply_policy_filter',
+            array_replace($result, $permissions),
+            $this
+        );
     }
 
 }
