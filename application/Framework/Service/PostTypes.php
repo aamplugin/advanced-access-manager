@@ -21,14 +21,14 @@ class AAM_Framework_Service_PostTypes
     /**
      * Get post type resource
      *
-     * @param mixed $identifier
+     * @param mixed $identifier [Optional]
      *
      * @return AAM_Framework_Resource_PostType
      * @access private
      *
      * @version 7.0.0
      */
-    private function _get_resource($identifier)
+    private function _get_resource($identifier = null)
     {
         return $this->_get_access_level()->get_resource(
             AAM_Framework_Type_Resource::POST_TYPE, $identifier
