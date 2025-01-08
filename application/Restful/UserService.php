@@ -29,8 +29,8 @@ class AAM_Restful_UserService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -40,7 +40,7 @@ class AAM_Restful_UserService
             // Get the list of users
             $this->_register_route('/service/users', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_user_list'),
+                'callback'            => array($this, 'get_users'),
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => array(
                     'fields' => array(
@@ -218,7 +218,7 @@ class AAM_Restful_UserService
      *
      * @version 7.0.0
      */
-    public function get_user_list(WP_REST_Request $request)
+    public function get_users(WP_REST_Request $request)
     {
         try {
             // Prepare the list of filters
@@ -241,11 +241,16 @@ class AAM_Restful_UserService
 
             // Iterate over the list of all users and enrich it with additional
             // attributes
-            $user_data = AAM::api()->users->list($filters, 'full');
             $fields    = $this->_determine_additional_fields($request);
-            $result    = [ 'list' => [], 'summary' => $user_data['summary'] ];
+            $result    = [
+                'list' => [],
+                'summary' =>  [
+                    'total_count'    => AAM::api()->users->get_user_count(),
+                    'filtered_count' => AAM::api()->users->get_user_count($filters)
+                ]
+            ];
 
-            foreach($user_data['list'] as $user) {
+            foreach(AAM::api()->users->get_users($filters) as $user) {
                 array_push($result['list'], $this->_prepare_output($user, $fields));
             }
         } catch (Exception $e) {
@@ -269,7 +274,7 @@ class AAM_Restful_UserService
     {
         try {
             $result = $this->_prepare_output(
-                AAM::api()->users->user($request->get_param('id')),
+                AAM::api()->users->get_user($request->get_param('id')),
                 $this->_determine_additional_fields($request)
             );
         } catch (Exception $e) {
@@ -319,7 +324,7 @@ class AAM_Restful_UserService
                 $data['deprive_caps'] = $deprive_caps;
             }
 
-            $user = AAM::api()->users->user($request->get_param('id'));
+            $user = AAM::api()->users->get_user($request->get_param('id'));
 
             // Update user data
             $user->update($data);
@@ -347,7 +352,7 @@ class AAM_Restful_UserService
     public function reset_user(WP_REST_Request $request)
     {
         try {
-            $user = AAM::api()->users->user($request->get_param('id'));
+            $user = AAM::api()->users->get_user($request->get_param('id'));
 
             // Reset user
             $user->reset();

@@ -22,72 +22,23 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
     /**
      * Query list of users & return aggregated result
      *
-     * @param array  $args
-     * @param string $result_type [Optional] Can be "list", "summary" or "full"
+     * @param array $args
      *
-     * @return array|Generator
+     * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_list(array $args = [], $result_type = 'list')
+    public function get_users(array $args = [])
     {
-        $args = array_merge([
-            'blog_id'        => get_current_blog_id(),
-            'fields'         => 'all',
-            'number'         => 10,
-            'offset'         => 0,
-            'search'         => '',
-            'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
-            'orderby'        => 'display_name'
-        ], $args);
+        $query  = $this->_prepare_user_query($args);
+        $result = function () use ($query) {
+            foreach ($query->get_results() as $user_id) {
+                yield $this->get_user($user_id);
+            }
+        };
 
-        $query = new WP_User_Query($args);
-        $data  = [];
-
-        if ($result_type !== 'summary') {
-            // Prepare the generator
-            $generator = function () use ($query) {
-                foreach ($query->get_results() as $user) {
-                    yield $this->get_user($user);
-                }
-            };
-
-            $data['list'] = $generator();
-        }
-
-        if (in_array($result_type, [ 'full', 'summary' ], true)) {
-            $data['summary'] = [
-                'total_count'    => count_users()['total_users'],
-                'filtered_count' => $query->get_total()
-            ];
-        }
-
-        if ($result_type === 'list') {
-            $result = $data['list'];
-        } elseif ($result_type === 'summary') {
-            $result = $data['summary'];
-        } else {
-            $result = $data;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_list method
-     *
-     * @param array  $args
-     * @param string $result_type [Optional] Can be "list", "summary" or "full"
-     *
-     * @return array|Generator
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function list(array $args = [], $result_type = 'list')
-    {
-        return $this->get_list($args, $result_type);
+        return $result();
     }
 
     /**
@@ -130,18 +81,57 @@ class AAM_Framework_Utility_Users implements AAM_Framework_Utility_Interface
     }
 
     /**
-     * Alias for the get_user method
+     * Get total number of users
      *
-     * @param mixed $identifier
+     * @param array $args
      *
-     * @return AAM_Framework_Proxy_User|null
+     * @return int
      * @access public
      *
      * @version 7.0.0
      */
-    public function user($identifier)
+    public function get_user_count(array $args = [])
     {
-        return $this->get_user($identifier);
+        if (empty($args)) {
+            $result = count_users()['total_users'];
+        } else {
+            $result = $this->_prepare_user_query($args)->get_total();
+        }
+
+        return intval($result);
+    }
+
+    /**
+     * Prepare user query args
+     *
+     * @param array $args
+     *
+     * @return WP_User_Query
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_user_query(array $args)
+    {
+        $args = array_merge([
+            'blog_id'        => get_current_blog_id(),
+            'fields'         => 'ID',
+            'number'         => 10,
+            'offset'         => 0,
+            'search'         => '',
+            'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
+            'orderby'        => 'display_name'
+        ], $args);
+
+        $result = AAM_Framework_Manager::_()->object_cache->get($args);
+
+        if (empty($result)) {
+            $result = new WP_User_Query($args);
+
+            AAM_Framework_Manager::_()->object_cache->set($args, $result);
+        }
+
+        return $result;
     }
 
 }

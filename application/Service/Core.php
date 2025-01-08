@@ -320,7 +320,7 @@ class AAM_Service_Core
     {
         // Check if user is blocked
         if (is_a($result, 'WP_User')) {
-            $user = AAM::api()->users->user($result);
+            $user = AAM::api()->users->get_user($result);
 
             // Step #1. Verify that user is active
             if (!$user->is_user_active()) {
@@ -353,7 +353,7 @@ class AAM_Service_Core
      */
     private function _control_user_account()
     {
-        $user = AAM::api()->users->user(get_current_user_id());
+        $user = AAM::api()->users->get_user(get_current_user_id());
 
         if (!is_null($user)) {
             // If user status is inactive - immediately logout user

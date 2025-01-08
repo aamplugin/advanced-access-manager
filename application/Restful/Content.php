@@ -383,8 +383,7 @@ class AAM_Restful_Content
                 'taxonomy'   => $request->get_param('taxonomy'),
                 'hide_empty' => false,
                 'search'     => $request->get_param('search'),
-                'offset'     => $request->get_param('offset'),
-                'post_type'  => $request->get_param('post_type')
+                'offset'     => $request->get_param('offset')
             ];
 
             // Getting the list of terms

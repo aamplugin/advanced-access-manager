@@ -124,7 +124,7 @@ class AAM_Restful_Identity
                 ]
             ]);
 
-            // Get the list of users with permissions
+            // Get the list of user identities
             $this->_register_route('/identity/users', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'get_users' ],
@@ -152,7 +152,7 @@ class AAM_Restful_Identity
             ]);
 
             // Get a specific user with permissions
-            $this->_register_route('/identity/user/(?P<id>[\d*]+)', [
+            $this->_register_route('/identity/user/(?P<id>[\d]+)', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'get_user' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
@@ -162,7 +162,7 @@ class AAM_Restful_Identity
             ]);
 
             // Set user identity permissions
-            $this->_register_route('/identity/user/(?P<id>[\d*]+)', [
+            $this->_register_route('/identity/user/(?P<id>[\d]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'set_user_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
@@ -173,7 +173,7 @@ class AAM_Restful_Identity
             ]);
 
             // Set a single permission for a user identity
-            $this->_register_route('/identity/user/(?P<id>[\d*]+)/(?P<permission>[\w\-]+)', [
+            $this->_register_route('/identity/user/(?P<id>[\d]+)/(?P<permission>[\w\-]+)', [
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => [ $this, 'set_user_permission' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
@@ -191,21 +191,14 @@ class AAM_Restful_Identity
                 'permission_callback' => [ $this, 'check_permissions' ]
             ]);
 
-            // Reset specific role permissions
-            $this->_register_route('/identity/user/(?P<id>[\d*]+)', [
+            // Reset specific user permissions
+            $this->_register_route('/identity/user/(?P<id>[\d]+)', [
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => [ $this, 'reset_user_permissions' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
                     'id' => $user_id
                 ]
-            ]);
-
-            // Reset all permissions
-            $this->_register_route('/identities', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_all_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
             ]);
         });
     }
@@ -405,11 +398,20 @@ class AAM_Restful_Identity
 
             // Iterate over the list of all users and enrich it with additional
             // attributes
-            $user_data = $this->_get_service($request)->get_users($filters, 'full');
-            $result    = [ 'list' => [], 'summary' => $user_data['summary'] ];
+            $result = [
+                'list' => [],
+                'summary' =>  [
+                    'total_count'    => AAM::api()->users->get_user_count(),
+                    'filtered_count' => AAM::api()->users->get_user_count($filters)
+                ]
+            ];
 
-            foreach($user_data['list'] as $user) {
-                array_push($result['list'], $this->_prepare_user_output($user));
+            $access_level = $this->_determine_access_level($request);
+
+            foreach(AAM::api()->users->get_users($filters) as $user) {
+                array_push($result['list'], $this->_prepare_user_output(
+                    $user, $access_level
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -424,16 +426,16 @@ class AAM_Restful_Identity
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_user(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
             $result  = $this->_prepare_user_output(
-                $service->user($request->get_param('id'))
+                AAM::api()->users->get_user($request->get_param('id')),
+                $this->_determine_access_level($request)
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -448,17 +450,26 @@ class AAM_Restful_Identity
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_user_permissions(WP_REST_Request $request)
     {
         try {
-            $result = $this->_set_identity_permissions(
-                $this->_get_service($request)->user($request->get_param('id')),
-                $request->get_param('permissions')
+            $user         = AAM::api()->users->get_user($request->get_param('id'));
+            $access_level = $this->_determine_access_level($request);
+
+            $this->_set_identity_permissions(
+                $user,
+                $request->get_param('permissions'),
+                $access_level
             );
+
+            $result = $access_level->get_resource(
+                AAM_Framework_Type_Resource::USER,
+                $user
+            )->get_permissions();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -472,18 +483,27 @@ class AAM_Restful_Identity
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_user_permission(WP_REST_Request $request)
     {
         try {
-            $result = $this->_set_identity_permission(
-                $this->_get_service($request)->user($request->get_param('id')),
+            $user         = AAM::api()->users->get_user($request->get_param('id'));
+            $access_level = $this->_determine_access_level($request);
+
+            $this->_set_identity_permission(
+                $user,
                 $request->get_param('permission'),
-                $request->get_param('effect')
+                $request->get_param('effect'),
+                $access_level
             );
+
+            $result = $access_level->get_resource(
+                AAM_Framework_Type_Resource::USER,
+                $user
+            )->get_permissions();
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -497,15 +517,17 @@ class AAM_Restful_Identity
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_users_permissions(WP_REST_Request $request)
     {
         try {
             $result = [
-                'success' => $this->_get_service($request)->reset('user')
+                'success' => $this->_determine_access_level($request)->get_resource(
+                    AAM_Framework_Type_Resource::USER
+                )->reset()
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -520,42 +542,19 @@ class AAM_Restful_Identity
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_user_permissions(WP_REST_Request $request)
     {
         try {
-            $result = [
-                'success' => $this->_get_service($request)->reset(
-                    'user', $request->get_param('id')
-                )
-            ];
-        } catch (Exception $e) {
-            $result = $this->_prepare_error_response($e);
-        }
+            $user = $this->_determine_access_level($request)->get_resource(
+                AAM_Framework_Type_Resource::USER,
+                $request->get_param('id')
+            );
 
-        return rest_ensure_response($result);
-    }
-
-
-    /**
-     * Reset all permissions
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function reset_all_permissions(WP_REST_Request $request)
-    {
-        try {
-            $result = [
-                'success' => $this->_get_service($request)->reset()
-            ];
+            $result = [ 'success' => $user->reset() ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -580,7 +579,7 @@ class AAM_Restful_Identity
     /**
      * Prepare the role output
      *
-     * @param AAM_Framework_Resource_Role         $role
+     * @param AAM_Framework_Proxy_Role            $role
      * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
@@ -605,20 +604,25 @@ class AAM_Restful_Identity
     /**
      * Prepare the user output
      *
-     * @param AAM_Framework_Resource_User $user
+     * @param AAM_Framework_Proxy_User            $user
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_user_output($user)
+    private function _prepare_user_output($user, $access_level)
     {
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::USER, $user
+        );
+
         return [
             'id'            => $user->ID,
             'display_name'  => $user->display_name,
-            'permissions'   => $user->get_permissions(),
-            'is_customized' => $user->is_customized()
+            'permissions'   => $resource->get_permissions(),
+            'is_customized' => $resource->is_customized()
         ];
     }
 
@@ -697,24 +701,6 @@ class AAM_Restful_Identity
         ));
 
         return $resource->get_permissions();
-    }
-
-    /**
-     * Get service
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return AAM_Framework_Service_Identities
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _get_service(WP_REST_Request $request)
-    {
-        return AAM::api()->identities(
-            $this->_determine_access_level($request),
-            [ 'error_handling' => 'exception' ]
-        );
     }
 
 }

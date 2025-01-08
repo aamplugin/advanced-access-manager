@@ -51,7 +51,7 @@ final class JwtsTest extends TestCase
         // Get user and lock them
         $this->assertEquals(
             'inactive',
-            AAM::api()->users->user($user_a)->update([ 'status' => 'inactive' ])->status
+            AAM::api()->users->get_user($user_a)->update([ 'status' => 'inactive' ])->status
         );
 
         // Adding token to the super global

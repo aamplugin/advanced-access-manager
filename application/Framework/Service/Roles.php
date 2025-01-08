@@ -150,7 +150,7 @@ class AAM_Framework_Service_Roles
      */
     public function is_hidden($role_identifier)
     {
-        return $this->is_denied_to($role_identifier, 'list');
+        return $this->is_denied_to($role_identifier, 'list_role');
     }
 
     /**

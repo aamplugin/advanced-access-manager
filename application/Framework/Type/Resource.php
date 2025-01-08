@@ -104,13 +104,6 @@ class AAM_Framework_Type_Resource
     const URL = 'url';
 
     /**
-     * Resource type aggregate
-     *
-     * @version 7.0.0
-     */
-    const AGGREGATE = 'aggregate';
-
-    /**
      * Resource type that represents WordPress hook (action or filter)
      *
      * @version 7.0.0

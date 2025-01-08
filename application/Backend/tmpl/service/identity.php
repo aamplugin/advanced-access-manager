@@ -39,14 +39,14 @@
                 </table>
 
                 <div class="aam-slide-form aam-access-form" id="aam_role_permissions_form">
-                    <a href="#" class="btn btn-xs btn-primary btn-right" id="role_identity_go_back">
+                    <a href="#" class="btn btn-xs btn-primary btn-right aam-identity-go-back">
                         &Lt; <?php echo __('Go Back', AAM_KEY); ?>
                     </a>
                     <span class="aam-clear"></span>
 
-                    <div class="aam-overwrite hidden" id="aam_role_identity_overwrite">
+                    <div class="aam-overwrite hidden aam-identity-overwrite" id="aam_role_identity_overwrite">
                         <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                        <span><a href="#" id="role_identity_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                        <span><a href="#" class="btn btn-xs btn-primary aam-identity-reset"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                     </div>
 
                     <table class="table table-striped table-bordered">
@@ -83,14 +83,14 @@
                 </div>
 
                 <div class="aam-slide-form aam-access-form" id="aam_user_permissions_form">
-                    <a href="#" class="btn btn-xs btn-primary btn-right" id="user_identity_go_back">
+                    <a href="#" class="btn btn-xs btn-primary btn-right aam-identity-go-back">
                         &Lt; <?php echo __('Go Back', AAM_KEY); ?>
                     </a>
                     <span class="aam-clear"></span>
 
-                    <div class="aam-overwrite hidden" id="aam_user_identity_overwrite">
+                    <div class="aam-overwrite hidden aam-identity-overwrite" id="aam_user_identity_overwrite">
                         <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                        <span><a href="#" id="user_identity_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                        <span><a href="#" class="btn btn-xs btn-primary aam-identity-reset"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
                     </div>
 
                     <table class="table table-striped table-bordered">
@@ -125,8 +125,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <?php do_action('aam_ui_identity_list_action', $access_level); ?>
             </div>
         </div>
     </div>

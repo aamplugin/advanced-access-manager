@@ -5614,40 +5614,83 @@
                 }
             }
 
+            function ResetPermissions(cb) {
+                getAAM().queueRequest(function () {
+                    const endpoint = `/service/identity/${current_selections.identity_type}/${current_selections.identity_id}`;
+
+                    $.ajax(getAAM().prepareApiEndpoint(endpoint), {
+                        type: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce,
+                            'X-HTTP-Method-Override': 'DELETE'
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', null, {
+                                request: endpoint,
+                                response
+                            });
+                        },
+                        complete: function() {
+                            cb();
+                        }
+                    });
+                });
+            }
+
             /**
              *
+             * @param {*} container
              * @param {*} type
              * @param {*} id
-             * @param {*} permissions
              */
-            function InitializePermissionForm(type, id, permissions, is_customized) {
+            function InitializePermissionForm(container, type, id, cb = null) {
                 // Initialize the permissions
                 current_selections.re_init       = true;
                 current_selections.identity_type = type;
                 current_selections.identity_id   = id;
 
-                $(`#aam_${type}_permissions_form input[type="checkbox"]`).prop(
-                    'checked', false
-                ).trigger('change');
+                getAAM().queueRequest(function () {
+                    $.ajax(getAAM().prepareApiEndpoint(`/service/identity/${type}/${id}`), {
+                        type: 'GET',
+                        headers: {
+                            'X-WP-Nonce': $.aam.getLocal().rest_nonce
+                        },
+                        success: function (response) {
+                            $(`${container} input[type="checkbox"]`).prop(
+                                'checked', false
+                            ).trigger('change');
 
-                $.each(permissions, function(permission, c) {
-                    if (c.effect === 'deny') {
-                        $(`#aam_${type}_permissions_form input[name="${permission}"]`).prop(
-                            'checked', true
-                        ).trigger('change');
-                    }
+                            $.each(response.permissions, function(permission, c) {
+                                if (c.effect === 'deny') {
+                                    $(`${container} input[name="${permission}"]`).prop(
+                                        'checked', true
+                                    ).trigger('change');
+                                }
+                            });
+
+                            if (response.is_customized) {
+                                $('.aam-overwrite', container).removeClass('hidden');
+                            } else {
+                                $('.aam-overwrite', container).addClass('hidden');
+                            }
+
+                            current_selections.re_init = false;
+
+                            $(`#${type}_identity_list_wrapper`).addClass('hidden');
+                            $(container).addClass('active');
+                        },
+                        error: function () {
+                            $.aam.notification('danger');
+                        },
+                        complete: function() {
+                            if (cb) {
+                                cb();
+                            }
+                        }
+                    });
                 });
-
-                if (is_customized) {
-                    $(`#aam_${type}_identity_overwrite`).removeClass('hidden');
-                } else {
-                    $(`#aam_${type}_identity_overwrite`).addClass('hidden');
-                }
-
-                current_selections.re_init = false;
-
-                $(`#${type}_identity_list_wrapper`).addClass('hidden');
-                $(`#aam_${type}_permissions_form`).addClass('active');
             }
 
             /**
@@ -5659,14 +5702,27 @@
                 if ($(container).length) {
                     $('[data-toggle="toggle"]', '#identity-content').bootstrapToggle();
 
-                    $('#role_identity_go_back').bind('click', function() {
-                        $('#role_identity_list_wrapper').removeClass('hidden');
-                        $('#aam_role_permissions_form').removeClass('active');
+                    $('.aam-identity-go-back').bind('click', function() {
+                        const type = current_selections.identity_type;
+
+                        $(`#${type}_identity_list_wrapper`).removeClass('hidden');
+                        $(`#aam_${type}_permissions_form`).removeClass('active');
+
+                        getAAM().triggerHook('user-identity-go-back', {
+                            current_selections
+                        });
                     });
 
-                    $('#user_identity_go_back').bind('click', function() {
-                        $('#user_identity_list_wrapper').removeClass('hidden');
-                        $('#aam_user_permissions_form').removeClass('active');
+                    $('.aam-identity-reset').bind('click', function() {
+                        const btn = $(this);
+
+                        btn.text(getAAM().__('Resetting...')).prop('disabled', true);
+
+                        ResetPermissions(function() {
+                            btn.text(getAAM().__('Reset to default')).prop('disabled', false);
+                            $('.aam-identity-overwrite').addClass('hidden');
+                            $('.aam-identity-go-back').trigger('click');
+                        });
                     });
 
                     const identity_types_filter = $('<select>').attr({
@@ -5676,25 +5732,15 @@
 
                         current_selections.identity_type = $(this).val();
 
-                        if ($(this).val() === 'roles') {
-                            $('#role_identity_list_wrapper').removeClass('hidden');
-                        } else if ($(this).val() === 'users') {
-                            $('#user_identity_list_wrapper').removeClass('hidden');
-                        } else if ($(this).val() === '') {
-                            $('#role_identity_list_wrapper').removeClass('hidden');
-                        } else {
-                            getAAM().triggerHook('aam-identity-types-change', {
-                                type: $(this).val()
-                            });
-                        }
+                        $(`#${$(this).val()}_identity_list_wrapper`).removeClass('hidden');
 
                         $('.aam-identity-type').val(current_selections.identity_type);
                     });
 
                     const types = getAAM().applyFilters('aam-identity-types', [
                         { key: '', label: getAAM().__('Identity Types') },
-                        { key: 'roles', label: getAAM().__('Roles') },
-                        { key: 'users', label: getAAM().__('Users') },
+                        { key: 'role', label: getAAM().__('Roles') },
+                        { key: 'user', label: getAAM().__('Users') },
                     ]);
 
                     $.each(types, (_, type) => {
@@ -5788,7 +5834,9 @@
                             }).bind('click', function () {
                                 // Initialize the permissions
                                 InitializePermissionForm(
-                                    'user', data[0], data[3].permissions
+                                    '#aam_user_permissions_form',
+                                    'user',
+                                    data[0]
                                 );
                             }).attr({
                                 'data-toggle': "tooltip",
@@ -5871,7 +5919,9 @@
                                 'class': 'aam-row-action icon-cog ' + (data[3].is_customized ? 'aam-access-overwritten' : 'text-info')
                             }).bind('click', function () {
                                 InitializePermissionForm(
-                                    'role', data[0], data[3].permissions
+                                    '#aam_role_permissions_form',
+                                    'role',
+                                    data[0]
                                 );
                             }).attr({
                                 'data-toggle': "tooltip",

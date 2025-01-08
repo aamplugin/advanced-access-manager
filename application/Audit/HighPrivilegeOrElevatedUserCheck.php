@@ -74,7 +74,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             // it is the first iteration of the check and fetch the batch of users
             // for further processing
             if ($response['progress'] === 0) {
-                $result = AAM::api()->users->list([
+                $result = AAM::api()->users->get_users([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID'
                 ], 'full');
@@ -83,7 +83,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $response['total_count'] = $result['summary']['total_count'];
                 $user_list               = $result['list'];
             } else {
-                $user_list = AAM::api()->users->list([
+                $user_list = AAM::api()->users->get_users([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID',
                     'offset'  => $response['offset']

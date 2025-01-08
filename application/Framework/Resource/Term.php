@@ -32,16 +32,8 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
         // Overriding the default serialization method to ensure that term's
         // compound ID is serialized with keys in correct order:
         // term_id|<taxonomy>|<post_type>
-        if (is_array($this->_internal_id) && $serialize) {
-            $parts = [];
-
-            foreach([ 'id', 'taxonomy', 'post_type' ] as $prop) {
-                if (array_key_exists($prop, $this->_internal_id)) {
-                    array_push($parts, $this->_internal_id[$prop]);
-                }
-            }
-
-            $result = implode('|', $parts);
+        if (!empty($this->_internal_id) && $serialize) {
+            $result = implode('|', array_values($this->_internal_id));
         } else {
             $result = $this->_internal_id;
         }
@@ -74,7 +66,7 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
                         'The term property is not a valid WP_Term instance'
                     );
                 }
-            } elseif (is_array($identifier)) { // Narrowed down with taxonomy?
+            } elseif (is_array($identifier)) {
                 // Based on the WP DB structure, the wp_terms table contains the unique
                 // list of all terms, however, the same term can be associated with
                 // multiple taxonomies. The table wp_term_taxonomy has the UNIQUE KEY
@@ -111,8 +103,6 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
                 if (is_array($identifier) && !empty($identifier['post_type'])) {
                     $this->_internal_id['post_type'] = $identifier['post_type'];
                 }
-            } else {
-                throw new OutOfRangeException('The term resource identifier is invalid');
             }
         }
     }
