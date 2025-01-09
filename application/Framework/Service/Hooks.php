@@ -208,8 +208,10 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
                     foreach($this->_get_hooks() as $hook) {
                         $this->_register_listener($hook);
                     }
-                } elseif (is_array($hook)) {
-                    $this->_register_listener($hook);
+                } elseif (is_array($hook) && isset($hook['name'])) {
+                    $this->_register_listener(apply_filters(
+                        'aam_normalize_hook_filter', $hook
+                    ));
                 }
             } else {
                 throw new LogicException(
@@ -254,13 +256,16 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     {
         $result = [];
 
-        foreach($this->_get_resource()->get_permissions() as $id => $permission) {
-            list($hook, $priority) = explode('|', $id);
+        foreach($this->_get_resource()->get_permissions() as $id => $data) {
+            list($name, $priority) = explode('|', $id);
 
-            array_push($result, array_merge([
-                'name'     => $hook,
-                'priority' => apply_filters('aam_get_hooks_filter', $priority)
-            ], $permission));
+            array_push(
+                $result,
+                apply_filters('aam_normalize_hook_filter', array_replace($data, [
+                    'name'     => $name,
+                    'priority' => is_numeric($priority) ? intval($priority) : $priority
+                ]))
+            );
         }
 
         return $result;
@@ -351,12 +356,6 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     {
         $name = $hook['name'];
 
-        if ($hook['priority'] === false) {
-            $priority = PHP_INT_MAX;
-        } else {
-            $priority = $hook['priority'];
-        }
-
         // Register filter modification function only if it was not yet registered
         if (!isset($this->_listeners[$name]['cb'])) {
             $this->_listeners[$name]['cb'] = function($value) use ($name) {
@@ -372,7 +371,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
                 return $value;
             };
 
-            add_filter($name, $this->_listeners[$name]['cb'], $priority);
+            add_filter($name, $this->_listeners[$name]['cb'], $hook['priority']);
         }
     }
 
@@ -399,11 +398,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
                 return $this->_listeners[$name]['return'];
             };
 
-            add_filter(
-                $name,
-                $this->_listeners[$name]['cb'],
-                $priority === false ? PHP_INT_MAX : $priority
-            );
+            add_filter($name, $this->_listeners[$name]['cb'], intval($priority));
         }
     }
 
@@ -460,7 +455,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
      */
     private function _evaluate_string_expression($expression, $input)
     {
-        $response = $input;
+        $response = $expression;
         $filter   = $this->_is_filter($expression);
 
         if (is_string($filter)) {

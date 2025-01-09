@@ -171,11 +171,26 @@ final class HooksTest extends TestCase
      */
     public function testReplaceEffect()
     {
-        $GLOBALS['test_replace'] = 0;
+        $GLOBALS['test_replace'] = [];
 
-        add_filter('aam_test_filter', function() {
-            $GLOBALS['test_replace']++;
+        add_filter('aam_test_filter', function($result) {
+            $GLOBALS['test_replace'][] = 'a';
+
+            return $result;
         });
+
+        add_filter('aam_test_filter', function($result) {
+            $GLOBALS['test_replace'][] = 'b';
+
+            return $result;
+        }, 20);
+
+        // Making sure that both filters are executed
+        apply_filters('aam_test_filter', false);
+
+        $this->assertEquals([ 'a', 'b' ], $GLOBALS['test_replace']);
+
+        $GLOBALS['test_replace'] = [];
 
         // Register new listener
         AAM::api()->hooks()->listen([
@@ -185,8 +200,9 @@ final class HooksTest extends TestCase
             'return'   => 'yes'
         ]);
 
+        // Making sure that only targeted filter is replaced
         $this->assertEquals('yes', apply_filters('aam_test_filter', false));
-        $this->assertEquals(0, $GLOBALS['test_replace']);
+        $this->assertEquals([ 'b' ], $GLOBALS['test_replace']);
 
         remove_all_filters('aam_test_filter');
         unset($GLOBALS['test_replace']);
@@ -253,7 +269,7 @@ final class HooksTest extends TestCase
                 [ '&:filter($key != hello)', '&:filter($value > 5)' ],
                 [ 'c' => 10 ],
                 [ 'hello' => 1, 'a' => 2, 'b' => 5, 'c' => 10 ]
-            ],
+            ]
         ];
     }
 
