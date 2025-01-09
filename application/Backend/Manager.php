@@ -10,25 +10,8 @@
 /**
  * Backend manager
  *
- * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/420
- * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/377
- * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
- * @since 6.9.8  https://github.com/aamplugin/advanced-access-manager/issues/262
- * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/260
- * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.8.4  https://github.com/aamplugin/advanced-access-manager/issues/212
- * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/179
- * @since 6.6.2  https://github.com/aamplugin/advanced-access-manager/issues/138
- * @since 6.2.2  Added `manage_policies` and removed `blog_id` for the localized
- *               array of properties
- * @since 6.2.0  Added new property to the JS localization `blog_id`
- * @since 6.1.0  Fixed bug with HTML compression
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.41
+ * @version 7.0.0
  */
 class AAM_Backend_Manager
 {
@@ -40,24 +23,16 @@ class AAM_Backend_Manager
      * Initialize the AAM backend manager
      *
      * @return void
-     *
-     * @since 6.9.41 https://github.com/aamplugin/advanced-access-manager/issues/420
-     * @since 6.9.20 https://github.com/aamplugin/advanced-access-manager/issues/335
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     * @since 6.9.7  https://github.com/aamplugin/advanced-access-manager/issues/260
-     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
-     * @since 6.8.4  https://github.com/aamplugin/advanced-access-manager/issues/212
-     * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/179
-     * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/88
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.41
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
         // Print required JS & CSS
-        add_action('aam_iframe_footer_action', array($this, 'printFooterJavascript'));
+        add_action('aam_iframe_footer_action', function() {
+            $this->_print_js();
+        });
 
         // Alter user edit screen with support for multiple roles
         if (AAM::api()->config->get('core.settings.multi_access_levels')) {
@@ -233,17 +208,11 @@ class AAM_Backend_Manager
      * Print all the necessary JS assets for the AAM UI
      *
      * @return void
-     *
-     * @since 6.9.8 https://github.com/aamplugin/advanced-access-manager/issues/262
-     * @since 6.2.2 Added `manage_policies` and removed `blog_id` for the localized
-     *              array of properties
-     * @since 6.2.0 Added `blog_id` to the localized array of properties
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.8
+     *
+     * @version 7.0.0
      */
-    public function printFooterJavascript()
+    private function _print_js()
     {
         if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
             $access_level = AAM_Backend_AccessLevel::get_instance()->get_access_level();

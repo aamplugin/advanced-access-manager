@@ -22,16 +22,15 @@ class AAM_Service_Hooks
      * Constructor
      *
      * @access protected
-     *
      * @return void
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        // Can register this only after user object is initialized
         add_action('init', function() {
-            // AAM_Service_AccessPolicy_HookController::bootstrap();
-        });
+            AAM::api()->hooks()->listen();
+        }, PHP_INT_MAX);
     }
 
 }

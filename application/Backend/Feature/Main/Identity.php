@@ -52,35 +52,35 @@ class AAM_Backend_Feature_Main_Identity extends AAM_Backend_Feature_Abstract
                 ),
                 'title' => __('LIST ROLE', AAM_KEY)
             ],
-            'list_users' => [
+            'list_user' => [
                 'hint'  => sprintf(
                     __('When denies, users that have the selected role are not visible anywhere on the website for %s.', AAM_KEY),
                     $access_level->get_display_name()
                 ),
                 'title' => __('LIST USERS', AAM_KEY)
             ],
-            'edit_users' => [
+            'edit_user' => [
                 'hint'  => sprintf(
                     __('When denies, users that have the selected role can not be edited by %s.', AAM_KEY),
                     $access_level->get_display_name()
                 ),
                 'title' => __('EDIT USERS', AAM_KEY)
             ],
-            'promote_users' => [
+            'promote_user' => [
                 'hint'  => sprintf(
                     __('When denies, users that belong to the selected role can not be promoted to any other role by %s.', AAM_KEY),
                     $access_level->get_display_name()
                 ),
                 'title' => __('PROMOTE USERS', AAM_KEY)
             ],
-            'change_users_password' => [
+            'change_user_password' => [
                 'hint'  => sprintf(
                     __('When denied, users assigned to the selected role are restricted from having their passwords changed by %s.', AAM_KEY),
                     $access_level->get_display_name()
                 ),
                 'title' => __('CHANGE USERS PASSWORD', AAM_KEY)
             ],
-            'delete_users' => [
+            'delete_user' => [
                 'hint'  => sprintf(
                     __('When denies, users that belong to the selected role can not be deleted by %s.', AAM_KEY),
                     $access_level->get_display_name()

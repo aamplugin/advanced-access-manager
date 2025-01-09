@@ -67,6 +67,11 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
                 'setting'     => AAM::SERVICES[AAM_Service_Capability::class]
             ],
             [
+                'title'       => __('Hooks', AAM_KEY),
+                'description' => __('Take control of your WordPress hooks (actions and filters). Manage their execution and customize return values with precision.', AAM_KEY),
+                'setting'     => AAM::SERVICES[AAM_Service_Hooks::class]
+            ],
+            [
                 'title'       => __('Posts & Terms', AAM_KEY),
                 'description' => __('Manage access to your website content for any user, role or visitor. This include access to posts, pages, media attachment, custom post types, categories, tags, custom taxonomies and terms.', AAM_KEY),
                 'setting'     => AAM::SERVICES[AAM_Service_Content::class]

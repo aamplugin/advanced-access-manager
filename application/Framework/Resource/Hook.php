@@ -50,12 +50,12 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
 
                 if ($effect === 'merge') {
                     if (isset($stm['MergeWith']) && is_array($stm['MergeWith'])) {
-                        $permission['response'] = $stm['MergeWith'];
+                        $permission['return'] = $stm['MergeWith'];
                     } else {
-                        $permission['response'] = [];
+                        $permission['return'] = [];
                     }
                 } elseif (array_key_exists('Return', $stm)) {
-                    $permission['response'] = $stm['Return'];
+                    $permission['return'] = $stm['Return'];
                 }
 
                 $permissions = array_replace([

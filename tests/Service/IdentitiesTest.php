@@ -17,7 +17,7 @@ use AAM,
 /**
  * AAM Identity service test suite
  */
-final class IdentityTest extends TestCase
+final class IdentitiesTest extends TestCase
 {
 
     /**
@@ -32,16 +32,19 @@ final class IdentityTest extends TestCase
         // Setting new current user
         wp_set_current_user($user_a);
 
-        // Making sure that we can see about to be hidden role
+        // Making sure that we can see about to be hidden roles
         $this->assertArrayHasKey('subscriber', get_editable_roles());
+        $this->assertArrayHasKey('author', get_editable_roles());
 
         // Defining permissions and hiding role
-        $service = AAM::api()->identities();
+        $service = AAM::api()->roles();
 
-        $this->assertTrue($service->role('subscriber')->deny('list_role'));
+        $this->assertTrue($service->hide('subscriber'));
+        $this->assertTrue($service->deny('author', 'list_role'));
 
-        // Making sure that we can see about to be hidden role
+        // Making sure that now we cannot see hidden roles
         $this->assertArrayNotHasKey('subscriber', get_editable_roles());
+        $this->assertArrayNotHasKey('author', get_editable_roles());
     }
 
     /**
@@ -61,8 +64,6 @@ final class IdentityTest extends TestCase
         // Setting new current user
         wp_set_current_user($user_a);
 
-        $service = AAM::api()->identities();
-
         // Ensure that we can see all the users
         $users = array_map('intval', get_users([
             'fields' => 'ids',
@@ -73,8 +74,8 @@ final class IdentityTest extends TestCase
         $this->assertContains($user_b, $users);
         $this->assertContains($user_c, $users);
 
-        // Case #1. Hide an individual user
-        $this->assertTrue($service->user($user_b)->deny('list_user'));
+        // Case #1. Hide individual user
+        $this->assertTrue(AAM::api()->users()->deny($user_b, 'list_user'));
 
         $users = array_map('intval', get_users([
             'fields' => 'ids',
@@ -86,10 +87,10 @@ final class IdentityTest extends TestCase
         $this->assertContains($user_c, $users);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->users()->reset());
 
         // Case #2. Hide users through the role
-        $this->assertTrue($service->role('contributor')->deny('list_users'));
+        $this->assertTrue(AAM::api()->roles()->deny('contributor', 'list_user'));
 
         $users = array_map('intval', get_users([
             'fields' => 'ids',
@@ -101,10 +102,10 @@ final class IdentityTest extends TestCase
         $this->assertNotContains($user_c, $users);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->roles()->reset());
 
         // Case #3. Manage querying with "include" query param
-        $this->assertTrue($service->user($user_b)->deny('list_user'));
+        $this->assertTrue(AAM::api()->users()->hide($user_b));
 
         $result_a = array_map('intval', get_users([
             'fields'  => 'ids',
@@ -123,10 +124,10 @@ final class IdentityTest extends TestCase
         $this->assertNotContains($user_b, $result_b);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->users()->reset());
 
         // Case #4. Manage querying with "exclude" query param
-        $this->assertTrue($service->user($user_b)->deny('list_user'));
+        $this->assertTrue(AAM::api()->users()->hide($user_b));
 
         $result_a = array_map('intval', get_users([
             'fields'  => 'ids',
@@ -148,10 +149,10 @@ final class IdentityTest extends TestCase
         $this->assertContains($user_c, $result_b);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->users()->reset());
 
         // Case #5. Manage querying with "role__in" query param
-        $this->assertTrue($service->role('contributor')->deny('list_users'));
+        $this->assertTrue(AAM::api()->roles()->deny('contributor', 'list_user'));
 
         $result_a = array_map('intval', get_users([
             'fields'   => 'ids',
@@ -171,10 +172,10 @@ final class IdentityTest extends TestCase
         $this->assertNotContains($user_a, $result_b);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->roles()->reset());
 
         // Case #6. Manage querying with "role__not_in" query param
-        $this->assertTrue($service->role('contributor')->deny('list_users'));
+        $this->assertTrue(AAM::api()->roles()->deny('contributor', 'list_user'));
 
         $result_a = array_map('intval', get_users([
             'fields'       => 'ids',
@@ -196,7 +197,7 @@ final class IdentityTest extends TestCase
         $this->assertNotContains($user_c, $result_b);
 
         // Reset permissions
-        $this->assertTrue($service->reset());
+        $this->assertTrue(AAM::api()->roles()->reset());
     }
 
     /**
@@ -219,7 +220,7 @@ final class IdentityTest extends TestCase
 
         // Setting permissions and hiding users in one role
         $this->assertTrue(
-            AAM::api()->identities('role:editor')->role('contributor')->deny('list_users')
+            AAM::api()->roles('role:editor')->deny('contributor', 'list_user')
         );
 
         $users = array_map('intval', get_users([
@@ -255,10 +256,10 @@ final class IdentityTest extends TestCase
         $this->assertTrue(current_user_can('promote_user', $user_c));
 
         // Set permissions on the role level
-        $this->assertTrue(AAM::api()->identities('role:subadmin')
-                                    ->role('subscriber')
-                                    ->deny(['edit_users', 'delete_users', 'promote_users'])
-        );
+        $this->assertTrue(AAM::api()->roles('role:subadmin')->deny(
+            'subscriber',
+            [ 'edit_user', 'delete_user', 'promote_user' ]
+        ));
 
         // Verifying permission
         $this->assertFalse(current_user_can('edit_user', $user_b));
@@ -269,11 +270,11 @@ final class IdentityTest extends TestCase
         $this->assertTrue(current_user_can('promote_user', $user_c));
 
         // Set permission for an individual user
-        $service = AAM::api()->identities('role:subadmin')->user($user_c);
+        $service = AAM::api()->users('role:subadmin');
 
-        $this->assertTrue($service->deny('edit_user'));
-        $this->assertTrue($service->deny('delete_user'));
-        $this->assertTrue($service->deny('promote_user'));
+        $this->assertTrue($service->deny($user_c, 'edit_user'));
+        $this->assertTrue($service->deny($user_c, 'delete_user'));
+        $this->assertTrue($service->deny($user_c, 'promote_user'));
 
         $this->assertFalse(current_user_can('edit_user', $user_c));
         $this->assertFalse(current_user_can('delete_user', $user_c));
@@ -296,10 +297,9 @@ final class IdentityTest extends TestCase
         wp_set_current_user($user_a);
 
         // Set permissions on the role level first
-        $this->assertTrue(AAM::api()->identities('role:subadmin')
-                                    ->role('subscriber')
-                                    ->deny('change_users_password')
-        );
+        $this->assertTrue(AAM::api()->roles('role:subadmin')->deny(
+            'subscriber', 'change_user_password'
+        ));
 
         $pass1 = $pass2 = uniqid('testpass_');
         $target_user = get_user($user_b);
@@ -327,10 +327,9 @@ final class IdentityTest extends TestCase
         $this->assertObjectNotHasProperty('user_pass', $data);
 
         // Set permissions on the user level
-        $this->assertTrue(AAM::api()->identities('role:subadmin')
-                                    ->user($user_c)
-                                    ->deny('change_user_password')
-        );
+        $this->assertTrue(AAM::api()->users('role:subadmin')->deny(
+            $user_c, 'change_user_password'
+        ));
 
         $pass1 = $pass2 = uniqid('testpass_');
         $target_user = get_user($user_c);

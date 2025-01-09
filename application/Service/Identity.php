@@ -211,8 +211,8 @@ class AAM_Service_Identity
         $users_not_in = [];
 
         foreach($role_aggregate as $role_id => $perms) {
-            if (array_key_exists('list_users', $perms)
-                && $perms['list_users']['effect'] === 'deny') {
+            if (array_key_exists('list_user', $perms)
+                && $perms['list_user']['effect'] === 'deny') {
                     array_push($roles_not_in, $role_id);
             }
         }

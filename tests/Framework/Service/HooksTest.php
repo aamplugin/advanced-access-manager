@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace AAM\UnitTest\Framework\Service;
 
 use AAM,
+    AAM_Framework_Type_Resource,
     AAM\UnitTest\Utility\TestCase;
 
 /**
@@ -42,7 +43,9 @@ final class HooksTest extends TestCase
         $this->assertTrue($service->replace('aam_hook_j', -1, 5));
 
         // Getting raw data to see that everything is stored as it should
-        $permissions = AAM::api()->user()->get_resource('hook')->get_permissions();
+        $permissions = AAM::api()->user()->get_resource(
+            AAM_Framework_Type_Resource::HOOK
+        )->get_permissions();
 
         $this->assertEquals([
             'aam_hook_a|10' => [
@@ -58,28 +61,28 @@ final class HooksTest extends TestCase
                 'effect' => 'allow'
             ],
             'aam_hook_e|10' => [
-                'effect'   => 'alter',
-                'response' => 'nope'
+                'effect' => 'alter',
+                'return' => 'nope'
             ],
             'aam_hook_f|3' => [
-                'effect'   => 'alter',
-                'response' => [ 'test' => true ]
+                'effect' => 'alter',
+                'return' => [ 'test' => true ]
             ],
             'aam_hook_g|10' => [
-                'effect'   => 'merge',
-                'response' => [ 'test' ]
+                'effect' => 'merge',
+                'return' => [ 'test' ]
             ],
             'aam_hook_h|4' => [
-                'effect'   => 'merge',
-                'response' => [ 'test' => true ]
+                'effect' => 'merge',
+                'return' => [ 'test' => true ]
             ],
             'aam_hook_i|10' => [
                 'effect' => 'replace',
-                'response' => false
+                'return' => false
             ],
             'aam_hook_j|5' => [
-                'effect'   => 'replace',
-                'response' => -1
+                'effect' => 'replace',
+                'return' => -1
             ]
         ], $permissions);
     }
@@ -124,7 +127,9 @@ final class HooksTest extends TestCase
         $contributor->alter('hook_e', 34);
 
         // Confirm permissions
-        $permissions = AAM::api()->user($user_a)->get_resource('hook')->get_permissions();
+        $permissions = AAM::api()->user($user_a)->get_resource(
+            AAM_Framework_Type_Resource::HOOK
+        )->get_permissions();
 
         $this->assertEquals([
             'hook_a|10' => [
@@ -134,8 +139,8 @@ final class HooksTest extends TestCase
                 'effect' => 'deny'
             ],
             'hook_c|10' => [
-                'effect'   => 'alter',
-                'response' => 'yes'
+                'effect' => 'alter',
+                'return' => 'yes'
             ],
             'hook_d|10' => [
                 'effect' => 'deny'
@@ -187,7 +192,9 @@ final class HooksTest extends TestCase
         $contributor->deny('hook_e');
 
         // Confirm permissions
-        $permissions = AAM::api()->user($user_a)->get_resource('hook')->get_permissions();
+        $permissions = AAM::api()->user($user_a)->get_resource(
+            AAM_Framework_Type_Resource::HOOK
+        )->get_permissions();
 
         $this->assertEquals([
             'hook_a|10' => [
@@ -195,11 +202,11 @@ final class HooksTest extends TestCase
             ],
             'hook_b|10' => [
                 'effect'   => 'replace',
-                'response' => false
+                'return' => false
             ],
             'hook_c|10' => [
                 'effect'   => 'alter',
-                'response' => 'yes'
+                'return' => 'yes'
             ],
             'hook_d|10' => [
                 'effect' => 'allow'

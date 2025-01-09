@@ -83,7 +83,10 @@ class AAM_Framework_Service_Users
     }
 
     /**
-     * Check if permission is denied
+     * Check if permission is denied for a given user
+     *
+     * This method is façade as it also does additional validation for each user's
+     * role to ensure proper protection
      *
      * @param mixed  $user_identifier
      * @param string $permission
@@ -101,6 +104,32 @@ class AAM_Framework_Service_Users
 
             if (isset($resource[$permission])) {
                 $result = $resource[$permission]['effect'] !== 'allow';
+            } else { // Get the list of all user roles and properly merge permissions
+                $user_roles    = array_values($resource->roles);
+                $multi_support = $this->config->get(
+                    'core.settings.multi_access_levels'
+                );
+
+                // Determine the final list of roles
+                $roles = $multi_support ? $user_roles : [ array_shift($user_roles) ];
+
+                // Iterate over the list of roles and merge permissions properly
+                $permissions = [];
+                $acl         = $resource->get_access_level();
+
+                foreach($roles as $slug) {
+                    $permissions = $this->misc->merge_permissions(
+                        $acl->get_resource(
+                            AAM_Framework_Type_Resource::ROLE, $slug
+                        )->get_permissions(),
+                        $permissions,
+                        AAM_Framework_Type_Resource::ROLE
+                    );
+                }
+
+                if (isset($permissions[$permission])) {
+                    $result = $permissions[$permission]['effect'] !== 'allow';
+                }
             }
 
             // Making sure that other implementations can affect the decision

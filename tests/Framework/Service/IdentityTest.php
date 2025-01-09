@@ -32,18 +32,18 @@ final class IdentityTest extends TestCase
         $user_b = $this->createUser([ 'role' => 'subadmin' ]);
 
         // Settings permissions
-        $this->assertTrue(AAM::api()->roles('role:subadmin')->deny('editor', 'edit_users'));
+        $this->assertTrue(AAM::api()->roles('role:subadmin')->deny('editor', 'edit_user'));
         $this->assertTrue(AAM::api()->users('role:subadmin')->deny($user_a, 'promote_user'));
 
         // Verifying permissions
-        $this->assertTrue(AAM::api()->roles('role:subadmin')->is_denied_to('editor', 'edit_users'));
-        $this->assertFalse(AAM::api()->roles('role:subadmin')->is_allowed_to('editor', 'edit_users'));
+        $this->assertTrue(AAM::api()->roles('role:subadmin')->is_denied_to('editor', 'edit_user'));
+        $this->assertFalse(AAM::api()->roles('role:subadmin')->is_allowed_to('editor', 'edit_user'));
         $this->assertTrue(AAM::api()->users('role:subadmin')->is_denied_to($user_a, 'promote_user'));
         $this->assertFalse(AAM::api()->users('role:subadmin')->is_allowed_to($user_a, 'promote_user'));
 
         // Verify that permissions are properly inherited
-        $this->assertTrue(AAM::api()->roles('user:' . $user_b)->is_denied_to('editor', 'edit_users'));
-        $this->assertFalse(AAM::api()->roles('user:' . $user_b)->is_allowed_to('editor', 'edit_users'));
+        $this->assertTrue(AAM::api()->roles('user:' . $user_b)->is_denied_to('editor', 'edit_user'));
+        $this->assertFalse(AAM::api()->roles('user:' . $user_b)->is_allowed_to('editor', 'edit_user'));
         $this->assertTrue(AAM::api()->users('user:' . $user_b)->is_denied_to($user_a, 'promote_user'));
         $this->assertFalse(AAM::api()->users('user:' . $user_b)->is_allowed_to($user_a, 'promote_user'));
     }
@@ -60,15 +60,19 @@ final class IdentityTest extends TestCase
         $user_b = $this->createUser([ 'role' => 'subadmin' ]);
 
         // Settings permissions
-        $this->assertTrue(AAM::api()->roles('role:subadmin')->deny('editor', 'edit_users'));
-        $this->assertTrue(AAM::api()->users('role:subadmin')->deny($user_a, 'promote_user'));
+        $this->assertTrue(
+            AAM::api()->roles('role:subadmin')->deny('editor', 'edit_user')
+        );
+        $this->assertTrue(
+            AAM::api()->users('role:subadmin')->deny($user_a, 'promote_user')
+        );
 
         // Confirm that identities are properly protected
         $this->assertTrue(AAM::api()->roles('role:subadmin')->is_denied_to(
-            'editor', 'edit_users'
+            'editor', 'edit_user'
         ));
         $this->assertFalse(AAM::api()->roles('role:subadmin')->is_allowed_to(
-            'editor', 'edit_users'
+            'editor', 'edit_user'
         ));
         $this->assertTrue(AAM::api()->users('role:subadmin')->is_denied_to(
             $user_a, 'promote_user'
@@ -79,10 +83,10 @@ final class IdentityTest extends TestCase
 
         // Confirm that identities are properly protected
         $this->assertTrue(AAM::api()->roles('user:' . $user_b)->is_denied_to(
-            'editor', 'edit_users'
+            'editor', 'edit_user'
         ));
         $this->assertFalse(AAM::api()->roles('user:' . $user_b)->is_allowed_to(
-            'editor', 'edit_users'
+            'editor', 'edit_user'
         ));
         $this->assertTrue(AAM::api()->users('user:' . $user_b)->is_denied_to(
             $user_a, 'promote_user'
@@ -149,7 +153,7 @@ final class IdentityTest extends TestCase
                 ]
             ],
             'author' => [
-                'list_users' => [
+                'list_user' => [
                     'effect' => 'deny'
                 ]
             ]

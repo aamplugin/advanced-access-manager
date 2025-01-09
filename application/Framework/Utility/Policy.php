@@ -174,15 +174,15 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
 
         if (count($bits) === 3) {
             if ($action === 'list') {
-                $action = 'list_users';
+                $action = 'list_user';
             } elseif ($action === 'edit') {
-                $action = 'edit_users';
+                $action = 'edit_user';
             } elseif ($action === 'changepassword') {
-                $action = 'change_users_password';
+                $action = 'change_user_password';
             } elseif (in_array($action, [ 'changerole', 'promote' ], true)) {
-                $action = 'promote_users';
+                $action = 'promote_user';
             } elseif ($action === 'delete') {
-                $action = 'delete_users';
+                $action = 'delete_user';
             }
         } else {
             $action = "{$action}_role";

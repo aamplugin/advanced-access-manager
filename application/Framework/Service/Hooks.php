@@ -19,6 +19,16 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     use AAM_Framework_Service_BaseTrait;
 
     /**
+     * Repository of hooks
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_listeners = [];
+
+    /**
      * Get all defined hooks
      *
      * @return array
@@ -29,6 +39,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     public function get_hooks()
     {
         try {
+            $result = $this->_get_hooks();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -170,6 +181,49 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     }
 
     /**
+     * Listen to any given hook or all hooks that have permissions defined
+     *
+     * If $hook argument is not empty, AAM will register listener, however, the
+     * permissions will not be persisted in DB.
+     *
+     * @param array $hook [Optional]
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function listen($hook = null)
+    {
+        $result = true;
+
+        try {
+            $acl = $this->_get_access_level();
+
+            if (in_array($acl::TYPE, [
+                AAM_Framework_Type_AccessLevel::USER,
+                AAM_Framework_Type_AccessLevel::VISITOR
+            ], true)) {
+                if (empty($hook)) {
+                    foreach($this->_get_hooks() as $hook) {
+                        $this->_register_listener($hook);
+                    }
+                } elseif (is_array($hook)) {
+                    $this->_register_listener($hook);
+                }
+            } else {
+                throw new LogicException(
+                    'Only user and visitor access level can listen to a hook'
+                );
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
      * Check if permissions are customized
      *
      * @return bool
@@ -189,19 +243,43 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     }
 
     /**
+     * Get array of pre-processed hooks
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_hooks()
+    {
+        $result = [];
+
+        foreach($this->_get_resource()->get_permissions() as $id => $permission) {
+            list($hook, $priority) = explode('|', $id);
+
+            array_push($result, array_merge([
+                'name'     => $hook,
+                'priority' => apply_filters('aam_get_hooks_filter', $priority)
+            ], $permission));
+        }
+
+        return $result;
+    }
+
+    /**
      * Update hook permission
      *
      * @param string     $hook
      * @param string|int $priority
      * @param string     $effect
-     * @param mixed      $response
+     * @param mixed      $return
      *
      * @return bool
      * @access private
      *
      * @version 7.0.0
      */
-    private function _update_permissions($hook, $priority, $effect, $response = null)
+    private function _update_permissions($hook, $priority, $effect, $return = null)
     {
         $resource   = $this->_get_resource();
         $permission = [
@@ -210,14 +288,311 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
             ]
         ];
 
-        if (!is_null($response)) {
-            $permission["{$hook}|{$priority}"]['response'] = $response;
+        if (!is_null($return)) {
+            $permission["{$hook}|{$priority}"]['return'] = $return;
         }
 
         return $resource->set_permissions(array_replace(
             $resource->get_permissions(true),
             $permission
         ));
+    }
+
+    /**
+     * Control execution of a hook
+     *
+     * @param array $hook
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _register_listener($hook)
+    {
+        $this->_listeners[$hook['name']] = $hook;
+
+        if ($hook['effect'] === 'deny') {
+            $this->_deny($hook);
+        } elseif (in_array($hook['effect'], [ 'merge', 'alter' ], true)) {
+            $this->_modify($hook);
+        } elseif ($hook['effect'] === 'replace') {
+            // Replace the entire chain and return defined value
+            $this->_replace($hook);
+        }
+    }
+
+    /**
+     * Deny hook execution
+     *
+     * @param array $hook
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _deny($hook)
+    {
+        remove_all_filters($hook['name'], $hook['priority']);
+    }
+
+    /**
+     * Register hook that modifies filter chain result
+     *
+     * @param array $hook
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _modify($hook)
+    {
+        $name = $hook['name'];
+
+        if ($hook['priority'] === false) {
+            $priority = PHP_INT_MAX;
+        } else {
+            $priority = $hook['priority'];
+        }
+
+        // Register filter modification function only if it was not yet registered
+        if (!isset($this->_listeners[$name]['cb'])) {
+            $this->_listeners[$name]['cb'] = function($value) use ($name) {
+                $effect = $this->_listeners[$name]['effect'];
+                $return = $this->_listeners[$name]['return'];
+
+                if ($effect === 'alter') {
+                    $value = $this->_override_return_value($value, $return);
+                } elseif ($effect === 'merge') {
+                    $value = $this->_merge_return_value($value, $return);
+                }
+
+                return $value;
+            };
+
+            add_filter($name, $this->_listeners[$name]['cb'], $priority);
+        }
+    }
+
+    /**
+     * Register replace callback
+     *
+     * @param array $hook
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _replace($hook)
+    {
+        $name     = $hook['name'];
+        $priority = $this->_listeners[$name]['priority'];
+
+        // Register filter replacement function only if it was not yet registered
+        if (!isset($this->_listeners[$name]['cb'])) {
+            remove_all_filters($name, $priority);
+
+            $this->_listeners[$name]['cb'] = function() use ($name) {
+                return $this->_listeners[$name]['return'];
+            };
+
+            add_filter(
+                $name,
+                $this->_listeners[$name]['cb'],
+                $priority === false ? PHP_INT_MAX : $priority
+            );
+        }
+    }
+
+    /**
+     * Override the filter's return value
+     *
+     * @param mixed $value
+     * @param mixed $override
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _override_return_value($value, $override)
+    {
+        if (is_string($override)) {
+            $result = $this->_evaluate_string_expression($override, $value);
+        } else if (is_array($override)) {
+            $result = $this->_evaluate_possible_array_of_filters($override, $value);
+        } else {
+            $result = $override;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge return value
+     *
+     * @param array $value
+     * @param array $merge_with
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _merge_return_value($value, $merge_with)
+    {
+        return array_merge(is_array($value) ? $value : [], $merge_with);
+    }
+
+    /**
+     * Evaluate hook return string expression
+     *
+     * @param string $expression
+     * @param mixed  $input
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _evaluate_string_expression($expression, $input)
+    {
+        $response = $input;
+        $filter   = $this->_is_filter($expression);
+
+        if (is_string($filter)) {
+            $response = $this->_process_filter_modifier($filter, $input);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Evaluate if response is an array of filters
+     *
+     * @param array $values
+     * @param mixed $input
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _evaluate_possible_array_of_filters($values, $input)
+    {
+        $filters = [];
+
+        foreach($values as $expression) {
+            $filter = $this->_is_filter($expression);
+
+            if (is_string($filter)) {
+                array_push($filters, $filter);
+            }
+        }
+
+        // If all the values in the array are filters, then run the chain of filters
+        if (count($values) === count($filters)) {
+            $response = $input;
+
+            foreach($filters as $filter) {
+                $response = $this->_process_filter_modifier($filter, $response);
+            }
+        } else {
+            $response = $values;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Determine if return value is filter
+     *
+     * @param string $expression
+     *
+     * @return string|boolean
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_filter($expression)
+    {
+        $matches = array();
+
+        // Evaluating if a string is &:filter(...)
+        $match = preg_match('/^\&:filter\(([^)]+)\)$/i', $expression, $matches);
+
+        return $match === 1 ? $matches[1] : false;
+    }
+
+    /**
+     * Process the "filter" modifier
+     *
+     * @param string $modifier
+     * @param mixed  $input
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _process_filter_modifier($modifier, $input)
+    {
+        $response = [];
+
+        if (is_iterable($input)) {
+            $ops = implode('|', array_map('preg_quote', [
+                '==', '*=', '^=', '$=', '!=', '!in', 'in', '∉', '∈', '>', '<', '>=',
+                '<='
+            ]));
+
+            if (preg_match("/^(.*)\s+({$ops})\s+(.*)\$/i", $modifier, $matches)) {
+                foreach($input as $key => $value) {
+                    $source = trim($matches[1]) === '$key' ? $key : $value;
+                    $a = AAM::api()->misc->get(
+                        $source,
+                        str_replace(array('$key', '$value'), '', $matches[1])
+                    );
+                    $b = trim($matches[3]," \t\"'[]");
+
+                    $include = false;
+
+                    if ($matches[2] === '==') { // Equals?
+                        $include = $a == $b;
+                    } elseif ($matches[2] === '*=') { // Contains?
+                        $include = strpos($a, $b) !== false;
+                    } elseif ($matches[2] === '^=') { // Starts with?
+                        $include = strpos($a, $b) === 0;
+                    } elseif ($matches[2] === '$=') { // Ends with?
+                        $include = preg_match('/' . preg_quote($b) . '$/', $a) === 1;
+                    } elseif ($matches[2] === '!=') { // Not Equals?
+                        $include = $a != $b;
+                    } elseif ($matches[2] === '>') { // Greater Than?
+                        $include = $a > $b;
+                    } elseif ($matches[2] === '<') { // Less Than?
+                        $include = $a < $b;
+                    } elseif ($matches[2] === '>=') { // Greater or Equals to?
+                        $include = $a >= $b;
+                    } elseif ($matches[2] === '<=') { // Less of Equals to?
+                        $include = $a <= $b;
+                    } elseif (in_array($matches[2], array('!in', '∉'), true)) {
+                        $include = !in_array($a, explode(',', $b), true);
+                    } elseif (in_array($matches[2], array('in', '∈'), true)) {
+                        $include = in_array($a, explode(',', $b), true);
+                    }
+
+                    if ($include) {
+                        $response[$key] = $value;
+                    }
+                }
+
+                $response = is_object($input) ? (object) $response : $response;
+            }
+        }
+
+        return $response;
     }
 
     /**
