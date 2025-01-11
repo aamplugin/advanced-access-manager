@@ -21,8 +21,8 @@ trait AAM_Framework_Service_BaseTrait
      * Collection of extended methods
      *
      * @var array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_extended_methods = [];
@@ -30,7 +30,7 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Service's access level
      *
-     * @var array
+     * @var AAM_Framework_AccessLevel_Interface
      * @access private
      *
      * @version 7.0.0

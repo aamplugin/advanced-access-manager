@@ -20,6 +20,9 @@
         <testsuite name="FrameworkUtility">
             <directory suffix="Test.php">./tests/Framework/Utility</directory>
         </testsuite>
+        <testsuite name="FrameworkManager">
+            <directory suffix="Test.php">./tests/Framework/Manager</directory>
+        </testsuite>
         <testsuite name="Service">
             <directory suffix="Test.php">./tests/Service</directory>
         </testsuite>

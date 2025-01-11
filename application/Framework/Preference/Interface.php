@@ -17,6 +17,15 @@ interface AAM_Framework_Preference_Interface
 {
 
     /**
+     * Preference type
+     *
+     * @var string
+     *
+     * @version 7.0.0
+     */
+    const TYPE = null;
+
+    /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
@@ -27,67 +36,32 @@ interface AAM_Framework_Preference_Interface
     public function get_access_level();
 
     /**
-     * Get preferences' namespace
-     *
-     * @return string
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_ns();
-
-    /**
      * Get the collection of resource preferences
      *
-     * @param boolean $explicit_only
+     * @param bool $explicit [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_preferences($explicit_only = false);
+    public function get($explicit = false);
 
     /**
      * Set resource preferences
      *
      * @param array $preferences
+     * @param bool  $explicit    [Optional]
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function set_preferences(array $preferences);
+    public function set(array $preferences, $explicit = true);
 
     /**
-     * Get a specific preference
-     *
-     * @param string $preference_key
-     * @param mixed  $default
-     *
-     * @return mixed
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_preference($preference_key, $default = null);
-
-    /**
-     * Set explicit permission
-     *
-     * @param string $preference_key
-     * @param mixed  $value
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function set_preference($preference_key, $value);
-
-    /**
-     * Check if resource settings are overwritten
+     * Check if preferences are customized for current access level
      *
      * @return boolean
      *
@@ -97,7 +71,7 @@ interface AAM_Framework_Preference_Interface
     public function is_customized();
 
     /**
-     * Reset all explicitly defined settings to default
+     * Reset all explicitly defined preferences
      *
      * @return array
      *

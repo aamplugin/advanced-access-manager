@@ -21,7 +21,7 @@ class AAM_Framework_Type_Preference
      *
      * @version 7.0.0
      */
-    const ACCESS_DENIED_REDIRECT = 'denied_redirect';
+    const ACCESS_DENIED_REDIRECT = 'access_denied_redirect';
 
     /**
      * Preference type that represents logout redirect preferences

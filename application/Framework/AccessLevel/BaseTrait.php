@@ -205,46 +205,18 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get_resource(
-        $resource_type,
-        $resource_id = null,
-        $skip_inheritance = false,
-        $reload = null
-    ) {
-        $result = $this->_get_cached_resource(
-            $resource_type, $resource_id, $skip_inheritance, $reload
-        );
+    public function get_resource($resource_type, $reload = null) {
+        $result = $this->_get_cached_instance('resource', $resource_type, $reload);
 
         if (is_null($result)) {
             $result = apply_filters(
                 'aam_get_resource_filter',
                 null,
                 $this,
-                $resource_type,
-                $resource_id,
+                $resource_type
             );
 
-            if (is_object($result)) {
-                if ($skip_inheritance !== true) {
-                    // Kick in the inheritance chain if needed
-                    $this->_inherit_from_parent_resource($result);
-
-                    // Trigger initialized action only when we are at the bottom of
-                    // the inheritance chain
-                    if (in_array(get_class($this), [
-                        AAM_Framework_AccessLevel_User::class,
-                        AAM_Framework_AccessLevel_Visitor::class
-                    ], true)) {
-                        do_action(
-                            "aam_init_{$resource_type}_resource_action", $result
-                        );
-                    }
-                }
-
-                $this->_set_cached_resource(
-                    $resource_type, $resource_id, $skip_inheritance, $result
-                );
-            }
+            $this->_set_cached_instance($result);
         }
 
         return $result;
@@ -254,35 +226,21 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get_preference(
-        $preference_ns,
-        $skip_inheritance = false,
-        $reload = null
-    ) {
-        $result = $this->_get_cached_preference(
-            $preference_ns, $skip_inheritance, $reload
+    public function get_preference($preference_type, $reload = null)
+    {
+        $result = $this->_get_cached_instance(
+            'preference', $preference_type, $reload
         );
 
         if (is_null($result)) {
-            $result = new AAM_Framework_Preference_Container($this, $preference_ns);
-
-            if ($skip_inheritance !== true) {
-                // Kick in the inheritance chain if needed
-                $this->_inherit_from_parent_preference($result);
-
-                // Trigger initialized action only when we are at the bottom of
-                // the inheritance chain
-                if (in_array(get_class($this), [
-                    AAM_Framework_AccessLevel_User::class,
-                    AAM_Framework_AccessLevel_Visitor::class
-                ], true)) {
-                    do_action('aam_init_preference_action', $result, $preference_ns);
-                }
-            }
-
-            $this->_set_cached_preference(
-                $preference_ns, $skip_inheritance, $result
+            $result = apply_filters(
+                'aam_get_preference_filter',
+                null,
+                $this,
+                $preference_type
             );
+
+            $this->_set_cached_instance($result);
         }
 
         return $result;
@@ -329,36 +287,32 @@ trait AAM_Framework_AccessLevel_BaseTrait
     }
 
     /**
-     * Get already cached resource
+     * Get already cached resource or preference instance
      *
-     * @param string $resource_type
-     * @param mixed  $resource_id
-     * @param bool   $skip_inheritance
+     * @param string $instance_type
+     * @param string $type
      * @param bool   $reload
      *
-     * @return null|AAM_Framework_Resource_Interface
+     * @return mixed
      * @access private
      *
      * @version 7.0.0
      */
-    private function _get_cached_resource(
-        $resource_type, $resource_id, $skip_inheritance, $reload
-    ) {
+    private function _get_cached_instance($instance_type, $type, $reload) {
         $result = null;
 
         if ($reload !== true) {
             // Determine if we can use cache
             $exclude = wp_parse_list(AAM_Framework_Manager::_()->config->get(
-                'core.settings.object_cache.ignore.resource_types', ''
+                "core.settings.object_cache.ignore.{$instance_type}_types", ''
             ));
 
-            if (!in_array($resource_type, $exclude, true)) {
+            if (!in_array($type, $exclude, true)) {
                 $result = AAM_Framework_Manager::_()->object_cache->get([
                     constant('static::TYPE'),
                     $this->get_id(),
-                    $resource_type,
-                    $resource_id,
-                    $skip_inheritance ? 'partial' : 'full'
+                    $instance_type,
+                    $type
                 ]);
             }
         }
@@ -369,262 +323,41 @@ trait AAM_Framework_AccessLevel_BaseTrait
     /**
      * Get already cached resource
      *
-     * @param string $resource_type
-     * @param mixed  $resource_id
-     * @param bool   $skip_inheritance
-     * @param mixed  $obj
+     * @param mixed $instance
      *
      * @return bool
      * @access private
      *
      * @version 7.0.0
      */
-    private function _set_cached_resource(
-        $resource_type, $resource_id, $skip_inheritance, $obj
-    ) {
+    private function _set_cached_instance($instance)
+    {
         $result = true;
 
-        $exclude = wp_parse_list(AAM_Framework_Manager::_()->config->get(
-            'core.settings.object_cache.ignore.resource_types', ''
-        ));
+        if (!empty($instance)) {
+            if (is_a($instance, AAM_Framework_Resource_Interface::class)) {
+                $instance_type = 'resource';
+            } else {
+                $instance_type = 'preference';
+            }
 
-        if (!in_array($resource_type, $exclude, true)) {
-            $result = AAM_Framework_Manager::_()->object_cache->set([
-                constant('static::TYPE'),
-                $this->get_id(),
-                $resource_type,
-                $resource_id,
-                $skip_inheritance ? 'partial' : 'full'
-            ], $obj);
-        }
+            $type = $instance::TYPE;
 
-        return $result;
-    }
-
-    /**
-     * Get preference object instance cache
-     *
-     * @param string $ns
-     * @param bool   $skip_inheritance
-     * @param bool   $reload
-     *
-     * @return null|AAM_Framework_Preference_Interface
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _get_cached_preference($ns, $skip_inheritance, $reload)
-    {
-        $result = null;
-
-        if ($reload !== true) {
-            // Determine if we can use cache
             $exclude = wp_parse_list(AAM_Framework_Manager::_()->config->get(
-                'core.settings.object_cache.ignore.preference_types', ''
+                "core.settings.object_cache.ignore.{$instance_type}_types", ''
             ));
 
-            if (!in_array($ns, $exclude, true)) {
-                $result = AAM_Framework_Manager::_()->object_cache->get([
+            if (!in_array($type, $exclude, true)) {
+                $result = AAM_Framework_Manager::_()->object_cache->set([
                     constant('static::TYPE'),
                     $this->get_id(),
-                    $ns,
-                    $skip_inheritance ? 'partial' : 'full'
-                ]);
+                    $instance_type,
+                    $type
+                ], $instance);
             }
         }
 
         return $result;
-    }
-
-    /**
-     * Cache preference object instance
-     *
-     * @param string $ns
-     * @param bool   $skip_inheritance
-     * @param mixed  $obj
-     *
-     * @return bool
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _set_cached_preference($ns, $skip_inheritance, $obj)
-    {
-        $result = true;
-
-        $exclude = wp_parse_list(AAM_Framework_Manager::_()->config->get(
-            'core.settings.object_cache.ignore.preference_types', ''
-        ));
-
-        if (!in_array($ns, $exclude, true)) {
-            $result = AAM_Framework_Manager::_()->object_cache->set([
-                constant('static::TYPE'),
-                $this->get_id(),
-                $ns,
-                $skip_inheritance ? 'partial' : 'full'
-            ], $obj);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Inherit settings from parent access level (if any)
-     *
-     * @param AAM_Framework_Resource_Interface $resource
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _inherit_from_parent_resource($resource)
-    {
-        $parent = $this->get_parent();
-
-        if (is_object($parent)) {
-            // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM_Framework_Manager::_()->config->get(
-                'core.settings.multi_access_levels'
-            );
-
-            if ($multi_support && $parent->has_siblings()) {
-                $siblings = $parent->get_siblings();
-            } else {
-                $siblings = [];
-            }
-
-            $resource->set_permissions($this->_prepare_permissions(
-                $resource,
-                $parent->get_resource(
-                    $resource::TYPE,
-                    $resource->get_internal_id(false)
-                ),
-                $siblings
-            ), false);
-        }
-    }
-
-    /**
-     * Inherit preferences from parent access level (if any)
-     *
-     * @param AAM_Framework_Preference_Container $preference
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _inherit_from_parent_preference($preference)
-    {
-        $parent = $this->get_parent();
-
-        if (is_object($parent)) {
-            // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM_Framework_Manager::_()->config->get(
-                'core.settings.multi_access_levels'
-            );
-
-            if ($multi_support && $parent->has_siblings()) {
-                $siblings = $parent->get_siblings();
-            } else {
-                $siblings = [];
-            }
-
-            $preference->set_preferences($this->_prepare_preferences(
-                $preference,
-                $parent->get_preference($preference->get_ns()),
-                $siblings
-            ), false);
-        }
-    }
-
-    /**
-     * Prepare resource's preferences
-     *
-     * @param AAM_Framework_Preference_Container $preference
-     * @param AAM_Framework_Preference_Container $parent_preference
-     * @param array                              $siblings
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _prepare_preferences(
-        $preference, $parent_preference, $siblings = []
-    ) {
-        $preferences = $parent_preference->get_preferences();
-
-        foreach ($siblings as $sibling) {
-            $sibling_resource = $sibling->get_preference($preference->get_ns());
-            $preferences      = AAM_Framework_Manager::_()->misc->merge_preferences(
-                $sibling_resource->get_preferences(), $preferences
-            );
-        }
-
-        // Merge preferences while reading hierarchical chain but only
-        // replace the top keys. Do not replace recursively
-        return array_replace($preferences, $preference->get_preferences());
-    }
-
-    /**
-     * Prepare resource's permissions
-     *
-     * @param AAM_Framework_Resource_Interface $resource
-     * @param AAM_Framework_Resource_Interface $parent_resource
-     * @param array                            $siblings
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _prepare_permissions(
-        $resource, $parent_resource, $siblings = []
-    ) {
-        $perms   = $parent_resource->get_permissions();
-        $manager = AAM_Framework_Manager::_();
-
-        foreach ($siblings as $sibling) {
-            $sib_perms = $sibling->get_resource(
-                $resource::TYPE, $resource->get_internal_id(false)
-            )->get_permissions();
-
-            // Important part. If resource is aggregate, than assume that there is
-            // an additional level in the array of permissions:
-            // [resource_id] => [
-            //      [permission] => [ ... ]
-            // ]
-            if (is_a($resource, AAM_Framework_Resource_AggregateInterface::class)
-                && $resource->is_aggregate()
-            ) {
-                // Getting the unique list of resource_ids from each aggregate
-                $resource_ids = array_unique([
-                    ...array_keys($perms),
-                    ...array_keys($sib_perms)
-                ]);
-
-                // Iterating over the list of all keys and merge settings accordingly
-                foreach($resource_ids as $id) {
-                    $perms[$id] = $manager->misc->merge_permissions(
-                        array_key_exists($id, $sib_perms) ? $sib_perms[$id] : [],
-                        array_key_exists($id, $perms) ? $perms[$id] : [],
-                        $resource::TYPE
-                    );
-                }
-            } else {
-                $perms = $manager->misc->merge_permissions(
-                    $sib_perms,
-                    $perms,
-                    $resource::TYPE
-                );
-            }
-        }
-
-        // Merge permissions while reading hierarchical chain but only
-        // replace the top keys. Do not replace recursively
-        return array_replace($perms, $resource->get_permissions());
     }
 
 }

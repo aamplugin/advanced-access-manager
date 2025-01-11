@@ -110,4 +110,18 @@ class AAM_Framework_Type_Resource
      */
     const HOOK = 'hook';
 
+    /**
+     * Resource type that represents AAM JSON Access Policy
+     *
+     * @version 7.0.0
+     */
+    const POLICY = 'policy';
+
+    /**
+     * Resource type that represents WordPress capability
+     *
+     * @version 7.0.0
+     */
+    const CAPABILITY = 'capability';
+
 }

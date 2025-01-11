@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_PolicyService
+class AAM_Restful_Policies
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_PolicyService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -117,6 +117,11 @@ class AAM_Restful_PolicyService
                 'callback'            => [ $this, 'toggle_policy' ],
                 'permission_callback' => [ $this, 'check_permissions' ],
                 'args'                => [
+                    'id' => [
+                        'description' => 'Policy ID',
+                        'type'        => 'number',
+                        'required'    => true
+                    ],
                     'effect' => [
                         'description' => 'Attach or detach policy',
                         'type'        => 'string',

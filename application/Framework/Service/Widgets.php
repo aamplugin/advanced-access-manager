@@ -236,13 +236,14 @@ class AAM_Framework_Service_Widgets
     public function is_denied($widget)
     {
         try {
-            $result   = null;
-            $slug     = $this->_prepare_widget_slug($widget);
-            $resource = $this->_get_resource();
+            $result      = null;
+            $slug        = $this->_prepare_widget_slug($widget);
+            $resource    = $this->_get_resource();
+            $permissions = $resource->get_permissions();
 
             // Determine if widget is restricted
-            if (isset($resource[$slug])) {
-                $result = $resource[$slug]['effect'] !== 'allow';
+            if (isset($permissions[$slug])) {
+                $result = $permissions[$slug]['effect'] !== 'allow';
             }
 
             // Allow third-party implementations to integrate with the

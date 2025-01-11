@@ -215,11 +215,12 @@ class AAM_Framework_Service_BackendMenu
 
             // The default dashboard landing page is always excluded
             if ($slug !== 'index.php') {
-                $resource = $this->_get_resource();
+                $resource    = $this->_get_resource();
+                $permissions = $resource->get_permissions();
 
                 // Step #1. Check if menu is explicitly restricted
-                if (isset($resource[$slug])) {
-                    $result = $resource[$slug]['effect'] !== 'allow';
+                if (isset($permissions[$slug])) {
+                    $result = $permissions[$slug]['effect'] !== 'allow';
                 }
 
                 // Step #2. If menu is not top level item and previous step did not
@@ -229,8 +230,8 @@ class AAM_Framework_Service_BackendMenu
                     $parent_slug = $this->_get_parent_slug($slug);
 
                     // If we found a parent menu item, check permissions
-                    if (!empty($parent_slug) && isset($resource[$parent_slug])) {
-                        $result = $resource[$parent_slug]['effect'] !== 'allow';
+                    if (!empty($parent_slug) && isset($permissions[$parent_slug])) {
+                        $result = $permissions[$parent_slug]['effect'] !== 'allow';
                     }
                 }
 

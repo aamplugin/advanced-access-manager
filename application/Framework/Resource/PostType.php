@@ -13,8 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_PostType
-implements AAM_Framework_Resource_Interface, ArrayAccess
+class AAM_Framework_Resource_PostType implements AAM_Framework_Resource_Interface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -25,55 +24,36 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
     const TYPE = AAM_Framework_Type_Resource::POST_TYPE;
 
     /**
-     * Initialize the core instance
-     *
-     * @param mixed $resource_identifier
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 7.0.0
+     * @inheritDoc
      */
-    protected function pre_init_hook($resource_identifier)
+    private function _get_resource_instance($resource_identifier)
     {
-        if (!empty($resource_identifier)) {
-            $post_type = get_post_type_object($resource_identifier);
-
-            if (is_a($post_type, WP_Post_Type::class)) {
-                $this->_core_instance = $post_type;
-                $this->_internal_id   = $resource_identifier;
-            } else {
-                throw new OutOfRangeException(
-                    'The post type resource identifier is invalid'
-                );
-            }
+        if (is_string($resource_identifier)) {
+            $result = get_post_type_object($resource_identifier);
+        } elseif (is_a($resource_identifier, WP_Post_Type::class)) {
+            $result = $resource_identifier;
         }
+
+        if (!is_a($result, WP_Post_Type::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
     /**
-     * Normalize permission model further
+     * Determine correct resource identifier based on provided data
      *
-     * @param array  $permission
-     * @param string $permission_key
+     * @param WP_Post_Type $resource_identifier
      *
-     * @return array
+     * @return mixed
      * @access private
      *
      * @version 7.0.0
      */
-    private function _normalize_permission($permission, $permission_key)
+    private function _get_resource_id($resource_identifier)
     {
-        if ($permission_key === 'list'
-            && (!array_key_exists('on', $permission) || !is_array($permission['on']))
-        ) {
-            $permission['on'] = [
-                'frontend',
-                'backend',
-                'api'
-            ];
-        }
-
-        return $permission;
+        return $resource_identifier->name;
     }
 
 }

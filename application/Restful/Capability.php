@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_CapabilityService
+class AAM_Restful_Capability
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_CapabilityService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -63,6 +63,11 @@ class AAM_Restful_CapabilityService
                         'description' => 'Bypass the recommended by WP core standard',
                         'type'        => 'boolean',
                         'default'     => false
+                    ],
+                    'is_granted' => [
+                        'description' => 'Grant this cap to current access level',
+                        'type'        => 'boolean',
+                        'default'     => true
                     ]
                 )
             ));
@@ -88,7 +93,7 @@ class AAM_Restful_CapabilityService
                         'type'        => 'boolean',
                         'default'     => false
                     ],
-                    'is_scoped_change' => [
+                    'globally' => [
                         'description' => 'Wether this change affect only this access level or all',
                         'type'        => 'boolean',
                         'default'     => false
@@ -102,7 +107,7 @@ class AAM_Restful_CapabilityService
                 'callback'            => array($this, 'delete_capability'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => [
-                    'is_scoped_change' => [
+                    'globally' => [
                         'description' => 'Wether this change affect only this access level or all',
                         'type'        => 'boolean',
                         'default'     => false
@@ -118,8 +123,8 @@ class AAM_Restful_CapabilityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_list(WP_REST_Request $request)
@@ -152,8 +157,8 @@ class AAM_Restful_CapabilityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function create_capability(WP_REST_Request $request)
@@ -161,17 +166,20 @@ class AAM_Restful_CapabilityService
         try {
             $capability    = urldecode($request->get_param('slug'));
             $ignore_format = $request->get_param('ignore_format');
+            $is_granted    = $request->get_param('is_granted');
 
             // Step #1. Let's create the capability and automatically assign it to
             // the administrator role
             if (wp_roles()->is_role('administrator')) {
-                AAM::api()->capabilities('role:administrator')->grant(
+                AAM::api()->capabilities('role:administrator')->allow(
                     $capability, $ignore_format
                 );
             }
 
-            // Step #2. Grant the newly created capability to role or user specified
-            $this->_get_service($request)->grant($capability, $ignore_format);
+            // Step #2. Assign the newly created capability to current access level
+            $this->_get_service($request)->add(
+                $capability, $is_granted, $ignore_format
+            );
 
             // Step #3. Prepare the output
             $result = $this->_prepare_output($capability, $request);
@@ -188,23 +196,19 @@ class AAM_Restful_CapabilityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_capability(WP_REST_Request $request)
     {
         try {
-            $capability       = urldecode($request->get_param('capability'));
-            $slug             = $request->get_param('slug');
-            $ignore_format    = $request->get_param('ignore_format');
-            $is_scoped_change = $request->get_param('is_scoped_change');
+            $capability    = urldecode($request->get_param('capability'));
+            $slug          = $request->get_param('slug');
+            $ignore_format = $request->get_param('ignore_format');
+            $globally      = $request->get_param('globally');
 
-            if ($is_scoped_change) {
-                $this->_get_service($request)->replace(
-                    $capability, $slug, $ignore_format
-                );
-            } else {
+            if ($globally) {
                 // Iterating over the list of all roles and replace capabilities
                 foreach(array_keys(wp_roles()->role_names) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->replace(
@@ -218,6 +222,10 @@ class AAM_Restful_CapabilityService
                         $capability, $slug, $ignore_format
                     );
                 }
+            } else {
+                $this->_get_service($request)->replace(
+                    $capability, $slug, $ignore_format
+                );
             }
 
             $result = $this->_prepare_output($slug, $request);
@@ -234,19 +242,17 @@ class AAM_Restful_CapabilityService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function delete_capability(WP_REST_Request $request)
     {
         try {
-            $capability       = urldecode($request->get_param('slug'));
-            $is_scoped_change = $request->get_param('is_scoped_change');
+            $capability = urldecode($request->get_param('slug'));
+            $globally   = $request->get_param('globally');
 
-            if ($is_scoped_change) {
-                $this->_get_service($request)->remove($capability);
-            } else {
+            if ($globally) {
                 // Iterating over the list of all roles and replace capabilities
                 foreach(array_keys(wp_roles()->role_names) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->remove(
@@ -258,6 +264,8 @@ class AAM_Restful_CapabilityService
                 if (is_user_logged_in()) {
                     AAM::api()->capabilities()->remove($capability);
                 }
+            } else {
+                $this->_get_service($request)->remove($capability);
             }
 
             $result = [ 'success' => true ];
@@ -323,7 +331,7 @@ class AAM_Restful_CapabilityService
                 'aam_capability_description_filter', null, $capability
             ),
             'permissions' => $this->_prepare_permissions($capability, $service),
-            'is_granted'  => $service->is_granted($capability)
+            'is_granted'  => $service->is_allowed($capability)
         ];
 
         // Prepare the final output

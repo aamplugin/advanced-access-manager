@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_RoleService
+class AAM_Restful_Roles
 {
 
     use AAM_Restful_ServiceTrait;

@@ -85,7 +85,7 @@ class AAM_Service_Policies
     protected function initialize_hooks()
     {
         // Register RESTful API
-        AAM_Restful_PolicyService::bootstrap();
+        AAM_Restful_Policies::bootstrap();
 
         // Override role list permissions
         add_filter('aam_rest_role_output_filter', function($result, $role) {

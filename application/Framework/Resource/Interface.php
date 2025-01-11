@@ -28,97 +28,109 @@ interface AAM_Framework_Resource_Interface
     const TYPE = null;
 
     /**
-     * Get resource internal ID
+     * Convert resource identifier into internal ID
      *
      * The internal ID represents unique resource identify AAM Framework users to
-     * distinguish between collection of initialize resources
+     * distinguish between collection of resources
      *
-     * @param bool $serialize
+     * @param mixed $resource_identifier
+     * @param bool  $serialize           [Optional]
      *
-     * @return string|int|null
-     *
+     * @return mixed
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_internal_id($serialize = true);
+    public function get_resource_id($resource_identifier, $serialize = true);
 
     /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_access_level();
 
     /**
-     * Get the collection of raw resource permissions
+     * Get raw permissions
      *
-     * @param boolean $explicit_only
+     * If $resource_identifier is not provided, this method returns the collection of
+     * all explicitly defined permissions
+     *
+     * @param mixed $resource_identifier [Optional]
+     * @param bool  $explicit            [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_permissions($explicit_only = false);
+    public function get_permissions($resource_identifier = null, $explicit = false);
 
     /**
      * Set raw resource permissions
      *
-     * @param array   $permissions
-     * @param boolean $explicit_only
+     * @param array $permissions
+     * @param mixed $resource_identifier [Optional]
+     * @param bool  $explicit            [Optional]
      *
-     * @return void
-     *
+     * @return bool
      * @access public
+     *
      * @version 7.0.0
      */
-    public function set_permissions(array $permissions, $explicit_only = true);
+    public function set_permissions(
+        array $permissions,
+        $resource_identifier = null,
+        $explicit = true
+    );
 
     /**
-     * Add a single permission
+     * Set raw resource permission
      *
-     * This method normalizes added permission to ensure it is consistent with
-     * internal permission data model
-     *
+     * @param mixed  $resource_identifier
      * @param string $permission_key
-     * @param mixed  $permission     [Optional]
-     * @param bool   ...$args        [Optional]
+     * @param mixed  $permission
+     * @param bool   $explicit            [Optional]
+     * @param mixed  ...$args             [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function add_permission($permission_key, $permission = 'deny', ...$args);
+    public function set_permission(
+        $resource_identifier,
+        $permission_key,
+        $permission,
+        $explicit = true,
+        ...$args
+    );
 
     /**
-     * Add multiple permissions
+     * Get raw resource permission
      *
-     * This method normalizes added permissions to ensure their consistency with
-     * internal permission data model.
+     * @param mixed  $resource_identifier
+     * @param string $permission_key
+     * @param bool   $explicit            [Optional]
      *
-     * Keep in mind that this method assumes that you are passing only array of
-     * permission keys. Examples of this method call:
-     *  ->add_permissions([ 'edit', 'comment', 'delete' ], 'deny');
-     *  ->add_permissions([ 'list', 'read' ], 'allow');
-     *
-     * @param array $permission_keys
-     * @param mixed $effect          [Optional]
-     * @param bool  ...$args         [Optional]
-     *
-     * @return bool
+     * @return array|null
      * @access public
      *
      * @version 7.0.0
      */
-    public function add_permissions($permission_keys, $effect = 'deny', ...$args);
+    public function get_permission(
+        $resource_identifier,
+        $permission_key,
+        $explicit = false
+    );
 
     /**
      * Remove a single permission
      *
+     * @param mixed  $resource_identifier
      * @param string $permission_key
      *
      * @return bool
@@ -126,38 +138,31 @@ interface AAM_Framework_Resource_Interface
      *
      * @version 7.0.0
      */
-    public function remove_permission($permission_key);
+    public function remove_permission(
+        $resource_identifier,
+        $permission_key
+    );
 
     /**
-     * Remove multiple permissions
+     * Check if resource settings are overwritten
      *
-     * @param array $permission_keys
+     * @param mixed $resource_identifier [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function remove_permissions($permission_keys);
-
-    /**
-     * Check if resource settings are overwritten
-     *
-     * @return boolean
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function is_customized();
+    public function is_customized($resource_identifier = null);
 
     /**
      * Reset all explicitly defined settings to default
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function reset();
+    public function reset($resource_identifier = null);
 
 }

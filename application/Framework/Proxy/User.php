@@ -66,7 +66,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @var WP_User
      * @version 7.0.0
      */
-    private $_wp_user;
+    private $_user;
 
     /**
      * User status
@@ -116,13 +116,26 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      */
     public function __construct(WP_User $user)
     {
-        $this->_wp_user = $user;
+        $this->_user = $user;
 
         // Init user expiration state
         $this->_init_user_expiration();
 
         // Init user status
         $this->_init_user_status();
+    }
+
+    /**
+     * Get WordPress core user instance
+     *
+     * @return WP_User
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_core_instance()
+    {
+        return $this->_user;
     }
 
     /**
@@ -283,9 +296,9 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
     {
         $response = null;
 
-        if (method_exists($this->_wp_user, $name)) {
+        if (method_exists($this->_user, $name)) {
             $response = call_user_func_array(
-                array($this->_wp_user, $name), $arguments
+                array($this->_user, $name), $arguments
             );
         } else {
             _doing_it_wrong(
@@ -315,7 +328,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
         if (property_exists($this, "_{$name}")) {
             $response = $this->{"_{$name}"};
         } else {
-            $response = $this->_wp_user->{$name};
+            $response = $this->_user->{$name};
         }
 
         return $response;
@@ -334,20 +347,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      */
     public function __set($name, $value)
     {
-        $this->_wp_user->{$name} = $value;
-    }
-
-    /**
-     * Get WordPress core user object
-     *
-     * @return WP_User
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function get_wp_user()
-    {
-        return $this->_wp_user;
+        $this->_user->{$name} = $value;
     }
 
     /**

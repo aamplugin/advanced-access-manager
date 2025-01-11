@@ -75,7 +75,7 @@ class AAM_Service_Capability
     protected function initialize_hooks()
     {
         // Register RESTful API endpoints
-        AAM_Restful_CapabilityService::bootstrap();
+        AAM_Restful_Capability::bootstrap();
 
         // Capability descriptions hooks
         add_filter(

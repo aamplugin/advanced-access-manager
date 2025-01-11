@@ -79,6 +79,19 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
     }
 
     /**
+     * Get WordPress core role instance
+     *
+     * @return WP_Role
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_core_instance()
+    {
+        return $this->_role;
+    }
+
+    /**
      * Update role
      *
      * @param array $attributes
@@ -120,7 +133,7 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 
         // Removing the list of capabilities
         if (isset($attributes['remove_caps'])) {
-            foreach($attributes['add_caps'] as $capability) {
+            foreach($attributes['remove_caps'] as $capability) {
                 $this->_role->remove_cap($capability);
             }
         }
@@ -270,23 +283,6 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
         } elseif (isset($this->_role->capabilities[$sanitized])) {
             $this->_role->capabilities[$sanitized] = false;
         }
-    }
-
-    /**
-     * Return role attributes as array
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function to_array()
-    {
-        return array(
-            'slug'         => $this->_slug,
-            'name'         => $this->_display_name,
-            'capabilities' => $this->_role->capabilities
-        );
     }
 
     /**

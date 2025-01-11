@@ -244,7 +244,7 @@ class AAM_Service_Jwt
 
         $user->update($data);
 
-        do_action('wp_login', $user->user_login, $user->get_wp_user());
+        do_action('wp_login', $user->user_login, $user->get_core_instance());
 
         // Determine where to redirect user and safely redirect & finally just
         // redirect user to the homepage
@@ -255,7 +255,7 @@ class AAM_Service_Jwt
                 'login_redirect',
                 (!empty($redirect_to) ? $redirect_to : admin_url()),
                 '',
-                $user->get_wp_user()
+                $user->get_core_instance()
             )
         );
 

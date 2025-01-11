@@ -10,9 +10,12 @@
 /**
  * User access level
  *
- * @package AAM
+ * @property array $caps
+ * @property array $allcaps
+ * @property array $roles
  *
- * @version 6.9.34
+ * @package AAM
+ * @version 7.0.0
  */
 class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interface
 {
@@ -28,8 +31,8 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
      * Get parent access level
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_parent()

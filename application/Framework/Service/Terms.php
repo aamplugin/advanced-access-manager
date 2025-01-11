@@ -10,7 +10,7 @@
 /**
  * Terms framework service
  *
- * @method  urls(mixed $access_level = null, array $settings = []) **[Premium Feature]**
+ * @method urls(mixed $access_level = null, array $settings = []) **[Premium Feature]**
  * @method bool is_hidden_on(mixed $term_identifier, string $website_area) **[Premium Feature]**
  * @method bool is_hidden(mixed $term_identifier) **[Premium Feature]**
  * @method bool is_denied_to(mixed $term_identifier, string $permission) **[Premium Feature]**
@@ -40,30 +40,6 @@ class AAM_Framework_Service_Terms
 {
 
     use AAM_Framework_Service_BaseTrait;
-
-    /**
-     * Return term resource data as array
-     *
-     * @param mixed $identifier
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function to_array($identifier)
-    {
-        $resource = $this->_get_resource($identifier);
-
-        return apply_filters('aam_term_to_array_filter', [
-            'resource_type'   => $resource::TYPE,
-            'identifier'      => $resource->get_internal_id(false),
-            'term'            => $resource->get_core_instance(),
-            'permissions'     => $resource->get_permissions(),
-            'is_customized'   => $resource->is_customized(),
-            'is_hierarchical' => get_taxonomy($resource->taxonomy)->hierarchical
-        ], $resource);
-    }
 
     /**
      * Get term resource

@@ -96,11 +96,12 @@ class AAM_Framework_Service_Roles
     public function is_denied_to($role_identifier, $permission)
     {
         try {
-            $result   = null;
-            $resource = $this->_get_resource($role_identifier);
+            $result      = null;
+            $resource    = $this->_get_resource();
+            $permissions = $resource->get_permissions($role_identifier);
 
-            if (isset($resource[$permission])) {
-                $result = $resource[$permission]['effect'] !== 'allow';
+            if (isset($permissions[$permission])) {
+                $result = $permissions[$permission]['effect'] !== 'allow';
             }
 
             // Making sure that other implementations can affect the decision

@@ -72,8 +72,8 @@ interface AAM_Framework_AccessLevel_Interface
      * @param array  $arguments
      *
      * @return mixed
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __call($name, $arguments);
@@ -81,47 +81,35 @@ interface AAM_Framework_AccessLevel_Interface
     /**
      * Get resource by its type and internal ID
      *
-     * @param string     $resource_type
-     * @param string|int $resource_id      [Optional]
-     * @param boolean    $skip_inheritance [Optional]
-     * @param boolean    $reload           [Optional]
+     * @param string  $resource_type
+     * @param boolean $reload        [Optional]
      *
      * @return AAM_Framework_Resource_Interface|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_resource(
-        $resource_type,
-        $resource_id = null,
-        $skip_inheritance = false,
-        $reload = null
-    );
+    public function get_resource($resource_type, $reload = null);
 
     /**
      * Get preference container
      *
-     * @param string  $ns
-     * @param boolean $skip_inheritance [Optional]
-     * @param boolean $reload           [Optional]
+     * @param string  $preference_type
+     * @param boolean $reload          Optional]
      *
      * @return AAM_Framework_Preference_Interface|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function get_preference(
-        $ns,
-        $skip_inheritance = false,
-        $reload = null
-    );
+    public function get_preference($preference_type, $reload = null);
 
     /**
      * Get AAM proxy instance to the WP core instance (if applicable)
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_proxy_instance();
@@ -130,8 +118,8 @@ interface AAM_Framework_AccessLevel_Interface
      * Get access level ID
      *
      * @return string|int|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_id();
@@ -140,8 +128,8 @@ interface AAM_Framework_AccessLevel_Interface
      * Get access level display name
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_display_name();
@@ -152,8 +140,8 @@ interface AAM_Framework_AccessLevel_Interface
      * @param AAM_Framework_AccessLevel_Role $role
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function add_sibling(AAM_Framework_AccessLevel_Interface $sibling);
@@ -162,8 +150,8 @@ interface AAM_Framework_AccessLevel_Interface
      * Check if there are any siblings
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function has_siblings();
@@ -172,8 +160,8 @@ interface AAM_Framework_AccessLevel_Interface
      * Get all siblings
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_siblings();
@@ -184,8 +172,8 @@ interface AAM_Framework_AccessLevel_Interface
      * Returns null, if there is no parent access level
      *
      * @return AAM_Framework_AccessLevel_Interface|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_parent();

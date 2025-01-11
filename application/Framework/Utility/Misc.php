@@ -38,10 +38,6 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
             $result = base64_encode(base64_decode($str, true)) === $str;
         }
 
-        if ($str === 'test') {
-            var_dump($result);
-        }
-
         return $result;
     }
 

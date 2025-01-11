@@ -167,7 +167,24 @@ final class AAM_Framework_Manager
         AAM_Framework_Type_Resource::METABOX      => AAM_Framework_Resource_Metabox::class,
         AAM_Framework_Type_Resource::URL          => AAM_Framework_Resource_Url::class,
         AAM_Framework_Type_Resource::WIDGET       => AAM_Framework_Resource_Widget::class,
-        AAM_Framework_Type_Resource::HOOK         => AAM_Framework_Resource_Hook::class
+        AAM_Framework_Type_Resource::HOOK         => AAM_Framework_Resource_Hook::class,
+        AAM_Framework_Type_Resource::POLICY       => AAM_Framework_Resource_Policy::class,
+        AAM_Framework_Type_Resource::CAPABILITY   => AAM_Framework_Resource_Capability::class
+    ];
+
+    /**
+     * Collection of preferences
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_preferences = [
+        AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT => AAM_Framework_Preference_AccessDeniedRedirect::class,
+        AAM_Framework_Type_Preference::LOGIN_REDIRECT         => AAM_Framework_Preference_LoginRedirect::class,
+        AAM_Framework_Type_Preference::LOGOUT_REDIRECT        => AAM_Framework_Preference_LogoutRedirect::class,
+        AAM_Framework_Type_Preference::NOT_FOUND_REDIRECT     => AAM_Framework_Preference_NotFoundRedirect::class
     ];
 
     /**
@@ -216,21 +233,41 @@ final class AAM_Framework_Manager
             }
         });
 
-        // Load list of resources that framework manages
+        // Dynamically adjust user account if JSON Access Policies are enabled
+        add_action('set_current_user', function() {
+            if (AAM::api()->config->get('service.policies.enabled', true)) {
+                $this->_dynamically_adjust_user_account();
+            }
+        }, 999);
+
+        // Load list of resources & preferences that framework manages
         // Register the resource
         add_filter(
             'aam_get_resource_filter',
-            function($resource, $access_level, $resource_type, $resource_id) {
-                if (is_null($resource)
+            function($result, $access_level, $resource_type) {
+                if (is_null($result)
                     && array_key_exists($resource_type, $this->_resources)
                 ) {
-                    $resource = new $this->_resources[$resource_type](
-                        $access_level, $resource_id
+                    $result = new $this->_resources[$resource_type]($access_level);
+                }
+
+                return $result;
+            }, 10, 3
+        );
+
+        add_filter(
+            'aam_get_preference_filter',
+            function($result, $access_level, $preference_type) {
+                if (is_null($result)
+                    && array_key_exists($preference_type, $this->_preferences)
+                ) {
+                    $result = new $this->_preferences[$preference_type](
+                        $access_level
                     );
                 }
 
-                return $resource;
-            }, 10, 4
+                return $result;
+            }, 10, 3
         );
     }
 
@@ -253,9 +290,14 @@ final class AAM_Framework_Manager
             $acl      = array_shift($args);
             $settings = array_shift($args);
 
+            if (!is_array($settings)) {
+                $settings = [];
+            }
+
             // Parse the incoming context and determine correct access level
             if (empty($acl)) { // Use default access level
                 $acl = $this->_default_access_level;
+                $settings['default_access_level'] = true;
             } elseif (is_string($acl)) {
                 $acl = $this->_string_to_access_level($acl);
             }
@@ -266,10 +308,10 @@ final class AAM_Framework_Manager
                 );
             }
 
-            if (empty($settings)) {
-                $settings = $this->_default_settings;
-            }
+            // Prepare settings for the service
+            $settings  = array_replace($this->_default_settings, $settings);
 
+            // Work with cache
             $cache_key = [ $acl::TYPE, $acl->get_id(), $name, $settings ];
             $result    = $this->object_cache->get($cache_key);
 
@@ -342,6 +384,94 @@ final class AAM_Framework_Manager
     public function has_utility($name)
     {
         return array_key_exists($name, $this->_utilities);
+    }
+
+    /**
+     * Dynamically adjust user roles & capabilities
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _dynamically_adjust_user_account()
+    {
+        if (is_user_logged_in()) {
+            $this->_update_user_capabilities();
+            $this->_update_user_roles();
+        }
+    }
+
+    /**
+     * Dynamically adjust user capabilities with JSON access policies
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _update_user_capabilities()
+    {
+        $current_user = wp_get_current_user();
+
+        // Iterate over the list of all capabilities and properly adjust them for
+        // current user
+        foreach(AAM::api()->caps()->list() as $cap => $is_granted) {
+            if (array_key_exists($cap, $current_user->caps)) {
+                $current_user->caps[$cap] = $is_granted;
+            }
+
+            $current_user->allcaps[$cap] = $is_granted;
+        }
+    }
+
+    /**
+     * Dynamically adjust user roles with JSON access policies
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _update_user_roles()
+    {
+        $user      = wp_get_current_user();
+        $service   = AAM::api()->roles();
+        $role_list = $user->roles;
+        $updated   = false;
+
+        foreach(AAM::api()->roles->get_editable_roles() as $role) {
+            if ($service->is_allowed_to($role, 'assume')) {
+                array_push($role_list, $role->slug);
+            } else {
+                $role_list = array_filter($role_list, function($r) use ($role) {
+                    return $r !== $role->slug;
+                });
+
+                // Making sure role is also deleted from the caps
+                $user->caps = array_filter($user->caps, function($c) use ($role) {
+                    return $c !== $role->slug;
+                }, ARRAY_FILTER_USE_KEY);
+
+                $user->allcaps = array_filter($user->allcaps, function($c) use ($role) {
+                    return $c !== $role->slug;
+                }, ARRAY_FILTER_USE_KEY);
+            }
+        }
+
+        // Set new list of roles
+        if ($updated) {
+            $user->roles = $role_list;
+
+            // Assign these roles to caps also, to allow WP core to do the rest
+            foreach($role_list as $slug) {
+                $user->caps[$slug] = true;
+            }
+
+            // Recalibrate user
+            $user->get_role_caps();
+            $user->update_user_level_from_caps();
+        }
     }
 
     /**

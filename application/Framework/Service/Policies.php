@@ -98,8 +98,8 @@ class AAM_Framework_Service_Policies
         try {
             $match = array_filter(
                 $this->_get_registered_policies(), function($p) use ($policy_id) {
-                    return $p['id'] === $policy_id;
-                }
+                    return $p === $policy_id;
+                }, ARRAY_FILTER_USE_KEY
             );
 
             if (!empty($match)) {
@@ -148,7 +148,9 @@ class AAM_Framework_Service_Policies
             $result = $this->_update($policy_id, 'attach');
 
             if ($result) {
-                $this->_registered_policies[$policy_id]['status'] = 'attach';
+                $this->_registered_policies[$policy_id] = $this->_prepare_policy_item(
+                    get_post($policy_id)
+                );
 
                 // Reset internal cache
                 $this->_cached_policy_tree = null;
@@ -177,7 +179,9 @@ class AAM_Framework_Service_Policies
             $result = $this->_update($policy_id, 'detach');
 
             if ($result) {
-                $this->_registered_policies[$policy_id]['status'] = 'detach';
+                $this->_registered_policies[$policy_id] = $this->_prepare_policy_item(
+                    get_post($policy_id)
+                );
 
                 // Reset internal cache
                 $this->_cached_policy_tree = null;
@@ -460,8 +464,7 @@ class AAM_Framework_Service_Policies
     public function is_customized()
     {
         try {
-            $container = $this->_get_container();
-            $result    = !empty($container);
+            $result = $this->_get_resource()->is_customized();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -584,11 +587,11 @@ class AAM_Framework_Service_Policies
             $registered = $this->_get_registered_policies();
 
             // Get list of policies attached to current access level
-            foreach($this->_get_container() as $policy_id => $data) {
+            foreach($this->_get_resource()->get_permissions() as $id => $data) {
                 if ($data['effect'] !== 'detach'
-                    && array_key_exists($policy_id, $registered)
+                    && array_key_exists($id, $registered)
                 ) {
-                    array_push($activated, $policy_id);
+                    array_push($activated, $id);
                 }
             }
 
@@ -608,18 +611,31 @@ class AAM_Framework_Service_Policies
     }
 
     /**
-     * Get access policy container
+     * Get access policy resource
      *
-     * @return array
+     * @return AAM_Framework_Resource_Policy
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_container()
+    private function _get_resource()
     {
-        return $this->settings($this->_get_access_level())->get_setting(
-            'policy', []
-        );
+        // If a very specific access level was provided, then ONLY return access
+        // policies that explicitly attached to this level. This way we retain proper
+        // access controls inheritance.
+        // Otherwise - trigger the inheritance mechanism and return all the policies
+        // that are attached to current user
+        if (!empty($this->_settings['default_access_level'])) {
+            $result = $this->_get_access_level()->get_resource(
+                AAM_Framework_Type_Resource::POLICY
+            );
+        } else {
+            $result = $this->_get_access_level()->get_resource(
+                AAM_Framework_Type_Resource::POLICY, null, true
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -1086,10 +1102,10 @@ class AAM_Framework_Service_Policies
      */
     private function _is_attached($policy_id)
     {
-        $container = $this->_get_container();
+        $permissions = $this->_get_resource()->get_permissions();
 
-        if (array_key_exists($policy_id, $container)) {
-            $result = $container[$policy_id]['effect'] !== 'detach';
+        if (array_key_exists($policy_id, $permissions)) {
+            $result = $permissions[$policy_id]['effect'] !== 'detach';
         } else {
             $result = false;
         }

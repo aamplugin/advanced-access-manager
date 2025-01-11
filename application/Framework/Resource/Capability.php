@@ -8,12 +8,12 @@
  */
 
 /**
- * URL resource
+ * Capability resource class
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Capability implements AAM_Framework_Resource_Interface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::URL;
+    const TYPE = AAM_Framework_Type_Resource::CAPABILITY;
 
     /**
      * @inheritDoc
@@ -32,21 +32,13 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
         $manager = AAM_Framework_Manager::_();
         $service = $manager->policies($this->get_access_level());
 
-        foreach($service->statements('Url:*') as $stm) {
+        foreach($service->statements('Capability:*') as $stm) {
+            $bits   = explode(':', $stm['Resource']);
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
-            $parsed = explode(':', $stm['Resource'], 2);
 
-            if (!empty($parsed[1])) {
-                $url    = $manager->misc->sanitize_url($parsed[1]);
-                $result = array_replace([
-                    $url => [
-                        'effect'   => $effect !== 'allow' ? 'deny' : 'allow',
-                        'redirect' => $manager->policy->convert_statement_redirect(
-                            $stm
-                        )
-                    ]
-                ], $result);
-            }
+            $result = array_replace([
+                $bits[1] => [ 'effect' => $effect ]
+            ], $result);
         }
 
         return apply_filters('aam_apply_policy_filter', $result, $this);

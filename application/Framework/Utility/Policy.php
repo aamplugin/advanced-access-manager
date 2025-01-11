@@ -164,7 +164,7 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
     private function _role_statement_to_permission($stm)
     {
         $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
-        $action = isset($stm['Action']) ? strtolower($stm['Action']) : 'list';
+        $action = isset($stm['Action']) ? strtolower($stm['Action']) : 'assume';
 
         // There are two possible representations of Role resource:
         //   1. Role:<slug>

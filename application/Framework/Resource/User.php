@@ -13,11 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_User
-implements
-    AAM_Framework_Resource_Interface,
-    ArrayAccess,
-    AAM_Framework_Resource_AggregateInterface
+class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -27,91 +23,80 @@ implements
      */
     const TYPE = AAM_Framework_Type_Resource::USER;
 
+
     /**
-     * Initialize the resource
+     * @inheritDoc
+     */
+    private function _get_resource_instance($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_User::class)) {
+            $result = $resource_identifier;
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_User::class)) {
+            $result = $resource_identifier->get_core_instance();
+        } else {
+            $user = AAM_Framework_Manager::_()->users->get_user(
+                $resource_identifier
+            );
+
+            if (is_a($user, AAM_Framework_Proxy_User::class)) {
+                $result = $user->get_core_instance();
+            }
+        }
+
+        if (!is_a($result, WP_User::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine correct resource identifier based on provided data
      *
-     * @param mixed $user_identifier
+     * @param WP_User $resource_identifier
      *
-     * @return void
-     * @access protected
+     * @return mixed
+     * @access private
      *
      * @version 7.0.0
      */
-    protected function pre_init_hook($user_identifier)
+    private function _get_resource_id($resource_identifier)
     {
-        if (!empty($user_identifier)) {
-            if (is_a($user_identifier, WP_User::class)) {
-                $this->_internal_id   = $user_identifier->ID;
-                $this->_core_instance = AAM_Framework_Manager::_()->users->get_user(
-                    $user_identifier
-                );
-            } elseif (is_a($user_identifier, AAM_Framework_Proxy_User::class)) {
-                $this->_core_instance = $user_identifier;
-                $this->_internal_id   = $user_identifier->ID;
-            } elseif (!empty($user_identifier)) {
-                $user = AAM_Framework_Manager::_()->users->get_user($user_identifier);
-
-                if (is_a($user, AAM_Framework_Proxy_User::class)) {
-                    $this->_core_instance = $user;
-                    $this->_internal_id   = $user->ID;
-                } elseif (is_scalar($user_identifier)) {
-                    $this->_internal_id = $user_identifier;
-                }
-            }
-        }
+        return $resource_identifier->ID;
     }
 
     /**
      * @inheritDoc
      */
-    private function _apply_policy($permissions)
+    private function _apply_policy()
     {
         $result  = [];
         $manager = AAM_Framework_Manager::_();
         $service = $manager->policies($this->get_access_level());
 
-        if (empty($this->_internal_id)) { // Assume that we are aggregating
-            foreach($service->statements('User:*') as $stm) {
-                $bits = explode(':', $stm['Resource']);
+        foreach($service->statements('User:*') as $stm) {
+            $bits = explode(':', $stm['Resource']);
 
-                // If user identifier is not numeric, convert it to WP_User::ID for
-                // consistency
-                if (is_numeric($bits[1])) {
-                    $id = intval($bits[1]);
-                } else {
-                    $user = $manager->users->get_user($bits[1]);
-                    $id   = is_object($user) ? $user->ID : null;
-                }
-
-                if (!empty($id)) {
-                    $result[$id] = array_replace(
-                        isset($result[$id]) ? $result[$id] : [],
-                        $manager->policy->statement_to_permission(
-                            $stm, self::TYPE
-                        )
-                    );
-                }
+            // If user identifier is not numeric, convert it to WP_User::ID for
+            // consistency
+            if (is_numeric($bits[1])) {
+                $id = intval($bits[1]);
+            } else {
+                $user = $manager->users->get_user($bits[1]);
+                $id   = is_object($user) ? $user->ID : null;
             }
-        } elseif (is_a($this->_core_instance, AAM_Framework_Proxy_User::class)) {
-            $list = array_merge(
-                $service->statements('User:' . $this->_internal_id),
-                $service->statements('User:' . $this->user_login),
-                $service->statements('User:' . $this->user_email)
-            );
 
-            foreach($list as $stm) {
-                $result = array_replace(
-                    $result,
-                    $manager->policy->statement_to_permission($stm, 'user')
+            if (!empty($id)) {
+                $result[$id] = array_replace(
+                    isset($result[$id]) ? $result[$id] : [],
+                    $manager->policy->statement_to_permission($stm, self::TYPE)
                 );
             }
         }
 
-        return apply_filters(
-            'aam_apply_policy_filter',
-            array_replace($result, $permissions),
-            $this
-        );
+        return apply_filters('aam_apply_policy_filter', $result, $this);
     }
 
 }

@@ -54,7 +54,7 @@ class AAM_Restful_MuService
         }, 10, 3);
 
         // Few services always available to support AAM UI
-        AAM_Restful_RoleService::bootstrap();
+        AAM_Restful_Roles::bootstrap();
         AAM_Restful_UserService::bootstrap();
         AAM_Restful_ConfigService::bootstrap();
         AAM_Restful_SettingService::bootstrap();

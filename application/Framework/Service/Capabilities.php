@@ -25,26 +25,26 @@ class AAM_Framework_Service_Capabilities
      * the Default or Visitor access levels, this method will return an empty array.
      *
      * @return array|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_all()
     {
         try {
-            $result       = [];
+            $result = [];
             $access_level = $this->_get_access_level();
 
             if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
-                $result = $access_level->allcaps;
+                $caps = $access_level->allcaps;
             } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
-                $result = $access_level->capabilities;
+                $caps = $access_level->capabilities;
+            } else {
+                $caps = [];
             }
 
-            // Normalizing the list of capabilities to ensure that they all have
-            // boolean value
-            foreach($result as $key => $value) {
-                $result[$key] = (bool)$value;
+            foreach(array_keys($caps) as $cap) {
+                $result[$cap] = $this->_is_allowed($cap);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -57,8 +57,8 @@ class AAM_Framework_Service_Capabilities
      * Alias for the get_all
      *
      * @return array|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function list()
@@ -73,12 +73,12 @@ class AAM_Framework_Service_Capabilities
      * not either Role or User.
      *
      * @param string $capability
-     * @param bool   $is_granted    [optional]
-     * @param bool   $ignore_format [optional]
+     * @param bool   $is_granted    [Optional]
+     * @param bool   $ignore_format [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function add($capability, $is_granted = true, $ignore_format = false)
@@ -90,17 +90,13 @@ class AAM_Framework_Service_Capabilities
                 );
             }
 
+            // Neither WP_Role nor WP_User return result, so do nothing here and
+            // assume that capability was added
             $result       = true;
             $access_level = $this->_get_access_level();
-            $valid_levels = [
-                AAM_Framework_Type_AccessLevel::USER,
-                AAM_Framework_Type_AccessLevel::ROLE
-            ];
 
-            if (in_array($access_level::TYPE, $valid_levels, true)) {
-                // Neither WP_Role nor WP_User return result, so do nothing here and
-                // assume that capability was added
-                $access_level->add_cap($capability, $is_granted);
+            if ($this->_is_acceptable_access_level()) {
+                $this->_get_access_level()->add_cap($capability, $is_granted);
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',
@@ -124,32 +120,18 @@ class AAM_Framework_Service_Capabilities
      *
      * @param string $capability
      *
-     * @return bool|null|WP_Error
-     *
+     * @return bool|WP_Error
      * @access public
+     *
      * @version 7.0.0
      */
     public function remove($capability)
     {
         try {
             $access_level = $this->_get_access_level();
-            $result       = null;
 
-            if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
-                // Additionally check if capability is assigned to user explicitly
-                if (array_key_exists($capability, $access_level->caps)) {
-                    // The remove_cap does not return any values
-                    $access_level->remove_cap($capability);
-
-                    $result = true;
-                }
-            } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
-                if (array_key_exists($capability, $access_level->capabilities)) {
-                    // The remove_cap does not return any values
-                    $access_level->remove_cap($capability);
-
-                    $result = true;
-                }
+            if ($this->_is_acceptable_access_level()) {
+                $result = $this->_get_resource()->remove_permission($capability);
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',
@@ -170,14 +152,14 @@ class AAM_Framework_Service_Capabilities
      * capabilities but rather set it's flag to false
      *
      * @param string $capability
-     * @param bool   $ignore_format [optional]
+     * @param bool   $ignore_format [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function deprive($capability, $ignore_format = false)
+    public function deny($capability, $ignore_format = false)
     {
         return $this->add($capability, false, $ignore_format);
     }
@@ -189,11 +171,11 @@ class AAM_Framework_Service_Capabilities
      * @param bool   $ignore_format [optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function grant($capability, $ignore_format = false)
+    public function allow($capability, $ignore_format = false)
     {
         return $this->add($capability, true, $ignore_format);
     }
@@ -206,8 +188,8 @@ class AAM_Framework_Service_Capabilities
      * @param bool   $ignore_format [optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function replace($old_slug, $new_slug, $ignore_format = false)
@@ -221,16 +203,23 @@ class AAM_Framework_Service_Capabilities
             }
 
             // Replace only if capability actually assigned to the access level
-            if ($this->exists($old_slug)) {
+            if ($this->_is_acceptable_access_level() && $this->_exists($old_slug)) {
+                $resource = $this->_get_resource();
+                $explicit = $resource->get_permissions(true);
+
                 // Step #2. Determine if old capability is granted to current access
                 // level
-                $is_granted = $this->is_granted($old_slug);
+                $is_granted = $explicit[$old_slug]['effect'] === 'allow';
 
                 // Step #3. Remove old capability
-                $this->remove($old_slug);
+                $resource->remove_permission($old_slug);
 
                 // Step #4. Add new capability
-                $result = $this->add($new_slug, $is_granted, $ignore_format);
+                $this->_get_access_level()->add_cap($new_slug, $is_granted);
+
+                // Neither WP_Role nor WP_User return result, so do nothing here and
+                // assume that capability was added
+                $result = true;
             } else {
                 $result = false;
             }
@@ -242,36 +231,22 @@ class AAM_Framework_Service_Capabilities
     }
 
     /**
-     * Check if capability exists
+     * Check if capability is explicitly assigned
      *
-     * Note! This method only checks if capability is added to the access level and
-     * returns true if it is present in the list of capabilities.
+     * Capability is considered as explicitly assigned when it is explicitly added
+     * to the access level. It does not matter if it is granted or deprived.
      *
      * @param string $capability
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function exists($capability)
     {
         try {
-            $caps         = [];
-            $access_level = $this->_get_access_level();
-
-            if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
-                $caps = $access_level->caps;
-            } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
-                $caps = $access_level->capabilities;
-            }
-
-            // To prevent from any kind of corrupted data
-            if (is_array($caps)) {
-                $result = array_key_exists($capability, $caps);
-            } else {
-                $result = false;
-            }
+            $result = $this->_exists($capability);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -285,24 +260,14 @@ class AAM_Framework_Service_Capabilities
      * @param string $capability
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_granted($capability)
+    public function is_allowed($capability)
     {
         try {
-            $access_level = $this->_get_access_level();
-            $valid_levels = [
-                AAM_Framework_Type_AccessLevel::USER,
-                AAM_Framework_Type_AccessLevel::ROLE
-            ];
-
-            if (in_array($access_level::TYPE, $valid_levels, true)) {
-                $result = $access_level->has_cap($capability);
-            } else {
-                $result = false;
-            }
+            $result = $this->_is_allowed($capability);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -316,15 +281,108 @@ class AAM_Framework_Service_Capabilities
      * @param string $capability
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function is_deprived($capability)
+    public function is_denied($capability)
     {
-        $result = $this->is_granted($capability);
+        $result = $this->is_allowed($capability);
 
         return is_bool($result) ? !$result : $result;
+    }
+
+    /**
+     * Check if capability is explicitly assigned
+     *
+     * @param string $capability
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _exists($capability)
+    {
+        $access_level = $this->_get_access_level();
+
+        if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
+            $caps = $access_level->caps;
+        } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
+            $caps = $access_level->capabilities;
+        } else {
+            $caps = [];
+        }
+
+        return array_key_exists($capability, $caps);
+    }
+
+    /**
+     * Determine if capability is allowed
+     *
+     * @param string $capability
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_allowed($capability)
+    {
+        $resource    = $this->_get_resource();
+        $permissions = $resource->get_permissions();
+
+        // Determine if capability is explicitly granted with AAM
+        if (array_key_exists($capability, $permissions)) {
+            $result = $permissions[$capability]['effect'] === 'allow';
+        } else {
+            $result = apply_filters(
+                'aam_capability_is_allowed_filter',
+                null,
+                $capability,
+                $resource
+            );
+        }
+
+        // Otherwise - default to WP core
+        if (is_null($result) && $this->_is_acceptable_access_level()) {
+            $result = $this->_get_access_level()->has_cap($capability);
+        }
+
+        return is_bool($result) ? $result : false;
+    }
+
+    /**
+     * Making sure the access level is acceptable to work with capabilities
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_acceptable_access_level()
+    {
+        $access_level = $this->_get_access_level();
+
+        return in_array($access_level::TYPE, [
+            AAM_Framework_Type_AccessLevel::USER,
+            AAM_Framework_Type_AccessLevel::ROLE
+        ], true);
+    }
+
+    /**
+     * Get capability resource
+     *
+     * @return AAM_Framework_Resource_Capability
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::CAPABILITY
+        );
     }
 
 }

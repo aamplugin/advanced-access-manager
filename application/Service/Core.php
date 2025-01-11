@@ -151,9 +151,9 @@ class AAM_Service_Core
 
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
-        add_filter('map_meta_cap', function($caps, $cap, $_, $args) {
-            return $this->_map_meta_cap($caps, $cap, $args);
-        }, 999, 4);
+        add_filter('map_meta_cap', function($caps) {
+            return $this->_map_meta_cap($caps);
+        }, 999);
 
         // User authentication control
         add_filter('wp_authenticate_user', function($result) {
@@ -254,19 +254,15 @@ class AAM_Service_Core
      * "0" element, it performs additional check on user's capability to manage
      * post, users etc.
      *
-     * @param array  $caps
-     * @param string $cap
-     * @param array  $args
+     * @param array $caps
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    private function _map_meta_cap($caps, $cap, $args)
+    private function _map_meta_cap($caps)
     {
-        $oid = (isset($args[0]) ? $args[0] : null);
-
         // Mutate any AAM specific capability if it does not exist
         foreach ((array) $caps as $i => $capability) {
             if (
@@ -278,27 +274,6 @@ class AAM_Service_Core
                     'administrator'
                 );
             }
-        }
-
-        switch ($cap) {
-            case 'install_plugins':
-            case 'delete_plugins':
-            case 'edit_plugins':
-            case 'update_plugins':
-                $action = explode('_', $cap);
-                $caps   = $this->_check_plugins_action($action[0], $caps, $cap);
-                break;
-
-            case 'activate_plugin':
-            case 'deactivate_plugin':
-                $action = explode('_', $cap);
-                $caps   = $this->_check_plugin_action(
-                    $oid, $action[0], $caps, $cap
-                );
-                break;
-
-            default:
-                break;
         }
 
         return $caps;
@@ -385,60 +360,6 @@ class AAM_Service_Core
                 }
             }
         }
-    }
-
-    /**
-     * Check if specific action for plugins is allowed
-     *
-     * @param string $action
-     * @param array  $caps
-     * @param string $cap
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _check_plugins_action($action, $caps, $cap)
-    {
-        $allow = apply_filters(
-            'aam_allowed_plugin_action_filter', null, $action
-        );
-
-        if ($allow !== null) {
-            $caps[] = $allow ? $cap : 'do_not_allow';
-        }
-
-        return $caps;
-    }
-
-    /**
-     * Check if specific action is allowed upon provided plugin
-     *
-     * @param string $plugin
-     * @param string $action
-     * @param array  $caps
-     * @param string $cap
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _check_plugin_action($plugin, $action, $caps, $cap)
-    {
-        $parts = explode('/', $plugin);
-        $slug  = (!empty($parts[0]) ? $parts[0] : null);
-
-        $allow = apply_filters(
-            'aam_allowed_plugin_action_filter', null, $action, $slug
-        );
-
-        if ($allow !== null) {
-            $caps[] = $allow ? $cap : 'do_not_allow';
-        }
-
-        return $caps;
     }
 
 }

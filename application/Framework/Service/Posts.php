@@ -33,7 +33,7 @@ class AAM_Framework_Service_Posts
     {
         try{
             $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
+            $resource   = $this->_get_resource();
             $permission = $resource['list'];
 
             if (!empty($permission)) {
@@ -149,18 +149,18 @@ class AAM_Framework_Service_Posts
     public function is_restricted($post_identifier)
     {
         try {
-            $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
-            $permission = $resource['read'];
+            $result      = null;
+            $resource    = $this->_get_resource();
+            $permissions = $resource->get_permissions($post_identifier);
 
-            if (!empty($permission)) {
+            if (!empty($permissions['read'])) {
                 $restriction_type = 'default';
 
-                if (!empty($permission['restriction_type'])) {
-                    $restriction_type = $permission['restriction_type'];
+                if (!empty($permissions['read']['restriction_type'])) {
+                    $restriction_type = $permissions['read']['restriction_type'];
                 }
 
-                if ($permission['effect'] !== 'allow') {
+                if ($permissions['read']['effect'] !== 'allow') {
                     if ($restriction_type === 'expire') {
                         $result = $this->_is_post_expired($resource);
                     } elseif ($restriction_type === 'default') {
@@ -290,14 +290,15 @@ class AAM_Framework_Service_Posts
     public function is_denied_to($post_identifier, $permission)
     {
         try {
-            $result   = null;
-            $resource = $this->_get_resource($post_identifier);
+            $result      = null;
+            $resource    = $this->_get_resource();
+            $permissions = $resource->get_permissions($post_identifier);
 
             if ($permission === 'read') {
                 $result = $this->is_restricted($post_identifier);
             } else {
-                if (isset($resource[$permission])) {
-                    $result = $resource[$permission]['effect'] !== 'allow';
+                if (isset($permissions[$permission])) {
+                    $result = $permissions[$permission]['effect'] !== 'allow';
                 }
             }
 
@@ -655,7 +656,7 @@ class AAM_Framework_Service_Posts
             }
 
             if (is_null($on) || count($on) === 3) {
-                $result = $resource->remove_permission('list');
+                $result = $resource->remove_permission($post_identifier, 'list');
             } else {
                 $permission['on'] = array_diff(
                     [ 'frontend', 'backend', 'api' ], $on

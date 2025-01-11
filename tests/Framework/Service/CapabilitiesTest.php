@@ -146,8 +146,8 @@ final class CapabilitiesTest extends TestCase
         $cap_b   = 'test_capability_f';
 
         // Adding both capabilities
-        $this->assertTrue($service->grant($cap_a));
-        $this->assertTrue($service->deprive($cap_b));
+        $this->assertTrue($service->allow($cap_a));
+        $this->assertTrue($service->deny($cap_b));
 
         $raw = $this->readWpOption(wp_roles()->role_key);
         $this->assertArrayHasKey($cap_a, $raw['subscriber']['capabilities']);
@@ -172,7 +172,7 @@ final class CapabilitiesTest extends TestCase
         $cap_b   = 'aam_test_cap_h';
 
         // Adding a capability
-        $this->assertTrue($service->deprive($cap_a));
+        $this->assertTrue($service->deny($cap_a));
 
         $raw = $this->readWpOption(wp_roles()->role_key);
         $this->assertArrayHasKey($cap_a, $raw['editor']['capabilities']);
@@ -203,8 +203,8 @@ final class CapabilitiesTest extends TestCase
         $cap_b   = 'test_cap_m';
 
         // Adding two capabilities with different effect
-        $this->assertTrue($service->grant($cap_a));
-        $this->assertTrue($service->deprive($cap_b));
+        $this->assertTrue($service->allow($cap_a));
+        $this->assertTrue($service->deny($cap_b));
 
         // Verify that both capabilities exist
         $this->assertTrue($service->exists($cap_a));
@@ -230,14 +230,14 @@ final class CapabilitiesTest extends TestCase
         $cap_b   = 'test_cap_m';
 
         // Adding two capabilities with different effect
-        $this->assertTrue($service->grant($cap_a));
-        $this->assertTrue($service->deprive($cap_b));
+        $this->assertTrue($service->allow($cap_a));
+        $this->assertTrue($service->deny($cap_b));
 
         // Verify that both capabilities exist
-        $this->assertTrue($service->is_granted($cap_a));
-        $this->assertFalse($service->is_deprived($cap_a));
-        $this->assertFalse($service->is_granted($cap_b));
-        $this->assertTrue($service->is_deprived($cap_b));
+        $this->assertTrue($service->is_allowed($cap_a));
+        $this->assertFalse($service->is_denied($cap_a));
+        $this->assertFalse($service->is_allowed($cap_b));
+        $this->assertTrue($service->is_denied($cap_b));
 
         // Remove added caps
         $this->assertTrue($service->remove($cap_a));

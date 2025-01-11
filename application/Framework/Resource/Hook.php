@@ -13,8 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Hook
-implements AAM_Framework_Resource_Interface, ArrayAccess
+class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -27,8 +26,10 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
     /**
      * @inheritDoc
      */
-    private function _apply_policy($permissions)
+    private function _apply_policy()
     {
+        $result = [];
+
         // Fetch list of statements for the resource Hook
         $list = AAM_Framework_Manager::_()->policies(
             $this->get_access_level()
@@ -58,13 +59,13 @@ implements AAM_Framework_Resource_Interface, ArrayAccess
                     $permission['return'] = $stm['Return'];
                 }
 
-                $permissions = array_replace([
+                $result = array_replace([
                     "{$hook}|{$priority}" => $permission
-                ], $permissions);
+                ], $result);
             }
         }
 
-        return apply_filters('aam_apply_policy_filter', $permissions, $this);
+        return apply_filters('aam_apply_policy_filter', $result, $this);
     }
 
 }

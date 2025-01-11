@@ -8,15 +8,12 @@
  */
 
 /**
- * Post Resource class
- *
- * @method WP_Post get_core_instance()
+ * Policy resource class
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Resource_Post
-implements AAM_Framework_Resource_Interface
+class AAM_Framework_Resource_Policy implements AAM_Framework_Resource_Interface
 {
 
     use AAM_Framework_Resource_BaseTrait;
@@ -24,7 +21,7 @@ implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::POST;
+    const TYPE = AAM_Framework_Type_Resource::POLICY;
 
     /**
      * @inheritDoc
@@ -48,11 +45,11 @@ implements AAM_Framework_Resource_Interface
                     $post_name = $resource_identifier['post_name'];
                 }
 
-                if (!empty($post_name) && isset($resource_identifier['post_type'])) {
+                if (!empty($post_name)) {
                     $result = get_page_by_path(
                         $post_name,
                         OBJECT,
-                        $resource_identifier['post_type']
+                        AAM_Framework_Service_Policies::CPT
                     );
                 }
             }
@@ -60,12 +57,9 @@ implements AAM_Framework_Resource_Interface
             // Do some additional validation if id & post_type are provided in the
             // array
             if (is_a($result, WP_Post::class)
-                && isset($resource_identifier['post_type'])
-                && $resource_identifier['post_type'] !== $result->post_type
+                && AAM_Framework_Service_Policies::CPT !== $result->post_type
             ) {
-                throw new OutOfRangeException(
-                    'The post_type does not match actual post type'
-                );
+                throw new OutOfRangeException('Invalid policy instance');
             }
         }
 
@@ -88,52 +82,7 @@ implements AAM_Framework_Resource_Interface
      */
     private function _get_resource_id($resource_identifier)
     {
-        return [
-            'id'        => $resource_identifier->ID,
-            'post_type' => $resource_identifier->post_type
-        ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private function _apply_policy()
-    {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
-
-        foreach($service->statements('Post:*') as $stm) {
-            $bits = explode(':', $stm['Resource']);
-
-            if (count($bits) === 3) {
-                // Preparing correct internal post ID
-                if (is_numeric($bits[2])) {
-                    $id = "{$bits[2]}|{$bits[1]}";
-                } else {
-                    $post = get_page_by_path($bits[2], OBJECT, $bits[1]);
-
-                    if (is_a($post, WP_Post::class)) {
-                        $id = "{$post->ID}|{$post->post_type}";
-                    } else {
-                        $id = null;
-                    }
-                }
-
-                if (!empty($id)) {
-                    $result[$id] = isset($result[$id]) ? $result[$id] : [];
-
-                    $result[$id] = array_replace(
-                        $result[$id],
-                        $manager->policy->statement_to_permission(
-                            $stm, self::TYPE
-                        )
-                    );
-                }
-            }
-        }
-
-        return apply_filters('aam_apply_policy_filter', $result, $this);
+        return $resource_identifier->ID;
     }
 
 }

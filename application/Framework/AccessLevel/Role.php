@@ -10,8 +10,9 @@
 /**
  * Role access level
  *
- * @package AAM
+ * @property array $capabilities
  *
+ * @package AAM
  * @version 7.0.0
  */
 class AAM_Framework_AccessLevel_Role implements AAM_Framework_AccessLevel_Interface
