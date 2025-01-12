@@ -97,30 +97,6 @@ trait AAM_Framework_Resource_BaseTrait
     {
         $this->_access_level = $access_level;
 
-        // Read explicitly defined settings from DB
-        $permissions = AAM_Framework_Manager::_()->settings(
-            $access_level
-        )->get_setting($this->_get_settings_ns(), []);
-
-        if (is_array($permissions)) { // Deal with corrupted data
-            $this->_explicit_permissions = $permissions;
-        }
-
-        // JSON Access Policy is deeply embedded in the framework, thus take it into
-        // consideration during resource initialization
-        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
-            foreach ($this->_apply_policy() as $resource_id => $permissions) {
-                if (array_key_exists($resource_id, $this->_explicit_permissions)) {
-                    $this->_permissions[$resource_id] = array_replace(
-                        $permissions,
-                        $this->_explicit_permissions[$resource_id]
-                    );
-                } else {
-                    $this->_permissions[$resource_id] = $permissions;
-                }
-            }
-        }
-
         // Extend access level with more methods
         $closures = apply_filters(
             'aam_framework_resource_methods_filter',
@@ -134,6 +110,55 @@ trait AAM_Framework_Resource_BaseTrait
             }
 
             $this->_extended_methods = $closures;
+        }
+
+        // Read explicitly defined settings from DB
+        $permissions = AAM_Framework_Manager::_()->settings(
+            $access_level
+        )->get_setting($this->_get_settings_ns(), []);
+
+        if (!is_array($permissions)) { // Deal with corrupted data
+            $permissions = [];
+        } else {
+            $permissions = $this->_add_sys_attributes($permissions);
+        }
+
+        $this->_explicit_permissions = $permissions;
+
+        // JSON Access Policy is deeply embedded in the framework, thus take it into
+        // consideration during resource initialization
+        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
+            $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
+
+            foreach ($policy_permissions as $resource_id => $permissions) {
+                if (array_key_exists($resource_id, $permissions)) {
+                    $this->_permissions[$resource_id] = array_replace(
+                        $permissions,
+                        $this->_permissions[$resource_id]
+                    );
+                } else {
+                    $this->_permissions[$resource_id] = $permissions;
+                }
+            }
+        } else {
+            $this->_permissions = $permissions;
+        }
+
+        // Pre-load all explicitly defined permissions
+        $inherited_permissions = $this->_add_sys_attributes(
+            $this->_trigger_inheritance(),
+            [ '__inherited' => true ]
+        );
+
+        foreach ($inherited_permissions as $resource_id => $permissions) {
+            if (array_key_exists($resource_id, $this->_permissions)) {
+                $this->_permissions[$resource_id] = array_replace(
+                    $permissions,
+                    $this->_permissions[$resource_id]
+                );
+            } else {
+                $this->_permissions[$resource_id] = $permissions;
+            }
         }
     }
 
@@ -181,28 +206,10 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get_resource_id($resource_identifier, $serialize = true)
-    {
-        $id = $this->_get_resource_id(
-            $this->_get_resource_instance($resource_identifier)
-        );
-
-        if (is_array($id) && $serialize) {
-            $result = implode('|', array_values($id));
-        } else {
-            $result = $id;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function is_customized($resource_identifier = null)
     {
         if (!empty($resource_identifier)) {
-            $id     = $this->get_resource_id($resource_identifier);
+            $id     = $this->_get_resource_id($resource_identifier);
             $result = !empty($this->_explicit_permissions[$id]);
         } else {
             $result = !empty($this->_explicit_permissions);
@@ -217,7 +224,7 @@ trait AAM_Framework_Resource_BaseTrait
     public function reset($resource_identifier = null)
     {
         if (!empty($resource_identifier)) {
-            $id = $this->get_resource_id($resource_identifier);
+            $id = $this->_get_resource_id($resource_identifier);
 
             if (array_key_exists($id, $this->_explicit_permissions)) {
                 unset($this->_explicit_permissions[$id]);
@@ -250,72 +257,39 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get_permissions(
-        $resource_identifier = null,
-        $explicit = false
-    ) {
-        $result = null;
-
-        if (empty($resource_identifier)) {
-            $result = $explicit ? $this->_explicit_permissions : $this->_permissions;
-        } else {
-            if ($explicit) {
-                $id = $this->get_resource_id($resource_identifier);
-
-                if (array_key_exists($id, $this->_explicit_permissions)) {
-                    $result = $this->_explicit_permissions[$id];
-                } elseif (empty($id)) {
-                    $result = $this->_explicit_permissions;
-                }
-            } else {
-                $result = $this->_get_permissions($resource_identifier);
-            }
-        }
-
-        return is_array($result) ? $result : [];
+    public function get_permissions($resource_identifier = null)
+    {
+        return $this->_get_permissions($resource_identifier);
     }
 
     /**
      * @inheritDoc
      */
-    public function set_permissions(
-        array $permissions,
-        $resource_identifier = null,
-        $explicit = true
-    ) {
+    public function set_permissions(array $permissions, $resource_identifier = null)
+    {
         if (!empty($resource_identifier)) {
-            $id = $this->get_resource_id($resource_identifier);
+            $id = $this->_get_resource_id($resource_identifier);
         }
 
-        if ($explicit) {
-            // First, settings the explicit permissions
-            if (empty($id)) {
-                $this->_explicit_permissions = $permissions;
-                $this->_permissions          = array_replace(
-                    $this->_permissions,
-                    $permissions
-                );
-            } else {
-                $this->_explicit_permissions[$id] = $permissions;
-                $this->_permissions[$id]          = array_replace(
-                    !empty($this->_permissions[$id]) ? $this->_permissions[$id]: [],
-                    $permissions
-                );
-            }
-
-            // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
+        // First, settings the explicit permissions
+        if (empty($id)) {
+            $this->_explicit_permissions = $permissions;
+            $this->_permissions          = array_replace(
+                $this->_permissions,
+                $permissions
+            );
         } else {
-            if (empty($id)) {
-                $this->_permissions = $permissions;
-            } else {
-                $this->_permissions[$id] = $permissions;
-            }
-
-            $result = true;
+            $this->_explicit_permissions[$id] = $permissions;
+            $this->_permissions[$id]          = array_replace(
+                !empty($this->_permissions[$id]) ? $this->_permissions[$id]: [],
+                $permissions
+            );
         }
+
+        // Store changes in DB
+        $result = AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
 
         return $result;
     }
@@ -327,10 +301,9 @@ trait AAM_Framework_Resource_BaseTrait
         $resource_identifier,
         $permission_key,
         $permission,
-        $explicit = true,
         ...$args
     ) {
-        $id = $this->get_resource_id($resource_identifier);
+        $id = $this->_get_resource_id($resource_identifier);
 
         // Prepare the permission that will be merged with others
         $sanitized = apply_filters(
@@ -339,24 +312,20 @@ trait AAM_Framework_Resource_BaseTrait
             $args
         );
 
-        if ($explicit) {
-            // Update explicit permissions
-            if (!array_key_exists($id, $this->_explicit_permissions)) {
-                $this->_explicit_permissions[$id] = [];
-            }
-
-            $this->_explicit_permissions[$id] = array_replace(
-                $this->_explicit_permissions[$id],
-                [ $permission_key => $sanitized ]
-            );
-
-            // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
-        } else {
-            $result = true;
+        // Update explicit permissions
+        if (!array_key_exists($id, $this->_explicit_permissions)) {
+            $this->_explicit_permissions[$id] = [];
         }
+
+        $this->_explicit_permissions[$id] = array_replace(
+            $this->_explicit_permissions[$id],
+            [ $permission_key => $sanitized ]
+        );
+
+        // Store changes in DB
+        $result = AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
 
         // Also sync it with final set of permissions
         if (!array_key_exists($id, $this->_permissions)) {
@@ -374,24 +343,13 @@ trait AAM_Framework_Resource_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get_permission(
-        $resource_identifier,
-        $permission_key,
-        $explicit = false
-    ) {
-        $result = null;
-        $id     = $this->get_resource_id($resource_identifier);
+    public function get_permission($resource_identifier, $permission_key)
+    {
+        $result      = null;
+        $permissions = $this->_get_permissions($resource_identifier);
 
-        if ($explicit) {
-            if (!empty($this->_explicit_permissions[$id][$permission_key])) {
-                $result = $this->_explicit_permissions[$id][$permission_key];
-            }
-        } else {
-            $permissions = $this->_get_permissions($resource_identifier);
-
-            if (!empty($permissions[$permission_key])) {
-                $result = $permissions[$permission_key];
-            }
+        if (!empty($permissions[$permission_key])) {
+            $result = $permissions[$permission_key];
         }
 
         return $result;
@@ -405,7 +363,7 @@ trait AAM_Framework_Resource_BaseTrait
         $permission_key
     ) {
         $result = true;
-        $id     = $this->get_resource_id($resource_identifier);
+        $id     = $this->_get_resource_id($resource_identifier);
 
         // If permission is part of explicit, delete it from their and store changes
         if (!empty($this->_explicit_permissions[$id][$permission_key])) {
@@ -443,21 +401,6 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
-     * Convert resource identifier into proper form for further processing
-     *
-     * @param mixed $resource_identifier
-     *
-     * @return mixed
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _get_resource_instance($resource_identifier)
-    {
-        return $resource_identifier;
-    }
-
-    /**
      * Get final set of permissions for given resource
      *
      * @param mixed $resource_identifier
@@ -471,9 +414,7 @@ trait AAM_Framework_Resource_BaseTrait
     {
         // This is done for performance reasons so we do not have to normalize
         // resource twice
-        $resource_instance = $this->_get_resource_instance($resource_identifier);
-
-        $resource_id = $this->get_resource_id($resource_instance);
+        $resource_id = $this->_get_resource_id($resource_identifier);
 
         if (empty($this->_inheritance_completed[$resource_id])) {
             // Get the base set of permissions
@@ -483,17 +424,9 @@ trait AAM_Framework_Resource_BaseTrait
                 $result = [];
             }
 
-            // Allow other implementations to influence set of permissions
-            $result = apply_filters(
-                'aam_resource_get_permissions_filter',
-                $result,
-                $resource_instance,
-                $this
-            );
-
             // Trigger inheritance mechanism
             $this->_permissions[$resource_id] = array_replace(
-                $this->_inherit_from_parent($resource_identifier),
+                $this->_trigger_inheritance($resource_identifier),
                 $result
             );
 
@@ -505,7 +438,7 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
-     * Inherit settings from parent access level (if any)
+     * Trigger inheritance mechanism
      *
      * @param mixed $resource_identifier
      *
@@ -514,7 +447,34 @@ trait AAM_Framework_Resource_BaseTrait
      *
      * @version 7.0.0
      */
-    private function _inherit_from_parent($resource_identifier)
+    private function _trigger_inheritance($resource_identifier = null)
+    {
+        // Allow other implementations to influence set of permissions
+        $result = apply_filters(
+            'aam_resource_get_permissions_filter',
+            [],
+            $resource_identifier,
+            $this
+        );
+
+        // Trigger inheritance mechanism
+        return array_replace(
+            $this->_inherit_from_parent($resource_identifier),
+            $result
+        );
+    }
+
+    /**
+     * Inherit settings from parent access level (if any)
+     *
+     * @param mixed $resource_identifier [Optional]
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _inherit_from_parent($resource_identifier = null)
     {
         $parent = $this->get_access_level()->get_parent();
         $result = [];
@@ -611,18 +571,21 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
-     * Determine correct resource identifier based on provided data
+     * Convert resource identifier into internal ID
      *
-     * @param mixed $resource_identifier
+     * The internal ID represents unique resource identify AAM Framework users to
+     * distinguish between collection of resources
+     *
+     * @param mixed $identifier
      *
      * @return mixed
-     * @access private
+     * @access public
      *
      * @version 7.0.0
      */
-    private function _get_resource_id($resource_identifier)
+    private function _get_resource_id($identifier)
     {
-        return $resource_identifier;
+        return (string) $identifier;
     }
 
     /**
@@ -636,6 +599,37 @@ trait AAM_Framework_Resource_BaseTrait
     private function _apply_policy()
     {
         return apply_filters('aam_apply_policy_filter', [], $this);
+    }
+
+    /**
+     * Add some system attributes to each permission
+     *
+     * @param array $data
+     * @param array $additional [Optional]
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _add_sys_attributes($data, $additional = [])
+    {
+        $acl    = $this->get_access_level();
+        $acl_id = $acl->get_id();
+
+        foreach($data as &$permissions) {
+            foreach($permissions as $key => $permission) {
+                $permission['__access_level'] = $acl::TYPE;
+
+                if (!empty($acl_id)) {
+                    $permission['__access_level_id'] = $acl_id;
+                }
+
+                $permissions[$key] = array_merge($permission, $additional);
+            }
+        }
+
+        return $data;
     }
 
 }

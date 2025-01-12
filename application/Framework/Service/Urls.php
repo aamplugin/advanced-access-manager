@@ -13,45 +13,29 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Framework_Service_Urls
-implements
-    AAM_Framework_Service_Interface
+class AAM_Framework_Service_Urls implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * List of allowed redirect types
-     *
-     * @version 7.0.0
-     */
-    const ALLOWED_REDIRECT_TYPES = [
-        'default',
-        'custom_message',
-        'page_redirect',
-        'url_redirect',
-        'trigger_callback',
-        'login_redirect'
-    ];
-
-    /**
      * Get the array of defined permissions
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
+     * @todo - Consider moving to AAM_Service_Url
      */
     public function get_permissions()
     {
         try {
-            $result      = [];
-            $resource    = $this->_get_resource();
-            $permissions = $resource->get_permissions();
+            $result   = [];
+            $resource = $this->_get_resource();
 
-            foreach($permissions as $url => $permission) {
+            foreach($resource->get_permissions() as $url => $permissions) {
                 array_push($result, $this->_prepare_url_schema_model(
-                    $url, $permission, $resource
+                    $url, $permissions['access']
                 ));
             }
         } catch (Exception $e) {
@@ -65,9 +49,10 @@ implements
      * Alias for the get_permissions method
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
+     * @todo - Consider moving to AAM_Service_Url
      */
     public function permissions()
     {
@@ -80,26 +65,27 @@ implements
      * @param string $url_schema
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
+     * @todo - Consider moving to AAM_Service_Url
      */
     public function get_permission($url_schema)
     {
         try {
             $resource    = $this->_get_resource();
-            $permissions = $resource->get_permissions();
-            $url_schema  = $this->misc->sanitize_url($url_schema);
+            $permission = $resource->get_permission(
+                $this->_normalize_resource_identifier($url_schema),
+                'access'
+            );
 
-            if (!array_key_exists($url_schema, $permissions)) {
+            if (empty($permission)) {
                 throw new OutOfRangeException(sprintf(
                     'Permission for URL schema "%s" does not exist', $url_schema
                 ));
             }
 
-            $result = $this->_prepare_url_schema_model(
-                $url_schema, $permissions[$url_schema], $resource
-            );
+            $result = $this->_prepare_url_schema_model($url_schema, $permission);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -113,9 +99,10 @@ implements
      * @param string $url_schema
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
+     * @todo - Consider moving to AAM_Service_Url
      */
     public function permission($url_schema)
     {
@@ -128,15 +115,15 @@ implements
      * @param string|array $url_schema
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function allow($url_schema)
     {
-        $result = true;
-
         try {
+            $result = true;
+
             foreach((array) $url_schema as $schema) {
                 $result = $result && $this->_set_permission($schema, 'allow');
             }
@@ -151,7 +138,7 @@ implements
      * Restrict access to a given URL
      *
      * @param string|array $url_schema
-     * @param array        $redirect   [optional]
+     * @param array        $redirect   [Optional]
      *
      * @return bool|WP_Error
      * @access public
@@ -160,9 +147,9 @@ implements
      */
     public function deny($url_schema, $redirect = null)
     {
-        $result = true;
-
         try {
+            $result = true;
+
             foreach((array) $url_schema as $schema) {
                 $result = $result && $this->_set_permission(
                     $schema, 'deny', $redirect
@@ -178,7 +165,7 @@ implements
     /**
      * Reset all rules or any given
      *
-     * @param string|array|null $url_schema [optional]
+     * @param string|array|null $url_schema [Optional]
      *
      * @return bool|WP_Error
      * @access public
@@ -187,19 +174,13 @@ implements
      */
     public function reset($url_schema = null)
     {
-        $result = true;
-
         try {
             if (!empty($url_schema)) {
-                foreach((array) $url_schema as $schema) {
-                    $result = $result && $this->_delete_permission($schema);
-                }
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($url_schema)
+                );
             } else {
                 $result = $this->_get_resource()->reset();
-            }
-
-            if (!$result) {
-                throw new RuntimeException('Failed to reset permissions');
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -209,7 +190,7 @@ implements
     }
 
     /**
-     * Alias method for the is_restricted
+     * Check if given URL is denied
      *
      * @param string $url
      *
@@ -277,9 +258,7 @@ implements
         $result = null;
 
         try {
-            $permission = $this->_get_permission_by_url(
-                $this->misc->sanitize_url($url)
-            );
+            $permission = $this->_get_permission_by_url($url);
 
             if (!empty($permission)) {
                 if (array_key_exists('redirect', $permission)) {
@@ -307,18 +286,19 @@ implements
      */
     private function _get_permission_by_url($url)
     {
+        $identifier  = $this->_normalize_resource_identifier($url);
         $permissions = $this->_sort_permissions(
             $this->_get_resource()->get_permissions()
         );
 
         // Step #1. Let's check if there is a full URL (potentially with query
         //          params explicitly defined
-        $result = $this->_find_permission_by_url($url, $permissions);
+        $result = $this->_find_permission_by_url($identifier, $permissions);
 
         // Step #2. Parsing the incoming URL and checking if there is the
         //          same URL without query params defined
         if (is_null($result)) {
-            $parsed_url = AAM_Framework_Manager::_()->misc->parse_url($url);
+            $parsed_url = AAM_Framework_Manager::_()->misc->parse_url($identifier);
 
             if (!empty($parsed_url['path'])) {
                 $result = $this->_find_permission_by_url(
@@ -392,10 +372,10 @@ implements
         $denied = $allowed = [];
 
         foreach ($permissions as $url => $permission) {
-            if ($permission['effect'] === 'allow') {
-                $allowed[$url] = $permission;
+            if ($permission['access']['effect'] !== 'allow') {
+                $denied[$url] = $permission['access'];
             } else {
-                $denied[$url] = $permission;
+                $allowed[$url] = $permission['access'];
             }
         }
 
@@ -416,8 +396,6 @@ implements
      */
     private function _set_permission($url_schema, $effect, $redirect = null)
     {
-        $resource = $this->_get_resource();
-
         // Prepare the permission model
         $permission = [ 'effect' => $effect ];
 
@@ -425,106 +403,68 @@ implements
             $permission['redirect'] = $redirect;
         }
 
-        // Sanitize the incoming URL
-        $url_schema = $this->misc->sanitize_url($url_schema);
-
-        // Prepare array of new permissions
-        $perms = array_merge($resource->get_permissions(true), [
-            $url_schema => $permission
-        ]);
-
-        if (!$resource->set_permissions($perms)) {
-            throw new RuntimeException('Failed to persist settings');
-        }
-
-        return true;
-    }
-
-    /**
-     * Delete URL permission
-     *
-     * @param string $url_schema
-     *
-     * @return boolean
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _delete_permission($url_schema)
-    {
-        $resource    = $this->_get_resource();
-        $permissions = $resource->get_permissions(true);
-        $url_schema  = $this->misc->sanitize_url($url_schema);
-
-        // Note! User can delete only explicitly set permissions (customized)
-        if (array_key_exists($url_schema, $permissions)) {
-            unset($permissions[$url_schema]);
-
-            if (!$resource->set_permissions($permissions)) {
-                throw new RuntimeException('Failed to persist changes');
-            }
-        }
-
-        return true;
+        return $this->_get_resource()->set_permission(
+            $this->_normalize_resource_identifier($url_schema),
+            'access',
+            $permission
+        );
     }
 
     /**
      * Get URL resource
-     *
-     * @param string|null $url
      *
      * @return AAM_Framework_Resource_Url
      * @access private
      *
      * @version 7.0.0
      */
-    private function _get_resource($url = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::URL, $url
+            AAM_Framework_Type_Resource::URL
         );
     }
 
     /**
      * Normalize and prepare the rule model
      *
-     * @param string                     $url_schema
-     * @param array                      $permission
-     * @param AAM_Framework_Resource_Url $resource
+     * @param string $url_schema
+     * @param array  $permission
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_url_schema_model($url_schema, $permission, $resource)
+    private function _prepare_url_schema_model($url_schema, $permission)
     {
-        // Determine if current permission is overwritten
-        $explicit     = $resource->get_permissions(true);
-        $is_inherited = !array_key_exists($url_schema, $explicit);
+        $result = [
+            'url_schema' => $url_schema
+        ];
 
-        return array_merge($permission, [
-            'url_schema'   => $url_schema,
-            'is_inherited' => $is_inherited
-        ]);
+        // Remove system attributes
+        foreach($permission as $key => $value) {
+            if ($key === '__inherited') {
+                $result['is_inherited'] = $value;
+            } elseif (strpos($key, '__') === false) {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**
-     * Sanitize incoming URL
-     *
-     * @param string $url_schema
+     * @inheritDoc
      *
      * @return string
-     * @access private
-     *
-     * @version 7.0.0
      */
-    private function _sanitize_url_schema($url_schema)
+    private function _normalize_resource_identifier($url_schema)
     {
         $result = $this->misc->sanitize_url($url_schema);
 
-        if ($result === false) {
-            throw new InvalidArgumentException('The incoming URL schema is invalid');
+        if (empty($result)) {
+            throw new InvalidArgumentException('Invalid URL resource identifier');
         }
 
         return $result;

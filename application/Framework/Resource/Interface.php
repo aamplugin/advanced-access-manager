@@ -28,22 +28,6 @@ interface AAM_Framework_Resource_Interface
     const TYPE = null;
 
     /**
-     * Convert resource identifier into internal ID
-     *
-     * The internal ID represents unique resource identify AAM Framework users to
-     * distinguish between collection of resources
-     *
-     * @param mixed $resource_identifier
-     * @param bool  $serialize           [Optional]
-     *
-     * @return mixed
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function get_resource_id($resource_identifier, $serialize = true);
-
-    /**
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
@@ -60,32 +44,26 @@ interface AAM_Framework_Resource_Interface
      * all explicitly defined permissions
      *
      * @param mixed $resource_identifier [Optional]
-     * @param bool  $explicit            [Optional]
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_permissions($resource_identifier = null, $explicit = false);
+    public function get_permissions($resource_identifier = null);
 
     /**
      * Set raw resource permissions
      *
      * @param array $permissions
      * @param mixed $resource_identifier [Optional]
-     * @param bool  $explicit            [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function set_permissions(
-        array $permissions,
-        $resource_identifier = null,
-        $explicit = true
-    );
+    public function set_permissions(array $permissions, $resource_identifier = null);
 
     /**
      * Set raw resource permission
@@ -93,7 +71,6 @@ interface AAM_Framework_Resource_Interface
      * @param mixed  $resource_identifier
      * @param string $permission_key
      * @param mixed  $permission
-     * @param bool   $explicit            [Optional]
      * @param mixed  ...$args             [Optional]
      *
      * @return bool
@@ -105,7 +82,6 @@ interface AAM_Framework_Resource_Interface
         $resource_identifier,
         $permission_key,
         $permission,
-        $explicit = true,
         ...$args
     );
 
@@ -114,18 +90,13 @@ interface AAM_Framework_Resource_Interface
      *
      * @param mixed  $resource_identifier
      * @param string $permission_key
-     * @param bool   $explicit            [Optional]
      *
      * @return array|null
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_permission(
-        $resource_identifier,
-        $permission_key,
-        $explicit = false
-    );
+    public function get_permission($resource_identifier, $permission_key);
 
     /**
      * Remove a single permission

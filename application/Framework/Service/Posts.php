@@ -34,7 +34,8 @@ class AAM_Framework_Service_Posts
         try{
             $result     = null;
             $resource   = $this->_get_resource();
-            $permission = $resource['list'];
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'list');
 
             if (!empty($permission)) {
                 if ($permission['effect'] === 'deny') {
@@ -48,10 +49,11 @@ class AAM_Framework_Service_Posts
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_hidden_on_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $website_area,
-                $resource
+                $permission,
+                $identifier,
+                'list'
             );
 
             // Prepare the final result
@@ -94,12 +96,13 @@ class AAM_Framework_Service_Posts
     {
         try {
             $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
-            $permission = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             // First, let's check that current post does not have password set
             // natively
-            $native_password = $resource->post_password;
+            $native_password = $identifier->post_password;
             $result          = !empty($native_password) ? true : null;
 
             if (is_null($result) && !is_null($permission)) {
@@ -117,9 +120,11 @@ class AAM_Framework_Service_Posts
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_password_protected_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $resource
+                $permission,
+                $identifier,
+                'read'
             );
 
             // Prepare the final result
@@ -151,16 +156,17 @@ class AAM_Framework_Service_Posts
         try {
             $result      = null;
             $resource    = $this->_get_resource();
-            $permissions = $resource->get_permissions($post_identifier);
+            $identifier  = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
-            if (!empty($permissions['read'])) {
+            if (!empty($permission)) {
                 $restriction_type = 'default';
 
-                if (!empty($permissions['read']['restriction_type'])) {
-                    $restriction_type = $permissions['read']['restriction_type'];
+                if (!empty($permission['restriction_type'])) {
+                    $restriction_type = $permission['restriction_type'];
                 }
 
-                if ($permissions['read']['effect'] !== 'allow') {
+                if ($permission['effect'] !== 'allow') {
                     if ($restriction_type === 'expire') {
                         $result = $this->_is_post_expired($resource);
                     } elseif ($restriction_type === 'default') {
@@ -171,9 +177,11 @@ class AAM_Framework_Service_Posts
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_restricted_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $resource
+                $permission,
+                $identifier,
+                'read'
             );
 
             // Prepare the final result
@@ -199,8 +207,9 @@ class AAM_Framework_Service_Posts
     {
         try {
             $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
-            $permission = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)) {
                 $type = null;
@@ -216,9 +225,11 @@ class AAM_Framework_Service_Posts
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_redirected_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $resource
+                $permission,
+                $identifier,
+                'read'
             );
 
             // Prepare the final result
@@ -244,8 +255,9 @@ class AAM_Framework_Service_Posts
     {
         try {
             $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
-            $permission = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)) {
                 $type = null;
@@ -261,9 +273,11 @@ class AAM_Framework_Service_Posts
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_teaser_message_set_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $resource
+                $permission,
+                $identifier,
+                'read'
             );
 
             // Prepare the final result
@@ -290,25 +304,28 @@ class AAM_Framework_Service_Posts
     public function is_denied_to($post_identifier, $permission)
     {
         try {
-            $result      = null;
-            $resource    = $this->_get_resource();
-            $permissions = $resource->get_permissions($post_identifier);
+            $result = null;
 
             if ($permission === 'read') {
                 $result = $this->is_restricted($post_identifier);
             } else {
-                if (isset($permissions[$permission])) {
-                    $result = $permissions[$permission]['effect'] !== 'allow';
-                }
-            }
+                $resource   = $this->_get_resource();
+                $identifier = $this->_normalize_resource_identifier($post_identifier);
+                $data       = $resource->get_permission($identifier, $permission);
 
-            // Making sure that other implementations can affect the decision
-            $result = apply_filters(
-                'aam_post_is_denied_to_filter',
-                $result,
-                $permission,
-                $resource
-            );
+                if (isset($data)) {
+                    $result = $data['effect'] !== 'allow';
+                }
+
+                // Making sure that other implementations can affect the decision
+                $result = apply_filters(
+                    'aam_post_permission_result_filter',
+                    $result,
+                    $data,
+                    $identifier,
+                    $permission
+                );
+            }
 
             // Prepare the final result
             $result = is_bool($result) ? $result : false;
@@ -351,8 +368,9 @@ class AAM_Framework_Service_Posts
     {
         try {
             $result     = null;
-            $resource   = $this->_get_resource($post_identifier);
-            $permission = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)) {
                 $type = null;
@@ -363,15 +381,17 @@ class AAM_Framework_Service_Posts
 
                 if ($type === 'expire') {
                     $result = $permission['effect'] !== 'allow'
-                        && $this->_is_post_expired($resource);
+                        && $this->_is_post_expired($permission);
                 }
             }
 
             // Making sure that other implementations can affect the decision
             $result = apply_filters(
-                'aam_post_is_access_expired_filter',
+                'aam_post_permission_result_filter',
                 $result,
-                $resource
+                $permission,
+                $identifier,
+                'read'
             );
 
             // Prepare the final result
@@ -401,8 +421,10 @@ class AAM_Framework_Service_Posts
         $exclude_authors = false
     ) {
         try {
-            $resource = $this->_get_resource($post_identifier);
-            $result   = $resource->add_permission('read', [
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+
+            $result   = $resource->set_permission($identifier, 'read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'password_protected',
                 'password'         => $password
@@ -433,7 +455,10 @@ class AAM_Framework_Service_Posts
         $exclude_authors = false
     ) {
         try {
-            $result = $this->_get_resource($post_identifier)->add_permission('read', [
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+
+            $result = $resource->set_permission($identifier, 'read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'teaser_message',
                 'message'          => $message
@@ -463,7 +488,10 @@ class AAM_Framework_Service_Posts
         $exclude_authors = false
     ) {
         try {
-            $result = $this->_get_resource($post_identifier)->add_permission('read', [
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+
+            $result = $resource->set_permission($identifier, 'read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'redirect',
                 'redirect'         => $redirect
@@ -505,7 +533,10 @@ class AAM_Framework_Service_Posts
                 );
             }
 
-            $result = $this->_get_resource($post_identifier)->add_permission('read', [
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+
+            $result = $resource->set_permission($identifier, 'read', [
                 'effect'           => 'deny',
                 'restriction_type' => 'expire',
                 'expires_after'    => intval($timestamp)
@@ -532,16 +563,21 @@ class AAM_Framework_Service_Posts
     public function deny($post_identifier, $permission, $exclude_authors = false)
     {
         try {
-            $resource = $this->_get_resource($post_identifier);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission(
-                    $permission, 'deny', $exclude_authors
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'deny', $exclude_authors
                 );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions(
-                    $permission, 'deny', $exclude_authors
-                );
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'deny', $exclude_authors
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -566,12 +602,21 @@ class AAM_Framework_Service_Posts
     public function allow($post_identifier, $permission)
     {
         try {
-            $resource = $this->_get_resource($post_identifier);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission($permission, 'allow');
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'allow'
+                );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions($permission, 'allow');
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'allow'
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -603,7 +648,8 @@ class AAM_Framework_Service_Posts
         $exclude_authors = false
     ) {
         try {
-            $resource   = $this->_get_resource($post_identifier);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
             $permission = [
                 'effect' => 'deny'
             ];
@@ -615,7 +661,9 @@ class AAM_Framework_Service_Posts
                 $permission['on'] = array_map('trim', $website_area);
             }
 
-            $result = $resource->add_permission('list', $permission, $exclude_authors);
+            $result = $resource->set_permission(
+                $identifier, 'list', $permission, $exclude_authors
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -642,6 +690,7 @@ class AAM_Framework_Service_Posts
     {
         try {
             $resource   = $this->_get_resource($post_identifier);
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
             $permission = [
                 'effect' => 'deny'
             ];
@@ -656,13 +705,15 @@ class AAM_Framework_Service_Posts
             }
 
             if (is_null($on) || count($on) === 3) {
-                $result = $resource->remove_permission($post_identifier, 'list');
+                $result = $resource->remove_permission($identifier, 'list');
             } else {
                 $permission['on'] = array_diff(
                     [ 'frontend', 'backend', 'api' ], $on
                 );
 
-                $result = $resource->add_permission('list', $permission);
+                $result = $resource->set_permission(
+                    $identifier, 'list', $permission
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -686,9 +737,10 @@ class AAM_Framework_Service_Posts
         $result = null;
 
         try {
-            $resource    = $this->_get_resource($post_identifier);
-            $permission  = $resource['read'];
-            $native_pass = $resource->post_password;
+            $resource    = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission  = $resource->get_permission($identifier, 'read');
+            $native_pass = $identifier->post_password;
 
             if (!empty($native_pass)) {
                 $result = $native_pass;
@@ -722,8 +774,9 @@ class AAM_Framework_Service_Posts
         $result = null;
 
         try {
-            $resource    = $this->_get_resource($post_identifier);
-            $permission  = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)
                 && $permission['effect'] === 'deny'
@@ -754,8 +807,9 @@ class AAM_Framework_Service_Posts
         $result = null;
 
         try {
-            $resource    = $this->_get_resource($post_identifier);
-            $permission  = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)
                 && $permission['effect'] === 'deny'
@@ -786,8 +840,9 @@ class AAM_Framework_Service_Posts
         $result = null;
 
         try {
-            $resource    = $this->_get_resource($post_identifier);
-            $permission  = $resource['read'];
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($post_identifier);
+            $permission = $resource->get_permission($identifier, 'read');
 
             if (!empty($permission)
                 && $permission['effect'] === 'deny'
@@ -842,7 +897,13 @@ class AAM_Framework_Service_Posts
     public function reset($post_identifier = null)
     {
         try {
-            $result = $this->_get_resource($post_identifier)->reset();
+            if (!empty($post_identifier)) {
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($post_identifier)
+                );
+            } else {
+                $result = $this->_get_resource()->reset();
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -853,34 +914,84 @@ class AAM_Framework_Service_Posts
     /**
      * Get post resource
      *
-     * @param mixed $identifier [Optional]
-     *
      * @return AAM_Framework_Resource_Post
      *
      * @access private
      * @version 7.0.0
      */
-    private function _get_resource($identifier = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::POST, $identifier
+            AAM_Framework_Type_Resource::POST
         );
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_Post
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_Post::class)) {
+            $result = $resource_identifier;
+        } elseif (is_numeric($resource_identifier)) {
+            $result = get_post($resource_identifier);
+        } elseif (is_array($resource_identifier)) {
+            if (isset($resource_identifier['id'])) {
+                $result = get_post($resource_identifier['id']);
+            } else {
+                // Let's get post_name
+                if (isset($resource_identifier['slug'])) {
+                    $post_name = $resource_identifier['slug'];
+                } elseif (isset($resource_identifier['post_name'])) {
+                    $post_name = $resource_identifier['post_name'];
+                }
+
+                if (!empty($post_name) && isset($resource_identifier['post_type'])) {
+                    $result = get_page_by_path(
+                        $post_name,
+                        OBJECT,
+                        $resource_identifier['post_type']
+                    );
+                }
+            }
+
+            // Do some additional validation if id & post_type are provided in the
+            // array
+            if (is_a($result, WP_Post::class)
+                && isset($resource_identifier['post_type'])
+                && $resource_identifier['post_type'] !== $result->post_type
+            ) {
+                throw new OutOfRangeException(
+                    'The post_type does not match actual post type'
+                );
+            }
+        }
+
+        if (!is_a($result, WP_Post::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
     /**
      * Determine if post is expired
      *
-     * @param AAM_Framework_Resource_Post $post
+     * @param array $permission
      *
      * @return bool
      * @access private
      *
      * @version 7.0.0
      */
-    private function _is_post_expired($post)
+    private function _is_post_expired($permission)
     {
-        if (isset($post['read']['expires_after'])) {
-            $after = intval($post['read']['expires_after']);
+        if (isset($permission['expires_after'])) {
+            $after = intval($permission['expires_after']);
         } else {
             $after = null;
         }

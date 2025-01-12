@@ -80,7 +80,7 @@ class AAM_Restful_ApiRoute
             // Delete a route permission
             $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_item_permissions'),
+                'callback'            => array($this, 'reset_item_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'id' => array(
@@ -109,15 +109,14 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = $service->get_items();
+            $result = $this->_get_route_list($this->_get_service($request));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -131,20 +130,21 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $id      = $request->get_param('id');
+            $result = $this->_find_route_by_id(
+                $this->_get_service($request),
+                $request->get_param('id')
+            );
 
-            // Unserialize the ID - extract HTTP method & endpoint
-            list($method, $endpoint) = explode(' ', base64_decode($id));
-
-            $result = $service->get_item($endpoint, $method);
+            if (empty($result)) {
+                throw new OutOfRangeException('Route does not exist');
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -158,8 +158,8 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_item_permissions(WP_REST_Request $request)
@@ -169,16 +169,13 @@ class AAM_Restful_ApiRoute
             $id      = $request->get_param('id');
             $effect  = $request->get_param('effect');
 
-            // Unserialize the ID - extract HTTP method & endpoint
-            list($method, $endpoint) = explode(' ', base64_decode($id));
-
             if ($effect === 'allow') {
-                $service->allow($endpoint, $method);
+                $service->allow(base64_decode($id));
             } else {
-                $service->deny($endpoint, $method);
+                $service->deny(base64_decode($id));
             }
 
-            $result = $service->item($endpoint, $method);
+            $result = $this->_find_route_by_id($service, $id);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -192,20 +189,18 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function delete_item_permissions(WP_REST_Request $request)
+    public function reset_item_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $id      = $request->get_param('id');
-
-            // Unserialize the ID - extract HTTP method & endpoint
-            list($method, $endpoint) = explode(' ', base64_decode($id));
-
-            $result = [ 'success' => $service->reset($endpoint, $method) ];
+            $result  = [
+                'success' => $this->_get_service($request)->reset(
+                    base64_decode($request->get_param('id'))
+                )
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -219,16 +214,15 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = [
-                'success' => $service->reset()
+            $result = [
+                'success' => $this->_get_service($request)->reset()
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -241,14 +235,75 @@ class AAM_Restful_ApiRoute
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
             && current_user_can('aam_manage_api_routes');
+    }
+
+    /**
+     * Get complete list of routes
+     *
+     * @param AAM_Framework_Service_ApiRoute $service
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_route_list($service)
+    {
+        $result = [];
+
+        // Iterating over the list of all registered API routes and compile the
+        // list
+        foreach (rest_get_server()->get_routes() as $endpoint => $handlers) {
+            $methods = [];
+
+            foreach ($handlers as $handler) {
+                $methods = array_merge(
+                    $methods, array_keys($handler['methods'])
+                );
+            }
+
+            foreach (array_unique($methods) as $method) {
+                array_push($result, [
+                    'endpoint'      => strtolower($endpoint),
+                    'method'        => strtoupper($method),
+                    'is_restricted' => $service->is_denied($endpoint, $method),
+                    'id'            => base64_encode(strtolower(
+                        "{$method} {$endpoint}
+                    "))
+                ]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find API route by ID
+     *
+     * @param AAM_Framework_Service_ApiRoute $service
+     * @param string                         $id
+     *
+     * @return array|null
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _find_route_by_id($service, $id)
+    {
+        $routes = $this->_get_route_list($service);
+        $found  = array_filter($routes, function($r) use ($id) {
+            return $r['id'] === $id;
+        });
+
+        return !empty($found) ? array_shift($found) : null;
     }
 
     /**

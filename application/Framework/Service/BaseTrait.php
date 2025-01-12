@@ -147,8 +147,11 @@ trait AAM_Framework_Service_BaseTrait
      * access level. Permissions are considered customized if there is at least one
      * permission explicitly allowed or denied.
      *
-     * @return boolean
+     * @return bool
+     * @access public
+     *
      * @version 7.0.0
+     * @todo Consider to remove
      */
     public function is_customized()
     {
@@ -162,11 +165,28 @@ trait AAM_Framework_Service_BaseTrait
     }
 
     /**
+     * Normalize resource identifier
+     *
+     * Convert resource identifier into proper shape for resource layer to consume
+     *
+     * @param mixed $resource_identifier
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        return $resource_identifier;
+    }
+
+    /**
      * Get current subject
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_access_level()
@@ -180,8 +200,8 @@ trait AAM_Framework_Service_BaseTrait
      * @param string $name
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _extended_method_exists($name)

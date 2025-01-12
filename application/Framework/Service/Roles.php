@@ -32,16 +32,21 @@ class AAM_Framework_Service_Roles
     public function deny($role_identifier, $permission)
     {
         try {
-            $resource = $this->_get_resource($role_identifier);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission(
-                    $permission, 'deny'
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'deny'
                 );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions(
-                    $permission, 'deny'
-                );
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'deny'
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -66,12 +71,21 @@ class AAM_Framework_Service_Roles
     public function allow($role_identifier, $permission)
     {
         try {
-            $resource = $this->_get_resource($role_identifier);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission($permission, 'allow');
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'allow'
+                );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions($permission, 'allow');
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'allow'
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -96,12 +110,13 @@ class AAM_Framework_Service_Roles
     public function is_denied_to($role_identifier, $permission)
     {
         try {
-            $result      = null;
-            $resource    = $this->_get_resource();
-            $permissions = $resource->get_permissions($role_identifier);
+            $result     = null;
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
+            $permission = $resource->get_permission($identifier, $permission);
 
-            if (isset($permissions[$permission])) {
-                $result = $permissions[$permission]['effect'] !== 'allow';
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
             }
 
             // Making sure that other implementations can affect the decision
@@ -200,7 +215,13 @@ class AAM_Framework_Service_Roles
     public function reset($role_identifier = null)
     {
         try {
-            $result = $this->_get_resource($role_identifier)->reset();
+            if (!empty($role_identifier)) {
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($role_identifier)
+                );
+            } else {
+                $result = $this->_get_resource()->reset();
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -234,19 +255,40 @@ class AAM_Framework_Service_Roles
     /**
      * Get role resource
      *
-     * @param mixed $identifier
-     *
      * @return AAM_Framework_Resource_Role
      * @access private
      *
      * @version 7.0.0
      */
-    private function _get_resource($identifier = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::ROLE,
-            $identifier
+            AAM_Framework_Type_Resource::ROLE
         );
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_Role
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_Role::class)) {
+            $result = $resource_identifier;
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_Role::class)) {
+            $result = $resource_identifier->get_core_instance();
+        } elseif (is_string($resource_identifier)) {
+            $result = wp_roles()->get_role($resource_identifier);
+        }
+
+        if (!is_a($result, WP_Role::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
 }

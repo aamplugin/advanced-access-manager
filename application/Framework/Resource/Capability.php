@@ -37,7 +37,11 @@ class AAM_Framework_Resource_Capability implements AAM_Framework_Resource_Interf
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
 
             $result = array_replace([
-                $bits[1] => [ 'effect' => $effect ]
+                $bits[1] => [
+                    'grant' => [
+                        'effect' => $effect
+                    ]
+                ]
             ], $result);
         }
 

@@ -226,25 +226,6 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
     }
 
     /**
-     * Check if permissions are customized
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function is_customized()
-    {
-        try {
-            $result = $this->_get_resource()->is_customized();
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
      * Get array of pre-processed hooks
      *
      * @return array
@@ -261,7 +242,8 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
 
             array_push(
                 $result,
-                apply_filters('aam_normalize_hook_filter', array_replace($data, [
+                apply_filters(
+                    'aam_normalize_hook_filter', array_replace($data['access'], [
                     'name'     => $name,
                     'priority' => is_numeric($priority) ? intval($priority) : $priority
                 ]))
@@ -286,21 +268,40 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
      */
     private function _update_permissions($hook, $priority, $effect, $return = null)
     {
-        $resource   = $this->_get_resource();
+        $resource_identifier = $this->_normalize_resource_identifier(
+            $hook, $priority
+        );
+
         $permission = [
-            "{$hook}|{$priority}" => [
-                'effect' => strtolower($effect)
-            ]
+            'effect' => strtolower($effect)
         ];
 
         if (!is_null($return)) {
-            $permission["{$hook}|{$priority}"]['return'] = $return;
+            $permission['return'] = $return;
         }
 
-        return $resource->set_permissions(array_replace(
-            $resource->get_permissions(true),
-            $permission
-        ));
+        return $this->_get_resource()->set_permission(
+            $resource_identifier, 'access', $permission
+        );
+    }
+
+    /**
+     * Normalize resource identifier
+     *
+     * @param string     $hook
+     * @param int|string $priority
+     *
+     * @return object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_resource_identifier($hook, $priority)
+    {
+        return (object) [
+            'name'     => $hook,
+            'priority' => $priority
+        ];
     }
 
     /**

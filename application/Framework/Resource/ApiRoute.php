@@ -47,7 +47,9 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
                 $key         = strtolower($verb . ' ' . $route);
                 $result = array_merge([
                     $key => [
-                        'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        'access' => [
+                            'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        ]
                     ]
                 ], $result);
             }

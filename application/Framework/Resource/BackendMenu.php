@@ -44,7 +44,9 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
             if (!empty($parsed[1])) {
                 $result = array_replace([
                     $parsed[1] => [
-                        'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        'access' => [
+                            'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        ]
                     ]
                 ], $result);
             }

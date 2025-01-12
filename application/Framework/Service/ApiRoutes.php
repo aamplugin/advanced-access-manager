@@ -10,9 +10,6 @@
 /**
  * AAM service for RESTful API routes
  *
- * @method bool set_access_mode(string $mode, string $endpoint = null) [Premium Method]
- * @method bool get_access_mode(string $endpoint = null) [Premium Method]
- *
  * @package AAM
  * @version 7.0.0
  */
@@ -22,117 +19,22 @@ class AAM_Framework_Service_ApiRoutes
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Return list of permissions
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function get_items()
-    {
-        try {
-            $result = [];
-
-            // Iterating over the list of all registered API routes and compile the
-            // list
-            foreach (rest_get_server()->get_routes() as $endpoint => $handlers) {
-                $methods = [];
-
-                foreach ($handlers as $handler) {
-                    $methods = array_merge(
-                        $methods, array_keys($handler['methods'])
-                    );
-                }
-
-                foreach (array_unique($methods) as $method) {
-                    array_push($result, $this->_prepare_route($endpoint, $method));
-                }
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_items method
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function items()
-    {
-        return $this->get_items();
-    }
-
-    /**
-     * Get existing route by combination of endpoint and HTTP method
-     *
-     * @param string      $endpoint Route endpoint
-     * @param string|null $method   HTTP method
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function get_item($endpoint, $method = 'GET')
-    {
-        try {
-            $routes = $this->get_items();
-            $found  = array_filter($routes, function($r) use ($endpoint, $method) {
-                return $r['endpoint'] === strtolower($endpoint)
-                            && $r['method'] === strtoupper($method);
-            });
-
-            if (empty($found)) {
-                throw new OutOfRangeException('Route does not exist');
-            } else{
-                $result = array_shift($found);
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias of the get_item method
-     *
-     * @param string $endpoint
-     * @param string $method
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function item($endpoint, $method = 'GET')
-    {
-        return $this->get_item($endpoint, $method);
-    }
-
-    /**
      * Restrict API route
      *
-     * @param mixed  $route
-     * @param string $method [Optional]
+     * @param mixed $api_route
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function deny($route, $method = 'GET')
+    public function deny($api_route)
     {
         try {
-            $route  = $this->_determine_route_key($route, $method);
-            $result = $this->_update_route_permission($route, true);
+            $result = $this->_update_route_permission(
+                $this->_normalize_resource_identifier($api_route),
+                true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -143,19 +45,20 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Allow API route
      *
-     * @param mixed  $route
-     * @param string $method [Optional]
+     * @param mixed $api_route
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function allow($route, $method = 'GET')
+    public function allow($api_route)
     {
         try {
-            $route  = $this->_determine_route_key($route, $method);
-            $result = $this->_update_route_permission($route, false);
+            $result = $this->_update_route_permission(
+                $this->_normalize_resource_identifier($api_route),
+                false
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -164,32 +67,27 @@ class AAM_Framework_Service_ApiRoutes
     }
 
     /**
-     * Reset all routes
+     * Reset a specific route permissions or all routes
      *
-     * @param mixed  $route  [Optional]
-     * @param string $method [Optional]
+     * @param mixed $api_route [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function reset($route = null, $method = null)
+    public function reset($api_route = null)
     {
         try {
             $resource = $this->_get_resource();
 
-            if (empty($route)) {
+            if (empty($api_route)) {
                 $result = $resource->reset();
             } else {
-                $route = $this->_determine_route_key($route, $method);
-                $perms = $resource->get_permissions(true);
-
-                if (array_key_exists($route, $perms)) {
-                    unset($perms[$route]);
-                }
-
-                $result = $resource->set_permissions($perms, true);
+                $result = $resource->remove_permission(
+                    $this->_normalize_resource_identifier($api_route),
+                    'access'
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -201,33 +99,34 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Check if API route is restricted
      *
-     * @param string|WP_REST_Request $route
-     * @param string                 $method [Optional]
+     * @param mixed $api_route
      *
      * @return boolean
      * @access public
      *
      * @version 7.0.0
      */
-    public function is_denied($route, $method = 'GET')
+    public function is_denied($api_route)
     {
         try {
-            $result   = null;
-            $resource = $this->_get_resource();
-            $key      = $this->_determine_route_key($route, $method);
+            $result      = null;
+            $resource    = $this->_get_resource();
+            $permissions = $resource->get_permission(
+                $this->_normalize_resource_identifier($api_route),
+                'access'
+            );
 
             // Step #1. Determine if route is explicitly restricted
-            if (isset($resource[$key])) {
-                $result = $resource[$key]['effect'] !== 'allow';
+            if (!empty($permissions)) {
+                $result = $resource['effect'] !== 'allow';
             }
 
             // Step #2. Allow third-party implementation to influence the decision
             $result = apply_filters(
                 'aam_api_route_is_denied_filter',
                 $result,
-                $resource,
-                $route,
-                $method
+                $api_route,
+                $resource
             );
 
             // Prepare the final answer
@@ -242,17 +141,16 @@ class AAM_Framework_Service_ApiRoutes
     /**
      * Check if API route is allowed
      *
-     * @param string|WP_REST_Request $route
-     * @param string                 $method [Optional]
+     * @param mixed $api_route
      *
      * @return boolean
      * @access public
      *
      * @version 7.0.0
      */
-    public function is_allowed($route, $method = 'GET')
+    public function is_allowed($api_route)
     {
-        $result = $this->is_denied($route, $method);
+        $result = $this->is_denied($api_route);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -273,29 +171,23 @@ class AAM_Framework_Service_ApiRoutes
     }
 
     /**
-     * Determine route key
-     *
-     * @param mixed  $route
-     * @param string $method
-     *
-     * @return string
-     * @access private
-     *
-     * @version 7.0.0
+     * @inheritDoc
      */
-    private function _determine_route_key($route, $method)
+    private function _normalize_resource_identifier($identifier)
     {
-        if (is_a($route, WP_REST_Request::class)) {
-            $endpoint = $route->get_route();
-            $method   = $route->get_method();
-        } elseif (is_string($route)) {
-            if (strpos($route, ' ') !== false) {
-                list($method, $endpoint) = explode(' ', $route, 2);
-            } else {
-                $endpoint = $route;
+        if (is_a($identifier, WP_REST_Request::class)) {
+            $endpoint = $identifier->get_route();
+            $method   = $identifier->get_method();
+        } elseif (is_string($identifier)) {
+            if (strpos($identifier, ' ') !== false) {
+                list($method, $endpoint) = explode(' ', $identifier, 2);
             }
-        } else {
-            throw new InvalidArgumentException('Invalid route');
+        } elseif (is_array($identifier)) {
+            extract($identifier);
+        }
+
+        if (empty($endpoint) || empty($method)) {
+            throw new InvalidArgumentException('Invalid API Route identifier');
         }
 
         return trim(strtolower("{$method} {$endpoint}"));
@@ -308,41 +200,15 @@ class AAM_Framework_Service_ApiRoutes
      * @param bool   $is_restricted
      *
      * @return array
-     * @access
+     * @access private
      *
      * @version 7.0.0
      */
     private function _update_route_permission($route, $is_restricted)
     {
-        $resource = $this->_get_resource();
-
-        // Prepare array of new permissions
-        return $resource->set_permissions(array_merge(
-            $resource->get_permissions(true),
-            [ $route => [ 'effect' => $is_restricted ? 'deny' : 'allow' ] ]
-        ));
-    }
-
-    /**
-     * Normalize and prepare the route model
-     *
-     * @param string $endpoint
-     * @param string $method
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     * @todo - Move this to RESTful class
-     */
-    private function _prepare_route($endpoint, $method)
-    {
-        return [
-            'endpoint'      => strtolower($endpoint),
-            'method'        => strtoupper($method),
-            'is_restricted' => $this->is_denied($endpoint, $method),
-            'id'            => base64_encode(strtolower("{$method} {$endpoint}"))
-        ];
+        return $this->_get_resource()->set_permission(
+            $route, 'access', $is_restricted
+        );
     }
 
 }

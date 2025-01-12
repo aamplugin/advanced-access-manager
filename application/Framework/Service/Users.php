@@ -32,16 +32,21 @@ class AAM_Framework_Service_Users
     public function deny($user_identifier, $permission)
     {
         try {
-            $resource = $this->_get_resource($user_identifier);
+            $resource  = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission(
-                    $permission, 'deny'
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'deny'
                 );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions(
-                    $permission, 'deny'
-                );
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'deny'
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -66,12 +71,21 @@ class AAM_Framework_Service_Users
     public function allow($user_identifier, $permission)
     {
         try {
-            $resource = $this->_get_resource($user_identifier);
+            $resource  = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
 
             if (is_string($permission)) {
-                $result = $resource->add_permission($permission, 'allow');
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'allow'
+                );
             } elseif (is_array($permission)) {
-                $result = $resource->add_permissions($permission, 'allow');
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'allow'
+                    );
+                }
             } else {
                 throw new InvalidArgumentException('Invalid permission type');
             }
@@ -99,13 +113,15 @@ class AAM_Framework_Service_Users
     public function is_denied_to($user_identifier, $permission)
     {
         try {
-            $result   = null;
-            $resource = $this->_get_resource($user_identifier);
+            $result     = null;
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
+            $data       = $resource->get_permission($identifier, $permission);
 
-            if (isset($resource[$permission])) {
-                $result = $resource[$permission]['effect'] !== 'allow';
+            if (!empty($data)) {
+                $result = $data['effect'] !== 'allow';
             } else { // Get the list of all user roles and properly merge permissions
-                $user_roles    = array_values($resource->roles);
+                $user_roles    = array_values($identifier->roles);
                 $multi_support = $this->config->get(
                     'core.settings.multi_access_levels'
                 );
@@ -118,13 +134,15 @@ class AAM_Framework_Service_Users
                 $acl         = $resource->get_access_level();
 
                 foreach($roles as $slug) {
-                    $permissions = $this->misc->merge_permissions(
-                        $acl->get_resource(
-                            AAM_Framework_Type_Resource::ROLE, $slug
-                        )->get_permissions(),
-                        $permissions,
-                        AAM_Framework_Type_Resource::ROLE
-                    );
+                    if (wp_roles()->is_role($slug)) { // Ignore invalid roles
+                        $permissions = $this->misc->merge_permissions(
+                            $acl->get_resource(
+                                AAM_Framework_Type_Resource::ROLE
+                            )->get_permissions(wp_roles()->get_role($slug)),
+                            $permissions,
+                            AAM_Framework_Type_Resource::ROLE
+                        );
+                    }
                 }
 
                 if (isset($permissions[$permission])) {
@@ -183,7 +201,13 @@ class AAM_Framework_Service_Users
     public function reset($user_identifier = null)
     {
         try {
-            $result = $this->_get_resource($user_identifier)->reset();
+            if (!empty($user_identifier)) {
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($user_identifier)
+                );
+            } else {
+                $result = $this->_get_resource()->reset();
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -262,19 +286,46 @@ class AAM_Framework_Service_Users
     /**
      * Get user resource
      *
-     * @param mixed $identifier
-     *
      * @return AAM_Framework_Resource_User
      * @access private
      *
      * @version 7.0.0
      */
-    private function _get_resource($identifier = null)
+    private function _get_resource()
     {
         return $this->_get_access_level()->get_resource(
-            AAM_Framework_Type_Resource::USER,
-            $identifier
+            AAM_Framework_Type_Resource::USER
         );
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_User
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_User::class)) {
+            $result = $resource_identifier;
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_User::class)) {
+            $result = $resource_identifier->get_core_instance();
+        } else {
+            $user = AAM_Framework_Manager::_()->users->get_user(
+                $resource_identifier
+            );
+
+            if (is_a($user, AAM_Framework_Proxy_User::class)) {
+                $result = $user->get_core_instance();
+            }
+        }
+
+        if (!is_a($result, WP_User::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
 }

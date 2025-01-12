@@ -60,12 +60,22 @@ class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
                 }
 
                 $result = array_replace([
-                    "{$hook}|{$priority}" => $permission
+                    "{$hook}|{$priority}" => [
+                        'access' => $permission
+                    ]
                 ], $result);
             }
         }
 
         return apply_filters('aam_apply_policy_filter', $result, $this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _get_resource_id($identifier)
+    {
+        return $identifier->name . '|' . $identifier->priority;
     }
 
 }

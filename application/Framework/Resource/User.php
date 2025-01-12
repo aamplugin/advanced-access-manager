@@ -25,34 +25,6 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
 
 
     /**
-     * @inheritDoc
-     */
-    private function _get_resource_instance($resource_identifier)
-    {
-        $result = null;
-
-        if (is_a($resource_identifier, WP_User::class)) {
-            $result = $resource_identifier;
-        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_User::class)) {
-            $result = $resource_identifier->get_core_instance();
-        } else {
-            $user = AAM_Framework_Manager::_()->users->get_user(
-                $resource_identifier
-            );
-
-            if (is_a($user, AAM_Framework_Proxy_User::class)) {
-                $result = $user->get_core_instance();
-            }
-        }
-
-        if (!is_a($result, WP_User::class)) {
-            throw new OutOfRangeException('The resource identifier is invalid');
-        }
-
-        return $result;
-    }
-
-    /**
      * Determine correct resource identifier based on provided data
      *
      * @param WP_User $resource_identifier

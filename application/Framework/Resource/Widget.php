@@ -44,20 +44,36 @@ class AAM_Framework_Resource_Widget implements AAM_Framework_Resource_Interface
             if (!empty($parsed[1])) {
                 // Determining correct internal resource id
                 if (array_key_exists('Area', $stm)) {
-                    $id = strtolower($stm['Area']) . '_' . $parsed[1];
+                    $id =  $parsed[1] . '|' . strtolower($stm['Area']);
                 } else {
                     $id = $parsed[1];
                 }
 
                 $result = array_replace([
                     $id => [
-                        'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        'access' => [
+                            'effect' => $effect !== 'allow' ? 'deny' : 'allow'
+                        ]
                     ]
                 ], $result);
             }
         }
 
         return apply_filters('aam_apply_policy_filter', $result, $this);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function _get_resource_id($identifier)
+    {
+        $result = $identifier->slug;
+
+        if (!empty($identifier->area)) {
+            $result .= '|' . $identifier->area;
+        }
+
+        return $result;
     }
 
 }

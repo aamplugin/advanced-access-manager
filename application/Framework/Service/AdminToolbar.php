@@ -42,6 +42,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
     public function get_items()
     {
@@ -70,6 +71,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
     public function items()
     {
@@ -85,6 +87,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
     public function get_item($item_id)
     {
@@ -92,9 +95,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             $result = $this->_find_item_by_id($item_id, $this->get_items());
 
             if ($result === null) {
-                throw new OutOfRangeException(
-                    'Admin toolbar menu item does not exist'
-                );
+                throw new OutOfRangeException('Admin toolbar item does not exist');
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -112,6 +113,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
     public function item($item_id)
     {
@@ -131,7 +133,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     public function deny($item_id)
     {
         try {
-            $result = $this->_update_item_permission($item_id, true);
+            $result = $this->_update_item_permission(
+                $this->_normalize_resource_identifier($item_id),
+                true
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -145,14 +150,17 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function allow($item_id)
     {
         try {
-            $result = $this->_update_item_permission($item_id, false);
+            $result = $this->_update_item_permission(
+                $this->_normalize_resource_identifier($item_id),
+                false
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -163,18 +171,20 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Reset admin toolbar permissions
      *
-     * @param string|null $item_id [optional]
+     * @param string $item_id [Optional]
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($item_id = null)
     {
         try {
-            if (is_string($item_id)) {
-                $result = $this->_delete_item_permission($item_id);
+            if (!empty($resource_identifier)) {
+                $result = $this->_remove_item_permission(
+                    $this->_normalize_resource_identifier($item_id)
+                );
             } else {
                 $result = $this->_get_resource()->reset();
             }
@@ -190,9 +200,9 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      *
      * @param string $item_id
      *
-     * @return boolean
-     *
+     * @return bool
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_denied($item_id)
@@ -202,11 +212,14 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
         try {
             // Getting all the defined permissions
             $resource   = $this->_get_resource();
-            $permissions = $resource->get_permissions();
+            $permission = $resource->get_permission(
+                $this->_normalize_resource_identifier($item_id),
+                'access'
+            );
 
             // Step #1. Checking if provided item has any access controls defined
-            if (isset($permissions[$item_id])) {
-                $result = $permissions[$item_id]['effect'] !== 'allow';
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
             }
 
             // Step #2. Checking if item has parent item and if so, determining if
@@ -216,10 +229,13 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                 $item = $this->_find_item_by_id($item_id, $this->_get_raw_menu());
 
                 if (!empty($item['parent_id'])) {
-                    $parent_id = $item['parent_id'];
+                    $permission = $resource->get_permission(
+                        $this->_normalize_resource_identifier($item['parent_id']),
+                        'access'
+                    );
 
-                    if (isset($permissions[$parent_id])) {
-                        $result = $permissions[$parent_id]['effect'] !== 'allow';
+                    if (!empty($permission)) {
+                        $result = $permission['effect'] !== 'allow';
                     }
                 }
             }
@@ -248,8 +264,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id
      *
      * @return bool|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_allowed($item_id)
@@ -262,11 +278,9 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Get Admin Toolbar resource
      *
-     * @param string $item_id [Optional]
-     *
      * @return AAM_Framework_Resource_AdminToolbar
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_resource()
@@ -283,20 +297,17 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param bool   $is_hidden [Optional]
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _update_item_permission($item_id, $is_hidden = true)
     {
-        $resource = $this->_get_resource();
-
-        // Prepare array of new permissions
-        $perms = array_merge($resource->get_permissions(true), [
-            $item_id => [ 'effect' => $is_hidden ? 'deny' : 'allow' ]
-        ]);
-
-        return $resource->set_permissions($perms);
+        return $this->_get_resource()->set_permission(
+            $this->_normalize_resource_identifier($item_id),
+            'access',
+            $is_hidden
+        );
     }
 
     /**
@@ -305,22 +316,16 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $item_id Menu item id
      *
      * @return bool
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _delete_item_permission($item_id)
+    private function _remove_item_permission($item_id)
     {
-        $resource = $this->_get_resource();
-        $settings = [];
-
-        foreach($resource->get_permissions(true) as $id => $permission) {
-            if ($id !== $item_id) {
-                $settings[$id] = $permission;
-            }
-        }
-
-        return $resource->set_permissions($settings);
+        return $this->_get_resource()->remove_permission(
+            $this->_normalize_resource_identifier($item_id),
+            'access'
+        );
     }
 
     /**
@@ -330,8 +335,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param array  $items
      *
      * @return array|null
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _find_item_by_id($item_id, $items)
@@ -361,8 +366,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param array $branch
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_item_branch($branch)
@@ -386,21 +391,17 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param array $item
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_item($item)
     {
-        $resource = $this->_get_resource();
         $response = [
             'id'            => $item['id'],
             'uri'           => $this->_prepare_item_uri($item['href']),
             'name'          => base64_decode($item['title']),
-            'is_restricted' => $this->is_denied($item['id']),
-            'is_inherited'  => !array_key_exists(
-                $item['id'], $resource->get_permissions(true)
-            )
+            'is_restricted' => $this->is_denied($item['id'])
         ];
 
         if (!empty($item['parent_id'])) {
@@ -416,8 +417,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $href
      *
      * @return string
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_item_uri($href)
@@ -431,8 +432,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * This method also caches the admin menu for future usage
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_raw_menu()
@@ -488,8 +489,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param array $items
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _normalize_items($items)
@@ -517,8 +518,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param string $parent_id
      *
      * @return array
+     * @access private
      *
-     * @access public
      * @version 7.0.0
      */
     private function _get_branch_children($branch, $parent_id)
@@ -561,8 +562,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @param array $item
      *
      * @return string
+     * @access private
      *
-     * @access protected
      * @version 7.0.0
      */
     private function _prepare_item_title($item)

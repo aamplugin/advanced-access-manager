@@ -61,11 +61,7 @@ class AAM_Restful_UrlService
                             'type' => [
                                 'description' => 'Redirect type',
                                 'type'        => 'string',
-                                'required'    => true,
-                                'enum'        => apply_filters(
-                                    'aam_url_access_allowed_rule_types_filter',
-                                    AAM_Framework_Service_Urls::ALLOWED_REDIRECT_TYPES
-                                )
+                                'required'    => true
                             ],
                             'message' => [
                                 'description' => 'Custom access denied message',
@@ -154,12 +150,7 @@ class AAM_Restful_UrlService
                         'properties' => [
                             'type' => [
                                 'description' => 'Redirect type',
-                                'type'        => 'string',
-                                'required'    => true,
-                                'enum'        => apply_filters(
-                                    'aam_url_access_allowed_rule_types_filter',
-                                    AAM_Framework_Service_Urls::ALLOWED_REDIRECT_TYPES
-                                )
+                                'type'        => 'string'
                             ],
                             'message' => [
                                 'description' => 'Custom access denied message',

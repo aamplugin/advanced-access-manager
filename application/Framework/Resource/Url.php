@@ -40,10 +40,12 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
                 $url    = $manager->misc->sanitize_url($parsed[1]);
                 $result = array_replace([
                     $url => [
-                        'effect'   => $effect !== 'allow' ? 'deny' : 'allow',
-                        'redirect' => $manager->policy->convert_statement_redirect(
-                            $stm
-                        )
+                        'access' => [
+                            'effect'   => $effect !== 'allow' ? 'deny' : 'allow',
+                            'redirect' => $manager->policy->convert_statement_redirect(
+                                $stm
+                            )
+                        ]
                     ]
                 ], $result);
             }

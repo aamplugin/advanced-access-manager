@@ -41,6 +41,7 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_Metaboxes
      */
     public function get_items($screen_id = null)
     {
@@ -87,6 +88,7 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_Metaboxes
      */
     public function items($screen_id = null)
     {
@@ -106,6 +108,7 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_Metaboxes
      */
     public function get_item($slug, $screen_id = null)
     {
@@ -139,6 +142,7 @@ class AAM_Framework_Service_Metaboxes
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move to AAM_Service_Metaboxes
      */
     public function item($slug, $screen_id = null)
     {
@@ -159,11 +163,7 @@ class AAM_Framework_Service_Metaboxes
     public function deny($metabox, $screen_id = null)
     {
         try {
-            $slug   = $this->_prepare_metabox_slug($metabox);
-            $result = $this->_update_item_permission(
-                is_null($screen_id) ? $slug : $screen_id . '_' . $slug,
-                true
-            );
+            $result = $this->_update_item_permission($metabox, $screen_id, 'deny');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -185,11 +185,7 @@ class AAM_Framework_Service_Metaboxes
     public function allow($metabox, $screen_id = null)
     {
         try {
-            $slug   = $this->_prepare_metabox_slug($metabox);
-            $result = $this->_update_item_permission(
-                is_null($screen_id) ? $slug : $screen_id . '_' . $slug,
-                false
-            );
+            $result = $this->_update_item_permission($metabox, $screen_id, 'allow');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -223,27 +219,9 @@ class AAM_Framework_Service_Metaboxes
             if (is_null($metabox) && is_null($screen_id)) {
                 $result = $resource->reset();
             } else {
-                $settings = $resource->get_permissions(true);
-                $slug     = $this->_prepare_metabox_slug($metabox);
-
-                // Check if we have any permissions defined just for a given slug.
-                // Keep in mind that the $slug can be also a screen id because the
-                // reset method has two overloads
-                if (array_key_exists($slug, $settings)) {
-                    unset($settings[$slug]);
-                } elseif(array_key_exists("{$screen_id}_{$slug}", $settings))  {
-                    unset($settings["{$screen_id}_{$slug}"]);
-                } else {
-                    $settings = apply_filters(
-                        'aam_reset_metaboxes_permissions_filter',
-                        $settings,
-                        $slug,
-                        $screen_id,
-                        $resource
-                    );
-                }
-
-                $result = $resource->set_permissions($settings, true);
+                $result = $resource->reset($this->_normalize_resource_identifier(
+                    $metabox, $screen_id
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -306,26 +284,15 @@ class AAM_Framework_Service_Metaboxes
      */
     private function _is_denied($metabox, $screen_id)
     {
-        $result = null;
+        $result     = null;
+        $resource   = $this->_get_resource();
+        $permission = $resource->get_permission(
+            $this->_normalize_resource_identifier($metabox, $screen_id),
+            'access'
+        );
 
-        // Determining metabox slug
-        $slug = $this->_prepare_metabox_slug($metabox);
-
-        // Getting resource
-        $resource = $this->_get_resource();
-
-        // Step #1. Check if there are any settings for metabox and specific
-        // screen ID
-        $screen_id = $this->_prepare_screen_id($screen_id);
-
-        if (!is_null($screen_id) && isset($resource[$screen_id . '_'. $slug])) {
-            $result = $resource[$screen_id . '_'. $slug]['effect'] !== 'allow';
-        }
-
-        // Step #2. If there are no scoped access controls defined to a given
-        // metabox, check if there are any settings for it by the slug as-is
-        if (is_null($result) && isset($resource[$slug])) {
-            $result = $resource[$slug]['effect'] !== 'allow';
+        if (!empty($permission)) {
+            $result = $permission['effect'] !== 'allow';
         }
 
         // Allow third-party implementations to integrate with the
@@ -333,9 +300,9 @@ class AAM_Framework_Service_Metaboxes
         return apply_filters(
             'aam_metabox_is_denied_filter',
             $result,
-            $resource,
+            $metabox,
             $screen_id,
-            $slug
+            $resource
         );
     }
 
@@ -352,6 +319,25 @@ class AAM_Framework_Service_Metaboxes
         return $this->_get_access_level()->get_resource(
             AAM_Framework_Type_Resource::METABOX
         );
+    }
+
+    /**
+     * Convert metabox and screen ID into resource identifier
+     *
+     * @param mixed       $metabox
+     * @param string|null $screen_id
+     *
+     * @return object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_resource_identifier($metabox, $screen_id)
+    {
+       return (object) [
+            'slug'      => $this->_prepare_metabox_slug($metabox),
+            'screen_id' => $screen_id
+       ];
     }
 
     /**
@@ -384,36 +370,6 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
-     * Prepare screen ID
-     *
-     * @param string|null $screen_id
-     *
-     * @return string|null
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _prepare_screen_id($screen_id)
-    {
-        $result = null;
-
-        if (is_null($screen_id)) {
-            if (function_exists('get_current_screen')) {
-                $screen = get_current_screen();
-
-                if (is_a($screen, WP_Screen::class)) {
-                    $result = $screen->id;
-                }
-            }
-        } elseif (is_string($screen_id)) {
-            $result = $screen_id;
-        }
-
-        return $result;
-    }
-
-
-    /**
      * Update existing metabox permission
      *
      * @param string $slug      Sudo-id for the metabox
@@ -427,13 +383,9 @@ class AAM_Framework_Service_Metaboxes
     private function _update_item_permission($slug, $is_denied)
     {
         try {
-            $resource = $this->_get_resource();
-
-            // Prepare array of new permissions and save them
-            $result = $resource->set_permissions(array_merge(
-                $resource->get_permissions(true),
-                [ $slug => [ 'effect' => $is_denied ? 'deny' : 'allow' ] ]
-            ));
+            $result = $this->_get_resource()->set_permission(
+                $slug, 'access', $is_denied
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

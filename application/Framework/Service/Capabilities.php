@@ -28,6 +28,7 @@ class AAM_Framework_Service_Capabilities
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move it to AAM_Service_Capability
      */
     public function get_all()
     {
@@ -60,6 +61,7 @@ class AAM_Framework_Service_Capabilities
      * @access public
      *
      * @version 7.0.0
+     * @todo - Move it to AAM_Service_Capability
      */
     public function list()
     {
@@ -131,7 +133,7 @@ class AAM_Framework_Service_Capabilities
             $access_level = $this->_get_access_level();
 
             if ($this->_is_acceptable_access_level()) {
-                $result = $this->_get_resource()->remove_permission($capability);
+                $result = $this->_get_access_level()->remove_cap($capability);
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',
@@ -168,7 +170,7 @@ class AAM_Framework_Service_Capabilities
      * Grant capability to the access level
      *
      * @param string $capability
-     * @param bool   $ignore_format [optional]
+     * @param bool   $ignore_format [Optional]
      *
      * @return bool|WP_Error
      * @access public
@@ -185,7 +187,7 @@ class AAM_Framework_Service_Capabilities
      *
      * @param string $old_slug
      * @param string $new_slug
-     * @param bool   $ignore_format [optional]
+     * @param bool   $ignore_format [Optional]
      *
      * @return bool|WP_Error
      * @access public
@@ -204,15 +206,12 @@ class AAM_Framework_Service_Capabilities
 
             // Replace only if capability actually assigned to the access level
             if ($this->_is_acceptable_access_level() && $this->_exists($old_slug)) {
-                $resource = $this->_get_resource();
-                $explicit = $resource->get_permissions(true);
-
                 // Step #2. Determine if old capability is granted to current access
                 // level
-                $is_granted = $explicit[$old_slug]['effect'] === 'allow';
+                $is_granted = $this->_is_allowed($old_slug);
 
                 // Step #3. Remove old capability
-                $resource->remove_permission($old_slug);
+                $this->_get_access_level()->remove_cap($old_slug);
 
                 // Step #4. Add new capability
                 $this->_get_access_level()->add_cap($new_slug, $is_granted);
@@ -329,12 +328,12 @@ class AAM_Framework_Service_Capabilities
      */
     private function _is_allowed($capability)
     {
-        $resource    = $this->_get_resource();
-        $permissions = $resource->get_permissions();
+        $resource   = $this->_get_resource();
+        $permission = $resource->get_permission($capability, 'grant');
 
         // Determine if capability is explicitly granted with AAM
-        if (array_key_exists($capability, $permissions)) {
-            $result = $permissions[$capability]['effect'] === 'allow';
+        if (!empty($permission)) {
+            $result = $permission['effect'] === 'allow';
         } else {
             $result = apply_filters(
                 'aam_capability_is_allowed_filter',
