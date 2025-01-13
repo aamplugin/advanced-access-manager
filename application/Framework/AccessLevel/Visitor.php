@@ -22,7 +22,7 @@ class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Int
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_AccessLevel::VISITOR;
+    protected $type = AAM_Framework_Type_AccessLevel::VISITOR;
 
     /**
      * @inheritDoc

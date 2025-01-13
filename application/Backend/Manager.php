@@ -232,7 +232,7 @@ class AAM_Backend_Manager
                     'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
                 ),
                 'subject'   => array(
-                    'type'  => $access_level::TYPE,
+                    'type'  => $access_level->type,
                     'id'    => $access_level->get_id(),
                     'name'  => $access_level->get_display_name()
                 ),

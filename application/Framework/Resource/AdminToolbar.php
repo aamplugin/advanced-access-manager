@@ -21,7 +21,7 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::TOOLBAR;
+    protected $type = AAM_Framework_Type_Resource::TOOLBAR;
 
     /**
      * @inheritDoc

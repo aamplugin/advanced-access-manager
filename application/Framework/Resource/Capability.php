@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Capability implements AAM_Framework_Resource_Interf
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::CAPABILITY;
+    protected $type = AAM_Framework_Type_Resource::CAPABILITY;
 
     /**
      * @inheritDoc

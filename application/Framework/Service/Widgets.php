@@ -142,7 +142,7 @@ class AAM_Framework_Service_Widgets
     public function deny($widget, $website_area = null)
     {
         try {
-            $result = $this->_update_item_permission($widget, $website_area, true);
+            $result = $this->_update_item_permission($widget, $website_area, 'deny');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -164,7 +164,7 @@ class AAM_Framework_Service_Widgets
     public function allow($widget, $website_area = null)
     {
         try {
-            $result = $this->_update_item_permission($widget, $website_area, false);
+            $result = $this->_update_item_permission($widget, $website_area, 'allow');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -219,24 +219,7 @@ class AAM_Framework_Service_Widgets
     public function is_denied($widget)
     {
         try {
-            $result     = null;
-            $identifier = $this->_normalize_resource_identifier($widget);
-            $resource   = $this->_get_resource();
-            $permission = $resource->get_permission($identifier, 'access');
-
-            // Determine if widget is restricted
-            if (!empty($permission)) {
-                $result = $permission['effect'] !== 'allow';
-            }
-
-            // Allow third-party implementations to integrate with the
-            // decision making process
-            $result = apply_filters(
-                'aam_widget_is_denied_filter',
-                $result,
-                $widget,
-                $resource
-            );
+            $result = $this->_is_denied($widget);
 
             // Prepare the final answer
             $result = is_bool($result) ? $result : false;
@@ -250,16 +233,16 @@ class AAM_Framework_Service_Widgets
     /**
      * Determine if metabox is allowed
      *
-     * @param string $slug
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      * @access public
      *
      * @version 7.0.0
      */
-    public function is_allowed($slug)
+    public function is_allowed($widget)
     {
-        $result = $this->is_denied($slug);
+        $result = $this->is_denied($widget);
 
         return is_bool($result) ? !$result : $result;
     }
@@ -276,6 +259,50 @@ class AAM_Framework_Service_Widgets
     {
         return $this->_get_access_level()->get_resource(
             AAM_Framework_Type_Resource::WIDGET
+        );
+    }
+
+     /**
+     * Check if metabox is restricted
+     *
+     * @param string $metabox
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_denied($widget)
+    {
+        $result     = null;
+        $resource   = $this->_get_resource();
+        $identifier = $this->_normalize_resource_identifier($widget);
+
+        // Step #1. Check for widget & screen ID first
+        $permission = $resource->get_permission($identifier, 'access');
+
+        if (!empty($permission)) {
+            $result = $permission['effect'] !== 'allow';
+        }
+
+        // Step #2. If there is no decision made and screen ID is not empty, then
+        // check for metabox itself only
+        if (is_null($result) && !empty($identifier->area)) {
+            $identifier->area = null;
+            $permission = $resource->get_permission($identifier, 'access');
+
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            }
+        }
+
+        // Allow third-party implementations to integrate with the
+        // decision making process
+        return apply_filters(
+            'aam_widget_is_denied_filter',
+            $result,
+            $widget,
+            $resource
         );
     }
 
@@ -317,18 +344,14 @@ class AAM_Framework_Service_Widgets
      *
      * @version 7.0.0
      */
-    private function _update_item_permission($widget, $area, $is_denied)
+    private function _update_item_permission($widget, $area, $effect)
     {
         try {
             $resource = $this->_get_resource();
             $identifier = $this->_normalize_resource_identifier($widget, $area);
 
             // Prepare array of new permissions and save them
-            $result = $resource->set_permission(
-                $identifier,
-                'access',
-                $is_denied ? 'deny' : 'allow'
-            );
+            $result = $resource->set_permission($identifier, 'access', $effect);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -351,7 +374,7 @@ class AAM_Framework_Service_Widgets
     {
        return (object) [
             'slug' => $this->_prepare_widget_slug($widget),
-            'area' => empty($area) ? $this->_determine_widget_area($area) : $area
+            'area' => empty($area) ? $this->_determine_widget_area($widget) : $area
        ];
     }
 

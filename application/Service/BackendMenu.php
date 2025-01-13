@@ -204,6 +204,7 @@ class AAM_Service_BackendMenu
      *
      * @param array                             $submenus
      * @param AAM_Framework_Service_BackendMenu $service
+     * @param bool                              $default_effect
      *
      * @return array
      * @access private

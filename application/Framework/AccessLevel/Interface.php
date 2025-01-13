@@ -51,19 +51,13 @@
  * @property AAM_Framework_Utility_Jwt $jwt
  * @property AAM_Framework_Utility_Policy $policy
  * @property AAM_Framework_Utility_Content $content
+ * @property string $type
  *
  * @package AAM
  * @version 7.0.0
  */
 interface AAM_Framework_AccessLevel_Interface
 {
-
-    /**
-     * Access level type
-     *
-     * @version 7.0.0
-     */
-    const TYPE = null;
 
     /**
      * Proxy methods to WordPress core instance

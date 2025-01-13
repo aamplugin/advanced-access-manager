@@ -642,7 +642,7 @@ class AAM_Restful_Identity
         $identity, $permissions, $access_level
     ) {
         // Prepare proper resource
-        if ($identity::TYPE === 'role') {
+        if ($identity->type === 'role') {
             $resource = $access_level->get_resource(
                 AAM_Framework_Type_Resource::ROLE,
                 $identity
@@ -683,7 +683,7 @@ class AAM_Restful_Identity
         $identity, $permission, $effect, $access_level
     ) {
         // Prepare proper resource
-        if ($identity::TYPE === 'role') {
+        if ($identity->type === 'role') {
             $resource = $access_level->get_resource(
                 AAM_Framework_Type_Resource::ROLE,
                 $identity

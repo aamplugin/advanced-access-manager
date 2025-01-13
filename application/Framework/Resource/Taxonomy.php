@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interfac
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::TAXONOMY;
+    protected $type = AAM_Framework_Type_Resource::TAXONOMY;
 
     /**
      * Determine correct resource identifier based on provided data

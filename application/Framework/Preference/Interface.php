@@ -10,20 +10,13 @@
 /**
  * Interface for all resources that are classified as such that hold preferences
  *
+ * @property string $type
+ *
  * @package AAM
  * @version 7.0.0
  */
 interface AAM_Framework_Preference_Interface
 {
-
-    /**
-     * Preference type
-     *
-     * @var string
-     *
-     * @version 7.0.0
-     */
-    const TYPE = null;
 
     /**
      * Get access level this resource is tight to
@@ -50,7 +43,7 @@ interface AAM_Framework_Preference_Interface
      *
      * @param array $preferences
      *
-     * @return void
+     * @return bool
      * @access public
      *
      * @version 7.0.0

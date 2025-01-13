@@ -21,7 +21,7 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::BACKEND_MENU;
+    protected $type = AAM_Framework_Type_Resource::BACKEND_MENU;
 
     /**
      * @inheritDoc

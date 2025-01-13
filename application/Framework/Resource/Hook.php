@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::HOOK;
+    protected $type = AAM_Framework_Type_Resource::HOOK;
 
     /**
      * @inheritDoc

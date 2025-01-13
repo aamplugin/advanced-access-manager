@@ -21,8 +21,7 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::USER;
-
+    protected $type = AAM_Framework_Type_Resource::USER;
 
     /**
      * Determine correct resource identifier based on provided data
@@ -63,7 +62,7 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
             if (!empty($id)) {
                 $result[$id] = array_replace(
                     isset($result[$id]) ? $result[$id] : [],
-                    $manager->policy->statement_to_permission($stm, self::TYPE)
+                    $manager->policy->statement_to_permission($stm, $this->type)
                 );
             }
         }

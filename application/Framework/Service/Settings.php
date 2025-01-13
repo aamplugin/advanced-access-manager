@@ -215,7 +215,7 @@ class AAM_Framework_Service_Settings
     {
         try {
             $access_level = $this->_get_access_level();
-            $type         = $access_level::TYPE;
+            $type         = $access_level->type;
             $id           = $access_level->get_id();
 
             if (in_array(
@@ -254,7 +254,7 @@ class AAM_Framework_Service_Settings
     {
         $result       = null;
         $access_level = $this->_get_access_level();
-        $type         = $access_level::TYPE;
+        $type         = $access_level->type;
         $id           = $access_level->get_id();
 
         if (in_array(
@@ -285,7 +285,7 @@ class AAM_Framework_Service_Settings
     {
         $result       = null;
         $access_level = $this->_get_access_level();
-        $type         = $access_level::TYPE;
+        $type         = $access_level->type;
         $id           = $access_level->get_id();
 
         if (in_array($type, [

@@ -13,19 +13,13 @@
  * Resource that is classified as such that contains permissions, have slightly
  * different way to handle its data, especially when it comes to merge permissions.
  *
+ * @property string $type
+ *
  * @package AAM
  * @version 7.0.0
  */
 interface AAM_Framework_Resource_Interface
 {
-
-    /**
-     * Resource type (aka alias)
-     *
-     * @var string
-     * @version 7.0.0
-     */
-    const TYPE = null;
 
     /**
      * Get access level this resource is tight to

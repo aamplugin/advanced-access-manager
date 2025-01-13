@@ -25,7 +25,7 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_AccessLevel::USER;
+    protected $type = AAM_Framework_Type_AccessLevel::USER;
 
     /**
      * Get parent access level

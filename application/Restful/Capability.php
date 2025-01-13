@@ -319,9 +319,9 @@ class AAM_Restful_Capability
      */
     private function _get_access_level_caps($access_level)
     {
-        if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
+        if ($access_level->type === AAM_Framework_Type_AccessLevel::USER) {
             $result = $access_level->allcaps;
-        } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
+        } elseif ($access_level->type === AAM_Framework_Type_AccessLevel::ROLE) {
             $result = $access_level->capabilities;
         } else {
             $result = [];

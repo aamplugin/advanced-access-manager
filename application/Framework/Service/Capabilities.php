@@ -98,7 +98,7 @@ class AAM_Framework_Service_Capabilities
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',
-                    $access_level::TYPE
+                    $access_level->type
                 ));
             }
         } catch (Exception $e) {
@@ -135,7 +135,7 @@ class AAM_Framework_Service_Capabilities
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',
-                    $access_level::TYPE
+                    $access_level->type
                 ));
             }
         } catch (Exception $e) {
@@ -303,9 +303,9 @@ class AAM_Framework_Service_Capabilities
     {
         $access_level = $this->_get_access_level();
 
-        if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
+        if ($access_level->type === AAM_Framework_Type_AccessLevel::USER) {
             $caps = $access_level->caps;
-        } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
+        } elseif ($access_level->type === AAM_Framework_Type_AccessLevel::ROLE) {
             $caps = $access_level->capabilities;
         } else {
             $caps = [];
@@ -363,7 +363,7 @@ class AAM_Framework_Service_Capabilities
     {
         $access_level = $this->_get_access_level();
 
-        return in_array($access_level::TYPE, [
+        return in_array($access_level->type, [
             AAM_Framework_Type_AccessLevel::USER,
             AAM_Framework_Type_AccessLevel::ROLE
         ], true);

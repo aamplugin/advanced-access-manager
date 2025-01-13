@@ -25,7 +25,7 @@ class AAM_Framework_AccessLevel_Default implements AAM_Framework_AccessLevel_Int
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_AccessLevel::ALL;
+    protected $type = AAM_Framework_Type_AccessLevel::ALL;
 
     /**
      * @inheritDoc

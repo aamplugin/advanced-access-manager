@@ -135,7 +135,7 @@ class AAM_Backend_Feature
         foreach (self::$_features as $feature) {
             if ($feature->type === $type) {
                 if (empty($feature->access_levels)
-                    || in_array($access_level::TYPE, $feature->access_levels, true)
+                    || in_array($access_level->type, $feature->access_levels, true)
                 ) {
                     $response[] = self::initView($feature);
                 }

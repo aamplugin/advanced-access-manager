@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::URL;
+    protected $type = AAM_Framework_Type_Resource::URL;
 
     /**
      * @inheritDoc

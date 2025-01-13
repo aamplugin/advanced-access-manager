@@ -22,6 +22,6 @@ implements AAM_Framework_Preference_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT;
+    protected $type = AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT;
 
 }

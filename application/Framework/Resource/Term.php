@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Term implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::TERM;
+    protected $type = AAM_Framework_Type_Resource::TERM;
 
     /**
      * Determine correct resource identifier based on provided data

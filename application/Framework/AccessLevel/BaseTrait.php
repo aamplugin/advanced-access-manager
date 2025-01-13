@@ -189,7 +189,9 @@ trait AAM_Framework_AccessLevel_BaseTrait
     {
         $response = null;
 
-        if (is_object($this->_proxy_instance)) {
+        if ($name === 'type') {
+            $response = $this->type;
+        } elseif (is_object($this->_proxy_instance)) {
             $response = $this->_proxy_instance->{$name};
         } else {
             _doing_it_wrong(
@@ -309,7 +311,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
             if (!in_array($type, $exclude, true)) {
                 $result = AAM_Framework_Manager::_()->object_cache->get([
-                    constant('static::TYPE'),
+                    $this->type,
                     $this->get_id(),
                     $instance_type,
                     $type
@@ -341,7 +343,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 $instance_type = 'preference';
             }
 
-            $type = $instance::TYPE;
+            $type = $instance->type;
 
             $exclude = wp_parse_list(AAM_Framework_Manager::_()->config->get(
                 "core.settings.object_cache.ignore.{$instance_type}_types", ''
@@ -349,7 +351,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
 
             if (!in_array($type, $exclude, true)) {
                 $result = AAM_Framework_Manager::_()->object_cache->set([
-                    constant('static::TYPE'),
+                    $this->type,
                     $this->get_id(),
                     $instance_type,
                     $type

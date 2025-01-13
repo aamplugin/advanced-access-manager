@@ -8,7 +8,7 @@
         $permission_scope = []; // Additional attributes to add
 
         // Determine the correct resource ID. Terms typically have compound ID
-        if ($resource::TYPE === AAM_Framework_Type_Resource::TERM) {
+        if ($resource->type === AAM_Framework_Type_Resource::TERM) {
             if (is_array($internal_id)) {
                 $id = $internal_id['id'];
 
@@ -22,7 +22,7 @@
             } else {
                 $id = intval($internal_id);
             }
-        } elseif ($resource::TYPE === AAM_Framework_Type_Resource::POST) {
+        } elseif ($resource->type === AAM_Framework_Type_Resource::POST) {
             $id = $internal_id['id'];
         } else {
             $id = $internal_id;
@@ -45,7 +45,7 @@
 
     <input
         type="hidden"
-        value="<?php echo esc_attr($resource::TYPE); ?>"
+        value="<?php echo esc_attr($resource->type); ?>"
         id="content_resource_type"
     />
     <input
@@ -105,13 +105,13 @@
                     <div class="col-xs-12">
                         <p class="aam-notification">
                             <?php
-                                if ($resource::TYPE === AAM_Framework_Type_Resource::POST_TYPE) {
+                                if ($resource->type === AAM_Framework_Type_Resource::POST_TYPE) {
                                     $resource_type = __('post type', AAM_KEY);
                                     $resource_name = $resource->label;
-                                } elseif ($resource::TYPE === AAM_Framework_Type_Resource::TAXONOMY) {
+                                } elseif ($resource->type === AAM_Framework_Type_Resource::TAXONOMY) {
                                     $resource_type = __('taxonomy', AAM_KEY);
                                     $resource_name = $resource->label;
-                                } elseif ($resource::TYPE === AAM_Framework_Type_Resource::TERM) {
+                                } elseif ($resource->type === AAM_Framework_Type_Resource::TERM) {
                                     $resource_type = __('term', AAM_KEY);
                                     $resource_name = $resource->name;
                                 }

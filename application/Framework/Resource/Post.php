@@ -24,7 +24,7 @@ implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::POST;
+    protected $type = AAM_Framework_Type_Resource::POST;
 
     /**
      * Determine correct resource identifier based on provided data
@@ -73,7 +73,7 @@ implements AAM_Framework_Resource_Interface
                     $result[$id] = array_replace(
                         $result[$id],
                         $manager->policy->statement_to_permission(
-                            $stm, self::TYPE
+                            $stm, $this->type
                         )
                     );
                 }

@@ -21,7 +21,7 @@ class AAM_Framework_Resource_Policy implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::POLICY;
+    protected $type = AAM_Framework_Type_Resource::POLICY;
 
     /**
      * Determine correct resource identifier based on provided data

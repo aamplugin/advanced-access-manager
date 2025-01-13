@@ -340,7 +340,14 @@ class AAM_Framework_Service_Roles
             $result = wp_roles()->get_role($resource_identifier);
         }
 
-        if (!is_a($result, WP_Role::class)) {
+        $result = apply_filters(
+            'aam_normalize_role_identifier_filter',
+            $result,
+            $resource_identifier
+        );
+
+        // Allow wildcard support
+        if (!is_object($result) || !property_exists($result, 'name')) {
             throw new OutOfRangeException('The resource identifier is invalid');
         }
 

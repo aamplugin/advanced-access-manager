@@ -26,7 +26,7 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::ROLE;
+    protected $type = AAM_Framework_Type_Resource::ROLE;
 
     /**
      * Determine correct resource identifier based on provided data
@@ -59,7 +59,7 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
             if (count($bits) === 2) { // Role:<slug>
                 $result[$id] = array_replace(
                     isset($result[$id]) ? $result[$id] : [],
-                    $manager->policy->statement_to_permission($stm, self::TYPE)
+                    $manager->policy->statement_to_permission($stm, $this->type)
                 );
             } elseif (count($bits) === 3 && $bits[2] === 'users') {
                 $result[$id] = array_replace(

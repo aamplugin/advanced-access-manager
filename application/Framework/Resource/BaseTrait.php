@@ -112,56 +112,8 @@ trait AAM_Framework_Resource_BaseTrait
             $this->_extended_methods = $closures;
         }
 
-        // Read explicitly defined settings from DB
-        $permissions = AAM_Framework_Manager::_()->settings(
-            $access_level
-        )->get_setting($this->_get_settings_ns(), []);
-
-        if (!is_array($permissions)) { // Deal with corrupted data
-            $permissions = [];
-        } else {
-            $permissions = $this->_add_sys_attributes($permissions);
-        }
-
-        // Store explicit permissions separately from final set of permissions
-        $this->_explicit_permissions = $permissions;
-
-        // These are the base permissions that are subject to override
-        $this->_permissions = $permissions;
-
-        // JSON Access Policy is deeply embedded in the framework, thus take it into
-        // consideration during resource initialization
-        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
-            $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
-
-            foreach ($policy_permissions as $resource_id => $permissions) {
-                if (array_key_exists($resource_id, $this->_permissions)) {
-                    $this->_permissions[$resource_id] = array_replace(
-                        $permissions,
-                        $this->_permissions[$resource_id]
-                    );
-                } else {
-                    $this->_permissions[$resource_id] = $permissions;
-                }
-            }
-        }
-
-        // Pre-load all explicitly defined permissions
-        $inherited_permissions = $this->_add_sys_attributes(
-            $this->_trigger_inheritance(),
-            [ '__inherited' => true ]
-        );
-
-        foreach ($inherited_permissions as $resource_id => $permissions) {
-            if (array_key_exists($resource_id, $this->_permissions)) {
-                $this->_permissions[$resource_id] = array_replace(
-                    $permissions,
-                    $this->_permissions[$resource_id]
-                );
-            } else {
-                $this->_permissions[$resource_id] = $permissions;
-            }
-        }
+        // Initialize permissions
+        $this->_init_permissions();
     }
 
     /**
@@ -203,6 +155,33 @@ trait AAM_Framework_Resource_BaseTrait
         }
 
         return $response;
+    }
+
+    /**
+     * Property overload
+     *
+     * @param string $name
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function __get($name)
+    {
+        $result = null;
+
+        if ($name === 'type') {
+            $result = $this->type;
+        } else {
+            _doing_it_wrong(
+                static::class . '::' . $name,
+                'Property does not exist',
+                AAM_VERSION
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -406,6 +385,68 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
+     * Initialize basic set of permissions
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _init_permissions()
+    {
+        // Read explicitly defined settings from DB
+        $permissions = AAM_Framework_Manager::_()->settings(
+            $this->_access_level
+        )->get_setting($this->_get_settings_ns(), []);
+
+        if (!is_array($permissions)) { // Deal with corrupted data
+            $permissions = [];
+        } else {
+            $permissions = $this->_add_sys_attributes($permissions);
+        }
+
+        // Store explicit permissions separately from final set of permissions
+        $this->_explicit_permissions = $permissions;
+
+        // These are the base permissions that are subject to override
+        $this->_permissions = $permissions;
+
+        // JSON Access Policy is deeply embedded in the framework, thus take it into
+        // consideration during resource initialization
+        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
+            $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
+
+            foreach ($policy_permissions as $resource_id => $permissions) {
+                if (array_key_exists($resource_id, $this->_permissions)) {
+                    $this->_permissions[$resource_id] = array_replace(
+                        $permissions,
+                        $this->_permissions[$resource_id]
+                    );
+                } else {
+                    $this->_permissions[$resource_id] = $permissions;
+                }
+            }
+        }
+
+        // Pre-load all explicitly defined permissions
+        $inherited_permissions = $this->_add_sys_attributes(
+            $this->_trigger_inheritance(),
+            [ '__inherited' => true ]
+        );
+
+        foreach ($inherited_permissions as $resource_id => $permissions) {
+            if (array_key_exists($resource_id, $this->_permissions)) {
+                $this->_permissions[$resource_id] = array_replace(
+                    $permissions,
+                    $this->_permissions[$resource_id]
+                );
+            } else {
+                $this->_permissions[$resource_id] = $permissions;
+            }
+        }
+    }
+
+    /**
      * Get settings namespace
      *
      * @return string
@@ -415,7 +456,7 @@ trait AAM_Framework_Resource_BaseTrait
      */
     private function _get_settings_ns()
     {
-        return constant('static::TYPE');
+        return $this->type;
     }
 
     /**
@@ -511,14 +552,14 @@ trait AAM_Framework_Resource_BaseTrait
 
             // Getting resource from the parent access level
             $result = $parent->get_resource(
-                constant('static::TYPE')
+                $this->type
             )->get_permissions($resource_identifier);
 
             $manager = AAM_Framework_Manager::_();
 
             foreach ($siblings as $sibling) {
                 $sib_perms = $sibling->get_resource(
-                    constant('static::TYPE')
+                    $this->type
                 )->get_permissions($resource_identifier);
 
                 if (empty($resource_identifier)) { // Aggregated merge
@@ -532,7 +573,7 @@ trait AAM_Framework_Resource_BaseTrait
                             $manager->misc->merge_permissions(
                                 isset($sib_perms[$id]) ? $sib_perms[$id] : [],
                                 isset($result[$id]) ? $result[$id] : [],
-                                constant('static::TYPE')
+                                $this->type
                             ),
                             $parent
                         );
@@ -542,7 +583,7 @@ trait AAM_Framework_Resource_BaseTrait
                         $manager->misc->merge_permissions(
                             $sib_perms,
                             $result,
-                            constant('static::TYPE')
+                            $this->type
                         ),
                         $parent
                     );
@@ -664,6 +705,16 @@ trait AAM_Framework_Resource_BaseTrait
         return $data;
     }
 
+    /**
+     * Add system attributes to collection of resource permissions
+     *
+     * @param array $data
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
     private function _remove_sys_attributes($data)
     {
         $result = [];
@@ -681,11 +732,23 @@ trait AAM_Framework_Resource_BaseTrait
         return $result;
     }
 
+    /**
+     * Add access level attributes to a specific resource permissions
+     *
+     * @param array                               $permissions
+     * @param AAM_Framework_AccessLevel_Interface $acl
+     * @param array                               $additional  [Optional]
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
     private function _add_acl_attributes($permissions, $acl, $additional = [])
     {
         foreach($permissions as $key => $permission) {
             if (!isset($permission['__access_level'])) {
-                $permission['__access_level'] = $acl::TYPE;
+                $permission['__access_level'] = $acl->type;
 
                 $acl_id = $acl->get_id();
 

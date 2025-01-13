@@ -90,43 +90,35 @@ trait AAM_Framework_Preference_BaseTrait
             $this->_extended_methods = $closures;
         }
 
-        // Read explicitly defined settings from DB
-        $preferences = AAM_Framework_Manager::_()->settings(
-            $access_level
-        )->get_setting($this->_get_settings_ns(), []);
+        // Initialize preferences
+        $this->_init_preferences();
+    }
 
-        if (!is_array($preferences)) { // Deal with corrupted data
-            $preferences = [];
+    /**
+     * Property overload
+     *
+     * @param string $name
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function __get($name)
+    {
+        $result = null;
+
+        if ($name === 'type') {
+            $result = $this->type;
         } else {
-            $preferences = $this->_add_sys_attributes($preferences);
-        }
-
-        $this->_explicit_preferences = $preferences;
-
-        // JSON Access Policy is deeply embedded in the framework, thus take it into
-        // consideration during resource initialization
-        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
-            $preferences = array_replace(
-                $this->_add_sys_attributes($this->_apply_policy()),
-                $preferences
+            _doing_it_wrong(
+                static::class . '::' . $name,
+                'Property does not exist',
+                AAM_VERSION
             );
         }
 
-        // Allow other implementations to influence set of preferences
-        $preferences = apply_filters(
-            'aam_init_preferences_filter',
-            $preferences,
-            $this
-        );
-
-        // Trigger inheritance mechanism
-        $this->_preferences = array_replace(
-            $this->_add_sys_attributes(
-                $this->_inherit_from_parent(),
-                [ '__inherited' => true ]
-            ),
-            $preferences
-        );
+        return $result;
     }
 
     /**
@@ -188,6 +180,55 @@ trait AAM_Framework_Preference_BaseTrait
     }
 
     /**
+     * Initialize preferences
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _init_preferences()
+    {
+        // Read explicitly defined settings from DB
+        $preferences = AAM_Framework_Manager::_()->settings(
+            $this->_access_level
+        )->get_setting($this->_get_settings_ns(), []);
+
+        if (!is_array($preferences)) { // Deal with corrupted data
+            $preferences = [];
+        } else {
+            $preferences = $this->_add_sys_attributes($preferences);
+        }
+
+        $this->_explicit_preferences = $preferences;
+
+        // JSON Access Policy is deeply embedded in the framework, thus take it into
+        // consideration during resource initialization
+        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
+            $preferences = array_replace(
+                $this->_add_sys_attributes($this->_apply_policy()),
+                $preferences
+            );
+        }
+
+        // Allow other implementations to influence set of preferences
+        $preferences = apply_filters(
+            'aam_init_preferences_filter',
+            $preferences,
+            $this
+        );
+
+        // Trigger inheritance mechanism
+        $this->_preferences = array_replace(
+            $this->_add_sys_attributes(
+                $this->_inherit_from_parent(),
+                [ '__inherited' => true ]
+            ),
+            $preferences
+        );
+    }
+
+    /**
      * Get settings namespace
      *
      * @return string
@@ -197,7 +238,7 @@ trait AAM_Framework_Preference_BaseTrait
      */
     private function _get_settings_ns()
     {
-        return constant('static::TYPE');
+        return $this->type;
     }
 
     /**
@@ -221,13 +262,11 @@ trait AAM_Framework_Preference_BaseTrait
             }
 
             // Getting preference from the parent access level
-            $result  = $parent->get_preference(constant('static::TYPE'))->get();
+            $result  = $parent->get_preference($this->type)->get();
             $manager = AAM_Framework_Manager::_();
 
             foreach ($siblings as $sibling) {
-                $sibling_preferences = $sibling->get_preference(
-                    constant('static::TYPE')
-                )->get();
+                $sibling_preferences = $sibling->get_preference($this->type)->get();
 
                 $result = $manager->misc->merge_preferences(
                     $sibling_preferences,
@@ -269,7 +308,7 @@ trait AAM_Framework_Preference_BaseTrait
             $acl    = $this->get_access_level();
             $acl_id = $acl->get_id();
 
-            $to_merge = [ '__access_level' => $acl::TYPE ];
+            $to_merge = [ '__access_level' => $acl->type ];
 
             if (!empty($acl_id)) {
                 $to_merge['__access_level_id'] = $acl_id;

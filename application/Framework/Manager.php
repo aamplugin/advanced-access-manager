@@ -245,10 +245,17 @@ final class AAM_Framework_Manager
         add_filter(
             'aam_get_resource_filter',
             function($result, $access_level, $resource_type) {
-                if (is_null($result)
-                    && array_key_exists($resource_type, $this->_resources)
-                ) {
-                    $result = new $this->_resources[$resource_type]($access_level);
+                if (is_null($result)) {
+                    if (array_key_exists($resource_type, $this->_resources)) {
+                        $result = new $this->_resources[$resource_type](
+                            $access_level
+                        );
+                    } else {
+                        $result = new AAM_Framework_Resource_Generic(
+                            $access_level,
+                            $resource_type
+                        );
+                    }
                 }
 
                 return $result;
@@ -258,12 +265,16 @@ final class AAM_Framework_Manager
         add_filter(
             'aam_get_preference_filter',
             function($result, $access_level, $preference_type) {
-                if (is_null($result)
-                    && array_key_exists($preference_type, $this->_preferences)
-                ) {
-                    $result = new $this->_preferences[$preference_type](
-                        $access_level
-                    );
+                if (is_null($result)) {
+                    if (array_key_exists($preference_type, $this->_preferences)) {
+                        $result = new $this->_preferences[$preference_type](
+                            $access_level
+                        );
+                    } else {
+                        $result = new AAM_Framework_Preference_Generic(
+                            $access_level, $preference_type
+                        );
+                    }
                 }
 
                 return $result;
@@ -312,7 +323,7 @@ final class AAM_Framework_Manager
             $settings  = array_replace($this->_default_settings, $settings);
 
             // Work with cache
-            $cache_key = [ $acl::TYPE, $acl->get_id(), $name, $settings ];
+            $cache_key = [ $acl->type, $acl->get_id(), $name, $settings ];
             $result    = $this->object_cache->get($cache_key);
 
             if (empty($result)) {

@@ -21,7 +21,7 @@ class AAM_Framework_Resource_PostType implements AAM_Framework_Resource_Interfac
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::POST_TYPE;
+    protected $type = AAM_Framework_Type_Resource::POST_TYPE;
 
     /**
      * Determine correct resource identifier based on provided data

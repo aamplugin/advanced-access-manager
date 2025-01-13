@@ -326,7 +326,7 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
     {
         $access_level = $this->_get_access_level();
 
-        if ($access_level::TYPE !== AAM_Framework_Type_AccessLevel::USER) {
+        if ($access_level->type !== AAM_Framework_Type_AccessLevel::USER) {
             throw new LogicException(
                 'The JWT service expects ONLY user access level'
             );

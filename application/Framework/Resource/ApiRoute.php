@@ -21,7 +21,7 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
     /**
      * @inheritDoc
      */
-    const TYPE = AAM_Framework_Type_Resource::API_ROUTE;
+    protected $type = AAM_Framework_Type_Resource::API_ROUTE;
 
     /**
      * @inheritDoc

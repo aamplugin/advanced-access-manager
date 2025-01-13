@@ -96,7 +96,7 @@ class AAM_Backend_AccessLevel
      */
     public function is_role()
     {
-        return $this->_access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE;
+        return $this->_access_level->type === AAM_Framework_Type_AccessLevel::ROLE;
     }
 
     /**
@@ -109,7 +109,7 @@ class AAM_Backend_AccessLevel
      */
     public function is_user()
     {
-        return $this->_access_level::TYPE === AAM_Framework_Type_AccessLevel::USER;
+        return $this->_access_level->type === AAM_Framework_Type_AccessLevel::USER;
     }
 
     /**
@@ -122,7 +122,7 @@ class AAM_Backend_AccessLevel
      */
     public function is_visitor()
     {
-        return $this->_access_level::TYPE === AAM_Framework_Type_AccessLevel::VISITOR;
+        return $this->_access_level->type === AAM_Framework_Type_AccessLevel::VISITOR;
     }
 
     /**
@@ -135,7 +135,7 @@ class AAM_Backend_AccessLevel
      */
     public function is_default()
     {
-        return $this->_access_level::TYPE === AAM_Framework_Type_AccessLevel::ALL;
+        return $this->_access_level->type === AAM_Framework_Type_AccessLevel::ALL;
     }
 
     /**

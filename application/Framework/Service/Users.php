@@ -321,7 +321,14 @@ class AAM_Framework_Service_Users
             }
         }
 
-        if (!is_a($result, WP_User::class)) {
+        $result = apply_filters(
+            'aam_normalize_user_identifier_filter',
+            $result,
+            $resource_identifier
+        );
+
+        // Allow wildcard support
+        if (!is_object($result) || !property_exists($result, 'ID')) {
             throw new OutOfRangeException('The resource identifier is invalid');
         }
 

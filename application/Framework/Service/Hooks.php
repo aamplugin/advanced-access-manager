@@ -200,7 +200,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
         try {
             $acl = $this->_get_access_level();
 
-            if (in_array($acl::TYPE, [
+            if (in_array($acl->type, [
                 AAM_Framework_Type_AccessLevel::USER,
                 AAM_Framework_Type_AccessLevel::VISITOR
             ], true)) {

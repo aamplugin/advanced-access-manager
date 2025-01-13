@@ -171,7 +171,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     {
         $result = [];
 
-        if ($resource::TYPE === AAM_Framework_Type_Resource::POST) {
+        if ($resource->type === AAM_Framework_Type_Resource::POST) {
             $result = $this->_prepare_post_access_controls($resource);
         } else {
             $result = $this->_prepare_other_access_controls($resource);
