@@ -133,7 +133,9 @@ class AAM_Framework_Service_Capabilities
             $access_level = $this->_get_access_level();
 
             if ($this->_is_acceptable_access_level()) {
-                $result = $this->_get_access_level()->remove_cap($capability);
+                $this->_get_access_level()->remove_cap($capability);
+
+                $result = !$this->_get_access_level()->has_cap($capability);
             } else {
                 throw new RuntimeException(sprintf(
                     'The access level %s cannot have capabilities',

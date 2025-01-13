@@ -58,7 +58,7 @@ implements
     public function get_redirect($area = null)
     {
         try {
-            $preferences = $this->_get_container()->get_preferences();
+            $preferences = $this->_get_container()->get();
 
             if (empty($area)) {
                 $result = array_replace(
@@ -118,7 +118,12 @@ implements
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            $result = $this->_get_container()->set_preference($area, $sanitized);
+            // Get all existing preferences and merge with incoming
+            $container = $this->_get_container();
+
+            $result = $container->set(array_merge($container->get(), [
+                $area => $sanitized
+            ]));
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -144,12 +149,12 @@ implements
             if (empty($area)) {
                 $result = $container->reset();
             } else {
-                $preferences = $container->get_preferences(true);
+                $preferences = $container->get();
 
                 if (array_key_exists($area, $preferences)) {
                     unset($preferences[$area]);
 
-                    $result = $container->set_preferences($preferences);
+                    $result = $container->set($preferences);
                 } else {
                     $result = true;
                 }

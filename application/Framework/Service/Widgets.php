@@ -410,7 +410,7 @@ class AAM_Framework_Service_Widgets
                     break;
                 }
             }
-        } else {
+        } elseif (!empty($widget)) {
             $widget_slug = AAM::api()->misc->callable_to_slug($widget['callback']);
 
             foreach($collection as $item) {

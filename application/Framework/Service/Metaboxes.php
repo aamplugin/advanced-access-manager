@@ -372,19 +372,22 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Update existing metabox permission
      *
-     * @param string $slug      Sudo-id for the metabox
-     * @param bool   $is_denied Is hidden or not
+     * @param mixed       $metabox
+     * @param string|null $screen_id
+     * @param bool        $is_denied
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _update_item_permission($slug, $is_denied)
+    private function _update_item_permission($metabox, $screen_id, $is_denied)
     {
         try {
             $result = $this->_get_resource()->set_permission(
-                $slug, 'access', $is_denied
+                $this->_normalize_resource_identifier($metabox, $screen_id),
+                'access',
+                $is_denied ? 'deny' : 'allow'
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);

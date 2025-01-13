@@ -82,8 +82,8 @@ final class ServiceTest extends TestCase
         $this->assertArrayHasKey($policy_a_id, $raw_settings['visitor']['policy']);
         $this->assertArrayHasKey($policy_b_id, $raw_settings['visitor']['policy']);
         $this->assertEquals([
-            $policy_a_id => [ 'effect' => 'attach' ],
-            $policy_b_id => [ 'effect' => 'attach' ]
+            $policy_a_id => [ 'attach' => [ 'effect' => 'attach' ] ],
+            $policy_b_id => [ 'attach' => [ 'effect' => 'attach' ] ]
         ], $raw_settings['visitor']['policy']);
 
         // Policy C should not be attached to current access level
@@ -467,7 +467,11 @@ final class ServiceTest extends TestCase
         $this->assertArrayHasKey('policy', $raw_settings['visitor']);
         $this->assertArrayHasKey($policy_a, $raw_settings['visitor']['policy']);
         $this->assertEquals([
-            $policy_a => [ 'effect' => 'attach' ]
+            $policy_a => [
+                'attach' => [
+                    'effect' => 'attach'
+                ]
+            ]
         ], $raw_settings['visitor']['policy']);
     }
 
@@ -499,7 +503,11 @@ final class ServiceTest extends TestCase
         $this->assertArrayHasKey('policy', $raw_settings['visitor']);
         $this->assertArrayHasKey($policy_id, $raw_settings['visitor']['policy']);
         $this->assertEquals([
-            $policy_id => [ 'effect' => 'detach' ]
+            $policy_id => [
+                'attach' => [
+                    'effect' => 'detach'
+                ]
+            ]
         ], $raw_settings['visitor']['policy']);
     }
 

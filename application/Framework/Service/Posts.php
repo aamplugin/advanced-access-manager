@@ -168,7 +168,7 @@ class AAM_Framework_Service_Posts
 
                 if ($permission['effect'] !== 'allow') {
                     if ($restriction_type === 'expire') {
-                        $result = $this->_is_post_expired($resource);
+                        $result = $this->_is_post_expired($permission);
                     } elseif ($restriction_type === 'default') {
                         $result = true;
                     }

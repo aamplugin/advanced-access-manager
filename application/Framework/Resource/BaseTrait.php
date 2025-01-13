@@ -122,8 +122,10 @@ trait AAM_Framework_Resource_BaseTrait
         } else {
             $permissions = $this->_add_sys_attributes($permissions);
         }
-
         $this->_explicit_permissions = $permissions;
+
+        // These are the base permissions that are subject to override
+        $this->_permissions = $permissions;
 
         // JSON Access Policy is deeply embedded in the framework, thus take it into
         // consideration during resource initialization
@@ -140,8 +142,6 @@ trait AAM_Framework_Resource_BaseTrait
                     $this->_permissions[$resource_id] = $permissions;
                 }
             }
-        } else {
-            $this->_permissions = $permissions;
         }
 
         // Pre-load all explicitly defined permissions
@@ -259,7 +259,15 @@ trait AAM_Framework_Resource_BaseTrait
      */
     public function get_permissions($resource_identifier = null)
     {
-        return $this->_get_permissions($resource_identifier);
+        if (empty($resource_identifier)) {
+            $result = $this->_permissions;
+        } else {
+            $result = $this->_get_permissions($resource_identifier);
+        }
+
+        return array_filter($result, function($v) {
+            return !empty($v);
+        });
     }
 
     /**
@@ -503,11 +511,26 @@ trait AAM_Framework_Resource_BaseTrait
                     constant('static::TYPE')
                 )->get_permissions($resource_identifier);
 
-                $result = $manager->misc->merge_permissions(
-                    $sib_perms,
-                    $result,
-                    constant('static::TYPE')
-                );
+                if (empty($resource_identifier)) { // Aggregated merge
+                    $resource_ids = array_unique(array_merge(
+                        array_keys($sib_perms),
+                        array_keys($result)
+                    ));
+
+                    foreach($resource_ids as $id) {
+                        $result[$id] = $manager->misc->merge_permissions(
+                            isset($sib_perms[$id]) ? $sib_perms[$id] : [],
+                            isset($result[$id]) ? $result[$id] : [],
+                            constant('static::TYPE')
+                        );
+                    }
+                } else {
+                    $result = $manager->misc->merge_permissions(
+                        $sib_perms,
+                        $result,
+                        constant('static::TYPE')
+                    );
+                }
             }
         }
 
@@ -619,10 +642,12 @@ trait AAM_Framework_Resource_BaseTrait
 
         foreach($data as &$permissions) {
             foreach($permissions as $key => $permission) {
-                $permission['__access_level'] = $acl::TYPE;
+                if (!isset($permission['__access_level'])) {
+                    $permission['__access_level'] = $acl::TYPE;
 
-                if (!empty($acl_id)) {
-                    $permission['__access_level_id'] = $acl_id;
+                    if (!empty($acl_id)) {
+                        $permission['__access_level_id'] = $acl_id;
+                    }
                 }
 
                 $permissions[$key] = array_merge($permission, $additional);

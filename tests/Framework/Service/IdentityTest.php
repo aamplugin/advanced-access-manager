@@ -110,12 +110,14 @@ final class IdentityTest extends TestCase
         $this->assertEquals([
             'author' => [
                 'list_role' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             'subscriber' => [
                 'list_role' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->roles()->aggregate());
@@ -149,12 +151,14 @@ final class IdentityTest extends TestCase
         $this->assertEquals([
             'subscriber' => [
                 'list_role' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             'author' => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->roles()->aggregate());
@@ -177,12 +181,14 @@ final class IdentityTest extends TestCase
         $this->assertEquals([
             $user_a => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             $user_b => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->users()->aggregate());
@@ -224,17 +230,20 @@ final class IdentityTest extends TestCase
         $this->assertEquals([
             $user_a => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             $user_b => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             $user_c => [
                 'list_user' => [
-                    'effect' => 'deny'
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->users()->aggregate());

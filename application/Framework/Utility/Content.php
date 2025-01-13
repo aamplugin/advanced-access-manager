@@ -70,15 +70,14 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
      * collection of AAM_Framework_Resource_PostType items. Otherwise, it yields an
      * array of WP_Post_Type instances
      *
-     * @param AAM_Framework_AccessLevel_Interface $access_level [Optional]
-     * @param bool                                $return_all   [Optional]
+     * @param bool $return_all [Optional]
      *
      * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_post_types($access_level = null, $return_all = null)
+    public function get_post_types($return_all = null)
     {
         // Determine the filters
         if ($return_all === true) {
@@ -106,16 +105,9 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
         // filters
         $post_types = get_post_types($args, 'names', 'or');
 
-        $result = function () use ($post_types, $access_level) {
+        $result = function () use ($post_types) {
             foreach ($post_types as $post_type) {
-                if (is_a($access_level, AAM_Framework_AccessLevel_Interface::class)) {
-                    yield $access_level->get_resource(
-                        AAM_Framework_Type_Resource::POST_TYPE, $post_type
-                    );
-                } else {
-                    yield get_post_type_object($post_type);
-                }
-
+                yield get_post_type_object($post_type);
             }
         };
 

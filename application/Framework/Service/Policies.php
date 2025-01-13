@@ -441,9 +441,7 @@ class AAM_Framework_Service_Policies
     public function reset()
     {
         try {
-            $result = $this->settings($this->_get_access_level())->delete_setting(
-                'policy'
-            );
+            $result = $this->_get_resource()->reset();
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -588,7 +586,7 @@ class AAM_Framework_Service_Policies
 
             // Get list of policies attached to current access level
             foreach($this->_get_resource()->get_permissions() as $id => $data) {
-                if ($data['effect'] !== 'detach'
+                if ($data['attach']['effect'] !== 'detach'
                     && array_key_exists($id, $registered)
                 ) {
                     array_push($activated, $id);
@@ -620,22 +618,9 @@ class AAM_Framework_Service_Policies
      */
     private function _get_resource()
     {
-        // If a very specific access level was provided, then ONLY return access
-        // policies that explicitly attached to this level. This way we retain proper
-        // access controls inheritance.
-        // Otherwise - trigger the inheritance mechanism and return all the policies
-        // that are attached to current user
-        if (!empty($this->_settings['default_access_level'])) {
-            $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::POLICY
-            );
-        } else {
-            $result = $this->_get_access_level()->get_resource(
-                AAM_Framework_Type_Resource::POLICY, null, true
-            );
-        }
-
-        return $result;
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::POLICY
+        );
     }
 
     /**
@@ -1061,11 +1046,11 @@ class AAM_Framework_Service_Policies
     {
         $settings = $this->settings($this->_get_access_level());
 
-        // Update policy permissions
-        return $settings->set_setting('policy', array_replace(
-            $settings->get_setting('policy', []),
-            [ $policy_id => [ 'effect' => $effect ] ]
-        ), true);
+        return $this->_get_resource()->set_permission(
+            $this->_normalize_resource_identifier($policy_id),
+            'attach',
+            $effect
+        );
     }
 
     /**
@@ -1102,10 +1087,13 @@ class AAM_Framework_Service_Policies
      */
     private function _is_attached($policy_id)
     {
-        $permissions = $this->_get_resource()->get_permissions();
+        $permission = $this->_get_resource()->get_permission(
+            $this->_normalize_resource_identifier($policy_id),
+            'attach'
+        );
 
-        if (array_key_exists($policy_id, $permissions)) {
-            $result = $permissions[$policy_id]['effect'] !== 'detach';
+        if (!empty($permission)) {
+            $result = $permission['effect'] !== 'detach';
         } else {
             $result = false;
         }
@@ -1141,6 +1129,55 @@ class AAM_Framework_Service_Policies
                 )
             ];
         }
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_Post
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_Post::class)) {
+            $result = $resource_identifier;
+        } elseif (is_numeric($resource_identifier)) {
+            $result = get_post($resource_identifier);
+        } elseif (is_array($resource_identifier)) {
+            if (isset($resource_identifier['id'])) {
+                $result = get_post($resource_identifier['id']);
+            } else {
+                // Let's get post_name
+                if (isset($resource_identifier['slug'])) {
+                    $post_name = $resource_identifier['slug'];
+                } elseif (isset($resource_identifier['post_name'])) {
+                    $post_name = $resource_identifier['post_name'];
+                }
+
+                if (!empty($post_name)) {
+                    $result = get_page_by_path(
+                        $post_name,
+                        OBJECT,
+                        self::CPT
+                    );
+                }
+            }
+
+            // Do some additional validation if id & post_type are provided in the
+            // array
+            if (is_a($result, WP_Post::class)
+                && self::CPT !== $result->post_type
+            ) {
+                throw new OutOfRangeException('Invalid policy instance');
+            }
+        }
+
+        if (!is_a($result, WP_Post::class)) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
     /**

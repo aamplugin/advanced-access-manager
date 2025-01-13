@@ -213,8 +213,9 @@ class AAM_Restful_Content
     public function get_post_types(WP_REST_Request $request)
     {
         try {
-            $raw_list = AAM::api()->content->get_post_types(
-                $this->_determine_access_level($request),
+            $access_level = $this->_determine_access_level($request);
+            $raw_list     = AAM::api()->content->get_post_types(
+                $access_level,
                 $request->get_param('return_all')
             );
 
@@ -228,7 +229,10 @@ class AAM_Restful_Content
 
             foreach($raw_list as $post_type) {
                 array_push(
-                    $result['list'], $this->_prepare_post_type_output($post_type)
+                    $result['list'], $this->_prepare_post_type_output(
+                        $access_level,
+                        $post_type
+                    )
                 );
 
                 $result['summary']['filtered_count']++;
@@ -573,22 +577,27 @@ class AAM_Restful_Content
     /**
      * Prepare post type item for output
      *
-     * @param AAM_Framework_Resource_PostType $post_type
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param WP_Post_Type                        $post_type
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_post_type_output($post_type)
+    private function _prepare_post_type_output($access_level, $post_type)
     {
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::POST_TYPE
+        );
+
         return [
             'slug'            => $post_type->name,
             'title'           => $post_type->label,
             'icon'            => $post_type->menu_icon,
             'is_hierarchical' => $post_type->hierarchical,
-            'permissions'     => $post_type->get_permissions(),
-            'is_customized'   => $post_type->is_customized()
+            'permissions'     => $resource->get_permissions($post_type),
+            'is_customized'   => $resource->is_customized($post_type)
         ];
     }
 

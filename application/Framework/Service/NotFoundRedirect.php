@@ -44,7 +44,7 @@ implements
     public function get_redirect()
     {
         try {
-            $result = $this->_get_container()->get_preferences();
+            $result = $this->_get_container()->get();
 
             if (empty($result)) {
                 $result = [ 'type' => 'default' ];
@@ -75,7 +75,7 @@ implements
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set_preferences($sanitized)) {
+            if (!$this->_get_container()->set($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 

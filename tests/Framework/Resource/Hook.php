@@ -50,10 +50,14 @@ final class HookTest extends TestCase
 
         $this->assertEquals([
             'admin_menu|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect' => 'deny'
+                ]
             ],
             'aam_test_filter|14' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect' => 'deny'
+                ]
             ]
         ], $resource->get_permissions());
     }
@@ -89,12 +93,16 @@ final class HookTest extends TestCase
 
         $this->assertEquals([
             'screen_options_show_screen|10' => [
-                'effect' => 'alter',
-                'return' => false
+                'access' => [
+                    'effect' => 'alter',
+                    'return' => false
+                ]
             ],
             'aam_test_filter|11' => [
-                'effect' => 'alter',
-                'return' => 'test'
+                'access' => [
+                    'effect' => 'alter',
+                    'return' => 'test'
+                ]
             ]
         ], $resource->get_permissions());
     }
@@ -128,10 +136,12 @@ final class HookTest extends TestCase
 
         $this->assertEquals([
             'allowed_redirect_hosts|10' => [
-                'effect' => 'merge',
-                'return' => [
-                    'members.aamportal.com',
-                    'store.aamportal.com'
+                'access' => [
+                    'effect' => 'merge',
+                    'return' => [
+                        'members.aamportal.com',
+                        'store.aamportal.com'
+                    ]
                 ]
             ]
         ], $resource->get_permissions());
@@ -161,8 +171,10 @@ final class HookTest extends TestCase
 
         $this->assertEquals([
             'show_password_fields|10' => [
-                'effect' => 'replace',
-                'return' => false
+                'access' => [
+                    'effect' => 'replace',
+                    'return' => false
+                ]
             ]
         ], $resource->get_permissions());
     }

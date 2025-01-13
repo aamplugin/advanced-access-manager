@@ -32,7 +32,7 @@ final class ApiRoutesTest extends TestCase
 
         // Set restrictions
         $this->assertTrue($service->deny($request));
-        $this->assertTrue($service->deny('/oembed/1.0/embed', 'GET'));
+        $this->assertTrue($service->deny('GET /oembed/1.0/embed'));
 
         // Assert that both endpoints are restricted
         $this->assertTrue($service->is_denied('/oembed/1.0'));
@@ -45,8 +45,8 @@ final class ApiRoutesTest extends TestCase
         // Making sure that HTTP method is taken into consideration
         $this->assertTrue($service->deny('/aam/v2/service/jwts'));
         $this->assertTrue($service->is_denied('/aam/v2/service/jwts'));
-        $this->assertFalse($service->is_denied('/aam/v2/service/jwts', 'POST'));
-        $this->assertFalse($service->is_denied('/aam/v2/service/jwts', 'DELETE'));
+        $this->assertFalse($service->is_denied('POST /aam/v2/service/jwts'));
+        $this->assertFalse($service->is_denied('DELETE /aam/v2/service/jwts'));
     }
 
 }

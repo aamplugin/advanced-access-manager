@@ -109,16 +109,16 @@ class AAM_Framework_Service_ApiRoutes
     public function is_denied($api_route)
     {
         try {
-            $result      = null;
-            $resource    = $this->_get_resource();
-            $permissions = $resource->get_permission(
+            $result     = null;
+            $resource   = $this->_get_resource();
+            $permission = $resource->get_permission(
                 $this->_normalize_resource_identifier($api_route),
                 'access'
             );
 
             // Step #1. Determine if route is explicitly restricted
-            if (!empty($permissions)) {
-                $result = $resource['effect'] !== 'allow';
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
             }
 
             // Step #2. Allow third-party implementation to influence the decision
@@ -181,6 +181,9 @@ class AAM_Framework_Service_ApiRoutes
         } elseif (is_string($identifier)) {
             if (strpos($identifier, ' ') !== false) {
                 list($method, $endpoint) = explode(' ', $identifier, 2);
+            } else {
+                $method   = 'GET';
+                $endpoint = trim($identifier);
             }
         } elseif (is_array($identifier)) {
             extract($identifier);

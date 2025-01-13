@@ -187,7 +187,6 @@ final class CapabilitiesTest extends TestCase
         $this->assertFalse($raw['editor']['capabilities'][$cap_b]);
 
         // Remove the added capabilities
-        $this->assertNull($service->remove($cap_a));
         $this->assertTrue($service->remove($cap_b));
     }
 

@@ -95,15 +95,19 @@ trait AAM_Framework_Preference_BaseTrait
             $access_level
         )->get_setting($this->_get_settings_ns(), []);
 
-        if (is_array($preferences)) { // Deal with corrupted data
-            $this->_explicit_preferences = $preferences;
+        if (!is_array($preferences)) { // Deal with corrupted data
+            $preferences = [];
+        } else {
+            $preferences = $this->_add_sys_attributes($preferences);
         }
+
+        $this->_explicit_preferences = $preferences;
 
         // JSON Access Policy is deeply embedded in the framework, thus take it into
         // consideration during resource initialization
         if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
             $preferences = array_replace(
-                $this->_apply_policy(),
+                $this->_add_sys_attributes($this->_apply_policy()),
                 $preferences
             );
         }
@@ -117,7 +121,10 @@ trait AAM_Framework_Preference_BaseTrait
 
         // Trigger inheritance mechanism
         $this->_preferences = array_replace(
-            $this->_inherit_from_parent(),
+            $this->_add_sys_attributes(
+                $this->_inherit_from_parent(),
+                [ '__inherited' => true ]
+            ),
             $preferences
         );
     }
@@ -158,39 +165,26 @@ trait AAM_Framework_Preference_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get($explicit = false)
+    public function get()
     {
-        if ($explicit) {
-            $result = $this->_explicit_preferences;
-        } else {
-            $result = $this->_preferences;
-        }
-
-        return is_array($result) ? $result : [];
+        return $this->_preferences;
     }
 
     /**
      * @inheritDoc
      */
-    public function set(array $preferences, $explicit = true)
+    public function set(array $preferences)
     {
-        if ($explicit) {
-            $this->_explicit_preferences = $preferences;
-            $this->_preferences          = array_replace(
-                $this->_preferences,
-                $preferences
-            );
+        $this->_explicit_preferences = $preferences;
+        $this->_preferences          = array_replace(
+            $this->_preferences,
+            $preferences
+        );
 
-            // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $preferences);
-        } else {
-            $this->_preferences = $preferences;
-            $result             = true;
-        }
-
-        return $result;
+        // Store changes in DB
+        return AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->set_setting($this->_get_settings_ns(), $preferences);
     }
 
     /**
@@ -256,6 +250,31 @@ trait AAM_Framework_Preference_BaseTrait
     private function _apply_policy()
     {
         return apply_filters('aam_apply_policy_filter', [], $this);
+    }
+
+    /**
+     * Add some system attributes to each permission
+     *
+     * @param array $data
+     * @param array $additional [Optional]
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _add_sys_attributes($data, $additional = [])
+    {
+        $acl    = $this->get_access_level();
+        $acl_id = $acl->get_id();
+
+        $to_merge = [ '__access_level' => $acl::TYPE ];
+
+        if (!empty($acl_id)) {
+            $to_merge['__access_level_id'] = $acl_id;
+        }
+
+        return array_merge($data, $to_merge, $additional);
     }
 
 }

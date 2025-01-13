@@ -81,12 +81,12 @@ final class PostsTest extends TestCase
      */
     public function testPostAccessExpired()
     {
-        $post    = $this->createPost();
+        $post    = get_post($this->createPost());
         $service = AAM::api()->posts();
 
         // Set raw post permissions
-        $resource = AAM::api()->user()->get_resource('post', $post);
-        $this->assertTrue($resource->add_permission('read', [
+        $resource = AAM::api()->user()->get_resource('post');
+        $this->assertTrue($resource->set_permission($post, 'read', [
             'effect'           => 'deny',
             'restriction_type' => 'expire',
             'expires_after'    => time() - 30
@@ -162,12 +162,7 @@ final class PostsTest extends TestCase
 
         $this->assertEquals([
             'list' => [
-                'effect' => 'deny',
-                'on' => [
-                    'frontend',
-                    'backend',
-                    'api'
-                ]
+                'effect' => 'deny'
             ]
         ], $options['visitor']['post'][$post_b . '|post']);
 
@@ -347,14 +342,15 @@ final class PostsTest extends TestCase
         $this->assertEquals([
             "{$post_a}|post" => [
                 'list' => [
-                    'effect' => 'deny',
-                    'on'     => [ 'frontend', 'backend', 'api' ]
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ],
             "{$post_b}|post" => [
                 'list' => [
-                    'effect' => 'deny',
-                    'on'     => [ 'backend', 'api' ]
+                    'effect'         => 'deny',
+                    'on'             => [ 'backend', 'api' ],
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->posts()->aggregate());
@@ -393,14 +389,16 @@ final class PostsTest extends TestCase
         $this->assertEquals([
             "{$post_a}|post" => [
                 'list' => [
-                    'effect' => 'deny',
-                    'on'     => [ 'frontend', 'backend', 'api' ]
+                    'effect'         => 'deny',
+                    'on'             => [ 'frontend', 'backend', 'api' ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             "{$post_b}|post" => [
                 'list' => [
-                    'effect' => 'deny',
-                    'on'     => [ 'backend', 'api' ]
+                    'effect'         => 'deny',
+                    'on'             => [ 'backend', 'api' ],
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->posts()->aggregate());
@@ -433,8 +431,8 @@ final class PostsTest extends TestCase
         $this->assertEquals([
             "{$post_a}|post" => [
                 'list' => [
-                    'effect' => 'deny',
-                    'on'     => [ 'frontend', 'backend', 'api' ]
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
                 ]
             ]
         ], AAM::api()->posts()->aggregate());

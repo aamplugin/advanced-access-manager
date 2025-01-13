@@ -49,40 +49,70 @@ final class HooksTest extends TestCase
 
         $this->assertEquals([
             'aam_hook_a|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_b|1' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'         => 'deny',
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_c|10' => [
-                'effect' => 'allow'
+                'access' => [
+                    'effect'         => 'allow',
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_d|2' => [
-                'effect' => 'allow'
+                'access' => [
+                    'effect'         => 'allow',
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_e|10' => [
-                'effect' => 'alter',
-                'return' => 'nope'
+                'access' => [
+                    'effect'         => 'alter',
+                    'return'         => 'nope',
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_f|3' => [
-                'effect' => 'alter',
-                'return' => [ 'test' => true ]
+                'access' => [
+                    'effect'         => 'alter',
+                    'return'         => [ 'test' => true ],
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_g|10' => [
-                'effect' => 'merge',
-                'return' => [ 'test' ]
+                'access' => [
+                    'effect'         => 'merge',
+                    'return'         => [ 'test' ],
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_h|4' => [
-                'effect' => 'merge',
-                'return' => [ 'test' => true ]
+                'access' => [
+                    'effect'         => 'merge',
+                    'return'         => [ 'test' => true ],
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_i|10' => [
-                'effect' => 'replace',
-                'return' => false
+                'access' => [
+                    'effect'         => 'replace',
+                    'return'         => false,
+                    '__access_level' => 'visitor'
+                ]
             ],
             'aam_hook_j|5' => [
-                'effect' => 'replace',
-                'return' => -1
+                'access' => [
+                    'effect'         => 'replace',
+                    'return'         => -1,
+                    '__access_level' => 'visitor'
+                ]
             ]
         ], $permissions);
     }
@@ -133,20 +163,45 @@ final class HooksTest extends TestCase
 
         $this->assertEquals([
             'hook_a|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'            => 'deny',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ],
             'hook_b|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'            => 'deny',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'contributor',
+                    '__inherited'       => true
+                ]
             ],
             'hook_c|10' => [
-                'effect' => 'alter',
-                'return' => 'yes'
+                'access' => [
+                    'effect'            => 'alter',
+                    'return'            => 'yes',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ],
             'hook_d|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'            => 'deny',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ],
             'hook_e|10' => [
-                'effect' => 'allow'
+                'access' => [
+                    'effect'            => 'allow',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ]
         ], $permissions);
     }
@@ -198,21 +253,43 @@ final class HooksTest extends TestCase
 
         $this->assertEquals([
             'hook_a|10' => [
-                'effect' => 'allow'
+                'access' => [
+                    'effect'            => 'allow',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'contributor',
+                    '__inherited'       => true
+                ]
             ],
             'hook_b|10' => [
-                'effect'   => 'replace',
-                'return' => false
+                'access' => [
+                    'effect' => 'replace',
+                    'return' => false,
+                    '__access_level' => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited' => true
+                ]
             ],
             'hook_c|10' => [
-                'effect'   => 'alter',
-                'return' => 'yes'
+                'access' => [
+                    'effect'            => 'alter',
+                    'return'            => 'yes',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ],
             'hook_d|10' => [
-                'effect' => 'allow'
+                'access' => [
+                    'effect' => 'allow'
+                ]
             ],
             'hook_e|10' => [
-                'effect' => 'deny'
+                'access' => [
+                    'effect'            => 'deny',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
+                ]
             ]
         ], $permissions);
     }

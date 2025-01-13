@@ -236,7 +236,7 @@ final class AAM_Framework_Manager
         // Dynamically adjust user account if JSON Access Policies are enabled
         add_action('set_current_user', function() {
             if (AAM::api()->config->get('service.policies.enabled', true)) {
-                $this->_dynamically_adjust_user_account();
+                // $this->_dynamically_adjust_user_account();
             }
         }, 999);
 

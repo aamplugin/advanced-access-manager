@@ -29,8 +29,8 @@ interface AAM_Framework_Preference_Interface
      * Get access level this resource is tight to
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_access_level();
@@ -38,34 +38,31 @@ interface AAM_Framework_Preference_Interface
     /**
      * Get the collection of resource preferences
      *
-     * @param bool $explicit [Optional]
-     *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get($explicit = false);
+    public function get();
 
     /**
      * Set resource preferences
      *
      * @param array $preferences
-     * @param bool  $explicit    [Optional]
      *
      * @return void
      * @access public
      *
      * @version 7.0.0
      */
-    public function set(array $preferences, $explicit = true);
+    public function set(array $preferences);
 
     /**
      * Check if preferences are customized for current access level
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized();
@@ -74,8 +71,8 @@ interface AAM_Framework_Preference_Interface
      * Reset all explicitly defined preferences
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset();

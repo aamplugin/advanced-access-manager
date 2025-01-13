@@ -41,7 +41,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     public function get_redirect()
     {
         try {
-            $result = $this->_get_container()->get_preferences();
+            $result = $this->_get_container()->get();
 
             if (empty($result)) {
                 $result = [ 'type' => 'default' ];
@@ -72,7 +72,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set_preferences($sanitized)) {
+            if (!$this->_get_container()->set($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
