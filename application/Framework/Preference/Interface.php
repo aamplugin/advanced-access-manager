@@ -31,34 +31,38 @@ interface AAM_Framework_Preference_Interface
     /**
      * Get the collection of resource preferences
      *
+     * @param string $offset [Optional]
+     *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get();
+    public function get_preferences($offset = null);
 
     /**
      * Set resource preferences
      *
-     * @param array $preferences
+     * @param array  $preferences
+     * @param string $offset      [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function set(array $preferences);
+    public function set_preferences(array $preferences, $offset = null);
 
     /**
      * Check if preferences are customized for current access level
      *
+     * @param string $offset [Optional]
      * @return boolean
      * @access public
      *
      * @version 7.0.0
      */
-    public function is_customized();
+    public function is_customized($offset = null);
 
     /**
      * Reset all explicitly defined preferences

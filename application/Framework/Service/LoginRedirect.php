@@ -34,14 +34,14 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
      * Get the login redirect
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect()
     {
         try {
-            $result = $this->_get_container()->get();
+            $result = $this->_get_container()->get_preferences();
 
             if (empty($result)) {
                 $result = [ 'type' => 'default' ];
@@ -59,8 +59,8 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
      * @param array $redirect Redirect settings
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_redirect(array $redirect)
@@ -72,7 +72,7 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set($sanitized)) {
+            if (!$this->_get_container()->set_preferences($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -85,32 +85,11 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     }
 
     /**
-     * Get or set login redirect
-     *
-     * @param array $redirect [optional]
-     *
-     * @return bool|array
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function redirect($redirect = null)
-    {
-        if (is_null($redirect)) {
-            $result = $this->get_redirect();
-        } else {
-            $result = $this->set_redirect($redirect);
-        }
-
-        return $result;
-    }
-
-    /**
      * Reset the redirect rule
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset()
@@ -128,8 +107,8 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
      * Check if login redirect preferences are customized
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized()
@@ -146,9 +125,9 @@ class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Inter
     /**
      * Get login redirect preference container
      *
-     * @return AAM_Framework_Preference_Interface
-     *
+     * @return AAM_Framework_Preference_LoginRedirect
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_container()

@@ -137,9 +137,15 @@ trait AAM_Framework_Preference_BaseTrait
     /**
      * @inheritDoc
      */
-    public function is_customized()
+    public function is_customized($offset = null)
     {
-        return !empty($this->_explicit_preferences);
+        if (!is_null($offset)) {
+            $result = !empty($this->_explicit_preferences[$offset]);
+        } else {
+            $result = !empty($this->_explicit_preferences);
+        }
+
+        return $result;
     }
 
     /**
@@ -157,27 +163,115 @@ trait AAM_Framework_Preference_BaseTrait
     /**
      * @inheritDoc
      */
-    public function get()
+    public function get_preferences($offset = null)
     {
-        return $this->_preferences;
+        if (is_null($offset)) {
+            $result = $this->_preferences;
+        } elseif (isset($this->_preferences[$offset])) {
+            $result = $this->_preferences[$offset];
+        } else {
+            $result = [];
+        }
+
+        return $this->_remove_sys_attributes($result);
     }
 
     /**
      * @inheritDoc
      */
-    public function set(array $preferences)
+    public function set_preferences(array $preferences, $offset = null)
     {
-        $this->_explicit_preferences = $preferences;
-        $this->_preferences          = array_replace(
+        if (is_null($offset)) {
+            $this->_explicit_preferences = $preferences;
+        } else {
+            $this->_explicit_preferences[$offset] = $preferences;
+        }
+
+        // Sync with preferences
+        $this->_preferences = array_replace(
             $this->_preferences,
-            $preferences
+            $this->_explicit_preferences
         );
 
-        // Store changes in DB
-        return AAM_Framework_Manager::_()->settings(
-            $this->get_access_level()
-        )->set_setting($this->_get_settings_ns(), $preferences);
+        return $this->_save($this->_explicit_preferences);
     }
+
+    /**
+	 * Set an individual preference value
+	 *
+	 * @param string $offset
+	 * @param mixed  $value
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+	 */
+	#[ReturnTypeWillChange]
+	public function offsetSet($offset, $value)
+    {
+        $this->_explicit_preferences[$offset] = $value;
+
+        $this->_save($this->_explicit_preferences);
+    }
+
+	/**
+	 * Remove an individual preference property
+	 *
+	 * @param string $offset
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+	 */
+	#[ReturnTypeWillChange]
+	public function offsetUnset($offset)
+    {
+        if (array_key_exists($offset, $this->_explicit_preferences)) {
+            unset($this->_explicit_preferences[$offset]);
+
+            $this->_save($this->_explicit_preferences);
+        }
+    }
+
+	/**
+	 * Check if preference exists
+	 *
+	 * @param string $offset
+     *
+	 * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+	 */
+	#[ReturnTypeWillChange]
+	public function offsetExists($offset)
+    {
+		return array_key_exists($offset, $this->_preferences);
+	}
+
+	/**
+	 * Get a single preference
+     *
+	 * @param string $offset
+     *
+	 * @return mixed
+     * @access public
+     *
+     * @version 7.0.0
+	 */
+	#[ReturnTypeWillChange]
+	public function offsetGet($offset)
+    {
+		if ($this->offsetExists($offset)) {
+            $result = $this->_preferences[$offset];
+        } else {
+            $result = null;
+        }
+
+        return $result;
+	}
 
     /**
      * Initialize preferences
@@ -262,11 +356,13 @@ trait AAM_Framework_Preference_BaseTrait
             }
 
             // Getting preference from the parent access level
-            $result  = $parent->get_preference($this->type)->get();
+            $result  = $parent->get_preference($this->type)->get_preferences();
             $manager = AAM_Framework_Manager::_();
 
             foreach ($siblings as $sibling) {
-                $sibling_preferences = $sibling->get_preference($this->type)->get();
+                $sibling_preferences = $sibling->get_preference(
+                    $this->type
+                )->get_preferences();
 
                 $result = $manager->misc->merge_preferences(
                     $sibling_preferences,
@@ -289,6 +385,26 @@ trait AAM_Framework_Preference_BaseTrait
     private function _apply_policy()
     {
         return apply_filters('aam_apply_policy_filter', [], $this);
+    }
+
+    /**
+     * Save preferences
+     *
+     * @param array $preferences
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _save($preferences)
+    {
+        return AAM_Framework_Manager::_()->settings(
+            $this->get_access_level()
+        )->set_setting(
+            $this->_get_settings_ns(),
+            $this->_remove_sys_attributes($preferences)
+        );
     }
 
     /**
@@ -320,6 +436,23 @@ trait AAM_Framework_Preference_BaseTrait
         }
 
         return $result;
+    }
+
+    /**
+     * Add system attributes
+     *
+     * @param array $data
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _remove_sys_attributes($data)
+    {
+        return array_filter($data, function($k) {
+            return strpos($k, '__') !== 0;
+        }, ARRAY_FILTER_USE_KEY);
     }
 
 }

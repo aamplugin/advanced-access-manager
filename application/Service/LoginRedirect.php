@@ -78,7 +78,7 @@ class AAM_Service_LoginRedirect
         add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
 
         // Register RESTful API
-        AAM_Restful_LoginRedirectService::bootstrap();
+        AAM_Restful_LoginRedirect::bootstrap();
     }
 
     /**

@@ -14,6 +14,9 @@
         <testsuite name="FrameworkResource">
             <directory suffix="Test.php">./tests/Framework/Resource</directory>
         </testsuite>
+         <testsuite name="FrameworkPreference">
+            <directory suffix="Test.php">./tests/Framework/Preference</directory>
+        </testsuite>
         <testsuite name="FrameworkService">
             <directory suffix="Test.php">./tests/Framework/Service</directory>
         </testsuite>

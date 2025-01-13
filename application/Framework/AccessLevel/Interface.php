@@ -131,7 +131,7 @@ interface AAM_Framework_AccessLevel_Interface
     /**
      * Add new siblings to the collection
      *
-     * @param AAM_Framework_AccessLevel_Role $role
+     * @param AAM_Framework_AccessLevel_Interface $sibling
      *
      * @return void
      * @access public
@@ -153,7 +153,7 @@ interface AAM_Framework_AccessLevel_Interface
     /**
      * Get all siblings
      *
-     * @return array
+     * @return array<AAM_Framework_AccessLevel_Interface>
      * @access public
      *
      * @version 7.0.0

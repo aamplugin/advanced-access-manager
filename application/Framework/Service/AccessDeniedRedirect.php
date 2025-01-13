@@ -58,7 +58,7 @@ implements
     public function get_redirect($area = null)
     {
         try {
-            $preferences = $this->_get_container()->get();
+            $preferences = $this->_get_container()->get_preferences();
 
             if (empty($area)) {
                 $result = array_replace(
@@ -118,12 +118,7 @@ implements
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            // Get all existing preferences and merge with incoming
-            $container = $this->_get_container();
-
-            $result = $container->set(array_merge($container->get(), [
-                $area => $sanitized
-            ]));
+            $result = $this->_get_container()->set_preferences($sanitized, $area);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -144,19 +139,14 @@ implements
     public function reset($area = null)
     {
         try {
+            $result    = true;
             $container = $this->_get_container();
 
             if (empty($area)) {
                 $result = $container->reset();
             } else {
-                $preferences = $container->get();
-
-                if (array_key_exists($area, $preferences)) {
-                    unset($preferences[$area]);
-
-                    $result = $container->set($preferences);
-                } else {
-                    $result = true;
+                if ($container[$area]) {
+                    unset($container[$area]);
                 }
             }
         } catch (Exception $e) {
@@ -188,7 +178,7 @@ implements
     /**
      * Get access denied preference container
      *
-     * @return AAM_Framework_Preference_Interface
+     * @return AAM_Framework_Preference_AccessDeniedRedirect
      * @access private
      *
      * @version 7.0.0

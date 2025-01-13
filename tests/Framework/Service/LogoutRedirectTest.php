@@ -35,13 +35,13 @@ final class LogoutRedirectTest extends TestCase
 
         // Setting redirect
         $this->assertEquals(
-            array_merge($redirect_a, [ '__access_level' => 'visitor' ]),
+            $redirect_a,
             AAM::api()->logout_redirect()->set_redirect($redirect_a)
         );
 
         // Verifying that we are getting the same redirect back
         $this->assertEquals(
-            array_merge($redirect_a, [ '__access_level' => 'visitor' ]),
+            $redirect_a,
             AAM::api()->logout_redirect()->get_redirect()
         );
 
@@ -49,14 +49,12 @@ final class LogoutRedirectTest extends TestCase
         $this->assertEquals([
             'type'           => 'url_redirect',
             'redirect_url'   => '/some-page',
-            '__access_level' => 'visitor'
         ], AAM::api()->logout_redirect()->set_redirect($redirect_b));
 
         // Verifying that we are getting the same redirect back
         $this->assertEquals([
             'type'           => 'url_redirect',
             'redirect_url'   => '/some-page',
-            '__access_level' => 'visitor'
         ], AAM::api()->logout_redirect()->get_redirect());
     }
 

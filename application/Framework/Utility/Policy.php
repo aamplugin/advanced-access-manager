@@ -51,50 +51,48 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
     /**
      * Convert `Redirect` property to internal representation of redirect
      *
-     * @param array $stm
+     * @param array $redirect
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function convert_statement_redirect($stm)
+    public function convert_statement_redirect($redirect)
     {
         $result = [ 'type' => 'default' ];
 
-        if (array_key_exists('Redirect', $stm) && is_array($stm['Redirect'])) {
-            // Getting redirect type
-            if (array_key_exists('Type', $stm['Redirect'])) {
-                $result['type'] = $stm['Redirect']['Type'];
-            }
+        // Getting redirect type
+        if (array_key_exists('Type', $redirect)) {
+            $result['type'] = $redirect['Type'];
+        }
 
-            // Getting HTTP status code
-            if (array_key_exists('StatusCode', $stm['Redirect'])) {
-                $result['http_status_code'] = intval(
-                    $stm['Redirect']['StatusCode']
-                );
-            }
+        // Getting HTTP status code
+        if (array_key_exists('StatusCode', $redirect)) {
+            $result['http_status_code'] = intval(
+                $redirect['StatusCode']
+            );
+        }
 
-            // Getting additional redirect attributes
-            if (array_key_exists('Slug', $stm['Redirect'])) {
-                $result['redirect_page_slug'] = $stm['Redirect']['Slug'];
-            }
+        // Getting additional redirect attributes
+        if (array_key_exists('Slug', $redirect)) {
+            $result['redirect_page_slug'] = $redirect['Slug'];
+        }
 
-            if (array_key_exists('Id', $stm['Redirect'])) {
-                $result['redirect_page_id'] = $stm['Redirect']['Id'];
-            }
+        if (array_key_exists('Id', $redirect)) {
+            $result['redirect_page_id'] = $redirect['Id'];
+        }
 
-            if (array_key_exists('Url', $stm['Redirect'])) {
-                $result['redirect_url'] = $stm['Redirect']['Url'];
-            }
+        if (array_key_exists('Url', $redirect)) {
+            $result['redirect_url'] = $redirect['Url'];
+        }
 
-            if (array_key_exists('Callback', $stm['Redirect'])) {
-                $result['callback'] = $stm['Redirect']['Callback'];
-            }
+        if (array_key_exists('Callback', $redirect)) {
+            $result['callback'] = $redirect['Callback'];
+        }
 
-            if (array_key_exists('Message', $stm['Redirect'])) {
-                $result['message'] = $stm['Redirect']['Message'];
-            }
+        if (array_key_exists('Message', $redirect)) {
+            $result['message'] = $redirect['Message'];
         }
 
         return $result;
@@ -133,9 +131,11 @@ class AAM_Framework_Utility_Policy implements AAM_Framework_Utility_Interface
                     $result['read']['restriction_type'] = 'redirect';
 
                     // Convert redirect
-                    $result['read']['redirect'] = $this->convert_statement_redirect(
-                        $stm
-                    );
+                    if (is_array($stm['Redirect'])) {
+                        $result['read']['redirect'] = $this->convert_statement_redirect(
+                            $stm['Redirect']
+                        );
+                    }
                 }
             } elseif ($action === 'list') {
                 if (array_key_exists('On', $stm)) {

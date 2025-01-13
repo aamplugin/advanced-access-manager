@@ -37,14 +37,14 @@ implements
      * Get the 404 redirect
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect()
     {
         try {
-            $result = $this->_get_container()->get();
+            $result = $this->_get_container()->get_preferences();
 
             if (empty($result)) {
                 $result = [ 'type' => 'default' ];
@@ -59,23 +59,23 @@ implements
     /**
      * Set the 404 redirect
      *
-     * @param array $incoming_data Redirect settings
+     * @param array $redirect
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function set_redirect(array $incoming_data)
+    public function set_redirect(array $redirect)
     {
         try {
             // Validating that incoming data is correct and normalize is for storage
             $sanitized = $this->redirect->sanitize_redirect(
-                $incoming_data,
+                $redirect,
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set($sanitized)) {
+            if (!$this->_get_container()->set_preferences($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -91,8 +91,8 @@ implements
      * Reset the redirect rule
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset()
@@ -110,8 +110,8 @@ implements
      * Check if 404 redirect preferences are customized
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized()
@@ -128,9 +128,9 @@ implements
     /**
      * Get Not Found Redirect preference resource
      *
-     * @return AAM_Framework_Preference_Interface
-     *
+     * @return AAM_Framework_Preference_NotFoundRedirect
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_container()

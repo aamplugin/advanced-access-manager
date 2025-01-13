@@ -79,7 +79,7 @@ class AAM_Service_LogoutRedirect
         }, PHP_INT_MAX);
 
         // Register RESTful API
-        AAM_Restful_LogoutRedirectService::bootstrap();
+        AAM_Restful_LogoutRedirect::bootstrap();
     }
 
 }

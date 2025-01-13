@@ -24,4 +24,24 @@ implements AAM_Framework_Preference_Interface
      */
     protected $type = AAM_Framework_Type_Preference::LOGOUT_REDIRECT;
 
+    /**
+     * @inheritDoc
+     */
+    private function _apply_policy()
+    {
+        $result  = [];
+        $manager = AAM_Framework_Manager::_();
+
+        // Fetch list of statements for the resource Toolbar
+        $param = $manager->policies($this->get_access_level())->param(
+            'redirect:on:logout'
+        );
+
+        if (!empty($param) && is_array($param)) {
+            $result = $manager->policy->convert_statement_redirect($param);
+        }
+
+        return apply_filters('aam_apply_policy_filter', $result, $this);
+    }
+
 }

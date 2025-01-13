@@ -60,7 +60,7 @@ class AAM_Service_NotFoundRedirect
         });
 
         // Register the RESTful API
-        AAM_Restful_NotFoundRedirectService::bootstrap();
+        AAM_Restful_NotFoundRedirect::bootstrap();
     }
 
 }

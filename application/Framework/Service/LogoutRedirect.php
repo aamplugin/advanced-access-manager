@@ -36,14 +36,14 @@ implements
      * Get the logout redirect
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_redirect()
     {
         try {
-            $result = $this->_get_container()->get();
+            $result = $this->_get_container()->get_preferences();
 
             if (empty($result)) {
                 $result = [ 'type' => 'default' ];
@@ -61,8 +61,8 @@ implements
      * @param array $redirect Redirect settings
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set_redirect(array $redirect)
@@ -73,7 +73,7 @@ implements
                 self::ALLOWED_REDIRECT_TYPES
             );
 
-            if (!$this->_get_container()->set($sanitized)) {
+            if (!$this->_get_container()->set_preferences($sanitized)) {
                 throw new RuntimeException('Failed to persist settings');
             }
 
@@ -89,8 +89,8 @@ implements
      * Reset the redirect rule
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset()
@@ -108,8 +108,8 @@ implements
      * Check if logout redirect preferences are customized
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_customized()
@@ -126,9 +126,9 @@ implements
     /**
      * Get Logout Redirect preference resource
      *
-     * @return AAM_Framework_Preference_Interface
-     *
+     * @return AAM_Framework_Preference_LogoutRedirect
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_container()

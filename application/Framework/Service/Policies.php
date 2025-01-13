@@ -351,26 +351,19 @@ class AAM_Framework_Service_Policies
      */
     public function get_param($key, $args = [])
     {
-        try {
-            $found = false;
+        $result = null;
 
+        try {
             foreach ($this->_get_processed_params($args) as $param_key => $params) {
                 if ($param_key === $key) {
                     $candidate = $this->_get_best_candidate($params, $args);
 
                     if (!is_null($candidate)) {
-                        $found  = true;
                         $result = $candidate['Value'];
 
                         break; // No need to search any further
                     }
                 }
-            }
-
-            if ($found === false) {
-                throw new OutOfRangeException(
-                    sprintf('Failed to find %s param', $key)
-                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
