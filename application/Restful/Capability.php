@@ -130,12 +130,11 @@ class AAM_Restful_Capability
     public function get_list(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-
             if ($request->get_param('list_all')) {
                 $caps = AAM::api()->caps->get_all_caps();
             } else {
-                $caps = array_keys($service->get_all());
+                $access_level = $this->_determine_access_level($request);
+                $caps         = $this->_get_access_level_caps($access_level);
             }
 
             // Return a pure and enriched array of capabilities
@@ -309,6 +308,29 @@ class AAM_Restful_Capability
     }
 
     /**
+     * Get array of all capabilities added to given access level
+     *
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_access_level_caps($access_level)
+    {
+        if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
+            $result = $access_level->allcaps;
+        } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
+            $result = $access_level->capabilities;
+        } else {
+            $result = [];
+        }
+
+        return array_keys($result);
+    }
+
+    /**
      * Prepare the output
      *
      * @param string          $capability
@@ -393,8 +415,8 @@ class AAM_Restful_Capability
      * @param WP_REST_Request $request
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _determine_fields(WP_REST_Request $request)

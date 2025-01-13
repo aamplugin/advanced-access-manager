@@ -54,12 +54,18 @@ final class UrlTest extends TestCase
 
         $this->assertEquals([
             '/test-page' => [
-                'effect'   => 'deny',
-                'redirect' => [ 'type' => 'default' ]
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [ 'type' => 'default' ],
+                    '__access_level' => 'visitor'
+                ]
             ],
             '/another-page' => [
-                'effect'   => 'deny',
-                'redirect' => [ 'type' => 'default' ]
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [ 'type' => 'default' ],
+                    '__access_level' => 'visitor'
+                ]
             ]
         ], $perms);
     }
@@ -136,52 +142,73 @@ final class UrlTest extends TestCase
 
         $this->assertEquals([
             '/page-a' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type'               => 'page_redirect',
-                    'redirect_page_slug' => 'authentication-required',
-                    'http_status_code'   => 301
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type'               => 'page_redirect',
+                        'redirect_page_slug' => 'authentication-required',
+                        'http_status_code'   => 301
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-b' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type'             => 'page_redirect',
-                    'redirect_page_id' => 76,
-                    'http_status_code' => 307
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type'             => 'page_redirect',
+                        'redirect_page_id' => 76,
+                        'http_status_code' => 307
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-c' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type'             => 'url_redirect',
-                    'redirect_url'     => '/different-page',
-                    'http_status_code' => 302
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type'             => 'url_redirect',
+                        'redirect_url'     => '/different-page',
+                        'http_status_code' => 302
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-d' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type'    => 'custom_message',
-                    'message' => 'You are not allowed to be here'
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type'    => 'custom_message',
+                        'message' => 'You are not allowed to be here'
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-e' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type' => 'login_redirect',
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type' => 'login_redirect',
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-f' => [
-                'effect'   => 'deny',
-                'redirect' => [
-                    'type'     => 'trigger_callback',
-                    'callback' => 'do_redirect_or_return_redirect_url_func',
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [
+                        'type'     => 'trigger_callback',
+                        'callback' => 'do_redirect_or_return_redirect_url_func',
+                    ],
+                    '__access_level' => 'visitor'
                 ]
             ],
             '/page-g' => [
-                'effect'   => 'deny',
-                'redirect' => [ 'type' => 'default' ]
+                'access' => [
+                    'effect'   => 'deny',
+                    'redirect' => [ 'type' => 'default' ],
+                    '__access_level' => 'visitor'
+                ]
             ]
         ], $perms);
     }

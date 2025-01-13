@@ -20,22 +20,22 @@ use AAM,
 final class CapabilitiesTest extends TestCase
 {
 
-    /**
-     * Making sure we can fetch the list of capabilities properly
-     *
-     * @return void
-     */
-    public function testGetAllCapabilities()
-    {
-        $raw     = $this->readWpOption(wp_roles()->role_key);
-        $service = AAM::api()->capabilities('role:subscriber');
+    // /**
+    //  * Making sure we can fetch the list of capabilities properly
+    //  *
+    //  * @return void
+    //  */
+    // public function testGetAllCapabilities()
+    // {
+    //     $raw     = $this->readWpOption(wp_roles()->role_key);
+    //     $service = AAM::api()->capabilities('role:subscriber');
 
-        // Making sure that both alias methods work properly
-        $this->assertEquals($service->get_all(), $service->list());
+    //     // Making sure that both alias methods work properly
+    //     $this->assertEquals($service->get_all(), $service->list());
 
-        // Making sure that both arrays are equal
-        $this->assertEquals($raw['subscriber']['capabilities'], $service->get_all());
-    }
+    //     // Making sure that both arrays are equal
+    //     $this->assertEquals($raw['subscriber']['capabilities'], $service->get_all());
+    // }
 
     /**
      * Testing that invalid capability cannot be added

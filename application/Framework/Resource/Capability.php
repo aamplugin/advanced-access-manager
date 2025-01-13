@@ -38,7 +38,7 @@ class AAM_Framework_Resource_Capability implements AAM_Framework_Resource_Interf
 
             $result = array_replace([
                 $bits[1] => [
-                    'grant' => [
+                    'assume' => [
                         'effect' => $effect
                     ]
                 ]

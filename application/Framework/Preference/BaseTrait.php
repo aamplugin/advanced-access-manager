@@ -265,16 +265,22 @@ trait AAM_Framework_Preference_BaseTrait
      */
     private function _add_sys_attributes($data, $additional = [])
     {
-        $acl    = $this->get_access_level();
-        $acl_id = $acl->get_id();
+        if (!empty($data)) {
+            $acl    = $this->get_access_level();
+            $acl_id = $acl->get_id();
 
-        $to_merge = [ '__access_level' => $acl::TYPE ];
+            $to_merge = [ '__access_level' => $acl::TYPE ];
 
-        if (!empty($acl_id)) {
-            $to_merge['__access_level_id'] = $acl_id;
+            if (!empty($acl_id)) {
+                $to_merge['__access_level_id'] = $acl_id;
+            }
+
+            $result = array_merge($data, $to_merge, $additional);
+        } else {
+            $result = [];
         }
 
-        return array_merge($data, $to_merge, $additional);
+        return $result;
     }
 
 }

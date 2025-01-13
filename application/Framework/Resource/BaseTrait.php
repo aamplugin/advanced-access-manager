@@ -122,6 +122,8 @@ trait AAM_Framework_Resource_BaseTrait
         } else {
             $permissions = $this->_add_sys_attributes($permissions);
         }
+
+        // Store explicit permissions separately from final set of permissions
         $this->_explicit_permissions = $permissions;
 
         // These are the base permissions that are subject to override
@@ -133,7 +135,7 @@ trait AAM_Framework_Resource_BaseTrait
             $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
 
             foreach ($policy_permissions as $resource_id => $permissions) {
-                if (array_key_exists($resource_id, $permissions)) {
+                if (array_key_exists($resource_id, $this->_permissions)) {
                     $this->_permissions[$resource_id] = array_replace(
                         $permissions,
                         $this->_permissions[$resource_id]
@@ -240,7 +242,9 @@ trait AAM_Framework_Resource_BaseTrait
 
             $result = AAM_Framework_Manager::_()->settings(
                 $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
+            )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
+                $this->_explicit_permissions
+            ));
         } else {
             $this->_explicit_permissions  = [];
             $this->_permissions           = [];
@@ -297,7 +301,9 @@ trait AAM_Framework_Resource_BaseTrait
         // Store changes in DB
         $result = AAM_Framework_Manager::_()->settings(
             $this->get_access_level()
-        )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
+        )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
+            $this->_explicit_permissions
+        ));
 
         return $result;
     }
@@ -333,7 +339,9 @@ trait AAM_Framework_Resource_BaseTrait
         // Store changes in DB
         $result = AAM_Framework_Manager::_()->settings(
             $this->get_access_level()
-        )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
+        )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
+            $this->_explicit_permissions
+        ));
 
         // Also sync it with final set of permissions
         if (!array_key_exists($id, $this->_permissions)) {
@@ -385,7 +393,9 @@ trait AAM_Framework_Resource_BaseTrait
             // Store changes in DB
             $result = AAM_Framework_Manager::_()->settings(
                 $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_explicit_permissions);
+            )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
+                $this->_explicit_permissions
+            ));
         }
 
         if (!empty($this->_permissions[$id][$permission_key])) {
@@ -518,17 +528,23 @@ trait AAM_Framework_Resource_BaseTrait
                     ));
 
                     foreach($resource_ids as $id) {
-                        $result[$id] = $manager->misc->merge_permissions(
-                            isset($sib_perms[$id]) ? $sib_perms[$id] : [],
-                            isset($result[$id]) ? $result[$id] : [],
-                            constant('static::TYPE')
+                        $result[$id] = $this->_add_acl_attributes(
+                            $manager->misc->merge_permissions(
+                                isset($sib_perms[$id]) ? $sib_perms[$id] : [],
+                                isset($result[$id]) ? $result[$id] : [],
+                                constant('static::TYPE')
+                            ),
+                            $parent
                         );
                     }
                 } else {
-                    $result = $manager->misc->merge_permissions(
-                        $sib_perms,
-                        $result,
-                        constant('static::TYPE')
+                    $result = $this->_add_acl_attributes(
+                        $manager->misc->merge_permissions(
+                            $sib_perms,
+                            $result,
+                            constant('static::TYPE')
+                        ),
+                        $parent
                     );
                 }
             }
@@ -637,24 +653,51 @@ trait AAM_Framework_Resource_BaseTrait
      */
     private function _add_sys_attributes($data, $additional = [])
     {
-        $acl    = $this->get_access_level();
-        $acl_id = $acl->get_id();
-
-        foreach($data as &$permissions) {
-            foreach($permissions as $key => $permission) {
-                if (!isset($permission['__access_level'])) {
-                    $permission['__access_level'] = $acl::TYPE;
-
-                    if (!empty($acl_id)) {
-                        $permission['__access_level_id'] = $acl_id;
-                    }
-                }
-
-                $permissions[$key] = array_merge($permission, $additional);
-            }
+        foreach($data as $resource_id => $permissions) {
+            $data[$resource_id] = $this->_add_acl_attributes(
+                $permissions,
+                $this->get_access_level(),
+                $additional
+            );
         }
 
         return $data;
+    }
+
+    private function _remove_sys_attributes($data)
+    {
+        $result = [];
+
+        foreach($data as $resource_id => $permissions) {
+            $result[$resource_id] = [];
+
+            foreach($permissions as $key => $permission) {
+                $result[$resource_id][$key] = array_filter($permission, function($k) {
+                    return strpos($k, '__') !== 0;
+                }, ARRAY_FILTER_USE_KEY);
+            }
+        }
+
+        return $result;
+    }
+
+    private function _add_acl_attributes($permissions, $acl, $additional = [])
+    {
+        foreach($permissions as $key => $permission) {
+            if (!isset($permission['__access_level'])) {
+                $permission['__access_level'] = $acl::TYPE;
+
+                $acl_id = $acl->get_id();
+
+                if (!empty($acl_id)) {
+                    $permission['__access_level_id'] = $acl_id;
+                }
+            }
+
+            $permissions[$key] = array_merge($permission, $additional);
+        }
+
+        return $permissions;
     }
 
 }

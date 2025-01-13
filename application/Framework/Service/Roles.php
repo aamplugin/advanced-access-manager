@@ -19,6 +19,62 @@ class AAM_Framework_Service_Roles
     use AAM_Framework_Service_BaseTrait;
 
     /**
+     * Get list of dynamic roles
+     *
+     * Note! This method return only list of dynamically assumed roles to
+     * access level. It does not return roles stored in WordPress core.
+     *
+     * This is an artificial abstraction layer on top of the WordPress core
+     * roles and capabilities to allow roles adjustment through JSON access policies
+     * and dynamic manipulations.
+     *
+     * @return array|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_list()
+    {
+        try {
+            $result   = [];
+            $resource = $this->_get_resource();
+
+            foreach($resource->get_permissions() as $slug => $permissions) {
+                if (wp_roles()->is_role($slug)) { // Ignore invalid roles
+                    if ($permissions['assume_role']['effect'] === 'allow') {
+                        // Additionally, if role is allowed, making sure it is
+                        // visible to the current access level
+                        if ($this->is_allowed_to($slug, 'list_role')) {
+                            $result[$slug] = true;
+                        } else {
+                            $result[$slug] = false;
+                        }
+                    } else {
+                        $result[$slug] = false;
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_list
+     *
+     * @return array|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function list()
+    {
+        return $this->get_list();
+    }
+
+    /**
      * Deny one or multiple permissions
      *
      * @param mixed        $role_identifier

@@ -19,33 +19,30 @@ class AAM_Framework_Service_Capabilities
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Get list of capabilities assigned to the access level
+     * Get list of dynamic capabilities
      *
-     * Note, this method is intended to work only with Role & User access levels. For
-     * the Default or Visitor access levels, this method will return an empty array.
+     * Note! This method return only list of dynamically assigned capabilities to
+     * access level. It does not return capabilities stored in WordPress core.
+     *
+     * This is an artificial abstraction layer on top of the WordPress core
+     * capabilities to allow capabilities adjustment through JSON access policies
+     * and dynamic manipulations.
      *
      * @return array|WP_Error
      * @access public
      *
      * @version 7.0.0
-     * @todo - Move it to AAM_Service_Capability
      */
-    public function get_all()
+    public function get_list()
     {
         try {
-            $result = [];
-            $access_level = $this->_get_access_level();
+            $result   = [];
+            $resource = $this->_get_resource();
 
-            if ($access_level::TYPE === AAM_Framework_Type_AccessLevel::USER) {
-                $caps = $access_level->allcaps;
-            } elseif ($access_level::TYPE === AAM_Framework_Type_AccessLevel::ROLE) {
-                $caps = $access_level->capabilities;
-            } else {
-                $caps = [];
-            }
-
-            foreach(array_keys($caps) as $cap) {
-                $result[$cap] = $this->_is_allowed($cap);
+            foreach($resource->get_permissions() as $cap => $permissions) {
+                if (apply_filters('aam_is_capability_filter', true, $cap)) {
+                    $result[$cap] = $permissions['assume']['effect'] === 'allow';
+                }
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -61,11 +58,10 @@ class AAM_Framework_Service_Capabilities
      * @access public
      *
      * @version 7.0.0
-     * @todo - Move it to AAM_Service_Capability
      */
     public function list()
     {
-        return $this->get_all();
+        return $this->get_list();
     }
 
     /**
@@ -330,20 +326,22 @@ class AAM_Framework_Service_Capabilities
      */
     private function _is_allowed($capability)
     {
+        $result     = null;
         $resource   = $this->_get_resource();
-        $permission = $resource->get_permission($capability, 'grant');
+        $permission = $resource->get_permission($capability, 'assume');
 
         // Determine if capability is explicitly granted with AAM
         if (!empty($permission)) {
             $result = $permission['effect'] === 'allow';
-        } else {
-            $result = apply_filters(
-                'aam_capability_is_allowed_filter',
-                null,
-                $capability,
-                $resource
-            );
         }
+
+        // Allow third-party implementation to influence the decision
+        $result = apply_filters(
+            'aam_capability_is_allowed_filter',
+            $result,
+            $capability,
+            $resource
+        );
 
         // Otherwise - default to WP core
         if (is_null($result) && $this->_is_acceptable_access_level()) {

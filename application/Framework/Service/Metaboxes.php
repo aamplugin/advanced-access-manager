@@ -286,6 +286,8 @@ class AAM_Framework_Service_Metaboxes
     {
         $result     = null;
         $resource   = $this->_get_resource();
+
+        // Step #1. Check for metabox & screen ID first
         $permission = $resource->get_permission(
             $this->_normalize_resource_identifier($metabox, $screen_id),
             'access'
@@ -293,6 +295,19 @@ class AAM_Framework_Service_Metaboxes
 
         if (!empty($permission)) {
             $result = $permission['effect'] !== 'allow';
+        }
+
+        // Step #2. If there is no decision made and screen ID is not empty, then
+        // check for metabox itself only
+        if (is_null($result) && !empty($screen_id)) {
+            $permission = $resource->get_permission(
+                $this->_normalize_resource_identifier($metabox, null),
+                'access'
+            );
+
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            }
         }
 
         // Allow third-party implementations to integrate with the
@@ -374,20 +389,20 @@ class AAM_Framework_Service_Metaboxes
      *
      * @param mixed       $metabox
      * @param string|null $screen_id
-     * @param bool        $is_denied
+     * @param string      $effect
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _update_item_permission($metabox, $screen_id, $is_denied)
+    private function _update_item_permission($metabox, $screen_id, $effect)
     {
         try {
             $result = $this->_get_resource()->set_permission(
                 $this->_normalize_resource_identifier($metabox, $screen_id),
                 'access',
-                $is_denied ? 'deny' : 'allow'
+                $effect
             );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);

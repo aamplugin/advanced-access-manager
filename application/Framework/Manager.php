@@ -236,7 +236,7 @@ final class AAM_Framework_Manager
         // Dynamically adjust user account if JSON Access Policies are enabled
         add_action('set_current_user', function() {
             if (AAM::api()->config->get('service.policies.enabled', true)) {
-                // $this->_dynamically_adjust_user_account();
+                $this->_dynamically_adjust_user_account();
             }
         }, 999);
 
@@ -417,11 +417,18 @@ final class AAM_Framework_Manager
         // Iterate over the list of all capabilities and properly adjust them for
         // current user
         foreach(AAM::api()->caps()->list() as $cap => $is_granted) {
-            if (array_key_exists($cap, $current_user->caps)) {
-                $current_user->caps[$cap] = $is_granted;
-            }
+            if ($is_granted === true) {
+                $current_user->caps[$cap]    = $is_granted;
+                $current_user->allcaps[$cap] = $is_granted;
+            } else {
+                if (array_key_exists($cap, $current_user->caps)) {
+                    unset($current_user->caps[$cap]);
+                }
 
-            $current_user->allcaps[$cap] = $is_granted;
+                if (array_key_exists($cap, $current_user->allcaps)) {
+                    unset($current_user->allcaps[$cap]);
+                }
+            }
         }
     }
 
@@ -436,31 +443,30 @@ final class AAM_Framework_Manager
     private function _update_user_roles()
     {
         $user      = wp_get_current_user();
-        $service   = AAM::api()->roles();
         $role_list = $user->roles;
-        $updated   = false;
+        $assumed   = AAM::api()->roles()->get_list();
 
-        foreach(AAM::api()->roles->get_editable_roles() as $role) {
-            if ($service->is_allowed_to($role, 'assume')) {
-                array_push($role_list, $role->slug);
+        foreach($assumed as $slug => $is_assumed) {
+            if ($is_assumed) {
+                array_push($role_list, $slug);
             } else {
-                $role_list = array_filter($role_list, function($r) use ($role) {
-                    return $r !== $role->slug;
+                $role_list = array_filter($role_list, function($r) use ($slug) {
+                    return $r !== $slug;
                 });
 
                 // Making sure role is also deleted from the caps
-                $user->caps = array_filter($user->caps, function($c) use ($role) {
-                    return $c !== $role->slug;
+                $user->caps = array_filter($user->caps, function($c) use ($slug) {
+                    return $c !== $slug;
                 }, ARRAY_FILTER_USE_KEY);
 
-                $user->allcaps = array_filter($user->allcaps, function($c) use ($role) {
-                    return $c !== $role->slug;
+                $user->allcaps = array_filter($user->allcaps, function($c) use ($slug) {
+                    return $c !== $slug;
                 }, ARRAY_FILTER_USE_KEY);
             }
         }
 
         // Set new list of roles
-        if ($updated) {
+        if (!empty($assumed)) {
             $user->roles = $role_list;
 
             // Assign these roles to caps also, to allow WP core to do the rest

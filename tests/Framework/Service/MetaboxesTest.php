@@ -41,7 +41,7 @@ final class MetaboxesTest extends TestCase
 
         // Assert metabox permissions
         $this->assertTrue($service->is_denied('post_thumbnail_meta_box', 'page'));
-        $this->assertTrue($service->is_denied('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_denied('post_thumbnail_meta_box', 'page'));
         $this->assertTrue($service->is_allowed('post_thumbnail_meta_box', 'post'));
 
         // Set allow permission
@@ -89,7 +89,7 @@ final class MetaboxesTest extends TestCase
 
         // Assert metabox permissions
         $this->assertTrue($service->is_denied($post_thumbnail_meta_box, 'page'));
-        $this->assertTrue($service->is_denied('page_post_thumbnail_meta_box'));
+        $this->assertTrue($service->is_denied('post_thumbnail_meta_box', 'page'));
         $this->assertTrue($service->is_allowed($post_thumbnail_meta_box, 'post'));
 
         // Set allow permission

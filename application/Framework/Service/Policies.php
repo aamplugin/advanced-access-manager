@@ -1044,8 +1044,6 @@ class AAM_Framework_Service_Policies
      */
     private function _update($policy_id, $effect)
     {
-        $settings = $this->settings($this->_get_access_level());
-
         return $this->_get_resource()->set_permission(
             $this->_normalize_resource_identifier($policy_id),
             'attach',

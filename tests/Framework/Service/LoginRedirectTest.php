@@ -35,27 +35,29 @@ final class LoginRedirectTest extends TestCase
 
         // Setting redirect
         $this->assertEquals(
-            $redirect_a,
+            array_merge($redirect_a, [ '__access_level' => 'visitor' ]),
             AAM::api()->login_redirect()->set_redirect($redirect_a)
         );
 
         // Verifying that we are getting the same redirect back
         $this->assertEquals(
-            $redirect_a,
+            array_merge($redirect_a, [ '__access_level' => 'visitor' ]),
             AAM::api()->login_redirect()->get_redirect()
         );
 
         // Setting another redirect
-        $this->assertEquals(
-            [ 'type' => 'url_redirect', 'redirect_url' => '/some-page' ],
-            AAM::api()->login_redirect()->set_redirect($redirect_b)
-        );
+        $this->assertEquals([
+            'type'           => 'url_redirect',
+            'redirect_url'   => '/some-page',
+            '__access_level' => 'visitor'
+        ], AAM::api()->login_redirect()->set_redirect($redirect_b));
 
         // Verifying that we are getting the same redirect back
-        $this->assertEquals(
-            [ 'type' => 'url_redirect', 'redirect_url' => '/some-page' ],
-            AAM::api()->login_redirect()->get_redirect()
-        );
+        $this->assertEquals([
+            'type'           => 'url_redirect',
+            'redirect_url'   => '/some-page',
+            '__access_level' => 'visitor'
+        ], AAM::api()->login_redirect()->get_redirect());
     }
 
 

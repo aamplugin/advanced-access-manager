@@ -280,7 +280,10 @@ final class HooksTest extends TestCase
             ],
             'hook_d|10' => [
                 'access' => [
-                    'effect' => 'allow'
+                    'effect'            => 'allow',
+                    '__access_level'    => 'role',
+                    '__access_level_id' => 'author',
+                    '__inherited'       => true
                 ]
             ],
             'hook_e|10' => [
