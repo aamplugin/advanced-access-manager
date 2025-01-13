@@ -40,11 +40,11 @@ class JwtManagerTest extends TestCase
 
         $payload = $manager->validate($result->token);
 
-        $this->assertObjectHasAttribute('test', $payload);
-        $this->assertObjectHasAttribute('iat', $payload);
-        $this->assertObjectHasAttribute('exp', $payload);
-        $this->assertObjectHasAttribute('iss', $payload);
-        $this->assertObjectHasAttribute('jti', $payload);
+        $this->assertObjectHasProperty('test', $payload);
+        $this->assertObjectHasProperty('iat', $payload);
+        $this->assertObjectHasProperty('exp', $payload);
+        $this->assertObjectHasProperty('iss', $payload);
+        $this->assertObjectHasProperty('jti', $payload);
         $this->assertTrue($payload->test);
     }
 

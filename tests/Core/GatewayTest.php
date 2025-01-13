@@ -47,7 +47,7 @@ class GatewayTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function mergingPreferenceData()
+    public static function mergingPreferenceData()
     {
         return array(
             array(array('hidden' => true), array('hidden' => true), 'deny', array('hidden' => true)),

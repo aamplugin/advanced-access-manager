@@ -47,7 +47,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function betweenDataProvider()
+    public static function betweenDataProvider()
     {
         return array(
             array(array('Between' => array(10 => array(5, 15))), true),
@@ -84,7 +84,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function equalsDataProvider()
+    public static function equalsDataProvider()
     {
         // Note! Left side of the condition should never be boolean
         return array(
@@ -124,7 +124,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function notEqualsDataProvider()
+    public static function notEqualsDataProvider()
     {
         // Note! Left side of the condition should never be boolean
         return array(
@@ -165,7 +165,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function greaterDataProvider()
+    public static function greaterDataProvider()
     {
         return array(
             array(array('Greater' => array(5 => 1)), true),
@@ -201,7 +201,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function lessDataProvider()
+    public static function lessDataProvider()
     {
         return array(
             array(array('Less' => array(5 => 10)), true),
@@ -237,7 +237,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function greaterOrEqualsDataProvider()
+    public static function greaterOrEqualsDataProvider()
     {
         return array(
             array(array('GreaterOrEquals' => array(5 => 1)), true),
@@ -273,7 +273,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function lessOrEqualsDataProvider()
+    public static function lessOrEqualsDataProvider()
     {
         return array(
             array(array('LessOrEquals' => array(5 => 10)), true),
@@ -312,7 +312,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.5.3
      */
-    public function inDataProvider()
+    public static function inDataProvider()
     {
         return array(
             array(array('In' => array('test' => array('test', 'test1'))), true),
@@ -354,7 +354,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.5.3
      */
-    public function notInDataProvider()
+    public static function notInDataProvider()
     {
         return array(
             array(array('NotIn' => array('test' => array('test', 'test1'))), false),
@@ -393,7 +393,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function likeDataProvider()
+    public static function likeDataProvider()
     {
         return array(
             array(array('Like' => array('Lucy van Pelt' => 'Lucy*')), true),
@@ -430,7 +430,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function notLikeDataProvider()
+    public static function notLikeDataProvider()
     {
         return array(
             array(array('NotLike' => array('Lucy van Pelt' => 'Lucy*')), false),
@@ -467,7 +467,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function regExDataProvider()
+    public static function regExDataProvider()
     {
         return array(
             array(array('RegEx' => array('Hello World' => '/^[\w\s]+$/i')), true),
@@ -502,7 +502,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function typeCastingDataProvider()
+    public static function typeCastingDataProvider()
     {
         return array(
             array(array('Equals' => array('(*int)1' => 1)), true),
@@ -542,7 +542,7 @@ class PolicyConditionTest extends TestCase
      * @access public
      * @version 6.0.0
      */
-    public function complexDataProvider()
+    public static function complexDataProvider()
     {
         return array(
             array(array(

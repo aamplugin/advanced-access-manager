@@ -114,7 +114,7 @@ class PolicyEffectTest extends TestCase
         // Create a stub for the SomeClass class.
         $stub = $this->getMockBuilder(AAM_Core_Policy_Manager::class)
             ->setConstructorArgs(array(AAM::getUser(), false))
-            ->setMethods(array('fetchPolicies'))
+            ->onlyMethods(array('fetchPolicies'))
             ->getMock();
 
         // Configure the stub

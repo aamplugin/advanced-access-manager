@@ -22,7 +22,7 @@ use DateTime,
  * @package AAM\UnitTest
  * @version 6.0.0
  */
-class JwtTest extends TestCase
+class JwtRestApiTest extends TestCase
 {
     use ResetTrait;
 

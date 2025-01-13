@@ -232,7 +232,7 @@ class AAM_Core_Jwt_Manager
      *
      * @param string $token
      *
-     * @return array
+     * @return object
      *
      * @access public
      * @version 6.9.11

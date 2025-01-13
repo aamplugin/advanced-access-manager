@@ -21,7 +21,7 @@ use AAM_Service_Jwt,
  * @package AAM\UnitTest
  * @version 6.0.0
  */
-class JwtRestApiTest extends TestCase
+class JwtTest extends TestCase
 {
     use ResetTrait;
 
