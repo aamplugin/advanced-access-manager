@@ -51,14 +51,12 @@ final class HookTest extends TestCase
         $this->assertEquals([
             'admin_menu|10' => [
                 'access' => [
-                    'effect'         => 'deny',
-                    '__access_level' => 'visitor'
+                    'effect'         => 'deny'
                 ]
             ],
             'aam_test_filter|14' => [
                 'access' => [
-                    'effect'         => 'deny',
-                    '__access_level' => 'visitor'
+                    'effect'         => 'deny'
                 ]
             ]
         ], $resource->get_permissions());
@@ -97,15 +95,13 @@ final class HookTest extends TestCase
             'screen_options_show_screen|10' => [
                 'access' => [
                     'effect'         => 'alter',
-                    'return'         => false,
-                    '__access_level' => 'visitor'
+                    'return'         => false
                 ]
             ],
             'aam_test_filter|11' => [
                 'access' => [
                     'effect'         => 'alter',
-                    'return'         => 'test',
-                    '__access_level' => 'visitor'
+                    'return'         => 'test'
                 ]
             ]
         ], $resource->get_permissions());
@@ -145,8 +141,7 @@ final class HookTest extends TestCase
                     'return' => [
                         'members.aamportal.com',
                         'store.aamportal.com'
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ]
         ], $resource->get_permissions());
@@ -178,8 +173,7 @@ final class HookTest extends TestCase
             'show_password_fields|10' => [
                 'access' => [
                     'effect'         => 'replace',
-                    'return'         => false,
-                    '__access_level' => 'visitor'
+                    'return'         => false
                 ]
             ]
         ], $resource->get_permissions());

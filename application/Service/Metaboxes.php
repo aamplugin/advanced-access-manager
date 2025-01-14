@@ -36,7 +36,7 @@ class AAM_Service_Metaboxes
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_MetaboxService::bootstrap();
+        AAM_Restful_Metabox::bootstrap();
 
         $this->initialize_hooks();
     }

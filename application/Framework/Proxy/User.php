@@ -17,11 +17,6 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
 {
 
     /**
-     * @inheritDoc
-     */
-    const TYPE = 'user';
-
-    /**
      * User status: ACTIVE
      *
      * @version 7.0.0
@@ -126,12 +121,9 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
     }
 
     /**
-     * Get WordPress core user instance
+     * @inheritDoc
      *
      * @return WP_User
-     * @access public
-     *
-     * @version 7.0.0
      */
     public function get_core_instance()
     {

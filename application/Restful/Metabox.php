@@ -8,12 +8,12 @@
  */
 
 /**
- * RESTful API for the Widgets service
+ * RESTful API for the Metaboxes service
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_WidgetService
+class AAM_Restful_Metabox
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,52 +22,62 @@ class AAM_Restful_WidgetService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
-            // Get the list of all widgets grouped by screen
-            $this->_register_route('/widgets', array(
+            // Get the list of all metaboxes grouped by screen
+            $this->_register_route('/metaboxes', array(
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_list'),
+                'callback'            => array($this, 'get_items'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
                     'screen_id' => array(
-                        'description' => 'Screen ID',
+                        'description' => 'The screen ID when metabox are rendered',
                         'type'        => 'string',
-                        'enum'        => [ 'dashboard', 'frontend' ]
+                        'required'    => false
                     )
                 )
             ));
 
-            // Get a widget
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
+            // Get a metabox
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Widget unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
 
-            // Update a widget's permission
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
+            // Update a metabox's permission
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Widget unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     ),
                     'effect' => array(
                         'description' => 'Either metabox is restricted or not',
@@ -78,30 +88,35 @@ class AAM_Restful_WidgetService
                 )
             ));
 
-            // Delete a widget's permission
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
+            // Delete a metabox's permission
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_item_permission'),
+                'callback'            => array($this, 'reset_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
                     'slug' => array(
-                        'description' => 'Widget unique slug',
+                        'description' => 'Metabox slug',
                         'type'        => 'string',
                         'required'    => true
+                    ),
+                    'screen_id' => array(
+                        'description' => 'The screen ID when metabox is rendered',
+                        'type'        => 'string',
+                        'required'    => false
                     )
                 )
             ));
 
             // Reset all or specific screen permissions
-            $this->_register_route('/widgets', array(
+            $this->_register_route('/metaboxes', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'reset_permissions'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args' => array(
                     'screen_id' => array(
-                        'description' => 'Screen ID',
+                        'description' => 'The screen ID when metaboxes are rendered',
                         'type'        => 'string',
-                        'enum'        => [ 'dashboard', 'frontend' ]
+                        'required'    => false
                     )
                 )
             ));
@@ -109,13 +124,13 @@ class AAM_Restful_WidgetService
     }
 
     /**
-     * Get a list of widgets grouped by screen
+     * Get a list of metaboxes for given post type
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_items(WP_REST_Request $request)
@@ -131,20 +146,23 @@ class AAM_Restful_WidgetService
     }
 
     /**
-     * Get a widget by ID
+     * Get a metabox by ID
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->item($request->get_param('slug'));
+            $result  = $service->item(
+                $request->get_param('slug'),
+                $request->get_param('screen_id')
+            );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -153,28 +171,29 @@ class AAM_Restful_WidgetService
     }
 
     /**
-     * Update widget permission
+     * Update metabox permission
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_item_permission(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $slug    = $request->get_param('slug');
+            $service   = $this->_get_service($request);
+            $slug      = $request->get_param('slug');
+            $screen_id = $request->get_param('screen_id');
 
             if ($request->get_param('effect') === 'allow') {
-                $service->allow($slug);
+                $service->allow($slug, $screen_id);
             } else {
-                $service->deny($slug);
+                $service->deny($slug, $screen_id);
             }
 
-            $result = $service->item($slug);
+            $result = $service->item($slug, $screen_id);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -183,20 +202,23 @@ class AAM_Restful_WidgetService
     }
 
     /**
-     * Delete widget permission
+     * Delete metabox permission
      *
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
-    public function delete_item_permission(WP_REST_Request $request)
+    public function reset_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset($request->get_param('slug'));
+            $result  = [ 'success' => $service->reset(
+                $request->get_param('slug'),
+                $request->get_param('screen_id')
+            ) ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -210,15 +232,18 @@ class AAM_Restful_WidgetService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->reset($request->get_param('screen_id'));
+            $result  = [ 'success' => $service->reset(
+                null,
+                $request->get_param('screen_id')
+            ) ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -237,7 +262,7 @@ class AAM_Restful_WidgetService
     public function check_permissions()
     {
         return current_user_can('aam_manager')
-            && current_user_can('aam_manage_widgets');
+            && current_user_can('aam_manage_metaboxes');
     }
 
     /**
@@ -245,14 +270,14 @@ class AAM_Restful_WidgetService
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Framework_Service_Widgets
+     * @return AAM_Framework_Service_Metaboxes
      *
      * @access private
      * @version 7.0.0
      */
     private function _get_service($request)
     {
-        return AAM::api()->widgets(
+        return AAM::api()->metaboxes(
             $this->_determine_access_level($request),
             [ 'error_handling' => 'exception' ]
         );

@@ -59,7 +59,9 @@ class AAM_Framework_Service_Metaboxes
                     // exist
                     if (array_key_exists($type, $wp_post_types)) {
                         foreach($metaboxes as $metabox) {
-                            array_push($result, $this->_prepare_metabox($metabox));
+                            array_push($result, $this->_prepare_metabox(
+                                $metabox, $screen_id
+                            ));
                         }
                     }
                 }
@@ -219,9 +221,10 @@ class AAM_Framework_Service_Metaboxes
             if (is_null($metabox) && is_null($screen_id)) {
                 $result = $resource->reset();
             } else {
-                $result = $resource->reset($this->_normalize_resource_identifier(
-                    $metabox, $screen_id
-                ));
+                $result = $resource->remove_permission(
+                    $this->_normalize_resource_identifier($metabox, $screen_id),
+                    'list'
+                );
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -244,8 +247,7 @@ class AAM_Framework_Service_Metaboxes
     public function is_denied($metabox, $screen_id = null)
     {
         try {
-            $restricted = $this->_is_denied($metabox, $screen_id);
-            $result     = is_bool($restricted) ? $restricted : false;
+            $result = $this->_is_denied($metabox, $screen_id);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -272,10 +274,29 @@ class AAM_Framework_Service_Metaboxes
     }
 
     /**
+     * @inheritDoc
+     *
+     * @param mixed  $metabox   [Optional]
+     * @param string $screen_id [Optional]
+     */
+    public function is_customized($metabox = null, $screen_id = null)
+    {
+        try {
+            $result = $this->_get_resource()->is_customized(
+                $this->_normalize_resource_identifier($metabox, $screen_id)
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
      * Check if metabox is restricted
      *
-     * @param string $metabox
-     * @param string $screen_id
+     * @param mixed       $metabox
+     * @param string|null $screen_id
      *
      * @return bool
      * @access private
@@ -286,39 +307,23 @@ class AAM_Framework_Service_Metaboxes
     {
         $result     = null;
         $resource   = $this->_get_resource();
-
-        // Step #1. Check for metabox & screen ID first
-        $permission = $resource->get_permission(
-            $this->_normalize_resource_identifier($metabox, $screen_id),
-            'access'
-        );
+        $identifier = $this->_normalize_resource_identifier($metabox, $screen_id);
+        $permission = $resource->get_permission($identifier, 'list');
 
         if (!empty($permission)) {
             $result = $permission['effect'] !== 'allow';
         }
 
-        // Step #2. If there is no decision made and screen ID is not empty, then
-        // check for metabox itself only
-        if (is_null($result) && !empty($screen_id)) {
-            $permission = $resource->get_permission(
-                $this->_normalize_resource_identifier($metabox, null),
-                'access'
-            );
-
-            if (!empty($permission)) {
-                $result = $permission['effect'] !== 'allow';
-            }
-        }
-
         // Allow third-party implementations to integrate with the
         // decision making process
-        return apply_filters(
+        $result = apply_filters(
             'aam_metabox_is_denied_filter',
             $result,
-            $metabox,
-            $screen_id,
+            $identifier,
             $resource
         );
+
+        return is_bool($result) ? $result : false;
     }
 
     /**
@@ -401,7 +406,7 @@ class AAM_Framework_Service_Metaboxes
         try {
             $result = $this->_get_resource()->set_permission(
                 $this->_normalize_resource_identifier($metabox, $screen_id),
-                'access',
+                'list',
                 $effect
             );
         } catch (Exception $e) {
@@ -414,7 +419,8 @@ class AAM_Framework_Service_Metaboxes
     /**
      * Normalize and prepare the metabox model
      *
-     * @param array $metabox
+     * @param mixed       $metabox
+     * @param string|null $screen_id
      *
      * @return array
      * @access private
@@ -422,14 +428,15 @@ class AAM_Framework_Service_Metaboxes
      * @version 7.0.0
      * @todo Move this to RESTful class
      */
-    private function _prepare_metabox($metabox)
+    private function _prepare_metabox($metabox, $screen_id)
     {
         return [
             'slug'          => $metabox['slug'],
             'screen_id'     => $metabox['screen_id'],
             'title'         => base64_decode($metabox['title']),
             'is_restricted' => $this->_is_denied(
-                $metabox['slug'], $metabox['screen_id']
+                $metabox['slug'],
+                $screen_id ? $screen_id : $metabox['screen_id']
             )
         ];
     }

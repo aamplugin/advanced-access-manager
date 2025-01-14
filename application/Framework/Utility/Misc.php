@@ -448,7 +448,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     {
         if (is_admin()) {
             $result = 'backend';
-        } elseif (wp_is_json_request()) {
+        } elseif (wp_is_rest_endpoint() || defined('REST_REQUEST')) {
             $result = 'api';
         } else {
             $result = 'frontend';

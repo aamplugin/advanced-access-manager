@@ -257,8 +257,8 @@ class AAM_Restful_Content
     public function get_taxonomies(WP_REST_Request $request)
     {
         try {
-            $raw_list = AAM::api()->content->get_taxonomies(
-                $this->_determine_access_level($request),
+            $access_level = $this->_determine_access_level($request);
+            $raw_list     = AAM::api()->content->get_taxonomies(
                 $request->get_param('return_all')
             );
 
@@ -272,7 +272,9 @@ class AAM_Restful_Content
 
             foreach($raw_list as $taxonomy) {
                 array_push(
-                    $result['list'], $this->_prepare_taxonomy_output($taxonomy)
+                    $result['list'], $this->_prepare_taxonomy_output(
+                        $access_level, $taxonomy
+                    )
                 );
 
                 $result['summary']['filtered_count']++;
@@ -329,12 +331,12 @@ class AAM_Restful_Content
                 ]
             ];
 
-            $raw_list = AAM::api()->content->get_posts(
-                $args, $this->_determine_access_level($request)
-            );
+            $access_level = $this->_determine_access_level($request);
 
-            foreach($raw_list as $item) {
-                array_push($result['list'], $this->_prepare_post_output($item));
+            foreach(AAM::api()->content->get_posts($args) as $item) {
+                array_push($result['list'], $this->_prepare_post_output(
+                    $item, $access_level
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -357,10 +359,8 @@ class AAM_Restful_Content
     {
         try {
             $result = $this->_prepare_post_output(
-                $this->_determine_access_level($request)->get_resource(
-                    AAM_Framework_Type_Resource::POST,
-                    $request->get_param('id')
-                )
+                get_post($request->get_param('id')),
+                $this->_determine_access_level($request)
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -382,12 +382,14 @@ class AAM_Restful_Content
     public function get_terms(WP_REST_Request $request)
     {
         try {
-            $args = [
+            $access_level = $this->_determine_access_level($request);
+            $args         = [
                 'number'     => $request->get_param('per_page'),
                 'taxonomy'   => $request->get_param('taxonomy'),
                 'hide_empty' => false,
                 'search'     => $request->get_param('search'),
-                'offset'     => $request->get_param('offset')
+                'offset'     => $request->get_param('offset'),
+                'post_type'  => $request->get_param('post_type')
             ];
 
             // Getting the list of terms
@@ -415,14 +417,12 @@ class AAM_Restful_Content
                 ]
             ];
 
-            $raw_list = AAM::api()->content->get_terms(
-                $args,
-                $this->_determine_access_level($request),
-                $request->get_param('post_type')
-            );
+            $raw_list = AAM::api()->content->get_terms($args);
 
             foreach($raw_list as $item) {
-                array_push($result['list'], $this->_prepare_term_output($item));
+                array_push($result['list'], $this->_prepare_term_output(
+                    $access_level, $item
+                ));
             }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -444,9 +444,10 @@ class AAM_Restful_Content
     public function update_post_permissions(WP_REST_Request $request)
     {
         try {
-            $post = $this->_determine_access_level($request)->get_resource(
-                AAM_Framework_Type_Resource::POST,
-                $request->get_param('id')
+            $post         = get_post($request->get_param('id'));
+            $access_level = $this->_determine_access_level($request);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::POST
             );
 
             // Normalize array of permissions
@@ -458,9 +459,9 @@ class AAM_Restful_Content
                 }, ARRAY_FILTER_USE_KEY);
             }
 
-            $post->set_permissions($normalized);
+            $resource->set_permissions($normalized, $post);
 
-            $result = $this->_prepare_post_output($post);
+            $result = $this->_prepare_post_output($post, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -481,17 +482,19 @@ class AAM_Restful_Content
     public function set_post_permission(WP_REST_Request $request)
     {
         try {
-            $post = $this->_determine_access_level($request)->get_resource(
-                AAM_Framework_Type_Resource::POST,
-                $request->get_param('id')
+            $post         = get_post($request->get_param('id'));
+            $access_level = $this->_determine_access_level($request);
+            $resource     = $access_level->get_resource(
+                AAM_Framework_Type_Resource::POST
             );
 
-            $post->set_permissions(array_merge(
-                $post->get_permissions(true),
-                [ $request->get_param('permission') => $request->get_json_params() ]
-            ));
+            $resource->set_permission(
+                $post,
+                $request->get_param('permission'),
+                $request->get_json_params()
+            );
 
-            $result = $this->_prepare_post_output($post);
+            $result = $this->_prepare_post_output($post, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -512,13 +515,14 @@ class AAM_Restful_Content
     public function reset_post_permissions(WP_REST_Request $request)
     {
         try {
-            $post = $this->_determine_access_level($request)->get_resource(
-                AAM_Framework_Type_Resource::POST,
-                $request->get_param('id')
+            $post     = get_post($request->get_param('id'));
+            $resource = $this->_determine_access_level($request)->get_resource(
+                AAM_Framework_Type_Resource::POST
+
             );
 
             $result = [
-                'success' => $post->reset()
+                'success' => $resource->reset($post)
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -544,32 +548,36 @@ class AAM_Restful_Content
     /**
      * Prepare post output model
      *
-     * @param AAM_Framework_Resource_Post $post_resource
+     * @param WP_Post                             $post
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_post_output($post_resource)
+    private function _prepare_post_output($post, $access_level)
     {
         // Get post type to add additional information about post
-        $post_type = get_post_type_object($post_resource->post_type);
+        $post_type = get_post_type_object($post->post_type);
+        $resource   = $access_level->get_resource(
+            AAM_Framework_Type_Resource::POST
+        );
 
         $result = [
-            'id'              => $post_resource->ID,
+            'id'              => $post->ID,
             'icon'            => $post_type->menu_icon,
             'is_hierarchical' => $post_type->hierarchical
         ];
 
-        if ($post_resource->post_type === 'nav_menu_item') {
-            $result['title'] = wp_setup_nav_menu_item($post_resource)->title;
+        if ($post->post_type === 'nav_menu_item') {
+            $result['title'] = wp_setup_nav_menu_item($post)->title;
         } else {
-            $result['title'] = $post_resource->post_title;
+            $result['title'] = $post->post_title;
         }
 
-        $result['permissions']   = $post_resource->get_permissions();
-        $result['is_customized'] = $post_resource->is_customized();
+        $result['permissions']   = $resource->get_permissions($post);
+        $result['is_customized'] = $resource->is_customized($post);
 
         return $result;
     }
@@ -604,21 +612,26 @@ class AAM_Restful_Content
     /**
      * Prepare taxonomy item for output
      *
-     * @param AAM_Framework_Resource_Taxonomy $taxonomy
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param \WP_Taxonomy                        $taxonomy
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_taxonomy_output($taxonomy)
+    private function _prepare_taxonomy_output($access_level, $taxonomy)
     {
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::TAXONOMY
+        );
+
         return [
             'slug'            => $taxonomy->name,
             'title'           => $taxonomy->label,
             'is_hierarchical' => $taxonomy->hierarchical,
-            'permissions'     => $taxonomy->get_permissions(),
-            'is_customized'   => $taxonomy->is_customized(),
+            'permissions'     => $resource->get_permissions($taxonomy),
+            'is_customized'   => $resource->is_customized($taxonomy),
             'post_types'      => array_values($taxonomy->object_type)
         ];
     }
@@ -626,39 +639,40 @@ class AAM_Restful_Content
     /**
      * Prepare term item for output
      *
-     * @param AAM_Framework_Resource_Term $term
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param WP_Term                             $term
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _prepare_term_output($term)
+    private function _prepare_term_output($access_level, $term)
     {
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::TERM
+        );
+
         $result = [
             'id'              => $term->term_id,
             'title'           => $term->name,
             'slug'            => $term->slug,
             'taxonomy'        => $term->taxonomy,
             'is_hierarchical' => get_taxonomy($term->taxonomy)->hierarchical,
-            'permissions'     => $term->get_permissions(),
-            'is_customized'   => $term->is_customized()
+            'permissions'     => $resource->get_permissions($term),
+            'is_customized'   => $resource->is_customized($term)
         ];
 
-        // If term is within post type scope, also determine if it is a default
-        // term
-        $internal_id = $term->get_internal_id(false);
-
-        if (!empty($internal_id['post_type'])) {
+        if (!empty($term->post_type)) {
             $is_default = $term->taxonomy === 'category'
                 && intval(get_option('default_category')) === $term->term_id;
 
             $result['is_default'] = apply_filters(
-                'aam_is_default_term_filter', $is_default, $term
+                'aam_is_default_term_filter', $is_default, $term, $access_level
             );
 
             // Also adding post type scope to the output
-            $result['post_type'] = $internal_id['post_type'];
+            $result['post_type'] = $term->post_type;
         }
 
         return $result;

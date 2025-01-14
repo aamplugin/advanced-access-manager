@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_ConfigService
+class AAM_Restful_Configs
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_ConfigService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -269,8 +269,8 @@ class AAM_Restful_ConfigService
      * Reset all configurations
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_configurations()
@@ -290,8 +290,8 @@ class AAM_Restful_ConfigService
      * Reset all configurations
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_configpress()
@@ -313,8 +313,8 @@ class AAM_Restful_ConfigService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()

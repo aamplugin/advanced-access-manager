@@ -56,15 +56,13 @@ final class UrlTest extends TestCase
             '/test-page' => [
                 'access' => [
                     'effect'   => 'deny',
-                    'redirect' => [ 'type' => 'default' ],
-                    '__access_level' => 'visitor'
+                    'redirect' => [ 'type' => 'default' ]
                 ]
             ],
             '/another-page' => [
                 'access' => [
                     'effect'   => 'deny',
-                    'redirect' => [ 'type' => 'default' ],
-                    '__access_level' => 'visitor'
+                    'redirect' => [ 'type' => 'default' ]
                 ]
             ]
         ], $perms);
@@ -148,8 +146,7 @@ final class UrlTest extends TestCase
                         'type'               => 'page_redirect',
                         'redirect_page_slug' => 'authentication-required',
                         'http_status_code'   => 301
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-b' => [
@@ -159,8 +156,7 @@ final class UrlTest extends TestCase
                         'type'             => 'page_redirect',
                         'redirect_page_id' => 76,
                         'http_status_code' => 307
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-c' => [
@@ -170,8 +166,7 @@ final class UrlTest extends TestCase
                         'type'             => 'url_redirect',
                         'redirect_url'     => '/different-page',
                         'http_status_code' => 302
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-d' => [
@@ -180,8 +175,7 @@ final class UrlTest extends TestCase
                     'redirect' => [
                         'type'    => 'custom_message',
                         'message' => 'You are not allowed to be here'
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-e' => [
@@ -189,8 +183,7 @@ final class UrlTest extends TestCase
                     'effect'   => 'deny',
                     'redirect' => [
                         'type' => 'login_redirect',
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-f' => [
@@ -199,15 +192,13 @@ final class UrlTest extends TestCase
                     'redirect' => [
                         'type'     => 'trigger_callback',
                         'callback' => 'do_redirect_or_return_redirect_url_func',
-                    ],
-                    '__access_level' => 'visitor'
+                    ]
                 ]
             ],
             '/page-g' => [
                 'access' => [
                     'effect'   => 'deny',
-                    'redirect' => [ 'type' => 'default' ],
-                    '__access_level' => 'visitor'
+                    'redirect' => [ 'type' => 'default' ]
                 ]
             ]
         ], $perms);

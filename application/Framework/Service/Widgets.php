@@ -22,127 +22,19 @@ class AAM_Framework_Service_Widgets
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Collection of captured widgets
-     *
-     * @version 7.0.0
-     */
-    const CACHE_DB_OPTION = 'aam_widgets_cache';
-
-    /**
-     * Return the complete list of all indexed widgets
-     *
-     * @param string $area [Optional]
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     * @todo - Consider moving to AAM_Service_Widget
-     */
-    public function get_items($area = null)
-    {
-        try {
-            $result = [];
-
-            // Getting the menu cache so we can build the list
-            $cache = $this->cache->get(self::CACHE_DB_OPTION, []);
-
-            if (!empty($cache) && is_array($cache)) {
-                foreach($cache as $s_id => $widgets) {
-                    foreach($widgets as $widget) {
-                        array_push($result, $this->_prepare_widget($widget, $s_id));
-                    }
-                }
-            }
-
-            if (!empty($screen_id)) {
-                $result = array_values(
-                    array_filter($result, function($c) use ($area) {
-                        return $c['area'] === $area;
-                    })
-                );
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-     /**
-     * Alias for the get_items method
-     *
-     * @param string $area [Optional]
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function items($area = null)
-    {
-        return $this->get_items($area);
-    }
-
-    /**
-     * Get existing widget by slug
-     *
-     * @param string $slug Sudo-id for the metabox
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function get_item($slug)
-    {
-        try {
-            $matches = array_filter($this->get_items(), function($m) use ($slug) {
-                return $m['slug'] === $slug;
-            });
-
-            $result = array_shift($matches);
-
-            if ($result === null) {
-                throw new OutOfRangeException('Widget does not exist');
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_item method
-     *
-     * @param string $slug
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function item($slug)
-    {
-        return $this->get_item($slug);
-    }
-
-    /**
      * Restrict/hide widget
      *
-     * @param mixed  $widget
-     * @param string $website_area [Optional]
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      * @access public
      *
      * @version 7.0.0
      */
-    public function deny($widget, $website_area = null)
+    public function deny($widget)
     {
         try {
-            $result = $this->_update_item_permission($widget, $website_area, 'deny');
+            $result = $this->_update_item_permission($widget, 'deny');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -153,18 +45,17 @@ class AAM_Framework_Service_Widgets
     /**
      * Allow widget
      *
-     * @param mixed  $widget
-     * @param string $website_area [Optional]
+     * @param mixed $widget
      *
      * @return bool|WP_Error
      * @access public
      *
      * @version 7.0.0
      */
-    public function allow($widget, $website_area = null)
+    public function allow($widget)
     {
         try {
-            $result = $this->_update_item_permission($widget, $website_area, 'allow');
+            $result = $this->_update_item_permission($widget, 'allow');
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -179,24 +70,23 @@ class AAM_Framework_Service_Widgets
      * permissions for a given widget or trigger a filter that invokes third-party
      * implementation.
      *
-     * @param mixed  $widget [Optional]
-     * @param string $area   [Optional]
+     * @param mixed $widget [Optional]
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function reset($widget = null, $area = null)
+    public function reset($widget = null)
     {
         try {
             $resource = $this->_get_resource();
 
-            if (empty($widget) && empty($area)) {
+            if (empty($widget)) {
                 $result = $resource->reset();
             } else {
                 $result = $resource->reset(
-                    $this->_normalize_resource_identifier($widget, $area)
+                    $this->_normalize_resource_identifier($widget)
                 );
             }
         } catch (Exception $e) {
@@ -220,9 +110,6 @@ class AAM_Framework_Service_Widgets
     {
         try {
             $result = $this->_is_denied($widget);
-
-            // Prepare the final answer
-            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -277,81 +164,45 @@ class AAM_Framework_Service_Widgets
         $result     = null;
         $resource   = $this->_get_resource();
         $identifier = $this->_normalize_resource_identifier($widget);
-
-        // Step #1. Check for widget & screen ID first
-        $permission = $resource->get_permission($identifier, 'access');
+        $permission = $resource->get_permission($identifier, 'list');
 
         if (!empty($permission)) {
             $result = $permission['effect'] !== 'allow';
         }
 
-        // Step #2. If there is no decision made and screen ID is not empty, then
-        // check for metabox itself only
-        if (is_null($result) && !empty($identifier->area)) {
-            $identifier->area = null;
-            $permission = $resource->get_permission($identifier, 'access');
-
-            if (!empty($permission)) {
-                $result = $permission['effect'] !== 'allow';
-            }
-        }
-
         // Allow third-party implementations to integrate with the
         // decision making process
-        return apply_filters(
+        $result = apply_filters(
             'aam_widget_is_denied_filter',
             $result,
-            $widget,
-            $resource
+            $identifier,
+            $resource,
+            is_array($widget) && isset($widget['area']) ? $widget['area'] : null
         );
-    }
 
-    /**
-     * Prepare widget slug
-     *
-     * @param mixed $widget
-     *
-     * @return string
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _prepare_widget_slug($widget)
-    {
-        // Determining metabox slug
-        if (is_array($widget) && isset($widget['callback'])) {
-            $result = $this->misc->callable_to_slug($widget['callback']);
-        } elseif (is_a($widget, WP_Widget::class)) {
-            $result = $this->misc->callable_to_slug($widget);
-        } elseif (is_string($widget)) {
-            $result = $this->misc->sanitize_slug($widget);
-        } else {
-            throw new InvalidArgumentException('Invalid metabox provided');
-        }
-
-        return $result;
+        // Prepare the final answer
+        return is_bool($result) ? $result : false;
     }
 
     /**
      * Update existing widget permission
      *
-     * @param mixed       $widget
-     * @param string|null $area
-     * @param bool        $is_denied
+     * @param mixed $widget
+     * @param bool  $is_denied
      *
      * @return array
      * @access private
      *
      * @version 7.0.0
      */
-    private function _update_item_permission($widget, $area, $effect)
+    private function _update_item_permission($widget, $effect)
     {
         try {
-            $resource = $this->_get_resource();
-            $identifier = $this->_normalize_resource_identifier($widget, $area);
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($widget);
 
             // Prepare array of new permissions and save them
-            $result = $resource->set_permission($identifier, 'access', $effect);
+            $result = $resource->set_permission($identifier, 'list', $effect);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -360,113 +211,26 @@ class AAM_Framework_Service_Widgets
     }
 
     /**
-     * Convert metabox and screen ID into resource identifier
+     * @inheritDoc
      *
-     * @param mixed       $widget
-     * @param string|null $area   [Optional]
-     *
-     * @return object
-     * @access private
-     *
-     * @version 7.0.0
+     * @return string
      */
-    private function _normalize_resource_identifier($widget, $area = null)
+    private function _normalize_resource_identifier($widget)
     {
-       return (object) [
-            'slug' => $this->_prepare_widget_slug($widget),
-            'area' => empty($area) ? $this->_determine_widget_area($widget) : $area
-       ];
-    }
-
-    /**
-     * Determine widget's area
-     *
-     * @param mixed $widget
-     *
-     * @return string|null
-     *
-     * @access private
-     */
-    private function _determine_widget_area($widget)
-    {
-        global $wp_registered_widgets, $wp_meta_boxes;
-
-        // Prepare the search array
-        $collection = [];
-
-        if (isset($wp_meta_boxes['dashboard'])) {
-            foreach ($wp_meta_boxes['dashboard'] as $groups) {
-                foreach($groups as $widgets) {
-                    foreach($widgets as $w) {
-                        if (is_array($w)) { // Widget is still valid and not filtered
-                            array_push($collection, [
-                                'area' => 'dashboard',
-                                'slug' => AAM::api()->misc->callable_to_slug(
-                                    $w['callback']
-                                )
-                            ]);
-                        }
-                    }
-                }
-            }
+       // Determining metabox slug
+       if (is_array($widget) && isset($widget['callback'])) {
+            $result = $this->misc->callable_to_slug($widget['callback']);
+        } elseif (is_a($widget, WP_Widget::class)) {
+            $result = $this->misc->callable_to_slug($widget);
+        } elseif (is_string($widget)) {
+            $result = $this->misc->sanitize_slug($widget);
+        } elseif (is_array($widget) && isset($widget['slug'])) {
+            $result = $widget['slug'];
+        } else {
+            throw new InvalidArgumentException('Invalid metabox provided');
         }
 
-        if (is_array($wp_registered_widgets)) {
-            array_push(
-                $collection,
-                ...array_values(array_map(function($w) {
-                    return [
-                        'area' => 'frontend',
-                        'slug' => AAM::api()->misc->callable_to_slug($w['callback'])
-                    ];
-                }, $wp_registered_widgets))
-            );
-        }
-
-        $area = null;
-
-        // How are we going to search - by widget array or slug?
-        if (is_string($widget)){
-            foreach($collection as $item) {
-                if ($item['slug'] === $widget) {
-                    $area = $item['area'];
-                    break;
-                }
-            }
-        } elseif (!empty($widget)) {
-            $widget_slug = AAM::api()->misc->callable_to_slug($widget['callback']);
-
-            foreach($collection as $item) {
-                if ($item['slug'] === $widget_slug) {
-                    $area = $item['area'];
-                    break;
-                }
-            }
-        }
-
-        return $area;
-    }
-
-    /**
-     * Normalize and prepare the widget model
-     *
-     * @param array  $widget
-     * @param string $screen_id
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     * @todo Move this to RESTful class
-     */
-    private function _prepare_widget($widget, $screen_id)
-    {
-        return [
-            'slug'          => $widget['slug'],
-            'screen_id'     => $screen_id,
-            'title'         => base64_decode($widget['title']),
-            'is_restricted' => $this->is_denied($widget['slug']),
-        ];
+        return $result;
     }
 
 }

@@ -22,8 +22,8 @@ class AAM_Restful_BackendMenu
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -100,8 +100,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_menu_items(WP_REST_Request $request)
@@ -126,8 +126,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_menu_item(WP_REST_Request $request)
@@ -150,8 +150,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_menu_item_permission(WP_REST_Request $request)
@@ -184,8 +184,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function delete_menu_item_permission(WP_REST_Request $request)
@@ -211,8 +211,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
@@ -221,10 +221,7 @@ class AAM_Restful_BackendMenu
             $service = $this->_get_service($request);
 
             // Reset all permissions
-            $service->reset();
-
-            // Prepare response
-            $result = [ 'success' => true ];
+            $result = [ 'success' => $service->reset() ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -236,8 +233,8 @@ class AAM_Restful_BackendMenu
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -252,8 +249,8 @@ class AAM_Restful_BackendMenu
      * @param array $menu
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_menu_item($menu)

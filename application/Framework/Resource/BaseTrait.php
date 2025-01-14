@@ -248,9 +248,7 @@ trait AAM_Framework_Resource_BaseTrait
             $result = $this->_get_permissions($resource_identifier);
         }
 
-        return array_filter($result, function($v) {
-            return !empty($v);
-        });
+        return $this->_remove_sys_attributes($result);
     }
 
     /**
@@ -347,7 +345,7 @@ trait AAM_Framework_Resource_BaseTrait
             $result = $permissions[$permission_key];
         }
 
-        return $result;
+        return is_array($result) ? $this->_remove_sys_attributes($result) : null;
     }
 
     /**
@@ -719,13 +717,11 @@ trait AAM_Framework_Resource_BaseTrait
     {
         $result = [];
 
-        foreach($data as $resource_id => $permissions) {
-            $result[$resource_id] = [];
-
-            foreach($permissions as $key => $permission) {
-                $result[$resource_id][$key] = array_filter($permission, function($k) {
-                    return strpos($k, '__') !== 0;
-                }, ARRAY_FILTER_USE_KEY);
+        foreach($data as $key => $value) {
+            if (is_array($value)) {
+                $result[$key] = $this->_remove_sys_attributes($value);
+            } elseif (strpos($key, '__') !== 0) {
+                $result[$key] = $value;
             }
         }
 

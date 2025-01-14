@@ -342,15 +342,13 @@ final class PostsTest extends TestCase
         $this->assertEquals([
             "{$post_a}|post" => [
                 'list' => [
-                    'effect'         => 'deny',
-                    '__access_level' => 'visitor'
+                    'effect'         => 'deny'
                 ]
             ],
             "{$post_b}|post" => [
                 'list' => [
                     'effect'         => 'deny',
-                    'on'             => [ 'backend', 'api' ],
-                    '__access_level' => 'visitor'
+                    'on'             => [ 'backend', 'api' ]
                 ]
             ]
         ], AAM::api()->posts()->aggregate());
@@ -390,15 +388,13 @@ final class PostsTest extends TestCase
             "{$post_a}|post" => [
                 'list' => [
                     'effect'         => 'deny',
-                    'on'             => [ 'frontend', 'backend', 'api' ],
-                    '__access_level' => 'visitor'
+                    'on'             => [ 'frontend', 'backend', 'api' ]
                 ]
             ],
             "{$post_b}|post" => [
                 'list' => [
                     'effect'         => 'deny',
-                    'on'             => [ 'backend', 'api' ],
-                    '__access_level' => 'visitor'
+                    'on'             => [ 'backend', 'api' ]
                 ]
             ]
         ], AAM::api()->posts()->aggregate());
@@ -431,8 +427,7 @@ final class PostsTest extends TestCase
         $this->assertEquals([
             "{$post_a}|post" => [
                 'list' => [
-                    'effect'         => 'deny',
-                    '__access_level' => 'visitor'
+                    'effect'         => 'deny'
                 ]
             ]
         ], AAM::api()->posts()->aggregate());

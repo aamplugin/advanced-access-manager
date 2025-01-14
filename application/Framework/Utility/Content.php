@@ -22,19 +22,14 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
     /**
      * Get collection of posts
      *
-     * If $access_level is provided, this method returns a Generator that yields a
-     * collection of AAM_Framework_Resource_Post items. Otherwise, it yields an array
-     * of WP_Post instances
-     *
-     * @param array                               $args         [Optional]
-     * @param AAM_Framework_AccessLevel_Interface $access_level [Optional]
+     * @param array $args [Optional]
      *
      * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_posts($query_args = [], $access_level = null)
+    public function get_posts($query_args = [])
     {
         // Get list of all posts
         $posts = get_posts(array_merge(
@@ -47,16 +42,9 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
             [ 'fields' => 'ids', 'suppress_filters' => true ]
         ));
 
-        $result = function () use ($posts, $access_level) {
+        $result = function () use ($posts) {
             foreach ($posts as $post_id) {
-                if (is_a($access_level, AAM_Framework_AccessLevel_Interface::class)) {
-                    yield $access_level->get_resource(
-                        AAM_Framework_Type_Resource::POST, $post_id
-                    );
-                } else {
-                    yield get_post($post_id);
-                }
-
+                yield get_post($post_id);
             }
         };
 
@@ -117,19 +105,14 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
     /**
      * Get collection of taxonomies
      *
-     * If $access_level is provided, this method returns a Generator that yields a
-     * collection of AAM_Framework_Resource_Taxonomy items. Otherwise, it yields an
-     * array of WP_Taxonomy instances
-     *
-     * @param AAM_Framework_AccessLevel_Interface $access_level [Optional]
-     * @param bool                                $return_all   [Optional]
+     * @param bool $return_all [Optional]
      *
      * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_taxonomies($access_level = null, $return_all = null)
+    public function get_taxonomies($return_all = null)
     {
         // Determine the filters
         if ($return_all === true) {
@@ -158,16 +141,9 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
         // filters
         $taxonomies = get_taxonomies($args, 'names', 'or');
 
-        $result = function () use ($taxonomies, $access_level) {
+        $result = function () use ($taxonomies) {
             foreach ($taxonomies as $taxonomy) {
-                if (is_a($access_level, AAM_Framework_AccessLevel_Interface::class)) {
-                    yield $access_level->get_resource(
-                        AAM_Framework_Type_Resource::TAXONOMY, $taxonomy
-                    );
-                } else {
-                    yield get_taxonomy($taxonomy);
-                }
-
+                yield get_taxonomy($taxonomy);
             }
         };
 

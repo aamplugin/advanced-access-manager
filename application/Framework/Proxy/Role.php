@@ -17,11 +17,6 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 {
 
     /**
-     * @inheritDoc
-     */
-    const TYPE = 'role';
-
-    /**
      * Role unique slug (aka ID)
      *
      * @var string
@@ -79,12 +74,9 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
     }
 
     /**
-     * Get WordPress core role instance
+     * @inheritDoc
      *
      * @return WP_Role
-     * @access public
-     *
-     * @version 7.0.0
      */
     public function get_core_instance()
     {
@@ -97,8 +89,8 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
      * @param array $attributes
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update(array $attributes = [])

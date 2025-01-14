@@ -56,7 +56,7 @@ class AAM_Restful_MuService
         // Few services always available to support AAM UI
         AAM_Restful_Roles::bootstrap();
         AAM_Restful_UserService::bootstrap();
-        AAM_Restful_ConfigService::bootstrap();
+        AAM_Restful_Configs::bootstrap();
         AAM_Restful_SettingService::bootstrap();
 
         // Get currently managed "Access Level"

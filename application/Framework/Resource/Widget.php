@@ -51,7 +51,7 @@ class AAM_Framework_Resource_Widget implements AAM_Framework_Resource_Interface
 
                 $result = array_replace([
                     $id => [
-                        'access' => [
+                        'list' => [
                             'effect' => $effect !== 'allow' ? 'deny' : 'allow'
                         ]
                     ]
@@ -60,20 +60,6 @@ class AAM_Framework_Resource_Widget implements AAM_Framework_Resource_Interface
         }
 
         return apply_filters('aam_apply_policy_filter', $result, $this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private function _get_resource_id($identifier)
-    {
-        $result = $identifier->slug;
-
-        if (!empty($identifier->area)) {
-            $result .= '|' . $identifier->area;
-        }
-
-        return $result;
     }
 
 }

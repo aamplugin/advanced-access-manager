@@ -51,7 +51,7 @@ class AAM_Framework_Resource_Metabox implements AAM_Framework_Resource_Interface
 
                 $result = array_replace([
                     $id => [
-                        'access' => [
+                        'list' => [
                             'effect' => $effect !== 'allow' ? 'deny' : 'allow'
                         ]
                     ]

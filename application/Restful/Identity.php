@@ -22,8 +22,8 @@ class AAM_Restful_Identity
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -466,10 +466,7 @@ class AAM_Restful_Identity
                 $access_level
             );
 
-            $result = $access_level->get_resource(
-                AAM_Framework_Type_Resource::USER,
-                $user
-            )->get_permissions();
+            $result = $this->_prepare_user_output($user, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -500,10 +497,7 @@ class AAM_Restful_Identity
                 $access_level
             );
 
-            $result = $access_level->get_resource(
-                AAM_Framework_Type_Resource::USER,
-                $user
-            )->get_permissions();
+            $result = $this->_prepare_user_output($user, $access_level);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -525,8 +519,8 @@ class AAM_Restful_Identity
     {
         try {
             $result = [
-                'success' => $this->_determine_access_level($request)->get_resource(
-                    AAM_Framework_Type_Resource::USER
+                'success' => AAM::api()->users(
+                    $this->_determine_access_level($request)
                 )->reset()
             ];
         } catch (Exception $e) {
@@ -549,12 +543,11 @@ class AAM_Restful_Identity
     public function reset_user_permissions(WP_REST_Request $request)
     {
         try {
-            $user = $this->_determine_access_level($request)->get_resource(
-                AAM_Framework_Type_Resource::USER,
-                $request->get_param('id')
-            );
-
-            $result = [ 'success' => $user->reset() ];
+            $result = [
+                'success' => AAM::api()->users(
+                    $this->_determine_access_level($request)
+                )->reset($request->get_param('id'))
+            ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -590,14 +583,14 @@ class AAM_Restful_Identity
     private function _prepare_role_output($role, $access_level)
     {
         $resource = $access_level->get_resource(
-            AAM_Framework_Type_Resource::ROLE, $role
+            AAM_Framework_Type_Resource::ROLE
         );
 
         return [
             'id'            => $role->slug,
             'name'          => $role->display_name,
-            'permissions'   => $resource->get_permissions(),
-            'is_customized' => $resource->is_customized()
+            'permissions'   => $resource->get_permissions($role->get_core_instance()),
+            'is_customized' => $resource->is_customized($role->get_core_instance())
         ];
     }
 
@@ -615,14 +608,14 @@ class AAM_Restful_Identity
     private function _prepare_user_output($user, $access_level)
     {
         $resource = $access_level->get_resource(
-            AAM_Framework_Type_Resource::USER, $user
+            AAM_Framework_Type_Resource::USER
         );
 
         return [
             'id'            => $user->ID,
             'display_name'  => $user->display_name,
-            'permissions'   => $resource->get_permissions(),
-            'is_customized' => $resource->is_customized()
+            'permissions'   => $resource->get_permissions($user->get_core_instance()),
+            'is_customized' => $resource->is_customized($user->get_core_instance())
         ];
     }
 
@@ -642,15 +635,13 @@ class AAM_Restful_Identity
         $identity, $permissions, $access_level
     ) {
         // Prepare proper resource
-        if ($identity->type === 'role') {
+        if (is_a($identity, AAM_Framework_Proxy_Role::class)) {
             $resource = $access_level->get_resource(
-                AAM_Framework_Type_Resource::ROLE,
-                $identity
+                AAM_Framework_Type_Resource::ROLE
             );
         } else {
             $resource = $access_level->get_resource(
-                AAM_Framework_Type_Resource::USER,
-                $identity
+                AAM_Framework_Type_Resource::USER
             );
         }
 
@@ -663,7 +654,10 @@ class AAM_Restful_Identity
             ];
         }
 
-        return $resource->set_permissions($normalized);
+        return $resource->set_permissions(
+            $normalized,
+            $identity->get_core_instance()
+        );
     }
 
     /**
@@ -683,24 +677,17 @@ class AAM_Restful_Identity
         $identity, $permission, $effect, $access_level
     ) {
         // Prepare proper resource
-        if ($identity->type === 'role') {
+        if (is_a($identity, AAM_Framework_Proxy_Role::class)) {
             $resource = $access_level->get_resource(
-                AAM_Framework_Type_Resource::ROLE,
-                $identity
+                AAM_Framework_Type_Resource::ROLE
             );
         } else {
             $resource = $access_level->get_resource(
-                AAM_Framework_Type_Resource::USER,
-                $identity
+                AAM_Framework_Type_Resource::USER
             );
         }
 
-        $resource->set_permissions(array_merge(
-            $resource->get_permissions(true),
-            [ $permission => [ 'effect' => $effect ] ]
-        ));
-
-        return $resource->get_permissions();
+        return $resource->set_permission($identity, $permission, $effect);
     }
 
 }

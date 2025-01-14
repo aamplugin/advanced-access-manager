@@ -16,12 +16,13 @@
 interface AAM_Framework_Proxy_Interface {
 
     /**
-     * Proxy type
+     * Get WordPress core instance
      *
-     * @var string
+     * @return object
+     * @access public
      *
      * @version 7.0.0
      */
-    const TYPE = null;
+    public function get_core_instance();
 
 }

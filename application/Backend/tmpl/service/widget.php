@@ -38,12 +38,12 @@
 
         <?php
             $first = false;
-            $list  = $service->get_items();
+            $list  = AAM_Service_Widgets::get_instance()->get_widget_list($service);
 
             // Group all the components by screen
             $grouped = array();
             foreach($list as $item) {
-                $screen = $item['screen_id'];
+                $screen = $item['area'];
 
                 if (!isset($grouped[$screen])) {
                     $grouped[$screen] = array();
@@ -55,20 +55,20 @@
 
         <?php if (!empty($list)) { ?>
             <div class="panel-group" id="widget-list" role="tablist">
-                <?php foreach ($grouped as $screen_id => $widgets) { ?>
+                <?php foreach ($grouped as $area => $widgets) { ?>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="group-<?php echo esc_js($screen_id); ?>-heading">
+                        <div class="panel-heading" role="tab" id="group-<?php echo esc_js($area); ?>-heading">
                             <h4 class="panel-title">
                                 <a
                                     role="button"
                                     data-toggle="collapse"
                                     data-parent="#widget-list"
-                                    href="#group-<?php echo esc_js($screen_id); ?>"
-                                    aria-controls="group-<?php echo esc_js($screen_id); ?>"
+                                    href="#group-<?php echo esc_js($area); ?>"
+                                    aria-controls="group-<?php echo esc_js($area); ?>"
                                     <?php if (!$first) { echo 'aria-expanded="true"'; } ?>
                                 >
                                     <?php
-                                        switch ($screen_id) {
+                                        switch ($area) {
                                             case 'dashboard':
                                                 echo __('Dashboard Widgets', AAM_KEY);
                                                 break;
@@ -85,10 +85,10 @@
                             </h4>
                         </div>
                         <div
-                            id="group-<?php echo esc_js($screen_id); ?>"
+                            id="group-<?php echo esc_js($area); ?>"
                             class="panel-collapse collapse<?php if (!$first) { echo ' in'; $first = true; } ?>"
                             role="tabpanel"
-                            aria-labelledby="group-<?php echo esc_js($screen_id); ?>-heading"
+                            aria-labelledby="group-<?php echo esc_js($area); ?>-heading"
                         >
                             <div class="panel-body">
                                 <div class="row">
@@ -100,7 +100,7 @@
                                                     href="#widget_details_modal"
                                                     data-toggle="modal"
                                                     data-title="<?php echo esc_attr($widget['title']); ?>"
-                                                    data-screen="<?php echo esc_attr($screen_id); ?>"
+                                                    data-screen="<?php echo esc_attr($area); ?>"
                                                     data-id="<?php echo esc_attr($widget['slug']); ?>"
                                                     class="aam-widget-item"><?php echo __('more details', AAM_KEY); ?>
                                                 </a></small>
@@ -133,7 +133,7 @@
                                     'aam_ui_widgets_screen_mode_filter',
                                     '',
                                     AAM_Backend_AccessLevel::get_instance()->widgets(),
-                                    $screen_id
+                                    $area
                                 ); ?>
                             </div>
                         </div>

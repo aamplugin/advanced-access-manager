@@ -22,8 +22,8 @@ class AAM_Restful_ApiRoute
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -248,7 +248,7 @@ class AAM_Restful_ApiRoute
     /**
      * Get complete list of routes
      *
-     * @param AAM_Framework_Service_ApiRoute $service
+     * @param AAM_Framework_Service_ApiRoutes $service
      *
      * @return array
      * @access private
@@ -274,7 +274,7 @@ class AAM_Restful_ApiRoute
                 array_push($result, [
                     'endpoint'      => strtolower($endpoint),
                     'method'        => strtoupper($method),
-                    'is_restricted' => $service->is_denied($endpoint, $method),
+                    'is_restricted' => $service->is_denied($method . ' ' . $endpoint),
                     'id'            => base64_encode(strtolower(
                         "{$method} {$endpoint}
                     "))
@@ -312,8 +312,8 @@ class AAM_Restful_ApiRoute
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_ApiRoutes
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)
@@ -330,8 +330,8 @@ class AAM_Restful_ApiRoute
      * @param string $value
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_base64($value)

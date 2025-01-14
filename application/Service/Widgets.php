@@ -19,6 +19,13 @@ class AAM_Service_Widgets
     use AAM_Core_Contract_ServiceTrait;
 
     /**
+     * Collection of captured widgets
+     *
+     * @version 7.0.0
+     */
+    const CACHE_DB_OPTION = 'aam_widgets_cache';
+
+    /**
      * Constructor
      *
      * @return void
@@ -36,9 +43,39 @@ class AAM_Service_Widgets
         }
 
         // Register RESTful API endpoints
-        AAM_Restful_WidgetService::bootstrap();
+        AAM_Restful_Widgets::bootstrap();
 
         $this->initialize_hooks();
+    }
+
+    /**
+     * Prepare the list of widgets
+     *
+     * @param AAM_Framework_Service_Widgets $service
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    public function get_widget_list($service)
+    {
+        $result = [];
+
+        // Getting the menu cache so we can build the list
+        $cache = AAM::api()->cache->get(AAM_Service_Widgets::CACHE_DB_OPTION, []);
+
+        if (!empty($cache) && is_array($cache)) {
+            foreach($cache as $s_id => $widgets) {
+                foreach($widgets as $widget) {
+                    array_push($result, $this->_prepare_widget(
+                        $widget, $s_id, $service
+                    ));
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -83,6 +120,28 @@ class AAM_Service_Widgets
     }
 
     /**
+     * Normalize and prepare the widget model
+     *
+     * @param array                         $widget
+     * @param string                        $area
+     * @param AAM_Framework_Service_Widgets $service
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _prepare_widget($widget, $area, $service)
+    {
+        return [
+            'slug'          => $widget['slug'],
+            'area'          => $area,
+            'title'         => base64_decode($widget['title']),
+            'is_restricted' => $service->is_denied($widget),
+        ];
+    }
+
+    /**
      * Collect the list of all registered widgets
      *
      * @return void
@@ -107,7 +166,7 @@ class AAM_Service_Widgets
             if (!empty($slug)) {
                 $cache['frontend'][$slug] = [
                     'title' => base64_encode(wp_strip_all_tags($widget['name'])),
-                    'type'  => 'frontend',
+                    'area'  => 'frontend',
                     'slug'  => $slug
                 ];
             }
@@ -123,7 +182,7 @@ class AAM_Service_Widgets
                         if (!empty($slug)) {
                             $cache['dashboard'][$slug] = [
                                 'slug'  => $slug,
-                                'type'  => 'backend',
+                                'area'  => 'backend',
                                 'title' => base64_encode(
                                     wp_strip_all_tags($data['title'])
                                 )
@@ -134,9 +193,7 @@ class AAM_Service_Widgets
             }
         }
 
-        AAM::api()->cache->set(
-            AAM_Framework_Service_Widgets::CACHE_DB_OPTION, $cache, 31536000
-        );
+        AAM::api()->cache->set(self::CACHE_DB_OPTION, $cache, 31536000);
     }
 
     /**

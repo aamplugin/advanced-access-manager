@@ -41,7 +41,9 @@ class AAM_Framework_Service_Roles
 
             foreach($resource->get_permissions() as $slug => $permissions) {
                 if (wp_roles()->is_role($slug)) { // Ignore invalid roles
-                    if ($permissions['assume_role']['effect'] === 'allow') {
+                    if (isset($permissions['assume_role'])
+                        && $permissions['assume_role']['effect'] === 'allow'
+                    ) {
                         // Additionally, if role is allowed, making sure it is
                         // visible to the current access level
                         if ($this->is_allowed_to($slug, 'list_role')) {
