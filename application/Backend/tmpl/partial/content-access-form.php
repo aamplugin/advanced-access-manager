@@ -4,32 +4,20 @@
     <?php
         $params           = isset($params) ? $params : (object) [];
         $resource         = $params->resource;
-        $internal_id      = $resource->get_internal_id(false);
         $permission_scope = []; // Additional attributes to add
 
-        // Determine the correct resource ID. Terms typically have compound ID
         if ($resource->type === AAM_Framework_Type_Resource::TERM) {
-            if (is_array($internal_id)) {
-                $id = $internal_id['id'];
+            $permission_scope['taxonomy'] = $params->resource_identifier->taxonomy;
 
-                if (isset($internal_id['taxonomy'])) {
-                    $permission_scope['taxonomy'] = $internal_id['taxonomy'];
-                }
-
-                if (isset($internal_id['post_type'])) {
-                    $permission_scope['post_type'] = $internal_id['post_type'];
-                }
-            } else {
-                $id = intval($internal_id);
+            if (!empty($params->resource_identifier->post_type)) {
+                $permission_scope['post_type'] = $params->resource_identifier->post_type;
             }
-        } elseif ($resource->type === AAM_Framework_Type_Resource::POST) {
-            $id = $internal_id['id'];
-        } else {
-            $id = $internal_id;
         }
+
+        $id = $params->resource_id;
     ?>
 
-    <div class="aam-overwrite<?php echo $resource->is_customized() ? '' : ' hidden'; ?>">
+    <div class="aam-overwrite<?php echo $resource->is_customized($params->resource_identifier) ? '' : ' hidden'; ?>">
         <span>
             <i class="icon-check"></i>
             <?php echo __('Settings are customized', AAM_KEY); ?>
@@ -58,7 +46,7 @@
         value="<?php echo esc_attr(json_encode($permission_scope)); ?>"
         id="content_permission_scope"
     />
-    <div id="content_resource_settings" class="hidden"><?php echo json_encode($resource->get_permissions()); ?></div>
+    <div id="content_resource_settings" class="hidden"><?php echo json_encode($resource->get_permissions($params->resource_identifier)); ?></div>
 
     <table class="table table-striped table-bordered" id="permission_toggles">
         <tbody>
@@ -107,13 +95,13 @@
                             <?php
                                 if ($resource->type === AAM_Framework_Type_Resource::POST_TYPE) {
                                     $resource_type = __('post type', AAM_KEY);
-                                    $resource_name = $resource->label;
+                                    $resource_name = $params->resource_identifier->label;
                                 } elseif ($resource->type === AAM_Framework_Type_Resource::TAXONOMY) {
                                     $resource_type = __('taxonomy', AAM_KEY);
-                                    $resource_name = $resource->label;
+                                    $resource_name = $params->resource_identifier->label;
                                 } elseif ($resource->type === AAM_Framework_Type_Resource::TERM) {
                                     $resource_type = __('term', AAM_KEY);
-                                    $resource_name = $resource->name;
+                                    $resource_name = $params->resource_identifier->name;
                                 }
 
                                 echo sprintf(
@@ -262,8 +250,7 @@
                         <?php } ?>
 
                         <?php
-                            $restriction_settings = $this->get_permission_settings('read', $resource);
-
+                            $restriction_settings = $resource->get_permission($params->resource_identifier, 'read');
                             $restriction_type     = isset($restriction_settings['restriction_type']) ? $restriction_settings['restriction_type'] : 'default';
                             $restriction_types    = apply_filters('aam_ui_content_restriction_types_filter', [
                                 'default' => [

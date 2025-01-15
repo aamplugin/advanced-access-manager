@@ -52,7 +52,7 @@ class AAM_Backend_AccessLevel
     protected function __construct()
     {
         $access_level_type = strtolower(AAM::api()->misc->get(
-            $_POST, 'access_level'
+            $_POST, 'access_level', ''
         ));
 
         if ($access_level_type === AAM_Framework_Type_AccessLevel::ROLE) {

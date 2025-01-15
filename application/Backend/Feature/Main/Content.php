@@ -54,8 +54,8 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * @param string $resource_type
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function render_content_access_form($resource_id, $resource_type)
@@ -64,26 +64,35 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
 
         // Making sure we are dealing with correct resource ID
         if ($resource_type === AAM_Framework_Type_Resource::TERM) {
-            // Term ID is compound and can have up to 3 layer of controls
-            $resource_id = [
-                'id' => intval($resource_id)
-            ];
+            // Get term
+            $resource_identifier = get_term(
+                intval($resource_id),
+                AAM::api()->misc->get($_POST, 'taxonomy', '')
+            );
 
-            if (isset($_POST['taxonomy'])) { // Is taxonomy specified?
-                $resource_id['taxonomy'] = trim($_POST['taxonomy']);
-            }
+            $post_type = AAM::api()->misc->get($_POST, 'post_type');
 
-            if (isset($_POST['post_type'])) { // Is post type specified?
-                $resource_id['post_type'] = trim($_POST['post_type']);
+            if (!empty($post_type)) {
+                $resource_identifier->post_type = $post_type;
             }
+        } elseif ($resource_type === AAM_Framework_Type_Resource::POST) {
+            $resource_identifier = get_post($resource_id);
+        } elseif ($resource_type === AAM_Framework_Type_Resource::TAXONOMY) {
+            $resource_identifier = get_taxonomy($resource_id);
+        } elseif ($resource_type === AAM_Framework_Type_Resource::POST_TYPE) {
+            $resource_identifier = get_post_type_object($resource_id);
         }
 
-        $resource = $access_level->get_resource($resource_type, $resource_id);
+        $resource = $access_level->get_resource($resource_type);
         $args     = [
-            'resource'        => $resource,
-            'access_controls' => $this->_prepare_access_controls($resource),
+            'resource'            => $resource,
+            'resource_identifier' => $resource_identifier,
+            'resource_id'         => $resource_id,
+            'access_controls'     => $this->_prepare_access_controls(
+                $resource, $resource_identifier
+            ),
             // TODO: Consider removing the Backend Access Level
-            'access_level'    => AAM_Backend_AccessLevel::get_instance()
+            'access_level'        => AAM_Backend_AccessLevel::get_instance()
         ];
 
         // Do the SSR for the access form
@@ -99,36 +108,19 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      *
      * @param string                      $permission
      * @param AAM_Framework_Resource_Post $resource
+     * @param mixed                       $resource_identifier
      *
      * @return boolean
      *
      * @access protected
      * @version 7.0.0
      */
-    protected function is_permission_denied($permission, $resource)
+    protected function is_permission_denied($permission, $resource, $resource_identifier)
     {
-        $perms    = $resource->get_permissions();
+        $perms    = $resource->get_permissions($resource_identifier);
         $settings = !empty($perms[$permission]) ? $perms[$permission] : null;
 
         return !empty($settings) && $settings['effect'] === 'deny';
-    }
-
-    /**
-     * Get specific permission's settings
-     *
-     * @param string                           $permission
-     * @param AAM_Framework_Resource_Interface $resource
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 7.0.0
-     */
-    protected function get_permission_settings($permission, $resource)
-    {
-        $permissions = $resource->get_permissions();
-
-        return isset($permissions[$permission]) ? $permissions[$permission] : [];
     }
 
     /**
@@ -161,20 +153,25 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * Prepare list of access controls for currently managed resource
      *
      * @param AAM_Framework_Resource_Interface $resource
+     * @param mixed                            $resource_identifier
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_access_controls($resource)
+    private function _prepare_access_controls($resource, $resource_identifier)
     {
         $result = [];
 
         if ($resource->type === AAM_Framework_Type_Resource::POST) {
-            $result = $this->_prepare_post_access_controls($resource);
+            $result = $this->_prepare_post_access_controls(
+                $resource, $resource_identifier
+            );
         } else {
-            $result = $this->_prepare_other_access_controls($resource);
+            $result = $this->_prepare_other_access_controls(
+                $resource, $resource_identifier
+            );
         }
 
         return $result;
@@ -184,110 +181,115 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * Prepare access controls for the post resource
      *
      * @param AAM_Framework_Resource_Post $resource
+     * @param mixed                       $resource_identifier
      *
      * @return array
      *
      * @access private
      * @version 7.0.0
      */
-    private function _prepare_post_access_controls($resource)
+    private function _prepare_post_access_controls($resource, $resource_identifier)
     {
-        $permissions = $resource->get_permissions();
+        $permissions = $resource->get_permissions($resource_identifier);
 
         return apply_filters('aam_ui_content_access_controls_filter', [
             'list' => array(
                 'title'       => __('Hidden', AAM_KEY),
                 'modal'       => 'modal_content_visibility',
-                'is_denied'   => $this->is_permission_denied('list', $resource),
+                'is_denied'   => $this->is_permission_denied('list', $resource, $resource_identifier),
                 'areas'       => isset($permissions['list']) ? $permissions['list']['on'] : [],
                 'customize'   => __('Customize visibility', AAM_KEY),
                 'tooltip'     => sprintf(
                     __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 ),
                 'description' => sprintf(
                     __('Hide the "%s" from all menus, lists, and API responses. However, it remains accessible via a direct URL. Visibility can be customized for the frontend, backend and API areas independently.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 ),
                 'on' => [
                     'frontend' => sprintf(
                         __('Hide the "%s" on the website frontend', AAM_KEY),
-                        $resource->post_title
+                        $resource_identifier->post_title
                     ),
                     'backend' => sprintf(
                         __('Hide the "%s" in the backend (admin area)', AAM_KEY),
-                        $resource->post_title
+                        $resource_identifier->post_title
                     ),
                     'api' => sprintf(
                         __('Hide the "%s" in the RESTful API results', AAM_KEY),
-                        $resource->post_title
+                        $resource_identifier->post_title
                     )
                 ]
             ),
             'read' => array(
                 'title'       => __('Restricted', AAM_KEY),
                 'modal'       => 'modal_content_restriction',
-                'is_denied'   => $this->is_permission_denied('read', $resource),
+                'is_denied'   => $this->is_permission_denied('read', $resource, $resource_identifier),
                 'customize'   => __('Customize direct access', AAM_KEY),
                 'tooltip'     => sprintf(
                     __('Restrict direct access to read or download the "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 ),
                 'description' => sprintf(
                     __('Restrict direct access to "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 )
             ),
             'comment' => array(
                 'title'       => __('Leave Comments', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('comment', $resource),
+                'is_denied'   => $this->is_permission_denied('comment', $resource, $resource_identifier),
                 'description' => sprintf(
                     __('Limit the ability to leave comments on the "%s".', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 )
             ),
             'edit' => array(
                 'title'       => __('Edit', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('edit', $resource),
+                'is_denied'   => $this->is_permission_denied('edit', $resource, $resource_identifier),
                 'description' => sprintf(
                     __('Disable the ability to edit "%s". Editing "%s" will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
-                    $resource->post_title,
-                    $resource->post_title
+                    $resource_identifier->post_title,
+                    $resource_identifier->post_title
                 )
             ),
             'publish' => array(
                 'title'       => __('Publish', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('publish', $resource),
+                'is_denied'   => $this->is_permission_denied('publish', $resource, $resource_identifier),
                 'description' => sprintf(
                     __('Manage the ability to publish draft "%s" or any updates to already published versions. If denied, a user will only be able to submit for review.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 )
             ),
             'delete' => array(
                 'title'       => __('Delete', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('delete', $resource),
+                'is_denied'   => $this->is_permission_denied('delete', $resource, $resource_identifier),
                 'description' => sprintf(
                     __('Disable the ability to delete "%s". Deletion will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
-                    $resource->post_title
+                    $resource_identifier->post_title
                 )
             )
-        ], $resource);
+        ], $resource, $resource_identifier);
     }
 
     /**
      * Prepare access controls for other resources
      *
      * @param AAM_Framework_Resource_Interface $resource
+     * @param mixed                            $resource_identifier
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _prepare_other_access_controls($resource)
+    private function _prepare_other_access_controls($resource, $resource_identifier)
     {
         return apply_filters(
-            'aam_ui_content_access_controls_filter', [], $resource
+            'aam_ui_content_access_controls_filter',
+            [],
+            $resource,
+            $resource_identifier
         );
     }
 
