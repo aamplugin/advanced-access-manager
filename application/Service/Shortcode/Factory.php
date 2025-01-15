@@ -10,12 +10,8 @@
 /**
  * Shortcode factory for the [aam] shortcode
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/405
- * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/90
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
 class AAM_Service_Shortcode_Factory
 {
@@ -23,10 +19,10 @@ class AAM_Service_Shortcode_Factory
     /**
      * Shortcode handler based on the provided attributes
      *
-     * @var AAM_Core_Contract_ShortcodeInterface
-     *
+     * @var object
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected $handler = null;
 
@@ -37,13 +33,9 @@ class AAM_Service_Shortcode_Factory
      * @param string $content
      *
      * @return void
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/405
-     * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/90
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.35
+     *
+     * @version 7.0.0
      */
     public function __construct($args, $content)
     {
@@ -72,25 +64,16 @@ class AAM_Service_Shortcode_Factory
      * Process the short-code
      *
      * @return string
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function process()
     {
-        $content = null;
+        $handler = $this->handler;
 
-        if (is_a($this->handler, 'AAM_Core_Contract_ShortcodeInterface')) {
-            $content = $this->handler->run();
-        } else {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                'No valid strategy found for the given context',
-                AAM_VERSION
-            );
-        }
-
-        return $content;
+        return is_object($handler)
+            && method_exists($handler, 'run') ? $handler->run() : '';
     }
 
 }

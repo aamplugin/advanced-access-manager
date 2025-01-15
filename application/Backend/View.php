@@ -146,7 +146,7 @@ class AAM_Backend_View
     {
         $response = null;
 
-        $action       = $this->getFromPost('sub_action');
+        $action       = AAM::api()->misc->get($_POST, 'sub_action');
         $parts        = explode('.', $action);
         $access_level = AAM_Backend_AccessLevel::get_instance();
 
@@ -166,7 +166,7 @@ class AAM_Backend_View
                 $action
             );
         } elseif ($action === 'renderContent') {
-            $partial  = $this->getFromPost('partial');
+            $partial  = AAM::api()->misc->get($_POST, 'partial');
             $response = $this->renderContent((!empty($partial) ? $partial : 'main'));
 
             $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
@@ -399,8 +399,8 @@ class AAM_Backend_View
             case 'content-access-form':
                 $manager = new AAM_Backend_Feature_Main_Content();
                 $content = $manager->render_content_access_form(
-                    $this->getFromPost('resource_id'),
-                    $this->getFromPost('resource_type')
+                    AAM::api()->misc->get($_POST, 'resource_id'),
+                    AAM::api()->misc->get($_POST, 'resource_type')
                 );
                 break;
 

@@ -518,10 +518,6 @@ class AAM_Framework_Service_Policies
     private function _get_registered_policies($args = [])
     {
         if (is_null($this->_registered_policies)) {
-            if (is_multisite()) {
-                switch_to_blog($this->_get_main_site_id());
-            }
-
             // Initializing the registered policies cache
             $this->_registered_policies = [];
 
@@ -542,10 +538,6 @@ class AAM_Framework_Service_Policies
                 $this->_registered_policies[$policy->ID] = $this->_prepare_policy_item(
                     $policy
                 );
-            }
-
-            if (is_multisite()) {
-                restore_current_blog();
             }
         }
 

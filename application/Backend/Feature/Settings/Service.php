@@ -107,6 +107,11 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
                 'setting'     => AAM::SERVICES[AAM_Service_NotFoundRedirect::class]
             ],
             [
+                'title'       => __('Shortcodes', AAM_KEY),
+                'description' => __('Classic WordPress shortcodes that allow to manage access to parts of a frontend content as well as some UI helpers.', AAM_KEY),
+                'setting'     => AAM::SERVICES[AAM_Service_Shortcodes::class]
+            ],
+            [
                 'title'       => __('Access Policies', AAM_KEY),
                 'description' => __('Control website access using thoroughly documented JSON policies for users, roles, and visitors. Maintain a detailed record of all access changes and policy revisions.', AAM_KEY),
                 'setting'     => AAM::SERVICES[AAM_Service_Policies::class]

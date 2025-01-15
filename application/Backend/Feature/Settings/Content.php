@@ -11,7 +11,7 @@
  * Backend content settings
  *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract
 {
@@ -19,14 +19,14 @@ class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the collection of settings
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_settings';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'settings/content.php';
 
@@ -34,22 +34,22 @@ class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract
      * Get list of content options
      *
      * @return array
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function getList()
     {
-        return apply_filters('aam_settings_list_filter', array(), 'content');
+        return apply_filters('aam_settings_list_filter', [], 'content');
     }
 
     /**
      * Register service UI
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {

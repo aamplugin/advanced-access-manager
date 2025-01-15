@@ -1,23 +1,10 @@
-<?php
-    /**
-     * @since 6.9.18 https://github.com/aamplugin/advanced-access-manager/issues/327
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
-     * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.7.4  Improved the UI consistency
-     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/104
-     * @since 6.4.2  Styling notification metabox
-     * @since 6.2.0  Added support & import/export modals
-     * @since 6.0.0  Initial implementation of the template
-     *
-     * @version 6.9.18
-     * */
+<?php /** @version 7.0.0 **/
 
-    if (defined('AAM_KEY')) {
-        wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
-        wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'));
-        wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js');
-    }
+if (defined('AAM_KEY')) {
+    wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
+    wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'));
+    wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js');
+}
 ?>
 
 <?php if (defined('AAM_KEY')) { ?>
@@ -58,8 +45,6 @@
                         </div>
                     </div>
                 <?php } ?>
-
-                <?php do_action('aam_top_right_column_action'); ?>
 
                 <div class="metabox-holder shared-metabox">
                     <div class="postbox">

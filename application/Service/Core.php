@@ -38,6 +38,7 @@ class AAM_Service_Core
         'core.settings.ui.render_access_metabox' => false,
         'core.settings.xmlrpc_enabled'           => true,
         'core.settings.restful_enabled'          => true,
+        'core.settings.multisite.members_only'   => false,
         'core.settings.merge.preference'         => 'deny',
         'core.export.groups'                     => [ 'settings', 'config', 'roles' ]
     ];
@@ -46,8 +47,8 @@ class AAM_Service_Core
      * Constructor
      *
      * @access protected
-     *
      * @return void
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -87,6 +88,12 @@ class AAM_Service_Core
                 AAM_Backend_Feature_Settings_ConfigPress::register();
                 AAM_Backend_Feature_Settings_Manager::register();
             }, 1);
+
+            if (is_multisite()) {
+                add_action('aam_initialize_ui_action', function () {
+                    AAM_Backend_Feature_Settings_Multisite::register();
+                });
+            }
         }
 
         // Allow third-party plugins to use AAM user IP detection
@@ -147,6 +154,10 @@ class AAM_Service_Core
                     }
                 }
             }, 999);
+
+            add_action('wp', function() {
+                $this->_control_multisite_members_only();
+            }, 999);
         }
 
         // Check if user has ability to perform certain task based on provided
@@ -192,11 +203,189 @@ class AAM_Service_Core
             $this->_control_user_account();
         });
 
+        // Control admin notifications
+        add_action(
+            'admin_notices',
+            function() { $this->_control_admin_notices(); },
+            -1
+        );
+        add_action(
+            'network_admin_notices',
+            function() { $this->_control_admin_notices(); },
+            -1
+        );
+        add_action(
+            'user_admin_notices',
+            function() { $this->_control_admin_notices(); }, -1
+        );
+
+        // Screen options & contextual help hooks
+        add_filter('screen_options_show_screen', function() {
+            return $this->_control_screen_options();
+        });
+        add_action('in_admin_header', function() {
+            $this->_control_help_tabs();
+        });
+
+        // Permalink manager
+        add_filter('get_sample_permalink_html', function ($html) {
+            return $this->_control_permalink_html($html);
+        });
+
+        // Control access to the backend area
+        add_action('init', function() {
+            $this->_control_admin_area_access();
+            $this->_control_admin_toolbar();
+        }, 1);
+
         // Run upgrades if available
         // AAM_Core_Migration::run();
 
         // Bootstrap RESTful API
         AAM_Restful_Mu::bootstrap();
+    }
+
+    /**
+     * Manage notifications visibility
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_admin_notices()
+    {
+        if ($this->_current_user_can('aam_show_admin_notices')) {
+            remove_all_actions('admin_notices');
+            remove_all_actions('network_admin_notices');
+            remove_all_actions('user_admin_notices');
+        }
+    }
+
+    /**
+     * Control if user has access to the Screen Options
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_screen_options()
+    {
+        if (is_admin() && isset($_GET['page']) && $_GET['page'] === 'aam') {
+            $result = false;
+        } else {
+            $result = $this->_current_user_can('aam_show_screen_options');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Control Help Tabs
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_help_tabs()
+    {
+        if (!$this->_current_user_can('aam_show_help_tabs')) {
+            get_current_screen()->remove_help_tabs();
+        }
+    }
+
+    /**
+     * Control permalink editing ability
+     *
+     * @param string $html
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_permalink_html($html)
+    {
+        if (!$this->_current_user_can('aam_edit_permalink')) {
+            $html = '';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Control access to the admin area
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_admin_area_access()
+    {
+        if (is_user_logged_in()) {
+            // Check if user is allowed to see backend
+            if (!$this->_current_user_can('aam_access_dashboard')) {
+                // If this is the AJAX call, still allow it because it will break
+                // a lot of frontend stuff that depends on it
+                if (!defined('DOING_AJAX')) {
+                    AAM::api()->redirect->do_access_denied_redirect();
+                }
+            }
+        }
+    }
+
+    /**
+     * Control if user can see admin toolbar
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_admin_toolbar()
+    {
+        if (is_user_logged_in() && !$this->_current_user_can('aam_show_toolbar')) {
+            add_filter('show_admin_bar', '__return_false', PHP_INT_MAX);
+        }
+    }
+
+    /**
+     * Check if current user has a capability
+     *
+     * This method checks if capability is actually existing first and then check
+     * if user has it assigned
+     *
+     * @param string $cap
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _current_user_can($cap)
+    {
+        return !AAM::api()->caps->exists($cap) || current_user_can($cap);
+    }
+
+    /**
+     * Control if user has access to current site
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _control_multisite_members_only()
+    {
+        // Check if the non-member access restriction is on
+        if (AAM::api()->config->get('core.settings.multisite.members_only')
+            && !is_user_member_of_blog()
+        ) {
+            AAM::api()->redirect->do_access_denied_redirect();
+        }
     }
 
     /**

@@ -246,8 +246,8 @@ class AAM_Framework_Service_Settings
      * Get access settings pointer
      *
      * @return null|array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_settings_pointer()

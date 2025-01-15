@@ -14,7 +14,6 @@
  * @version 6.9.35
  */
 class AAM_Service_Shortcode_Handler_PostList
-    implements AAM_Core_Contract_ShortcodeInterface
 {
 
     /**

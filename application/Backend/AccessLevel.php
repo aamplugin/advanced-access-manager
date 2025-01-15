@@ -45,18 +45,20 @@ class AAM_Backend_AccessLevel
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
     {
-        $access_level_type = strtolower($this->getFromPost('access_level'));
+        $access_level_type = strtolower(AAM::api()->misc->get(
+            $_POST, 'access_level'
+        ));
 
         if ($access_level_type === AAM_Framework_Type_AccessLevel::ROLE) {
-            $access_level_id = $this->getFromPost('role_id');
+            $access_level_id = AAM::api()->misc->get($_POST, 'role_id');
         } elseif ($access_level_type === AAM_Framework_Type_AccessLevel::USER) {
-            $access_level_id = $this->getFromPost('user_id');
+            $access_level_id = AAM::api()->misc->get($_POST, 'user_id');
         } else {
             $access_level_id = null;
         }

@@ -22,17 +22,21 @@ class AAM_Framework_Utility_Db implements AAM_Framework_Utility_Interface
      * Read option from DB
      *
      * @param string $option
-     * @param mixed  $default
+     * @param mixed  $default [Optional]
+     * @param int    $blog_id [Optional]
      *
      * @return mixed
      * @access private
      *
      * @version 7.0.0
      */
-    public function read($option, $default = null)
+    public function read($option, $default = null, $blog_id = null)
     {
         if (is_multisite()) {
-            $result = get_blog_option(get_current_blog_id(), $option, $default);
+            $result = get_blog_option(
+                empty($blog_id) ? get_current_blog_id() : $blog_id,
+                $option, $default
+            );
         } else {
             $result = get_option($option, $default);
         }

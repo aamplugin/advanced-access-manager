@@ -51,11 +51,8 @@ class AAM
         AAM_Service_SecurityAudit::class        => 'service.security_audit.enabled',
         AAM_Service_Welcome::class              => 'service.welcome.enabled',
         AAM_Service_Policies::class             => 'service.policies.enabled',
-        AAM_Service_Hooks::class                => 'service.hooks.enabled'
-
-        // 'AAM_Service_ExtendedCapabilities' => AAM_Service_ExtendedCapabilities::FEATURE_FLAG,
-        // 'AAM_Service_Multisite'            => AAM_Service_Multisite::FEATURE_FLAG,
-        // 'AAM_Service_Shortcode'            => AAM_Service_Shortcode::FEATURE_FLAG,
+        AAM_Service_Hooks::class                => 'service.hooks.enabled',
+        AAM_Service_Shortcodes::class           => 'service.shortcodes.enabled'
     ];
 
     /**

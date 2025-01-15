@@ -17,7 +17,6 @@
  * @version 6.6.17
  */
 class AAM_Service_Shortcode_Handler_LoginForm
-    implements AAM_Core_Contract_ShortcodeInterface
 {
 
     /**

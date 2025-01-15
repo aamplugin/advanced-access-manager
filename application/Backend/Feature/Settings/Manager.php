@@ -215,7 +215,7 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
         $error = __('Invalid data', AAM_KEY);
 
         if (is_null($payload)) {
-            $payload = json_decode($this->getFromPost('payload'), true);
+            $payload = json_decode(AAM::api()->misc->get($_POST, 'payload'), true);
         }
 
         if ($payload) {
