@@ -282,9 +282,13 @@ class AAM_Framework_Service_Metaboxes
     public function is_customized($metabox = null, $screen_id = null)
     {
         try {
-            $result = $this->_get_resource()->is_customized(
-                $this->_normalize_resource_identifier($metabox, $screen_id)
-            );
+            if (empty($metabox) && empty($screen_id)) {
+                $result = $this->_get_resource()->is_customized();
+            } else {
+                $result = $this->_get_resource()->is_customized(
+                    $this->_normalize_resource_identifier($metabox, $screen_id)
+                );
+            }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -383,7 +387,7 @@ class AAM_Framework_Service_Metaboxes
         } elseif (is_string($metabox)) {
             $result = $this->misc->sanitize_slug($metabox);
         } else {
-            throw new InvalidArgumentException('Invalid metabox provided');
+            throw new InvalidArgumentException('Invalide metabox provided');
         }
 
         return $result;

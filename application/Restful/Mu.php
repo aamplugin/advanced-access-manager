@@ -10,13 +10,10 @@
 /**
  * RESTful API service that must be on at all time
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/398
- * @since 6.9.33 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
-class AAM_Restful_MuService
+class AAM_Restful_Mu
 {
 
     use AAM_Restful_ServiceTrait;
@@ -25,12 +22,9 @@ class AAM_Restful_MuService
      * Construct
      *
      * @return void
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/398
-     * @since 6.9.33 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.35
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -55,22 +49,28 @@ class AAM_Restful_MuService
 
         // Few services always available to support AAM UI
         AAM_Restful_Roles::bootstrap();
-        AAM_Restful_UserService::bootstrap();
+        AAM_Restful_Users::bootstrap();
         AAM_Restful_Configs::bootstrap();
-        AAM_Restful_SettingService::bootstrap();
+        AAM_Restful_Settings::bootstrap();
 
         // Get currently managed "Access Level"
         add_filter(
-            'aam_rest_get_access_level_filter', [$this, 'get_access_level'], 10, 2
+            'aam_rest_get_access_level_filter',
+            [ $this, 'get_access_level' ],
+            10,
+            2
         );
 
         // Handle common REST errors
         add_filter(
-            'aam_rest_get_error_response_filter', [$this, 'get_error_response'], 10, 4
+            'aam_rest_get_error_response_filter',
+            [ $this, 'get_error_response' ],
+            10,
+            4
         );
 
         // Register a common AAM, access level aware RESTful API endpoint
-        add_action('aam_rest_register_route', [$this, 'register_route'], 10, 4);
+        add_action('aam_rest_register_route', [ $this, 'register_route' ], 10, 4);
     }
 
     /**
@@ -80,9 +80,9 @@ class AAM_Restful_MuService
      * @param WP_REST_Request $request
      *
      * @return null|object
-     *
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     public function get_access_level($access_level, $request)
     {
@@ -102,9 +102,9 @@ class AAM_Restful_MuService
      * @param int       $http_status
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     public function get_error_response(
         $response, $exception, $rest_code, $http_status
@@ -127,9 +127,9 @@ class AAM_Restful_MuService
      * @param string $ns
      *
      * @return void
-     *
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     public function register_route(
         $route, $args, $access_level_aware = true, $ns = null

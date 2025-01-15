@@ -248,7 +248,11 @@ trait AAM_Framework_Resource_BaseTrait
             $result = $this->_get_permissions($resource_identifier);
         }
 
-        return $this->_remove_sys_attributes($result);
+        // Remove empty permission containers
+        return array_filter(
+            $this->_remove_sys_attributes($result),
+            function($perms) { return !empty($perms); }
+        );
     }
 
     /**

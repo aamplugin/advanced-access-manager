@@ -276,8 +276,8 @@ class AAM_Restful_ApiRoute
                     'method'        => strtoupper($method),
                     'is_restricted' => $service->is_denied($method . ' ' . $endpoint),
                     'id'            => base64_encode(strtolower(
-                        "{$method} {$endpoint}
-                    "))
+                        "{$method} {$endpoint}"
+                    ))
                 ]);
             }
         }

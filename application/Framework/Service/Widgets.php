@@ -227,7 +227,7 @@ class AAM_Framework_Service_Widgets
         } elseif (is_array($widget) && isset($widget['slug'])) {
             $result = $widget['slug'];
         } else {
-            throw new InvalidArgumentException('Invalid metabox provided');
+            throw new InvalidArgumentException('Invalid widget provided');
         }
 
         return $result;

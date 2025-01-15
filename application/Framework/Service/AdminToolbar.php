@@ -214,7 +214,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             $resource   = $this->_get_resource();
             $permission = $resource->get_permission(
                 $this->_normalize_resource_identifier($item_id),
-                'access'
+                'list'
             );
 
             // Step #1. Checking if provided item has any access controls defined
@@ -231,7 +231,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                 if (!empty($item['parent_id'])) {
                     $permission = $resource->get_permission(
                         $this->_normalize_resource_identifier($item['parent_id']),
-                        'access'
+                        'list'
                     );
 
                     if (!empty($permission)) {
@@ -305,7 +305,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     {
         return $this->_get_resource()->set_permission(
             $this->_normalize_resource_identifier($item_id),
-            'access',
+            'list',
             $is_hidden
         );
     }
@@ -324,7 +324,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     {
         return $this->_get_resource()->remove_permission(
             $this->_normalize_resource_identifier($item_id),
-            'access'
+            'list'
         );
     }
 

@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_JwtService
+class AAM_Restful_Jwt
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_JwtService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -140,8 +140,8 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_tokens(WP_REST_Request $request)
@@ -168,8 +168,8 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function create_token(WP_REST_Request $request)
@@ -225,8 +225,8 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_token(WP_REST_Request $request)
@@ -250,8 +250,8 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function delete_token(WP_REST_Request $request)
@@ -274,18 +274,14 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_tokens(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-
-            $service->reset();
-
-            $result = [ 'success' => true ];
+            $result = [ 'success' => $this->_get_service($request)->reset() ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -297,8 +293,8 @@ class AAM_Restful_JwtService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -317,8 +313,8 @@ class AAM_Restful_JwtService
      * @param array  $args
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _register_route($route, $args)
@@ -351,8 +347,8 @@ class AAM_Restful_JwtService
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_fields_input($value)
@@ -389,8 +385,8 @@ class AAM_Restful_JwtService
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_expires_in_input($value)
@@ -419,8 +415,8 @@ class AAM_Restful_JwtService
      * @param array $fields
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_token_output($token_data, $fields)
@@ -454,14 +450,15 @@ class AAM_Restful_JwtService
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_Jwts
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)
     {
         $access_level = AAM::api()->access_levels->get(
-            AAM_Framework_Type_AccessLevel::USER, $request->get_param('user_id')
+            AAM_Framework_Type_AccessLevel::USER,
+            $request->get_param('user_id')
         );
 
         return AAM::api()->jwts(

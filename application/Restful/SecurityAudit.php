@@ -11,9 +11,9 @@
  * RESTful API for the security audit service
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
-class AAM_Restful_SecurityAuditService
+class AAM_Restful_SecurityAudit
 {
 
     use AAM_Restful_ServiceTrait;
@@ -26,11 +26,12 @@ class AAM_Restful_SecurityAuditService
     /**
      * Single instance of itself
      *
-     * @var AAM_Restful_SecurityAuditService
+     * @var AAM_Restful_SecurityAudit
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static $_instance = null;
 
@@ -38,9 +39,9 @@ class AAM_Restful_SecurityAuditService
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -86,7 +87,9 @@ class AAM_Restful_SecurityAuditService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.40
+     * @access public
+     *
+     * @version 7.0.0
      */
     public function run_step(WP_REST_Request $request)
     {
@@ -156,7 +159,9 @@ class AAM_Restful_SecurityAuditService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     * @version 6.9.40
+     * @access public
+     *
+     * @version 7.0.0
      */
     public function generate_report(WP_REST_Request $request)
     {
@@ -184,9 +189,9 @@ class AAM_Restful_SecurityAuditService
      * Generate CSV version of the report
      *
      * @return void
-     *
      * @access private
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private function _generate_csv_report()
     {
@@ -219,9 +224,9 @@ class AAM_Restful_SecurityAuditService
      * Generate JSON version of the report
      *
      * @return string
-     *
      * @access private
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private function _generate_json_report()
     {
@@ -256,9 +261,9 @@ class AAM_Restful_SecurityAuditService
      * @param array  $args
      *
      * @return void
-     *
      * @access private
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private function _register_route($route, $args)
     {

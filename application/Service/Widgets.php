@@ -182,7 +182,7 @@ class AAM_Service_Widgets
                         if (!empty($slug)) {
                             $cache['dashboard'][$slug] = [
                                 'slug'  => $slug,
-                                'area'  => 'backend',
+                                'area'  => 'dashboard',
                                 'title' => base64_encode(
                                     wp_strip_all_tags($data['title'])
                                 )

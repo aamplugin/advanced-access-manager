@@ -167,8 +167,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_policies(WP_REST_Request $request)
@@ -192,8 +192,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function toggle_policy(WP_REST_Request $request)
@@ -224,8 +224,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function create_policy(WP_REST_Request $request)
@@ -240,7 +240,7 @@ class AAM_Restful_Policies
                     'excerpt' => $request->get_param('excerpt')
                 ],
                 $request->get_param('status'),
-                $request->get_param('attach')
+                $request->get_param('effect')
             );
 
             $result = $this->_prepare_policy_item(
@@ -259,8 +259,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_policy(WP_REST_Request $request)
@@ -284,8 +284,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function delete_policy(WP_REST_Request $request)
@@ -311,16 +311,14 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_policies(WP_REST_Request $request)
     {
         try {
-            $this->_get_service($request)->reset();
-
-            $result = [ 'success' => true ];
+            $result = [ 'success' => $this->_get_service($request)->reset() ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -332,8 +330,8 @@ class AAM_Restful_Policies
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -394,8 +392,8 @@ class AAM_Restful_Policies
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_Policies
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)
@@ -412,8 +410,8 @@ class AAM_Restful_Policies
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_fields_input($value)

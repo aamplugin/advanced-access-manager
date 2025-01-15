@@ -93,7 +93,7 @@ class AAM_Service_Jwt
         });
 
         // Register RESTful API
-        AAM_Restful_JwtService::bootstrap();
+        AAM_Restful_Jwt::bootstrap();
 
         add_filter(
             'aam_rest_authenticated_user_data_filter',

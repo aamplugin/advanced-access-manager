@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_SettingService
+class AAM_Restful_Settings
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_SettingService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -41,14 +41,7 @@ class AAM_Restful_SettingService
             $this->_register_route('/settings', array(
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => array($this, 'set_settings'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
-                    'settings' => array(
-                        'description' => 'Collection of settings',
-                        'type'        => 'object',
-                        'required'    => true
-                    )
-                )
+                'permission_callback' => array($this, 'check_permissions')
             ));
 
             // Reset settings
@@ -66,8 +59,8 @@ class AAM_Restful_SettingService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_settings(WP_REST_Request $request)
@@ -102,14 +95,16 @@ class AAM_Restful_SettingService
         try {
             if ($this->_has_access_level($request)) {
                 $result = $this->_get_service($request)->set_settings(
-                    $request->get_param('settings')
+                    $request->get_json_params()
                 );
             } else {
                 $result = AAM::api()->db->write(
                     AAM_Framework_Service_Settings::DB_OPTION,
-                    $request->get_param('settings')
+                    $request->get_json_params()
                 );
             }
+
+            $result = [ 'success' => $result ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -137,6 +132,8 @@ class AAM_Restful_SettingService
                     AAM_Framework_Service_Settings::DB_OPTION
                 );
             }
+
+            $result = [ 'success' => $result ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

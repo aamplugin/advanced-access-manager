@@ -44,7 +44,7 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
             if (!empty($parsed[1])) {
                 $result = array_merge([
                     $parsed[1] => [
-                        'access' => [
+                        'list' => [
                             'effect' => $effect !== 'allow' ? 'deny' : 'allow'
                         ]
                     ]

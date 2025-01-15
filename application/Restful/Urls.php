@@ -13,7 +13,7 @@
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Restful_UrlService
+class AAM_Restful_Urls
 {
 
     use AAM_Restful_ServiceTrait;
@@ -22,8 +22,8 @@ class AAM_Restful_UrlService
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -226,19 +226,14 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_permissions(WP_REST_Request $request)
     {
         try {
-            $service = $this->_get_service($request);
-            $result  = [];
-
-            foreach ($service->get_permissions() as $permission) {
-                array_push($result, $this->_prepare_permission($permission));
-            }
+            $result = $this->_get_permissions($request);
         } catch(Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -262,20 +257,25 @@ class AAM_Restful_UrlService
             $service = $this->_get_service($request);
 
             // Grab all the necessary permission attributes
-            $url_schema = $request->get_param('url_schema');
-            $effect     = strtolower($request->get_param('effect'));
-            $redirect   = $request->get_param('redirect');
+            $url_schema = AAM::api()->misc->sanitize_url(
+                $request->get_param('url_schema')
+            );
+
+            $effect   = strtolower($request->get_param('effect'));
+            $redirect = $request->get_param('redirect');
 
             // Persist the permission
             if ($effect === 'allow') {
                 $service->allow($url_schema);
             } else {
-                $service->restrict($url_schema, $redirect);
+                $service->deny($url_schema, $redirect);
             }
 
             // Prepare the response
-            $result = $this->_prepare_permission(
-                $service->get_permission($url_schema)
+            $result = $this->_prepare_output(
+                $url_schema,
+                $this->_find_permission_by_id(base64_encode($url_schema), $request),
+                true
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -290,19 +290,18 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_permission(WP_REST_Request $request)
     {
         try {
-            $service    = $this->_get_service($request);
-            $url_schema = base64_decode($request->get_param('id'));
-
             // Prepare result
-            $result = $this->_prepare_permission(
-                $service->get_permission($url_schema)
+            $result = $this->_prepare_output(
+                base64_decode($request->get_param('id')),
+                $this->_find_permission_by_id($request->get_param('id'), $request),
+                true
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -317,8 +316,8 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_permission(WP_REST_Request $request)
@@ -338,17 +337,21 @@ class AAM_Restful_UrlService
             }
 
             // Now we are settings permission for the given URL
-            $url_schema = !empty($new_url) ? $new_url : $original_url;
+            $url_schema = AAM::api()->misc->sanitize_url(
+                !empty($new_url) ? $new_url : $original_url
+            );
 
             if ($effect === 'allow') {
                 $service->allow($url_schema);
             } else {
-                $service->restrict($url_schema, $redirect);
+                $service->deny($url_schema, $redirect);
             }
 
-            // Prepare the result
-            $result = $this->_prepare_permission(
-                $service->get_permission($url_schema)
+            // Prepare the response
+            $result = $this->_prepare_output(
+                $url_schema,
+                $this->_find_permission_by_id(base64_encode($url_schema), $request),
+                true
             );
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -416,14 +419,68 @@ class AAM_Restful_UrlService
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
     {
         return current_user_can('aam_manager')
             && current_user_can('aam_manage_url_access');
+    }
+
+    /**
+     * Get complete list of defined permissions
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_permissions($request)
+    {
+        $result   = [];
+        $access_level = $this->_determine_access_level($request);
+        $resource     = $access_level->get_resource(
+            AAM_Framework_Type_Resource::URL
+        );
+
+        foreach($resource->get_permissions() as $url => $permissions) {
+            array_push($result, $this->_prepare_output(
+                $url, $permissions['access'], $resource->is_customized($url)
+            ));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find permission by ID
+     *
+     * @param string          $id
+     * @param WP_REST_Request $request
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _find_permission_by_id($id, $request)
+    {
+        $permissions = array_filter(
+            $this->_get_permissions($request),
+            function($p) use ($id) {
+                return $p['id'] === $id;
+            }
+        );
+
+        if (empty($permissions)) {
+            throw new OutOfRangeException('Permission does not exist');
+        }
+
+        return array_shift($permissions);
     }
 
     /**
@@ -462,8 +519,8 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_redirect_page_id($value, $request)
@@ -493,8 +550,8 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_redirect_url($value, $request)
@@ -522,8 +579,8 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_callback($value, $request)
@@ -551,17 +608,21 @@ class AAM_Restful_UrlService
      * This method prepares the URL model so it can be effectively used by RESTful
      * API
      *
-     * @param array $permission
+     * @param string $url_schema
+     * @param array  $permission
+     * @param bool   $is_customized
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
-    private function _prepare_permission($permission)
+    private function _prepare_output($url_schema, $permission, $is_customized)
     {
-        return array_merge([
-            'id' => base64_encode($permission['url_schema'])
+       return array_merge([
+            'id'            => base64_encode($url_schema),
+            'url_schema'    => $url_schema,
+            'is_customized' => $is_customized
         ], $permission);
     }
 
@@ -571,8 +632,8 @@ class AAM_Restful_UrlService
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_Urls
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)

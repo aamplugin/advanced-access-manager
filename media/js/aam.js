@@ -5409,10 +5409,10 @@
                                 $.each(json, (_, rule) => {
                                     const actions = ['edit'];
 
-                                    if (rule.is_inherited) {
-                                        actions.push('no-delete');
-                                    } else {
+                                    if (rule.is_customized) {
                                         actions.push('delete');
+                                    } else {
+                                        actions.push('no-delete');
                                     }
 
                                     let restriction_type = null;

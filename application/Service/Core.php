@@ -196,7 +196,7 @@ class AAM_Service_Core
         // AAM_Core_Migration::run();
 
         // Bootstrap RESTful API
-        AAM_Restful_MuService::bootstrap();
+        AAM_Restful_Mu::bootstrap();
     }
 
     /**

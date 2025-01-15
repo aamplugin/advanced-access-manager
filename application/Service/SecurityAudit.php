@@ -33,7 +33,7 @@ class AAM_Service_SecurityAudit
 
         // Keep the support RESTful service enabled at all times because it is used
         // by issue reporting feature as well
-        AAM_Restful_SecurityAuditService::bootstrap();
+        AAM_Restful_SecurityAudit::bootstrap();
     }
 
     /**

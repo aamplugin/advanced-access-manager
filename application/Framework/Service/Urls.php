@@ -19,97 +19,6 @@ class AAM_Framework_Service_Urls implements AAM_Framework_Service_Interface
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Get the array of defined permissions
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     * @todo - Consider moving to AAM_Service_Url
-     */
-    public function get_permissions()
-    {
-        try {
-            $result   = [];
-            $resource = $this->_get_resource();
-
-            foreach($resource->get_permissions() as $url => $permissions) {
-                array_push($result, $this->_prepare_url_schema_model(
-                    $url, $permissions['access']
-                ));
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_permissions method
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     * @todo - Consider moving to AAM_Service_Url
-     */
-    public function permissions()
-    {
-        return $this->get_permissions();
-    }
-
-    /**
-     * Get permission for a given URL schema
-     *
-     * @param string $url_schema
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     * @todo - Consider moving to AAM_Service_Url
-     */
-    public function get_permission($url_schema)
-    {
-        try {
-            $resource    = $this->_get_resource();
-            $permission = $resource->get_permission(
-                $this->_normalize_resource_identifier($url_schema),
-                'access'
-            );
-
-            if (empty($permission)) {
-                throw new OutOfRangeException(sprintf(
-                    'Permission for URL schema "%s" does not exist', $url_schema
-                ));
-            }
-
-            $result = $this->_prepare_url_schema_model($url_schema, $permission);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Alias for the get_url method
-     *
-     * @param string $url_schema
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     * @todo - Consider moving to AAM_Service_Url
-     */
-    public function permission($url_schema)
-    {
-        return $this->get_permission($url_schema);
-    }
-
-    /**
      * Allow access to a given URL
      *
      * @param string|array $url_schema
@@ -423,35 +332,6 @@ class AAM_Framework_Service_Urls implements AAM_Framework_Service_Interface
         return $this->_get_access_level()->get_resource(
             AAM_Framework_Type_Resource::URL
         );
-    }
-
-    /**
-     * Normalize and prepare the rule model
-     *
-     * @param string $url_schema
-     * @param array  $permission
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _prepare_url_schema_model($url_schema, $permission)
-    {
-        $result = [
-            'url_schema' => $url_schema
-        ];
-
-        // Remove system attributes
-        foreach($permission as $key => $value) {
-            if ($key === '__inherited') {
-                $result['is_inherited'] = $value;
-            } elseif (strpos($key, '__') === false) {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
     }
 
     /**
