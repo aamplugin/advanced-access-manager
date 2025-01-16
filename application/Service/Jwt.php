@@ -83,7 +83,7 @@ class AAM_Service_Jwt
      */
     protected function initialize_hooks()
     {
-        add_action('aam_clear_settings_action', function() {
+        add_action('aam_reset_action', function() {
             global $wpdb;
 
             // Run the query, will return true if deleted, false otherwise

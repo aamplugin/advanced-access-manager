@@ -75,36 +75,6 @@ class AAM_Service_Content
             );
 
             if ($metaboxEnabled) {
-                // Make sure that all already registered taxonomies are hooked
-                foreach(get_taxonomies() as $taxonomy) {
-                    add_action(
-                        "{$taxonomy}_edit_form_fields",
-                        function($term) {
-                            if (is_a($term, 'WP_Term')
-                                && current_user_can('aam_manage_content')
-                            ) {
-                                $view = AAM_Backend_View::get_instance();
-
-                                echo $view->renderTermMetabox($term);
-                            }
-                        }
-                    );
-                }
-
-                // Hook into still up-coming taxonomies down the pipeline
-                add_action('registered_taxonomy', function($taxonomy) {
-                    add_action(
-                        "{$taxonomy}_edit_form_fields",
-                        function($term) {
-                            if (is_a($term, 'WP_Term')) {
-                                $view = AAM_Backend_View::get_instance();
-
-                                echo $view->renderTermMetabox($term);
-                            }
-                        }
-                    );
-                });
-
                 // Register custom access control metabox
                 add_action(
                     'add_meta_boxes',
@@ -297,10 +267,17 @@ class AAM_Service_Content
         $result = true;
 
         if (AAM::api()->posts()->is_password_protected($post)) {
+            // Load hash checker
+            if (!class_exists('PasswordHash')) {
+                require_once ABSPATH . WPINC . '/class-phpass.php';
+            }
+
+            $checker = new PasswordHash(8, true);
+
             // If password is empty or not provided, try to read it from the cookie.
             // This is the default WordPress behavior when it comes to password
             // protected posts/pages
-            $is_matched = AAM_Core_API::prepareHasher()->CheckPassword(
+            $is_matched = $checker->CheckPassword(
                 AAM::api()->posts()->get_password($post),
                 wp_unslash(AAM::api()->misc->get(
                     $_COOKIE, 'wp-postpass_' . COOKIEHASH, ''

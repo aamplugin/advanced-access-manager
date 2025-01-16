@@ -10,15 +10,8 @@
 /**
  * Backend core settings
  *
- * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- *               https://github.com/aamplugin/advanced-access-manager/issues/311
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/270
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.34
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
 {
@@ -26,14 +19,14 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the collection of settings
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_settings';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'settings/core.php';
 
@@ -41,16 +34,9 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      * Get list of core options
      *
      * @return array
-     *
-     * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     *               https://github.com/aamplugin/advanced-access-manager/issues/311
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/298
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/270
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.34
+     *
+     * @version 7.0.0
      */
     public static function getList()
     {
@@ -104,9 +90,9 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      * Register core settings UI
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {

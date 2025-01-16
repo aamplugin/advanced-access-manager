@@ -1078,6 +1078,7 @@ input[type="radio"]:focus {
   background-color: #f0ad4e;
   color: #FFFFFF;
   font-weight: 700;
+  height: 28px;
   margin-bottom: 20px;
   letter-spacing: 1px;
 }

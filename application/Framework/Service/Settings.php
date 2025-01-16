@@ -231,10 +231,7 @@ class AAM_Framework_Service_Settings
                 unset($this->_data[$type]);
             }
 
-            if (!$this->db->write(self::DB_OPTION, $this->_data)) {
-                throw new RuntimeException('Failed to persist configurations');
-            }
-
+            $result = $this->db->write(self::DB_OPTION, $this->_data);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

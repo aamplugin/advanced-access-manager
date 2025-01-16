@@ -166,7 +166,7 @@ class AAM_Restful_Configs
     {
         try {
             // Read stored ConfigPress from DB
-            $raw = AAM::api()->db->read(AAM_Service_Core::CONFIGPRESS_DB_OPTION);
+            $raw = AAM::api()->db->read(AAM_Service_Core::DB_OPTION);
 
             if (!empty($raw)) {
                 $parsed = parse_ini_string($raw, true, INI_SCANNER_TYPED);
@@ -248,7 +248,7 @@ class AAM_Restful_Configs
                 throw new InvalidArgumentException('The ConfigPress value is empty');
             } else {
                 $result = AAM::api()->db->write(
-                    AAM_Service_Core::CONFIGPRESS_DB_OPTION, $raw
+                    AAM_Service_Core::DB_OPTION, $raw
                 );
             }
 
@@ -299,7 +299,7 @@ class AAM_Restful_Configs
         try {
             $result = [
                 'success' => AAM::api()->db->delete(
-                    AAM_Service_Core::CONFIGPRESS_DB_OPTION
+                    AAM_Service_Core::DB_OPTION
                 )
             ];
         } catch (Exception $e) {

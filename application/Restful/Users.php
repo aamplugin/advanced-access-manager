@@ -432,10 +432,25 @@ class AAM_Restful_Users
      */
     private function _prepare_output($user, $fields = [])
     {
+        // Prepare user's display name
+        if ($user->first_name && $user->last_name) {
+            $display_name = sprintf(
+                _x('%1$s %2$s', 'Display name based on first name and last name'),
+                $user->first_name,
+                $user->last_name
+            );
+        } elseif ( $user->first_name ) {
+            $display_name = $user->first_name;
+        } elseif ( $user->last_name ) {
+            $display_name = $user->last_name;
+        } else {
+            $display_name = $user->user_email;
+        }
+
         $item = [
             'id'                    => $user->ID,
             'user_login'            => $user->user_login,
-            'display_name'          => $user->display_name,
+            'display_name'          => $display_name,
             'user_level'            => intval($user->user_level),
             'roles'                 => $this->_prepare_user_roles($user->roles),
             'assigned_capabilities' => $user->caps,

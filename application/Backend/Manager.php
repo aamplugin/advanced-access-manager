@@ -236,9 +236,6 @@ class AAM_Backend_Manager
                     'id'    => $access_level->get_id(),
                     'name'  => $access_level->get_display_name()
                 ),
-                'system' => array(
-                    'apiEndpoint' => AAM_Core_API::getAPIEndpoint()
-                ),
                 'translation' => AAM_Backend_View_Localization::get(),
                 'caps'        => array(
                     'create_roles'    => current_user_can('aam_create_roles'),
@@ -400,13 +397,13 @@ class AAM_Backend_Manager
             }
         }
 
-        $hasManagerCap = AAM_Core_API::capExists('aam_manager');
+        $cap_exists = AAM::api()->caps->exists('aam_manager');
 
         // Register the menu
         add_menu_page(
             'AAM',
             'AAM' . $bubble,
-            ($hasManagerCap ? 'aam_manager' : 'administrator'),
+            ($cap_exists ? 'aam_manager' : 'administrator'),
             'aam',
             function() {
                 echo AAM_Backend_View::get_instance()->renderPage();

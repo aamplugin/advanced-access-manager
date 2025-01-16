@@ -25,14 +25,14 @@ class AAM_Addon_Repository
      *
      * @version 7.0.0
      */
-    const LATEST_PREMIUM_VERSION = '6.1.10';
+    const LATEST_PREMIUM_VERSION = '7.0.0-beta.1';
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -71,8 +71,8 @@ class AAM_Addon_Repository
      * Get list of all registered licenses
      *
      * @return string|null
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_premium_license_key()
@@ -122,8 +122,8 @@ class AAM_Addon_Repository
      *
      * @param string $plugin
      *
-     * @return protected
-     * @access public
+     * @return string|null
+     * @access protected
      *
      * @version 7.0.0
      */

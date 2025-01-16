@@ -23,7 +23,7 @@ class AAM_Framework_Service_BackendMenu
      *
      * @version 7.0.0
      */
-    const CACHE_DB_OPTION = 'aam_menu_cache';
+    const CACHE_OPTION = 'aam_menu';
 
     /**
      * Return the complete backend menu list with permissions
@@ -234,7 +234,18 @@ class AAM_Framework_Service_BackendMenu
                 // If menu is not top level item, assume that this is a submenu item
                 // and check if parent menu item is restricted
                 if (is_null($result) && strpos($slug, 'menu/') !== 0) {
-                    $parent_slug = $this->_get_parent_slug($slug);
+                    if ($slug === 'post.php') { // Submitting post
+                        $post_type   = AAM::api()->misc->get($_POST, 'post_type');
+                        $parent_slug = 'menu/edit.php';
+
+                        if(!empty($post_type) && $post_type !== 'post') {
+                            $parent_slug .= '?post_type=' . $post_type;
+                        }
+                    }
+
+                    if (empty($parent_slug)){
+                        $parent_slug = $this->_get_parent_slug($slug);
+                    }
 
                     // If we found a parent menu item, check permissions
                     if (!empty($parent_slug)) {
@@ -351,11 +362,11 @@ class AAM_Framework_Service_BackendMenu
             }
 
             if ($persist_cache) {
-                $this->cache->set(self::CACHE_DB_OPTION, $result, 31536000);
+                $this->cache->set(self::CACHE_OPTION, $result, 31536000);
             }
 
             if (empty($result)) { // Either AJAX or RESTful API call
-                $result = $this->cache->get(self::CACHE_DB_OPTION);
+                $result = $this->cache->get(self::CACHE_OPTION);
             }
 
             $_cache = $result; // Avoid doing the same thing over & over again

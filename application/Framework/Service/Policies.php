@@ -524,7 +524,7 @@ class AAM_Framework_Service_Policies
             // Fetching the list of registered policies from DB
             $policies = get_posts(array_merge(
                 [
-                    'post_status' => [ 'publish', 'draft', 'pending' ],
+                    'post_status' => [ 'publish', 'draft', 'pending', 'private' ],
                     'nopaging'    => true
                 ],
                 $args,

@@ -41,13 +41,13 @@
             $list  = AAM_Service_Widgets::get_instance()->get_widget_list($service);
 
             // Group all the components by screen
-            $grouped = array();
+            $grouped = [
+                'dashboard' => [],
+                'frontend'  => []
+            ];
+
             foreach($list as $item) {
                 $screen = $item['area'];
-
-                if (!isset($grouped[$screen])) {
-                    $grouped[$screen] = array();
-                }
 
                 array_push($grouped[$screen], $item);
             }

@@ -611,9 +611,24 @@ class AAM_Restful_Identity
             AAM_Framework_Type_Resource::USER
         );
 
+        // Prepare user's display name
+        if ($user->first_name && $user->last_name) {
+            $display_name = sprintf(
+                _x('%1$s %2$s', 'Display name based on first name and last name'),
+                $user->first_name,
+                $user->last_name
+            );
+        } elseif ( $user->first_name ) {
+            $display_name = $user->first_name;
+        } elseif ( $user->last_name ) {
+            $display_name = $user->last_name;
+        } else {
+            $display_name = $user->user_email;
+        }
+
         return [
             'id'            => $user->ID,
-            'display_name'  => $user->display_name,
+            'display_name'  => $display_name,
             'permissions'   => $resource->get_permissions($user->get_core_instance()),
             'is_customized' => $resource->is_customized($user->get_core_instance())
         ];

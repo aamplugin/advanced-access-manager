@@ -264,27 +264,6 @@ class AAM_Backend_View
     }
 
     /**
-     * Render Access Manager metabox iFrame element for terms
-     *
-     * @param WP_Term $term
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public static function renderTermMetabox($term)
-    {
-        return static::loadTemplate(
-            dirname(__FILE__) . '/tmpl/metabox/term-metabox.php',
-            (object) array(
-                'term'     => $term,
-                'postType' => filter_input(INPUT_GET, 'post_type')
-            )
-        );
-    }
-
-    /**
      * Render Access Manager metabox iFrame element for user
      *
      * @param WP_User $term

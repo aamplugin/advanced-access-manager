@@ -25,7 +25,7 @@ class AAM_Service_Core
      *
      * @version 7.0.0
      */
-    const CONFIGPRESS_DB_OPTION = 'aam_configpress';
+    const DB_OPTION = 'aam_configpress';
 
     /**
      * Default configurations
@@ -39,8 +39,7 @@ class AAM_Service_Core
         'core.settings.xmlrpc_enabled'           => true,
         'core.settings.restful_enabled'          => true,
         'core.settings.multisite.members_only'   => false,
-        'core.settings.merge.preference'         => 'deny',
-        'core.export.groups'                     => [ 'settings', 'config', 'roles' ]
+        'core.settings.merge.preference'         => 'deny'
     ];
 
     /**
@@ -246,6 +245,187 @@ class AAM_Service_Core
     }
 
     /**
+     * Export all AAM settings & configurations
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function export()
+    {
+        $db     = AAM::api()->db;
+        $result = [
+            'version'   => AAM_VERSION,
+            'plugin'    => AAM_KEY,
+            'timestamp' => (new DateTime('now', new DateTimeZone('UTC')))->format('U'),
+            'dataset'   => [
+                'settings'    => $db->read(AAM_Framework_Service_Settings::DB_OPTION, []),
+                'configs'     => $db->read(AAM_Framework_Utility_Config::DB_OPTION, []),
+                'configpress' => $db->read(self::DB_OPTION, ''),
+                'roles'       => $db->read(wp_roles()->role_key, []),
+                'policies'    => []
+            ]
+        ];
+
+        // Get list of all JSON policies
+        $policies = get_posts([
+            'post_status'      => [ 'publish', 'draft', 'pending', 'private' ],
+            'nopaging'         => true,
+            'suppress_filters' => true,
+            'post_type'        => AAM_Framework_Service_Policies::CPT
+        ]);
+
+        foreach($policies as $policy) {
+            array_push($result['dataset']['policies'], [
+                'id'      => $policy->ID,
+                'content' => $policy->post_content,
+                'status'  => $policy->post_status,
+                'title'   => $policy->post_title,
+                'excerpt' => $policy->post_excerpt
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Import settings
+     *
+     * @param array $dataset
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function import($dataset)
+    {
+        // Import data in very specific order
+        $policy_map = [];
+
+        if (array_key_exists('policies', $dataset)) {
+            foreach($dataset['policies'] as $policy) {
+                $policy_map[$policy['id']] = wp_insert_post([
+                    'post_content' => $policy['content'],
+                    'post_type'    => AAM_Framework_Service_Policies::CPT,
+                    'post_status'  => $policy['status'],
+                    'post_title'   => $policy['title'],
+                    'post_excerpt' => $policy['excerpt']
+                ]);
+            }
+        }
+
+        // Import raw data sets
+        $db = AAM::api()->db;
+
+        if (array_key_exists('roles', $dataset)) {
+            $db->write(wp_roles()->role_key, $dataset['roles']);
+        }
+
+        if (array_key_exists('configpress', $dataset)) {
+            $db->write(self::DB_OPTION, $dataset['configpress']);
+        }
+
+        if (array_key_exists('configs', $dataset)) {
+            $db->write(AAM_Framework_Utility_Config::DB_OPTION, $dataset['configs']);
+        }
+
+        if (array_key_exists('settings', $dataset)) {
+            // If policy map is not empty, replace all old policy ids with new
+            if (!empty($policy_map)) {
+                $settings = $this->_replace_policy_ids(
+                    $dataset['settings'], $policy_map
+                );
+            } else {
+                $settings = $dataset['settings'];
+            }
+
+            $db->write(AAM_Framework_Service_Settings::DB_OPTION, $settings);
+        }
+
+        return true;
+    }
+
+    /**
+     * Reset AAM
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset()
+    {
+        global $wpdb;
+
+        // Clear all configurations & settings
+
+        $options = array(
+            AAM_Framework_Service_Settings::DB_OPTION,
+            AAM_Core_Migration::DB_OPTION,
+            AAM_Framework_Utility_Config::DB_OPTION,
+            AAM_Framework_Utility_Cache::DB_OPTION,
+            AAM_Service_Core::DB_OPTION
+        );
+
+        foreach($options as $option) {
+            AAM::api()->db->delete($option);
+        }
+
+        // Delete all legacy options
+        $query  = "DELETE FROM {$wpdb->options} WHERE (`option_name` LIKE %s) AND ";
+        $query .= "(`option_name` NOT IN ('aam_addons', 'aam_migrations'))";
+        $wpdb->query($wpdb->prepare($query, 'aam%'));
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->postmeta} WHERE `meta_key` LIKE %s", 'aam-%'
+        ));
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s", 'aam%'
+        ));
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE %s",
+            $wpdb->get_blog_prefix() . 'aam%'
+        ));
+
+        // Trigger the action to inform other services to clean-up the options
+        do_action('aam_reset_action', $options);
+
+        return true;
+    }
+
+    /**
+     * Replace old policy ids with new
+     *
+     * @param array $settings
+     * @param array $policy_map
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _replace_policy_ids($settings, $policy_map)
+    {
+        foreach($settings as $key => $data) {
+            if ($key === 'policy' && is_array($data)) {
+                foreach($data as $policy_id => $perm) {
+                    if (isset($policy_map[$policy_id])) {
+                        $settings[$key][$policy_map[$policy_id]] = $perm;
+                    }
+                }
+            } elseif (is_array($data)) {
+                $settings[$key] = $this->_replace_policy_ids($data, $policy_map);
+            }
+        }
+
+        return $settings;
+    }
+
+    /**
      * Manage notifications visibility
      *
      * @return void
@@ -291,7 +471,11 @@ class AAM_Service_Core
      */
     private function _control_help_tabs()
     {
-        if (!$this->_current_user_can('aam_show_help_tabs')) {
+        $screen = get_current_screen();
+
+        if (!$this->_current_user_can('aam_show_help_tabs')
+            && is_a($screen, WP_Screen::class)
+        ) {
             get_current_screen()->remove_help_tabs();
         }
     }
@@ -400,7 +584,7 @@ class AAM_Service_Core
      */
     private function _aam_initialize_config($configs)
     {
-        $configpress = AAM::api()->db->read(self::CONFIGPRESS_DB_OPTION);
+        $configpress = AAM::api()->db->read(self::DB_OPTION);
 
         if (!empty($configpress) && is_string($configpress)) {
             $result = parse_ini_string($configpress, true, INI_SCANNER_TYPED);

@@ -20,13 +20,6 @@ class AAM_Service_AdminToolbar
         AAM_Core_Contract_ServiceTrait;
 
     /**
-     * DB option name for cache
-     *
-     * @version 7.0.0
-     */
-    const CACHE_DB_OPTION = 'aam_toolbar_cache';
-
-    /**
      * Constructor
      *
      * @return void
@@ -53,19 +46,6 @@ class AAM_Service_AdminToolbar
         }
 
         $this->initialize_hooks();
-    }
-
-    /**
-     * Get cached admin toolbar
-     *
-     * @return array
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function getToolbarCache()
-    {
-        return AAM::api()->cache->get(self::CACHE_DB_OPTION);
     }
 
     /**

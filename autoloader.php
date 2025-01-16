@@ -11,12 +11,7 @@
  * Project auto-loader
  *
  * @package AAM
- *
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/244
- * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
- * @since 6.0.0  Initial implementation of the class
- *
- * @version 6.9.12
+ * @version 7.0.0
  */
 class AAM_Autoloader
 {
@@ -24,14 +19,14 @@ class AAM_Autoloader
     /**
      * PRS HTTP Message package
      *
-     * @since 6.9.12
+     * @version 7.0.0
      */
     const PSRHM_BASEDIR = __DIR__ . '/vendor/psr-http-message';
 
     /**
      * Whip package
      *
-     * @since 6.9.12
+     * @version 7.0.0
      */
     const WHIP_BASEDIR = __DIR__ . '/vendor/whip';
 
@@ -39,13 +34,9 @@ class AAM_Autoloader
      * Class map
      *
      * @var array
-     *
-     * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/244
-     * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
-     * @since 6.0.0  Initial implementation of the property
-     *
      * @access protected
-     * @version 6.9.12
+     *
+     * @version 7.0.0
      */
     protected static $class_map = array(
         'Psr\Http\Message\MessageInterface'                 => self::PSRHM_BASEDIR . '/MessageInterface.php',
@@ -70,9 +61,9 @@ class AAM_Autoloader
      *
      * @param string $class_name
      * @param string $file_path
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function add($class_name, $file_path)
     {
@@ -87,9 +78,9 @@ class AAM_Autoloader
      * @param string $class_name
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function load($class_name)
     {
@@ -114,9 +105,9 @@ class AAM_Autoloader
      * Register auto-loader
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {

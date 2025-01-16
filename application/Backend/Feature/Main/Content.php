@@ -10,21 +10,8 @@
 /**
  * Backend posts & terms service UI
  *
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/384
- * @since 6.9.29 https://github.com/aamplugin/advanced-access-manager/issues/375
- * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/363
- * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/89
- *               https://github.com/aamplugin/advanced-access-manager/issues/108
- * @since 6.3.1  Fixed bug with incorrectly escaped passwords and teaser messages
- * @since 6.3.0  Fixed bug with PHP noticed that was triggered if password was not
- *               defined
- * @since 6.2.0  Added more granular control over the HIDDEN access option
- * @since 6.0.3  Allowed to manage access to ALL registered post types
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.31
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
 {
@@ -35,14 +22,14 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_content';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/content.php';
 
@@ -104,34 +91,14 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
     }
 
     /**
-     * Determine if permission is denied
-     *
-     * @param string                      $permission
-     * @param AAM_Framework_Resource_Post $resource
-     * @param mixed                       $resource_identifier
-     *
-     * @return boolean
-     *
-     * @access protected
-     * @version 7.0.0
-     */
-    protected function is_permission_denied($permission, $resource, $resource_identifier)
-    {
-        $perms    = $resource->get_permissions($resource_identifier);
-        $settings = !empty($perms[$permission]) ? $perms[$permission] : null;
-
-        return !empty($settings) && $settings['effect'] === 'deny';
-    }
-
-    /**
      * Load dynamic template
      *
      * @param string $name
      * @param object $params
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     private function _load_partial($name, object $params)
@@ -156,8 +123,8 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * @param mixed                            $resource_identifier
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_access_controls($resource, $resource_identifier)
@@ -184,20 +151,32 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * @param mixed                       $resource_identifier
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_post_access_controls($resource, $resource_identifier)
     {
-        $permissions = $resource->get_permissions($resource_identifier);
+        $list    = $resource->get_permission($resource_identifier, 'list');
+
+        if (!empty($list) && $list['effect'] !== 'allow') {
+            $on = !empty($list['on']) ? $list['on'] : [ 'frontend', 'backend', 'api' ];
+        } else {
+            $on = [];
+        }
+
+        $read    = $resource->get_permission($resource_identifier, 'read');
+        $comment = $resource->get_permission($resource_identifier, 'comment');
+        $edit    = $resource->get_permission($resource_identifier, 'edit');
+        $publish = $resource->get_permission($resource_identifier, 'publish');
+        $delete  = $resource->get_permission($resource_identifier, 'delete');
 
         return apply_filters('aam_ui_content_access_controls_filter', [
             'list' => array(
                 'title'       => __('Hidden', AAM_KEY),
                 'modal'       => 'modal_content_visibility',
-                'is_denied'   => $this->is_permission_denied('list', $resource, $resource_identifier),
-                'areas'       => isset($permissions['list']) ? $permissions['list']['on'] : [],
+                'is_denied'   => !empty($list) && $list['effect'] !== 'allow',
+                'areas'       => $on,
                 'customize'   => __('Customize visibility', AAM_KEY),
                 'tooltip'     => sprintf(
                     __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', AAM_KEY),
@@ -225,7 +204,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             'read' => array(
                 'title'       => __('Restricted', AAM_KEY),
                 'modal'       => 'modal_content_restriction',
-                'is_denied'   => $this->is_permission_denied('read', $resource, $resource_identifier),
+                'is_denied'   => !empty($read) && $read['effect'] !== 'allow',
                 'customize'   => __('Customize direct access', AAM_KEY),
                 'tooltip'     => sprintf(
                     __('Restrict direct access to read or download the "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
@@ -238,7 +217,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             ),
             'comment' => array(
                 'title'       => __('Leave Comments', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('comment', $resource, $resource_identifier),
+                'is_denied'   => !empty($comment) && $comment['effect'] !== 'allow',
                 'description' => sprintf(
                     __('Limit the ability to leave comments on the "%s".', AAM_KEY),
                     $resource_identifier->post_title
@@ -246,7 +225,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             ),
             'edit' => array(
                 'title'       => __('Edit', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('edit', $resource, $resource_identifier),
+                'is_denied'   => !empty($edit) && $edit['effect'] !== 'allow',
                 'description' => sprintf(
                     __('Disable the ability to edit "%s". Editing "%s" will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
                     $resource_identifier->post_title,
@@ -255,7 +234,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             ),
             'publish' => array(
                 'title'       => __('Publish', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('publish', $resource, $resource_identifier),
+                'is_denied'   => !empty($publish) && $publish['effect'] !== 'allow',
                 'description' => sprintf(
                     __('Manage the ability to publish draft "%s" or any updates to already published versions. If denied, a user will only be able to submit for review.', AAM_KEY),
                     $resource_identifier->post_title
@@ -263,7 +242,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             ),
             'delete' => array(
                 'title'       => __('Delete', AAM_KEY),
-                'is_denied'   => $this->is_permission_denied('delete', $resource, $resource_identifier),
+                'is_denied'   => !empty($delete) && $delete['effect'] !== 'allow',
                 'description' => sprintf(
                     __('Disable the ability to delete "%s". Deletion will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
                     $resource_identifier->post_title
@@ -297,9 +276,9 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * Register Posts & Pages service UI
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {

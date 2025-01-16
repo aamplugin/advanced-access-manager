@@ -195,6 +195,7 @@ class AAM_Service_BackendMenu
         }
 
         if (AAM::api()->backend_menu()->is_denied($id)) {
+            // die('here');
             AAM::api()->redirect->do_access_denied_redirect();
         }
     }

@@ -43,7 +43,7 @@ final class BackendMenuTest extends TestCase
 
         // Double-checking the cache value itself
         $cache = AAM::api()->cache->get(
-            AAM_Framework_Service_BackendMenu::CACHE_DB_OPTION
+            AAM_Framework_Service_BackendMenu::CACHE_OPTION
         );
 
         // The $cache should not be empty

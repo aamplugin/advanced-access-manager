@@ -1,12 +1,4 @@
-<?php
-
-/**
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.21
- * */
+<?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) { ?>
     <?php if (!is_user_logged_in()) { ?>
@@ -105,7 +97,7 @@ if (defined('AAM_KEY')) { ?>
                 <?php echo get_avatar(AAM::current_user()->ID, 50); ?>
             </div>
             <div style="display:table-cell;">
-                <?php if (AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) { ?>
+                <?php if (AAM::api()->caps->exists('aam_access_dashboard') && current_user_can('aam_access_dashboard')) { ?>
                     <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br />
                     <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br />
                 <?php } ?>

@@ -34,7 +34,7 @@ final class AdminToolbarTest extends TestCase
         ));
 
         AAM::api()->cache->set(
-            AAM_Framework_Service_AdminToolbar::CACHE_DB_OPTION, $mock
+            AAM_Framework_Service_AdminToolbar::CACHE_OPTION, $mock
         );
     }
 

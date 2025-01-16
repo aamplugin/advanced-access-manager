@@ -53,6 +53,30 @@ class AAM_Restful_Mu
         AAM_Restful_Configs::bootstrap();
         AAM_Restful_Settings::bootstrap();
 
+        // Register API endpoint
+        add_action('rest_api_init', function() {
+            // Reset AAM
+            $this->_register_route('/reset', [
+                'methods'             => WP_REST_Server::DELETABLE,
+                'callback'            => [ $this, 'reset' ],
+                'permission_callback' => [ $this, 'check_permissions' ]
+            ], false, 'aam/v2');
+
+            // Export AAM settings, configurations & roles
+            $this->_register_route('/export', [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ $this, 'export' ],
+                'permission_callback' => [ $this, 'check_permissions' ]
+            ], false, 'aam/v2');
+
+            // Import AAM settings, configurations & roles
+            $this->_register_route('/import', [
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => [ $this, 'import' ],
+                'permission_callback' => [ $this, 'check_permissions' ]
+            ], false, 'aam/v2');
+        });
+
         // Get currently managed "Access Level"
         add_filter(
             'aam_rest_get_access_level_filter',
@@ -71,6 +95,67 @@ class AAM_Restful_Mu
 
         // Register a common AAM, access level aware RESTful API endpoint
         add_action('aam_rest_register_route', [ $this, 'register_route' ], 10, 4);
+    }
+
+    /**
+     * Reset all AAM settings
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset()
+    {
+        return rest_ensure_response([
+            'success' => AAM_Service_Core::get_instance()->reset()
+        ]);
+    }
+
+    /**
+     * Export all AAM settings
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function export()
+    {
+        return rest_ensure_response(AAM_Service_Core::get_instance()->export());
+    }
+
+    /**
+     * Export all AAM settings
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function import($request)
+    {
+        return rest_ensure_response([
+            'success' => AAM_Service_Core::get_instance()->import(
+                $request->get_param('dataset')
+            )
+        ]);
+    }
+
+     /**
+     * Check if current user has access to the service
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function check_permissions()
+    {
+        return current_user_can('aam_manager')
+            && AAM::api()->misc->is_super_admin();
     }
 
     /**

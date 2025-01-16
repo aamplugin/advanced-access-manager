@@ -92,7 +92,7 @@ class AAM_Service_Metaboxes
         global $wp_meta_boxes;
 
         $cache = AAM::api()->cache->get(
-            AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, []
+            AAM_Framework_Service_Metaboxes::CACHE_OPTION, []
         );
 
         $cache[$post_type] = []; // Reset the list
@@ -126,7 +126,7 @@ class AAM_Service_Metaboxes
         }
 
         AAM::api()->cache->set(
-            AAM_Framework_Service_Metaboxes::CACHE_DB_OPTION, $cache, 31536000
+            AAM_Framework_Service_Metaboxes::CACHE_OPTION, $cache, 31536000
         );
     }
 

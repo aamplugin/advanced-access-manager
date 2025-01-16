@@ -23,7 +23,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      *
      * @version 7.0.0
      */
-    const CACHE_DB_OPTION = 'aam_admin_toolbar_cache';
+    const CACHE_OPTION = 'aam_admin_toolbar';
 
     /**
      * Initialized Admin Toolbar items
@@ -471,13 +471,13 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                         $response
                     );
 
-                    $this->cache->set(self::CACHE_DB_OPTION, $response, 31536000);
+                    $this->cache->set(self::CACHE_OPTION, $response, 31536000);
                 }
             }
         }
 
         if (empty($response)) { // Try to pull it from the cache
-            $response = $this->cache->get(self::CACHE_DB_OPTION, []);
+            $response = $this->cache->get(self::CACHE_OPTION, []);
         }
 
         return $response;

@@ -25,7 +25,7 @@ class AAM_Framework_Service_Metaboxes
      *
      * @version 7.0.0
      */
-    const CACHE_DB_OPTION = 'aam_metaboxes_cache';
+    const CACHE_OPTION = 'aam_metaboxes';
 
     /**
      * Return the list of all indexed metaboxes
@@ -51,7 +51,7 @@ class AAM_Framework_Service_Metaboxes
             $result = [];
 
             // Getting the menu cache so we can build the list
-            $cache = $this->cache->get(self::CACHE_DB_OPTION, []);
+            $cache = $this->cache->get(self::CACHE_OPTION, []);
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $type => $metaboxes) {

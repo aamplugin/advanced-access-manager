@@ -88,9 +88,7 @@ class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interf
      */
     public function exists($capability)
     {
-        $all_caps = $this->get_all_caps();
-
-        return array_key_exists($capability, $all_caps);
+        return in_array($capability, $this->get_all_caps(), true);
     }
 
 }

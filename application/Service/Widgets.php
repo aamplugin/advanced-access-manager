@@ -23,7 +23,7 @@ class AAM_Service_Widgets
      *
      * @version 7.0.0
      */
-    const CACHE_DB_OPTION = 'aam_widgets_cache';
+    const CACHE_OPTION = 'aam_widgets';
 
     /**
      * Constructor
@@ -63,7 +63,7 @@ class AAM_Service_Widgets
         $result = [];
 
         // Getting the menu cache so we can build the list
-        $cache = AAM::api()->cache->get(AAM_Service_Widgets::CACHE_DB_OPTION, []);
+        $cache = AAM::api()->cache->get(self::CACHE_OPTION, []);
 
         if (!empty($cache) && is_array($cache)) {
             foreach($cache as $s_id => $widgets) {
@@ -193,7 +193,7 @@ class AAM_Service_Widgets
             }
         }
 
-        AAM::api()->cache->set(self::CACHE_DB_OPTION, $cache, 31536000);
+        AAM::api()->cache->set(self::CACHE_OPTION, $cache, 31536000);
     }
 
     /**
