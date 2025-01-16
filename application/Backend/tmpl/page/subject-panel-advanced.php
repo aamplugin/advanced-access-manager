@@ -34,17 +34,17 @@
                     </div>
                     <div class="form-group">
                         <label><?php echo __('Inherit Capabilities From', AAM_KEY); ?></label>
-                        <select class="form-control inherit-role-list" name="clone_role" id="inherit-role">
+                        <select class="form-control aam-role-list" name="clone_role" id="inherit-role">
                             <option value=""><?php echo __('Select Role', AAM_KEY); ?></option>
                         </select>
                     </div>
                     <div class="checkbox">
                         <label for="clone-role">
                             <input type="checkbox" id="clone-role" name="clone_role_settings" />
-                            <?php echo __('Also clone all AAM access settings from selected role (admin menu, metaboxes, redirects, etc.)', AAM_KEY); ?>
+                            <?php echo __('Also, only once, inherit all settings from selected role (admin menu, metaboxes, redirects, etc.)', AAM_KEY); ?>
                         </label>
                     </div>
-                    <?php echo apply_filters('aam_add_role_ui_filter', ''); ?>
+                    <?php echo do_action('aam_ui_add_role_form_action'); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="add-role-btn"><?php echo __('Create', AAM_KEY); ?></button>
@@ -76,8 +76,7 @@
                         <input type="text" class="form-control" id="edit-role-slug" name="new_slug" />
                         <small class="text-muted hint"><?php echo __('Can be changed if no users are assigned to role', AAM_KEY); ?></small>
                     </div>
-
-                    <?php do_action('aam_edit_role_ui_action'); ?>
+                    <?php do_action('aam_ui_edit_role_form_action'); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="edit-role-btn"><?php echo __('Update', AAM_KEY); ?></button>

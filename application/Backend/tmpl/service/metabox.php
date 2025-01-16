@@ -126,7 +126,7 @@
                                 <?php echo apply_filters(
                                     'aam_ui_metaboxes_screen_mode_filter',
                                     '',
-                                    AAM_Backend_AccessLevel::get_instance()->metaboxes(),
+                                    AAM_Backend_AccessLevel::get_instance(),
                                     $screen_id
                                 ); ?>
                             </div>

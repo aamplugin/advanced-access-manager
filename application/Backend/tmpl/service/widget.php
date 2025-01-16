@@ -132,7 +132,7 @@
                                 <?php echo apply_filters(
                                     'aam_ui_widgets_screen_mode_filter',
                                     '',
-                                    AAM_Backend_AccessLevel::get_instance()->widgets(),
+                                    AAM_Backend_AccessLevel::get_instance(),
                                     $area
                                 ); ?>
                             </div>

@@ -90,32 +90,36 @@
              *
              * @param {type} exclude
              */
-            function LoadRolesDropdown(exclude) {
+            function LoadRolesDropdown(exclude, cb = null) {
                 // Display the indicator that the list of roles is loading
-                $('.inherit-role-list').html(
+                $('.aam-role-list').html(
                     '<option value="">' + getAAM().__('Loading...') + '</option>'
                 );
 
                 GetRoles((response) => {
-                    $('.inherit-role-list').html(
+                    $('.aam-role-list').html(
                         '<option value="">' + getAAM().__('No role') + '</option>'
                     );
 
                     for (var i in response) {
                         if (exclude !== response[i].slug) {
-                            $('.inherit-role-list').append(
+                            $('.aam-role-list').append(
                                 '<option value="' + response[i].slug + '">' + response[i].name + '</option>'
                             );
                         }
                     }
 
                     if ($.aamEditRole) {
-                        $('.inherit-role-list').val($.aamEditRole[0]);
+                        $('.aam-role-list').val($.aamEditRole[0]);
                     }
 
                     getAAM().triggerHook('post-get-role-list', {
                         list: response
                     });
+
+                    if (cb) {
+                        cb();
+                    }
 
                     //TODO - Rewrite JavaScript to support $.aam
                     $.aamEditRole = null;
@@ -192,34 +196,26 @@
                                 $.each(json, (_, role) => {
                                     const actions = [];
 
-                                    if (getLocal().ui === 'principal' && policyId) {
-                                        if (role.applied_policy_ids.includes(policyId)) {
-                                            actions.push('detach');
-                                        } else {
-                                            actions.push('attach');
-                                        }
+                                    if (role.permissions.includes('allow_manage')) {
+                                        actions.push('manage');
+                                    }
+
+                                    if (role.permissions.includes('allow_edit')) {
+                                        actions.push('edit');
                                     } else {
-                                        if (role.permissions.includes('allow_manage')) {
-                                            actions.push('manage');
-                                        }
+                                        actions.push('no-edit');
+                                    }
 
-                                        if (role.permissions.includes('allow_edit')) {
-                                            actions.push('edit');
-                                        } else {
-                                            actions.push('no-edit');
-                                        }
+                                    if (role.permissions.includes('allow_delete')) {
+                                        actions.push('delete');
+                                    } else {
+                                        actions.push('no-delete');
+                                    }
 
-                                        if (role.permissions.includes('allow_delete')) {
-                                            actions.push('delete');
-                                        } else {
-                                            actions.push('no-delete');
-                                        }
-
-                                        if (role.permissions.includes('allow_clone')) {
-                                            actions.push('clone');
-                                        } else {
-                                            actions.push('no-clone');
-                                        }
+                                    if (role.permissions.includes('allow_clone')) {
+                                        actions.push('clone');
+                                    } else {
+                                        actions.push('no-clone');
                                     }
 
                                     data.push([
@@ -281,7 +277,7 @@
                                     getAAM().applyFilters(
                                         'role-subtitle',
                                         getAAM().__('Users') + ': <b>' + parseInt(data[1]) + '</b>; Slug: <b>' + data[0] + '</b>',
-                                        data
+                                        data[5]
                                     )
                                 )
                             );
@@ -349,18 +345,21 @@
                                                 $('#edit-role-slug').val(data[0]);
                                                 $('#edit-role-modal').modal('show');
 
-                                                LoadRolesDropdown(data[0]);
-
                                                 if (data[1] > 0) {
                                                     $('#edit-role-slug').prop('disabled', true);
                                                 } else {
                                                     $('#edit-role-slug').prop('disabled', false);
                                                 }
 
+                                                LoadRolesDropdown(data[0], () => {
+                                                    getAAM().triggerHook(
+                                                        'edit-role-modal',
+                                                        data[5]
+                                                    );
+                                                });
+
                                                 //TODO - Rewrite JavaScript to support $.aam
                                                 $.aamEditRole = data;
-
-                                                getAAM().triggerHook('edit-role-modal', data);
                                             }).attr({
                                                 'data-toggle': "tooltip",
                                                 'title': getAAM().__('Edit role')
@@ -929,16 +928,12 @@
                             'class': 'user-filter form-control',
                             'id': 'user-list-filter'
                         })
-                            .html('<option value="">' + getAAM().__('Loading roles...') + '</option>')
+                            .html('<option value="">' + getAAM().__('Loading...') + '</option>')
                             .bind('change', function () {
                                 $('#user-list').DataTable().ajax.reload();
                             });
 
                         $('.dataTables_filter', '#user-list_wrapper').append(filter);
-
-                        $('.inherit-role-list').html(
-                            '<option value="">' + getAAM().__('Loading...') + '</option>'
-                        );
 
                         GetRoles((response) => {
                             $('#user-list-filter').html(

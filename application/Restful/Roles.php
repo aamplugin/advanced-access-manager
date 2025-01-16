@@ -27,8 +27,8 @@ class AAM_Restful_Roles
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()
@@ -109,13 +109,6 @@ class AAM_Restful_Roles
                         'items'       => array(
                             'type' => 'string'
                         )
-                    ),
-                    'parent_role' => array(
-                        'description' => 'Parent role slug (aka ID)',
-                        'type'        => 'string',
-                        'validate_callback' => function ($value) {
-                            return $this->_validate_role_accessibility($value);
-                        }
                     ),
                     'clone_role' => array(
                         'description' => 'Clone role slug (aka ID)',
@@ -204,8 +197,8 @@ class AAM_Restful_Roles
      * Get list of all editable roles
      *
      * @param WP_REST_Request $request
-     *
      * @return WP_REST_Response
+     *
      * @version 7.0.0
      */
     public function get_role_list(WP_REST_Request $request)
@@ -232,8 +225,8 @@ class AAM_Restful_Roles
      * Get specific role by slug
      *
      * @param WP_REST_Request $request
-     *
      * @return WP_REST_Response
+     *
      * @version 7.0.0
      */
     public function get_role(WP_REST_Request $request)
@@ -254,8 +247,8 @@ class AAM_Restful_Roles
      * Create new role
      *
      * @param WP_REST_Request $request
-     *
      * @return WP_REST_Response
+     *
      * @version 7.0.0
      */
     public function create_role(WP_REST_Request $request)
@@ -412,6 +405,8 @@ class AAM_Restful_Roles
      * @param array                         $fields
      *
      * @return array
+     * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_output($role, $fields = [])
