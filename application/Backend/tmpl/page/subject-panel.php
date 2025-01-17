@@ -1,11 +1,4 @@
-<?php
-    /**
-     * @since 6.2.0 Changed the size of the "Role Name" column to 60%
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.2.0
-     * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="metabox-holder main-metabox">

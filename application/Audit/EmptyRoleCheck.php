@@ -11,7 +11,7 @@
  * Detect empty roles
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_EmptyRoleCheck
 {
@@ -25,7 +25,8 @@ class AAM_Audit_EmptyRoleCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -41,7 +42,7 @@ class AAM_Audit_EmptyRoleCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -63,7 +64,8 @@ class AAM_Audit_EmptyRoleCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _detect_empty_roles($db_roles)
     {
@@ -76,7 +78,7 @@ class AAM_Audit_EmptyRoleCheck
                     translate_user_role(
                         !empty($role['name']) ? $role['name'] : $role_id
                     )
-                )));
+                ), 'EMPTY_ROLE'));
             }
         }
 

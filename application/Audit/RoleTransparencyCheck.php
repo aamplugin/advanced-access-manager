@@ -11,7 +11,7 @@
  * Check if all registered roles are transparent to the admin user
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_RoleTransparencyCheck
 {
@@ -25,7 +25,8 @@ class AAM_Audit_RoleTransparencyCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -41,7 +42,7 @@ class AAM_Audit_RoleTransparencyCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -63,7 +64,8 @@ class AAM_Audit_RoleTransparencyCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _validate_roles_transparency($db_roles)
     {
@@ -86,7 +88,7 @@ class AAM_Audit_RoleTransparencyCheck
             array_push($response, self::_format_issue(sprintf(
                 __('Detected hidden role(s): %s', AAM_KEY),
                 implode(', ', $diff_roles)
-            )));
+            ), 'HIDDEN_ROLE'));
         }
 
         return $response;

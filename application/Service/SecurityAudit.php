@@ -18,6 +18,31 @@ class AAM_Service_SecurityAudit
     use AAM_Core_Contract_ServiceTrait;
 
     /**
+     * Security audit result
+     *
+     * @version 7.0.0
+     */
+    const DB_OPTION = 'aam_security_audit_report';
+
+    /**
+     * Security audit last score
+     *
+     * @version 7.0.0
+     */
+    const DB_SCOPE_OPTION = 'aam_security_audit_score';
+
+    /**
+     * Issue weights
+     *
+     * @version 7.0.0
+     */
+    const ISSUE_WEIGHT = [
+        'critical' => 10,
+        'warning'  => 5,
+        'notice'   => 2
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -34,6 +59,110 @@ class AAM_Service_SecurityAudit
         // Keep the support RESTful service enabled at all times because it is used
         // by issue reporting feature as well
         AAM_Restful_SecurityAudit::bootstrap();
+    }
+
+    /**
+     * Reset last audit results
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset()
+    {
+        return AAM::api()->db->delete(self::DB_OPTION);
+    }
+
+    /**
+     * Read last audit report
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function read()
+    {
+        return AAM::api()->db->read(self::DB_OPTION, []);
+    }
+
+    /**
+     * Execute security audit check
+     *
+     * @param string $check
+     * @param bool   $reset
+     *
+     * @return void
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function execute($check, $reset = false)
+    {
+        $checks = $this->get_steps();
+        $report = [];
+
+        if ($reset) {
+            $this->reset();
+        } else {
+            $report = $this->read();
+        }
+
+        if (array_key_exists($check, $report)) {
+            $current_result = $report[$check];
+        } else {
+            $current_result = [];
+        }
+
+        if (array_key_exists($check, $checks)) {
+            // Exclude already captures list of issues
+            $result = call_user_func(
+                $checks[$check]['executor'] . '::run',
+                array_filter($current_result, function($k) {
+                    return $k !== 'issues';
+                }, ARRAY_FILTER_USE_KEY)
+            );
+
+            // Merge the array of issues first
+            $issues = [];
+
+            if (isset($current_result['issues'])) {
+                $issues = $current_result['issues'];
+            }
+
+            if (isset($result['issues'])) {
+                $issues = array_merge($issues, $result['issues']);
+            }
+
+            // Storing results in db
+            $report[$check]           = array_merge($current_result, $result);
+            $report[$check]['issues'] = $issues;
+
+            AAM::api()->db->write(self::DB_OPTION, $report, false);
+
+            // Recalculate the score
+            $score    = 100;
+            $detected = [];
+
+            foreach($report as $check => $results) {
+                if (isset($results['issues'])) {
+                    foreach($results['issues'] as $issue) {
+                        $detected[$issue['code']] = $issue['type'];
+                    }
+                }
+            }
+
+            foreach($detected as $type) {
+                $score -= self::ISSUE_WEIGHT[$type];
+            }
+
+            AAM::api()->db->write(
+                self::DB_SCOPE_OPTION, $score > 0 ? $score : 0
+            );
+        }
+
+        return $report[$check];
     }
 
     /**
@@ -164,9 +293,46 @@ class AAM_Service_SecurityAudit
      */
     public function has_report()
     {
-        $report = AAM::api()->db->read('aam_security_audit_result');
+        $report = AAM::api()->db->read(self::DB_SCOPE_OPTION);
 
         return !empty($report);
+    }
+
+    /**
+     * Read the latest score
+     *
+     * @return int|null
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_score()
+    {
+        return AAM::api()->db->read(self::DB_SCOPE_OPTION);
+    }
+
+    /**
+     * Get score grade
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_score_grade()
+    {
+        $score  = $this->get_score();
+        $result = __('Excellent', AAM_KEY);
+
+        if (empty($score)) {
+            $result = '';
+        } elseif ($score < 75) {
+            $result = __('Poor', AAM_KEY);
+        } elseif ($score <= 90) {
+            $result = __('Moderate', AAM_KEY);
+        }
+
+        return $result;
     }
 
 }

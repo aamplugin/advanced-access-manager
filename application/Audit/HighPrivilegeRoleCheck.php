@@ -11,7 +11,7 @@
  * Check for the high privilege roles
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_HighPrivilegeRoleCheck
 {
@@ -21,16 +21,16 @@ class AAM_Audit_HighPrivilegeRoleCheck
     /**
      * List of roles that are allowed to be high-privileged
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const WHITELISTED_ROLES = [
-        'administrator'
+        'administrator', 'editor'
     ];
 
     /**
      * List of core capabilities that can cause significant damage to the site
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const HIGH_PRIVILEGE_CAPS = [
         'edit_themes',
@@ -41,6 +41,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
         'delete_users',
         'create_users',
         'unfiltered_upload',
+        'unfiltered_html',
         'update_plugins',
         'delete_plugins',
         'install_plugins',
@@ -58,7 +59,8 @@ class AAM_Audit_HighPrivilegeRoleCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -75,7 +77,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -97,7 +99,8 @@ class AAM_Audit_HighPrivilegeRoleCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _scan_for_high_privilege_roles($db_roles)
     {
@@ -120,7 +123,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
                             !empty($role['name']) ? $role['name'] : $role_id
                         ),
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_PRIVILEGE_ROLE_CAPS', 'critical'));
                 }
             }
         }

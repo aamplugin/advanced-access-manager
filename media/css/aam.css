@@ -2952,16 +2952,32 @@ ul.tab li a:focus,
   opacity: 0.6;
 }
 
-.ui-widget-content.ui-autocomplete {
-  background-color: #FFFFFF;
-  border: 1px solid #CCCCCC;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-  padding: 5px 10px 0 5px;
-  max-width: 100%;
+.gauge-wrapper {
+  height: 175px;
+  overflow: hidden;
+}
+.gauge-wrapper > .gauge-container {
+  margin: auto;
 }
 
-.ui-widget-content.ui-autocomplete li:hover,
-.ui-widget-content.ui-autocomplete:focus {
-  background-color: #FAFAFA;
+.gauge-container {
+  width: 250px;
+  height: 150px;
+  display: block;
+}
+.gauge-container > .gauge .dial {
+  stroke: rgb(131, 127, 127, 0.4);
+  stroke-width: 9;
+  fill: rgba(0,0,0,0);
+}
+.gauge-container > .gauge .value {
+  stroke: rgb(131, 127, 127);
+  stroke-width: 12;
+  fill: rgba(0,0,0,0);
+}
+.gauge-container > .gauge .value-text {
+  fill: rgba(131, 127, 127);
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 1em;
 }

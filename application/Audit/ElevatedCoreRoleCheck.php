@@ -11,7 +11,7 @@
  * Detect WordPress core roles that got elevated access
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_ElevatedCoreRoleCheck
 {
@@ -21,7 +21,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
     /**
      * WordPress core roles to scan
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const TARGETING_CORE_ROLES = [
         'editor' => [
@@ -104,7 +104,8 @@ class AAM_Audit_ElevatedCoreRoleCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -122,7 +123,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -144,7 +145,8 @@ class AAM_Audit_ElevatedCoreRoleCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _detect_elevated_core_roles($db_roles)
     {
@@ -170,7 +172,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
                             __('Detected WordPress core role "%s" with elevated capabilities: %s', AAM_KEY),
                             translate_user_role($role['name']),
                             implode(', ', $diff_caps)
-                        ), 'warning')
+                        ), 'ELEVATED_ROLE_CAPS', 'warning')
                     );
                 }
             }

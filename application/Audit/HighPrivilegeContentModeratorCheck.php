@@ -11,7 +11,7 @@
  * Check for the high privilege roles
  *
  * @package AAM
- * @version 6.9.43
+ * @version 7.0.0
  */
 class AAM_Audit_HighPrivilegeContentModeratorCheck
 {
@@ -21,7 +21,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
     /**
      * List of roles that are allowed to be high-privileged
      *
-     * @version 6.9.43
+     * @version 7.0.0
      */
     const WHITELISTED_ROLES = [
         'administrator',
@@ -31,7 +31,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
     /**
      * List of core capabilities that can cause damage to the site's content
      *
-     * @version 6.9.43
+     * @version 7.0.0
      */
     const HIGH_PRIVILEGE_CAPS = [
         'manage_categories',
@@ -48,7 +48,8 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
      *
      * @access public
      * @static
-     * @version 6.9.43
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -65,7 +66,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -87,7 +88,8 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
      *
      * @access private
      * @static
-     * @version 6.9.43
+     *
+     * @version 7.0.0
      */
     private static function _scan_for_high_privilege_roles($db_roles)
     {
@@ -110,7 +112,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
                             !empty($role['name']) ? $role['name'] : $role_id
                         ),
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_CONTENT_MODERATION_ROLE_CAP', 'critical'));
                 }
             }
         }

@@ -11,7 +11,7 @@
  * Role integrity audit check
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_RoleIntegrityCheck
 {
@@ -21,7 +21,7 @@ class AAM_Audit_RoleIntegrityCheck
     /**
      * Default collection of roles & capabilities
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const DEFAULT_STATE = [
         'administrator' => [
@@ -170,7 +170,8 @@ class AAM_Audit_RoleIntegrityCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -192,7 +193,7 @@ class AAM_Audit_RoleIntegrityCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -214,7 +215,8 @@ class AAM_Audit_RoleIntegrityCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _validate_core_role_existence($db_roles)
     {
@@ -231,7 +233,7 @@ class AAM_Audit_RoleIntegrityCheck
                     ', ',
                     array_map('translate_user_role', $diff_roles)
                 )
-            ), 'warning'));
+            ), 'MISSING_ROLE', 'warning'));
         }
 
         return $response;
@@ -246,7 +248,8 @@ class AAM_Audit_RoleIntegrityCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _validate_core_role_capabilities($db_roles)
     {
@@ -268,7 +271,7 @@ class AAM_Audit_RoleIntegrityCheck
                         __('Detected missing WordPress core capabilities for role "%s": %s', AAM_KEY),
                         translate_user_role($role['name']),
                         implode(', ', $diff_caps)
-                    ), 'warning'));
+                    ), 'MISSING_CAP', 'warning'));
                 }
             }
         }

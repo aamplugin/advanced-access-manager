@@ -11,7 +11,7 @@
  * Check for the high privilege users
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_HighPrivilegeOrElevatedUserCheck
 {
@@ -21,14 +21,14 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     /**
      * Maximum number of users to iterate with one execution
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
-    const ITERATION_LIMIT = 500;
+    const ITERATION_LIMIT = 2000;
 
     /**
      * List of core capabilities that can cause significant damage to the site
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const HIGH_PRIVILEGE_CAPS = [
         'edit_themes',
@@ -39,6 +39,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         'delete_users',
         'create_users',
         'unfiltered_upload',
+        'unfiltered_html',
         'update_plugins',
         'delete_plugins',
         'install_plugins',
@@ -58,12 +59,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run($params = [])
     {
-        $issues   = [];
-        $response = array_merge([
+        $issues = [];
+        $result = array_merge([
             'is_completed' => false,
             'progress'     => 0,
             'offset'       => 0
@@ -73,24 +75,24 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             // Step #1. Let's determine how many users are on the site, but only if
             // it is the first iteration of the check and fetch the batch of users
             // for further processing
-            if ($response['progress'] === 0) {
+            if ($result['progress'] === 0) {
                 $user_list = AAM::api()->users->get_users([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID'
                 ]);
 
                 // Capture the total number of users
-                $response['total_count'] = AAM::api()->users->get_user_count();
+                $result['total_count'] = AAM::api()->users->get_user_count();
             } else {
                 $user_list = AAM::api()->users->get_users([
                     'number'  => self::ITERATION_LIMIT,
                     'orderby' => 'ID',
-                    'offset'  => $response['offset']
+                    'offset'  => $result['offset']
                 ]);
             }
 
             // Increment the offset and move on
-            $response['offset'] += self::ITERATION_LIMIT;
+            $result['offset'] += self::ITERATION_LIMIT;
 
             // Step #2. Analyze the batch and determine how many users have high
             // privilege access
@@ -100,30 +102,30 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             );
 
             // Step #3. Determining if we actually done with the scan
-            if ($response['total_count'] <= $response['offset']) {
-                $response['is_completed'] = true;
+            if ($result['total_count'] <= $result['offset']) {
+                $result['is_completed'] = true;
             } else {
-                $response['progress'] = $response['offset'] / $response['total_count'];
+                $result['progress'] = $result['offset'] / $result['total_count'];
             }
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
-            if (array_key_exists('issues', $response)) {
-                array_push($response['issues'], ...$issues);
+            if (array_key_exists('issues', $result)) {
+                array_push($result['issues'], ...$issues);
             } else {
-                $response['issues'] = $issues;
+                $result['issues'] = $issues;
             }
         }
 
         // Determine final status for the check
-        self::_determine_check_status($response);
+        self::_determine_check_status($result);
 
-        return $response;
+        return $result;
     }
 
     /**
@@ -135,7 +137,8 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _scan_for_high_privilege_users($user_list)
     {
@@ -159,7 +162,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                         $user->get_display_name(),
                         $user->ID,
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_PRIVILEGE_USER_CAPS', 'critical'));
                 }
 
                 // Detecting if user has elevated privileges as well
@@ -175,7 +178,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                         $user->get_display_name(),
                         $user->ID,
                         implode(', ', $elevated_caps)
-                    )));
+                    ), 'ELEVATED_USER_CAPS'));
                 }
             }
         }

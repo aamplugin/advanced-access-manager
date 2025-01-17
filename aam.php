@@ -271,6 +271,8 @@ class AAM
      */
     public static function uninstall()
     {
+        AAM_Service_Core::get_instance()->reset();
+
         // Trigger any uninstall hook that is registered by any extension
         do_action('aam-uninstall-action');
     }

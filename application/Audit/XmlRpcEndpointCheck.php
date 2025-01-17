@@ -11,7 +11,7 @@
  * Check if XML-RPC endpoint is enabled
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_XmlRpcEndpointCheck
 {
@@ -25,7 +25,8 @@ class AAM_Audit_XmlRpcEndpointCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -38,7 +39,7 @@ class AAM_Audit_XmlRpcEndpointCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -58,7 +59,8 @@ class AAM_Audit_XmlRpcEndpointCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _check_endpoint_accessability()
     {
@@ -71,7 +73,8 @@ class AAM_Audit_XmlRpcEndpointCheck
 
         if ($api_url_enabled) {
             array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users XML-RPC endpoint ', AAM_KEY)
+                __('Detected open to unauthenticated users XML-RPC endpoint', AAM_KEY),
+                'OPEN_XMLRPC_ENDPOINT'
             ));
         }
 
@@ -80,7 +83,9 @@ class AAM_Audit_XmlRpcEndpointCheck
 
         if ($api_enabled) {
             array_push($response, self::_format_issue(
-                __('The XML-RPC API is enabled', AAM_KEY), 'warning'
+                __('The XML-RPC API is enabled', AAM_KEY),
+                'ENABLED_XMLRPC',
+                'warning'
             ));
         }
 

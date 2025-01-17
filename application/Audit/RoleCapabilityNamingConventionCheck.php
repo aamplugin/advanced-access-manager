@@ -11,7 +11,7 @@
  * Check if roles and capabilities follow proper naming convention
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_RoleCapabilityNamingConventionCheck
 {
@@ -25,7 +25,8 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -41,7 +42,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -64,7 +65,8 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _validate_naming_convention($db_roles)
     {
@@ -75,7 +77,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
                 array_push($response, self::_format_issue(sprintf(
                     __('Detected role "%s" with incorrect identifier', AAM_KEY),
                     $role_id
-                )));
+                ), 'INCORRECT_ROLE_SLUG'));
             }
 
             foreach(array_keys($role['capabilities']) as $cap) {
@@ -84,7 +86,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
                         __('Detected incorrect capability "%s" for %s role', AAM_KEY),
                         $cap,
                         $role_id
-                    )));
+                    ), 'INCORRECT_CAP_SLUG'));
                 }
             }
         }

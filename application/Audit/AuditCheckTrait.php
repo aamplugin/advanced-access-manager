@@ -76,6 +76,7 @@ trait AAM_Audit_AuditCheckTrait
      * Format detected issue
      *
      * @param string $reason
+     * @param string $code
      * @param string $type
      *
      * @return array
@@ -85,10 +86,11 @@ trait AAM_Audit_AuditCheckTrait
      *
      * @version 7.0.0
      */
-    private static function _format_issue($reason, $type = 'notice')
+    private static function _format_issue($reason, $code, $type = 'notice')
     {
         return [
             'type'   => $type,
+            'code'   => $code,
             'reason' => $reason
         ];
     }

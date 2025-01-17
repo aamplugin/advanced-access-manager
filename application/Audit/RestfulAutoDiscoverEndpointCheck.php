@@ -11,7 +11,7 @@
  * Check if RESTful Auto-discovery endpoint is enabled
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_RestfulAutoDiscoverEndpointCheck
 {
@@ -25,7 +25,8 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -38,7 +39,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -58,7 +59,8 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _check_endpoint_accessability()
     {
@@ -67,7 +69,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         $visitor = AAM::api()->visitor();
 
         // Check if API route "/" is enabled
-        $api_route_enabled = !$visitor->api_routes()->is_denied('/');
+        $api_route_enabled = $visitor->api_routes()->is_allowed('/');
 
         // Additionally check if the same endpoint is restricted with URL Access
         // service
@@ -79,7 +81,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         if ($url_enabled && $api_route_enabled) {
             array_push($response, self::_format_issue(
                 __('Detected open to unauthenticated users RESTful auto-discover endpoint', AAM_KEY),
-                'warning'
+                'REST_OPEN_DISCOVER_ENDPOINT'
             ));
         }
 

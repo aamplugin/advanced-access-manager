@@ -366,7 +366,9 @@ class AAM_Service_Core
             AAM_Core_Migration::DB_OPTION,
             AAM_Framework_Utility_Config::DB_OPTION,
             AAM_Framework_Utility_Cache::DB_OPTION,
-            AAM_Service_Core::DB_OPTION
+            AAM_Service_Core::DB_OPTION,
+            AAM_Service_SecurityAudit::DB_OPTION,
+            AAM_Service_SecurityAudit::DB_SCOPE_OPTION
         );
 
         foreach($options as $option) {

@@ -46,6 +46,46 @@ if (defined('AAM_KEY')) {
                     </div>
                 <?php } ?>
 
+                <?php if (apply_filters('aam_security_scan_enabled_filter', false)) { ?>
+                <?php
+                    $score = AAM_Service_SecurityAudit::get_instance()->get_score();
+                    $grade = AAM_Service_SecurityAudit::get_instance()->get_score_grade()
+                ?>
+                <div class="metabox-holder shared-metabox">
+                    <div class="postbox" style="border:none !important;">
+                        <div class="panel-group" style="margin-bottom:0" id="security-score-block" role="tablist" aria-multiselectable="true">
+                            <div class="panel panel-default" style="border-radius: 0">
+                                <div class="panel-heading" role="tab" id="security-score-heading">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#security-score-block" href="#security-score" aria-controls="security-score" style="font-size: 2rem;">
+                                            <?php echo sprintf(
+                                                __('Your Security Score: %s %s', AAM_KEY),
+                                                empty($score) ? 'Unknown' : $score,
+                                                empty($grade) ? '' : "({$grade})"
+                                            ); ?>
+                                        </a>
+                                    </h4>
+                                </div>
+
+                                <div id="security-score" class="panel-collapse collapse" role="tabpanel" aria-labelledby="security-score-heading">
+                                    <div class="panel-body">
+                                        <?php if (!empty($score)) {  ?>
+                                        <div class="gauge-wrapper">
+                                            <div id="security_gauge" class="gauge-container" data-score="<?php echo esc_attr(AAM_Service_SecurityAudit::get_instance()->get_score()); ?>"></div>
+                                        </div>
+                                        <?php } else { ?>
+                                            <p class="aam-info"><?php echo __('Run first security scan to identify your website AAM security score', AAM_KEY); ?></p>
+                                        <?php } ?>
+
+                                        <a href="#" target="_blank" id="security_audit_tab" class="btn btn-primary btn-block">Learn More →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
+
                 <div class="metabox-holder shared-metabox">
                     <div class="postbox">
                         <div class="inside">
@@ -58,12 +98,6 @@ if (defined('AAM_KEY')) {
                                     <a href="#" title="Settings" data-type="settings" class="aam-area">
                                         <i class="icon-wrench"></i>
                                         <span><?php echo __('Settings', AAM_KEY); ?></span>
-                                    </a>
-                                <?php } ?>
-                                <?php if (apply_filters('aam_security_scan_enabled_filter', false)) { ?>
-                                    <a href="#" title="Security Scan" data-type="audit" class="aam-area">
-                                        <i class="icon-eye"></i>
-                                        <span><?php echo __('Security Scan', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_manage_addons')) { ?>
