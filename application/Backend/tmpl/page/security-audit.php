@@ -1,7 +1,5 @@
 <?php if (defined('AAM_KEY')) { ?>
     <div id="audit-content" class="audit-container">
-        <h1><?php echo __('Security Scan', AAM_KEY); ?></h1>
-
         <p class="aam-info">
             This automated security scan will conduct a series of checks to verify the integrity of your website's configurations and detect any potential elevated privileges for users and roles.
             Below is a list of all the steps included in the audit. You can expand each item to learn more about its purpose and importance and we strongly advice conducting the automated security audit periodically to catch any potential issues.<br/><br/>

@@ -2966,7 +2966,7 @@ ul.tab li a:focus,
   display: block;
 }
 .gauge-container > .gauge .dial {
-  stroke: rgb(131, 127, 127, 0.4);
+  stroke: rgb(233, 231, 231);
   stroke-width: 9;
   fill: rgba(0,0,0,0);
 }
@@ -2976,7 +2976,7 @@ ul.tab li a:focus,
   fill: rgba(0,0,0,0);
 }
 .gauge-container > .gauge .value-text {
-  fill: rgba(131, 127, 127);
+  fill: rgb(131, 127, 127);
   font-family: sans-serif;
   font-weight: bold;
   font-size: 1em;

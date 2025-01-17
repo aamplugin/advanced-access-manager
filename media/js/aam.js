@@ -88,8 +88,6 @@
                             result = '#8a6d3b';
                         }
 
-                        console.log(result);
-
                         return result;
                     }
                 });
