@@ -38,7 +38,7 @@ class AAM_Audit_EditableFileSystemCheck
             array_push($failure, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -70,6 +70,7 @@ class AAM_Audit_EditableFileSystemCheck
         ) {
             array_push($response, self::_format_issue(
                 __('Detected potentially writable file system', AAM_KEY),
+                'WRITABLE_FS',
                 'warning'
             ));
         }

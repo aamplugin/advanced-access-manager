@@ -83,7 +83,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -102,7 +102,6 @@ class AAM_Audit_HighPrivilegeUserCountCheck
      * @param array $db_roles
      *
      * @return array
-     *
      * @access private
      * @version 6.9.43
      */
@@ -188,14 +187,14 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Detected elevated number of users (%d) with administrator level privileges', AAM_KEY),
                 $sums['website']
-            ), 'critical'));
+            ), 'ELEVATED_ADMINS_COUNT', 'critical'));
         }
 
         if ($sums['content'] > $suggested_editors) {
             array_push($issues, self::_format_issue(sprintf(
                 __('Detected elevated number of users (%d) with high-privilege content moderation access', AAM_KEY),
                 $sums['content']
-            ), 'warning'));
+            ), 'ELEVATED_EDITORS_COUNT', 'warning'));
         }
 
         return $issues;

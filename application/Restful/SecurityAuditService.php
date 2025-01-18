@@ -90,59 +90,11 @@ class AAM_Restful_SecurityAuditService
      */
     public function run_step(WP_REST_Request $request)
     {
-        $response     = [];
-        $current_step = $request->get_param('step');
-        $should_reset = $request->get_param('reset');
-
         try {
-            if ($should_reset) {
-                AAM_Core_API::deleteOption('aam_security_audit_result');
-                $result = [];
-            } else {
-                $result = AAM_Core_API::getOption('aam_security_audit_result', []);
-            }
-
-            if (array_key_exists($current_step, $result)) {
-                $current_result = $result[$current_step];
-            } else {
-                $current_result = [];
-            }
-
-            if (!empty($current_result) && $current_result['is_completed']
-            ) {
-                $response = $current_result;
-            } else {
-                $checks = AAM_Service_SecurityAudit::bootstrap()->get_steps();
-
-                if (array_key_exists($current_step, $checks)) {
-                    // Exclude already captures list of issues
-                    $response = call_user_func(
-                        $checks[$current_step]['executor'] . '::run',
-                        array_filter($current_result, function($k) {
-                            return $k !== 'issues';
-                        }, ARRAY_FILTER_USE_KEY)
-                    );
-
-                    // Merge the array of issues first
-                    $issues = [];
-
-                    if (isset($current_result['issues'])) {
-                        $issues = $current_result['issues'];
-                    }
-
-                    if (isset($response['issues'])) {
-                        $issues = array_merge($issues, $response['issues']);
-                    }
-
-                    // Storing results in db
-                    $result[$current_step] = array_merge($current_result, $response);
-                    $result[$current_step]['issues'] = $issues;
-
-                    AAM_Core_API::updateOption(
-                        'aam_security_audit_result', $result, false
-                    );
-                }
-            }
+            $response = AAM_Service_SecurityAudit::bootstrap()->execute(
+                $request->get_param('step'),
+                $request->get_param('reset')
+            );
         } catch (Exception $ex) {
             $response = $this->_prepare_error_response($ex);
         }
@@ -190,12 +142,14 @@ class AAM_Restful_SecurityAuditService
      */
     private function _generate_csv_report()
     {
+        $service = AAM_Service_SecurityAudit::bootstrap();
+
         // Open output buffer for CSV content & set header
         $report = fopen('php://output', 'w');
         fputcsv($report, [ 'Issue', 'Type', 'Category' ]);
 
-        $data   = AAM_Core_API::getOption('aam_security_audit_result', []);
-        $checks = AAM_Service_SecurityAudit::bootstrap()->get_steps();
+        $data   = $service->read();
+        $checks = $service->get_steps();
 
         foreach($data as $check_id => $check_result) {
             $check = $checks[$check_id];
@@ -225,9 +179,10 @@ class AAM_Restful_SecurityAuditService
      */
     private function _generate_json_report()
     {
-        $report = [];
-        $data   = AAM_Core_API::getOption('aam_security_audit_result', []);
-        $checks = AAM_Service_SecurityAudit::bootstrap()->get_steps();
+        $report  = [];
+        $service = AAM_Service_SecurityAudit::bootstrap();
+        $data    = $service->read();
+        $checks  = $service->get_steps();
 
         foreach($data as $check_id => $check_result) {
             $check = $checks[$check_id];

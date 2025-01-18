@@ -122,7 +122,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -170,7 +170,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
                             __('Detected WordPress core role "%s" with elevated capabilities: %s', AAM_KEY),
                             translate_user_role($role['name']),
                             implode(', ', $diff_caps)
-                        ), 'warning')
+                        ), 'ELEVATED_ROLE_CAPS', 'warning')
                     );
                 }
             }

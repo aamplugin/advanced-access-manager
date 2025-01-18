@@ -41,6 +41,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
         'delete_users',
         'create_users',
         'unfiltered_upload',
+        'unfiltered_html',
         'update_plugins',
         'delete_plugins',
         'install_plugins',
@@ -75,7 +76,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -120,7 +121,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
                             !empty($role['name']) ? $role['name'] : $role_id
                         ),
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_PRIVILEGE_ROLE_CAPS', 'critical'));
                 }
             }
         }

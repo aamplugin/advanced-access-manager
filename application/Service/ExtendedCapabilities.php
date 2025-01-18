@@ -168,7 +168,7 @@ class AAM_Service_ExtendedCapabilities
             $flag = current_user_can('aam_show_screen_options');
         }
 
-        return $flag;
+        return AAM::isAAM() ? false : $flag;
     }
 
     /**

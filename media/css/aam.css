@@ -2977,3 +2977,33 @@ ul.tab li a:focus,
 .ui-widget-content.ui-autocomplete:focus {
   background-color: #FAFAFA;
 }
+
+.gauge-wrapper {
+  height: 175px;
+  overflow: hidden;
+}
+.gauge-wrapper > .gauge-container {
+  margin: auto;
+}
+
+.gauge-container {
+  width: 250px;
+  height: 150px;
+  display: block;
+}
+.gauge-container > .gauge .dial {
+  stroke: rgb(233, 231, 231);
+  stroke-width: 9;
+  fill: rgba(0,0,0,0);
+}
+.gauge-container > .gauge .value {
+  stroke: rgb(131, 127, 127);
+  stroke-width: 12;
+  fill: rgba(0,0,0,0);
+}
+.gauge-container > .gauge .value-text {
+  fill: rgb(131, 127, 127);
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 1em;
+}

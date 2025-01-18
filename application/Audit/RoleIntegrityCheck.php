@@ -97,7 +97,7 @@ class AAM_Audit_RoleIntegrityCheck
                 'manage_categories',
                 'manage_links',
                 'upload_files',
-                'unfiltered_html',
+                // 'unfiltered_html', - Disabling this as it is very dangerous cap
                 'edit_posts',
                 'edit_others_posts',
                 'edit_published_posts',
@@ -192,7 +192,7 @@ class AAM_Audit_RoleIntegrityCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -231,7 +231,7 @@ class AAM_Audit_RoleIntegrityCheck
                     ', ',
                     array_map('translate_user_role', $diff_roles)
                 )
-            ), 'warning'));
+            ), 'MISSING_ROLE', 'warning'));
         }
 
         return $response;
@@ -268,7 +268,7 @@ class AAM_Audit_RoleIntegrityCheck
                         __('Detected missing WordPress core capabilities for role "%s": %s', AAM_KEY),
                         translate_user_role($role['name']),
                         implode(', ', $diff_caps)
-                    ), 'warning'));
+                    ), 'MISSING_CAP', 'warning'));
                 }
             }
         }

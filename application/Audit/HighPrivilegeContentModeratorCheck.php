@@ -24,8 +24,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
      * @version 6.9.43
      */
     const WHITELISTED_ROLES = [
-        'administrator',
-        'editor'
+        'administrator', 'editor'
     ];
 
     /**
@@ -38,7 +37,8 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
         'unfiltered_html',
         'edit_published_pages',
         'delete_published_pages',
-        'unfiltered_upload'
+        'unfiltered_upload',
+        'unfiltered_html'
     ];
 
     /**
@@ -65,7 +65,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -110,7 +110,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
                             !empty($role['name']) ? $role['name'] : $role_id
                         ),
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_CONTENT_MODERATION_ROLE_CAP', 'critical'));
                 }
             }
         }

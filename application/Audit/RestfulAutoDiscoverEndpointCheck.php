@@ -38,7 +38,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -84,7 +84,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         if ($url_enabled && $api_route_enabled) {
             array_push($response, self::_format_issue(
                 __('Detected open to unauthenticated users RESTful auto-discover endpoint', AAM_KEY),
-                'warning'
+                'REST_OPEN_DISCOVER_ENDPOINT'
             ));
         }
 

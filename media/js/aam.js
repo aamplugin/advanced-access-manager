@@ -66,6 +66,40 @@
     function UI() {
 
         /**
+         * Security score tab
+         */
+        (function($) {
+            if ($('#security_gauge').length) {
+                Gauge(document.getElementById('security_gauge'), {
+                    min: 0,
+                    max: 100,
+                    dialStartAngle: 180,
+                    dialEndAngle: 0,
+                    value: $('#security_gauge').data('score'),
+                    label: function(value) {
+                        return value;
+                    },
+                    color: function(value) {
+                        let result = '#3c763d';
+
+                        if(value < 75) {
+                            result = '#a94442';
+                        } else if(value <= 90) {
+                            result = '#8a6d3b';
+                        }
+
+                        return result;
+                    }
+                });
+            }
+
+            $('#security_audit_tab').bind('click', function () {
+                $('.aam-area').removeClass('text-danger');
+                getAAM().fetchContent('audit');
+            });
+        })(jQuery);
+
+        /**
          * Role List Interface
          *
          * @param {jQuery} $

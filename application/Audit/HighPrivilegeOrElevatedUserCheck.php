@@ -23,7 +23,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
      *
      * @version 6.9.40
      */
-    const ITERATION_LIMIT = 500;
+    const ITERATION_LIMIT = 2000;
 
     /**
      * List of core capabilities that can cause significant damage to the site
@@ -39,6 +39,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         'delete_users',
         'create_users',
         'unfiltered_upload',
+        'unfiltered_html',
         'update_plugins',
         'delete_plugins',
         'install_plugins',
@@ -113,7 +114,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -163,7 +164,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                         $user['display_name'],
                         $user['id'],
                         implode(', ', $matched)
-                    ), 'critical'));
+                    ), 'HIGH_PRIVILEGE_USER_CAPS', 'critical'));
                 }
 
                 // Detecting if user has elevated privileges as well
@@ -179,7 +180,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                         $user['display_name'],
                         $user['id'],
                         implode(', ', $elevated_caps)
-                    )));
+                    ), 'ELEVATED_USER_CAPS'));
                 }
             }
         }

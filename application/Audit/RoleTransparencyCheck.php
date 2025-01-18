@@ -41,7 +41,7 @@ class AAM_Audit_RoleTransparencyCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -86,7 +86,7 @@ class AAM_Audit_RoleTransparencyCheck
             array_push($response, self::_format_issue(sprintf(
                 __('Detected hidden role(s): %s', AAM_KEY),
                 implode(', ', $diff_roles)
-            )));
+            ), 'HIDDEN_ROLE'));
         }
 
         return $response;

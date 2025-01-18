@@ -25,6 +25,13 @@
 
     <div class="wrap">
         <div class="row">
+            <div class="col-xs-12">
+                <p class="aam-notification text-center text-larger">
+                    <strong>AAM version 7 is coming soon!</strong> Please check <a href="https://aamportal.com/announcement/aam7" target="_blank">this article for details</a>.
+                </p>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-xs-12 col-md-8">
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/current-subject.php'); ?>
 
@@ -40,9 +47,6 @@
             </div>
 
             <div class="col-xs-12 col-md-4 aam-sidebar">
-                <p class="aam-notification">
-                    <strong>AAM version 7 is coming soon!</strong> Please check <a href="https://aamportal.com/announcement/aam7" target="_blank">this article for details</a>.
-                </p>
                 <?php if (AAM_Core_Console::count() && current_user_can('aam_show_notifications')) { ?>
                     <div class="metabox-holder shared-metabox aam-notification-metabox">
                         <div class="postbox">
@@ -63,6 +67,46 @@
                     </div>
                 <?php } ?>
 
+                <?php if (AAM_Service_SecurityAudit::bootstrap()->is_enabled()) { ?>
+                <?php
+                    $score = AAM_Service_SecurityAudit::bootstrap()->get_score();
+                    $grade = AAM_Service_SecurityAudit::bootstrap()->get_score_grade()
+                ?>
+                <div class="metabox-holder shared-metabox">
+                    <div class="postbox" style="border:none !important;">
+                        <div class="panel-group" style="margin-bottom:0" id="security-score-block" role="tablist" aria-multiselectable="true">
+                            <div class="panel panel-default" style="border-radius: 0">
+                                <div class="panel-heading" role="tab" id="security-score-heading">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#security-score-block" href="#security-score" aria-controls="security-score" style="font-size: 2rem;">
+                                            <?php echo sprintf(
+                                                __('AAM Security Score: %s %s', AAM_KEY),
+                                                empty($score) ? 'Unknown' : $score,
+                                                empty($grade) ? '' : "({$grade})"
+                                            ); ?>
+                                        </a>
+                                    </h4>
+                                </div>
+
+                                <div id="security-score" class="panel-collapse collapse" role="tabpanel" aria-labelledby="security-score-heading">
+                                    <div class="panel-body">
+                                        <?php if (!empty($score)) {  ?>
+                                        <div class="gauge-wrapper">
+                                            <div id="security_gauge" class="gauge-container" data-score="<?php echo esc_attr($score); ?>"></div>
+                                        </div>
+                                        <?php } else { ?>
+                                            <p class="aam-info"><?php echo __('Run first security scan to identify your website AAM security score', AAM_KEY); ?></p>
+                                        <?php } ?>
+
+                                        <a href="#" target="_blank" id="security_audit_tab" class="btn btn-primary btn-block">Learn More →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
+
                 <?php do_action('aam_top_right_column_action'); ?>
 
                 <div class="metabox-holder shared-metabox">
@@ -77,12 +121,6 @@
                                     <a href="#" title="Settings" data-type="settings" class="aam-area">
                                         <i class="icon-wrench"></i>
                                         <span><?php echo __('Settings', AAM_KEY); ?></span>
-                                    </a>
-                                <?php } ?>
-                                <?php if (AAM_Service_SecurityAudit::bootstrap()->is_enabled()) { ?>
-                                    <a href="#" title="Security Scan" data-type="audit" class="aam-area">
-                                        <i class="icon-eye"></i>
-                                        <span><?php echo __('Security Scan', AAM_KEY); ?></span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_manage_addons')) { ?>

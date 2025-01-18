@@ -36,7 +36,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
             $db_roles = self::_read_role_key_option();
 
             // The core user_roles structure is intact and not deviated from
-            // th WordPress core original standard
+            // the WordPress core original standard
             array_push(
                 $issues,
                 ...self::_validate_core_option_structure($db_roles)
@@ -45,7 +45,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
             array_push($issues, self::_format_issue(sprintf(
                 __('Unexpected application error: %s', AAM_KEY),
                 $e->getMessage()
-            ), 'error'));
+            ), 'APPLICATION_ERROR', 'error'));
         }
 
         if (count($issues) > 0) {
@@ -79,7 +79,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
                 array_push($response, self::_format_issue(sprintf(
                     __('Detected role "%s" with invalid identifier', AAM_KEY),
                     $role_id
-                ), 'warning'));
+                ), 'INVALID_ROLE_SLUG', 'warning'));
             }
 
             // Step #2. Verifying that each role has only proper properties & no core
@@ -93,7 +93,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
                     __('Detected role "%s" with invalid properties: %s', AAM_KEY),
                     $role_id,
                     implode(', ', $invalid_props)
-                )));
+                ), 'ILLEGAL_ROLE_PROPERTY'));
             }
 
             if (!empty($missing_props)) {
@@ -101,7 +101,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
                     __('Detected role "%s" with missing mandatory properties: %s', AAM_KEY),
                     $role_id,
                     implode(', ', $missing_props)
-                ), 'critical'));
+                ), 'CORRUPTED_ROLE_DATA', 'critical'));
             }
         }
 
