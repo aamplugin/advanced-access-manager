@@ -97,7 +97,7 @@ class AAM_Audit_RoleIntegrityCheck
                 'manage_categories',
                 'manage_links',
                 'upload_files',
-                'unfiltered_html',
+                // 'unfiltered_html', - Disabling this as it is very dangerous cap
                 'edit_posts',
                 'edit_others_posts',
                 'edit_published_posts',

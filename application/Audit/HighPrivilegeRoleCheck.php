@@ -24,7 +24,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
      * @version 7.0.0
      */
     const WHITELISTED_ROLES = [
-        'administrator', 'editor'
+        'administrator'
     ];
 
     /**
