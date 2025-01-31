@@ -1,2 +1,2 @@
 #!/bin/bash
-/Applications/MAMP/bin/php/php8.2.0/bin/php phpunit
+/Applications/MAMP/bin/php/php8.2.0/bin/php phpunit --testsuite="Rest"

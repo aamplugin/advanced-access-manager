@@ -155,9 +155,11 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
         try {
             $user   = $this->_get_access_level();
             $config = array_merge([
-                'ttl' => $this->config->get('service.jwt.expires_in', '+24 hours'),
                 'revocable'   => true,
-                'refreshable' => false
+                'refreshable' => false,
+                'ttl'         => $this->config->get(
+                    'service.jwt.expires_in', '+24 hours'
+                )
             ], $settings);
 
 

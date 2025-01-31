@@ -308,7 +308,6 @@ final class AAM_Framework_Manager
             // Parse the incoming context and determine correct access level
             if (empty($acl)) { // Use default access level
                 $acl = $this->_default_access_level;
-                $settings['default_access_level'] = true;
             } elseif (is_string($acl)) {
                 $acl = $this->_string_to_access_level($acl);
             }

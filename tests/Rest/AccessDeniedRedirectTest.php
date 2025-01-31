@@ -11,9 +11,7 @@ declare(strict_types=1);
 
 namespace AAM\UnitTest\Service;
 
-use AAM,
-    WP_REST_Request,
-    AAM\UnitTest\Utility\TestCase;
+use AAM\UnitTest\Utility\TestCase;
 
 /**
  * Access Denied Redirect RESTful API test
@@ -21,10 +19,15 @@ use AAM,
 final class AccessDeniedRedirectTest extends TestCase
 {
 
+    /**
+     * Test get redirects endpoint
+     *
+     * @return void
+     */
     public function testGetRedirect()
     {
         $server = rest_get_server();
-        $result = $server->dispatch($this->_prepareRequest(
+        $result = $server->dispatch($this->prepareRestRequest(
             'GET',
             '/aam/v2/service/redirect/access-denied',
             [
@@ -38,32 +41,96 @@ final class AccessDeniedRedirectTest extends TestCase
 
         $this->assertEquals(200, $result->get_status());
         $this->assertEquals([ 'type' => 'default' ], $result->get_data());
+
+        // Test that we can get all areas at once
+        $result = $server->dispatch($this->prepareRestRequest(
+            'GET',
+            '/aam/v2/service/redirect/access-denied',
+            [
+                'query_params' => [
+                    'access_level' => 'role',
+                    'role_id'      => 'subscriber'
+                ]
+            ]
+        ));
+
+        $this->assertEquals(200, $result->get_status());
+        $this->assertEquals([
+            'frontend' => [ 'type' => 'default' ],
+            'backend'  => [ 'type' => 'default' ],
+            'api'      => [ 'type' => 'default' ],
+        ], $result->get_data());
     }
 
     /**
-     * Undocumented function
+     * Test set redirect
      *
-     * @param [type] $method
-     * @param [type] $endpoint
-     * @param array $data
      * @return void
      */
-    private function _prepareRequest($method, $endpoint, $data = [])
+    public function testSetRedirect()
     {
-        // Resetting user to unauthorized. User will be re-authorized with while
-        // dispatching the request
-        wp_set_current_user(0);
+        $page_a = $this->createPost([ 'post_type' => 'page' ]);
+        $server = rest_get_server();
+        $result = $server->dispatch($this->prepareRestRequest(
+            'POST',
+            '/aam/v2/service/redirect/access-denied',
+            [
+                'query_params' => [
+                    'access_level' => 'role',
+                    'role_id'      => 'subscriber'
+                ],
+                'post_params' => [
+                    'area'             => 'frontend',
+                    'type'             => 'page_redirect',
+                    'redirect_page_id' => $page_a
+                ]
+            ]
+        ));
 
-        $user_a  = $this->createUser([ 'role' => 'administrator' ]);
-        $jwt     = AAM::api()->jwts('user:' . $user_a)->issue();
-        $request = new WP_REST_Request($method, $endpoint);
-
-        $request->add_header('Authorization', 'Bearer ' . $jwt['token']);
-
-        if (isset($data['query_params'])) {
-            $request->set_query_params($data['query_params']);
-        }
-
-        return $request;
+        $this->assertEquals(200, $result->get_status());
+        $this->assertEquals([
+            'type'             => 'page_redirect',
+            'redirect_page_id' => $page_a
+        ], $result->get_data());
     }
+
+    /**
+     * Test reset redirect
+     *
+     * @return void
+     */
+    public function testResetRedirect()
+    {
+        $server = rest_get_server();
+        $result = $server->dispatch($this->prepareRestRequest(
+            'DELETE',
+            '/aam/v2/service/redirect/access-denied',
+            [
+                'query_params' => [
+                    'access_level' => 'role',
+                    'role_id'      => 'subscriber',
+                    'area'         => 'backend'
+                ]
+            ]
+        ));
+
+        $this->assertEquals(200, $result->get_status());
+        $this->assertEquals([ 'success' => true ], $result->get_data());
+
+        // Test resetting for all areas
+        $result = $server->dispatch($this->prepareRestRequest(
+            'DELETE',
+            '/aam/v2/service/redirect/access-denied',
+            [
+                'query_params' => [
+                    'access_level' => 'role',
+                    'role_id'      => 'subscriber'
+                ]
+            ]
+        ));
+
+        $this->assertEquals(200, $result->get_status());
+        $this->assertEquals([ 'success' => true ], $result->get_data());
+    }
+
 }

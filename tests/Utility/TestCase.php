@@ -11,7 +11,9 @@ declare(strict_types=1);
 
 namespace AAM\UnitTest\Utility;
 
-use InvalidArgumentException,
+use AAM,
+    WP_REST_Request,
+    InvalidArgumentException,
     PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 /**
@@ -309,6 +311,38 @@ class TestCase extends PHPUnitTestCase
         ob_end_clean();
 
         return trim($content);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $method
+     * @param [type] $endpoint
+     * @param array $data
+     *
+     * @return void
+     */
+    public function prepareRestRequest($method, $endpoint, $data = [])
+    {
+        // Resetting user to unauthorized. User will be re-authorized with while
+        // dispatching the request
+        wp_set_current_user(0);
+
+        $user_a  = $this->createUser([ 'role' => 'administrator' ]);
+        $jwt     = AAM::api()->jwts('user:' . $user_a)->issue();
+        $request = new WP_REST_Request($method, $endpoint);
+
+        $request->add_header('Authorization', 'Bearer ' . $jwt['token']);
+
+        if (isset($data['query_params'])) {
+            $request->set_query_params($data['query_params']);
+        }
+
+        if (isset($data['post_params'])) {
+            $request->set_body_params($data['post_params']);
+        }
+
+        return $request;
     }
 
     /**

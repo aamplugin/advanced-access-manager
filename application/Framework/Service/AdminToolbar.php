@@ -81,7 +81,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Get existing menu by ID
      *
-     * @param string $item_id Menu item ID
+     * @param string $slug
      *
      * @return array
      * @access public
@@ -89,10 +89,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @version 7.0.0
      * @todo - Move to AAM_Service_AdminToolbar
      */
-    public function get_item($item_id)
+    public function get_item($slug)
     {
         try {
-            $result = $this->_find_item_by_id($item_id, $this->get_items());
+            $result = $this->_find_item_by_slug($slug, $this->get_items());
 
             if ($result === null) {
                 throw new OutOfRangeException('Admin toolbar item does not exist');
@@ -198,14 +198,14 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     /**
      * Check if toolbar item is denied
      *
-     * @param string $item_id
+     * @param string $slug
      *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      */
-    public function is_denied($item_id)
+    public function is_denied($slug)
     {
         $result = null;
 
@@ -213,7 +213,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             // Getting all the defined permissions
             $resource   = $this->_get_resource();
             $permission = $resource->get_permission(
-                $this->_normalize_resource_identifier($item_id),
+                $this->_normalize_resource_identifier($slug),
                 'list'
             );
 
@@ -226,7 +226,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             // parent item is restricted
             if (is_null($result)) {
                 // Find the item so we can check if it is a subitem
-                $item = $this->_find_item_by_id($item_id, $this->_get_raw_menu());
+                $item = $this->_find_item_by_slug($slug, $this->_get_raw_menu());
 
                 if (!empty($item['parent_id'])) {
                     $permission = $resource->get_permission(
@@ -245,7 +245,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             $result = apply_filters(
                 'aam_admin_toolbar_is_denied_filter',
                 $result,
-                $item_id,
+                $slug,
                 $resource
             );
 
@@ -329,9 +329,9 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     }
 
     /**
-     * Find item by ID
+     * Find item by slug
      *
-     * @param string $item_id
+     * @param string $slug
      * @param array  $items
      *
      * @return array|null
@@ -339,17 +339,17 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      *
      * @version 7.0.0
      */
-    private function _find_item_by_id($item_id, $items)
+    private function _find_item_by_slug($slug, $items)
     {
         $result = null;
 
         foreach($items as $item) {
-            if ($item['id'] === $item_id) {
+            if ($item['slug'] === $slug) {
                 $result = $item;
                 break;
             } elseif (isset($item['children'])) {
                 foreach($item['children'] as $child) {
-                    if ($child['id'] === $item_id) {
+                    if ($child['slug'] === $slug) {
                         $result = $child;
                         break;
                     }
@@ -398,10 +398,10 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
     private function _prepare_item($item)
     {
         $response = [
-            'id'            => $item['id'],
+            'slug'          => $item['slug'],
             'uri'           => $this->_prepare_item_uri($item['href']),
             'name'          => base64_decode($item['title']),
-            'is_restricted' => $this->is_denied($item['id'])
+            'is_restricted' => $this->is_denied($item['slug'])
         ];
 
         if (!empty($item['parent_id'])) {
@@ -501,7 +501,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
         // modifications
         foreach (json_decode(json_encode($items), true) as $branch) {
             array_push($response, array(
-                'id'       => $branch['id'],
+                'slug'     => $branch['id'],
                 'href'     => $branch['href'],
                 'title'    => $this->_prepare_item_title($branch),
                 'children' => $this->_get_branch_children($branch, $branch['id'])
@@ -534,7 +534,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             // them
             if (!in_array($type, [ 'container', 'group' ], true)) {
                 $children[] = array(
-                    'id'        => $child['id'],
+                    'slug'      => $child['id'],
                     'href'      => $child['href'],
                     'title'     => $this->_prepare_item_title($child),
                     // Persist the parent ID so we can easier identify if parent item

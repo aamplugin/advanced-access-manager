@@ -93,8 +93,8 @@ class AAM_Framework_AccessLevel_User implements AAM_Framework_AccessLevel_Interf
      * @param WP_User $core_instance
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function initialize($core_instance)

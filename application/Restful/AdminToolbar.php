@@ -38,12 +38,12 @@ class AAM_Restful_AdminToolbar
             ));
 
             // Get a menu
-            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => array($this, 'get_item'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
+                    'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
@@ -52,12 +52,12 @@ class AAM_Restful_AdminToolbar
             ));
 
             // Set or update a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array($this, 'update_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
+                    'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
@@ -72,12 +72,12 @@ class AAM_Restful_AdminToolbar
             ));
 
             // Delete a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<id>[\w\-]+)', array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => array($this, 'delete_item_permission'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'args'                => array(
-                    'id' => array(
+                    'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
@@ -122,15 +122,15 @@ class AAM_Restful_AdminToolbar
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_item(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $result  = $service->get_item($request->get_param('id'));
+            $result  = $service->get_item($request->get_param('slug'));
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }
@@ -144,15 +144,15 @@ class AAM_Restful_AdminToolbar
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update_item_permission(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
-            $item_id = $request->get_param('id');
+            $item_id = $request->get_param('slug');
 
             if ($request->get_param('effect') === 'allow') {
                 $result = $service->allow($item_id);
@@ -174,8 +174,8 @@ class AAM_Restful_AdminToolbar
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function delete_item_permission(WP_REST_Request $request)
@@ -183,7 +183,7 @@ class AAM_Restful_AdminToolbar
         try {
             $service = $this->_get_service($request);
             $result  = [
-                'success' => $service->reset($request->get_param('id'))
+                'success' => $service->reset($request->get_param('slug'))
             ];
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
@@ -198,8 +198,8 @@ class AAM_Restful_AdminToolbar
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_permissions(WP_REST_Request $request)
@@ -219,8 +219,8 @@ class AAM_Restful_AdminToolbar
      * Check if current user has access to the service
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function check_permissions()
@@ -235,8 +235,8 @@ class AAM_Restful_AdminToolbar
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_AdminToolbar
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)

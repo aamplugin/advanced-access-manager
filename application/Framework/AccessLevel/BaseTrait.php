@@ -143,27 +143,27 @@ trait AAM_Framework_AccessLevel_BaseTrait
      * Proxy methods to WordPress core instance
      *
      * @param string $name
-     * @param array  $arguments
+     * @param array  $args
      *
      * @return mixed
      * @access public
      *
      * @since 7.0.0
      */
-    public function __call($name, $arguments)
+    public function __call($name, $args)
     {
         $response = null;
 
         if (array_key_exists($name, $this->_extended_methods)) {
             $response = call_user_func_array(
-                $this->_extended_methods[$name], $arguments
+                $this->_extended_methods[$name], $args
             );
         } else {
             if (AAM_Framework_Manager::_()->has_service($name)) {
-                $response = AAM_Framework_Manager::_()->{$name}($this);
+                $response = AAM_Framework_Manager::_()->{$name}($this, ...$args);
             } elseif (is_object($this->_proxy_instance)) {
                 $response = call_user_func_array(
-                    array($this->_proxy_instance, $name), $arguments
+                    array($this->_proxy_instance, $name), $args
                 );
             } else {
                 throw new RuntimeException(
