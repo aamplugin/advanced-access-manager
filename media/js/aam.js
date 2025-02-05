@@ -6811,8 +6811,6 @@
                 });
             });
         })(jQuery);
-
-        getAAM().fetchContent('main'); //fetch default AAM content
     }
 
     /**
@@ -7168,7 +7166,7 @@
             $('#aam-subject-banner').addClass('hidden');
         }
 
-        //load the UI javascript support
+        // Load the UI javascript support
         UI();
 
         // Migration log downloader
@@ -7225,6 +7223,16 @@
                 getAAM().fetchContent($(this).data('type'));
             });
         });
+
+        const query = new URLSearchParams(location.search);
+
+        if (query.has('aam_page')) {
+            $('.aam-area').removeClass('text-danger');
+            $('.aam-area[data-type="' + query.get('aam_page') + '"]').addClass('text-danger');
+            getAAM().fetchContent(query.get('aam_page'));
+        } else {
+            getAAM().fetchContent('main'); // Fetch default AAM content
+        }
 
         // preventDefault for all links with # href
         $('#aam-container').delegate('a[href="#"]', 'click', function (event) {

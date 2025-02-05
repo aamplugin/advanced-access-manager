@@ -26,6 +26,15 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     const ITERATION_LIMIT = 2000;
 
     /**
+     * Maximum number of iterations before stop
+     *
+     * This is done to avoid overloading DB with tons of issues
+     *
+     * @version 6.9.46
+     */
+    const MAX_ITERATIONS = 5;
+
+    /**
      * List of core capabilities that can cause significant damage to the site
      *
      * @version 6.9.40
@@ -67,7 +76,12 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         $response = array_merge([
             'is_completed' => false,
             'progress'     => 0,
-            'offset'       => 0
+            'offset'       => 0,
+            // Calculate the maximum number of users we can check with this step
+            'max'          => AAM::api()->configs()->get_config(
+                'service.security_audit.max_users_to_check',
+                self::ITERATION_LIMIT * self::MAX_ITERATIONS
+            )
         ], $params);
 
         try {
@@ -85,6 +99,10 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 // Capture the total number of users
                 $response['total_count'] = $result['summary']['total_count'];
                 $user_list               = $result['list'];
+
+                // Determine if total number of users is higher than allowed number
+                // of users for check
+                $response['has_overflow'] = $response['total_count'] > $response['max'];
             } else {
                 $user_list = $service->get_user_list([
                     'number'      => self::ITERATION_LIMIT,
@@ -105,7 +123,9 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             );
 
             // Step #3. Determining if we actually done with the scan
-            if ($response['total_count'] <= $response['offset']) {
+            if ($response['total_count'] <= $response['offset']
+                || ($response['max'] !== -1 && $response['offset'] >= $response['max'])
+            ) {
                 $response['is_completed'] = true;
             } else {
                 $response['progress'] = $response['offset'] / $response['total_count'];
