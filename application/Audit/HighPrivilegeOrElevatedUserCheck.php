@@ -26,6 +26,15 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     const ITERATION_LIMIT = 2000;
 
     /**
+     * Maximum number of iterations before stop
+     *
+     * This is done to avoid overloading DB with tons of issues
+     *
+     * @version 7.0.0
+     */
+    const MAX_ITERATIONS = 5;
+
+    /**
      * List of core capabilities that can cause significant damage to the site
      *
      * @version 7.0.0
@@ -68,7 +77,12 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         $result = array_merge([
             'is_completed' => false,
             'progress'     => 0,
-            'offset'       => 0
+            'offset'       => 0,
+            // Calculate the maximum number of users we can check with this step
+            'max'          => AAM::api()->config->get(
+                'service.security_audit.max_users_to_check',
+                self::ITERATION_LIMIT * self::MAX_ITERATIONS
+            )
         ], $params);
 
         try {
@@ -83,6 +97,10 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
 
                 // Capture the total number of users
                 $result['total_count'] = AAM::api()->users->get_user_count();
+
+                // Determine if total number of users is higher than allowed number
+                // of users for check
+                $result['has_overflow'] = $result['total_count'] > $result['max'];
             } else {
                 $user_list = AAM::api()->users->get_users([
                     'number'  => self::ITERATION_LIMIT,
@@ -102,7 +120,9 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             );
 
             // Step #3. Determining if we actually done with the scan
-            if ($result['total_count'] <= $result['offset']) {
+            if ($result['total_count'] <= $result['offset']
+                || ($result['max'] !== -1 && $result['offset'] >= $result['max'])
+            ) {
                 $result['is_completed'] = true;
             } else {
                 $result['progress'] = $result['offset'] / $result['total_count'];

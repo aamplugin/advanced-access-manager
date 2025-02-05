@@ -56,6 +56,23 @@ class AAM_Service_SecurityAudit
             return AAM::api()->config->get(AAM::SERVICES[__CLASS__], true);
         });
 
+
+        // Register cron-job
+        if (wp_next_scheduled('aam_security_audit_cron') === false) {
+            wp_schedule_event(time(), 'daily', 'aam_security_audit_cron');
+        }
+
+        add_action('aam_security_audit_cron', function() {
+            $this->_run_audit();
+        });
+
+        add_action('aam_uninstall_action', function() {
+            wp_unschedule_event(
+                wp_next_scheduled('aam_security_audit_cron'),
+                'aam_security_audit_cron'
+            );
+        });
+
         // Keep the support RESTful service enabled at all times because it is used
         // by issue reporting feature as well
         AAM_Restful_SecurityAudit::bootstrap();
@@ -333,6 +350,31 @@ class AAM_Service_SecurityAudit
         }
 
         return $result;
+    }
+
+    /**
+     * This is a cron job that runs audit on a background
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _run_audit()
+    {
+        $first = true;
+        $steps = array_keys($this->get_steps());
+
+        do {
+            $result = $this->execute($steps[0], $first === true);
+
+            // No need to reset results anymore
+            $first = false;
+
+            if ($result['is_completed']) {
+                array_shift($steps);
+            }
+        } while (!empty($steps));
     }
 
 }

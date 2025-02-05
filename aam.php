@@ -274,7 +274,7 @@ class AAM
         AAM_Service_Core::get_instance()->reset();
 
         // Trigger any uninstall hook that is registered by any extension
-        do_action('aam-uninstall-action');
+        do_action('aam_uninstall_action');
     }
 
 }
