@@ -39,6 +39,19 @@ class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Int
     }
 
     /**
+     * Check if access level has specific capability
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_cap()
+    {
+        return false;
+    }
+
+    /**
      * @inheritDoc
      */
     public function get_display_name()

@@ -169,7 +169,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         $result = false;
         $parsed = wp_parse_url(call_user_func(
             function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower',
-            is_string($url) ? rtrim($url,  '/') : ''
+            is_string($url) ? htmlspecialchars_decode(rtrim($url,  '/')) : ''
         ));
 
         if ($parsed !== false) {

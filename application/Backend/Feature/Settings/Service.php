@@ -145,7 +145,9 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
 
         // Get each service status
         foreach ($response as &$item) {
-            $item['status'] = AAM::api()->config->get($item['setting'], true);
+            if (!array_key_exists('status', $item)) {
+                $item['status'] = AAM::api()->config->get($item['setting'], true);
+            }
         }
 
         return $response;

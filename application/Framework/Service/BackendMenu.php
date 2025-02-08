@@ -517,9 +517,6 @@ class AAM_Framework_Service_BackendMenu
                     }
                 }
 
-                // Sorting query params to ensure exactly the same ordering
-                ksort($query_params);
-
                 if (count($query_params)) {
                     $parsed_slug .= '?' . http_build_query($query_params);
                 }

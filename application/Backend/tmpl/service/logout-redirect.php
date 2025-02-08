@@ -1,13 +1,4 @@
-<?php
-/**
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/291
- * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
- * @since 6.0.0  Initial implementation of the templates
- *
- * @version 6.9.12
- *
- */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -82,7 +73,7 @@
                     <label for="logout-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                 </div>
 
-                <div class="form-group logout-redirect-action" id="page-logout-redirect-action" style="display: <?php echo ($type === 'page' ? 'block' : 'none'); ?>;">
+                <div class="form-group logout-redirect-action" id="page-logout-redirect-action" style="display: <?php echo ($type === 'page_redirect' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                     <?php
                         wp_dropdown_pages(array(
@@ -96,7 +87,7 @@
                         ?>
                 </div>
 
-                <div class="form-group logout-redirect-action" id="url-logout-redirect-action" style="display: <?php echo ($type === 'url' ? 'block' : 'none'); ?>;">
+                <div class="form-group logout-redirect-action" id="url-logout-redirect-action" style="display: <?php echo ($type === 'url_redirect' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('The URL', AAM_KEY); ?></label>
                     <input
                         type="text"
@@ -107,7 +98,7 @@
                     />
                 </div>
 
-                <div class="form-group logout-redirect-action" id="callback-logout-redirect-action" style="display: <?php echo ($type === 'callback' ? 'block' : 'none'); ?>;">
+                <div class="form-group logout-redirect-action" id="callback-logout-redirect-action" style="display: <?php echo ($type === 'trigger_callback' ? 'block' : 'none'); ?>;">
                     <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                     <input
                         type="text"

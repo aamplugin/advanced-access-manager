@@ -43,4 +43,17 @@ class AAM_Framework_AccessLevel_Default implements AAM_Framework_AccessLevel_Int
         return __('Default Access Level', AAM_KEY);
     }
 
+    /**
+     * Check if access level has specific capability
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_cap()
+    {
+        return true;
+    }
+
 }

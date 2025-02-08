@@ -242,8 +242,8 @@ class AAM_Restful_LoginRedirect
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The redirect_url is not valid URL', AAM_KEY),
-                array('status'  => 400)
+                __('The redirect_url is not a valid URL', AAM_KEY),
+                [ 'status'  => 400 ]
             );
         }
 

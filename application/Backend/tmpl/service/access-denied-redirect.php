@@ -41,7 +41,7 @@
                                 value="default"
                                 data-action="#frontend-default-action"
                                 data-group="frontend"
-                                <?php echo ($frontend_redirect['type'] == 'default' ? ' checked' : ''); ?>
+                                <?php echo ($frontend_redirect['type'] === 'default' ? ' checked' : ''); ?>
                             />
                             <label for="frontend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                         </div>
@@ -53,7 +53,7 @@
                                 data-action="#frontend-message-action"
                                 value="custom_message"
                                 data-group="frontend"
-                                <?php echo ($frontend_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
+                                <?php echo ($frontend_redirect['type'] === 'custom_message' ? ' checked' : ''); ?>
                             />
                             <label for="frontend-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                         </div>
@@ -66,7 +66,7 @@
                                     value="login_redirect"
                                     data-action="none"
                                     data-group="frontend"
-                                    <?php echo ($frontend_redirect['type'] == 'login_redirect' ? ' checked' : ''); ?>
+                                    <?php echo ($frontend_redirect['type'] === 'login_redirect' ? ' checked' : ''); ?>
                                 />
                                 <label for="frontend-redirect-login"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirect to the login page [(after login, user will be redirected back to the restricted page)]', 'small'); ?></label>
                             </div>
@@ -79,7 +79,7 @@
                                 data-action="#frontend-page-action"
                                 value="page_redirect"
                                 data-group="frontend"
-                                <?php echo ($frontend_redirect['type'] == 'page_redirect' ? ' checked' : ''); ?>
+                                <?php echo ($frontend_redirect['type'] === 'page_redirect' ? ' checked' : ''); ?>
                             />
                             <label for="frontend-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing page [(select from the drop-down)]', 'small'); ?></label>
                         </div>
@@ -91,7 +91,7 @@
                                 data-action="#frontend-url-action"
                                 value="url_redirect"
                                 data-group="frontend"
-                                <?php echo ($frontend_redirect['type'] == 'url_redirect' ? ' checked' : ''); ?>
+                                <?php echo ($frontend_redirect['type'] === 'url_redirect' ? ' checked' : ''); ?>
                             />
                             <label for="frontend-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
                         </div>
@@ -103,7 +103,7 @@
                                 data-action="#frontend-callback-action"
                                 value="trigger_callback"
                                 data-group="frontend"
-                                <?php echo ($frontend_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
+                                <?php echo ($frontend_redirect['type'] === 'trigger_callback' ? ' checked' : ''); ?>
                             />
                             <label for="frontend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
@@ -111,7 +111,7 @@
                         <div
                             class="form-group aam-redirect-action frontend"
                             id="frontend-default-action"
-                            style="display: <?php echo ($frontend_redirect['type'] == 'default' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($frontend_redirect['type'] === 'default' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
                             <?php $redirect_code = isset($frontend_redirect['http_status_code']) ? $frontend_redirect['http_status_code'] : 401; ?>
@@ -127,7 +127,7 @@
                         <div
                             class="form-group aam-redirect-action frontend"
                             id="frontend-message-action"
-                            style="display: <?php echo ($frontend_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($frontend_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                             <?php $redirect_message = isset($frontend_redirect['message']) ? $frontend_redirect['message'] : ''; ?>
@@ -155,7 +155,7 @@
                         <div
                             class="form-group aam-redirect-action frontend"
                             id="frontend-page-action"
-                            style="display: <?php echo ($frontend_redirect['type'] == 'page_redirect' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($frontend_redirect['type'] === 'page_redirect' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
                             <?php
@@ -173,7 +173,7 @@
                         <div
                             class="form-group aam-redirect-action frontend"
                             id="frontend-url-action"
-                            style="display: <?php echo ($frontend_redirect == 'url_redirect' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($frontend_redirect['type'] === 'url_redirect' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-url"><?php echo __('The URL', AAM_KEY); ?></label>
                             <input
@@ -189,7 +189,7 @@
                         <div
                             class="form-group aam-redirect-action frontend"
                             id="frontend-callback-action"
-                            style="display: <?php echo ($frontend_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($frontend_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                             <input
@@ -212,7 +212,7 @@
                                 data-action="#backend-default"
                                 value="default"
                                 data-group="backend"
-                                <?php echo ($backend_redirect['type'] == 'default' ? ' checked' : ''); ?>
+                                <?php echo ($backend_redirect['type'] === 'default' ? ' checked' : ''); ?>
                             />
                             <label for="backend-redirect-default"><?php echo AAM_Backend_View_Helper::preparePhrase('Default [("Access Denied" message)]', 'small'); ?></label>
                         </div>
@@ -224,7 +224,7 @@
                                 data-action="#backend-message"
                                 value="custom_message"
                                 data-group="backend"
-                                <?php echo ($backend_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
+                                <?php echo ($backend_redirect['type'] === 'custom_message' ? ' checked' : ''); ?>
                             />
                             <label for="backend-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message [(plain text or HTML)]', 'small'); ?></label>
                         </div>
@@ -236,7 +236,7 @@
                                 data-action="#backend-page-action"
                                 value="page_redirect"
                                 data-group="backend"
-                                <?php echo ($backend_redirect['type'] == 'page_redirect' ? ' checked' : ''); ?>
+                                <?php echo ($backend_redirect['type'] === 'page_redirect' ? ' checked' : ''); ?>
                             />
                             <label for="backend-redirect-page"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to existing frontend page [(select from the drop-down)]', 'small'); ?></label>
                         </div>
@@ -248,7 +248,7 @@
                                 data-action="#backend-url"
                                 value="url_redirect"
                                 data-group="backend"
-                                <?php echo ($backend_redirect['type'] == 'url_redirect' ? ' checked' : ''); ?>
+                                <?php echo ($backend_redirect['type'] === 'url_redirect' ? ' checked' : ''); ?>
                             />
                             <label for="backend-redirect-url"><?php echo AAM_Backend_View_Helper::preparePhrase('Redirected to local URL [(enter valid URL starting from http or https)]', 'small'); ?></label>
                         </div>
@@ -260,7 +260,7 @@
                                 data-action="#backend-callback-action"
                                 value="trigger_callback"
                                 data-group="backend"
-                                <?php echo ($backend_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
+                                <?php echo ($backend_redirect['type'] === 'trigger_callback' ? ' checked' : ''); ?>
                             />
                             <label for="backend-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
@@ -268,7 +268,7 @@
                         <div
                             class="form-group aam-redirect-action backend"
                             id="backend-default"
-                            style="display: <?php echo ($backend_redirect['type'] == 'default' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($backend_redirect['type'] === 'default' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
                             <?php $redirect_code = isset($backend_redirect['http_status_code']) ? $backend_redirect['http_status_code'] : 401; ?>
@@ -284,7 +284,7 @@
                         <div
                             class="form-group aam-redirect-action backend"
                             id="backend-message"
-                            style="display: <?php echo ($backend_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($backend_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
                             <label for="backend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                             <?php $redirect_message = isset($backend_redirect['message']) ? $backend_redirect['message'] : ''; ?>
@@ -312,7 +312,7 @@
                         <div
                             class="form-group aam-redirect-action backend"
                             id="backend-page-action"
-                            style="display: <?php echo ($backend_redirect['type'] == 'page_redirect' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($backend_redirect['type'] === 'page_redirect' ? 'block' : 'none'); ?>;"
                         >
                             <label for="backend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
                             <?php
@@ -330,7 +330,7 @@
                         <div
                             class="form-group aam-redirect-action backend"
                             id="backend-url"
-                            style="display: <?php echo ($backend_redirect['type'] == 'url_redirect' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($backend_redirect['type'] === 'url_redirect' ? 'block' : 'none'); ?>;"
                         >
                             <label for="backend-url"><?php echo __('The URL', AAM_KEY); ?></label>
                             <input
@@ -346,7 +346,7 @@
                         <div
                             class="form-group aam-redirect-action backend"
                             id="backend-callback-action"
-                            style="display: <?php echo ($backend_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($backend_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                             <input
@@ -381,7 +381,7 @@
                                 data-action="#api-message"
                                 value="custom_message"
                                 data-group="api"
-                                <?php echo ($api_redirect['type'] == 'custom_message' ? ' checked' : ''); ?>
+                                <?php echo ($api_redirect['type'] === 'custom_message' ? ' checked' : ''); ?>
                             />
                             <label for="api-redirect-message"><?php echo AAM_Backend_View_Helper::preparePhrase('Show customized message', 'small'); ?></label>
                         </div>
@@ -393,7 +393,7 @@
                                 data-action="#api-callback-action"
                                 value="trigger_callback"
                                 data-group="api"
-                                <?php echo ($api_redirect['type'] == 'trigger_callback' ? ' checked' : ''); ?>
+                                <?php echo ($api_redirect['type'] === 'trigger_callback' ? ' checked' : ''); ?>
                             />
                             <label for="api-redirect-callback"><?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Trigger PHP callback function [(valid %sPHP callback%s is required)]', 'small'), '<a href="https://php.net/manual/en/language.types.callable.php" target="_blank">', '</a>'); ?></label>
                         </div>
@@ -401,7 +401,7 @@
                         <div
                             class="form-group aam-redirect-action api"
                             id="api-message"
-                            style="display: <?php echo ($api_redirect['type'] == 'custom_message' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($api_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
                             <label for="api-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
                             <?php $redirect_message = isset($api_redirect['message']) ? $api_redirect['message'] : ''; ?>
@@ -429,7 +429,7 @@
                         <div
                             class="form-group aam-redirect-action api"
                             id="api-callback-action"
-                            style="display: <?php echo ($api_redirect['type'] == 'trigger_callback' ? 'block' : 'none'); ?>;"
+                            style="display: <?php echo ($api_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
                             <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
                             <input

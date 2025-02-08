@@ -74,7 +74,7 @@ class AAM_Audit_RoleTransparencyCheck
         $registered_roles = array_keys($db_roles);
 
         if (function_exists('get_editable_roles')) {
-            $visible_roles = get_editable_roles();
+            $visible_roles = array_keys(get_editable_roles());
         } else {
             $visible_roles = array_keys(
                 apply_filters('editable_roles', wp_roles()->roles)

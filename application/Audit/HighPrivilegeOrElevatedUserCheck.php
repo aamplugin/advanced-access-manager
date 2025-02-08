@@ -179,7 +179,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 if (!empty($matched)) {
                     array_push($response, self::_format_issue(sprintf(
                         __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', AAM_KEY),
-                        $user->get_display_name(),
+                        $user->display_name,
                         $user->ID,
                         implode(', ', $matched)
                     ), 'HIGH_PRIVILEGE_USER_CAPS', 'critical'));
@@ -195,7 +195,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 if (!empty($elevated_caps)) {
                     array_push($response, self::_format_issue(sprintf(
                         __('Detected elevated capabilities for user "%s" (ID: %s): %s', AAM_KEY),
-                        $user->get_display_name(),
+                        $user->display_name,
                         $user->ID,
                         implode(', ', $elevated_caps)
                     ), 'ELEVATED_USER_CAPS'));

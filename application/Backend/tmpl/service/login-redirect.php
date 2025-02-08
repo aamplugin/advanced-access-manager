@@ -1,12 +1,4 @@
-<?php
-/**
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
- * @since 6.8.0  https://github.com/aamplugin/advanced-access-manager/issues/195
- * @since 6.0.0  Initial implementation of the templates
- *
- * @version 6.9.12
- */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -78,7 +70,7 @@
                 <div
                     class="form-group login-redirect-action"
                     id="page-login-redirect-action"
-                    style="display: <?php echo ($type == 'page_redirect' ? 'block' : 'none'); ?>;"
+                    style="display: <?php echo ($type === 'page_redirect' ? 'block' : 'none'); ?>;"
                 >
                     <label><?php echo __('Existing Page', AAM_KEY); ?></label>
                     <?php

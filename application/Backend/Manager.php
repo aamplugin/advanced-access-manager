@@ -69,10 +69,6 @@ class AAM_Backend_Manager
 
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
-            // Checking for any legacy add-ons presence. If are available, let
-            // user know
-            $this->checkForLegacyAddons();
-
             // Checking for the new update availability
             $this->checkForPremiumAddonUpdate();
         }
@@ -129,60 +125,6 @@ class AAM_Backend_Manager
         }
 
         return $actions;
-    }
-
-    /**
-     * Check for presence of legacy add-ons
-     *
-     * @return void
-     *
-     * @since 6.9.30 https://github.com/aamplugin/advanced-access-manager/issues/377
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     * @since 6.9.5  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.30
-     */
-    protected function checkForLegacyAddons()
-    {
-        static $plugins = null;
-
-        if (is_null($plugins)) {
-            if (file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) {
-                require_once ABSPATH . 'wp-admin/includes/plugin.php';
-            }
-
-            $plugins = get_plugins();
-        }
-
-        if (array_key_exists('aam-plus-package/bootstrap.php', $plugins)) {
-            AAM_Core_Console::add(sprintf(
-                __('The Plus Package was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
-                '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
-            ));
-        }
-
-        if (array_key_exists('aam-ip-check/bootstrap.php', $plugins)) {
-            AAM_Core_Console::add(sprintf(
-                __('The IP Check was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
-                '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
-            ));
-        }
-
-        if (array_key_exists('aam-role-hierarchy/bootstrap.php', $plugins)) {
-            AAM_Core_Console::add(sprintf(
-                __('The Role Hierarchy was deprecated and is no longer maintained. %sLearn more%s.', AAM_KEY),
-                '<a href="https://aamportal.com/blog/we-are-migrating?ref=plugin">', '</a>'
-            ));
-        }
-
-        if (defined('AAM_COMPLETE_PACKAGE')
-            && version_compare(AAM_COMPLETE_PACKAGE, '6.1.7') === -1) {
-            AAM_Core_Console::add(sprintf(
-                __('Upgrade the AAM premium add-on to version 6.1.7 or higher to ensure all features function correctly. %sLearn more%s.', AAM_KEY),
-                '<a href="https://aamportal.com/question/update-premium-addon-warning?ref=plugin">', '</a>'
-            ));
-        }
     }
 
     /**
