@@ -15,301 +15,240 @@
     <div class="aam-feature" id="welcome-content">
         <div class="row">
             <div class="col-xs-12">
-                <?php if (AAM_Framework_Manager::configs()->get_config('core.settings.tips', true)) { ?>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <p class="aam-info"><?php echo __("Here, we've outlined several typical scenarios where you can leverage AAM, along with some key features. If you require assistance, don't hesitate to reach out by filling out the contact form below. We'll get back to you as soon as possible.", AAM_KEY); ?></p>
-                        </div>
-                    </div>
-                <?php } ?>
-
-                <span class="aam-common-use-cases aam-mt-2"><?php echo __('Announcements', AAM_KEY); ?></span>
-
-                <div class="panel-group aam-mb-6" id="announcement-block" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="announcement-a-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#announcement-block" href="#announcement-a" aria-controls="announcement-a">
-                                    <?php echo __('NEW: Enhancing WordPress Security Beyond the Basics', AAM_KEY); ?>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="announcement-a" class="panel-collapse collapse" role="tabpanel" aria-labelledby="announcement-a-heading">
-                            <div class="panel-body">
-                                <p>
-                                    WordPress security often focuses on external threats, such as brute force or DDoS attacks, malware, and outdated plugins.
-                                    However, internal security is equally important, as authenticated users can pose risks if granted inappropriate access.
-                                    Just as setting boundaries for house guests is crucial, site owners must manage user roles and permissions.
-                                </p>
-                                <p>
-                                    Advanced Access Manager (AAM) plugin addresses this need with its <strong>Security Scan</strong> feature, identifying misconfigurations and potential vulnerabilities, such as over-assigned administrative roles or escalated privileges.
-                                    By managing internal access and roles, site owners can ensure comprehensive security for their WordPress sites.
-                                </p>
-
-                                <a href="https://aamportal.com/article/enhancing-wordPress-security-beyond-basics" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <span class="aam-common-use-cases aam-mt-2"><?php echo __('Introduction', AAM_KEY); ?></span>
 
                 <div class="panel-group" id="intro-block" role="tablist" aria-multiselectable="true">
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-intro-heading">
+                        <div class="panel-heading" role="tab" id="video-1-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#menu-intro" aria-controls="menu-intro">
-                                    <?php echo __('Introduction to Advanced Access Manager (aka AAM)', AAM_KEY); ?> <small class="aam-menu-capability">6 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-1" aria-controls="video-1">
+                                    <?php echo __('Navigating the AAM UI: A Quick Guide', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-intro" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-intro-heading">
+                        <div id="video-1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-1-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/introduction-to-aam" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/introduction-to-aam.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/qVJDolt31pY?si=xlbnrgPRYyjmxEs1"
+                                    title="Navigating the AAM UI: A Quick Guide"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/introduction-to-aam" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <span class="aam-common-use-cases aam-mt-4"><?php echo __('5 Most Common Use Cases', AAM_KEY); ?></span>
-
-                <div class="panel-group" id="common-features" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-common-a-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#common-features" href="#menu-common-a" aria-controls="menu-common-a">
-                                    <?php echo __('Make My WordPress Website Private', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-common-a" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-common-a-heading">
-                            <div class="panel-body">
-                                <a href="https://aamportal.com/video/make-wordpress-website-private" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/private-wordpress-website.png'; ?>" width="100%" />
-                                </a>
-
-                                <a href="https://aamportal.com/video/make-wordpress-website-private" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=qVJDolt31pY&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-common-b-heading">
+                        <div class="panel-heading" role="tab" id="video-2-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#common-features" href="#menu-common-b" aria-controls="menu-common-b">
-                                    <?php echo __('3 Simple Steps to Enhance your Website Security', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-2" aria-controls="video-2">
+                                    <?php echo __('Fine-Tuning AAM for Optimal Performance', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-common-b" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-common-b-heading">
+                        <div id="video-2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-2-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/3-simple-steps-to-enhance-wordpress-security" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/3-simple-steps-for-website-security.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/JVbevBWdJjo?si=lCP4VLNTyyMh5OoS"
+                                    title="Fine-Tuning AAM for Optimal Performance"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/3-simple-steps-to-enhance-wordpress-security" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=JVbevBWdJjo&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=2" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-common-c-heading">
+                        <div class="panel-heading" role="tab" id="video-3-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#common-features" href="#menu-common-c" aria-controls="menu-common-c">
-                                    <?php echo __('Manage Access to Admin Menu', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-3" aria-controls="video-3">
+                                    <?php echo __('Understanding Access Levels in AAM', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-common-c" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-common-c-heading">
+                        <div id="video-3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-3-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/manage-access-to-wordpress-admin-menu" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/manage-access-to-admin-menu.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/mKQ1TTICtE4?si=53byc76WzhH9Lm9K"
+                                    title="Understanding Access Levels in AAM"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/manage-access-to-wordpress-admin-menu" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=mKQ1TTICtE4&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=3" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-common-d-heading">
+                        <div class="panel-heading" role="tab" id="video-4-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#common-features" href="#menu-common-d" aria-controls="menu-common-d">
-                                    <?php echo __('Protect Posts, Pages, CPTs, Terms & Taxonomies', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-4" aria-controls="video-4">
+                                    <?php echo __('Understanding Access Controls & Preferences Inheritance', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-common-d" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-common-d-heading">
+                        <div id="video-4" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-4-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/protect-wordpress-content" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/protected-content.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/RrZcK9HkZHI?si=UBu0XqAViTfKBpOZ"
+                                    title="Understanding Access Controls & Preferences Inheritance"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/protect-wordpress-content" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=RrZcK9HkZHI&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=4" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-common-e-heading">
+                        <div class="panel-heading" role="tab" id="video-5-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#common-features" href="#menu-common-e" aria-controls="menu-common-e">
-                                    <?php echo __('Manage Roles, Users & Capabilities', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-5" aria-controls="video-5">
+                                    <?php echo __('Master WordPress Roles & Capabilities With AAM', AAM_KEY); ?> <small class="aam-menu-capability">4 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-common-e" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-common-e-heading">
+                        <div id="video-5" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-5-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/manage-wordpress-roles-users-capabilities" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/manage-roles-users-capabilities.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/bqBLSqUjHV0?si=d6nkVrlFh_gwlCZi"
+                                    title="Master WordPress Roles & Capabilities With AAM"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/manage-wordpress-roles-users-capabilities" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <span class="aam-common-use-cases aam-mt-4">Highlighted Use Cases</span>
-
-                <div class="panel-group" id="ht-features" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-a-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-a" aria-controls="menu-ht-a">
-                                    <?php echo __('Customize Editorial Team Permissions to Content', AAM_KEY); ?> <small class="aam-menu-capability">4 mins</small>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-ht-a" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-a-heading">
-                            <div class="panel-body">
-                                <a href="https://aamportal.com/video/customize-wordpress-editorial-team-permissions" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/customize-editorial-workflow.png'; ?>" width="100%" />
-                                </a>
-
-                                <a href="https://aamportal.com/video/customize-wordpress-editorial-team-permissions" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=bqBLSqUjHV0&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=5" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-b-heading">
+                        <div class="panel-heading" role="tab" id="video-6-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-b" aria-controls="menu-ht-b">
-                                    <?php echo __('Explore Enterprise-Level Access Management with JSON Policies', AAM_KEY); ?> <small class="aam-menu-capability">6 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-6" aria-controls="video-6">
+                                    <?php echo __('Manage User Accounts with AAM | WordPress Access Control', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-ht-b" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-b-heading">
+                        <div id="video-6" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-6-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/wordpress-enterprise-level-access-management" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/json-policy.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/QUj6BY_ELZU?si=AKv7M04cV_k48VKs"
+                                    title="Manage User Accounts with AAM | WordPress Access Control"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/wordpress-enterprise-level-access-management" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-c-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-c" aria-controls="menu-ht-c">
-                                    <?php echo __('Customize Widgets & Metaboxes Visibility', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-ht-c" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-c-heading">
-                            <div class="panel-body">
-                                <a href="https://aamportal.com/video/customize-wordpress-widgets-metaboxes-visibility" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/customize-widgets-visibility.png'; ?>" width="100%" />
-                                </a>
-
-                                <a href="https://aamportal.com/video/customize-wordpress-widgets-metaboxes-visibility" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
-                            </div>
-                        </div>
-                    </div> -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-d-heading">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-d" aria-controls="menu-ht-d">
-                                    <?php echo __('Protect Media Library, Files & Static Pages', AAM_KEY); ?> <small class="aam-menu-capability">4 mins</small>
-                                </a>
-                            </h4>
-                        </div>
-
-                        <div id="menu-ht-d" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-d-heading">
-                            <div class="panel-body">
-                                <a href="https://aamportal.com/video/protect-wordpress-media-library-files-static-pages" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/protect-media-library.png'; ?>" width="100%" />
-                                </a>
-
-                                <a href="https://aamportal.com/video/protect-wordpress-media-library-files-static-pages" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=QUj6BY_ELZU&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=6" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-e-heading">
+                        <div class="panel-heading" role="tab" id="video-7-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-e" aria-controls="menu-ht-e">
-                                    <?php echo __('Redefine Login, Logout, 404 and Access Denied Redirects', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-7" aria-controls="video-7">
+                                    <?php echo __('Mastering Access Control in WordPress: Back-End Menu, Admin Toolbar, Metaboxes & Widgets', AAM_KEY); ?> <small class="aam-menu-capability">9 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-ht-e" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-e-heading">
+                        <div id="video-7" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-7-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/redefine-wordpress-login-logout-404-401-redirects" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/redefine-redirects.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/oF79nPvc-7Q?si=ioEyyh84_nxhYyFL"
+                                    title="Mastering Access Control in WordPress: Back-end Menu, Admin Toolbar, Metaboxes & Widgets"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/redefine-wordpress-login-logout-404-401-redirects" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=oF79nPvc-7Q&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=7" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-f-heading">
+                        <div class="panel-heading" role="tab" id="video-8-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-f" aria-controls="menu-ht-f">
-                                    <?php echo __('Manage Passwordless Login and Temporary User Accounts', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-8" aria-controls="video-8">
+                                    <?php echo __('Mastering WordPress Content Access with Posts and Terms in AAM', AAM_KEY); ?> <small class="aam-menu-capability">9 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-ht-f" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-f-heading">
+                        <div id="video-8" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-8-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/manage-wordpress-passwordless-login-and-temporary-user-accounts" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/passwordless-login-temp-accounts.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/iN_X1h6vmSo?si=VCyg2x_r5YF2ON2c"
+                                    title="Mastering WordPress Content Access with Posts and Terms in AAM"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/manage-wordpress-passwordless-login-and-temporary-user-accounts" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=iN_X1h6vmSo&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=8" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="menu-ht-g-heading">
+                        <div class="panel-heading" role="tab" id="video-9-heading">
                             <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#ht-features" href="#menu-ht-g" aria-controls="menu-ht-g">
-                                    <?php echo __('Manage JWT Tokens and RESTful API Authentication', AAM_KEY); ?> <small class="aam-menu-capability">5 mins</small>
+                                <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-9" aria-controls="video-9">
+                                    <?php echo __('Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects', AAM_KEY); ?> <small class="aam-menu-capability">5 mins</small>
                                 </a>
                             </h4>
                         </div>
 
-                        <div id="menu-ht-g" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu-ht-g-heading">
+                        <div id="video-9" class="panel-collapse collapse" role="tabpanel" aria-labelledby="video-9-heading">
                             <div class="panel-body">
-                                <a href="https://aamportal.com/video/manage-wordpress-jwt-tokens-and-restful-api-authentication" target="_blank">
-                                    <img src="<?php echo AAM_MEDIA . '/material/jwt.png'; ?>" width="100%" />
-                                </a>
+                                <iframe
+                                    width="100%"
+                                    height="315"
+                                    src="https://www.youtube.com/embed/rg6-nt6-o7U?si=UrbA8asRLT0vr4GC"
+                                    title="Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen
+                                ></iframe>
 
-                                <a href="https://aamportal.com/video/manage-wordpress-jwt-tokens-and-restful-api-authentication" target="_blank" class="btn btn-danger btn-block aam-mt-1">Learn More →</a>
+                                <a href="https://www.youtube.com/watch?v=rg6-nt6-o7U&list=PLged38T3QQC0lAMQ2Ov3w1KVah96233eE&index=9" target="_blank" class="btn btn-danger btn-block aam-mt-1">Watch on YouTube →</a>
                             </div>
                         </div>
                     </div>
