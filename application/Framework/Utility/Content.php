@@ -160,20 +160,16 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
      * If $post_type_scope is defined, the array term resources will be scoped for
      * this give post type.
      *
-     * @param array                               $args            [Optional]
-     * @param AAM_Framework_AccessLevel_Interface $access_level    [Optional]
-     * @param string                              $post_type_scope [Optional]
+     * @param array  $args            [Optional]
+     * @param string $post_type_scope [Optional]
      *
      * @return Generator
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_terms(
-        $query_args = [],
-        $access_level = null,
-        $post_type_scope = null
-    ) {
+    public function get_terms($query_args = [], $post_type_scope = null)
+    {
         // Get list of terms
         $terms = get_terms(array_merge(
             [ 'number' => 500, 'hide_empty' => false ],
@@ -182,19 +178,15 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
             [ 'fields' => 'ids', 'suppress_filters' => true ]
         ));
 
-        $result = function () use ($terms, $access_level, $post_type_scope) {
+        $result = function () use ($terms, $post_type_scope) {
             foreach ($terms as $term_id) {
-                if (is_a($access_level, AAM_Framework_AccessLevel_Interface::class)) {
-                    yield $access_level->get_resource(
-                        AAM_Framework_Type_Resource::TERM, [
-                            'id'        => $term_id,
-                            'post_type' => $post_type_scope
-                        ]
-                    );
-                } else {
-                    yield get_term($term_id);
+                $term = get_term($term_id);
+
+                if (!empty($post_type_scope)) {
+                    $term->post_type = $post_type_scope;
                 }
 
+                yield $term;
             }
         };
 

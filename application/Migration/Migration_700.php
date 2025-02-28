@@ -516,8 +516,8 @@ final class AAM_Migration_700
      * @param array $rule
      *
      * @return array|null
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_url_access_rule_condition($rule)
@@ -556,8 +556,8 @@ final class AAM_Migration_700
      * @param array $settings
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _convert_legacy_post_settings($settings)
@@ -565,7 +565,13 @@ final class AAM_Migration_700
         $result = [];
 
         foreach($settings as $id => $data) {
-            $result[$id] = $this->_convert_legacy_post_object($data);
+            $post = get_post($id);
+
+            if (is_a($post, WP_Post::class)) {
+                $result[$id . '|' . $post->post_type] = $this->_convert_legacy_post_object(
+                    $data
+                );
+            }
         }
     }
 
@@ -575,8 +581,8 @@ final class AAM_Migration_700
      * @param array $settings
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _convert_legacy_post_type_settings($settings)
@@ -695,8 +701,8 @@ final class AAM_Migration_700
      * @param array $data
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _convert_legacy_post_object($data)
@@ -735,22 +741,18 @@ final class AAM_Migration_700
                 $areas = $this->_prepare_visibility_areas($settings);
 
                 $item = [
-                    'permission' => 'list',
-                    'enabled'    => $this->_convert_to_boolean($settings),
-                    'on'         => $areas
+                    'effect' => $this->_convert_to_effect($settings),
+                    'on'     => $areas
                 ];
 
                 if ($action !== 'hidden') {
                     $item['exclude_authors'] = true;
                 }
 
-                if (!empty($areas)) { // Ignore the control if no areas defined
-                    $result['list'] = $item;
-                }
+                $result['list'] = $item;
             } elseif (in_array($action, ['restricted', 'restricted_others'], true)) {
                 $item = [
-                    'permission'       => 'read',
-                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'effect'           => $this->_convert_to_effect($settings),
                     'restriction_type' => 'default'
                 ];
 
@@ -761,8 +763,7 @@ final class AAM_Migration_700
                 $result['read'] = $item;
             } elseif (in_array($action, ['edit', 'edit_others'], true)) {
                 $item = [
-                    'permission' => 'edit',
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
 
                 if ($action !== 'edit') {
@@ -772,8 +773,7 @@ final class AAM_Migration_700
                 $result['edit'] = $item;
             } elseif (in_array($action, ['delete', 'delete_others'], true)) {
                 $item = [
-                    'permission' => 'delete',
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
 
                 if ($action !== 'delete') {
@@ -783,8 +783,7 @@ final class AAM_Migration_700
                 $result['delete'] = $item;
             } elseif (in_array($action, ['publish', 'publish_others'], true)) {
                 $item = [
-                    'permission' => 'publish',
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
 
                 if ($action !== 'publish') {
@@ -794,13 +793,11 @@ final class AAM_Migration_700
                 $result['publish'] = $item;
             } elseif ($action === 'comment') {
                 $result['comment'] = [
-                    'permission' => 'comment',
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
             } elseif ($action === 'teaser') {
                 $result['read'] = [
-                    'permission'       => 'read',
-                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'effect'           => $this->_convert_to_effect($settings),
                     'restriction_type' => 'teaser_message',
                     'message'          => $settings['message']
                 ];
@@ -822,24 +819,21 @@ final class AAM_Migration_700
                 }
 
                 $result['read'] = [
-                    'permission'       => 'read',
-                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'effect'           => $this->_convert_to_effect($settings),
                     'restriction_type' => 'redirect',
                     'redirect'         => $redirect
                 ];
             } elseif ($action === 'protected') {
                 $result['read'] = [
-                    'permission'       => 'read',
-                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'effect'           => $this->_convert_to_effect($settings),
                     'restriction_type' => 'password_protected',
                     'password'         => $settings['password']
                 ];
             } elseif ($action === 'ceased') {
                 $result['read'] = [
-                    'permission'       => 'read',
-                    'enabled'          => $this->_convert_to_boolean($settings),
+                    'effect'           => $this->_convert_to_effect($settings),
                     'restriction_type' => 'expire',
-                    'after_timestamp'  => intval($settings['after'])
+                    'expires_after'    => intval($settings['after'])
                 ];
             }
         }
@@ -853,8 +847,8 @@ final class AAM_Migration_700
      * @param array $data
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _convert_legacy_term_object($data)
@@ -864,19 +858,16 @@ final class AAM_Migration_700
         foreach($data as $action => $settings) {
             if ($action === 'restricted') {
                 $result['browse'] = [
-                    'permission' => 'browse',
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
             } elseif ($action === 'hidden') {
                 $result['list'] = [
-                    'permission' => 'list',
-                    'enabled'    => $this->_convert_to_boolean($settings),
-                    'on'         =>  $this->_prepare_visibility_areas($settings)
+                    'effect' => $this->_convert_to_effect($settings),
+                    'on'     =>  $this->_prepare_visibility_areas($settings)
                 ];
             } elseif (in_array($action, ['create', 'edit', 'delete', 'assign'], true)) {
                 $result[$action] = [
-                    'permission' => $action,
-                    'enabled'    => $this->_convert_to_boolean($settings)
+                    'effect' => $this->_convert_to_effect($settings)
                 ];
             }
         }
@@ -890,8 +881,8 @@ final class AAM_Migration_700
      * @param array $settings
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_visibility_areas($settings)
@@ -910,41 +901,14 @@ final class AAM_Migration_700
     }
 
     /**
-     * Convert REFERENCE access control rules to new format
-     *
-     * @param array $settings
-     *
-     * @return array
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _convert_selective_rules($settings)
-    {
-        $result = [];
-
-        foreach($settings['rules'] as $rule => $effect) {
-            list($criteria, $value) = explode('|', $rule);
-
-            array_push($result, [
-                'effect'   => $this->_convert_to_boolean($effect) ? 'deny' : 'allow',
-                'criteria' => $criteria,
-                'compare'  => $value
-            ]);
-        }
-
-        return $result;
-    }
-
-    /**
      * Convert AAM access control flag to permission effect
      *
      * @param mixed $setting
      *
      * @return boolean
-     *
      * @access private
-     * @version 6.9.31
+     *
+     * @version 7.0.0
      */
     private function _convert_to_boolean($setting)
     {
@@ -961,6 +925,21 @@ final class AAM_Migration_700
         }
 
         return $response;
+    }
+
+    /**
+     * Convert to effect value
+     *
+     * @param mixed $setting
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _convert_to_effect($setting)
+    {
+        return $this->_convert_to_boolean($setting) ? 'deny' : 'allow';
     }
 
 }

@@ -388,8 +388,7 @@ class AAM_Restful_Content
                 'taxonomy'   => $request->get_param('taxonomy'),
                 'hide_empty' => false,
                 'search'     => $request->get_param('search'),
-                'offset'     => $request->get_param('offset'),
-                'post_type'  => $request->get_param('post_type')
+                'offset'     => $request->get_param('offset')
             ];
 
             // Getting the list of terms
@@ -417,7 +416,9 @@ class AAM_Restful_Content
                 ]
             ];
 
-            $raw_list = AAM::api()->content->get_terms($args);
+            $raw_list = AAM::api()->content->get_terms(
+                $args, $request->get_param('post_type')
+            );
 
             foreach($raw_list as $item) {
                 array_push($result['list'], $this->_prepare_term_output(
@@ -649,11 +650,8 @@ class AAM_Restful_Content
      */
     private function _prepare_term_output($access_level, $term)
     {
-        $resource = $access_level->get_resource(
-            AAM_Framework_Type_Resource::TERM
-        );
-
-        $result = [
+        $resource = $access_level->get_resource(AAM_Framework_Type_Resource::TERM);
+        $result   = [
             'id'              => $term->term_id,
             'title'           => $term->name,
             'slug'            => $term->slug,
@@ -663,7 +661,7 @@ class AAM_Restful_Content
             'is_customized'   => $resource->is_customized($term)
         ];
 
-        if (!empty($term->post_type)) {
+        if (!empty($post_type_scope)) {
             $is_default = $term->taxonomy === 'category'
                 && intval(get_option('default_category')) === $term->term_id;
 
@@ -672,7 +670,7 @@ class AAM_Restful_Content
             );
 
             // Also adding post type scope to the output
-            $result['post_type'] = $term->post_type;
+            $result['post_type'] = $post_type_scope;
         }
 
         return $result;
