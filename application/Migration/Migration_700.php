@@ -226,7 +226,7 @@ final class AAM_Migration_700
                     $level[$new_type] = $cb($level[$legacy_type]);
 
                     // Delete legacy data
-                    unset( $level[$legacy_type]);
+                    unset($level[$legacy_type]);
                 }
             }
         }
