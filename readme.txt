@@ -81,6 +81,9 @@ Discover the power and flexibility of Advanced Access Manager and take control o
 
 == Changelog ==
 
+= 6.9.47 =
+* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
+
 = 6.9.46 =
 * Added: Run AAM Audit periodically [https://github.com/aamplugin/advanced-access-manager/issues/432](https://github.com/aamplugin/advanced-access-manager/issues/432)
 * Added: Allow the ability to jump to a specific AAM tab [https://github.com/aamplugin/advanced-access-manager/issues/431](https://github.com/aamplugin/advanced-access-manager/issues/431)

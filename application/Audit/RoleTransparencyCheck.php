@@ -10,8 +10,11 @@
 /**
  * Check if all registered roles are transparent to the admin user
  *
+ * @since 6.9.47 https://github.com/aamplugin/advanced-access-manager/issues/433
+ * @since 6.9.40 Initial implementation of the class
+ *
  * @package AAM
- * @version 6.9.40
+ * @version 6.9.47
  */
 class AAM_Audit_RoleTransparencyCheck
 {
@@ -61,9 +64,12 @@ class AAM_Audit_RoleTransparencyCheck
      *
      * @return array
      *
+     * @since 6.9.47 https://github.com/aamplugin/advanced-access-manager/issues/433
+     * @since 6.9.40 Initial implementation of the method
+     *
      * @access private
      * @static
-     * @version 6.9.40
+     * @version 6.9.47
      */
     private static function _validate_roles_transparency($db_roles)
     {
@@ -72,7 +78,7 @@ class AAM_Audit_RoleTransparencyCheck
         $registered_roles = array_keys($db_roles);
 
         if (function_exists('get_editable_roles')) {
-            $visible_roles = get_editable_roles();
+            $visible_roles = array_keys(get_editable_roles());
         } else {
             $visible_roles = array_keys(
                 apply_filters('editable_roles', wp_roles()->roles)
