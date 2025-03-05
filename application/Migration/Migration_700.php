@@ -507,10 +507,19 @@ final class AAM_Migration_700
         $result = [];
 
         foreach($rules as $url => $rule) {
+            $new_url = AAM::api()->misc->sanitize_url($url);
+
             if ($rule['type'] === 'allow') {
-                $result[$url] = [
-                    'effect' => 'allow',
-                    'url'    => $url
+                $result[$new_url] = [
+                    'access' => [
+                        'effect' => 'allow'
+                    ]
+                ];
+            } elseif ($rule['type'] === 'default') {
+                $result[$new_url] = [
+                    'access' => [
+                        'effect' => 'deny'
+                    ]
                 ];
             } else {
                 $redirect = [
@@ -538,7 +547,6 @@ final class AAM_Migration_700
 
                 $new_rule = [
                     'effect'   => 'deny',
-                    'url'      =>  $url,
                     'redirect' => $redirect
                 ];
 
@@ -549,7 +557,7 @@ final class AAM_Migration_700
                     $new_rule['condition'] = $condition;
                 }
 
-                $result[$url] = $new_rule;
+                $result[$new_url] = [ 'access' => $new_rule ];
             }
         }
 
