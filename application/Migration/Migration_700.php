@@ -677,11 +677,12 @@ final class AAM_Migration_700
             $post = get_post($id);
 
             if (is_a($post, WP_Post::class)) {
-                $result[$id . '|' . $post->post_type] = $this->_convert_legacy_post_object(
-                    $data
-                );
+                $new_id = strpos($id, '|') ? $id : $id . '|' . $post->post_type;
+                $result[$new_id] = $this->_convert_legacy_post_object($data);
             }
         }
+
+        return $result;
     }
 
     /**
