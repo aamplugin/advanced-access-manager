@@ -43,6 +43,15 @@ final class AAM_Migration_700
         // Convert configs to new names
         $this->_transform_legacy_config_names();
 
+        // Convert Backend Menu settings to new format
+        $this->_transform_legacy_settings(
+            'menu',
+            AAM_Framework_Type_Resource::BACKEND_MENU,
+            function($data) {
+                return $this->_convert_legacy_backend_menu($data);
+            }
+        );
+
         // Convert URL Access rules to new format
         $this->_transform_legacy_settings(
             'uri',
@@ -216,12 +225,14 @@ final class AAM_Migration_700
             if (in_array($access_level, ['role', 'user'])) {
                 foreach($level as $id => $data) {
                     if (array_key_exists($legacy_type, $data)) {
-                        $settings[$id][$new_type] = $cb($data[$legacy_type]);
+                        $settings[$access_level][$id][$new_type] = $cb(
+                            $data[$legacy_type]
+                        );
                     }
                 }
             } else {
                 if (array_key_exists($legacy_type, $level)) {
-                    $settings[$new_type] = $cb($level[$legacy_type]);
+                    $settings[$access_level][$new_type] = $cb($level[$legacy_type]);
                 }
             }
         }
@@ -236,13 +247,67 @@ final class AAM_Migration_700
     }
 
     /**
+     * Convert legacy backend menu settings
+     *
+     * @param array $data
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _convert_legacy_backend_menu($data)
+    {
+        $result = [];
+
+        if (is_array($data)) {
+            foreach($data as $id => $effect) {
+                if (strpos($id, '.php') !== false) {
+                    $parsed_url  = wp_parse_url($id);
+                    $parsed_slug = $parsed_url['path'];
+
+                    if (isset($parsed_url['query'])) {
+                        parse_str($parsed_url['query'], $query_params);
+
+                        // Removing some redundant query params
+                        $redundant_params = apply_filters(
+                            'aam_ignored_backend_menu_item_query_params_filter',
+                            ['return', 'path']
+                        );
+
+                        foreach($redundant_params as $to_remove) {
+                            if (array_key_exists($to_remove, $query_params)) {
+                                unset($query_params[$to_remove]);
+                            }
+                        }
+
+                        if (count($query_params)) {
+                            $parsed_slug .= '?' . http_build_query($query_params);
+                        }
+                    }
+                } else {
+                    $parsed_slug = trim($id);
+                }
+
+                $result[urldecode(str_replace('menu-', 'menu/', $parsed_slug))] = [
+                    'access' => [
+                        'effect' => $this->_convert_to_effect($effect)
+                    ]
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Convert legacy login redirect
      *
      * @param array $data
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _convert_legacy_login_redirect($data)
