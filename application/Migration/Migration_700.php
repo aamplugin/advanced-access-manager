@@ -52,6 +52,15 @@ final class AAM_Migration_700
             }
         );
 
+        // Convert Admin Toolbar settings to new format
+        $this->_transform_legacy_settings(
+            'toolbar',
+            AAM_Framework_Type_Resource::TOOLBAR,
+            function($data) {
+                return $this->_convert_legacy_admin_toolbar($data);
+            }
+        );
+
         // Convert URL Access rules to new format
         $this->_transform_legacy_settings(
             'uri',
@@ -291,6 +300,33 @@ final class AAM_Migration_700
 
                 $result[urldecode(str_replace('menu-', 'menu/', $parsed_slug))] = [
                     'access' => [
+                        'effect' => $this->_convert_to_effect($effect)
+                    ]
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert legacy admin toolbar settings
+     *
+     * @param array $data
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _convert_legacy_admin_toolbar($data)
+    {
+        $result = [];
+
+        if (is_array($data)) {
+            foreach($data as $id => $effect) {
+                $result[str_replace('toolbar-', '', $id)] = [
+                    'list' => [
                         'effect' => $this->_convert_to_effect($effect)
                     ]
                 ];
