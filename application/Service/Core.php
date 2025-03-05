@@ -235,10 +235,10 @@ class AAM_Service_Core
         add_action('init', function() {
             $this->_control_admin_area_access();
             $this->_control_admin_toolbar();
-        }, 1);
 
-        // Run upgrades if available
-        AAM_Core_Migration::run();
+            // Run upgrades if available
+            AAM_Core_Migration::run();
+        }, 1);
 
         // Bootstrap RESTful API
         AAM_Restful_Mu::bootstrap();

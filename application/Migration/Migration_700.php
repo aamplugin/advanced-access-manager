@@ -208,31 +208,31 @@ final class AAM_Migration_700
     private function _transform_legacy_settings($legacy_type, $new_type, $cb)
     {
         // Let's get all the settings first
-        $settings = AAM::api()->settings()->get_settings();
+        $legacy   = AAM::api()->db->read('aam_access_settings');
+        $settings = AAM::api()->db->read(AAM_Framework_Service_Settings::DB_OPTION);
 
         // Iterating of the list of all settings and modify the URL Access rule
-        foreach($settings as $access_level => &$level) {
+        foreach($legacy as $access_level => &$level) {
             if (in_array($access_level, ['role', 'user'])) {
                 foreach($level as $id => $data) {
                     if (array_key_exists($legacy_type, $data)) {
-                        $level[$id][$new_type] = $cb($data[$legacy_type]);
-
-                        // Delete legacy data
-                        unset($level[$id][$legacy_type]);
+                        $settings[$id][$new_type] = $cb($data[$legacy_type]);
                     }
                 }
             } else {
                 if (array_key_exists($legacy_type, $level)) {
-                    $level[$new_type] = $cb($level[$legacy_type]);
-
-                    // Delete legacy data
-                    unset($level[$legacy_type]);
+                    $settings[$new_type] = $cb($level[$legacy_type]);
                 }
             }
         }
 
         // Save changes
-        AAM::api()->settings()->set_settings($settings);
+        if (!empty($settings)) {
+            AAM::api()->db->write(
+                AAM_Framework_Service_Settings::DB_OPTION,
+                $settings
+            );
+        }
     }
 
     /**

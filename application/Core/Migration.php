@@ -38,7 +38,7 @@ final class AAM_Core_Migration
         foreach(self::get_pending() as $script) {
             if (file_exists($script)) {
                 $results     = include $script;
-                $completed[] = $file_name;
+                $completed[] = basename($script);
 
                 AAM::api()->db->write(self::DB_OPTION, $completed);
             } else {
@@ -59,7 +59,7 @@ final class AAM_Core_Migration
      */
     public static function get_pending()
     {
-        $completed = AAM::api()->db->read(self::DB_OPTION);
+        $completed = AAM::api()->db->read(self::DB_OPTION, []);
         $pending   = [];
         $iterator  = null;
         $dirname   = dirname(__DIR__) . '/Migration';
