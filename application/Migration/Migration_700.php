@@ -226,7 +226,7 @@ final class AAM_Migration_700
     private function _transform_legacy_settings($legacy_type, $new_type, $cb)
     {
         // Let's get all the settings first
-        $legacy   = AAM::api()->db->read('aam_access_settings');
+        $legacy   = AAM::api()->db->read('aam_access_settings', []);
         $settings = AAM::api()->db->read(AAM_Framework_Service_Settings::DB_OPTION);
 
         // Iterating of the list of all settings and modify the URL Access rule
