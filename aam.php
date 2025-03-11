@@ -248,12 +248,14 @@ class AAM
      */
     public static function activated_plugin($plugin)
     {
+        $misc = AAM::api()->misc;
+
         if (
             $plugin === "advanced-access-manager/aam.php"
             && !is_network_admin()
-            && AAM_Core_Request::server('REQUEST_METHOD') === 'GET'
-            && AAM_Core_Request::get('action') === 'activate'
-            && AAM_Core_Request::server('SCRIPT_NAME') === '/wp-admin/plugins.php'
+            && $misc->get($_SERVER, 'REQUEST_METHOD') === 'GET'
+            && filter_input(INPUT_GET, 'action') === 'activate'
+            && $misc->get($_SERVER, 'SCRIPT_NAME') === '/wp-admin/plugins.php'
         ) {
             wp_redirect(admin_url('admin.php?page=aam')); exit;
         }

@@ -15,7 +15,7 @@
  */
 class AAM_Service_SecurityAudit
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Security audit result

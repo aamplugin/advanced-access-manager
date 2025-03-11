@@ -10,17 +10,11 @@
 /**
  * Toolbar manager
  *
- * @since 6.9.33 https://github.com/aamplugin/advanced-access-manager/issues/392
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
- * @since 6.0.0 Initial implementation of the method
- *
  * @package AAM
- * @version 6.9.33
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Main_AdminToolbar extends AAM_Backend_Feature_Abstract
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Default access capability to the service

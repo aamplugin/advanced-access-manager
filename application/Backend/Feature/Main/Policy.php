@@ -16,8 +16,6 @@
 class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
 {
 
-    use AAM_Core_Contract_RequestTrait;
-
     /**
      * Default access capability to the feature
      *
@@ -65,7 +63,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
             $result = $view->loadTemplate(
                 dirname(__DIR__) . '/../tmpl/metabox/principal-iframe.php',
                 (object) array(
-                    'policyId' => $this->getFromQuery('id', FILTER_VALIDATE_INT)
+                    'policyId' => filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT)
                 )
             );
         }

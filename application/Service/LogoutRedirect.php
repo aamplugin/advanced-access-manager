@@ -15,7 +15,7 @@
  */
 class AAM_Service_LogoutRedirect
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Contains the redirect instructions for just logged out user

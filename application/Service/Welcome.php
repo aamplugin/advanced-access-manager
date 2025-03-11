@@ -15,7 +15,7 @@
  */
 class AAM_Service_Welcome
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor

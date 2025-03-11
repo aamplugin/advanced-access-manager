@@ -15,14 +15,14 @@
  */
 class AAM_Service_Policies
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     protected function __construct()

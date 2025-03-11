@@ -10,16 +10,11 @@
 /**
  * Abstract class for each backend UI feature
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.0.0 Initial implementation of the class
- *
  * @package AAM
- * @version 6.7.9
+ * @version 7.0.0
  */
 abstract class AAM_Backend_Feature_Abstract
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Default access capability to the service

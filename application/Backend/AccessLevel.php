@@ -19,8 +19,6 @@
 class AAM_Backend_AccessLevel
 {
 
-    use AAM_Core_Contract_RequestTrait;
-
     /**
      * Single instance of itself
      *

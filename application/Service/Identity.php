@@ -16,7 +16,7 @@
 class AAM_Service_Identity
 {
 
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * WordPress core user caps mapped to AAM permissions
@@ -70,45 +70,45 @@ class AAM_Service_Identity
     protected function initialize_hooks()
     {
         // Control the list of editable roles
-        $this->_register_filter('editable_roles', function($roles) {
+        add_filter('editable_roles', function($roles) {
             return $this->_filter_editable_roles($roles);
-        }, 10, 1, true);
+        }, 10, 1);
 
         // Control list of roles that are listed above the Users table
-        $this->_register_filter('views_users', function($roles) {
+        add_filter('views_users', function($roles) {
             return $this->_filter_views_users($roles);
-        }, 10, 1, true);
+        }, 10, 1);
 
         // Filter the list of users
-        $this->_register_action('pre_get_users', function($query) {
+        add_action('pre_get_users', function($query) {
             $this->_pre_get_users($query);
-        }, PHP_INT_MAX, 1, true);
+        }, PHP_INT_MAX, 1);
 
         // RESTful user querying
-        $this->_register_filter('rest_user_query', function($args) {
+        add_filter('rest_user_query', function($args) {
             return $this->_rest_user_query($args);
-        }, PHP_INT_MAX, 1, true);
+        }, PHP_INT_MAX, 1);
 
         // Check if user has ability to perform certain task on other users
-        $this->_register_filter('map_meta_cap', function($caps, $cap, $_, $args) {
+        add_filter('map_meta_cap', function($caps, $cap, $_, $args) {
             return $this->_map_meta_cap($caps, $cap, $args);
-        }, PHP_INT_MAX, 4, true);
+        }, PHP_INT_MAX, 4);
 
         // Additionally tap into password management
-        $this->_register_filter('show_password_fields', function($result, $user) {
+        add_filter('show_password_fields', function($result, $user) {
             return $this->_show_password_fields($result, $user);
-        }, 10, 2, true);
-        $this->_register_filter('allow_password_reset', function($result, $user_id) {
+        }, 10, 2);
+        add_filter('allow_password_reset', function($result, $user_id) {
             return $this->_allow_password_reset($result, $user_id);
-        }, 10, 2, true);
+        }, 10, 2);
         add_action('check_passwords', function($login, &$pwd1, &$pwd2) {
             if (!AAM::api()->misc->is_super_admin()) {
                 $this->_check_passwords($login, $pwd1, $pwd2);
             }
         }, 10, 3);
-        $this->_register_filter('rest_pre_insert_user', function($data, $request) {
+        add_filter('rest_pre_insert_user', function($data, $request) {
             return $this->_rest_pre_insert_user($data, $request);
-        }, 10, 2, true);
+        }, 10, 2);
     }
 
     /**

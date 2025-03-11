@@ -17,7 +17,7 @@ use Vectorface\Whip\Whip;
  */
 class AAM_Service_SecureLogin
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Default configurations

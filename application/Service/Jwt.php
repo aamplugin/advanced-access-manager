@@ -15,7 +15,7 @@
  */
 class AAM_Service_Jwt
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * JWT Registry DB option

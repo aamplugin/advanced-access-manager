@@ -16,7 +16,7 @@
 class AAM_Service_Widgets
 {
 
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Collection of captured widgets
@@ -93,7 +93,7 @@ class AAM_Service_Widgets
             add_action('in_admin_header', function () {
                 $screen = get_current_screen();
 
-                if (AAM_Core_Request::get('init') === 'widget') {
+                if (filter_input(INPUT_GET, 'init') === 'widget') {
                     if ($screen && $screen->id === 'dashboard') {
                         $this->_initialize_widgets();
 

@@ -16,7 +16,7 @@
 class AAM_Service_Urls
 {
 
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor

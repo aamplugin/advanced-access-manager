@@ -16,8 +16,6 @@
 class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
 {
 
-    use AAM_Core_Contract_RequestTrait;
-
     /**
      * Default access capability to the settings tab
      *

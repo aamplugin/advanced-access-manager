@@ -45,7 +45,11 @@ class AAM_Framework_Service_Settings
      */
     protected function initialize_hooks()
     {
-        $this->_data = $this->db->read(self::DB_OPTION, []);
+        $this->_data = apply_filters(
+            'aam_init_access_level_settings_filter',
+            $this->db->read(self::DB_OPTION, []),
+            $this
+        );
     }
 
     /**

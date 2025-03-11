@@ -14,28 +14,28 @@
  * is strongly recommended to adhere to this interface and periodically check if it
  * changed.
  *
- * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Roles roles(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Users users(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
- * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Urls urls(array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(array $settings = [])
+ * @method AAM_Framework_Service_Roles roles(array $settings = [])
+ * @method AAM_Framework_Service_Users users(array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(array $settings = [])
  *
  * @property AAM_Framework_Utility_Cache $cache
  * @property AAM_Framework_Utility_ObjectCache $object_cache
@@ -97,16 +97,6 @@ interface AAM_Framework_AccessLevel_Interface
      * @version 7.0.0
      */
     public function get_preference($preference_type, $reload = null);
-
-    /**
-     * Get AAM proxy instance to the WP core instance (if applicable)
-     *
-     * @return mixed
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function get_proxy_instance();
 
     /**
      * Get access level ID

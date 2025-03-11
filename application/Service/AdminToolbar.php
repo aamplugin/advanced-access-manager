@@ -16,8 +16,7 @@
 class AAM_Service_AdminToolbar
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
@@ -58,7 +57,7 @@ class AAM_Service_AdminToolbar
      */
     protected function initialize_hooks()
     {
-        $this->_register_action('wp_before_admin_bar_render', function () {
+        add_action('wp_before_admin_bar_render', function () {
             $this->_filter_admin_toolbar();
         }, PHP_INT_MAX, 0, true);
     }

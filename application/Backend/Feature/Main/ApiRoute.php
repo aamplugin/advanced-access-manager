@@ -10,17 +10,11 @@
 /**
  * WordPress API manager
  *
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
- * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/131
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.10
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Main_ApiRoute extends AAM_Backend_Feature_Abstract
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Default access capability to the service

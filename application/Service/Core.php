@@ -18,7 +18,7 @@ use Vectorface\Whip\Whip;
 class AAM_Service_Core
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * ConfigPress DB option

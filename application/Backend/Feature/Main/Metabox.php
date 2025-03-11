@@ -24,8 +24,6 @@
 class AAM_Backend_Feature_Main_Metabox extends AAM_Backend_Feature_Abstract
 {
 
-    use AAM_Core_Contract_RequestTrait;
-
     /**
      * Default access capability to the service
      *

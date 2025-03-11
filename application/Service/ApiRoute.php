@@ -15,7 +15,7 @@
  */
 class AAM_Service_ApiRoute
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
@@ -51,7 +51,7 @@ class AAM_Service_ApiRoute
     protected function initialize_hooks()
     {
         // Register API manager is applicable
-        $this->_register_filter('rest_pre_dispatch', function($result, $_, $request) {
+        add_filter('rest_pre_dispatch', function($result, $_, $request) {
             return $this->_rest_pre_dispatch($result, $request);
         }, PHP_INT_MAX, 3);
     }

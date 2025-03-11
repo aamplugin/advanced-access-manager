@@ -16,9 +16,6 @@
 class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
 {
 
-    use AAM_Core_Contract_ServiceTrait,
-        AAM_Core_Contract_RequestTrait;
-
     /**
      * Default access capability to the service
      *

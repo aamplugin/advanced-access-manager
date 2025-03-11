@@ -15,7 +15,7 @@
  */
 class AAM_Service_BackendMenu
 {
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
@@ -69,7 +69,7 @@ class AAM_Service_BackendMenu
 
         // Control admin area
         if (!defined('DOING_AJAX') || !DOING_AJAX) {
-            $this->_register_action('admin_init', function() {
+            add_action('admin_init', function() {
                 $this->_admin_init();
             }, PHP_INT_MAX);
         }
@@ -173,11 +173,11 @@ class AAM_Service_BackendMenu
         $id = $plugin_page;
 
         if (empty($id)) {
-            $id       = basename(AAM_Core_Request::server('SCRIPT_NAME'));
-            $taxonomy = AAM_Core_Request::get('taxonomy');
-            $postType = AAM_Core_Request::get('post_type');
-            $page     = AAM_Core_Request::get('page');
-            $params   = array();
+            $id       = basename(AAM::api()->misc->get($_SERVER, 'SCRIPT_NAME'));
+            $taxonomy = filter_input(INPUT_GET, 'taxonomy');
+            $postType = filter_input(INPUT_GET, 'post_type');
+            $page     = filter_input(INPUT_GET, 'page');
+            $params   = [];
 
             if (!empty($taxonomy)) {
                 array_push($params, 'taxonomy=' . $taxonomy);

@@ -16,7 +16,7 @@
 class AAM_Service_Metaboxes
 {
 
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
@@ -55,7 +55,7 @@ class AAM_Service_Metaboxes
         add_action('in_admin_header', function () {
             global $post;
 
-            if (AAM_Core_Request::get('init') === 'metabox') {
+            if (filter_input(INPUT_GET, 'init') === 'metabox') {
                 // Make sure that nobody is playing with screen options
                 if (is_a($post, 'WP_Post')) {
                     $this->_initialize_metaboxes($post->post_type);

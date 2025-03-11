@@ -16,7 +16,7 @@
 class AAM_Service_Content
 {
 
-    use AAM_Core_Contract_ServiceTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Default configurations
@@ -704,8 +704,8 @@ class AAM_Service_Content
                 // Cover the scenario when user uses Bulk Action or Quick Edit to
                 // change the Status to Published and post is not allowed to be
                 // published
-                $action = AAM_Core_Request::request('action');
-                $status = AAM_Core_Request::request('_status');
+                $action = AAM::api()->misc->get($_SERVER, 'action');
+                $status = AAM::api()->misc->get($_SERVER, '_status');
 
                 if (
                     in_array($action, [ 'edit', 'inline-save'] , true)

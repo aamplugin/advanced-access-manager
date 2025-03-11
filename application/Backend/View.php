@@ -13,27 +13,29 @@
  * This class is used to manage all AAM UI templates and interaction of the UI with
  * AAM backend core
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.6.0 Allow partial to be loaded more than once
- * @since 6.0.5 Removed prepareIframeWPAssetsURL method
- * @since 6.0.0 Initial implementation of the class
- *
  * @package AAM
- * @version 6.7.9
+ * @version 7.0.0
  */
 class AAM_Backend_View
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -55,6 +57,7 @@ class AAM_Backend_View
      *
      * @access public
      * @static
+     *
      * @version 7.0.0
      */
     public static function replace_aam_urls($str)
@@ -87,8 +90,8 @@ class AAM_Backend_View
      * @param array  $params
      *
      * @return string|null
-     *
      * @access public
+     *
      * @version 6.0.0
      */
     public static function loadPartial($tmpl, $params = array())
@@ -112,11 +115,8 @@ class AAM_Backend_View
      * @param object $params
      *
      * @return string
-     *
-     * @since 6.6.0 Fixed the way the partial is loaded
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
+     *
      * @version 6.6.0
      */
     public static function loadTemplate($file_path, $params =  null)
@@ -135,11 +135,8 @@ class AAM_Backend_View
      * Process the ajax call
      *
      * @return string
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
+     *
      * @version 6.7.9
      */
     public function processAjax()
@@ -169,7 +166,7 @@ class AAM_Backend_View
             $partial  = AAM::api()->misc->get($_POST, 'partial');
             $response = $this->renderContent((!empty($partial) ? $partial : 'main'));
 
-            $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
+            $accept = AAM::api()->misc->get($_SERVER, 'HTTP_ACCEPT_ENCODING');
             header('Content-Type: text/html; charset=UTF-8');
 
             $compressed = count(array_intersect(
@@ -209,8 +206,8 @@ class AAM_Backend_View
      * Run AAM iFrame
      *
      * @return string
-     *
      * @access public
+     *
      * @version 6.0.0
      */
     public function renderIFrame($type)
@@ -222,8 +219,8 @@ class AAM_Backend_View
                 echo $this->loadTemplate(
                     $basedir . 'post-iframe.php',
                     (object) array(
-                        'objectId'    => $this->getFromQuery('id'),
-                        'objectType'  => $this->getFromQuery('type'),
+                        'objectId'    => filter_input(INPUT_GET, 'id'),
+                        'objectType'  => filter_input(INPUT_GET, 'type'),
                         'postManager' => new AAM_Backend_Feature_Main_Content()
                     )
                 );
@@ -231,7 +228,7 @@ class AAM_Backend_View
                 echo $this->loadTemplate(
                     $basedir . 'user-iframe.php',
                     (object) array(
-                        'user' => new WP_User($this->getFromQuery('id')),
+                        'user' => new WP_User(filter_input(INPUT_GET, 'id')),
                         'type' => 'main'
                     )
                 );
@@ -397,6 +394,36 @@ class AAM_Backend_View
         }
 
         return $content;
+    }
+
+    /**
+     * Bootstrap the object
+     *
+     * @return AAM_Backend_View
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Backend_View
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function get_instance()
+    {
+        return self::bootstrap();
     }
 
 }

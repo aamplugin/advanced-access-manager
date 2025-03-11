@@ -16,7 +16,15 @@
 class AAM_Addon_Repository
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
 
     /**
      * The latest know premium release
@@ -25,7 +33,7 @@ class AAM_Addon_Repository
      *
      * @version 7.0.0
      */
-    const LATEST_PREMIUM_VERSION = '7.0.0-beta.1';
+    const LATEST_PREMIUM_VERSION = '7.0.0';
 
     /**
      * Constructor
@@ -156,6 +164,36 @@ class AAM_Addon_Repository
         }
 
         return $data;
+    }
+
+    /**
+     * Bootstrap the object
+     *
+     * @return AAM_Addon_Repository
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Addon_Repository
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public static function get_instance()
+    {
+        return self::bootstrap();
     }
 
 }

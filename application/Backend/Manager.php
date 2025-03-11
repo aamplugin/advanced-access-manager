@@ -16,8 +16,15 @@
 class AAM_Backend_Manager
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
 
     /**
      * Initialize the AAM backend manager
@@ -36,7 +43,9 @@ class AAM_Backend_Manager
 
         // Alter user edit screen with support for multiple roles
         if (AAM::api()->config->get('core.settings.multi_access_levels')) {
-            add_action('edit_user_profile', array($this, 'editUserProfilePage'));
+            add_action('edit_user_profile', function($user) {
+                $this->_update_user_profile_form($user);
+            });
             add_action('user_new_form', array($this, 'addNewUserPage'));
 
             // User profile update action
@@ -70,7 +79,7 @@ class AAM_Backend_Manager
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
             // Checking for the new update availability
-            $this->checkForPremiumAddonUpdate();
+            $this->_check_for_premium_addon_update();
         }
 
         add_action( 'admin_enqueue_scripts', function() {
@@ -110,9 +119,9 @@ class AAM_Backend_Manager
      * @param array $actions
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.20
+     *
+     * @version 7.0.0
      */
     public function add_premium_link($actions)
     {
@@ -131,17 +140,17 @@ class AAM_Backend_Manager
      * Check if there is a new premium version available
      *
      * @return void
+     * @access private
      *
-     * @access protected
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    protected function checkForPremiumAddonUpdate()
+    private function _check_for_premium_addon_update()
     {
         $premium = AAM_Addon_Repository::get_instance()->get_premium_data();
 
         if (!is_null($premium['version']) && $premium['hasUpdate']) {
             AAM_Core_Console::add(
-                __('The new version of premium Complete Package is available. Go to your license page to download the latest release.', AAM_KEY)
+                __('The new version of premium add-on is available. Go to your license page to download the latest release.', AAM_KEY)
             );
         }
     }
@@ -158,14 +167,15 @@ class AAM_Backend_Manager
     {
         if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
             $access_level = AAM_Backend_AccessLevel::get_instance()->get_access_level();
+            $ui           = filter_input(INPUT_GET, 'aamframe');
 
             // Prepare the JS locals
-            $locals   = apply_filters('aam_js_localization_filter', array(
+            $locals = apply_filters('aam_js_localization_filter', array(
                 'nonce'      => wp_create_nonce('aam_ajax'),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'rest_base'  => esc_url_raw(rest_url()),
                 'ajaxurl'    => esc_url(admin_url('admin-ajax.php')),
-                'ui'            => AAM_Core_Request::get('aamframe', 'main'),
+                'ui'         => empty($ui) ? 'main' : $ui,
                 'url' => array(
                     'editUser'  => esc_url(admin_url('user-edit.php')),
                     'addUser'   => esc_url(admin_url('user-new.php')),
@@ -202,11 +212,11 @@ class AAM_Backend_Manager
      * @param WP_User $user
      *
      * @return void
-     *
      * @access public
-     * @version 6.7.6
+     *
+     * @version 7.0.0
      */
-    public function editUserProfilePage($user)
+    public function _update_user_profile_form($user)
     {
         if (current_user_can('promote_user', $user->ID)) {
             require dirname(__FILE__) . '/tmpl/user/multiple-roles.php';
@@ -278,16 +288,13 @@ class AAM_Backend_Manager
      * Render AAM iframe content if specified
      *
      * @return void
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.7.9
+     *
+     * @version 7.0.0
      */
     public function adminInit()
     {
-        $frame = $this->getFromQuery('aamframe');
+        $frame = filter_input(INPUT_GET, 'aamframe');
 
         if ($frame) {
             AAM_Backend_View::get_instance()->renderIFrame($frame);
@@ -300,9 +307,9 @@ class AAM_Backend_Manager
      * @param string $text
      *
      * @return string
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function thankYou($text)
     {
@@ -377,6 +384,36 @@ class AAM_Backend_Manager
         }
 
         exit;
+    }
+
+    /**
+     * Bootstrap the object
+     *
+     * @return AAM_Backend_Manager
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Backend_Manager
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public static function get_instance()
+    {
+        return self::bootstrap();
     }
 
 }

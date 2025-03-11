@@ -19,8 +19,6 @@
 class AAM_Backend_Widget_Login extends WP_Widget
 {
 
-    use AAM_Core_Contract_RequestTrait;
-
     /**
      * Widget arguments
      *
@@ -109,7 +107,7 @@ class AAM_Backend_Widget_Login extends WP_Widget
             $instance['user-title'] = __('Howdy, %username%', AAM_KEY);
         }
 
-        $instance['redirect'] = $this->getFromQuery('redirect_to');
+        $instance['redirect'] = filter_input(INPUT_GET, 'redirect_to');
 
         return $instance;
     }

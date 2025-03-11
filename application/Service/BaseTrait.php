@@ -8,60 +8,56 @@
  */
 
 /**
- * Reusable elements for singletons
+ * Reusable elements for each service
  *
  * @package AAM
  * @version 7.0.0
  */
-trait AAM_Core_Contract_SingletonTrait
+trait AAM_Service_BaseTrait
 {
 
     /**
      * Single instance of itself
      *
      * @var object
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private static $_instance = null;
-
-    /**
-     * Constructor
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
-    protected function __construct() { }
+    protected static $instance = null;
 
     /**
-     * Bootstrap the object
+     * Bootstrap the service
      *
-     * @return self
+     * @return object
      *
+     * @param boolean $reload
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function bootstrap()
+    public static function bootstrap($reload = false)
     {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
+        if (is_null(self::$instance) || $reload) {
+            self::$instance = new self;
         }
 
-        return self::$_instance;
+        return self::$instance;
     }
 
     /**
      * Get single instance of itself
      *
-     * @return self
+     * @return object
      *
+     * @param boolean $reload
      * @access public
+     *
      * @version 7.0.0
      */
-    public static function get_instance()
+    public static function get_instance($reload = false)
     {
-        return self::bootstrap();
+        return self::bootstrap($reload);
     }
 
 }

@@ -16,7 +16,7 @@
 class AAM_Service_Hooks
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    use AAM_Service_BaseTrait;
 
     /**
      * Constructor
