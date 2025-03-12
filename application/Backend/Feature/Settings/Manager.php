@@ -27,9 +27,9 @@ class AAM_Backend_Feature_Settings_Manager extends AAM_Backend_Feature_Abstract
      * Register settings UI manager
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {

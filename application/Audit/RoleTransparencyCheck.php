@@ -40,7 +40,7 @@ class AAM_Audit_RoleTransparencyCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -86,7 +86,7 @@ class AAM_Audit_RoleTransparencyCheck
 
         if (!empty($diff_roles)) {
             array_push($response, self::_format_issue(sprintf(
-                __('Detected hidden role(s): %s', AAM_KEY),
+                __('Detected hidden role(s): %s', 'advanced-access-manager'),
                 implode(', ', $diff_roles)
             ), 'HIDDEN_ROLE'));
         }

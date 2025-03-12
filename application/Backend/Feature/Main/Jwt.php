@@ -19,14 +19,14 @@ class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_jwt';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/jwt.php';
 
@@ -34,16 +34,16 @@ class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract
      * Register JWT service UI
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'           => 'jwt',
             'position'      => 65,
-            'title'         => __('JWT Tokens', AAM_KEY),
+            'title'         => __('JWT Tokens', 'advanced-access-manager'),
             'capability'    => self::ACCESS_CAPABILITY,
             'type'          => 'main',
             'view'          => __CLASS__,

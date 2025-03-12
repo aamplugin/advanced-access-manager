@@ -114,7 +114,7 @@ class AAM_Service_Core
                     array(
                         'parent' => 'site-name',
                         'id'     => 'aam',
-                        'title'  => __('Manager Access', AAM_KEY),
+                        'title'  => __('Manager Access', 'advanced-access-manager'),
                         'href'   => admin_url('admin.php?page=aam'),
                     )
                 );
@@ -143,7 +143,7 @@ class AAM_Service_Core
                                 array(
                                     'parent' => $menu_id,
                                     'id'     => $menu_id . '-aam',
-                                    'title'  => __('Manage Access', AAM_KEY),
+                                    'title'  => __('Manage Access', 'advanced-access-manager'),
                                     'href'   => admin_url('admin.php?page=aam'),
                                 )
                             );
@@ -189,7 +189,7 @@ class AAM_Service_Core
             ) {
                 $response = new WP_Error(
                     'rest_access_disabled',
-                    __('RESTful API is disabled', AAM_KEY),
+                    __('RESTful API is disabled', 'advanced-access-manager'),
                     array('status' => 403)
                 );
             }
@@ -257,7 +257,7 @@ class AAM_Service_Core
         $db     = AAM::api()->db;
         $result = [
             'version'   => AAM_VERSION,
-            'plugin'    => AAM_KEY,
+            'plugin'    => 'advanced-access-manager',
             'timestamp' => (new DateTime('now', new DateTimeZone('UTC')))->format('U'),
             'dataset'   => [
                 'settings'    => $db->read(AAM_Framework_Service_Settings::DB_OPTION, []),

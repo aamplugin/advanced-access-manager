@@ -11,13 +11,13 @@
             <div class="col-xs-12">
                 <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
-                        <?php echo __('Seamlessly redirects users to their designated landing page post-login, ensuring personalized and efficient access to the website.', AAM_KEY); ?>
+                        <?php echo __('Seamlessly redirects users to their designated landing page post-login, ensuring personalized and efficient access to the website.', 'advanced-access-manager'); ?>
                     </p>
                 <?php } ?>
 
                 <div class="aam-overwrite" id="aam-login-redirect-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="login-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="login-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
 
                 <?php $type = $settings['type']; ?>
@@ -31,7 +31,7 @@
                         value="default"
                         <?php echo ($type === 'default' ? ' checked' : ''); ?>
                     />
-                    <label for="login-redirect-default"><?php echo __('WordPress default behavior', AAM_KEY); ?></label>
+                    <label for="login-redirect-default"><?php echo __('WordPress default behavior', 'advanced-access-manager'); ?></label>
                 </div>
                 <div class="radio">
                     <input
@@ -72,7 +72,7 @@
                     id="page-login-redirect-action"
                     style="display: <?php echo ($type === 'page_redirect' ? 'block' : 'none'); ?>;"
                 >
-                    <label><?php echo __('Existing Page', AAM_KEY); ?></label>
+                    <label><?php echo __('Existing Page', 'advanced-access-manager'); ?></label>
                     <?php
                         wp_dropdown_pages(array(
                             'depth'            => 99,
@@ -80,7 +80,7 @@
                             'echo'             => 1,
                             'id'               => 'login-redirect-page',
                             'class'            => 'form-control',
-                            'show_option_none' => __('-- Select Page --', AAM_KEY)
+                            'show_option_none' => __('-- Select Page --', 'advanced-access-manager')
                         ));
                     ?>
                 </div>
@@ -90,7 +90,7 @@
                     id="url-login-redirect-action"
                     style="display: <?php echo ($type === 'url_redirect' ? 'block' : 'none'); ?>;"
                 >
-                    <label><?php echo __('The URL', AAM_KEY); ?></label>
+                    <label><?php echo __('The URL', 'advanced-access-manager'); ?></label>
                     <input
                         type="text"
                         class="form-control"
@@ -105,7 +105,7 @@
                     id="callback-login-redirect-action"
                     style="display: <?php echo ($type === 'trigger_callback' ? 'block' : 'none'); ?>;"
                 >
-                    <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                    <label><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                     <input
                         type="text"
                         class="form-control"

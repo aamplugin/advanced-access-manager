@@ -1,9 +1,9 @@
 <?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) {
-    wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
-    wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'));
-    wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js');
+    wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css', [], AAM_VERSION);
+    wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'), AAM_VERSION);
+    wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js', [], AAM_VERSION);
 }
 ?>
 
@@ -31,7 +31,7 @@ if (defined('AAM_KEY')) {
                     <div class="metabox-holder shared-metabox aam-notification-metabox">
                         <div class="postbox">
                             <h3 class="hndle text-danger">
-                                <i class='icon-attention-circled'></i> <span><?php echo __('Notifications', AAM_KEY); ?></span>
+                                <i class='icon-attention-circled'></i> <span><?php echo __('Notifications', 'advanced-access-manager'); ?></span>
                             </h3>
                             <div class="inside">
                                 <div class="aam-postbox-inside">
@@ -59,7 +59,7 @@ if (defined('AAM_KEY')) {
                                     <h4 class="panel-title">
                                         <a role="button" data-toggle="collapse" data-parent="#security-score-block" href="#security-score" aria-controls="security-score" style="font-size: 2rem;">
                                             <?php echo sprintf(
-                                                __('Your Security Score: %s %s', AAM_KEY),
+                                                __('Your Security Score: %s %s', 'advanced-access-manager'),
                                                 empty($score) ? 'Unknown' : $score,
                                                 empty($grade) ? '' : "({$grade})"
                                             ); ?>
@@ -74,7 +74,7 @@ if (defined('AAM_KEY')) {
                                             <div id="security_gauge" class="gauge-container" data-score="<?php echo esc_attr(AAM_Service_SecurityAudit::get_instance()->get_score()); ?>"></div>
                                         </div>
                                         <?php } else { ?>
-                                            <p class="aam-info"><?php echo __('Run first security scan to identify your website AAM security score', AAM_KEY); ?></p>
+                                            <p class="aam-info"><?php echo __('Run first security scan to identify your website AAM security score', 'advanced-access-manager'); ?></p>
                                         <?php } ?>
 
                                         <a href="#" target="_blank" id="security_audit_tab" class="btn btn-primary btn-block">Learn More →</a>
@@ -92,24 +92,24 @@ if (defined('AAM_KEY')) {
                             <div class="aam-social">
                                 <a href="#" title="Access" data-type="main" class="aam-area text-danger">
                                     <i class="icon-cog-alt"></i>
-                                    <span><?php echo __('Access', AAM_KEY); ?></span>
+                                    <span><?php echo __('Access', 'advanced-access-manager'); ?></span>
                                 </a>
                                 <?php if (current_user_can('aam_manage_settings')) { ?>
                                     <a href="#" title="Settings" data-type="settings" class="aam-area">
                                         <i class="icon-wrench"></i>
-                                        <span><?php echo __('Settings', AAM_KEY); ?></span>
+                                        <span><?php echo __('Settings', 'advanced-access-manager'); ?></span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_manage_addons')) { ?>
                                     <a href="#" title="Premium" data-type="extensions" class="aam-area">
                                         <i class="icon-cubes"></i>
-                                        <span><?php echo __('Premium', AAM_KEY); ?></span>
+                                        <span><?php echo __('Premium', 'advanced-access-manager'); ?></span>
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
                                     <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Documentation">
                                         <i class="icon-help-circled"></i>
-                                        <span><?php echo __('Docs', AAM_KEY); ?></span>
+                                        <span><?php echo __('Docs', 'advanced-access-manager'); ?></span>
                                     </a>
                                 <?php } ?>
                             </div>
@@ -123,12 +123,12 @@ if (defined('AAM_KEY')) {
                             <div class="inside">
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        <a href="#transfer-settings-modal" data-toggle="modal" class="btn btn-warning btn-block"><?php echo __('Export/Import AAM Settings', AAM_KEY); ?></a>
+                                        <a href="#transfer-settings-modal" data-toggle="modal" class="btn btn-warning btn-block"><?php echo __('Export/Import AAM Settings', 'advanced-access-manager'); ?></a>
                                     </div>
                                 </div>
                                 <div class="row aam-outer-top-xxs">
                                     <div class="col-xs-12">
-                                        <a href="#clear-settings-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Reset AAM Settings', AAM_KEY); ?></a>
+                                        <a href="#clear-settings-modal" data-toggle="modal" class="btn btn-danger btn-block"><?php echo __('Reset AAM Settings', 'advanced-access-manager'); ?></a>
                                     </div>
                                 </div>
                             </div>
@@ -138,19 +138,19 @@ if (defined('AAM_KEY')) {
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-body">
-                                        <p class="alert alert-danger" id="file-api-error"><?php echo __('Your browser does not support modern way to work with files. The Export/Import feature will not work properly. Consider to use the latest Chrome, Firefox or Safari browser instead.', AAM_KEY); ?></p>
+                                        <p class="alert alert-danger" id="file-api-error"><?php echo __('Your browser does not support modern way to work with files. The Export/Import feature will not work properly. Consider to use the latest Chrome, Firefox or Safari browser instead.', 'advanced-access-manager'); ?></p>
 
                                         <div id="import-export-container">
                                             <ul class="nav nav-tabs" role="tablist">
-                                                <li role="presentation" class="active"><a href="#export-tab" aria-controls="export-tab" role="tab" data-toggle="tab"><?php echo __('Export', AAM_KEY); ?></a></li>
-                                                <li role="presentation"><a href="#import-tab" aria-controls="import-tab" role="tab" data-toggle="tab"><?php echo __('Import', AAM_KEY); ?></a></li>
+                                                <li role="presentation" class="active"><a href="#export-tab" aria-controls="export-tab" role="tab" data-toggle="tab"><?php echo __('Export', 'advanced-access-manager'); ?></a></li>
+                                                <li role="presentation"><a href="#import-tab" aria-controls="import-tab" role="tab" data-toggle="tab"><?php echo __('Import', 'advanced-access-manager'); ?></a></li>
                                             </ul>
 
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="export-tab">
                                                     <p class="alert alert-info">
                                                         <?php echo sprintf(
-                                                            __('Export AAM settings so they can be imported to a different location. To learn more about customizing exported data, refer to the %s"How to export/import AAM settings?"%s article.', AAM_KEY),
+                                                            __('Export AAM settings so they can be imported to a different location. To learn more about customizing exported data, refer to the %s"How to export/import AAM settings?"%s article.', 'advanced-access-manager'),
                                                             '<a href="https://aamportal.com/question/how-to-export-import-aam-settings?ref=plugin" target="_blank">',
                                                             '</a>'
                                                             );
@@ -158,12 +158,12 @@ if (defined('AAM_KEY')) {
                                                     </p>
 
                                                     <div class="form-group aam-bordered aam-outer-top-xxs text-center">
-                                                        <a href="#" id="export-settings" class="btn btn-primary"><?php echo __('Download Exported Settings', AAM_KEY); ?></a>
+                                                        <a href="#" id="export-settings" class="btn btn-primary"><?php echo __('Download Exported Settings', 'advanced-access-manager'); ?></a>
                                                     </div>
                                                 </div>
 
                                                 <div role="tabpanel" class="tab-pane" id="import-tab">
-                                                    <p class="alert alert-warning"><?php echo __('Select a *.json file with valid AAM settings. All the current AAM settings will be lost and replaced with imported settings.', AAM_KEY); ?></p>
+                                                    <p class="alert alert-warning"><?php echo __('Select a *.json file with valid AAM settings. All the current AAM settings will be lost and replaced with imported settings.', 'advanced-access-manager'); ?></p>
                                                     <div class="form-group aam-bordered aam-outer-top-xxs">
                                                         <input type="file" id="aam-settings" name="aam-settings" />
                                                     </div>
@@ -172,7 +172,7 @@ if (defined('AAM_KEY')) {
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', 'advanced-access-manager'); ?></button>
                                     </div>
                                 </div>
                             </div>
@@ -182,15 +182,15 @@ if (defined('AAM_KEY')) {
                             <div class="modal-dialog modal-sm" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title"><?php echo __('Clear all settings', AAM_KEY); ?></h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title"><?php echo __('Clear all settings', 'advanced-access-manager'); ?></h4>
                                     </div>
                                     <div class="modal-body">
-                                        <p class="text-center alert alert-danger text-larger"><?php echo __('All AAM settings will be removed.', AAM_KEY); ?></p>
+                                        <p class="text-center alert alert-danger text-larger"><?php echo __('All AAM settings will be removed.', 'advanced-access-manager'); ?></p>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" id="clear-settings"><?php echo __('Clear', AAM_KEY); ?></button>
-                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', AAM_KEY); ?></button>
+                                        <button type="button" class="btn btn-danger" id="clear-settings"><?php echo __('Clear', 'advanced-access-manager'); ?></button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', 'advanced-access-manager'); ?></button>
                                     </div>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@ if (defined('AAM_KEY')) {
                                     <table class="table table-striped table-bordered dataTable no-footer">
                                         <thead>
                                             <tr>
-                                                <th><?php echo __('Registered License', AAM_KEY); ?></th>
+                                                <th><?php echo __('Registered License', 'advanced-access-manager'); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -236,8 +236,8 @@ if (defined('AAM_KEY')) {
                                     Email us your report at <a href="mailto:support@aamplugin.com">support@aamplugin.com</a>, and we'll schedule a video consultation to guide you.
                                     Please note, this is a paid service, and we will send an invoice prior to the session.
                                 </p>
-                                <a href="#" class="btn btn-info btn-block download-latest-report""><?php echo __('Download Latest Report', AAM_KEY); ?></a>
-                                <a href="mailto:support@aamplugin.com" class="btn btn-primary btn-block"><?php echo __('Contact Us', AAM_KEY); ?></a>
+                                <a href="#" class="btn btn-info btn-block download-latest-report""><?php echo __('Download Latest Report', 'advanced-access-manager'); ?></a>
+                                <a href="mailto:support@aamplugin.com" class="btn btn-primary btn-block"><?php echo __('Contact Us', 'advanced-access-manager'); ?></a>
                             </div>
                         </div>
                     </div>

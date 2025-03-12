@@ -7,8 +7,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th width="80%"><?php echo __('Service Name/Description', AAM_KEY); ?></th>
-                    <th><?php echo __('Status', AAM_KEY); ?></th>
+                    <th width="80%"><?php echo __('Service Name/Description', 'advanced-access-manager'); ?></th>
+                    <th><?php echo __('Status', 'advanced-access-manager'); ?></th>
                 </tr>
             </thead>
             <tbody></tbody>

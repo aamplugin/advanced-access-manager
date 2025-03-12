@@ -180,7 +180,7 @@ trait AAM_Restful_ServiceTrait
             if (empty($role_id)) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The role_id is required', AAM_KEY),
+                    __('The role_id is required', 'advanced-access-manager'),
                     array('status'  => 400)
                 );
             }
@@ -190,7 +190,7 @@ trait AAM_Restful_ServiceTrait
             if (empty($user_id)) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The user_id is required', AAM_KEY),
+                    __('The user_id is required', 'advanced-access-manager'),
                     array('status'  => 400)
                 );
             }
@@ -279,10 +279,7 @@ trait AAM_Restful_ServiceTrait
         } catch (Exception $_) {
             $response = new WP_Error(
                 'rest_not_found',
-                sprintf(
-                    __("The role '%s' does not exist or is not editable"),
-                    $slug
-                ),
+                sprintf("The role '%s' does not exist or is not editable", $slug),
                 [ 'status'  => 404 ]
             );
         }
@@ -323,7 +320,7 @@ trait AAM_Restful_ServiceTrait
             $response = new WP_Error(
                 'rest_not_found',
                 sprintf(
-                    __("The user with ID '%s' does not exist or is not editable"),
+                    "The user with ID '%s' does not exist or is not editable",
                     $user_id
                 ),
                 [ 'status'  => 404 ]

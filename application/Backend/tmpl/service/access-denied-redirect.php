@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo __('Automatically redirects users to a desired destination when access to restricted resources is denied, with options to customize redirects for specific users or roles for restricted areas like posts, categories, and menus.', AAM_KEY); ?>
+                    <?php echo __('Automatically redirects users to a desired destination when access to restricted resources is denied, with options to customize redirects for specific users or roles for restricted areas like posts, categories, and menus.', 'advanced-access-manager'); ?>
                 </p>
 
                 <div
@@ -21,14 +21,14 @@
                     id="aam-redirect-overwrite"
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
 
                 <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', AAM_KEY); ?></a></li>
-                    <?php if (!$access_level->is_visitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', AAM_KEY); ?></a></li><?php } ?>
-                    <li role="presentation"><a href="#api-redirect" aria-controls="api" role="tab" data-toggle="tab"><i class="icon-exchange"></i> <?php echo __('RESTful Redirect', AAM_KEY); ?></a></li>
+                    <li role="presentation" class="active"><a href="#frontend-redirect" aria-controls="frontend" role="tab" data-toggle="tab"><i class="icon-home"></i> <?php echo __('Frontend Redirect', 'advanced-access-manager'); ?></a></li>
+                    <?php if (!$access_level->is_visitor()) { ?><li role="presentation"><a href="#backend-redirect" aria-controls="backend" role="tab" data-toggle="tab"><i class="icon-circle"></i> <?php echo __('Backend Redirect', 'advanced-access-manager'); ?></a></li><?php } ?>
+                    <li role="presentation"><a href="#api-redirect" aria-controls="api" role="tab" data-toggle="tab"><i class="icon-exchange"></i> <?php echo __('RESTful Redirect', 'advanced-access-manager'); ?></a></li>
                 </ul>
 
                 <div class="tab-content">
@@ -113,14 +113,14 @@
                             id="frontend-default-action"
                             style="display: <?php echo ($frontend_redirect['type'] === 'default' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                            <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', 'advanced-access-manager'); ?></label>
                             <?php $redirect_code = isset($frontend_redirect['http_status_code']) ? $frontend_redirect['http_status_code'] : 401; ?>
                             <select class="form-control form-clearable" id="frontend-default-status-code" data-group="frontend">
-                                <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
-                                <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
-                                <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
-                                <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
-                                <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', 'advanced-access-manager'); ?></option>
+                                <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', 'advanced-access-manager'); ?></option>
+                                <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', 'advanced-access-manager'); ?></option>
+                                <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', 'advanced-access-manager'); ?></option>
+                                <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', 'advanced-access-manager'); ?></option>
                             </select>
                         </div>
 
@@ -129,25 +129,25 @@
                             id="frontend-message-action"
                             style="display: <?php echo ($frontend_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <label for="frontend-message"><?php echo __('Customized Message', 'advanced-access-manager'); ?></label>
                             <?php $redirect_message = isset($frontend_redirect['message']) ? $frontend_redirect['message'] : ''; ?>
                             <textarea
                                 class="form-control"
                                 name="frontend.redirect.message"
                                 data-group="frontend"
                                 rows="3"
-                                placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter message...', 'advanced-access-manager'); ?>"
                             ><?php echo esc_textarea($redirect_message); ?></textarea>
 
                             <div class="aam-mt-1">
-                                <label for="frontend-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <label for="frontend-message-status-code"><?php echo __('HTTP Status Code', 'advanced-access-manager'); ?></label>
                                 <?php $redirect_code = isset($frontend_redirect['http_status_code']) ? $frontend_redirect['http_status_code'] : 401; ?>
                                 <select class="form-control form-clearable" name="frontend.redirect.message.code" id="frontend-message-status-code" data-group="frontend">
-                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
-                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
-                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
-                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
-                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', 'advanced-access-manager'); ?></option>
+                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', 'advanced-access-manager'); ?></option>
+                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', 'advanced-access-manager'); ?></option>
+                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', 'advanced-access-manager'); ?></option>
+                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', 'advanced-access-manager'); ?></option>
                                 </select>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                             id="frontend-page-action"
                             style="display: <?php echo ($frontend_redirect['type'] === 'page_redirect' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
+                            <label for="frontend-page"><?php echo __('Existing Page', 'advanced-access-manager'); ?></label>
                             <?php
                                 wp_dropdown_pages(array(
                                     'depth'            => 99,
@@ -165,7 +165,7 @@
                                     'echo'             => 1,
                                     'id'               => 'frontend-page',
                                     'class'            => 'form-control',
-                                    'show_option_none' => __('-- Select Page --', AAM_KEY)
+                                    'show_option_none' => __('-- Select Page --', 'advanced-access-manager')
                                 ));
                             ?>
                         </div>
@@ -175,7 +175,7 @@
                             id="frontend-url-action"
                             style="display: <?php echo ($frontend_redirect['type'] === 'url_redirect' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-url"><?php echo __('The URL', AAM_KEY); ?></label>
+                            <label for="frontend-url"><?php echo __('The URL', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
@@ -191,11 +191,11 @@
                             id="frontend-callback-action"
                             style="display: <?php echo ($frontend_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                            <label for="frontend-url"><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
-                                placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter valid callback', 'advanced-access-manager'); ?>"
                                 data-group="frontend"
                                 name="frontend.redirect.callback"
                                 value="<?php echo stripslashes(esc_js(isset($frontend_redirect['callback']) ? $frontend_redirect['callback'] : '')); ?>"
@@ -270,14 +270,14 @@
                             id="backend-default"
                             style="display: <?php echo ($backend_redirect['type'] === 'default' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                            <label for="frontend-default-status-code"><?php echo __('HTTP Status Code', 'advanced-access-manager'); ?></label>
                             <?php $redirect_code = isset($backend_redirect['http_status_code']) ? $backend_redirect['http_status_code'] : 401; ?>
                             <select class="form-control form-clearable" id="backend-default-status-code" data-group="frontend">
-                                <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
-                                <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
-                                <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
-                                <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
-                                <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', 'advanced-access-manager'); ?></option>
+                                <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', 'advanced-access-manager'); ?></option>
+                                <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', 'advanced-access-manager'); ?></option>
+                                <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', 'advanced-access-manager'); ?></option>
+                                <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', 'advanced-access-manager'); ?></option>
                             </select>
                         </div>
 
@@ -286,25 +286,25 @@
                             id="backend-message"
                             style="display: <?php echo ($backend_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="backend-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <label for="backend-message"><?php echo __('Customized Message', 'advanced-access-manager'); ?></label>
                             <?php $redirect_message = isset($backend_redirect['message']) ? $backend_redirect['message'] : ''; ?>
                             <textarea
                                 class="form-control"
                                 rows="3"
                                 data-group="backend"
-                                placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter message...', 'advanced-access-manager'); ?>"
                                 name="backend.redirect.message"
                             ><?php echo esc_textarea($redirect_message); ?></textarea>
 
                             <div class="aam-mt-1">
-                                <label for="backend-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <label for="backend-message-status-code"><?php echo __('HTTP Status Code', 'advanced-access-manager'); ?></label>
                                 <?php $redirect_code = isset($backend_redirect['http_status_code']) ? $backend_redirect['http_status_code'] : 401; ?>
                                 <select class="form-control form-clearable" name="backend.redirect.message.code" id="backend-message-status-code" data-group="backend">
-                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
-                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
-                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
-                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
-                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', 'advanced-access-manager'); ?></option>
+                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', 'advanced-access-manager'); ?></option>
+                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', 'advanced-access-manager'); ?></option>
+                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', 'advanced-access-manager'); ?></option>
+                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', 'advanced-access-manager'); ?></option>
                                 </select>
                             </div>
                         </div>
@@ -314,7 +314,7 @@
                             id="backend-page-action"
                             style="display: <?php echo ($backend_redirect['type'] === 'page_redirect' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="backend-page"><?php echo __('Existing Page', AAM_KEY); ?></label>
+                            <label for="backend-page"><?php echo __('Existing Page', 'advanced-access-manager'); ?></label>
                             <?php
                                 wp_dropdown_pages(array(
                                     'depth'            => 99,
@@ -322,7 +322,7 @@
                                     'echo'             => 1,
                                     'id'               => 'backend-page',
                                     'class'            => 'form-control',
-                                    'show_option_none' => __('-- Select Page --', AAM_KEY)
+                                    'show_option_none' => __('-- Select Page --', 'advanced-access-manager')
                                 ));
                             ?>
                         </div>
@@ -332,7 +332,7 @@
                             id="backend-url"
                             style="display: <?php echo ($backend_redirect['type'] === 'url_redirect' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="backend-url"><?php echo __('The URL', AAM_KEY); ?></label>
+                            <label for="backend-url"><?php echo __('The URL', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
@@ -348,12 +348,12 @@
                             id="backend-callback-action"
                             style="display: <?php echo ($backend_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                            <label for="frontend-url"><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
                                 data-group="backend"
-                                placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter valid callback', 'advanced-access-manager'); ?>"
                                 name="backend.redirect.callback"
                                 value="<?php echo stripslashes(esc_js(isset($backend_redirect['callback']) ? $backend_redirect['callback'] : '')); ?>"
                             />
@@ -403,25 +403,25 @@
                             id="api-message"
                             style="display: <?php echo ($api_redirect['type'] === 'custom_message' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="api-message"><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <label for="api-message"><?php echo __('Customized Message', 'advanced-access-manager'); ?></label>
                             <?php $redirect_message = isset($api_redirect['message']) ? $api_redirect['message'] : ''; ?>
                             <textarea
                                 class="form-control"
                                 rows="3"
                                 data-group="api"
-                                placeholder="<?php echo __('Enter message...', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter message...', 'advanced-access-manager'); ?>"
                                 name="api.redirect.message"
                             ><?php echo esc_textarea($redirect_message); ?></textarea>
 
                             <div class="aam-mt-1">
-                                <label for="api-message-status-code"><?php echo __('HTTP Status Code', AAM_KEY); ?></label>
+                                <label for="api-message-status-code"><?php echo __('HTTP Status Code', 'advanced-access-manager'); ?></label>
                                 <?php $redirect_code = isset($api_redirect['http_status_code']) ? $api_redirect['http_status_code'] : 401; ?>
                                 <select class="form-control form-clearable" name="api.redirect.message.code" id="api-message-status-code" data-group="api">
-                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', AAM_KEY); ?></option>
-                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', AAM_KEY); ?></option>
-                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', AAM_KEY); ?></option>
-                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', AAM_KEY); ?></option>
-                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', AAM_KEY); ?></option>
+                                    <option value="401"><?php echo __('HTTP Code (Default 401 - Unauthorized)', 'advanced-access-manager'); ?></option>
+                                    <option value="402"<?php echo $redirect_code == 402 ? ' selected' : ''; ?>><?php echo __('402 - Payment Required', 'advanced-access-manager'); ?></option>
+                                    <option value="403"<?php echo $redirect_code == 403 ? ' selected' : ''; ?>><?php echo __('403 - Forbidden', 'advanced-access-manager'); ?></option>
+                                    <option value="404"<?php echo $redirect_code == 404 ? ' selected' : ''; ?>><?php echo __('404 - Not Found', 'advanced-access-manager'); ?></option>
+                                    <option value="500"<?php echo $redirect_code == 500 ? ' selected' : ''; ?>><?php echo __('500 - Internal Server Error (WordPress Default)', 'advanced-access-manager'); ?></option>
                                 </select>
                             </div>
                         </div>
@@ -431,12 +431,12 @@
                             id="api-callback-action"
                             style="display: <?php echo ($api_redirect['type'] === 'trigger_callback' ? 'block' : 'none'); ?>;"
                         >
-                            <label for="frontend-url"><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                            <label for="frontend-url"><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control"
                                 data-group="api"
-                                placeholder="<?php echo __('Enter valid callback', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter valid callback', 'advanced-access-manager'); ?>"
                                 name="api.redirect.callback"
                                 value="<?php echo stripslashes(esc_js(isset($api_redirect['callback']) ? $api_redirect['callback'] : '')); ?>"
                             />

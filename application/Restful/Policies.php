@@ -430,10 +430,7 @@ class AAM_Restful_Policies
             if (count($invalid_fields) > 0) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    sprintf(
-                        __('Invalid fields: %s'),
-                        implode(', ', $invalid_fields)
-                    ),
+                    sprintf('Invalid fields: %s', implode(', ', $invalid_fields)),
                     array('status'  => 400)
                 );
             }

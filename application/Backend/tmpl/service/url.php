@@ -20,16 +20,16 @@
                     id="aam-uri-overwrite"
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="uri-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="uri-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
 
                 <table id="uri-list" class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th width="60%"><?php echo __('URL', AAM_KEY); ?></th>
-                            <th width="20%"><?php echo __('Type', AAM_KEY); ?></th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th width="60%"><?php echo __('URL', 'advanced-access-manager'); ?></th>
+                            <th width="20%"><?php echo __('Type', 'advanced-access-manager'); ?></th>
+                            <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
                             <th>Rule</th>
                         </tr>
                     </thead>
@@ -42,8 +42,8 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('URL Access Rule', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('URL Access Rule', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -52,37 +52,37 @@
                                 type="text"
                                 class="form-control form-clearable"
                                 id="url_rule_url"
-                                placeholder="<?php echo __('Enter valid URL', AAM_KEY); ?>"
+                                placeholder="<?php echo __('Enter valid URL', 'advanced-access-manager'); ?>"
                             />
                         </div>
 
-                        <label><?php echo __('What should be done when a URL is matched?', AAM_KEY); ?></label><br />
+                        <label><?php echo __('What should be done when a URL is matched?', 'advanced-access-manager'); ?></label><br />
 
                         <?php
                             $restriction_types = apply_filters('aam_ui_url_restriction_types_filter', [
                                 'allow' => [
-                                    'title' => __('Allow direct access', AAM_KEY)
+                                    'title' => __('Allow direct access', 'advanced-access-manager')
                                 ],
                                 'deny' => [
-                                    'title' => __('Restrict direct access (Access Denied Redirect preference is applied)', AAM_KEY)
+                                    'title' => __('Restrict direct access (Access Denied Redirect preference is applied)', 'advanced-access-manager')
                                 ],
                                 'custom_message' => [
-                                    'title' => __('Show customized message (plain text or HTML)', AAM_KEY)
+                                    'title' => __('Show customized message (plain text or HTML)', 'advanced-access-manager')
                                 ],
                                 'page_redirect' => [
-                                    'title' => __('Redirected to existing page (select from the drop-down)', AAM_KEY)
+                                    'title' => __('Redirected to existing page (select from the drop-down)', 'advanced-access-manager')
                                 ],
                                 'url_redirect' => [
-                                    'title' => __('Redirected to a different URL (valid URL, starting with http or https is required)', AAM_KEY)
+                                    'title' => __('Redirected to a different URL (valid URL, starting with http or https is required)', 'advanced-access-manager')
                                 ],
                                 'trigger_callback' => [
-                                    'title' => __('Trigger PHP callback function (valid HP callback is required)', AAM_KEY)
+                                    'title' => __('Trigger PHP callback function (valid HP callback is required)', 'advanced-access-manager')
                                 ],
                             ]);
 
                             if ($access_level->is_visitor()) {
                                 $restriction_types['login_redirect'] = [
-                                    'title' => __('Redirect to the login page (after login, user will be redirected back to the restricted page)', AAM_KEY)
+                                    'title' => __('Redirect to the login page (after login, user will be redirected back to the restricted page)', 'advanced-access-manager')
                                 ];
                             }
                         ?>
@@ -102,30 +102,30 @@
                         <?php } ?>
 
                         <div class="form-group aam-uri-access-action" id="url_access_custom_message_attrs" style="display: none;">
-                            <label><?php echo __('Customized Message', AAM_KEY); ?></label>
+                            <label><?php echo __('Customized Message', 'advanced-access-manager'); ?></label>
                             <textarea
                                 class="form-control form-clearable"
                                 rows="3"
                                 id="url_access_custom_message_value"
-                                placeholder="<?php echo __('Enter message...', AAM_KEY); ?>">
+                                placeholder="<?php echo __('Enter message...', 'advanced-access-manager'); ?>">
                             </textarea>
                         </div>
 
                         <div class="form-group aam-uri-access-action" id="url_access_page_redirect_attrs" style="display: none;">
-                            <label><?php echo __('Existing Page', AAM_KEY); ?></label>
+                            <label><?php echo __('Existing Page', 'advanced-access-manager'); ?></label>
                             <?php
                                 wp_dropdown_pages(array(
                                     'depth'            => 99,
                                     'echo'             => 1,
                                     'id'               => 'url_access_page_redirect_value',
                                     'class'            => 'form-control form-clearable',
-                                    'show_option_none' => __('-- Select Page --', AAM_KEY)
+                                    'show_option_none' => __('-- Select Page --', 'advanced-access-manager')
                                 ));
                             ?>
                         </div>
 
                         <div class="form-group aam-uri-access-action" id="url_access_url_redirect_attrs" style="display: none;">
-                            <label><?php echo __('The Valid Redirect URL', AAM_KEY); ?></label>
+                            <label><?php echo __('The Valid Redirect URL', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control form-clearable"
@@ -135,18 +135,18 @@
                         </div>
 
                         <div class="form-group aam-uri-access-action" id="url_access_http_status_code" style="display: none;">
-                            <label><?php echo __('HTTP Redirect Code', AAM_KEY); ?></label>
+                            <label><?php echo __('HTTP Redirect Code', 'advanced-access-manager'); ?></label>
                             <select class="form-control form-clearable" id="url_access_http_redirect_code">
-                                <option value=""><?php echo __('HTTP Code (Default 307)', AAM_KEY); ?></option>
-                                <option value="301"><?php echo __('301 - Moved Permanently', AAM_KEY); ?></option>
-                                <option value="302"><?php echo __('302 - Found', AAM_KEY); ?></option>
-                                <option value="303"><?php echo __('303 - See Other', AAM_KEY); ?></option>
-                                <option value="307"><?php echo __('307 - Temporary Redirect', AAM_KEY); ?></option>
+                                <option value=""><?php echo __('HTTP Code (Default 307)', 'advanced-access-manager'); ?></option>
+                                <option value="301"><?php echo __('301 - Moved Permanently', 'advanced-access-manager'); ?></option>
+                                <option value="302"><?php echo __('302 - Found', 'advanced-access-manager'); ?></option>
+                                <option value="303"><?php echo __('303 - See Other', 'advanced-access-manager'); ?></option>
+                                <option value="307"><?php echo __('307 - Temporary Redirect', 'advanced-access-manager'); ?></option>
                             </select>
                         </div>
 
                         <div class="form-group aam-uri-access-action" id="url_access_trigger_callback_attrs" style="display: none;">
-                            <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                            <label><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                             <input
                                 type="text"
                                 class="form-control form-clearable"
@@ -162,12 +162,12 @@
                             type="button"
                             class="btn btn-success"
                             id="url_save_btn"
-                        ><?php echo __('Save', AAM_KEY); ?></button>
+                        ><?php echo __('Save', 'advanced-access-manager'); ?></button>
                         <button
                             type="button"
                             class="btn btn-default"
                             data-dismiss="modal"
-                        ><?php echo __('Close', AAM_KEY); ?></button>
+                        ><?php echo __('Close', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>
@@ -177,19 +177,19 @@
             <div class="modal-dialog modal-sm" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Delete URL Rule', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('Delete URL Rule', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
                             <p class="aam-notification">
-                                <?php echo __('You are about to delete the URL Rule. Please confirm!', AAM_KEY); ?>
+                                <?php echo __('You are about to delete the URL Rule. Please confirm!', 'advanced-access-manager'); ?>
                             </p>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="uri-delete-btn"><?php echo __('Delete', AAM_KEY); ?></button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-danger" id="uri-delete-btn"><?php echo __('Delete', 'advanced-access-manager'); ?></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>

@@ -1,12 +1,4 @@
-<?php
-    /**
-     * @since 6.9.4 https://github.com/aamplugin/advanced-access-manager/issues/239
-     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.9.4
-     * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature settings" id="settings-security-content">
@@ -27,8 +19,8 @@
                                 id="utility-<?php echo esc_attr($id); ?>"
                                 <?php echo ($option['value'] ? 'checked' : ''); ?>
                                 type="checkbox"
-                                data-on="<?php echo __('Enabled', AAM_KEY); ?>"
-                                data-off="<?php echo __('Disabled', AAM_KEY); ?>"
+                                data-on="<?php echo __('Enabled', 'advanced-access-manager'); ?>"
+                                data-off="<?php echo __('Disabled', 'advanced-access-manager'); ?>"
                                 data-size="small"
                             />
                         </td>

@@ -19,14 +19,14 @@ abstract class AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manager';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = null;
 
@@ -34,8 +34,8 @@ abstract class AAM_Backend_Feature_Abstract
      * Get content
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __invoke()
@@ -47,8 +47,8 @@ abstract class AAM_Backend_Feature_Abstract
      * Get HTML content
      *
      * @return string
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_content()
@@ -65,9 +65,9 @@ abstract class AAM_Backend_Feature_Abstract
      * Get currently managed access level
      *
      * @return AAM_Backend_AccessLevel
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function get_access_level()
     {
@@ -78,9 +78,9 @@ abstract class AAM_Backend_Feature_Abstract
      * Register feature
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register() {}
 

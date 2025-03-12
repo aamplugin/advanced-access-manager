@@ -9,13 +9,13 @@ if (defined('AAM_KEY')) { ?>
 
         <div id="login-form-<?php echo esc_js($params->id); ?>">
             <p>
-                <label for="user_login"><?php echo __('Username or Email Address', AAM_KEY); ?><br>
+                <label for="user_login"><?php echo __('Username or Email Address', 'advanced-access-manager'); ?><br>
                     <input id="aam-login-username-<?php echo esc_js($params->id); ?>" class="input login-input" type="text" />
                 </label>
             </p>
 
             <p>
-                <label for="user_pass"><?php echo __('Password', AAM_KEY); ?><br>
+                <label for="user_pass"><?php echo __('Password', 'advanced-access-manager'); ?><br>
                     <input id="aam-login-password-<?php echo esc_js($params->id); ?>" class="input login-input" type="password" />
                 </label>
             </p>
@@ -24,12 +24,12 @@ if (defined('AAM_KEY')) { ?>
 
             <p class="forgetmenot">
                 <label for="aam-login-remember-<?php echo esc_js($params->id); ?>">
-                    <input id="aam-login-remember-<?php echo esc_js($params->id); ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', AAM_KEY); ?>
+                    <input id="aam-login-remember-<?php echo esc_js($params->id); ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', 'advanced-access-manager'); ?>
                 </label>
             </p>
 
             <p class="submit">
-                <input class="button button-primary button-large" id="aam-login-submit-<?php echo esc_js($params->id); ?>" value="<?php echo __('Log In', AAM_KEY); ?>" type="submit" />
+                <input class="button button-primary button-large" id="aam-login-submit-<?php echo esc_js($params->id); ?>" value="<?php echo __('Log In', 'advanced-access-manager'); ?>" type="submit" />
                 <input id="aam-login-redirect-<?php echo esc_js($params->id); ?>" value="<?php echo esc_js($params->redirect); ?>" type="hidden" />
             </p>
         </div>
@@ -37,12 +37,12 @@ if (defined('AAM_KEY')) { ?>
         <p>
             <?php
             if (get_option('users_can_register')) {
-                $registration_url = sprintf('<a href="%s">%s</a>', esc_url(wp_registration_url()), __('Register', AAM_KEY));
+                $registration_url = sprintf('<a href="%s">%s</a>', esc_url(wp_registration_url()), __('Register', 'advanced-access-manager'));
                 echo apply_filters('register', $registration_url);
                 echo esc_html(apply_filters('login_link_separator', ' | '));
             }
             ?>
-            <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"><?php echo __('Lost your password?', AAM_KEY); ?></a>
+            <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"><?php echo __('Lost your password?', 'advanced-access-manager'); ?></a>
         </p>
         <script>
             (function() {
@@ -98,10 +98,10 @@ if (defined('AAM_KEY')) { ?>
             </div>
             <div style="display:table-cell;">
                 <?php if (AAM::api()->caps->exists('aam_access_dashboard') && current_user_can('aam_access_dashboard')) { ?>
-                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br />
-                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br />
+                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', 'advanced-access-manager'); ?></a><br />
+                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', 'advanced-access-manager'); ?></a><br />
                 <?php } ?>
-                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out', AAM_KEY); ?></a>
+                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out', 'advanced-access-manager'); ?></a>
             </div>
         </div>
     <?php } ?>

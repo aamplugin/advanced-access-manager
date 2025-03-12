@@ -5,8 +5,6 @@
  * LICENSE: This file is subject to the terms and conditions defined in *
  * file 'license.txt', which is part of this source code package.       *
  * ======================================================================
- *
- * @version 6.0.0
  */
 
 /**
@@ -16,7 +14,7 @@
  * execution. The consol is used only when AAM interface was triggered in Admin side.
  *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 class AAM_Core_Console
 {
@@ -25,9 +23,9 @@ class AAM_Core_Console
      * List of Runtime errors related to AAM
      *
      * @var array
-     *
      * @access private
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     private static $_messages = array();
 
@@ -38,9 +36,9 @@ class AAM_Core_Console
      * @param string $args...
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function add($message)
     {
@@ -77,9 +75,9 @@ class AAM_Core_Console
      * Count the list of all notifications
      *
      * @return int
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function count()
     {

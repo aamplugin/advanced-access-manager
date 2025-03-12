@@ -84,7 +84,7 @@ class AAM_Backend_Feature_Main_Policy extends AAM_Backend_Feature_Abstract
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'policy',
             'position'   => 2,
-            'title'      => __('Access Policies', AAM_KEY),
+            'title'      => __('Access Policies', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__

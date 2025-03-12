@@ -129,7 +129,7 @@ class AAM_Backend_Manager
             $actions['premium'] = sprintf(
                 '<a href="%s" target="_blank">%s</a>',
                 'https://aamportal.com/premium',
-                __('Get Premium', AAM_KEY)
+                __('Get Premium', 'advanced-access-manager')
             );
         }
 
@@ -150,7 +150,7 @@ class AAM_Backend_Manager
 
         if (!is_null($premium['version']) && $premium['hasUpdate']) {
             AAM_Core_Console::add(
-                __('The new version of premium add-on is available. Go to your license page to download the latest release.', AAM_KEY)
+                __('The new version of premium add-on is available. Go to your license page to download the latest release.', 'advanced-access-manager')
             );
         }
     }

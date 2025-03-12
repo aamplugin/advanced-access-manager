@@ -11,7 +11,7 @@
  * Access Denied Redirect manager
  *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Main_AccessDeniedRedirect
     extends AAM_Backend_Feature_Abstract
@@ -20,14 +20,14 @@ class AAM_Backend_Feature_Main_AccessDeniedRedirect
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_access_denied_redirect';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/access-denied-redirect.php';
 
@@ -35,16 +35,16 @@ class AAM_Backend_Feature_Main_AccessDeniedRedirect
      * Register Access Denied Redirect UI feature
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'redirect',
             'position'   => 30,
-            'title'      => __('Access Denied Redirect', AAM_KEY),
+            'title'      => __('Access Denied Redirect', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__

@@ -1,4 +1,4 @@
-<?php /** @version 6.0.0 */ ?>
+<?php /** @version 7.0.0 */ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <p class="alert alert-info text-larger text-center" id="aam-initial-load">

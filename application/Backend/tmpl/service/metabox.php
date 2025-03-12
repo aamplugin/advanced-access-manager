@@ -8,7 +8,7 @@
                 <div class="col-xs-12">
                     <p class="aam-info">
                         <?php echo AAM_Backend_View::replace_aam_urls(
-                            __('Manage access to WordPress classical metaboxes on the content-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.', AAM_KEY),
+                            __('Manage access to WordPress classical metaboxes on the content-edit screens. This service does not define access controls to Gutenberg blocks. The premium %sadd-on%s also allows defining default visibility for metaboxes.', 'advanced-access-manager'),
                             '/premium'
                         ); ?>
                     </p>
@@ -21,19 +21,19 @@
                 href="#"
                 class="btn btn-xs btn-primary"
                 id="refresh-metabox-list"
-            ><i class="icon-arrows-cw"></i> <?php echo __('Refresh', AAM_KEY); ?></a>
+            ><i class="icon-arrows-cw"></i> <?php echo __('Refresh', 'advanced-access-manager'); ?></a>
             <a
                 href="#init-url-modal"
                 class="btn btn-xs btn-primary"
                 data-toggle="modal"><i class="icon-link"
-            ></i> <?php echo __('Init URL', AAM_KEY); ?></a>
+            ></i> <?php echo __('Init URL', 'advanced-access-manager'); ?></a>
         </div>
 
         <div class="row">
             <div class="col-xs-12">
                 <div class="aam-overwrite" id="aam-metabox-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="metabox-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                                                     data-title="<?php echo esc_attr($metabox['title']); ?>"
                                                     data-screen="<?php echo esc_attr($screen_id); ?>"
                                                     data-id="<?php echo esc_attr($metabox['slug']); ?>"
-                                                    class="aam-metabox-item"><?php echo __('more details', AAM_KEY); ?>
+                                                    class="aam-metabox-item"><?php echo __('more details', 'advanced-access-manager'); ?>
                                                 </a></small>
                                             </div>
 
@@ -117,7 +117,7 @@
                                             <label
                                                 for="metabox_<?php echo esc_attr($metabox['slug']); ?>"
                                                 data-toggle="tooltip"
-                                                title="<?php echo ($metabox['is_restricted'] ?  __('Uncheck to show', AAM_KEY) : __('Check to hide', AAM_KEY)); ?>"
+                                                title="<?php echo ($metabox['is_restricted'] ?  __('Uncheck to show', 'advanced-access-manager') : __('Check to hide', 'advanced-access-manager')); ?>"
                                             ></label>
                                         </div>
                                     <?php } ?>
@@ -138,7 +138,7 @@
             <div class="row">
                 <div class="col-xs-12 text-center">
                     <p class="alert alert-info text-larger">
-                        <?php echo __('The list is not initialized. Select the "Refresh" button above.', AAM_KEY); ?>
+                        <?php echo __('The list is not initialized. Select the "Refresh" button above.', 'advanced-access-manager'); ?>
                     </p>
                 </div>
             </div>
@@ -150,21 +150,21 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Initialize URL', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('Initialize URL', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <p class="aam-info">
-                            <?php echo __('Some metaboxes are "conditional" and appear on the edit screen when certain conditions are met. For example metabox "Comments" appears only for existing page and not for new page. If you do not see a desired metabox, try to copy & paste the full URL to the backend page where that metabox appears.'); ?>
+                            <?php echo __('Some metaboxes are "conditional" and appear on the edit screen when certain conditions are met. For example metabox "Comments" appears only for existing page and not for new page. If you do not see a desired metabox, try to copy & paste the full URL to the backend page where that metabox appears.', 'advanced-access-manager'); ?>
                         </p>
                         <div class="form-group">
-                            <label><?php echo __('Backend page URL', AAM_KEY); ?></label>
-                            <input type="text" class="form-control" id="init-url" placeholder="<?php echo __('Insert valid URL', AAM_KEY); ?>" />
+                            <label><?php echo __('Backend page URL', 'advanced-access-manager'); ?></label>
+                            <input type="text" class="form-control" id="init-url" placeholder="<?php echo __('Insert valid URL', 'advanced-access-manager'); ?>" />
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-success" id="init-url-btn"><?php echo __('Initialize', AAM_KEY); ?></button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-success" id="init-url-btn"><?php echo __('Initialize', 'advanced-access-manager'); ?></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>
@@ -174,29 +174,29 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Metabox Details', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('Metabox Details', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <table class="table table-striped table-bordered">
                             <tbody>
                                 <tr>
-                                    <th width="20%"><?php echo __('Title', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Title', 'advanced-access-manager'); ?></th>
                                     <td id="metabox-title"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Screen ID', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Screen ID', 'advanced-access-manager'); ?></th>
                                     <td id="metabox-screen-id"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Slug', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Slug', 'advanced-access-manager'); ?></th>
                                     <td id="metabox-id"></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>

@@ -443,7 +443,7 @@ class AAM_Framework_Service_BackendMenu
     {
        return [
             // Name
-            base64_encode(is_string($item[0]) ? $item[0] : __('No Label', AAM_KEY)),
+            base64_encode(is_string($item[0]) ? $item[0] : __('No Label', 'advanced-access-manager')),
             // Capability
             $item[1],
             // Slug

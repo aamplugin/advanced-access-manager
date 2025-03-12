@@ -75,7 +75,7 @@ class AAM_Service_Shortcode_Handler_LoginRedirect
             if (!empty($this->args['label'])) {
                 $label = $this->args['label'];
             } else {
-                $label = __('Login to continue', AAM_KEY);
+                $label = __('Login to continue', 'advanced-access-manager');
             }
         } else {
             $label = $this->content;

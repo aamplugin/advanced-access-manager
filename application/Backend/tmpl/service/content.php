@@ -18,8 +18,8 @@
                         <tr>
                             <th>ID</th>
                             <th width="5%">&nbsp;</th>
-                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th width="75%"><?php echo __('Title', 'advanced-access-manager'); ?></th>
+                            <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
                             <th>Data</th>
                         </tr>
                     </thead>
@@ -30,8 +30,8 @@
                         <tr>
                             <th>ID</th>
                             <th width="5%">&nbsp;</th>
-                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th width="75%"><?php echo __('Title', 'advanced-access-manager'); ?></th>
+                            <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
                             <th>Data</th>
                         </tr>
                     </thead>
@@ -42,8 +42,8 @@
                         <tr>
                             <th>ID</th>
                             <th width="5%">&nbsp;</th>
-                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th width="75%"><?php echo __('Title', 'advanced-access-manager'); ?></th>
+                            <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
                             <th>Data</th>
                         </tr>
                     </thead>
@@ -54,8 +54,8 @@
                         <tr>
                             <th>ID</th>
                             <th width="5%">&nbsp;</th>
-                            <th width="75%"><?php echo __('Title', AAM_KEY); ?></th>
-                            <th><?php echo __('Actions', AAM_KEY); ?></th>
+                            <th width="75%"><?php echo __('Title', 'advanced-access-manager'); ?></th>
+                            <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
                             <th>Data</th>
                         </tr>
                     </thead>
@@ -65,14 +65,14 @@
 
             <div class="aam-slide-form aam-access-form" id="aam_content_access_form">
                 <a href="#" class="btn btn-xs btn-primary post-back btn-right">
-                    &Lt; <?php echo __('Go Back', AAM_KEY); ?>
+                    &Lt; <?php echo __('Go Back', 'advanced-access-manager'); ?>
                 </a>
                 <span class="aam-clear"></span>
 
                 <div id="aam_access_form_container"></div>
 
                 <a href="#" class="btn btn-xs btn-primary post-back">
-                    &Lt; <?php echo __('Go Back', AAM_KEY); ?>
+                    &Lt; <?php echo __('Go Back', 'advanced-access-manager'); ?>
                 </a>
             </div>
         </div>

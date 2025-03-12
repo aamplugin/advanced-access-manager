@@ -11,7 +11,7 @@
  * Logout redirect service
  *
  * @package AAM
- * @version 6.0.0
+ * @version 7.0.0
  */
 class AAM_Backend_Feature_Main_LogoutRedirect extends AAM_Backend_Feature_Abstract
 {
@@ -19,14 +19,14 @@ class AAM_Backend_Feature_Main_LogoutRedirect extends AAM_Backend_Feature_Abstra
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_logout_redirect';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/logout-redirect.php';
 
@@ -34,16 +34,16 @@ class AAM_Backend_Feature_Main_LogoutRedirect extends AAM_Backend_Feature_Abstra
      * Register logout redirect feature
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'           => 'logout_redirect',
             'position'      => 41,
-            'title'         => __('Logout Redirect', AAM_KEY),
+            'title'         => __('Logout Redirect', 'advanced-access-manager'),
             'capability'    => self::ACCESS_CAPABILITY,
             'type'          => 'main',
             'view'          => __CLASS__,

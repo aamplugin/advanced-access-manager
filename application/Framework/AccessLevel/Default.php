@@ -40,7 +40,7 @@ class AAM_Framework_AccessLevel_Default implements AAM_Framework_AccessLevel_Int
      */
     public function get_display_name()
     {
-        return __('Default Access Level', AAM_KEY);
+        return __('Default Access Level', 'advanced-access-manager');
     }
 
     /**

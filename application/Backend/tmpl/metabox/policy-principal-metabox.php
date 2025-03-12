@@ -1,4 +1,4 @@
-<?php /** @version 6.8.4 **/
+<?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) {
     AAM_Backend_View_Helper::loadIframe(

@@ -187,7 +187,7 @@ class AAM_Service_SecureLogin
             if ($attempts >= $threshold) {
                 $response = new WP_Error(
                     405,
-                    __('Exceeded maximum number for login attempts.', AAM_KEY)
+                    __('Exceeded maximum number for login attempts.', 'advanced-access-manager')
                 );
             }
         }
@@ -214,7 +214,7 @@ class AAM_Service_SecureLogin
                 'service.secure_login.login_message'
             );
 
-            $message = '<p class="message">' . esc_js(__($str, AAM_KEY)) . '</p>';
+            $message = '<p class="message">' . esc_js($str) . '</p>';
         }
 
         return $message;

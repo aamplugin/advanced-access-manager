@@ -37,7 +37,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
             array_push($issues, ...self::_check_endpoint_accessability());
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -80,7 +80,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         // Verifying that auto-discover endpoint is disabled for visitors
         if ($url_enabled && $api_route_enabled) {
             array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users RESTful auto-discover endpoint', AAM_KEY),
+                __('Detected open to unauthenticated users RESTful auto-discover endpoint', 'advanced-access-manager'),
                 'REST_OPEN_DISCOVER_ENDPOINT'
             ));
         }

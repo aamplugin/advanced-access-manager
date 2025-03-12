@@ -45,45 +45,45 @@ class AAM_Backend_Feature_Main_Identity extends AAM_Backend_Feature_Abstract
         return [
             'list_role' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected role is not visible anywhere on the website for %s.', AAM_KEY),
+                    __('When denies, the selected role is not visible anywhere on the website for %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('LIST ROLE', AAM_KEY)
+                'title' => __('LIST ROLE', 'advanced-access-manager')
             ],
             'list_user' => [
                 'hint'  => sprintf(
-                    __('When denies, users that have the selected role are not visible anywhere on the website for %s.', AAM_KEY),
+                    __('When denies, users that have the selected role are not visible anywhere on the website for %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('LIST USERS', AAM_KEY)
+                'title' => __('LIST USERS', 'advanced-access-manager')
             ],
             'edit_user' => [
                 'hint'  => sprintf(
-                    __('When denies, users that have the selected role can not be edited by %s.', AAM_KEY),
+                    __('When denies, users that have the selected role can not be edited by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('EDIT USERS', AAM_KEY)
+                'title' => __('EDIT USERS', 'advanced-access-manager')
             ],
             'promote_user' => [
                 'hint'  => sprintf(
-                    __('When denies, users that belong to the selected role can not be promoted to any other role by %s.', AAM_KEY),
+                    __('When denies, users that belong to the selected role can not be promoted to any other role by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('PROMOTE USERS', AAM_KEY)
+                'title' => __('PROMOTE USERS', 'advanced-access-manager')
             ],
             'change_user_password' => [
                 'hint'  => sprintf(
-                    __('When denied, users assigned to the selected role are restricted from having their passwords changed by %s.', AAM_KEY),
+                    __('When denied, users assigned to the selected role are restricted from having their passwords changed by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('CHANGE USERS PASSWORD', AAM_KEY)
+                'title' => __('CHANGE USERS PASSWORD', 'advanced-access-manager')
             ],
             'delete_user' => [
                 'hint'  => sprintf(
-                    __('When denies, users that belong to the selected role can not be deleted by %s.', AAM_KEY),
+                    __('When denies, users that belong to the selected role can not be deleted by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('DELETE USERS', AAM_KEY)
+                'title' => __('DELETE USERS', 'advanced-access-manager')
             ]
         ];
     }
@@ -103,38 +103,38 @@ class AAM_Backend_Feature_Main_Identity extends AAM_Backend_Feature_Abstract
         return [
             'list_user' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected user is not visible anywhere on the website for %s.', AAM_KEY),
+                    __('When denies, the selected user is not visible anywhere on the website for %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('LIST USER', AAM_KEY)
+                'title' => __('LIST USER', 'advanced-access-manager')
             ],
             'edit_user' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected user can not be edited by %s.', AAM_KEY),
+                    __('When denies, the selected user can not be edited by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('EDIT USER', AAM_KEY)
+                'title' => __('EDIT USER', 'advanced-access-manager')
             ],
             'promote_user' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected user can not be promoted to any other role by %s.', AAM_KEY),
+                    __('When denies, the selected user can not be promoted to any other role by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('PROMOTE USER', AAM_KEY)
+                'title' => __('PROMOTE USER', 'advanced-access-manager')
             ],
             'change_user_password' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected user`s password can not be changed by %s.', AAM_KEY),
+                    __('When denies, the selected user`s password can not be changed by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('CHANGE USER PASSWORD', AAM_KEY)
+                'title' => __('CHANGE USER PASSWORD', 'advanced-access-manager')
             ],
             'delete_user' => [
                 'hint'  => sprintf(
-                    __('When denies, the selected user can not be deleted by %s.', AAM_KEY),
+                    __('When denies, the selected user can not be deleted by %s.', 'advanced-access-manager'),
                     $access_level->get_display_name()
                 ),
-                'title' => __('DELETE USER', AAM_KEY)
+                'title' => __('DELETE USER', 'advanced-access-manager')
             ]
         ];
     }
@@ -152,7 +152,7 @@ class AAM_Backend_Feature_Main_Identity extends AAM_Backend_Feature_Abstract
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'identity',
             'position'   => 60,
-            'title'      => __('Identity Governance', AAM_KEY),
+            'title'      => __('Identity Governance', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__

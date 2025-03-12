@@ -4,14 +4,14 @@
     <div class="aam-feature" id="welcome-content">
         <div class="row">
             <div class="col-xs-12">
-                <span class="aam-common-use-cases aam-mt-2"><?php echo __('Introduction', AAM_KEY); ?></span>
+                <span class="aam-common-use-cases aam-mt-2"><?php echo __('Introduction', 'advanced-access-manager'); ?></span>
 
                 <div class="panel-group" id="intro-block" role="tablist" aria-multiselectable="true">
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="video-1-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-1" aria-controls="video-1">
-                                    <?php echo __('Navigating the AAM UI: A Quick Guide', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
+                                    <?php echo __('Navigating the AAM UI: A Quick Guide', 'advanced-access-manager'); ?> <small class="aam-menu-capability">2 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -37,7 +37,7 @@
                         <div class="panel-heading" role="tab" id="video-2-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-2" aria-controls="video-2">
-                                    <?php echo __('Fine-Tuning AAM for Optimal Performance', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                    <?php echo __('Fine-Tuning AAM for Optimal Performance', 'advanced-access-manager'); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -63,7 +63,7 @@
                         <div class="panel-heading" role="tab" id="video-3-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-3" aria-controls="video-3">
-                                    <?php echo __('Understanding Access Levels in AAM', AAM_KEY); ?> <small class="aam-menu-capability">2 mins</small>
+                                    <?php echo __('Understanding Access Levels in AAM', 'advanced-access-manager'); ?> <small class="aam-menu-capability">2 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -89,7 +89,7 @@
                         <div class="panel-heading" role="tab" id="video-4-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-4" aria-controls="video-4">
-                                    <?php echo __('Understanding Access Controls & Preferences Inheritance', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                    <?php echo __('Understanding Access Controls & Preferences Inheritance', 'advanced-access-manager'); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -115,7 +115,7 @@
                         <div class="panel-heading" role="tab" id="video-5-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-5" aria-controls="video-5">
-                                    <?php echo __('Master WordPress Roles & Capabilities With AAM', AAM_KEY); ?> <small class="aam-menu-capability">4 mins</small>
+                                    <?php echo __('Master WordPress Roles & Capabilities With AAM', 'advanced-access-manager'); ?> <small class="aam-menu-capability">4 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -141,7 +141,7 @@
                         <div class="panel-heading" role="tab" id="video-6-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-6" aria-controls="video-6">
-                                    <?php echo __('Manage User Accounts with AAM | WordPress Access Control', AAM_KEY); ?> <small class="aam-menu-capability">3 mins</small>
+                                    <?php echo __('Manage User Accounts with AAM | WordPress Access Control', 'advanced-access-manager'); ?> <small class="aam-menu-capability">3 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -167,7 +167,7 @@
                         <div class="panel-heading" role="tab" id="video-7-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-7" aria-controls="video-7">
-                                    <?php echo __('Mastering Access Control in WordPress: Back-End Menu, Admin Toolbar, Metaboxes & Widgets', AAM_KEY); ?> <small class="aam-menu-capability">9 mins</small>
+                                    <?php echo __('Mastering Access Control in WordPress: Back-End Menu, Admin Toolbar, Metaboxes & Widgets', 'advanced-access-manager'); ?> <small class="aam-menu-capability">9 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -193,7 +193,7 @@
                         <div class="panel-heading" role="tab" id="video-8-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-8" aria-controls="video-8">
-                                    <?php echo __('Mastering WordPress Content Access with Posts and Terms in AAM', AAM_KEY); ?> <small class="aam-menu-capability">9 mins</small>
+                                    <?php echo __('Mastering WordPress Content Access with Posts and Terms in AAM', 'advanced-access-manager'); ?> <small class="aam-menu-capability">9 mins</small>
                                 </a>
                             </h4>
                         </div>
@@ -219,7 +219,7 @@
                         <div class="panel-heading" role="tab" id="video-9-heading">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#intro-block" href="#video-9" aria-controls="video-9">
-                                    <?php echo __('Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects', AAM_KEY); ?> <small class="aam-menu-capability">5 mins</small>
+                                    <?php echo __('Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects', 'advanced-access-manager'); ?> <small class="aam-menu-capability">5 mins</small>
                                 </a>
                             </h4>
                         </div>

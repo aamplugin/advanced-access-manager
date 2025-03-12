@@ -8,10 +8,8 @@
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
  * Domain Path: /lang/
- *
- * -------
- * LICENSE: This file is subject to the terms and conditions defined in
- * file 'license.txt', which is part of Advanced Access Manager source package.
+ * License: GPLv3
+ * License URI: http://www.gnu.org/licenses/gpl.html
  *
  **/
 
@@ -205,7 +203,7 @@ class AAM
             }, 10, 2);
 
             // Load AAM internationalization
-            load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
+            load_plugin_textdomain('advanced-access-manager', false, 'advanced-access-manager/lang');
 
             // Initialize current user
             self::$_instance->_init_current_user();
@@ -228,9 +226,9 @@ class AAM
 
         // Check PHP Version
         if (version_compare(PHP_VERSION, '5.6.40') === -1) {
-            exit(__('PHP 5.6.40 or higher is required.', AAM_KEY));
+            exit(__('PHP 5.6.40 or higher is required.', 'advanced-access-manager'));
         } elseif (version_compare($wp_version, '5.8.0') === -1) {
-            exit(__('WP 5.8.0 or higher is required.', AAM_KEY));
+            exit(__('WP 5.8.0 or higher is required.', 'advanced-access-manager'));
         }
     }
 

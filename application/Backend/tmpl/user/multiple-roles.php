@@ -1,19 +1,10 @@
-<?php
-/**
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.4  https://github.com/aamplugin/advanced-access-manager/issues/180
- * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/179
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.21
- */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php if ((!defined('IS_PROFILE_PAGE') || !IS_PROFILE_PAGE) && !is_network_admin() && (empty($user) || current_user_can('promote_user', $user->ID))) { ?>
         <table class="form-table">
             <tr>
-                <th><?php echo __('User Roles', AAM_KEY); ?></th>
+                <th><?php echo __('User Roles', 'advanced-access-manager'); ?></th>
                 <td>
                     <div class="wp-tab-panel">
                         <ul>

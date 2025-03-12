@@ -540,10 +540,7 @@ class AAM_Restful_Roles
             if (count($invalid_fields) > 0) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    sprintf(
-                        __('Invalid fields: %s'),
-                        implode(', ', $invalid_fields)
-                    ),
+                    sprintf('Invalid fields: %s', implode(', ', $invalid_fields)),
                     array('status'  => 400)
                 );
             }
@@ -576,20 +573,14 @@ class AAM_Restful_Roles
                 if (wp_roles()->is_role($slug)) {
                     $response = new WP_Error(
                         'rest_invalid_param',
-                        sprintf(
-                            __("The role with '%s' slug already exists"),
-                            $slug
-                        ),
+                        sprintf("The role with '%s' slug already exists", $slug),
                         array('status'  => 400)
                     );
                 }
             } else {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    sprintf(
-                        __("Invalid role slug '%s'"),
-                        $value
-                    ),
+                    sprintf("Invalid role slug '%s'", $value),
                     array('status'  => 400)
                 );
             }
@@ -624,10 +615,7 @@ class AAM_Restful_Roles
             if (count($invalid_keys) > 0) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    sprintf(
-                        __('Invalid keys: %s'),
-                        implode(', ', $invalid_keys)
-                    ),
+                    sprintf('Invalid keys: %s', implode(', ', $invalid_keys)),
                     array('status'  => 400)
                 );
             }

@@ -1,11 +1,4 @@
-<?php
-/**
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.14
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="row">

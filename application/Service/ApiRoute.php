@@ -75,7 +75,7 @@ class AAM_Service_ApiRoute
             if (AAM::api()->api_routes()->is_denied($request)) {
                 $response = new WP_Error(
                     'rest_access_denied',
-                    __('Access Denied', AAM_KEY),
+                    __('Access Denied', 'advanced-access-manager'),
                     array('status' => 401)
                 );
             }

@@ -367,10 +367,7 @@ class AAM_Restful_Jwt
             if (count($invalid_fields) > 0) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    sprintf(
-                        __('Invalid fields: %s'),
-                        implode(', ', $invalid_fields)
-                    ),
+                    sprintf('Invalid fields: %s', implode(', ', $invalid_fields)),
                     array('status'  => 400)
                 );
             }
@@ -399,7 +396,7 @@ class AAM_Restful_Jwt
             if ($time === false) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('Invalid expires_in value'),
+                    'Invalid expires_in value',
                     array('status'  => 400)
                 );
             }

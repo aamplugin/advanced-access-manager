@@ -177,7 +177,7 @@ class AAM_Service_Content
                     if (AAM::api()->posts()->is_denied_to($post_id, 'publish')) {
                         $post = new WP_Error(
                             'rest_cannot_publish',
-                            __('You are not allowed to publish this content', AAM_KEY),
+                            __('You are not allowed to publish this content', 'advanced-access-manager'),
                             array('status' => rest_authorization_required_code())
                         );
                     }
@@ -330,7 +330,7 @@ class AAM_Service_Content
         if (is_a($post, 'WP_Post')) {
             add_meta_box(
                 'aam-access-manager',
-                __('Access Manager', AAM_KEY),
+                __('Access Manager', 'advanced-access-manager'),
                 function () {
                     global $post;
 

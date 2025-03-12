@@ -1,9 +1,9 @@
 <?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) {
-    wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css');
-    wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'));
-    wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js');
+    wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css', [], AAM_VERSION);
+    wp_enqueue_style('aam', AAM_MEDIA . '/css/aam.css', array('aam-vendor'), AAM_VERSION);
+    wp_enqueue_script('aam-iframe', AAM_MEDIA . '/js/iframe-content.js', [], AAM_VERSION);
 }
 ?>
 

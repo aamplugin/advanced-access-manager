@@ -1,11 +1,11 @@
-<?php /** @version 6.9.34 **/
+<?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="configpress-content">
         <div class="row">
             <div class="col-xs-12">
                 <p class="aam-info">
-                    <?php echo sprintf(__('For detail about AAM configurations, refer to the %sConfigPress%s official documentation.', AAM_KEY), '<a href="https://aamportal.com/reference/configpress?ref=plugin">', '</a>'); ?>
+                    <?php echo sprintf(__('For detail about AAM configurations, refer to the %sConfigPress%s official documentation.', 'advanced-access-manager'), '<a href="https://aamportal.com/reference/configpress?ref=plugin">', '</a>'); ?>
                 </p>
             </div>
         </div>

@@ -56,7 +56,7 @@ class AAM_Backend_Feature_Settings_Content extends AAM_Backend_Feature_Abstract
         AAM_Backend_Feature::registerFeature((object)array(
             'uid'        => 'settings-content',
             'position'   => 5,
-            'title'      => __('Content Settings', AAM_KEY),
+            'title'      => __('Content Settings', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'settings',
             'view'       => __CLASS__

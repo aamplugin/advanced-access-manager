@@ -408,7 +408,7 @@ class AAM_Restful_Users
                 $response = new WP_Error(
                     'rest_invalid_param',
                     sprintf(
-                        __('Invalid fields: %s'),
+                        'Invalid fields: %s',
                         implode(', ', $invalid_fields)
                     ),
                     array('status'  => 400)
@@ -434,11 +434,7 @@ class AAM_Restful_Users
     {
         // Prepare user's display name
         if ($user->first_name && $user->last_name) {
-            $display_name = sprintf(
-                _x('%1$s %2$s', 'Display name based on first name and last name'),
-                $user->first_name,
-                $user->last_name
-            );
+            $display_name = sprintf('%s %s', $user->first_name, $user->last_name);
         } elseif ( $user->first_name ) {
             $display_name = $user->first_name;
         } elseif ( $user->last_name ) {

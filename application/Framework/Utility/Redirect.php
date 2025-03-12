@@ -83,8 +83,8 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
 
         if (is_null($handler)) {
             wp_die(
-                __('The access is denied.', AAM_KEY),
-                __('Access Denied', AAM_KEY),
+                __('The access is denied.', 'advanced-access-manager'),
+                __('Access Denied', 'advanced-access-manager'),
                 apply_filters('aam_wp_die_args_filter', [
                     'exit'     => true,
                     'response' => 401

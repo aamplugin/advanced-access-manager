@@ -1,13 +1,4 @@
-<?php
-/**
- * @since 6.9.34 https://github.com/aamplugin/advanced-access-manager/issues/395
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/274
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.34
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php
@@ -31,8 +22,8 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="aam-overwrite<?php echo ($service->is_customized() ? '' : ' hidden'); ?>" id="aam-route-overwrite">
-                    <span><i class="icon-check"></i> <?php echo __('Routes are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="route-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Routes are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="route-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
             </div>
         </div>
@@ -43,9 +34,9 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th width="10%"><?php echo __('Method', AAM_KEY); ?></th>
-                    <th width="80%"><?php echo __('Route', AAM_KEY); ?></th>
-                    <th><?php echo __('Deny', AAM_KEY); ?></th>
+                    <th width="10%"><?php echo __('Method', 'advanced-access-manager'); ?></th>
+                    <th width="80%"><?php echo __('Route', 'advanced-access-manager'); ?></th>
+                    <th><?php echo __('Deny', 'advanced-access-manager'); ?></th>
                 </tr>
             </thead>
             <tbody></tbody>

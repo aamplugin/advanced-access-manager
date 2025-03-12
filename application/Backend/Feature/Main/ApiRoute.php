@@ -19,14 +19,14 @@ class AAM_Backend_Feature_Main_ApiRoute extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_api_routes';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/api-route.php';
 
@@ -34,9 +34,9 @@ class AAM_Backend_Feature_Main_ApiRoute extends AAM_Backend_Feature_Abstract
      * Constructor
      *
      * @return void
-     *
      * @access public
-     * @version 6.9.13
+     *
+     * @version 7.0.0
      */
     public function __construct()
     {
@@ -50,16 +50,16 @@ class AAM_Backend_Feature_Main_ApiRoute extends AAM_Backend_Feature_Abstract
      * Register API Routes service
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object)array(
             'uid'        => 'route',
             'position'   => 50,
-            'title'      => __('API Routes', AAM_KEY),
+            'title'      => __('API Routes', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__

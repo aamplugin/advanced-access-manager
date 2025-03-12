@@ -23,8 +23,8 @@ class AAM_Backend_AccessLevel
      * Single instance of itself
      *
      * @var AAM_Backend_AccessLevel
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private static $_instance = null;
@@ -33,8 +33,8 @@ class AAM_Backend_AccessLevel
      * Access Level
      *
      * @var AAM_Framework_AccessLevel_Interface
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private $_access_level = null;
@@ -90,8 +90,8 @@ class AAM_Backend_AccessLevel
      * Check if current access level is role
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_role()
@@ -103,8 +103,8 @@ class AAM_Backend_AccessLevel
      * Check if current access level is user
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_user()
@@ -116,8 +116,8 @@ class AAM_Backend_AccessLevel
      * Check if current access level is visitor
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_visitor()
@@ -129,8 +129,8 @@ class AAM_Backend_AccessLevel
      * Check if current access level is default
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_default()
@@ -142,8 +142,8 @@ class AAM_Backend_AccessLevel
      * Get last managed access level
      *
      * @return array|null
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_last_managed_access_level()
@@ -180,8 +180,8 @@ class AAM_Backend_AccessLevel
      * @param int|string $id
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _init_access_level($type, $id = null)
@@ -196,8 +196,8 @@ class AAM_Backend_AccessLevel
      * user can manage
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _init_fallback_access_level()
@@ -218,7 +218,7 @@ class AAM_Backend_AccessLevel
         } else {
             AAM::api()->redirect->do_redirect([
                 'type'    => 'custom_message',
-                'message' => __('You do not have permission to manage any access levels', AAM_KEY)
+                'message' => __('You do not have permission to manage any access levels', 'advanced-access-manager')
             ]);
         }
     }
@@ -227,8 +227,8 @@ class AAM_Backend_AccessLevel
      * Get access level property
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __get($name)
@@ -243,8 +243,8 @@ class AAM_Backend_AccessLevel
      * @param array  $args
      *
      * @return mixed
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function __call($name, $args)
@@ -256,8 +256,8 @@ class AAM_Backend_AccessLevel
      * Get AAM core subject
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_access_level()
@@ -269,8 +269,8 @@ class AAM_Backend_AccessLevel
      * Bootstrap the object
      *
      * @return AAM_Backend_AccessLevel
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function bootstrap()
@@ -286,8 +286,8 @@ class AAM_Backend_AccessLevel
      * Get single instance of itself
      *
      * @return AAM_Backend_AccessLevel
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function get_instance()

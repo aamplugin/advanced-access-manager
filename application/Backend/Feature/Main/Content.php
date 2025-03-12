@@ -170,78 +170,78 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
 
         return apply_filters('aam_ui_content_access_controls_filter', [
             'list' => array(
-                'title'       => __('Hidden', AAM_KEY),
+                'title'       => __('Hidden', 'advanced-access-manager'),
                 'modal'       => 'modal_content_visibility',
                 'is_denied'   => !empty($list) && $list['effect'] !== 'allow',
                 'areas'       => $on,
-                'customize'   => __('Customize visibility', AAM_KEY),
+                'customize'   => __('Customize visibility', 'advanced-access-manager'),
                 'tooltip'     => sprintf(
-                    __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', AAM_KEY),
+                    __('Customize the visibility of "%s" separately for each section of your website. It\'s crucial to thoughtfully select which areas will have hidden content. For instance, you might choose to hide certain posts in the backend for content editors, while still allowing them to be visible on the frontend for general users.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 ),
                 'description' => sprintf(
-                    __('Hide the "%s" from all menus, lists, and API responses. However, it remains accessible via a direct URL. Visibility can be customized for the frontend, backend and API areas independently.', AAM_KEY),
+                    __('Hide the "%s" from all menus, lists, and API responses. However, it remains accessible via a direct URL. Visibility can be customized for the frontend, backend and API areas independently.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 ),
                 'on' => [
                     'frontend' => sprintf(
-                        __('Hide the "%s" on the website frontend', AAM_KEY),
+                        __('Hide the "%s" on the website frontend', 'advanced-access-manager'),
                         $resource_identifier->post_title
                     ),
                     'backend' => sprintf(
-                        __('Hide the "%s" in the backend (admin area)', AAM_KEY),
+                        __('Hide the "%s" in the backend (admin area)', 'advanced-access-manager'),
                         $resource_identifier->post_title
                     ),
                     'api' => sprintf(
-                        __('Hide the "%s" in the RESTful API results', AAM_KEY),
+                        __('Hide the "%s" in the RESTful API results', 'advanced-access-manager'),
                         $resource_identifier->post_title
                     )
                 ]
             ),
             'read' => array(
-                'title'       => __('Restricted', AAM_KEY),
+                'title'       => __('Restricted', 'advanced-access-manager'),
                 'modal'       => 'modal_content_restriction',
                 'is_denied'   => !empty($read) && $read['effect'] !== 'allow',
-                'customize'   => __('Customize direct access', AAM_KEY),
+                'customize'   => __('Customize direct access', 'advanced-access-manager'),
                 'tooltip'     => sprintf(
-                    __('Restrict direct access to read or download the "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
+                    __('Restrict direct access to read or download the "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 ),
                 'description' => sprintf(
-                    __('Restrict direct access to "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', AAM_KEY),
+                    __('Restrict direct access to "%s". This restriction can be customized with options such as setting an access expiration date, creating a password, redirecting to a different location, and more.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 )
             ),
             'comment' => array(
-                'title'       => __('Leave Comments', AAM_KEY),
+                'title'       => __('Leave Comments', 'advanced-access-manager'),
                 'is_denied'   => !empty($comment) && $comment['effect'] !== 'allow',
                 'description' => sprintf(
-                    __('Limit the ability to leave comments on the "%s".', AAM_KEY),
+                    __('Limit the ability to leave comments on the "%s".', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 )
             ),
             'edit' => array(
-                'title'       => __('Edit', AAM_KEY),
+                'title'       => __('Edit', 'advanced-access-manager'),
                 'is_denied'   => !empty($edit) && $edit['effect'] !== 'allow',
                 'description' => sprintf(
-                    __('Disable the ability to edit "%s". Editing "%s" will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
+                    __('Disable the ability to edit "%s". Editing "%s" will be restricted both in the backend area and via the RESTful API.', 'advanced-access-manager'),
                     $resource_identifier->post_title,
                     $resource_identifier->post_title
                 )
             ),
             'publish' => array(
-                'title'       => __('Publish', AAM_KEY),
+                'title'       => __('Publish', 'advanced-access-manager'),
                 'is_denied'   => !empty($publish) && $publish['effect'] !== 'allow',
                 'description' => sprintf(
-                    __('Manage the ability to publish draft "%s" or any updates to already published versions. If denied, a user will only be able to submit for review.', AAM_KEY),
+                    __('Manage the ability to publish draft "%s" or any updates to already published versions. If denied, a user will only be able to submit for review.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 )
             ),
             'delete' => array(
-                'title'       => __('Delete', AAM_KEY),
+                'title'       => __('Delete', 'advanced-access-manager'),
                 'is_denied'   => !empty($delete) && $delete['effect'] !== 'allow',
                 'description' => sprintf(
-                    __('Disable the ability to delete "%s". Deletion will be restricted both in the backend area and via the RESTful API.', AAM_KEY),
+                    __('Disable the ability to delete "%s". Deletion will be restricted both in the backend area and via the RESTful API.', 'advanced-access-manager'),
                     $resource_identifier->post_title
                 )
             )
@@ -282,7 +282,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'        => 'post',
             'position'   => 20,
-            'title'      => __('Posts & Terms', AAM_KEY),
+            'title'      => __('Posts & Terms', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'       => __CLASS__

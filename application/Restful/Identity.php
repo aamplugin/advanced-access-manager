@@ -613,11 +613,7 @@ class AAM_Restful_Identity
 
         // Prepare user's display name
         if ($user->first_name && $user->last_name) {
-            $display_name = sprintf(
-                _x('%1$s %2$s', 'Display name based on first name and last name'),
-                $user->first_name,
-                $user->last_name
-            );
+            $display_name = sprintf('%s %s', $user->first_name, $user->last_name);
         } elseif ( $user->first_name ) {
             $display_name = $user->first_name;
         } elseif ( $user->last_name ) {

@@ -129,7 +129,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
             }
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -178,7 +178,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
 
                 if (!empty($matched)) {
                     array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', AAM_KEY),
+                        __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', 'advanced-access-manager'),
                         $user->display_name,
                         $user->ID,
                         implode(', ', $matched)
@@ -194,7 +194,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
 
                 if (!empty($elevated_caps)) {
                     array_push($response, self::_format_issue(sprintf(
-                        __('Detected elevated capabilities for user "%s" (ID: %s): %s', AAM_KEY),
+                        __('Detected elevated capabilities for user "%s" (ID: %s): %s', 'advanced-access-manager'),
                         $user->display_name,
                         $user->ID,
                         implode(', ', $elevated_caps)

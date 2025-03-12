@@ -191,7 +191,7 @@ class AAM_Audit_RoleIntegrityCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -228,7 +228,7 @@ class AAM_Audit_RoleIntegrityCheck
 
         if (!empty($diff_roles)) {
             array_push($response, self::_format_issue(sprintf(
-                __('Detected missing WordPress core role(s): %s', AAM_KEY),
+                __('Detected missing WordPress core role(s): %s', 'advanced-access-manager'),
                 implode(
                     ', ',
                     array_map('translate_user_role', $diff_roles)
@@ -268,7 +268,7 @@ class AAM_Audit_RoleIntegrityCheck
 
                 if (!empty($diff_caps)) {
                     array_push($response, self::_format_issue(sprintf(
-                        __('Detected missing WordPress core capabilities for role "%s": %s', AAM_KEY),
+                        __('Detected missing WordPress core capabilities for role "%s": %s', 'advanced-access-manager'),
                         translate_user_role($role['name']),
                         implode(', ', $diff_caps)
                     ), 'MISSING_CAP', 'warning'));

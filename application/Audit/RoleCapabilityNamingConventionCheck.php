@@ -40,7 +40,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -75,7 +75,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
         foreach($db_roles as $role_id => $role) {
             if (preg_match('/^[a-z\d_\-]+$/', $role_id) !== 1) {
                 array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with incorrect identifier', AAM_KEY),
+                    __('Detected role "%s" with incorrect identifier', 'advanced-access-manager'),
                     $role_id
                 ), 'INCORRECT_ROLE_SLUG'));
             }
@@ -83,7 +83,7 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
             foreach(array_keys($role['capabilities']) as $cap) {
                 if (preg_match('/^[a-z\d_\-]+$/', $cap) !== 1) {
                     array_push($response, self::_format_issue(sprintf(
-                        __('Detected incorrect capability "%s" for %s role', AAM_KEY),
+                        __('Detected incorrect capability "%s" for %s role', 'advanced-access-manager'),
                         $cap,
                         $role_id
                     ), 'INCORRECT_CAP_SLUG'));

@@ -571,7 +571,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
         if (isset($item['title']) && is_string($item['title'])) {
             $filtered = trim(wp_strip_all_tags($item['title'], true));
         } else {
-            $filtered = __('Invalid Title', AAM_KEY);
+            $filtered = __('Invalid Title', 'advanced-access-manager');
         }
 
         return base64_encode(preg_replace('/([\d]+)$/', '', $filtered));

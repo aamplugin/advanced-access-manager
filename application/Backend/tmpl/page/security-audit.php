@@ -1,3 +1,5 @@
+<?php /** @version 7.0.0 **/ ?>
+
 <?php if (defined('AAM_KEY')) { ?>
     <div id="audit-content" class="audit-container">
         <p class="aam-info">
@@ -6,7 +8,7 @@
             To learn more about the AAM security scan, refer to the article <a href="https://aamportal.com/article/what-is-aam-security-audit-and-how-it-works" target="_blank">"What is AAM security audit and how it works?"</a>
         </p>
         <a href="#" class="btn btn-lg btn-primary" id="execute_security_audit">
-            <?php echo __('Run the Security Scan', AAM_KEY); ?>
+            <?php echo __('Run the Security Scan', 'advanced-access-manager'); ?>
         </a>
         <hr />
 
@@ -89,14 +91,14 @@
                             <p class="aam-highlighted text-larger">
                                 <?php echo esc_js($step['description']); ?>
                                 <?php if (!empty($step['article'])) { ?>
-                                    <a href="<?php echo esc_url($step['article']); ?>" target="_blank"><?php echo __('Learn more', AAM_KEY); ?>.</a>
+                                    <a href="<?php echo esc_url($step['article']); ?>" target="_blank"><?php echo __('Learn more', 'advanced-access-manager'); ?>.</a>
                                 <?php } ?>
                             </p>
 
                             <table id="issue_list_<?php echo esc_attr($step['step']); ?>" class="table table-striped table-bordered aam-detected-issues <?php echo empty($report[$step['step']]['issues']) ? 'hidden' : ''; ?>">
                                 <thead>
                                     <tr>
-                                        <th><?php echo __('Detected Issues', AAM_KEY); ?></th>
+                                        <th><?php echo __('Detected Issues', 'advanced-access-manager'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -115,7 +117,7 @@
 
         <div class="<?php echo $has_report ? '' : 'hidden '; ?>text-right" id="download_report_container">
             <hr />
-            <a href="#" class="btn btn-primary download-latest-report"><?php echo __('Download Latest Report', AAM_KEY); ?></a>
+            <a href="#" class="btn btn-primary download-latest-report"><?php echo __('Download Latest Report', 'advanced-access-manager'); ?></a>
         </div>
     </div>
 <?php }

@@ -56,7 +56,7 @@ class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Int
      */
     public function get_display_name()
     {
-        return __('Visitors', AAM_KEY);
+        return __('Visitors', 'advanced-access-manager');
     }
 
 }

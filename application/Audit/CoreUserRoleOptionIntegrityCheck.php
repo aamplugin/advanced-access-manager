@@ -44,7 +44,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -79,7 +79,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
             // Step #1. Validating that all the keys are strings
             if (!is_string($role_id)) {
                 array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with invalid identifier', AAM_KEY),
+                    __('Detected role "%s" with invalid identifier', 'advanced-access-manager'),
                     $role_id
                 ), 'INVALID_ROLE_SLUG', 'warning'));
             }
@@ -92,7 +92,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
 
             if (!empty($invalid_props)) {
                 array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with invalid properties: %s', AAM_KEY),
+                    __('Detected role "%s" with invalid properties: %s', 'advanced-access-manager'),
                     $role_id,
                     implode(', ', $invalid_props)
                 ), 'ILLEGAL_ROLE_PROPERTY'));
@@ -100,7 +100,7 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
 
             if (!empty($missing_props)) {
                 array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with missing mandatory properties: %s', AAM_KEY),
+                    __('Detected role "%s" with missing mandatory properties: %s', 'advanced-access-manager'),
                     $role_id,
                     implode(', ', $missing_props)
                 ), 'CORRUPTED_ROLE_DATA', 'critical'));

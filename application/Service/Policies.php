@@ -147,7 +147,7 @@ class AAM_Service_Policies
         ) {
             add_meta_box(
                 AAM_Framework_Service_Policies::CPT,
-                __('Access Policy Document', AAM_KEY),
+                __('Access Policy Document', 'advanced-access-manager'),
                 function() {
                     echo AAM_Backend_View::get_instance()->renderPolicyMetabox();
                 },
@@ -160,7 +160,7 @@ class AAM_Service_Policies
             if ($post->post_status === 'publish') {
                 add_meta_box(
                     'aam-policy-assignee',
-                    __('Access Policy Assignee', AAM_KEY),
+                    __('Access Policy Assignee', 'advanced-access-manager'),
                     function() {
                         echo AAM_Backend_View::get_instance()->renderPolicyPrincipalMetabox();
                     },

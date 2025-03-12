@@ -40,7 +40,7 @@ class AAM_Audit_EmptyRoleCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -74,7 +74,7 @@ class AAM_Audit_EmptyRoleCheck
         foreach($db_roles as $role_id => $role) {
             if (empty($role['capabilities'])) {
                 array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with no capabilities', AAM_KEY),
+                    __('Detected role "%s" with no capabilities', 'advanced-access-manager'),
                     translate_user_role(
                         !empty($role['name']) ? $role['name'] : $role_id
                     )

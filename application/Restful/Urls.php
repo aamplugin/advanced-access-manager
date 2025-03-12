@@ -504,7 +504,7 @@ class AAM_Restful_Urls
         if ($rule_type === 'custom_message' && strlen($message) === 0) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The custom_message cannot be empty or be unsafe', AAM_KEY),
+                __('The custom_message cannot be empty or be unsafe', 'advanced-access-manager'),
                 array('status'  => 400)
             );
         }
@@ -534,7 +534,7 @@ class AAM_Restful_Urls
             if ($page_id === 0 || get_post($page_id) === null) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The redirect_page_id refers to non-existing page', AAM_KEY),
+                    __('The redirect_page_id refers to non-existing page', 'advanced-access-manager'),
                     array('status'  => 400)
                 );
             }
@@ -564,7 +564,7 @@ class AAM_Restful_Urls
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The redirect_url is not valid URL', AAM_KEY),
+                __('The redirect_url is not valid URL', 'advanced-access-manager'),
                 array('status'  => 400)
             );
         }
@@ -594,7 +594,7 @@ class AAM_Restful_Urls
         ) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The callback is not valid PHP callback', AAM_KEY),
+                __('The callback is not valid PHP callback', 'advanced-access-manager'),
                 array('status'  => 400)
             );
         }

@@ -1,8 +1,4 @@
-<?php
-/**
- * @version 6.9.32
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature settings" id="settings-multisite-content">
@@ -23,8 +19,8 @@
                                 id="utility-<?php echo esc_attr($id); ?>"
                                 <?php echo ($option['value'] ? 'checked' : ''); ?>
                                 type="checkbox"
-                                data-on="<?php echo isset($option['optionOn']) ? $option['optionOn'] : __('Enabled', AAM_KEY); ?>"
-                                data-off="<?php echo isset($option['optionOff']) ? $option['optionOff'] : __('Disable', AAM_KEY); ?>"
+                                data-on="<?php echo isset($option['optionOn']) ? $option['optionOn'] : __('Enabled', 'advanced-access-manager'); ?>"
+                                data-off="<?php echo isset($option['optionOff']) ? $option['optionOff'] : __('Disable', 'advanced-access-manager'); ?>"
                                 data-size="small"
                                 <?php echo (isset($option['valueOn']) ? 'data-value-on="' . esc_attr($option['valueOn']). '"' : ''); ?>
                                 <?php echo (isset($option['valueOff']) ? 'data-value-off="' . esc_attr($option['valueOff']). '"' : ''); ?>

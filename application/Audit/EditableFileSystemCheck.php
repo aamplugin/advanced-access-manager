@@ -37,7 +37,7 @@ class AAM_Audit_EditableFileSystemCheck
             array_push($issues, ...self::_check_file_system_permissions());
         } catch (Exception $e) {
             array_push($failure, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -71,7 +71,7 @@ class AAM_Audit_EditableFileSystemCheck
             || !wp_is_file_mod_allowed('capability_edit_themes')
         ) {
             array_push($response, self::_format_issue(
-                __('Detected potentially writable file system', AAM_KEY),
+                __('Detected potentially writable file system', 'advanced-access-manager'),
                 'WRITABLE_FS',
                 'warning'
             ));

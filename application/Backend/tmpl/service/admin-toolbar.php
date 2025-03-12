@@ -21,8 +21,8 @@
                     id="aam_toolbar_overwrite"
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="toolbar_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="toolbar_reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                             <div class="panel-body">
                                 <div class="row aam-inner-tab">
                                     <div class="col-xs-12 text-center">
-                                        <small class="aam-menu-capability"><?php echo __('Item ID:', AAM_KEY); ?> <b><?php echo esc_js($branch['slug']); ?></b></small>
+                                        <small class="aam-menu-capability"><?php echo __('Item ID:', 'advanced-access-manager'); ?> <b><?php echo esc_js($branch['slug']); ?></b></small>
                                     </div>
                                 </div>
 
@@ -88,7 +88,7 @@
                                                             data-id="<?php echo esc_attr($child['slug']); ?>"
                                                             data-name="<?php echo esc_attr($child['name']); ?>"
                                                             class="aam-toolbar-item"
-                                                        ><?php echo __('more details', AAM_KEY); ?></a>
+                                                        ><?php echo __('more details', 'advanced-access-manager'); ?></a>
                                                     </small>
                                                 </div>
 
@@ -107,7 +107,7 @@
                                                 <label
                                                     for="toolbar_<?php echo esc_attr($child['slug']); ?>"
                                                     data-toggle="tooltip"
-                                                    title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"
+                                                    title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', 'advanced-access-manager') : __('Check to restrict', 'advanced-access-manager')); ?>"
                                                 ></label>
                                             </div>
                                         <?php } ?>
@@ -124,7 +124,7 @@
                                                 data-toolbar="<?php echo esc_attr($branch['slug']); ?>"
                                                 data-target="#toolbar_<?php echo esc_attr($branch['slug']); ?>"
                                             >
-                                                <i class="icon-lock-open"></i> <?php echo __('Show Menu Branch', AAM_KEY); ?>
+                                                <i class="icon-lock-open"></i> <?php echo __('Show Menu Branch', 'advanced-access-manager'); ?>
                                             </a>
                                         <?php } else { ?>
                                             <a
@@ -133,7 +133,7 @@
                                                 data-toolbar="<?php echo esc_attr($branch['slug']); ?>"
                                                 data-target="#toolbar_<?php echo esc_attr($branch['slug']); ?>"
                                             >
-                                                <i class="icon-lock"></i> <?php echo __('Hide Menu Branch', AAM_KEY); ?>
+                                                <i class="icon-lock"></i> <?php echo __('Hide Menu Branch', 'advanced-access-manager'); ?>
                                             </a>
                                         <?php } ?>
                                     </div>
@@ -146,22 +146,22 @@
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title"><?php echo __('Item Details', AAM_KEY); ?></h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title"><?php echo __('Item Details', 'advanced-access-manager'); ?></h4>
                                 </div>
                                 <div class="modal-body">
                                     <table class="table table-striped table-bordered">
                                         <tbody>
                                             <tr>
-                                                <th width="35%"><?php echo __('Name', AAM_KEY); ?></th>
+                                                <th width="35%"><?php echo __('Name', 'advanced-access-manager'); ?></th>
                                                 <td id="toolbar-item-name"></td>
                                             </tr>
                                             <tr>
-                                                <th width="35%"><?php echo __('Admin Page URL', AAM_KEY); ?></th>
+                                                <th width="35%"><?php echo __('Admin Page URL', 'advanced-access-manager'); ?></th>
                                                 <td id="toolbar-item-uri"></td>
                                             </tr>
                                             <tr>
-                                                <th width="35%"><?php echo __('ID', AAM_KEY); ?></th>
+                                                <th width="35%"><?php echo __('ID', 'advanced-access-manager'); ?></th>
                                                 <td id="toolbar-item-id"></td>
                                             </tr>
                                         </tbody>
@@ -172,7 +172,7 @@
                                         type="button"
                                         class="btn btn-default"
                                         data-dismiss="modal"
-                                    ><?php echo __('Close', AAM_KEY); ?></button>
+                                    ><?php echo __('Close', 'advanced-access-manager'); ?></button>
                                 </div>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <p class="aam-info">
-                            <?php echo __('The list of admin toolbar items is not initialized. Reload the page.', AAM_KEY); ?>
+                            <?php echo __('The list of admin toolbar items is not initialized. Reload the page.', 'advanced-access-manager'); ?>
                         </p>
                     </div>
                 </div>

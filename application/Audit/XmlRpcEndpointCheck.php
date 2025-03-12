@@ -37,7 +37,7 @@ class AAM_Audit_XmlRpcEndpointCheck
             array_push($issues, ...self::_check_endpoint_accessability());
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -73,7 +73,7 @@ class AAM_Audit_XmlRpcEndpointCheck
 
         if ($api_url_enabled) {
             array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users XML-RPC endpoint', AAM_KEY),
+                __('Detected open to unauthenticated users XML-RPC endpoint', 'advanced-access-manager'),
                 'OPEN_XMLRPC_ENDPOINT'
             ));
         }
@@ -83,7 +83,7 @@ class AAM_Audit_XmlRpcEndpointCheck
 
         if ($api_enabled) {
             array_push($response, self::_format_issue(
-                __('The XML-RPC API is enabled', AAM_KEY),
+                __('The XML-RPC API is enabled', 'advanced-access-manager'),
                 'ENABLED_XMLRPC',
                 'warning'
             ));

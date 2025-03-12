@@ -70,7 +70,7 @@ class AAM_Addon_Repository
             'version'     => $version,
             'hasUpdate'   => $has_update,
             'license'     => $this->get_premium_license_key($slug),
-            'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', AAM_KEY),
+            'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', 'advanced-access-manager'),
             'url'         => 'https://aamportal.com/premium?ref=plugin'
         );
     }

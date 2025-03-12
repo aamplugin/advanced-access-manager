@@ -34,8 +34,8 @@ class AAM_Backend_Feature_Main_Widget extends AAM_Backend_Feature_Abstract
      * Get the complete list of admin screens AAM uses to index metaboxes
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     protected function get_screen_urls()
@@ -49,8 +49,8 @@ class AAM_Backend_Feature_Main_Widget extends AAM_Backend_Feature_Abstract
      * Register metabox service UI
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public static function register()
@@ -58,7 +58,7 @@ class AAM_Backend_Feature_Main_Widget extends AAM_Backend_Feature_Abstract
         AAM_Backend_Feature::registerFeature((object)array(
             'uid'        => 'widget',
             'position'   => 10,
-            'title'      => __('Widgets', AAM_KEY),
+            'title'      => __('Widgets', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'main',
             'view'        => __CLASS__

@@ -75,7 +75,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
             );
         } catch (Exception $e) {
             array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
+                __('Unexpected application error: %s', 'advanced-access-manager'),
                 $e->getMessage()
             ), 'APPLICATION_ERROR', 'error'));
         }
@@ -118,7 +118,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
 
                 if (!empty($matched)) {
                     array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege role "%s" with capabilities: %s', AAM_KEY),
+                        __('Detected high-privilege role "%s" with capabilities: %s', 'advanced-access-manager'),
                         translate_user_role(
                             !empty($role['name']) ? $role['name'] : $role_id
                         ),

@@ -43,8 +43,8 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
         $configs  = AAM::api()->config;
         $settings = array(
             'core.settings.multisite.members_only' => array(
-                'title'       => __('Non-Member Access Restriction', AAM_KEY),
-                'description' => __('Limit subsite access to only members within the WordPress multisite network', AAM_KEY),
+                'title'       => __('Non-Member Access Restriction', 'advanced-access-manager'),
+                'description' => __('Limit subsite access to only members within the WordPress multisite network', 'advanced-access-manager'),
                 'value'       => $configs->get('core.settings.multisite.members_only')
             )
         );
@@ -65,7 +65,7 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
         AAM_Backend_Feature::registerFeature((object)array(
             'uid'        => 'settings-multisite',
             'position'   => 15,
-            'title'      => __('Multisite Settings', AAM_KEY),
+            'title'      => __('Multisite Settings', 'advanced-access-manager'),
             'capability' => self::ACCESS_CAPABILITY,
             'type'       => 'settings',
             'view'       => __CLASS__

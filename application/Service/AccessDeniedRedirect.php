@@ -67,8 +67,8 @@ class AAM_Service_AccessDeniedRedirect
                         }
 
                         wp_die(
-                            __('The access is denied.', AAM_KEY),
-                            __('Access Denied', AAM_KEY),
+                            __('The access is denied.', 'advanced-access-manager'),
+                            __('Access Denied', 'advanced-access-manager'),
                             apply_filters('aam_wp_die_args_filter', [
                                 'exit'     => true,
                                 'response' => $status_code

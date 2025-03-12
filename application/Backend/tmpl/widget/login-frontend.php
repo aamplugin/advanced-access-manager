@@ -1,12 +1,4 @@
-<?php
-
-/**
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
- * @since 6.6.0  https://github.com/aamplugin/advanced-access-manager/issues/90
- * @since 6.0.4  Initial implementation of the template
- *
- * @version 6.9.19
- * */
+<?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) {
     echo $this->args['before_widget'];

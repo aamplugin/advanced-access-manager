@@ -10,7 +10,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php echo sprintf(__('Manage access to the backend menu and its submenu items. With the premium %sadd-on%s, you can also activate "restricted mode," allowing you to whitelist specific menu items. For more details, refer to our official documentation page %shere%s.', AAM_KEY), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/streamlining-wordpress-backend-menu-access?ref=plugin" target="_blank">', '</a>'); ?>
+                        <?php echo sprintf(__('Manage access to the backend menu and its submenu items. With the premium %sadd-on%s, you can also activate "restricted mode," allowing you to whitelist specific menu items. For more details, refer to our official documentation page %shere%s.', 'advanced-access-manager'), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/streamlining-wordpress-backend-menu-access?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                     id="aam-menu-overwrite"
                     style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>"
                 >
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="menu-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="menu-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
                                 <?php if ($top_menu_item['slug'] != 'index.php') { ?>
                                     <div class="row aam-inner-tab">
                                         <div class="col-xs-12 text-center">
-                                            <small class="aam-menu-capability"><?php echo __('Menu URL:', AAM_KEY); ?> <b><?php echo urldecode($top_menu_item['path']); ?></b></small>
+                                            <small class="aam-menu-capability"><?php echo __('Menu URL:', 'advanced-access-manager'); ?> <b><?php echo urldecode($top_menu_item['path']); ?></b></small>
                                         </div>
                                     </div>
                                     <hr class="aam-divider" />
@@ -83,7 +83,7 @@
 
                                 <?php if (!empty($top_menu_item['children'])) { ?>
                                     <div class="row aam-inner-tab aam-menu-expended-list">
-                                        <?php echo ($top_menu_item['is_restricted'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', AAM_KEY) . '</div>' : ''); ?>
+                                        <?php echo ($top_menu_item['is_restricted'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', 'advanced-access-manager') . '</div>' : ''); ?>
 
                                         <?php foreach ($top_menu_item['children'] as $j => $child) { ?>
                                             <?php if ($child['slug'] == 'index.php') { ?>
@@ -107,7 +107,7 @@
                                                                 data-slug="<?php echo esc_attr($child['slug']); ?>"
                                                                 data-id="<?php echo esc_attr(base64_encode($child['slug'])); ?>"
                                                                 class="aam-menu-item"
-                                                            ><?php echo __('more details', AAM_KEY); ?></a>
+                                                            ><?php echo __('more details', 'advanced-access-manager'); ?></a>
                                                         </small>
                                                     </div>
                                                     <?php if ($child['is_restricted']) { ?>
@@ -126,7 +126,7 @@
                                                     <label
                                                         for="menu-item-<?php echo $i . $j; ?>"
                                                         data-toggle="tooltip"
-                                                        title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', AAM_KEY) : __('Check to restrict', AAM_KEY)); ?>"
+                                                        title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', 'advanced-access-manager') : __('Check to restrict', 'advanced-access-manager')); ?>"
                                                     ></label>
                                                 </div>
                                             <?php } ?>
@@ -146,7 +146,7 @@
                                                     data-menu-id="<?php echo esc_attr(base64_encode($top_menu_item['slug'])); ?>"
                                                     data-target="#menu-<?php echo $i; ?>"
                                                 >
-                                                    <i class="icon-lock-open"></i> <?php echo __('Show Menu', AAM_KEY); ?>
+                                                    <i class="icon-lock-open"></i> <?php echo __('Show Menu', 'advanced-access-manager'); ?>
                                                 </a>
                                             <?php } else { ?>
                                                 <a
@@ -155,14 +155,14 @@
                                                     data-menu-id="<?php echo esc_attr(base64_encode($top_menu_item['slug'])); ?>"
                                                     data-target="#menu-<?php echo $i; ?>"
                                                 >
-                                                    <i class="icon-lock"></i> <?php echo __('Restrict Menu', AAM_KEY); ?>
+                                                    <i class="icon-lock"></i> <?php echo __('Restrict Menu', 'advanced-access-manager'); ?>
                                                 </a>
                                             <?php } ?>
                                         </div>
                                     </div>
                                 <?php } else { ?>
                                     <p class="aam-info">
-                                        <?php echo __('The "Dashboard" menu cannot be restricted because it is the default page all users are redirected to after login.', AAM_KEY); ?>
+                                        <?php echo __('The "Dashboard" menu cannot be restricted because it is the default page all users are redirected to after login.', 'advanced-access-manager'); ?>
                                     </p>
                                 <?php } ?>
                             </div>
@@ -173,7 +173,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         <p class="aam-notification">
-                            <?php echo __('Please try refreshing the page. If the issue persists, the current user might not have the required privileges to access backend menu items. Another common issue could be insufficient database storage on your server, preventing AAM from storing a proper snapshot of your backend menu. If you\'re unable to resolve the problem, feel free to contact us, and we\'ll do our best to assist you.', AAM_KEY); ?>
+                            <?php echo __('Please try refreshing the page. If the issue persists, the current user might not have the required privileges to access backend menu items. Another common issue could be insufficient database storage on your server, preventing AAM from storing a proper snapshot of your backend menu. If you\'re unable to resolve the problem, feel free to contact us, and we\'ll do our best to assist you.', 'advanced-access-manager'); ?>
                         </p>
                     </div>
                 </div>
@@ -184,17 +184,17 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Dashboard Lockdown', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('Dashboard Lockdown', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <p class="text-center alert alert-warning text-larger">
-                            <strong><?php echo __('You cannot restrict access to the Dashboard Home page.', AAM_KEY); ?></strong><br />
+                            <strong><?php echo __('You cannot restrict access to the Dashboard Home page.', 'advanced-access-manager'); ?></strong><br />
                             <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('The [Dashboard Home] is the default page every user redirects to after login. To restrict access to the entire backend, check the %sHow to lock down WordPress backend%s Q&A.', 'b'), '<a href="https://aamportal.com/question/how-to-lockdown-the-entire-wordpress-backend-area?ref=plugin" target="_blank">', '</a>'); ?>
                         </p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('OK', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('OK', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>
@@ -204,33 +204,33 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', AAM_KEY); ?>"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title"><?php echo __('Menu Details', AAM_KEY); ?></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title"><?php echo __('Menu Details', 'advanced-access-manager'); ?></h4>
                     </div>
                     <div class="modal-body">
                         <table class="table table-striped table-bordered">
                             <tbody>
                                 <tr>
-                                    <th width="20%"><?php echo __('Name', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Name', 'advanced-access-manager'); ?></th>
                                     <td id="menu-item-name"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Slug', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Slug', 'advanced-access-manager'); ?></th>
                                     <td id="menu-item-slug"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Capability', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Capability', 'advanced-access-manager'); ?></th>
                                     <td id="menu-item-cap"></td>
                                 </tr>
                                 <tr>
-                                    <th width="20%"><?php echo __('Path', AAM_KEY); ?></th>
+                                    <th width="20%"><?php echo __('Path', 'advanced-access-manager'); ?></th>
                                     <td id="menu-item-path"></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', AAM_KEY); ?></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Close', 'advanced-access-manager'); ?></button>
                     </div>
                 </div>
             </div>

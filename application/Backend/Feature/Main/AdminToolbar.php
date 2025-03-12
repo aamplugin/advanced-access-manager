@@ -19,14 +19,14 @@ class AAM_Backend_Feature_Main_AdminToolbar extends AAM_Backend_Feature_Abstract
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_admin_toolbar';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/admin-toolbar.php';
 
@@ -34,9 +34,9 @@ class AAM_Backend_Feature_Main_AdminToolbar extends AAM_Backend_Feature_Abstract
      * Constructor
      *
      * @return void
-     *
      * @access public
-     * @version 6.9.13
+     *
+     * @version 7.0.0
      */
     public function __construct()
     {
@@ -52,16 +52,16 @@ class AAM_Backend_Feature_Main_AdminToolbar extends AAM_Backend_Feature_Abstract
      * Register Menu feature
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
             'uid'           => 'toolbar',
             'position'      => 6,
-            'title'         => __('Admin Toolbar', AAM_KEY),
+            'title'         => __('Admin Toolbar', 'advanced-access-manager'),
             'capability'    => self::ACCESS_CAPABILITY,
             'type'          => 'main',
             'view'          => __CLASS__,

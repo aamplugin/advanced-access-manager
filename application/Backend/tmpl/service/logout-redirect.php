@@ -17,13 +17,13 @@
             <div class="col-xs-12">
                 <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
                     <p class="aam-info">
-                        <?php echo __('Efficiently handle user logouts, ensuring they are securely redirected to the appropriate post-logout destination for a smooth and safe exit.', AAM_KEY); ?>
+                        <?php echo __('Efficiently handle user logouts, ensuring they are securely redirected to the appropriate post-logout destination for a smooth and safe exit.', 'advanced-access-manager'); ?>
                     </p>
                 <?php } ?>
 
                 <div class="aam-overwrite" id="aam-logout-redirect-overwrite" style="display: <?php echo ($service->is_customized() ? 'block' : 'none'); ?>">
-                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', AAM_KEY); ?></span>
-                    <span><a href="#" id="logout-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', AAM_KEY); ?></a></span>
+                    <span><i class="icon-check"></i> <?php echo __('Settings are customized', 'advanced-access-manager'); ?></span>
+                    <span><a href="#" id="logout-redirect-reset" class="btn btn-xs btn-primary"><?php echo __('Reset to default', 'advanced-access-manager'); ?></a></span>
                 </div>
 
                 <?php $type = $settings['type']; ?>
@@ -37,7 +37,7 @@
                         value="default"
                         <?php echo ($type === 'default' ? ' checked' : ''); ?>
                     />
-                    <label for="logout-redirect-default"><?php echo __('WordPress default behavior', AAM_KEY); ?></label>
+                    <label for="logout-redirect-default"><?php echo __('WordPress default behavior', 'advanced-access-manager'); ?></label>
                 </div>
                 <div class="radio">
                     <input
@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="form-group logout-redirect-action" id="page-logout-redirect-action" style="display: <?php echo ($type === 'page_redirect' ? 'block' : 'none'); ?>;">
-                    <label><?php echo __('Existing Page', AAM_KEY); ?></label>
+                    <label><?php echo __('Existing Page', 'advanced-access-manager'); ?></label>
                     <?php
                         wp_dropdown_pages(array(
                             'depth'            => 99,
@@ -82,13 +82,13 @@
                             'echo'             => 1,
                             'id'               => 'logout-redirect-page',
                             'class'            => 'form-control',
-                            'show_option_none' => __('-- Select Page --', AAM_KEY)
+                            'show_option_none' => __('-- Select Page --', 'advanced-access-manager')
                         ));
                         ?>
                 </div>
 
                 <div class="form-group logout-redirect-action" id="url-logout-redirect-action" style="display: <?php echo ($type === 'url_redirect' ? 'block' : 'none'); ?>;">
-                    <label><?php echo __('The URL', AAM_KEY); ?></label>
+                    <label><?php echo __('The URL', 'advanced-access-manager'); ?></label>
                     <input
                         type="text"
                         class="form-control"
@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="form-group logout-redirect-action" id="callback-logout-redirect-action" style="display: <?php echo ($type === 'trigger_callback' ? 'block' : 'none'); ?>;">
-                    <label><?php echo __('PHP Callback Function', AAM_KEY); ?></label>
+                    <label><?php echo __('PHP Callback Function', 'advanced-access-manager'); ?></label>
                     <input
                         type="text"
                         class="form-control"
