@@ -347,19 +347,17 @@
                                                     'class', 'aam-row-action icon-cog text-muted'
                                                 );
                                             } else if (getAAM().isUI('post')) {
-                                                getAAM().fetchPartial('post-access-form', function (content) {
-                                                    $('#metabox-post-access-form').html(content);
-
-                                                    getAAM().triggerHook('load-access-form', [
-                                                        $('#content-object-type').val(),
-                                                        $('#content-object-id').val(),
-                                                        $(this)
-                                                    ]);
-
-                                                    $('i.icon-spin4', container).attr(
-                                                        'class', 'aam-row-action icon-cog text-muted'
-                                                    );
-                                                });
+                                                getAAM().triggerHook('load-access-form', [
+                                                    {
+                                                        resource_type: $('#content_resource_type').val(),
+                                                        resource_id: $('#content_resource_id').val()
+                                                    },
+                                                    function() {
+                                                        $('i.icon-spin4', container).attr(
+                                                            'class', 'aam-row-action icon-cog text-muted'
+                                                        );
+                                                    }
+                                                ]);
                                             }
                                         }).attr({
                                             'data-toggle': "tooltip",
@@ -1026,18 +1024,17 @@
                                                     'class', 'aam-row-action icon-cog text-muted'
                                                 );
                                             } else if (getAAM().isUI('post')) {
-                                                getAAM().fetchPartial('post-access-form', function (content) {
-                                                    $('#metabox-post-access-form').html(content);
-                                                    getAAM().triggerHook('load-access-form', [
-                                                        $('#content-object-type').val(),
-                                                        $('#content-object-id').val(),
-                                                        $(this)
-                                                    ]);
-
-                                                    $('i.icon-spin4', container).attr(
-                                                        'class', 'aam-row-action icon-cog text-muted'
-                                                    );
-                                                });
+                                                getAAM().triggerHook('load-access-form', [
+                                                    {
+                                                        resource_type: $('#content_resource_type').val(),
+                                                        resource_id: $('#content_resource_id').val()
+                                                    },
+                                                    function() {
+                                                        $('i.icon-spin4', container).attr(
+                                                            'class', 'aam-row-action icon-cog text-muted'
+                                                        );
+                                                    }
+                                                ]);
                                             }
                                         }
                                     }).attr({
@@ -1292,27 +1289,24 @@
 
             $('document').ready(function () {
                 $('#manage-visitor').bind('click', function () {
-                    var _this = this;
+                    var _this = $(this);
 
                     getAAM().setSubject('visitor', null, getAAM().__('Anonymous'), 0);
-                    $('i.icon-cog', $(this)).attr('class', 'icon-spin4 animate-spin');
+                    $('i.icon-cog', _this).attr('class', 'icon-spin4 animate-spin');
 
                     if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
-                        $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
+                        $('i.icon-spin4', _this).attr('class', 'icon-cog');
                     } else if (getAAM().isUI('post')) {
-                        getAAM().fetchPartial('post-access-form', function (content) {
-                            $('#metabox-post-access-form').html(content);
-
-                            getAAM().triggerHook('load-access-form', [
-                                $('#content-object-type').val(),
-                                $('#content-object-id').val(),
-                                null,
-                                function () {
-                                    $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
-                                }
-                            ]);
-                        });
+                        getAAM().triggerHook('load-access-form', [
+                            {
+                                resource_type: $('#content_resource_type').val(),
+                                resource_id: $('#content_resource_id').val()
+                            },
+                            function() {
+                                $('i.icon-spin4', _this).attr('class', 'icon-cog');
+                            }
+                        ]);
                     }
                 });
             });
@@ -1330,28 +1324,26 @@
 
             $('document').ready(function () {
                 $('#manage-default').bind('click', function () {
-                    var _this = this;
+                    var _this = $(this);
 
                     getAAM().setSubject(
                         'default', null, getAAM().__('All Users, Roles and Visitor'), 0
                     );
 
-                    $('i.icon-cog', $(this)).attr('class', 'icon-spin4 animate-spin');
+                    $('i.icon-cog', _this).attr('class', 'icon-spin4 animate-spin');
                     if (getAAM().isUI('main')) {
                         getAAM().fetchContent('main');
-                        $('i.icon-spin4', $(this)).attr('class', 'icon-cog');
+                        $('i.icon-spin4', _this).attr('class', 'icon-cog');
                     } else if (getAAM().isUI('post')) {
-                        getAAM().fetchPartial('post-access-form', function (content) {
-                            $('#metabox-post-access-form').html(content);
-                            getAAM().triggerHook('load-access-form', [
-                                $('#content-object-type').val(),
-                                $('#content-object-id').val(),
-                                null,
-                                function () {
-                                    $('i.icon-spin4', $(_this)).attr('class', 'icon-cog');
-                                }
-                            ]);
-                        });
+                        getAAM().triggerHook('load-access-form', [
+                            {
+                                resource_type: $('#content_resource_type').val(),
+                                resource_id: $('#content_resource_id').val()
+                            },
+                            function() {
+                                $('i.icon-spin4', _this).attr('class', 'icon-cog');
+                            }
+                        ]);
                     }
                 });
             });
