@@ -174,6 +174,13 @@ class AAM
         if (is_admin()) {
             AAM_Backend_Manager::bootstrap();
         }
+
+        // Load AAM internationalization
+        load_plugin_textdomain(
+            'advanced-access-manager',
+            false,
+            'advanced-access-manager/lang'
+        );
     }
 
     /**
@@ -201,9 +208,6 @@ class AAM
             add_action('wp_login', function($_, $user) {
                 self::$_instance->_init_current_user($user);
             }, 10, 2);
-
-            // Load AAM internationalization
-            load_plugin_textdomain('advanced-access-manager', false, 'advanced-access-manager/lang');
 
             // Initialize current user
             self::$_instance->_init_current_user();
