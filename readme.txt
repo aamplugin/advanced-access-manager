@@ -6,59 +6,38 @@ Requires PHP: 5.6.0
 Tested up to: 6.7.1
 Stable tag: 6.9.47
 
-Take full control of your WordPress site with Advanced Access Manager (AAM), the ultimate plugin for managing access at the frontend, backend, and API levels for any role, user, or visitor.
+Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
 == Description ==
 
-> Advanced Access Manager (aka AAM) is a powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
+Most security plugins protect against external threats like malware or brute force attacks, but what about internal risks? AAM secures your site from within by preventing unauthorized access, privilege escalation, and broken access controls — the leading security vulnerabilities in WordPress.
 
-https://www.youtube.com/watch?v=9oU6wjlSRM8
+* **Mitigate Broken Access Controls.** Ensure roles and permissions are correctly configured to prevent unauthorized actions.
+* **Eliminate Excessive Privileges**. Identify overpowered users and tighten access to critical site functions.
+* **Harden Content Moderation**. Restrict who can edit, publish, or delete sensitive content.
+* **Enforce Security with Code**. Define access rules as JSON Access Policies, making them portable, auditable, and automated.
+* **Empower Developers with AAM PHP Framework**. Build custom, secure access controls with a robust set of services and APIs.
 
 = Key Features =
 
-* **Security Audit:** Service that can quickly identified potential broken access controls, compromised accounts and server misconfigurations.
-* **Unparalleled Flexibility:** The only plugin that offers the freedom to define highly specific access controls across your entire site, with most features available for free.
-* **Proven Reliability:** Trusted by over 150,000 websites, AAM is rigorously tested and [well-documented](https://aamportal.com/documentation), ensuring top-notch quality with minimal support needed.
-* **Comprehensive Access Management:** Control access for any role, user, or visitor, and configure default permissions for posts, pages, custom post types, categories, and taxonomies.
-* **Developer-Friendly:** Loaded with hooks and configurations, AAM integrates seamlessly with WordPress core, providing a robust framework for custom development.
-* **Ad-Free Interface:** Enjoy a clean, well-crafted UI without any advertisements or promotional content.
-* **Accessible Support:** Get help whenever you need it without being a paid customer. Request support directly from your admin area.
-* **Transparent Premium Features:** While most features are free, some advanced functionalities require [premium add-ons](https://aamportal.com/premium). You'll always know when an upgrade is needed.
+* **Security Audit** – Instantly detect misconfigurations, compromised accounts, and risky role assignments.
+* **Granular Access Control** – Manage permissions for any role, user, or visitor with fine-tuned restrictions.
+* **Content Security** – Lock down posts, pages, media, terms and custom content types or taxonomies.
+* **Role & Capability Management** – Customize WordPress roles and define capabilities with precision.
+* **Backend & Menu Control** – Restrict dashboard areas and tailor admin menus per user or role.
+* **API & Endpoint Management** – Secure RESTful and XML-RPC APIs by controlling who can access them.
+* **Passwordless & Secure Logins** – Offer password-free login while keeping authentication safe.
+* **Developer-Ready** – Utilize a one-of-a-kind [AAM PHP Framework](https://aamportal.com/reference/php-framework/) for custom security solutions.
+* **Ad-Free & Transparent** – No ads, no bloat—just powerful security tools.
 
-= Popular Features =
+= Built for Security-Conscious WordPress Users =
 
-* **Manage Backend Menu:** Control backend menu access for any user or role.
-* **Roles & Capabilities:** Customize WordPress roles and capabilities with ease.
-* **Authentication Tools:** Manage JWT authentication seamlessly.
-* **Temporary User Accounts:** Create and manage temporary user accounts.
-* **Content Access:** Enjoy granular access controls for posts, pages, and custom content types (premium feature).
-* **Admin Toolbar Management:** Customize the top admin toolbar for any role or user.
-* **Backend Lockdown:** Restrict backend access as needed.
-* **Secure Login Widget:** Use AJAX login widgets or shortcodes anywhere on your site.
-* **API Management:** Enable/disable RESTful and XML-RPC APIs.
-* **URI Access Control:** Control access to pages via URLs and set custom redirects (premium feature).
-* **Endpoint Access:** Manage access to individual RESTful endpoints.
-* **Passwordless Login:** Allow password-free login via URL.
-* **Content Filtering:** Use AAM shortcodes to filter or replace content.
-* **Redirects:** Set custom login, logout, 404, and access denied redirects.
-* **Metaboxes & Widgets:** Manage metaboxes and widgets visibility.
-* **IP Address & Domain Access:** Control access based on IP or referred domain (premium feature).
-* **Multiple Role Support:** Assign multiple roles to users.
-* **And more...**
+AAM is trusted by over 150,000 websites to deliver enterprise-grade security without complexity. Whether you’re a site admin, developer, or security professional, AAM gives you the tools to take control of WordPress security — your way.
 
-= Security and Privacy =
+* Most features are free. Advanced capabilities are available through [premium add-ons](https://aamportal.com/premium).
+* No hidden tracking, no data collection, no unwanted modifications — just security you can trust.
 
-AAM is committed to your security and privacy:
-
-* No alterations to your website's database.
-* No reading of files outside the AAM plugin folder.
-* No creation, modification, or deletion of server files or folders.
-* No external data capture or transmission about plugin usage or server details.
-* No direct integration with other plugins.
-* No user session impersonation or swapping; authentication is managed by WordPress core.
-* No advertisements or affiliate links.
-
-Discover the power and flexibility of Advanced Access Manager and take control of your WordPress site today!
+> Take control of your WordPress security today — install AAM now!
 
 == Installation ==
 
