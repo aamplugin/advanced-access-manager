@@ -169,6 +169,9 @@ class AAM
         if (is_admin()) {
             AAM_Backend_Manager::bootstrap();
         }
+
+        // Load AAM internationalization
+        load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
     }
 
     /**
@@ -189,9 +192,6 @@ class AAM
 
             // Init current user
             self::$_instance->_initialize_current_user();
-
-            // Load AAM internationalization
-            load_plugin_textdomain(AAM_KEY, false, 'advanced-access-manager/lang');
 
             // Validate logged in user status
             AAM_Service_Core::getInstance()->verify_user_status();
