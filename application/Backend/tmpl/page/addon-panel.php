@@ -82,7 +82,7 @@ $perks = array(
             </p>
         <?php } ?>
 
-        <div class="">
+        <div>
             <h3>FAQs</h3>
 
             <ul>

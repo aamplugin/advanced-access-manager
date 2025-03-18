@@ -6396,7 +6396,9 @@
                                         .text(getAAM().__('Execute the Security Audit'))
                                         .attr('disabled', false);
 
-                                    $('#download_report_container').removeClass('hidden');
+                                    const url = new URL(window.location);
+                                    url.searchParams.set('aam_page', 'audit');
+                                    window.location.href = url.toString();
                                 }
                             } else {
                                 $(`#check_${current_step}_status`).text(
@@ -6455,6 +6457,48 @@
 
             /**
              *
+             * @param {*} btn
+             */
+            function ShareReport(btn) {
+                getAAM().queueRequest(function () {
+                    btn.text(getAAM().__('Sharing Report...')).prop('disabled', true);
+
+                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit/share`, {
+                        type: 'POST',
+                        headers: {
+                            'X-WP-Nonce': getLocal().rest_nonce
+                        },
+                        dataType: 'json',
+                        data: {
+                            email: $('#audit_report_email').val()
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                getAAM().notification(
+                                    'success',
+                                    'Report Shared Successfully. We will come back to you with next steps asap.'
+                                );
+                            }
+
+                            $('#share_audit_confirmation_modal').modal('hide');
+                        },
+                        error: function (response) {
+                            getAAM().notification('danger', response, {
+                                request: `aam/v2/service/audit/share`,
+                                response
+                            });
+                        },
+                        complete: function() {
+                            btn
+                                .text(getAAM().__('Share'))
+                                .prop('disabled', false);
+                        }
+                    });
+                });
+            }
+
+            /**
+             *
              * @returns {undefined}
              */
             function initialize() {
@@ -6491,6 +6535,20 @@
 
                     $('.download-latest-report').bind('click', function() {
                         DownloadReport($(this));
+                    });
+
+                    $('#share_audit_report').bind('click', function() {
+                        ShareReport($(this));
+                    });
+
+                    $('#audit_report_email').bind('change', function() {
+                        const email = $.trim($(this).val());
+
+                        if (email) {
+                            $('#share_audit_report').prop('disabled', false);
+                        } else {
+                            $('#share_audit_report').prop('disabled', true);
+                        }
                     });
                 }
             }
@@ -7153,7 +7211,7 @@
 
         // Making sure that when modal is presented, we scroll to the top
         $('body').delegate('.modal', 'show.bs.modal', function() {
-            parent.window.scrollTo(0, 0);
+            window.scrollTo(0, 0);
         });
 
         $('.aam-area').each(function () {

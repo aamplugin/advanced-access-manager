@@ -1422,7 +1422,14 @@ input[type="radio"]:focus {
   margin-bottom: 30px;
 }
 
-.error-container>ul {
+.error-container > ul {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding-left: 20px;
+  list-style: circle;
+}
+
+.list-of-items {
   margin-top: 10px;
   margin-bottom: 0;
   padding-left: 20px;

@@ -78,6 +78,26 @@ class AAM_Restful_SecurityAudit
                         && current_user_can('aam_trigger_audit');
                 }
             ));
+
+            // Share complete report
+            $this->_register_route('/service/audit/share', array(
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => array($this, 'share_report'),
+                'permission_callback' => function () {
+                    return current_user_can('aam_manager')
+                        && current_user_can('aam_share_audit_results');
+                },
+                'args' => [
+                    'email' => [
+                        'description' => 'Email address for communication',
+                        'type'        => 'string',
+                        'required'    => true,
+                        'validate_callback' => function($email) {
+                            return filter_var($email, FILTER_VALIDATE_EMAIL);
+                        }
+                    ]
+                ]
+            ));
         });
     }
 
@@ -135,6 +155,88 @@ class AAM_Restful_SecurityAudit
         }
 
         return $response;
+    }
+
+    /**
+     * Share report
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function share_report(WP_REST_Request $request)
+    {
+        // Step #1. Let's get signed URL that we can use to upload the report
+        $url = $this->_get_signed_url($request->get_param('email'));
+
+        // Step #2. Prepare the audit report
+        $report = json_encode([
+            'roles'     => wp_roles()->roles,
+            'users'     => count_users(),
+            'results'   => $this->_generate_json_report(),
+            'settings'  => AAM::api()->db->read(
+                AAM_Framework_Service_Settings::DB_OPTION, []
+            ),
+            'configs'   => AAM::api()->db->read(
+                AAM_Framework_Utility_Config::DB_OPTION, []
+            ),
+            'plugins'   => $this->_get_plugin_list()
+        ]);
+
+        // Step #3. Upload the report
+        $response = wp_remote_request($url, [
+            'method'    => 'PUT',
+            'body'      => $report,
+            'headers'   => [
+                'Content-Type'   => 'application/octet-stream',
+                'Content-Length' => strlen($report)
+            ],
+            'timeout'     => 15,
+            'data_format' => 'body'
+        ]);
+
+        // Check for errors in the response
+        if (is_wp_error($response)) {
+            throw new RuntimeException($response->get_error_message());
+        }
+
+        $http_code = wp_remote_retrieve_response_code($response);
+
+        return rest_ensure_response([
+            'status' => $http_code == 200 ? 'success' : 'failure'
+        ]);
+    }
+
+    /**
+     * Get signed URL for report upload
+     *
+     * @param string $email
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_signed_url($email)
+    {
+        $result = wp_remote_get(add_query_arg([
+            'email' => $email
+        ], 'https://api.aamportal.com/upload/url'));
+
+        if (is_wp_error($result)) {
+            throw new RuntimeException('Failed to connect to the server');
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($result), true);
+
+        if (empty($data['url'])) {
+            throw new RuntimeException('Failed to prepare report for upload');
+        }
+
+        return $data['url'];
     }
 
     /**
@@ -204,6 +306,40 @@ class AAM_Restful_SecurityAudit
         }
 
         return $report;
+    }
+
+    /**
+     * Get list of all installed plugins
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_plugin_list()
+    {
+        if (!function_exists('get_plugins')) {
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        }
+
+        // Get all installed plugins
+        $plugins = get_plugins();
+
+        // Initialize an array to store the plugin information
+        $result = [];
+
+        // Loop through each plugin and check its status
+        foreach ($plugins as $plugin_path => $plugin) {
+            $result[] = [
+                'name'        => $plugin['Name'],
+                'version'     => $plugin['Version'],
+                'is_active'   => is_plugin_active($plugin_path),
+                'plugin_path' => $plugin_path,
+                'description' => $plugin['Description']
+            ];
+        }
+
+        return $result;
     }
 
     /**
