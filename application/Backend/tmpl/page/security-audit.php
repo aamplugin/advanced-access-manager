@@ -112,10 +112,5 @@
                 </div>
             <?php } ?>
         </div>
-
-        <div class="<?php echo $has_report ? '' : 'hidden '; ?>text-right" id="download_report_container">
-            <hr />
-            <a href="#" class="btn btn-primary download-latest-report"><?php echo __('Download Latest Report', AAM_KEY); ?></a>
-        </div>
     </div>
 <?php }

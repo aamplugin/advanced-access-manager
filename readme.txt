@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.7.1
-Stable tag: 6.9.47
+Stable tag: 6.9.48
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,11 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.48 =
+* Fixed: Notice in WordPress if the none-default language is active [https://github.com/aamplugin/advanced-access-manager/issues/435](https://github.com/aamplugin/advanced-access-manager/issues/435)
+* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
+* New: Give the ability to share security audit report [https://github.com/aamplugin/advanced-access-manager/issues/434](https://github.com/aamplugin/advanced-access-manager/issues/434)
 
 = 6.9.47 =
 * Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)

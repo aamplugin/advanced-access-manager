@@ -270,21 +270,54 @@
                     </div>
                 <?php } ?>
 
+                <?php if (AAM_Service_SecurityAudit::bootstrap()->get_score()) { ?>
                 <div class="metabox-holder audit-metabox" style="display:none;">
                     <div class="postbox">
                         <div class="inside">
                             <div class="aam-postbox-inside text-center">
                                 <p class="text-larger aam-info text-left">
-                                    <strong>Need help interpreting your security scan report and identifying the next steps to address critical issues?</strong>
-                                    Contact us and we'll schedule a video consultation to guide you.
-                                    Please note, this is a paid service, and we will send an invoice prior to the session.
+                                    <strong><?php echo __('Need help interpreting your security scan report and identifying the next steps to address critical issues?', 'advanced-access-manager'); ?></strong>
+                                    <?php echo __('Share your report with us, and we\'ll get back to you with the next actionable steps. Please note that this service is not free and may incur additional charges based on the number of issues identified.', 'advanced-access-manager'); ?>
                                 </p>
-                                <a href="#" class="btn btn-info btn-block download-latest-report""><?php echo __('Download Latest Report', AAM_KEY); ?></a>
-                                <a href="https://aamportal.com/contact-us" target="_blank" class="btn btn-primary btn-block"><?php echo __('Contact Us', AAM_KEY); ?></a>
+                                <a href="#" class="btn btn-info btn-block download-latest-report"><?php echo __('Download Latest Report', 'advanced-access-manager'); ?></a>
+                                <a href="#share_audit_confirmation_modal" data-toggle="modal" class="btn btn-primary btn-block"><?php echo __('Share Your Report', 'advanced-access-manager'); ?></a>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="modal fade" id="share_audit_confirmation_modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="<?php echo __('Close', 'advanced-access-manager'); ?>"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title"><?php echo __('Share Audit Report', 'advanced-access-manager'); ?></h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info text-larger">
+                                    <?php echo __('You are about to share the full AAM security audit report with us, which includes the following details:', 'advanced-access-manager'); ?>
+                                    <ul class="list-of-items">
+                                        <li><?php echo __('List of roles and their capabilities.', 'advanced-access-manager'); ?></li>
+                                        <li><?php echo __('Total number of users per role (without individual user details).', 'advanced-access-manager'); ?></li>
+                                        <li><?php echo __('Security audit results as outlined on this page.', 'advanced-access-manager'); ?></li>
+                                        <li><?php echo __('AAM settings and configurations.', 'advanced-access-manager'); ?></li>
+                                        <li><?php echo __('List of installed plugins.', 'advanced-access-manager'); ?></li>
+                                    </ul>
+                                </div>
+
+                                <div class="form-group aam-mt-2">
+                                    <label><?php echo __('Email', 'advanced-access-manager');?><span class="aam-asterix">*</span></label>
+                                    <input type="text" class="form-control" id="audit_report_email" name="email" placeholder="<?php echo __('Enter Your Email Address', 'advanced-access-manager'); ?>" />
+                                    <span class="aam-hint"><?php echo __('Provide valid email address we can use to contact you back', 'advanced-access-manager'); ?></span>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" id="share_audit_report" disabled><?php echo __('Share', 'advanced-access-manager'); ?></button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo __('Cancel', 'advanced-access-manager'); ?></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
 
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel.php'); ?>
                 <?php echo static::loadTemplate(dirname(__DIR__) . '/page/subject-panel-advanced.php'); ?>
