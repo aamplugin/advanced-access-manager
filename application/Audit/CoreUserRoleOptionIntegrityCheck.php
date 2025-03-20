@@ -19,6 +19,13 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'user_roles_option_integrity';
+
+    /**
      * Run the check
      *
      * @return array
@@ -43,10 +50,13 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
                 ...self::_validate_core_option_structure($db_roles)
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($issues, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -57,6 +67,33 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'INVALID_ROLE_SLUG' => __(
+                'Detected role %s (%s) with invalid slug',
+                'advanced-access-manager'
+            ),
+            'ILLEGAL_ROLE_PROPERTY' => __(
+                'Detected role %s (%s) with invalid properties: %s',
+                'advanced-access-manager'
+            ),
+            'MISSING_ROLE_PROPERTY' => __(
+                'Detected role %s (%s) with missing mandatory properties: %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -78,10 +115,14 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
         foreach($db_roles as $role_id => $role) {
             // Step #1. Validating that all the keys are strings
             if (!is_string($role_id)) {
-                array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with invalid identifier', 'advanced-access-manager'),
-                    $role_id
-                ), 'INVALID_ROLE_SLUG', 'warning'));
+                array_push($response, self::_format_issue(
+                    'INVALID_ROLE_SLUG',
+                    [
+                        'name' => isset($role['name']) ? $role['name'] : $role_id,
+                        'slug' => $role_id
+                    ],
+                    'warning'
+                ));
             }
 
             // Step #2. Verifying that each role has only proper properties & no core
@@ -91,19 +132,26 @@ class AAM_Audit_CoreUserRoleOptionIntegrityCheck
             $missing_props = array_diff(['name', 'capabilities'], $props);
 
             if (!empty($invalid_props)) {
-                array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with invalid properties: %s', 'advanced-access-manager'),
-                    $role_id,
-                    implode(', ', $invalid_props)
-                ), 'ILLEGAL_ROLE_PROPERTY'));
+                array_push($response, self::_format_issue(
+                    'ILLEGAL_ROLE_PROPERTY',
+                    [
+                        'name'  => isset($role['name']) ? $role['name'] : $role_id,
+                        'slug'  => $role_id,
+                        'props' => $invalid_props
+                    ]
+                ));
             }
 
             if (!empty($missing_props)) {
-                array_push($response, self::_format_issue(sprintf(
-                    __('Detected role "%s" with missing mandatory properties: %s', 'advanced-access-manager'),
-                    $role_id,
-                    implode(', ', $missing_props)
-                ), 'CORRUPTED_ROLE_DATA', 'critical'));
+                array_push($response, self::_format_issue(
+                    'MISSING_ROLE_PROPERTY',
+                    [
+                        'name'  => isset($role['name']) ? $role['name'] : $role_id,
+                        'slug'  => $role_id,
+                        'props' => $missing_props
+                    ],
+                    'critical'
+                ));
             }
         }
 

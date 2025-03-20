@@ -17,6 +17,43 @@ trait AAM_Audit_AuditCheckTrait
 {
 
     /**
+     * Convert issue to message
+     *
+     * @param array $issue
+     *
+     * @return string|null
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function issue_to_message($issue)
+    {
+        $result = null;
+        $map    = self::_get_message_templates();
+
+        if ($issue['code'] === 'APPLICATION_ERROR') {
+            $result = sprintf(
+                __('Unexpected application error: %s', 'advanced-access-manager'),
+                $issue['data']['message']
+            );
+        } elseif (array_key_exists($issue['code'], $map)) {
+            if (!empty($issue['data'])) {
+                $result = sprintf(
+                    $map[$issue['code']],
+                    ...array_values(array_map(function($v) {
+                        return is_array($v) ? implode(', ', $v) : $v;
+                    }, $issue['data']))
+                );
+            } else {
+                $result = $map[$issue['code']];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Determine the final check status
      *
      * @param array $response
@@ -75,9 +112,9 @@ trait AAM_Audit_AuditCheckTrait
     /**
      * Format detected issue
      *
-     * @param string $reason
      * @param string $code
-     * @param string $type
+     * @param array  $metadata [Optional]
+     * @param string $type     [Optional]
      *
      * @return array
      *
@@ -86,13 +123,18 @@ trait AAM_Audit_AuditCheckTrait
      *
      * @version 7.0.0
      */
-    private static function _format_issue($reason, $code, $type = 'notice')
+    private static function _format_issue($code, $metadata = [], $type = 'notice')
     {
-        return [
-            'type'   => $type,
-            'code'   => $code,
-            'reason' => $reason
+        $result = [
+            'type' => $type,
+            'code' => $code
         ];
+
+        if (!empty($metadata)) {
+            $result['data'] = $metadata;
+        }
+
+        return $result;
     }
 
     /**

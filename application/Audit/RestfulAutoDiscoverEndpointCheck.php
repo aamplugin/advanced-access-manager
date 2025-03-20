@@ -19,6 +19,13 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'restful_auto_discover_endpoint';
+
+    /**
      * Run the check
      *
      * @return array
@@ -36,10 +43,13 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         try {
             array_push($issues, ...self::_check_endpoint_accessability());
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -50,6 +60,25 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'REST_OPEN_DISCOVER_ENDPOINT' => __(
+                'Detected open to anonymous users REST auto-discover endpoint',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -79,10 +108,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
 
         // Verifying that auto-discover endpoint is disabled for visitors
         if ($url_enabled && $api_route_enabled) {
-            array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users RESTful auto-discover endpoint', 'advanced-access-manager'),
-                'REST_OPEN_DISCOVER_ENDPOINT'
-            ));
+            array_push($response, self::_format_issue('REST_OPEN_DISCOVER_ENDPOINT'));
         }
 
         return $response;

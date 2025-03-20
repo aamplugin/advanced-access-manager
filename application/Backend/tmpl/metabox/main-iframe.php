@@ -57,7 +57,15 @@ if (defined('AAM_KEY')) {
                             <div class="panel panel-default" style="border-radius: 0">
                                 <div class="panel-heading" role="tab" id="security-score-heading">
                                     <h4 class="panel-title">
-                                        <a role="button" data-toggle="collapse" data-parent="#security-score-block" href="#security-score" aria-controls="security-score" style="font-size: 2rem;">
+                                        <a
+                                            role="button"
+                                            data-toggle="collapse"
+                                            data-parent="#security-score-block"
+                                            href="#security-score"
+                                            aria-controls="security-score"
+                                            aria-expanded="true"
+                                            style="font-size: 2rem;"
+                                        >
                                             <?php echo sprintf(
                                                 __('Your Security Score: %s %s', 'advanced-access-manager'),
                                                 empty($score) ? 'Unknown' : $score,
@@ -67,7 +75,7 @@ if (defined('AAM_KEY')) {
                                     </h4>
                                 </div>
 
-                                <div id="security-score" class="panel-collapse collapse" role="tabpanel" aria-labelledby="security-score-heading">
+                                <div id="security-score" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="security-score-heading">
                                     <div class="panel-body">
                                         <?php if (!empty($score)) {  ?>
                                         <div class="gauge-wrapper">

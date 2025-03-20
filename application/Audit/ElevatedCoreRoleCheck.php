@@ -19,6 +19,13 @@ class AAM_Audit_ElevatedCoreRoleCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'elevated_core_role_caps';
+
+    /**
      * WordPress core roles to scan
      *
      * @version 7.0.0
@@ -120,10 +127,13 @@ class AAM_Audit_ElevatedCoreRoleCheck
                 ...self::_detect_elevated_core_roles($db_roles)
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -134,6 +144,25 @@ class AAM_Audit_ElevatedCoreRoleCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'ELEVATED_ROLE_CAPS' => __(
+                'Detected WordPress core role %s (%s) with elevated caps: %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -166,14 +195,15 @@ class AAM_Audit_ElevatedCoreRoleCheck
                 );
 
                 if (!empty($diff_caps)) {
-                    array_push(
-                        $response,
-                        self::_format_issue(sprintf(
-                            __('Detected WordPress core role "%s" with elevated capabilities: %s', 'advanced-access-manager'),
-                            translate_user_role($role['name']),
-                            implode(', ', $diff_caps)
-                        ), 'ELEVATED_ROLE_CAPS', 'warning')
-                    );
+                    array_push($response, self::_format_issue(
+                        'ELEVATED_ROLE_CAPS',
+                        [
+                            'name' => translate_user_role($role['name']),
+                            'slug' => $role_id,
+                            'caps' => $diff_caps
+                        ],
+                        'warning'
+                    ));
                 }
             }
         }

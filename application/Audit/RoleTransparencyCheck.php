@@ -19,6 +19,13 @@ class AAM_Audit_RoleTransparencyCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'roles_visibility';
+
+    /**
      * Run the check
      *
      * @return array
@@ -39,10 +46,13 @@ class AAM_Audit_RoleTransparencyCheck
                 ...self::_validate_roles_transparency(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -53,6 +63,25 @@ class AAM_Audit_RoleTransparencyCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIDDEN_ROLES' => __(
+                'Detected hidden role(s): %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -85,10 +114,12 @@ class AAM_Audit_RoleTransparencyCheck
         $diff_roles = array_diff($registered_roles, $visible_roles);
 
         if (!empty($diff_roles)) {
-            array_push($response, self::_format_issue(sprintf(
-                __('Detected hidden role(s): %s', 'advanced-access-manager'),
-                implode(', ', $diff_roles)
-            ), 'HIDDEN_ROLE'));
+            array_push($response, self::_format_issue(
+                'HIDDEN_ROLES',
+                [
+                    'roles' => $diff_roles
+                ]
+            ));
         }
 
         return $response;

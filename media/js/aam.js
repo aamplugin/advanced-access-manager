@@ -6339,22 +6339,22 @@
                         data: payload,
                         success: function (response) {
                             // Append the list of identified issues to the list
-                            if (Array.isArray(response.issues)) {
-                                $.each(response.issues, (_, issue) => {
-                                    $(`#issue_list_${current_step} tbody`).append(
-                                        '<tr><td><strong>' + issue.type.toUpperCase() + ':</strong> ' + issue.reason + '</td></tr>'
-                                    );
+                            // if (Array.isArray(response.issues)) {
+                            //     $.each(response.issues, (_, issue) => {
+                            //         $(`#issue_list_${current_step} tbody`).append(
+                            //             '<tr><td><strong>' + issue.type.toUpperCase() + ':</strong> ' + issue.reason + '</td></tr>'
+                            //         );
 
-                                    // Also increment the issue index
-                                    if (issues_index[current_step][issue.type] === undefined) {
-                                        issues_index[current_step][issue.type] = 0;
-                                    }
+                            //         // Also increment the issue index
+                            //         if (issues_index[current_step][issue.type] === undefined) {
+                            //             issues_index[current_step][issue.type] = 0;
+                            //         }
 
-                                    issues_index[current_step][issue.type]++;
-                                });
+                            //         issues_index[current_step][issue.type]++;
+                            //     });
 
-                                $(`#issue_list_${current_step}`).removeClass('hidden');
-                            }
+                            //     $(`#issue_list_${current_step}`).removeClass('hidden');
+                            // }
 
                             if (response.is_completed) {
                                 queue.shift(); // Remove completed step
@@ -6397,8 +6397,13 @@
                                         .attr('disabled', false);
 
                                     const url = new URL(window.location);
-                                    url.searchParams.set('aam_page', 'audit');
-                                    window.location.href = url.toString();
+
+                                    if (url.searchParams.get('aam_page') === 'audit') {
+                                        window.location.reload();
+                                    } else {
+                                        url.searchParams.set('aam_page', 'audit');
+                                        window.location.href = url.toString();
+                                    }
                                 }
                             } else {
                                 $(`#check_${current_step}_status`).text(

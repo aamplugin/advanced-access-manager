@@ -22,6 +22,7 @@
                 <?php
                     $indicator = 'icon-circle-thin text-info aam-security-audit-step';
                     $summary   = '';
+                    $executor  = $step['executor'];
 
                     // Determine the icon
                     if (!empty($report[$step['step']]['is_completed'])) {
@@ -91,11 +92,16 @@
                             <p class="aam-highlighted text-larger">
                                 <?php echo esc_js($step['description']); ?>
                                 <?php if (!empty($step['article'])) { ?>
-                                    <a href="<?php echo esc_url($step['article']); ?>" target="_blank"><?php echo __('Learn more', 'advanced-access-manager'); ?>.</a>
+                                    <a href="<?php echo esc_url($step['article']); ?>" target="_blank">
+                                        <?php echo __('Learn more', 'advanced-access-manager'); ?>.
+                                    </a>
                                 <?php } ?>
                             </p>
 
-                            <table id="issue_list_<?php echo esc_attr($step['step']); ?>" class="table table-striped table-bordered aam-detected-issues <?php echo empty($report[$step['step']]['issues']) ? 'hidden' : ''; ?>">
+                            <table
+                                id="issue_list_<?php echo esc_attr($step['step']); ?>"
+                                class="table table-striped table-bordered aam-detected-issues <?php echo empty($report[$step['step']]['issues']) ? 'hidden' : ''; ?>"
+                            >
                                 <thead>
                                     <tr>
                                         <th><?php echo __('Detected Issues', 'advanced-access-manager'); ?></th>
@@ -104,7 +110,7 @@
                                 <tbody>
                                     <?php if (!empty($report[$step['step']]['issues'])) {
                                         foreach($report[$step['step']]['issues'] as $issue) {
-                                            echo '<tr><td><strong>' . esc_js(strtoupper($issue['type'])) . ':</strong> ' . esc_js($issue['reason']) . '</td></tr>';
+                                            echo '<tr><td><strong>' . esc_js(strtoupper($issue['type'])) . ':</strong> ' . esc_js(call_user_func("{$executor}::issue_to_message", $issue)) . '</td></tr>';
                                         }
                                     } ?>
                                 </tbody>

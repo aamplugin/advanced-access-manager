@@ -19,6 +19,13 @@ class AAM_Audit_RoleIntegrityCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'core_roles_integrity';
+
+    /**
      * Default collection of roles & capabilities
      *
      * @version 7.0.0
@@ -190,10 +197,13 @@ class AAM_Audit_RoleIntegrityCheck
                 ...self::_validate_core_role_capabilities($db_roles)
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -204,6 +214,29 @@ class AAM_Audit_RoleIntegrityCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'MISSING_CORE_ROLES' => __(
+                'Detected missing WordPress core role(s): %s',
+                'advanced-access-manager'
+            ),
+            'MISSING_CORE_CAPS' => __(
+                'Detected missing WordPress core caps for role %s (%s): %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -227,13 +260,13 @@ class AAM_Audit_RoleIntegrityCheck
         $diff_roles     = array_diff($complete_roles, $existing_roles);
 
         if (!empty($diff_roles)) {
-            array_push($response, self::_format_issue(sprintf(
-                __('Detected missing WordPress core role(s): %s', 'advanced-access-manager'),
-                implode(
-                    ', ',
-                    array_map('translate_user_role', $diff_roles)
-                )
-            ), 'MISSING_ROLE', 'warning'));
+            array_push($response, self::_format_issue(
+                'MISSING_CORE_ROLES',
+                [
+                    'roles' => $diff_roles
+                ],
+                'warning'
+            ));
         }
 
         return $response;
@@ -267,11 +300,15 @@ class AAM_Audit_RoleIntegrityCheck
                 $diff_caps     = array_diff($complete_caps, $existing_caps);
 
                 if (!empty($diff_caps)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected missing WordPress core capabilities for role "%s": %s', 'advanced-access-manager'),
-                        translate_user_role($role['name']),
-                        implode(', ', $diff_caps)
-                    ), 'MISSING_CAP', 'warning'));
+                    array_push($response, self::_format_issue(
+                        'MISSING_CORE_CAPS',
+                        [
+                            'role_name' => translate_user_role($role['name']),
+                            'role_slug' => $role_id,
+                            'caps'      => $diff_caps
+                        ],
+                        'warning'
+                    ));
                 }
             }
         }

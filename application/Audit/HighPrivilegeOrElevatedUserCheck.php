@@ -19,6 +19,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'high_privilege_or_elevated_users';
+
+    /**
      * Maximum number of users to iterate with one execution
      *
      * @version 7.0.0
@@ -128,10 +135,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $result['progress'] = $result['offset'] / $result['total_count'];
             }
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -146,6 +156,29 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
         self::_determine_check_status($result);
 
         return $result;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIGH_PRIVILEGE_CAPS_USER' => __(
+                'Detected high-privilege user %s (ID: %d) with caps: %s',
+                'advanced-access-manager'
+            ),
+            'ELEVATED_CAPS_USER' => __(
+                'Detected user %s (ID: %d) with elevated caps: %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -177,12 +210,15 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $matched = array_intersect($assigned_caps, self::HIGH_PRIVILEGE_CAPS);
 
                 if (!empty($matched)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', 'advanced-access-manager'),
-                        $user->display_name,
-                        $user->ID,
-                        implode(', ', $matched)
-                    ), 'HIGH_PRIVILEGE_USER_CAPS', 'critical'));
+                    array_push($response, self::_format_issue(
+                        'HIGH_PRIVILEGE_CAPS_USER',
+                        [
+                            'name' => $user->display_name,
+                            'id'   => $user->ID,
+                            'caps' => $matched
+                        ],
+                        'critical'
+                    ));
                 }
 
                 // Detecting if user has elevated privileges as well
@@ -193,12 +229,14 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 );
 
                 if (!empty($elevated_caps)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected elevated capabilities for user "%s" (ID: %s): %s', 'advanced-access-manager'),
-                        $user->display_name,
-                        $user->ID,
-                        implode(', ', $elevated_caps)
-                    ), 'ELEVATED_USER_CAPS'));
+                    array_push($response, self::_format_issue(
+                        'ELEVATED_CAPS_USER',
+                        [
+                            'name' => $user->display_name,
+                            'id'   => $user->ID,
+                            'caps' => $elevated_caps
+                        ]
+                    ));
                 }
             }
         }

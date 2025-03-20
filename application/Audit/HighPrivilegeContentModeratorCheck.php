@@ -19,6 +19,13 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'high_privilege_content_moderator_roles';
+
+    /**
      * List of roles that are allowed to be high-privileged
      *
      * @version 7.0.0
@@ -63,10 +70,13 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
                 ...self::_scan_for_high_privilege_roles(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -77,6 +87,25 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIGH_CONTENT_MODERATOR_ROLE' => __(
+                'Detected high-privilege content moderator role %s (%s) with caps: %s',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -106,13 +135,17 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
                 $matched = array_intersect($assigned_caps, self::HIGH_PRIVILEGE_CAPS);
 
                 if (!empty($matched)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege content moderator role "%s" with capabilities: %s', 'advanced-access-manager'),
-                        translate_user_role(
-                            !empty($role['name']) ? $role['name'] : $role_id
-                        ),
-                        implode(', ', $matched)
-                    ), 'HIGH_CONTENT_MODERATION_ROLE_CAP', 'critical'));
+                    array_push($response, self::_format_issue(
+                        'HIGH_CONTENT_MODERATOR_ROLE',
+                        [
+                            'name' => translate_user_role(
+                                !empty($role['name']) ? $role['name'] : $role_id
+                            ),
+                            'slug' => $role_id,
+                            'caps' => $matched
+                        ],
+                        'critical'
+                    ));
                 }
             }
         }

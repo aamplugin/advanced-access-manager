@@ -19,6 +19,13 @@ class AAM_Audit_XmlRpcEndpointCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'xml_rpc_endpoint';
+
+    /**
      * Run the check
      *
      * @return array
@@ -36,10 +43,13 @@ class AAM_Audit_XmlRpcEndpointCheck
         try {
             array_push($issues, ...self::_check_endpoint_accessability());
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', 'advanced-access-manager'),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -50,6 +60,29 @@ class AAM_Audit_XmlRpcEndpointCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'OPEN_XMLRPC_ENDPOINT' => __(
+                'Detected open to anonymous users XML-RPC endpoint',
+                'advanced-access-manager'
+            ),
+            'ENABLED_XMLRPC' => __(
+                'The XML-RPC API is enabled',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -72,10 +105,7 @@ class AAM_Audit_XmlRpcEndpointCheck
         $api_url_enabled = !$visitor->urls()->is_denied('/xmlrpc.php');
 
         if ($api_url_enabled) {
-            array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users XML-RPC endpoint', 'advanced-access-manager'),
-                'OPEN_XMLRPC_ENDPOINT'
-            ));
+            array_push($response, self::_format_issue('OPEN_XMLRPC_ENDPOINT'));
         }
 
         // Check if XML-PRC API is enabled
@@ -83,8 +113,8 @@ class AAM_Audit_XmlRpcEndpointCheck
 
         if ($api_enabled) {
             array_push($response, self::_format_issue(
-                __('The XML-RPC API is enabled', 'advanced-access-manager'),
                 'ENABLED_XMLRPC',
+                [],
                 'warning'
             ));
         }
