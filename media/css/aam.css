@@ -1521,6 +1521,13 @@ input[type=radio]:checked+label:before {
   color: #F0F0F0 !important;
 }
 
+.list-of-items {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding-left: 20px;
+  list-style: circle;
+}
+
 .aam-menu-capability,
 .aam-metabox-details {
   color: #777777;
