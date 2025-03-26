@@ -35,15 +35,15 @@ trait AAM_Audit_AuditCheckTrait
         if ($issue['code'] === 'APPLICATION_ERROR') {
             $result = sprintf(
                 __('Unexpected application error: %s', 'advanced-access-manager'),
-                $issue['data']['message']
+                $issue['metadata']['message']
             );
         } elseif (array_key_exists($issue['code'], $map)) {
-            if (!empty($issue['data'])) {
+            if (!empty($issue['metadata'])) {
                 $result = sprintf(
                     $map[$issue['code']],
                     ...array_values(array_map(function($v) {
                         return is_array($v) ? implode(', ', $v) : $v;
-                    }, $issue['data']))
+                    }, $issue['metadata']))
                 );
             } else {
                 $result = $map[$issue['code']];
@@ -51,6 +51,22 @@ trait AAM_Audit_AuditCheckTrait
         }
 
         return $result;
+    }
+
+    /**
+     * Convert audit step results into shareable dataset
+     *
+     * @param array $results
+     *
+     * @return array
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function issues_to_shareable($results)
+    {
+        return $results['issues'];
     }
 
     /**
@@ -131,7 +147,7 @@ trait AAM_Audit_AuditCheckTrait
         ];
 
         if (!empty($metadata)) {
-            $result['data'] = $metadata;
+            $result['metadata'] = $metadata;
         }
 
         return $result;

@@ -158,7 +158,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
     private static function _get_message_templates()
     {
         return [
-            'ELEVATED_ROLE_CAPS' => __(
+            'ELEVATED_CORE_ROLE_CAPS' => __(
                 'Detected WordPress core role %s (%s) with elevated caps: %s',
                 'advanced-access-manager'
             )
@@ -196,7 +196,7 @@ class AAM_Audit_ElevatedCoreRoleCheck
 
                 if (!empty($diff_caps)) {
                     array_push($response, self::_format_issue(
-                        'ELEVATED_ROLE_CAPS',
+                        'ELEVATED_CORE_ROLE_CAPS',
                         [
                             'name' => translate_user_role($role['name']),
                             'slug' => $role_id,

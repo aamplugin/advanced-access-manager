@@ -95,7 +95,7 @@ class AAM_Audit_EditableFileSystemCheck
     {
         $response = [];
 
-        if (!defined( 'DISALLOW_FILE_EDIT' )
+        if (!defined('DISALLOW_FILE_EDIT')
             || !constant('DISALLOW_FILE_EDIT')
             || !wp_is_file_mod_allowed('capability_edit_themes')
         ) {

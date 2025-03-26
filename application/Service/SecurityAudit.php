@@ -32,6 +32,13 @@ class AAM_Service_SecurityAudit
     const DB_SCOPE_OPTION = 'aam_security_audit_score';
 
     /**
+     * Executive summary for the audit report
+     *
+     * @version 7.0.0
+     */
+    const DB_SUMMARY_OPTION = 'aam_audit_executive_summary';
+
+    /**
      * Issue weights
      *
      * @version 7.0.0
@@ -88,7 +95,9 @@ class AAM_Service_SecurityAudit
      */
     public function reset()
     {
-        return AAM::api()->db->delete(self::DB_OPTION);
+        return AAM::api()->db->delete(self::DB_OPTION)
+            && AAM::api()->db->delete(self::DB_SCOPE_OPTION)
+            && AAM::api()->db->delete(self::DB_SUMMARY_OPTION);
     }
 
     /**
@@ -315,6 +324,34 @@ class AAM_Service_SecurityAudit
         $report = AAM::api()->db->read(self::DB_SCOPE_OPTION);
 
         return !empty($report);
+    }
+
+    /**
+     * Check if there is an executive summary
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_summary()
+    {
+        $summary = $this->get_summary();
+
+        return !empty($summary);
+    }
+
+    /**
+     * Get executive summary
+     *
+     * @return array|null
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_summary()
+    {
+        return AAM::api()->db->read(self::DB_SUMMARY_OPTION);
     }
 
     /**

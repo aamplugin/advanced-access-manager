@@ -182,6 +182,42 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     }
 
     /**
+     * @inheritDoc
+     *
+     * Let's not share any information (like IDs or names) about specific user
+     * accounts
+     *
+     * @version 7.0.0
+     */
+    public static function issues_to_shareable($results)
+    {
+        $response = [];
+
+        foreach($results['issues'] as $issue) {
+            $issue_code = $issue['code'];
+            if (!array_key_exists($issue_code, $response)) {
+                $response[$issue_code] = [
+                    'type'     => $issue['type'],
+                    'code'     => $issue_code,
+                    'metadata' => [
+                        'user_count'   => 0,
+                        'capabilities' => []
+                    ]
+                ];
+            }
+
+            $response[$issue_code]['metadata']['user_count']++; // Increment #
+
+            $response[$issue_code]['metadata']['capabilities'] = array_unique(array_merge(
+                $response[$issue_code]['metadata']['capabilities'],
+                $issue['metadata']['caps']
+            ));
+        }
+
+        return $response;
+    }
+
+    /**
      * Scan for high-privilege users
      *
      * @param array $user_list
@@ -197,10 +233,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     {
         $response = [];
 
+        // We are going to exclude the admin of the site
+        $admin_email = AAM::api()->db->read('admin_email');
+
         foreach($user_list as $user) {
             // Exclude current user and assume that they are the only Administrator
             // with high-privilege access
-            if ($user->ID !== get_current_user_id()) {
+            if ($user->user_email !== $admin_email) {
                 $assigned_caps = array_keys(
                     array_filter($user->allcaps, function($v) {
                         return !empty($v);

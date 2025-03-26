@@ -223,7 +223,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             array_push($issues, self::_format_issue(
                 'ELEVATED_ADMIN_USER_COUNT',
                 [
-                    'count' => $sums['website']
+                    'user_count' => $sums['website']
                 ],
                 'critical'
             ));
@@ -233,7 +233,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             array_push($issues, self::_format_issue(
                 'ELEVATED_EDITOR_USER_COUNT',
                 [
-                    'count' => $sums['content']
+                    'user_count' => $sums['content']
                 ],
                 'warning'
             ));
