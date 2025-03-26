@@ -56,8 +56,10 @@
                     <div id="executive_summary_critical" class="<?php echo empty($summary['critical']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('Critical Findings', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php foreach($summary['critical'] as $critical_issue) { ?>
-                            <li><?php echo stripslashes(esc_js($critical_issue)); ?></li>
+                            <?php if (!empty($summary['critical'])) { ?>
+                                <?php foreach($summary['critical'] as $critical_issue) { ?>
+                                <li><?php echo stripslashes(esc_js($critical_issue)); ?></li>
+                                <?php } ?>
                             <?php } ?>
                         </ul>
                     </div>
@@ -65,8 +67,10 @@
                     <div id="executive_summary_concerns" class="<?php echo empty($summary['concerns']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('Additional Concerns', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php foreach($summary['concerns'] as $concern) { ?>
-                            <li><?php echo stripslashes(esc_js($concern)); ?></li>
+                            <?php if (!empty($summary['concerns'])) { ?>
+                                <?php foreach($summary['concerns'] as $concern) { ?>
+                                <li><?php echo stripslashes(esc_js($concern)); ?></li>
+                                <?php } ?>
                             <?php } ?>
                         </ul>
                     </div>
@@ -74,8 +78,10 @@
                     <div id="executive_summary_recommendations" class="<?php echo empty($summary['recommendations']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('Recommendations', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php foreach($summary['recommendations'] as $recommendation) { ?>
-                            <li><?php echo stripslashes(esc_js($recommendation)); ?></li>
+                            <?php if (!empty($summary['recommendations'])) { ?>
+                                <?php foreach($summary['recommendations'] as $recommendation) { ?>
+                                <li><?php echo stripslashes(esc_js($recommendation)); ?></li>
+                                <?php } ?>
                             <?php } ?>
                         </ul>
                     </div>
@@ -83,8 +89,10 @@
                     <div id="executive_summary_references" class="<?php echo empty($summary['references']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('References', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php foreach($summary['references'] as $reference) { ?>
-                            <li><a href="<?php echo esc_attr($reference); ?>" target="_blank"><?php echo esc_js($reference); ?></a></li>
+                            <?php if (!empty($summary['recommendations'])) { ?>
+                                <?php foreach($summary['recommendations'] as $reference) { ?>
+                                <li><a href="<?php echo esc_attr($reference); ?>" target="_blank"><?php echo esc_js($reference); ?></a></li>
+                                <?php } ?>
                             <?php } ?>
                         </ul>
                     </div>
