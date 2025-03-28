@@ -226,8 +226,11 @@ class AAM_Framework_Service_Settings
             $access_level = $this->_get_subject($inline_context);
             $type         = is_null($access_level) ? null : $access_level::UID;
 
-            if (is_null($type)) { // Return all settings
+            if (is_null($type)) { // Reset all settings
                 $this->_settings = [];
+
+                AAM_Core_API::clearSettings();
+
             } elseif (in_array($type, [
                 AAM_Framework_Type_AccessLevel::USER,
                 AAM_Framework_Type_AccessLevel::ROLE

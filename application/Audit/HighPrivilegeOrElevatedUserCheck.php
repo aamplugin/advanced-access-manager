@@ -19,6 +19,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'high_privilege_or_elevated_users';
+
+    /**
      * Maximum number of users to iterate with one execution
      *
      * @version 6.9.40
@@ -131,10 +138,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $response['progress'] = $response['offset'] / $response['total_count'];
             }
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -147,6 +157,65 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
 
         // Determine final status for the check
         self::_determine_check_status($response);
+
+        return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIGH_PRIVILEGE_CAPS_USER' => __(
+                'Detected high-privilege user %s (ID: %d) with caps: %s',
+                'advanced-access-manager'
+            ),
+            'ELEVATED_CAPS_USER' => __(
+                'Detected user %s (ID: %d) with elevated caps: %s',
+                'advanced-access-manager'
+            )
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * Let's not share any information (like IDs or names) about specific user
+     * accounts
+     *
+     * @version 7.0.0
+     */
+    public static function issues_to_shareable($results)
+    {
+        $response = [];
+
+        foreach($results['issues'] as $issue) {
+            $issue_code = $issue['code'];
+            if (!array_key_exists($issue_code, $response)) {
+                $response[$issue_code] = [
+                    'type'     => $issue['type'],
+                    'code'     => $issue_code,
+                    'metadata' => [
+                        'user_count'   => 0,
+                        'capabilities' => []
+                    ]
+                ];
+            }
+
+            $response[$issue_code]['metadata']['user_count']++; // Increment #
+
+            $response[$issue_code]['metadata']['capabilities'] = array_unique(array_merge(
+                $response[$issue_code]['metadata']['capabilities'],
+                $issue['metadata']['caps']
+            ));
+        }
 
         return $response;
     }
@@ -166,10 +235,13 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
     {
         $response = [];
 
+        // We are going to exclude the admin of the site
+        $admin_email = AAM_Core_API::getOption('admin_email');
+
         foreach($user_list as $user) {
             // Exclude current user and assume that they are the only Administrator
             // with high-privilege access
-            if ($user['id'] !== get_current_user_id()) {
+            if ($user['user_email'] !== $admin_email) {
                 $assigned_caps = array_keys(
                     array_filter($user['all_capabilities'], function($v) {
                         return !empty($v);
@@ -179,12 +251,15 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $matched = array_intersect($assigned_caps, self::HIGH_PRIVILEGE_CAPS);
 
                 if (!empty($matched)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege user "%s" (ID: %s) with capabilities: %s', AAM_KEY),
-                        $user['display_name'],
-                        $user['id'],
-                        implode(', ', $matched)
-                    ), 'HIGH_PRIVILEGE_USER_CAPS', 'critical'));
+                    array_push($response, self::_format_issue(
+                        'HIGH_PRIVILEGE_CAPS_USER',
+                        [
+                            'name' => $user['display_name'],
+                            'id'   => $user['id'],
+                            'caps' => $matched
+                        ],
+                        'critical'
+                    ));
                 }
 
                 // Detecting if user has elevated privileges as well
@@ -195,12 +270,14 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 );
 
                 if (!empty($elevated_caps)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected elevated capabilities for user "%s" (ID: %s): %s', AAM_KEY),
-                        $user['display_name'],
-                        $user['id'],
-                        implode(', ', $elevated_caps)
-                    ), 'ELEVATED_USER_CAPS'));
+                    array_push($response, self::_format_issue(
+                        'ELEVATED_CAPS_USER',
+                        [
+                            'name' => $user['display_name'],
+                            'id'   => $user['id'],
+                            'caps' => $elevated_caps
+                        ]
+                    ));
                 }
             }
         }

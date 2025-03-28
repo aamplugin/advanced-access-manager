@@ -19,6 +19,13 @@ class AAM_Audit_HighPrivilegeUserCountCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'high_privilege_users_count';
+
+    /**
      * List of core capabilities that can cause damage to the site through content
      *
      * @version 6.9.43
@@ -80,10 +87,13 @@ class AAM_Audit_HighPrivilegeUserCountCheck
                 ...self::_identify_elevated_user_count($identified_roles)
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -94,6 +104,29 @@ class AAM_Audit_HighPrivilegeUserCountCheck
         self::_determine_check_status($response);
 
         return $response;
+    }
+
+    /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'ELEVATED_ADMIN_USER_COUNT' => __(
+                'Detected elevated user count (%d) with admin level privileges',
+                'advanced-access-manager'
+            ),
+            'ELEVATED_EDITOR_USER_COUNT' => __(
+                'Detected elevated user count (%d) with high content moderation privileges',
+                'advanced-access-manager'
+            )
+        ];
     }
 
     /**
@@ -184,17 +217,23 @@ class AAM_Audit_HighPrivilegeUserCountCheck
         );
 
         if ($sums['website'] > $suggested_admins) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Detected elevated number of users (%d) with administrator level privileges', AAM_KEY),
-                $sums['website']
-            ), 'ELEVATED_ADMINS_COUNT', 'critical'));
+            array_push($issues, self::_format_issue(
+                'ELEVATED_ADMIN_USER_COUNT',
+                [
+                    'user_count' => $sums['website']
+                ],
+                'critical'
+            ));
         }
 
         if ($sums['content'] > $suggested_editors) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Detected elevated number of users (%d) with high-privilege content moderation access', AAM_KEY),
-                $sums['content']
-            ), 'ELEVATED_EDITORS_COUNT', 'warning'));
+            array_push($issues, self::_format_issue(
+                'ELEVATED_EDITOR_USER_COUNT',
+                [
+                    'user_count' => $sums['content']
+                ],
+                'warning'
+            ));
         }
 
         return $issues;

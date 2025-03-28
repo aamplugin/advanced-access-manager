@@ -11,12 +11,19 @@
  * Check if RESTful Auto-discovery endpoint is enabled
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_RestfulAutoDiscoverEndpointCheck
 {
 
     use AAM_Audit_AuditCheckTrait;
+
+    /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'restful_auto_discover_endpoint';
 
     /**
      * Run the check
@@ -25,7 +32,8 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -35,10 +43,13 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
         try {
             array_push($issues, ...self::_check_endpoint_accessability());
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -52,13 +63,33 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
     }
 
     /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'REST_OPEN_DISCOVER_ENDPOINT' => __(
+                'Detected open to anonymous users REST auto-discover endpoint',
+                'advanced-access-manager'
+            )
+        ];
+    }
+
+    /**
      * Detect empty roles
      *
      * @return array
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _check_endpoint_accessability()
     {
@@ -82,10 +113,7 @@ class AAM_Audit_RestfulAutoDiscoverEndpointCheck
 
         // Verifying that auto-discover endpoint is disabled for visitors
         if ($url_enabled && $api_route_enabled) {
-            array_push($response, self::_format_issue(
-                __('Detected open to unauthenticated users RESTful auto-discover endpoint', AAM_KEY),
-                'REST_OPEN_DISCOVER_ENDPOINT'
-            ));
+            array_push($response, self::_format_issue('REST_OPEN_DISCOVER_ENDPOINT'));
         }
 
         return $response;

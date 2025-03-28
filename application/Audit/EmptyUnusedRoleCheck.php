@@ -8,12 +8,12 @@
  */
 
 /**
- * Check if roles and capabilities follow proper naming convention
+ * Detect empty roles
  *
  * @package AAM
  * @version 7.0.0
  */
-class AAM_Audit_RoleCapabilityNamingConventionCheck
+class AAM_Audit_EmptyUnusedRoleCheck
 {
 
     use AAM_Audit_AuditCheckTrait;
@@ -23,7 +23,22 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
      *
      * @version 7.0.0
      */
-    const ID = 'roles_caps_naming_convention';
+    const ID = 'empty_unused_roles_detection';
+
+    /**
+     * List of WordPress core roles
+     *
+     * @return array
+     *
+     * @version 7.0.0
+     */
+    const CORE_ROLES = [
+        'administrator',
+        'editor',
+        'author',
+        'contributor',
+        'subscriber'
+    ];
 
     /**
      * Run the check
@@ -43,7 +58,12 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
         try {
             array_push(
                 $issues,
-                ...self::_validate_naming_convention(self::_read_role_key_option())
+                ...self::_detect_empty_roles(self::_read_role_key_option())
+            );
+
+            array_push(
+                $issues,
+                ...self::_detect_unused_roles(self::_read_role_key_option())
             );
         } catch (Exception $e) {
             array_push($failure, self::_format_issue(
@@ -77,20 +97,19 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
     private static function _get_message_templates()
     {
         return [
-            'INVALID_ROLE_SLUG' => __(
-                'Detected role %s (%s) with invalid slug',
+            'EMPTY_ROLE' => __(
+                'Detected role %s (%s) with no capabilities',
                 'advanced-access-manager'
             ),
-            'INVALID_CAP_SLUG' => __(
-                'Detected invalid capability %s for %s (%s) role',
+            'UNUSED_CUSTOM_ROLE' => __(
+                'Detected unused custom role %s (%s)',
                 'advanced-access-manager'
             )
         ];
     }
 
     /**
-     * Validate that all roles and capabilities are following proper naming
-     * convention
+     * Detect empty roles
      *
      * @param array $db_roles
      *
@@ -101,14 +120,14 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
      *
      * @version 7.0.0
      */
-    private static function _validate_naming_convention($db_roles)
+    private static function _detect_empty_roles($db_roles)
     {
         $response = [];
 
         foreach($db_roles as $role_id => $role) {
-            if (preg_match('/^[a-z\d_\-]+$/', $role_id) !== 1) {
+            if (empty($role['capabilities'])) {
                 array_push($response, self::_format_issue(
-                    'INVALID_ROLE_SLUG',
+                    'EMPTY_ROLE',
                     [
                         'name' => translate_user_role(
                             !empty($role['name']) ? $role['name'] : $role_id
@@ -117,20 +136,41 @@ class AAM_Audit_RoleCapabilityNamingConventionCheck
                     ]
                 ));
             }
+        }
 
-            foreach(array_keys($role['capabilities']) as $cap) {
-                if (preg_match('/^[a-z\d_\-]+$/', $cap) !== 1) {
-                    array_push($response, self::_format_issue(
-                        'INVALID_CAP_SLUG',
-                        [
-                            'slug'      => $cap,
-                            'role_name' => translate_user_role(
-                                !empty($role['name']) ? $role['name'] : $role_id
-                            ),
-                            'role_slug' => $role_id
-                        ]
-                    ));
-                }
+        return $response;
+    }
+
+    /**
+     * Detect unused roles
+     *
+     * @param array $db_roles
+     *
+     * @return array
+     *
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _detect_unused_roles($db_roles)
+    {
+        $response = [];
+        $stats    = count_users();
+
+        foreach($db_roles as $role_id => $role) {
+            if (empty($stats['avail_roles'][$role_id])
+                && !in_array($role_id, self::CORE_ROLES, true)
+            ) {
+                array_push($response, self::_format_issue(
+                    'UNUSED_CUSTOM_ROLE',
+                    [
+                        'name' => translate_user_role(
+                            !empty($role['name']) ? $role['name'] : $role_id
+                        ),
+                        'slug' => $role_id
+                    ]
+                ));
             }
         }
 

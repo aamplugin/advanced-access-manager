@@ -11,12 +11,19 @@
  * Check if file system is editable
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_EditableFileSystemCheck
 {
 
     use AAM_Audit_AuditCheckTrait;
+
+    /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'editable_file_system';
 
     /**
      * Run the check
@@ -25,7 +32,8 @@ class AAM_Audit_EditableFileSystemCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -35,10 +43,13 @@ class AAM_Audit_EditableFileSystemCheck
         try {
             array_push($issues, ...self::_check_file_system_permissions());
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -52,25 +63,45 @@ class AAM_Audit_EditableFileSystemCheck
     }
 
     /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'WRITABLE_FILE_SYSTEM' => __(
+                'Detected potentially writable file system',
+                'advanced-access-manager'
+            )
+        ];
+    }
+
+    /**
      * Detect empty roles
      *
      * @return array
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _check_file_system_permissions()
     {
         $response = [];
 
-        if (!defined( 'DISALLOW_FILE_EDIT' )
+        if (!defined('DISALLOW_FILE_EDIT')
             || !constant('DISALLOW_FILE_EDIT')
             || !wp_is_file_mod_allowed('capability_edit_themes')
         ) {
             array_push($response, self::_format_issue(
-                __('Detected potentially writable file system', AAM_KEY),
-                'WRITABLE_FS',
+                'WRITABLE_FILE_SYSTEM',
+                [],
                 'warning'
             ));
         }

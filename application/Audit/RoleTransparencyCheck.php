@@ -10,16 +10,20 @@
 /**
  * Check if all registered roles are transparent to the admin user
  *
- * @since 6.9.47 https://github.com/aamplugin/advanced-access-manager/issues/433
- * @since 6.9.40 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.47
+ * @version 7.0.0
  */
 class AAM_Audit_RoleTransparencyCheck
 {
 
     use AAM_Audit_AuditCheckTrait;
+
+    /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'roles_visibility';
 
     /**
      * Run the check
@@ -28,7 +32,8 @@ class AAM_Audit_RoleTransparencyCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -41,10 +46,13 @@ class AAM_Audit_RoleTransparencyCheck
                 ...self::_validate_roles_transparency(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -58,18 +66,35 @@ class AAM_Audit_RoleTransparencyCheck
     }
 
     /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIDDEN_ROLES' => __(
+                'Detected hidden role(s): %s',
+                'advanced-access-manager'
+            )
+        ];
+    }
+
+    /**
      * Validate all registered roles are visible to the admin user
      *
      * @param array $db_roles
      *
      * @return array
      *
-     * @since 6.9.47 https://github.com/aamplugin/advanced-access-manager/issues/433
-     * @since 6.9.40 Initial implementation of the method
-     *
      * @access private
      * @static
-     * @version 6.9.47
+     *
+     * @version 7.0.0
      */
     private static function _validate_roles_transparency($db_roles)
     {
@@ -89,10 +114,12 @@ class AAM_Audit_RoleTransparencyCheck
         $diff_roles = array_diff($registered_roles, $visible_roles);
 
         if (!empty($diff_roles)) {
-            array_push($response, self::_format_issue(sprintf(
-                __('Detected hidden role(s): %s', AAM_KEY),
-                implode(', ', $diff_roles)
-            ), 'HIDDEN_ROLE'));
+            array_push($response, self::_format_issue(
+                'HIDDEN_ROLES',
+                [
+                    'roles' => $diff_roles
+                ]
+            ));
         }
 
         return $response;

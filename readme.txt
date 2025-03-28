@@ -4,7 +4,7 @@ Tags: access control, backend menu, user role, restricted content, security
 Requires at least: 5.2.0
 Requires PHP: 5.6.0
 Tested up to: 6.7.1
-Stable tag: 6.9.48
+Stable tag: 6.9.49
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,10 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 6.9.49 =
+* Fixed: Resetting all settings does not actually reset them all [https://github.com/aamplugin/advanced-access-manager/issues/436](https://github.com/aamplugin/advanced-access-manager/issues/436)
+* New: Allow to prepare the executive audit report [https://github.com/aamplugin/advanced-access-manager/issues/437](https://github.com/aamplugin/advanced-access-manager/issues/437)
 
 = 6.9.48 =
 * Fixed: Notice in WordPress if the none-default language is active [https://github.com/aamplugin/advanced-access-manager/issues/435](https://github.com/aamplugin/advanced-access-manager/issues/435)

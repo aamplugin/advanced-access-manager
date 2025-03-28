@@ -11,7 +11,7 @@
  * Check for the high privilege roles
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Audit_HighPrivilegeRoleCheck
 {
@@ -19,9 +19,16 @@ class AAM_Audit_HighPrivilegeRoleCheck
     use AAM_Audit_AuditCheckTrait;
 
     /**
+     * Step ID
+     *
+     * @version 7.0.0
+     */
+    const ID = 'high_privilege_roles';
+
+    /**
      * List of roles that are allowed to be high-privileged
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const WHITELISTED_ROLES = [
         'administrator'
@@ -30,7 +37,7 @@ class AAM_Audit_HighPrivilegeRoleCheck
     /**
      * List of core capabilities that can cause significant damage to the site
      *
-     * @version 6.9.40
+     * @version 7.0.0
      */
     const HIGH_PRIVILEGE_CAPS = [
         'edit_themes',
@@ -59,7 +66,8 @@ class AAM_Audit_HighPrivilegeRoleCheck
      *
      * @access public
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -73,10 +81,13 @@ class AAM_Audit_HighPrivilegeRoleCheck
                 ...self::_scan_for_high_privilege_roles(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($issues, self::_format_issue(sprintf(
-                __('Unexpected application error: %s', AAM_KEY),
-                $e->getMessage()
-            ), 'APPLICATION_ERROR', 'error'));
+            array_push($failure, self::_format_issue(
+                'APPLICATION_ERROR',
+                [
+                    'message' => $e->getMessage()
+                ],
+                'error'
+            ));
         }
 
         if (count($issues) > 0) {
@@ -90,6 +101,25 @@ class AAM_Audit_HighPrivilegeRoleCheck
     }
 
     /**
+     * Get a collection of error messages for current step
+     *
+     * @return array
+     * @access private
+     * @static
+     *
+     * @version 7.0.0
+     */
+    private static function _get_message_templates()
+    {
+        return [
+            'HIGH_PRIVILEGE_CAPS_ROLE' => __(
+                'Detected high-privilege role %s (%s) with caps: %s',
+                'advanced-access-manager'
+            )
+        ];
+    }
+
+    /**
      * Scan for high-privilege roles that are not whitelisted
      *
      * @param array $db_roles
@@ -98,7 +128,8 @@ class AAM_Audit_HighPrivilegeRoleCheck
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _scan_for_high_privilege_roles($db_roles)
     {
@@ -115,13 +146,17 @@ class AAM_Audit_HighPrivilegeRoleCheck
                 $matched = array_intersect($assigned_caps, self::HIGH_PRIVILEGE_CAPS);
 
                 if (!empty($matched)) {
-                    array_push($response, self::_format_issue(sprintf(
-                        __('Detected high-privilege role "%s" with capabilities: %s', AAM_KEY),
-                        translate_user_role(
-                            !empty($role['name']) ? $role['name'] : $role_id
-                        ),
-                        implode(', ', $matched)
-                    ), 'HIGH_PRIVILEGE_ROLE_CAPS', 'critical'));
+                    array_push($response, self::_format_issue(
+                        'HIGH_PRIVILEGE_CAPS_ROLE',
+                        [
+                            'name' => translate_user_role(
+                                !empty($role['name']) ? $role['name'] : $role_id
+                            ),
+                            'slug' => $role_id,
+                            'caps' => $matched
+                        ],
+                        'critical'
+                    ));
                 }
             }
         }

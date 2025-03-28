@@ -224,6 +224,7 @@ class AAM_Framework_Service_Users
             'id'                    => $user->ID,
             'user_login'            => $user->user_login,
             'display_name'          => $user->display_name,
+            'user_email'            => $user->user_email,
             'user_level'            => intval($user->user_level),
             'roles'                 => $this->_prepare_user_roles($user->roles),
             'assigned_capabilities' => $user->caps,

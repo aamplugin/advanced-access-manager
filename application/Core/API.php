@@ -291,7 +291,10 @@ final class AAM_Core_API
             AAM_Core_Cache::DB_OPTION,
             AAM_Framework_Service_Configs::DB_CONFIGPRESS_OPTION,
             AAM_Service_AdminMenu::CACHE_DB_OPTION,
-            AAM_Service_Toolbar::CACHE_DB_OPTION
+            AAM_Service_Toolbar::CACHE_DB_OPTION,
+            AAM_Service_SecurityAudit::DB_OPTION,
+            AAM_Service_SecurityAudit::DB_SCOPE_OPTION,
+            AAM_Service_SecurityAudit::DB_SUMMARY_OPTION
         );
 
         foreach($options as $option) {
