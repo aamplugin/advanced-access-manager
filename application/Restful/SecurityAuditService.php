@@ -160,7 +160,7 @@ class AAM_Restful_SecurityAuditService
         ]);
 
         // Step #2. Upload the report
-        $result = wp_remote_post('http://localhost:3000/audit/summary', [
+        $result = wp_remote_post('http://api.aamportal.com/audit/summary', [
             'body'        => $payload,
             'timeout'     => 30,
             'data_format' => 'body',
