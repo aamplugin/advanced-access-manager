@@ -215,6 +215,20 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
 
         if ($role->update($data)) {
             $result = $role;
+
+            // Also, if slug changed & there are already any settings defined for
+            // the old slug, migrate them to new one
+            if (!empty($data['slug']) && $data['slug'] !== $slug) {
+                $db       = AAM_Framework_Manager::_()->db;
+                $settings = $db->read(AAM_Framework_Service_Settings::DB_OPTION);
+
+                if (isset($settings['role'][$slug])) {
+                    $settings['role'][$data['slug']] = $settings['role'][$slug];
+                    unset($settings['role'][$slug]);
+
+                    $db->write(AAM_Framework_Service_Settings::DB_OPTION, $settings);
+                }
+            }
         } else {
             throw new RuntimeException('Failed to persist changes');
         }

@@ -235,7 +235,7 @@ final class AAM_Framework_Manager
 
         // Dynamically adjust user account if JSON Access Policies are enabled
         add_action('set_current_user', function() {
-            if (AAM::api()->config->get('service.policies.enabled', true)) {
+            if ($this->config->get('service.policies.enabled', true)) {
                 $this->_dynamically_adjust_user_account();
             }
         }, 999);
@@ -426,7 +426,7 @@ final class AAM_Framework_Manager
 
         // Iterate over the list of all capabilities and properly adjust them for
         // current user
-        foreach(AAM::api()->caps()->list() as $cap => $is_granted) {
+        foreach($this->caps()->list() as $cap => $is_granted) {
             if ($is_granted === true) {
                 $current_user->caps[$cap]    = $is_granted;
                 $current_user->allcaps[$cap] = $is_granted;
@@ -454,7 +454,7 @@ final class AAM_Framework_Manager
     {
         $user      = wp_get_current_user();
         $role_list = $user->roles;
-        $assumed   = AAM::api()->roles()->get_list();
+        $assumed   = $this->roles()->get_list();
 
         foreach($assumed as $slug => $is_assumed) {
             if ($is_assumed) {

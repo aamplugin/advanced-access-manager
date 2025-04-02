@@ -194,7 +194,9 @@ final class AAM_Migration_700
             'service.secureLogin.feature.bruteForceLockout' => 'service.secure_login.brute_force_lockout',
             'core.settings.xmlrpc'                      => 'core.settings.xmlrpc_enabled',
             'core.settings.restful'                     => 'core.settings.restful_enabled',
-            'core.service.welcome.enabled'              => 'service.welcome.enabled'
+            'core.service.welcome.enabled'              => 'service.welcome.enabled',
+            'addon.protected-media-files.settings.deniedRedirect' => 'addon.protected_media_files.settings.denied_redirect',
+            'addon.protected-media-files.settings.absolutePath'   => 'addon.protected_media_files.settings.absolute_path'
         ];
 
         foreach($changes as $legacy => $new) {
@@ -233,7 +235,9 @@ final class AAM_Migration_700
         foreach($legacy as $access_level => &$level) {
             if (in_array($access_level, ['role', 'user'])) {
                 foreach($level as $id => $data) {
-                    if (array_key_exists($legacy_type, $data)) {
+                    if ($this->_access_level_exists($access_level, $id)
+                        && array_key_exists($legacy_type, $data)
+                    ) {
                         $settings[$access_level][$id][$new_type] = $cb(
                             $data[$legacy_type]
                         );
@@ -256,6 +260,28 @@ final class AAM_Migration_700
     }
 
     /**
+     * Determine if access level exists
+     *
+     * @param string     $type
+     * @param string|int $id
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _access_level_exists($type, $id)
+    {
+        if ($type === 'role') {
+            $exists = wp_roles()->is_role($id);
+        } else {
+            $exists = is_a(get_user($id), WP_User::class);
+        }
+
+        return $exists;
+    }
+
+    /**
      * Convert legacy backend menu settings
      *
      * @param array $data
@@ -271,32 +297,7 @@ final class AAM_Migration_700
 
         if (is_array($data)) {
             foreach($data as $id => $effect) {
-                if (strpos($id, '.php') !== false) {
-                    $parsed_url  = wp_parse_url($id);
-                    $parsed_slug = $parsed_url['path'];
-
-                    if (isset($parsed_url['query'])) {
-                        parse_str($parsed_url['query'], $query_params);
-
-                        // Removing some redundant query params
-                        $redundant_params = apply_filters(
-                            'aam_ignored_backend_menu_item_query_params_filter',
-                            ['return', 'path']
-                        );
-
-                        foreach($redundant_params as $to_remove) {
-                            if (array_key_exists($to_remove, $query_params)) {
-                                unset($query_params[$to_remove]);
-                            }
-                        }
-
-                        if (count($query_params)) {
-                            $parsed_slug .= '?' . http_build_query($query_params);
-                        }
-                    }
-                } else {
-                    $parsed_slug = trim($id);
-                }
+                $parsed_slug = $this->_normalize_backend_menu_slug($id);
 
                 $result[urldecode(str_replace('menu-', 'menu/', $parsed_slug))] = [
                     'access' => [
@@ -307,6 +308,52 @@ final class AAM_Migration_700
         }
 
         return $result;
+    }
+
+    /**
+     * Normalize the backend menu slug
+     *
+     * @param string $menu_slug
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_backend_menu_slug($menu_slug)
+    {
+        if (strpos($menu_slug, '.php') !== false) {
+            $parsed_url  = wp_parse_url($menu_slug);
+            $parsed_slug = $parsed_url['path'];
+
+            if (isset($parsed_url['query'])) {
+                parse_str($parsed_url['query'], $query_params);
+
+                // Removing some redundant query params
+                $redundant_params = apply_filters(
+                    'aam_ignored_backend_menu_item_query_params_filter',
+                    ['return', 'path']
+                );
+
+                foreach($redundant_params as $to_remove) {
+                    if (array_key_exists($to_remove, $query_params)) {
+                        unset($query_params[$to_remove]);
+                    }
+                }
+
+                // Finally, sort the list of query params in alphabetical order to
+                // ensure consistent order
+                ksort($query_params);
+
+                if (count($query_params)) {
+                    $parsed_slug .= '?' . http_build_query($query_params);
+                }
+            }
+        } else {
+            $parsed_slug = trim($menu_slug);
+        }
+
+        return urldecode($parsed_slug);
     }
 
     /**
@@ -832,16 +879,31 @@ final class AAM_Migration_700
         // Prepare the filtered list of actions
         $filtered_list      = [];
         $ignore_other_reads = false;
+        $first_read         = null;
 
         foreach($data as $action => $settings) {
             if (in_array($action, $read_permissions, true)) {
-                if (!$ignore_other_reads) {
+                // Covering scenario when all "read" controls are unchecked and
+                // we need to pick the first one
+                if ($first_read === null) {
+                    $first_read = [ $action => $settings ];
+                }
+
+                $enabled = $this->_convert_to_boolean($settings);
+
+                if (!$ignore_other_reads && $enabled) {
                     $filtered_list[$action] = $settings;
                     $ignore_other_reads     = true;
+                    $first_read             = false; // We chose the read option
                 }
             } elseif ($action !== 'limited') {
                 $filtered_list[$action] = $settings;
             }
+        }
+
+        // If all "read" controls are unchecked, pick the first one
+        if (!empty($first_read)) {
+            $filtered_list = array_merge($filtered_list, $first_read);
         }
 
         // Convert the filtered list of actions to new format

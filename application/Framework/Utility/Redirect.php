@@ -113,10 +113,9 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
         $result = null;
 
         if ($redirect['type'] === 'login_redirect') {
-            $result = add_query_arg(
-                [ 'reason' => 'restricted' ],
-                wp_login_url(AAM::api()->misc->get($_SERVER, 'REQUEST_URI'))
-            );
+            $result = add_query_arg([ 'reason' => 'restricted' ], wp_login_url(
+                AAM_Framework_Manager::_()->misc->get($_SERVER, 'REQUEST_URI')
+            ));
         } elseif ($redirect['type'] === 'page_redirect') {
             if (!empty($redirect['redirect_page_id'])) {
                 $result = get_page_link($redirect['redirect_page_id']);

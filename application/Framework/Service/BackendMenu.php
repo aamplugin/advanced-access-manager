@@ -218,7 +218,8 @@ class AAM_Framework_Service_BackendMenu
             $result = null;
 
             // Normalize the input data based on top level flat
-            $slug = $this->_normalize_resource_identifier($menu_slug);
+            $slug        = $this->_normalize_resource_identifier($menu_slug);
+            $parent_slug = null;
 
             // The default dashboard landing page is always excluded
             if ($slug !== 'index.php') {
@@ -235,11 +236,25 @@ class AAM_Framework_Service_BackendMenu
                 // and check if parent menu item is restricted
                 if (is_null($result) && strpos($slug, 'menu/') !== 0) {
                     if ($slug === 'post.php') { // Submitting post
-                        $post_type   = AAM::api()->misc->get($_POST, 'post_type');
+                        $post_type   = $this->misc->get($_POST, 'post_type');
                         $parent_slug = 'menu/edit.php';
 
+                        // Here we are covering the post management screens. WP core
+                        // recycles the "edit.php" screen to manage all post types.
+                        // However, if "Posts" (default WP posts) get restricted, it
+                        // creates an issues for all other custom post type screens.
+                        // This is why we are taking extra steps to ensure proper
+                        // access controls
                         if(!empty($post_type) && $post_type !== 'post') {
                             $parent_slug .= '?post_type=' . $post_type;
+                        } elseif (isset($_GET['post'])) {
+                            $post = get_post(filter_input(INPUT_GET, 'post'));
+
+                            if (is_a($post, WP_Post::class)
+                                && $post->post_type !== 'post'
+                            ) {
+                                $parent_slug .= '?post_type=' . $post->post_type;
+                            }
                         }
                     }
 
@@ -264,8 +279,9 @@ class AAM_Framework_Service_BackendMenu
                 $result = apply_filters(
                     'aam_backend_menu_is_denied_filter',
                     $result,
-                    $menu_slug,
-                    $resource
+                    $slug, // Note! Passing already normalized menu slug
+                    $resource,
+                    $parent_slug
                 );
 
                 // Prepare the final answer
@@ -464,7 +480,8 @@ class AAM_Framework_Service_BackendMenu
      */
     private function _prepare_menu_item($menu_item, $is_top_level = true)
     {
-        $slug = $is_top_level ? 'menu/' . $menu_item[2] : $menu_item[2];
+        $normalized = $this->_normalize_resource_identifier($menu_item[2]);
+        $slug       = $is_top_level ? 'menu/' . $normalized : $normalized;
 
         $response = array(
             'slug'          => $slug,
@@ -503,7 +520,7 @@ class AAM_Framework_Service_BackendMenu
             $parsed_slug = $parsed_url['path'];
 
             if (isset($parsed_url['query'])) {
-                parse_str($parsed_url['query'], $query_params);
+                parse_str(html_entity_decode($parsed_url['query']), $query_params);
 
                 // Removing some redundant query params
                 $redundant_params = apply_filters(
@@ -516,6 +533,10 @@ class AAM_Framework_Service_BackendMenu
                         unset($query_params[$to_remove]);
                     }
                 }
+
+                // Finally, sort the list of query params in alphabetical order to
+                // ensure consistent order
+                ksort($query_params);
 
                 if (count($query_params)) {
                     $parsed_slug .= '?' . http_build_query($query_params);

@@ -109,25 +109,7 @@ class AAM_Service_BackendMenu
                     unset($submenu[$menu_slug]);
                     unset($menu[$id]);
                 } else {
-                    // When we are swapping the submenu item pointer, making sure
-                    // that we correctly update submenu array
-                    if ($menu_slug !== $submenus[0][2]) {
-                        // Ensuring the parent menu item always points to
-                        // the first submenu item and title is updated accordingly
-                        $menu[$id][0] = $submenus[0][0]; // Swap title
-                        $menu[$id][1] = $submenus[0][1]; // Swap capability
-                        $menu[$id][2] = $submenus[0][2]; // Swap slug
-
-                        $submenu[$menu[$id][2]] = $submenus;
-
-                        // Remove the lingering reference
-                        unset($submenu[$menu_slug]);
-
-                        // Update the pointer
-                        $menu_slug = $menu[$id][2];
-                    } else {
-                        $submenu[$menu_slug] = $submenus;
-                    }
+                    $submenu[$menu_slug] = $submenus;
                 }
             }
 
@@ -173,18 +155,18 @@ class AAM_Service_BackendMenu
         $id = $plugin_page;
 
         if (empty($id)) {
-            $id       = basename(AAM::api()->misc->get($_SERVER, 'SCRIPT_NAME'));
-            $taxonomy = filter_input(INPUT_GET, 'taxonomy');
-            $postType = filter_input(INPUT_GET, 'post_type');
-            $page     = filter_input(INPUT_GET, 'page');
-            $params   = [];
+            $id        = basename(AAM::api()->misc->get($_SERVER, 'SCRIPT_NAME'));
+            $taxonomy  = filter_input(INPUT_GET, 'taxonomy');
+            $post_type = filter_input(INPUT_GET, 'post_type');
+            $page      = filter_input(INPUT_GET, 'page');
+            $params    = [];
 
             if (!empty($taxonomy)) {
                 array_push($params, 'taxonomy=' . $taxonomy);
             }
 
-            if (!empty($postType) && ($postType !== 'post')) {
-                array_push($params, 'post_type=' . $postType);
+            if (!empty($post_type) && ($post_type !== 'post')) {
+                array_push($params, 'post_type=' . $post_type);
             } elseif (!empty($page)) {
                 array_push($params, 'page=' . $page);
             }
@@ -195,7 +177,6 @@ class AAM_Service_BackendMenu
         }
 
         if (AAM::api()->backend_menu()->is_denied($id)) {
-            // die('here');
             AAM::api()->redirect->do_access_denied_redirect();
         }
     }

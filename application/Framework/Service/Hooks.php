@@ -547,7 +547,7 @@ class AAM_Framework_Service_Hooks implements AAM_Framework_Service_Interface
             if (preg_match("/^(.*)\s+({$ops})\s+(.*)\$/i", $modifier, $matches)) {
                 foreach($input as $key => $value) {
                     $source = trim($matches[1]) === '$key' ? $key : $value;
-                    $a = AAM::api()->misc->get(
+                    $a = $this->misc->get(
                         $source,
                         str_replace(array('$key', '$value'), '', $matches[1])
                     );

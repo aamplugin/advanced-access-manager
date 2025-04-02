@@ -101,6 +101,29 @@ final class BackendMenuTest extends TestCase
     }
 
     /**
+     * Making sure that when "Posts" menu item is restricted other CPTs are handled
+     * properly
+     *
+     * @return void
+     */
+    public function testPostsMenuItemPermissionHandling()
+    {
+        // Mocking backend menu
+        $this->_mockAdminMenu();
+
+        $service = AAM::api()->backend_menu(
+            AAM::api()->role('editor')
+        );
+
+        // Update permission for the "Posts"
+        $this->assertTrue($service->deny('menu/edit.php'));
+
+        // Make sure that other menu items are allowed
+        $this->assertTrue($service->is_allowed('edit.php?post_type=page'));
+        $this->assertTrue($service->is_allowed('edit.php?post_type=house'));
+    }
+
+    /**
      * Mocking admin menu globals
      *
      * @return void

@@ -34,9 +34,9 @@
             <div class="well">
                 <div id="executive_summary_prompt" class="<?php echo empty($has_summary) ? '' : 'hidden'; ?>">
                     <div class="alert alert-info text-larger">
-                        <?php echo __('You are about to send the results of your AAM security audit scan to our server. The data you share includes ONLY partial audit results and a list of installed plugins. It DOES NOT contain any details about your server, website, or user accounts.', 'advanced-access-manager'); ?><br/><br/>
-                        <?php echo __('In other words, we have no way to link the shared data to your website or know anything about your users.', 'advanced-access-manager'); ?><br/><br/>
-                        <?php echo __('This highly aggregated data is used ONLY to generate an executive-level overview of your website\'s security posture, focusing on access controls and providing actionable steps to address identified security concerns.', 'advanced-access-manager'); ?>
+                        <?php echo __('This service provides an executive-level security overview, helping you strengthen access controls with clear, actionable insights. The data we use is fully anonymized and cannot be linked back to your website.', 'advanced-access-manager'); ?><br/><br/>
+                        <?php echo __('To generate this report, we only get partial audit results and a list of installed plugins — nothing about your server, website, or users is shared.', 'advanced-access-manager'); ?><br/><br/>
+                        <?php echo __('You will get, promptly, valuable security recommendations, making it a safe and effective way to improve your website security posture.', 'advanced-access-manager'); ?>
                     </div>
 
                     <a href="#" class="btn aam-mt-2 btn-lg btn-success" id="prepare_executive_summary">

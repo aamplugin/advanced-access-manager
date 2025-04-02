@@ -1028,7 +1028,7 @@ input[type="radio"]:focus {
   text-align: center;
   font-weight: 500;
   font-size: 1.4em;
-  z-index: 9999;
+  z-index: 700;
 }
 
 .panel-title {

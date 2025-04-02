@@ -401,7 +401,7 @@ class AAM_Framework_Policy_Marker
 
         if (!empty($option)) {
             $result = AAM_Framework_Policy_Xpath::get_value_by_xpath(
-                AAM::api()->db->read($option),
+                AAM_Framework_Manager::_()->db->read($option),
                 $path
             );
         } else {
@@ -428,7 +428,7 @@ class AAM_Framework_Policy_Marker
 
         if (!empty($config)) {
             $result = AAM_Framework_Policy_Xpath::get_value_by_xpath(
-                AAM::api()->config->get($config),
+                AAM_Framework_Manager::_()->config->get($config),
                 $path
             );
         } else {
