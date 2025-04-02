@@ -133,20 +133,24 @@ trait AAM_Framework_Resource_BaseTrait
      * Proxy methods to WordPress core instance
      *
      * @param string $name
-     * @param array  $arguments
+     * @param array  $args
      *
      * @return mixed
      * @access public
      *
      * @since 7.0.0
      */
-    public function __call($name, $arguments)
+    public function __call($name, $args)
     {
         $response = null;
 
         if (array_key_exists($name, $this->_extended_methods)) {
             $response = call_user_func_array(
-                $this->_extended_methods[$name], $arguments
+                $this->_extended_methods[$name], $args
+            );
+        } elseif (AAM_Framework_Manager::_()->has_service($name)) {
+            $response = AAM_Framework_Manager::_()->{$name}(
+                $this->get_access_level(), ...$args
             );
         } else {
             throw new BadMethodCallException(sprintf(
@@ -173,6 +177,8 @@ trait AAM_Framework_Resource_BaseTrait
 
         if ($name === 'type') {
             $result = $this->type;
+        } elseif (AAM_Framework_Manager::_()->has_utility($name)) {
+            $result = AAM_Framework_Manager::_()->{$name};
         } else {
             _doing_it_wrong(
                 static::class . '::' . $name,
@@ -219,19 +225,16 @@ trait AAM_Framework_Resource_BaseTrait
                 unset($this->_inheritance_completed[$id]);
             }
 
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
-                $this->_explicit_permissions
-            ));
+            $result = $this->settings()->set_setting(
+                $this->_get_settings_ns(),
+                $this->_remove_sys_attributes($this->_explicit_permissions)
+            );
         } else {
             $this->_explicit_permissions  = [];
             $this->_permissions           = [];
             $this->_inheritance_completed = [];
 
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->delete_setting($this->_get_settings_ns());
+            $result = $this->settings()->delete_setting($this->_get_settings_ns());
         }
 
         return $result;
@@ -280,11 +283,10 @@ trait AAM_Framework_Resource_BaseTrait
         }
 
         // Store changes in DB
-        $result = AAM_Framework_Manager::_()->settings(
-            $this->get_access_level()
-        )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
-            $this->_explicit_permissions
-        ));
+        $result = $this->settings()->set_setting(
+            $this->_get_settings_ns(),
+            $this->_remove_sys_attributes($this->_explicit_permissions)
+        );
 
         return $result;
     }
@@ -318,11 +320,10 @@ trait AAM_Framework_Resource_BaseTrait
         );
 
         // Store changes in DB
-        $result = AAM_Framework_Manager::_()->settings(
-            $this->get_access_level()
-        )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
-            $this->_explicit_permissions
-        ));
+        $result = $this->settings()->set_setting(
+            $this->_get_settings_ns(),
+            $this->_remove_sys_attributes($this->_explicit_permissions)
+        );
 
         // Also sync it with final set of permissions
         if (!array_key_exists($id, $this->_permissions)) {
@@ -372,11 +373,10 @@ trait AAM_Framework_Resource_BaseTrait
             }
 
             // Store changes in DB
-            $result = AAM_Framework_Manager::_()->settings(
-                $this->get_access_level()
-            )->set_setting($this->_get_settings_ns(), $this->_remove_sys_attributes(
-                $this->_explicit_permissions
-            ));
+            $result = $this->settings()->set_setting(
+                $this->_get_settings_ns(),
+                $this->_remove_sys_attributes($this->_explicit_permissions)
+            );
         }
 
         if (!empty($this->_permissions[$id][$permission_key])) {
@@ -397,9 +397,7 @@ trait AAM_Framework_Resource_BaseTrait
     private function _init_permissions()
     {
         // Read explicitly defined settings from DB
-        $permissions = AAM_Framework_Manager::_()->settings(
-            $this->_access_level
-        )->get_setting($this->_get_settings_ns(), []);
+        $permissions = $this->settings()->get_setting($this->_get_settings_ns(), []);
 
         if (!is_array($permissions)) { // Deal with corrupted data
             $permissions = [];
@@ -415,7 +413,7 @@ trait AAM_Framework_Resource_BaseTrait
 
         // JSON Access Policy is deeply embedded in the framework, thus take it into
         // consideration during resource initialization
-        if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
+        if ($this->_should_apply_policies()) {
             $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
 
             foreach ($policy_permissions as $resource_id => $permissions) {
@@ -446,6 +444,36 @@ trait AAM_Framework_Resource_BaseTrait
                 $this->_permissions[$resource_id] = $permissions;
             }
         }
+    }
+
+    /**
+     * Determine if we should tap into JSON policies
+     *
+     * This method performs two crucial checks:
+     *  1. Verifies that the JSON Access Policies service is enabled;
+     *  2. Confirms that only the lowest possible access level is currently used
+     *
+     * The second step is extremely important to ensure that we retain proper level
+     * flexibility. For instance if policy X is attached to the Editor role, we
+     * should be able to detach it from any individual user with Editor role. Without
+     * this trade-off users will inherit initialized resourced from Editor role and
+     * there will be no chance to suppress them on user level as we have no awareness
+     * that these resources where initialized through policies.
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _should_apply_policies()
+    {
+        $is_enabled      = $this->config->get('service.policies.enabled', true);
+        $is_lowest_level = in_array($this->get_access_level()->type, [
+            AAM_Framework_Type_AccessLevel::USER,
+            AAM_Framework_Type_AccessLevel::VISITOR
+        ], true);
+
+        return $is_enabled && $is_lowest_level;
     }
 
     /**
@@ -542,9 +570,7 @@ trait AAM_Framework_Resource_BaseTrait
 
         if (is_a($parent, AAM_Framework_AccessLevel_Interface::class)) {
             // Merge access settings if multi access levels config is enabled
-            $multi_support = AAM_Framework_Manager::_()->config->get(
-                'core.settings.multi_access_levels'
-            );
+            $multi_support = $this->config->get('core.settings.multi_access_levels');
 
             if ($multi_support && $parent->has_siblings()) {
                 $siblings = $parent->get_siblings();
@@ -556,8 +582,6 @@ trait AAM_Framework_Resource_BaseTrait
             $result = $parent->get_resource(
                 $this->type
             )->get_permissions($resource_identifier);
-
-            $manager = AAM_Framework_Manager::_();
 
             foreach ($siblings as $sibling) {
                 $sib_perms = $sibling->get_resource(
@@ -572,7 +596,7 @@ trait AAM_Framework_Resource_BaseTrait
 
                     foreach($resource_ids as $id) {
                         $result[$id] = $this->_add_acl_attributes(
-                            $manager->misc->merge_permissions(
+                            $this->misc->merge_permissions(
                                 isset($sib_perms[$id]) ? $sib_perms[$id] : [],
                                 isset($result[$id]) ? $result[$id] : [],
                                 $this->type
@@ -582,7 +606,7 @@ trait AAM_Framework_Resource_BaseTrait
                     }
                 } else {
                     $result = $this->_add_acl_attributes(
-                        $manager->misc->merge_permissions(
+                        $this->misc->merge_permissions(
                             $sib_perms,
                             $result,
                             $this->type

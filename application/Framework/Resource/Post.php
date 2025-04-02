@@ -46,11 +46,9 @@ implements AAM_Framework_Resource_Interface
      */
     private function _apply_policy()
     {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
+        $result = [];
 
-        foreach($service->statements('Post:*') as $stm) {
+        foreach($this->policies()->statements('Post:*') as $stm) {
             $bits = explode(':', $stm['Resource']);
 
             if (count($bits) === 3) {
@@ -72,7 +70,7 @@ implements AAM_Framework_Resource_Interface
 
                     $result[$id] = array_replace(
                         $result[$id],
-                        $manager->policy->statement_to_permission(
+                        $this->policy->statement_to_permission(
                             $stm, $this->type
                         )
                     );

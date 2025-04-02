@@ -48,23 +48,21 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
      */
     private function _apply_policy()
     {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
+        $result = [];
 
-        foreach($service->statements('Role:*') as $stm) {
+        foreach($this->policies()->statements('Role:*') as $stm) {
             $bits = explode(':', $stm['Resource']);
             $id   = $bits[1];
 
             if (count($bits) === 2) { // Role:<slug>
                 $result[$id] = array_replace(
                     isset($result[$id]) ? $result[$id] : [],
-                    $manager->policy->statement_to_permission($stm, $this->type)
+                    $this->policy->statement_to_permission($stm, $this->type)
                 );
             } elseif (count($bits) === 3 && $bits[2] === 'users') {
                 $result[$id] = array_replace(
                     isset($result[$id]) ? $result[$id] : [],
-                    $manager->policy->statement_to_permission($stm, 'user')
+                    $this->policy->statement_to_permission($stm, 'user')
                 );
             }
         }

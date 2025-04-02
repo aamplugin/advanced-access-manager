@@ -31,9 +31,7 @@ class AAM_Framework_Resource_AdminToolbar implements AAM_Framework_Resource_Inte
         $result = [];
 
         // Fetch list of statements for the resource Toolbar
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('Toolbar:*');
+        $list = $this->policies()->statements('Toolbar:*');
 
         foreach($list as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';

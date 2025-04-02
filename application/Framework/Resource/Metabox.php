@@ -31,9 +31,7 @@ class AAM_Framework_Resource_Metabox implements AAM_Framework_Resource_Interface
         $result = [];
 
         // Fetch list of statements for the resource Metabox
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('Metabox:*');
+        $list = $this->policies()->statements('Metabox:*');
 
         foreach($list as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';

@@ -31,9 +31,7 @@ class AAM_Framework_Resource_BackendMenu implements AAM_Framework_Resource_Inter
         $result = [];
 
         // Fetch list of statements for the resource BackendMenu
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('BackendMenu:*');
+        $list = $this->policies()->statements('BackendMenu:*');
 
         foreach($list as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';

@@ -31,11 +31,7 @@ class AAM_Framework_Resource_Widget implements AAM_Framework_Resource_Interface
         $result = [];
 
         // Fetch list of statements for the resource Widget
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('Widget:*');
-
-        foreach($list as $stm) {
+        foreach($this->policies()->statements('Widget:*') as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
 
             // Extracting widget slug

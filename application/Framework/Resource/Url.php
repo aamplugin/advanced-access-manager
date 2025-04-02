@@ -28,20 +28,18 @@ class AAM_Framework_Resource_Url implements AAM_Framework_Resource_Interface
      */
     private function _apply_policy()
     {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
+        $result = [];
 
-        foreach($service->statements('Url:*') as $stm) {
+        foreach($this->policies()->statements('Url:*') as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
             $parsed = explode(':', $stm['Resource'], 2);
 
             if (!empty($parsed[1])) {
-                $url = $manager->misc->sanitize_url($parsed[1]);
+                $url = $this->misc->sanitize_url($parsed[1]);
 
                 // Covert redirect
                 if (!empty($stm['Redirect']) && is_array($stm['Redirect'])) {
-                    $redirect = $manager->policy->convert_statement_redirect(
+                    $redirect = $this->policy->convert_statement_redirect(
                         $stm['Redirect']
                     );
                 } else {

@@ -29,8 +29,7 @@ class AAM_Framework_Resource_Capability implements AAM_Framework_Resource_Interf
     private function _apply_policy()
     {
         $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
+        $service = $this->policies();
 
         foreach($service->statements('Capability:*') as $stm) {
             $bits   = explode(':', $stm['Resource']);

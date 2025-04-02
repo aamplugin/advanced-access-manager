@@ -31,9 +31,7 @@ class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
         $result = [];
 
         // Fetch list of statements for the resource Hook
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('Hook:*');
+        $list = $this->policies()->statements('Hook:*');
 
         foreach($list as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';

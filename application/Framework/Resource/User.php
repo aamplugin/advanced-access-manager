@@ -43,11 +43,9 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
      */
     private function _apply_policy()
     {
-        $result  = [];
-        $manager = AAM_Framework_Manager::_();
-        $service = $manager->policies($this->get_access_level());
+        $result = [];
 
-        foreach($service->statements('User:*') as $stm) {
+        foreach($this->policies()->statements('User:*') as $stm) {
             $bits = explode(':', $stm['Resource']);
 
             // If user identifier is not numeric, convert it to WP_User::ID for
@@ -55,14 +53,14 @@ class AAM_Framework_Resource_User implements AAM_Framework_Resource_Interface
             if (is_numeric($bits[1])) {
                 $id = intval($bits[1]);
             } else {
-                $user = $manager->users->get_user($bits[1]);
+                $user = $this->users->get_user($bits[1]);
                 $id   = is_object($user) ? $user->ID : null;
             }
 
             if (!empty($id)) {
                 $result[$id] = array_replace(
                     isset($result[$id]) ? $result[$id] : [],
-                    $manager->policy->statement_to_permission($stm, $this->type)
+                    $this->policy->statement_to_permission($stm, $this->type)
                 );
             }
         }

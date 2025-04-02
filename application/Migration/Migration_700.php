@@ -155,9 +155,7 @@ final class AAM_Migration_700
     {
         $service     = AAM::api()->config;
         $configs     = $service->get();
-
-        // TODO: Finish ConfigPress
-        //$configpress = $service->get_configpress();
+        $configpress = AAM::api()->db->read(AAM_Service_Core::DB_OPTION, '');
 
         // The list of changes
         $changes = [
@@ -206,11 +204,11 @@ final class AAM_Migration_700
                 unset($configs[$legacy]);
             }
 
-            // $configpress = str_replace($legacy, $new, $configpress);
+            $configpress = str_replace($legacy, $new, $configpress);
         }
 
         $service->set($configs);
-        // $service->set_configpress($configpress);
+        AAM::api()->db->write(AAM_Service_Core::DB_OPTION, $configpress);
     }
 
     /**

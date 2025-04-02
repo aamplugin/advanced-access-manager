@@ -31,9 +31,7 @@ class AAM_Framework_Resource_ApiRoute implements AAM_Framework_Resource_Interfac
         $result = [];
 
         // Fetch list of statements for the resource Route
-        $list = AAM_Framework_Manager::_()->policies(
-            $this->get_access_level()
-        )->statements('Route:*');
+        $list = $this->policies()->statements('Route:*');
 
         foreach($list as $stm) {
             $effect = isset($stm['Effect']) ? strtolower($stm['Effect']) : 'deny';
