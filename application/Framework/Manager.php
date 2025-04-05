@@ -427,18 +427,8 @@ final class AAM_Framework_Manager
         // Iterate over the list of all capabilities and properly adjust them for
         // current user
         foreach($this->caps()->list() as $cap => $is_granted) {
-            if ($is_granted === true) {
-                $current_user->caps[$cap]    = $is_granted;
-                $current_user->allcaps[$cap] = $is_granted;
-            } else {
-                if (array_key_exists($cap, $current_user->caps)) {
-                    unset($current_user->caps[$cap]);
-                }
-
-                if (array_key_exists($cap, $current_user->allcaps)) {
-                    unset($current_user->allcaps[$cap]);
-                }
-            }
+            $current_user->caps[$cap]    = $is_granted;
+            $current_user->allcaps[$cap] = $is_granted;
         }
     }
 

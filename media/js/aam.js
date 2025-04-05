@@ -6865,6 +6865,35 @@
         })(jQuery);
 
         /**
+         * Welcome Interface
+         *
+         * @param {jQuery} $
+         *
+         * @returns {void}
+         */
+        (function ($) {
+
+            /**
+             *
+             * @returns {undefined}
+             */
+            function initialize() {
+                if ($('#welcome-content').length) {
+                    $('#intro_videos_block').on('show.bs.collapse', function(e) {
+                        $('.panel-body', e.target).contents().filter(function() {
+                            return this.nodeType === 8; // Node.COMMENT_NODE
+                        }).replaceWith(function() {
+                            return this.data;
+                        });
+                    });
+                }
+            }
+
+            getAAM().addHook('init', initialize);
+
+        })(jQuery);
+
+        /**
          * Top subject bar
          */
         (function ($) {
@@ -7431,8 +7460,6 @@
                 loaderBg: '#a94442'
             });
         }
-
-        parent.window.scrollTo(0, 0);
     };
 
     /**

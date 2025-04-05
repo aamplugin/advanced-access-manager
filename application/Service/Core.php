@@ -279,6 +279,7 @@ class AAM_Service_Core
         foreach($policies as $policy) {
             array_push($result['dataset']['policies'], [
                 'id'      => $policy->ID,
+                'slug'    => $policy->post_name,
                 'content' => $policy->post_content,
                 'status'  => $policy->post_status,
                 'title'   => $policy->post_title,
@@ -306,13 +307,37 @@ class AAM_Service_Core
 
         if (array_key_exists('policies', $dataset)) {
             foreach($dataset['policies'] as $policy) {
-                $policy_map[$policy['id']] = wp_insert_post([
-                    'post_content' => $policy['content'],
-                    'post_type'    => AAM_Framework_Service_Policies::CPT,
-                    'post_status'  => $policy['status'],
-                    'post_title'   => $policy['title'],
-                    'post_excerpt' => $policy['excerpt']
-                ]);
+                $insert = true;
+
+                if (!empty($policy['slug'])) {
+                    $existing = get_page_by_path(
+                        $policy['slug'],
+                        OBJECT,
+                        AAM_Framework_Service_Policies::CPT
+                    );
+
+                    $insert = is_a($existing, WP_Post::class) ? false : true;
+                }
+
+                if ($insert) {
+                    $policy_map[$policy['id']] = wp_insert_post([
+                        'post_content' => $policy['content'],
+                        'post_type'    => AAM_Framework_Service_Policies::CPT,
+                        'post_status'  => $policy['status'],
+                        'post_title'   => $policy['title'],
+                        'post_excerpt' => $policy['excerpt']
+                    ]);
+                } else {
+                    $policy_map[$policy['id']] = $existing->ID;
+
+                    // Update existing policy with new imported content
+                    wp_update_post([
+                        'ID' => $existing->ID,
+                        'post_content' => $policy['content'],
+                        'post_title'   => $policy['title'],
+                        'post_excerpt' => $policy['excerpt']
+                    ]);
+                }
             }
         }
 

@@ -239,13 +239,14 @@ class AAM_Restful_SecurityAudit
         $checks = $service->get_steps();
 
         foreach($data as $check_id => $check_result) {
-            $check = $checks[$check_id];
+            $check    = $checks[$check_id];
+            $executor = $checks[$check_id]['executor'];
 
             if (!empty($check_result['issues'])) {
-                foreach($check_result['issues'] as $failure) {
+                foreach($check_result['issues'] as $issue) {
                     fputcsv($report, [
-                        $failure['reason'],
-                        $failure['type'],
+                        call_user_func("{$executor}::issue_to_message", $issue),
+                        $issue['type'],
                         isset($check['category']) ? $check['category'] : $check_id
                     ]);
                 }
@@ -341,13 +342,17 @@ class AAM_Restful_SecurityAudit
 
         foreach($data as $check_id => $check_result) {
             $check = $checks[$check_id];
+            $exec  = $checks[$check_id]['executor'];
 
             if (!empty($check_result['issues'])) {
-                foreach($check_result['issues'] as $failure) {
+                foreach($check_result['issues'] as $issue) {
+                    $msg = call_user_func("{$exec}::issue_to_message", $issue);
+                    $cat = isset($check['category']) ? $check['category'] : $check_id;
+
                     array_push($report, [
-                        'issue'    => $failure['reason'],
-                        'type'     => $failure['type'],
-                        'category' => isset($check['category']) ? $check['category'] : $check_id
+                        'issue'    => $msg,
+                        'type'     => $issue['type'],
+                        'category' => $cat
                     ]);
                 }
             }

@@ -124,7 +124,6 @@
                                                         ></i>
                                                     <?php } ?>
                                                     <label
-                                                        for="menu-item-<?php echo $i . $j; ?>"
                                                         data-toggle="tooltip"
                                                         title="<?php echo ($child['is_restricted'] ?  __('Uncheck to allow', 'advanced-access-manager') : __('Check to restrict', 'advanced-access-manager')); ?>"
                                                     ></label>

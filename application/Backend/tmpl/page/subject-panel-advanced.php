@@ -62,7 +62,7 @@
                         <input type="text" class="form-control" id="edit-role-name" placeholder="<?php echo __('Enter Role Name', 'advanced-access-manager'); ?>" name="name" />
                     </div>
                     <div class="form-group">
-                        <label for="new-role-slug"><?php echo __('Role Slug', 'advanced-access-manager'); ?></label>
+                        <label for="edit-role-slug"><?php echo __('Role Slug', 'advanced-access-manager'); ?></label>
                         <input type="text" class="form-control" id="edit-role-slug" name="new_slug" />
                         <small class="text-muted hint"><?php echo __('Can be changed if no users are assigned to role', 'advanced-access-manager'); ?></small>
                     </div>

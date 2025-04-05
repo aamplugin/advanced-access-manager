@@ -28,7 +28,7 @@ class AAM_Service_SecureLogin
         'service.secure_login.single_session'      => false,
         'service.secure_login.brute_force_lockout' => false,
         'service.secure_login.time_window'         => '+20 minutes',
-        'service.secure_login.login_attempts'      => 8,
+        'service.secure_login.login_attempts'      => 5,
         'service.secure_login.login_message'       => 'Login to get access.'
     ];
 
@@ -148,7 +148,7 @@ class AAM_Service_SecureLogin
             $name     = $this->_get_login_attempt_key();
             $attempts = AAM::api()->cache->get($name);
 
-            if ($attempts !== false) {
+            if (!empty($attempts)) {
                 $attempts = intval($attempts) + 1;
 
                 AAM::api()->cache->update($name, $attempts);
