@@ -525,7 +525,9 @@ class AAM_Framework_Service_Policies
             $policies = get_posts(array_merge(
                 [
                     'post_status' => [ 'publish', 'draft', 'pending', 'private' ],
-                    'nopaging'    => true
+                    'nopaging'    => true,
+                    'order'       => 'ASC',
+                    'orderby'     => 'post_parent, menu_order'
                 ],
                 $args,
                 [
@@ -563,25 +565,15 @@ class AAM_Framework_Service_Policies
                 'Param'     => []
             ];
 
-            // Prepare the list of all activated policies first
-            $activated = [];
+            // Important! Retain the exact order of fetched policies
+            $permissions = $this->_get_resource()->get_permissions();
 
-            // Getting the list of all registered policies
-            $registered = $this->_get_registered_policies();
-
-            // Get list of policies attached to current access level
-            foreach($this->_get_resource()->get_permissions() as $id => $data) {
-                if ($data['attach']['effect'] !== 'detach'
-                    && array_key_exists($id, $registered)
+            foreach($this->_get_registered_policies() as $id => $policy) {
+                if (array_key_exists($id, $permissions)
+                    && $permissions[$id]['attach']['effect'] !== 'detach'
                 ) {
-                    array_push($activated, $id);
+                    $this->_insert_policy_into_tree($policy, $result);
                 }
-            }
-
-            // Iterated over the list of all activated policies and prepare the policy
-            // tree
-            foreach($activated as $policy_id) {
-                $this->_insert_policy_into_tree($registered[$policy_id], $result);
             }
 
             // Cache the tree

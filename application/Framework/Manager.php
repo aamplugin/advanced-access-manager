@@ -215,7 +215,7 @@ final class AAM_Framework_Manager
                     'show_in_menu'        => false,
                     'exclude_from_search' => true,
                     'publicly_queryable'  => false,
-                    'hierarchical' => false,
+                    'hierarchical' => true,
                     'supports'     => [
                         'title', 'excerpt', 'revisions', 'custom-fields'
                     ],

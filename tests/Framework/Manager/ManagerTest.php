@@ -52,8 +52,13 @@ final class ManagerTest extends TestCase
 
         $this->assertTrue($current_user->caps['aam_custom_cap']);
         $this->assertTrue($current_user->allcaps['aam_custom_cap']);
-        $this->assertArrayNotHasKey('read', $current_user->caps);
-        $this->assertArrayNotHasKey('read', $current_user->allcaps);
+
+        // Making sure that read cap still present, but it is false
+        $this->assertArrayHasKey('read', $current_user->caps);
+        $this->assertArrayHasKey('read', $current_user->allcaps);
+
+        $this->assertFalse($current_user->caps['read']);
+        $this->assertFalse($current_user->allcaps['read']);
     }
 
     /**

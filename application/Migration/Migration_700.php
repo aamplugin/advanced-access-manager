@@ -194,7 +194,12 @@ final class AAM_Migration_700
             'core.settings.restful'                     => 'core.settings.restful_enabled',
             'core.service.welcome.enabled'              => 'service.welcome.enabled',
             'addon.protected-media-files.settings.deniedRedirect' => 'addon.protected_media_files.settings.denied_redirect',
-            'addon.protected-media-files.settings.absolutePath'   => 'addon.protected_media_files.settings.absolute_path'
+            'addon.protected-media-files.settings.absolutePath'   => 'addon.protected_media_files.settings.absolute_path',
+            'core.settings.menu.merge.preference'                 => 'core.settings.backend_menu.merge.preference',
+            'core.settings.toolbar.merge.preference'              => 'core.settings.admin_toolbar.merge.preference',
+            'core.settings.route.merge.preference'                => 'core.settings.api_route.merge.preference',
+            'core.settings.type.merge.preference'                 => 'core.settings.post_type.merge.preference',
+            'core.settings.uri.merge.preference'                  => 'core.settings.url.merge.preference',
         ];
 
         foreach($changes as $legacy => $new) {

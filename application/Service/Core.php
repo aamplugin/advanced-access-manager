@@ -43,6 +43,20 @@ class AAM_Service_Core
     ];
 
     /**
+     * Collection of capabilities responsible for API password management
+     *
+     * @version 7.0.0
+     */
+    const APP_PASSWORD_CAPS = [
+        'create_app_password',
+        'list_app_passwords',
+        'read_app_password',
+        'edit_app_password',
+        'delete_app_passwords',
+        'delete_app_password'
+    ];
+
+    /**
      * Constructor
      *
      * @access protected
@@ -161,9 +175,9 @@ class AAM_Service_Core
 
         // Check if user has ability to perform certain task based on provided
         // capability and meta data
-        add_filter('map_meta_cap', function($caps) {
-            return $this->_map_meta_cap($caps);
-        }, 999);
+        add_filter('map_meta_cap', function($caps, $_, $user_id) {
+            return $this->_map_meta_cap($caps, $user_id);
+        }, 999, 3);
 
         // User authentication control
         add_filter('wp_authenticate_user', function($result) {
@@ -230,6 +244,16 @@ class AAM_Service_Core
         add_filter('get_sample_permalink_html', function ($html) {
             return $this->_control_permalink_html($html);
         });
+
+        // Control the ability to manage application password
+        add_filter(
+            'wp_is_application_passwords_available_for_user',
+            function($response, $user) {
+                return $this->_is_app_passwords_available_for_user(
+                    $response, $user
+                );
+            }, 10, 2
+        );
 
         // Control access to the backend area
         add_action('init', function() {
@@ -632,6 +656,26 @@ class AAM_Service_Core
     }
 
     /**
+     * Determine if given user is allowed to manage application passwords
+     *
+     * @param bool    $response
+     * @param WP_User $user
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_app_passwords_available_for_user($response, $user)
+    {
+        if (AAM::api()->caps->exists('aam_manage_application_passwords')) {
+            $response = user_can($user, 'aam_manage_application_passwords');
+        }
+
+        return $response;
+    }
+
+    /**
      * Render "Access Manager" widget on the user/profile edit screen
      *
      * @param WP_User $user
@@ -655,24 +699,28 @@ class AAM_Service_Core
      * post, users etc.
      *
      * @param array $caps
+     * @param int   $user_id
      *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    private function _map_meta_cap($caps)
+    private function _map_meta_cap($caps, $user_id)
     {
         // Mutate any AAM specific capability if it does not exist
         foreach ((array) $caps as $i => $capability) {
-            if (
-                is_string($capability) && (strpos($capability, 'aam_') === 0)
-                && !AAM::api()->capabilities->exists($capability)
-            ) {
-                $caps[$i] = AAM::api()->config->get(
-                    'page.capability',
-                    'administrator'
-                );
+            if (is_string($capability) && (strpos($capability, 'aam_') === 0)) {
+                if (!AAM::api()->capabilities->exists($capability)) {
+                    $caps[$i] = AAM::api()->config->get(
+                        'page.capability',
+                        'administrator'
+                    );
+                }
+            } elseif (in_array($capability, self::APP_PASSWORD_CAPS, true)) {
+                if (!$this->_is_app_passwords_available_for_user(true, $user_id)) {
+                    array_push($caps, 'do_not_allow');
+                }
             }
         }
 

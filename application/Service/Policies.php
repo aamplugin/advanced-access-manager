@@ -149,11 +149,23 @@ class AAM_Service_Policies
                 AAM_Framework_Service_Policies::CPT,
                 __('Access Policy Document', 'advanced-access-manager'),
                 function() {
-                    echo AAM_Backend_View::get_instance()->renderPolicyMetabox();
+                    echo AAM_Backend_View::get_instance()->render_policy_metabox();
                 },
                 AAM_Framework_Service_Policies::CPT,
                 'normal',
                 'high'
+            );
+
+            // Parent policy metabox
+            add_meta_box(
+                AAM_Framework_Service_Policies::CPT . '_parent',
+                __('Parent Policy', 'advanced-access-manager'),
+                function() {
+                    echo AAM_Backend_View::get_instance()->render_policy_parent_metabox();
+                },
+                AAM_Framework_Service_Policies::CPT,
+                'side',
+                'low'
             );
 
             // Only display the assignee when policy is published

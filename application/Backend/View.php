@@ -287,16 +287,41 @@ class AAM_Backend_View
      *
      * @access public
      * @global WP_Post $post
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public static function renderPolicyMetabox()
+    public function render_policy_metabox()
     {
         global $post;
 
         if (is_a($post, 'WP_Post')) {
-            $content = static::loadTemplate(
+            $content = $this->loadTemplate(
                 dirname(__FILE__) . '/tmpl/metabox/policy-metabox.php',
                 (object) array('post' => $post)
+            );
+        } else {
+            $content = null;
+        }
+
+        return  $content;
+    }
+
+    /**
+     * Render policy parent metabox
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function render_policy_parent_metabox()
+    {
+        global $post;
+
+        if (is_a($post, 'WP_Post')) {
+            $content = $this->loadTemplate(
+                dirname(__FILE__) . '/tmpl/metabox/policy-parent-metabox.php',
+                (object) [ 'post' => $post ]
             );
         } else {
             $content = null;
