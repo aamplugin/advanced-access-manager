@@ -43,10 +43,10 @@ final class ApiRoutesTest extends TestCase
         $this->assertFalse($service->is_allowed('/oembed/1.0/embed'));
 
         // Making sure that HTTP method is taken into consideration
-        $this->assertTrue($service->deny('/aam/v2/service/jwts'));
-        $this->assertTrue($service->is_denied('/aam/v2/service/jwts'));
-        $this->assertFalse($service->is_denied('POST /aam/v2/service/jwts'));
-        $this->assertFalse($service->is_denied('DELETE /aam/v2/service/jwts'));
+        $this->assertTrue($service->deny('/aam/v2/jwts'));
+        $this->assertTrue($service->is_denied('/aam/v2/jwts'));
+        $this->assertFalse($service->is_denied('POST /aam/v2/jwts'));
+        $this->assertFalse($service->is_denied('DELETE /aam/v2/jwts'));
     }
 
 }

@@ -42,7 +42,7 @@
      */
     function GetRoles(cb) {
         if (cache.roles === null) {
-            $.ajax(`${getLocal().rest_base}aam/v2/service/roles`, {
+            $.ajax(`${getLocal().rest_base}aam/v2/roles`, {
                 type: 'GET',
                 headers: {
                     'X-WP-Nonce': getLocal().rest_nonce
@@ -189,7 +189,7 @@
              * @returns
              */
             function prepareRoleEndpoint(role) {
-                return getLocal().rest_base + 'aam/v2/service/role/' + encodeURIComponent(role);
+                return getLocal().rest_base + 'aam/v2/role/' + encodeURIComponent(role);
             }
 
             /**
@@ -205,7 +205,7 @@
                     getAAM().applyFilters('role-list-fields', fields);
 
                     // Prepare the RESTful API endpoint
-                    let url = `${getLocal().rest_base}aam/v2/service/roles`;
+                    let url = `${getLocal().rest_base}aam/v2/roles`;
 
                     if (url.indexOf('rest_route') === -1) {
                         url += `?fields=${fields.join(',')}`;
@@ -538,7 +538,7 @@
 
 
                         if (data.name) {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/roles`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/roles`, {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
@@ -688,7 +688,7 @@
                                     'danger',
                                     getAAM().__('I\'m having trouble deleting the role.'),
                                     {
-                                        request: `aam/v2/service/role/${$(_this).data('role')}`,
+                                        request: `aam/v2/role/${$(_this).data('role')}`,
                                         response: response.responseJSON
                                     }
                                 );
@@ -760,7 +760,7 @@
                 const status = ($(btn).hasClass('icon-lock') ? 'active' : 'inactive');
 
                 $.ajax({
-                    url: `${getLocal().rest_base}aam/v2/service/user/${id}?fields=status`,
+                    url: `${getLocal().rest_base}aam/v2/user/${id}?fields=status`,
                     type: 'POST',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
@@ -788,7 +788,7 @@
                     },
                     error: function (response) {
                         getAAM().notification('danger', response, {
-                            request: `aam/v2/service/user/${id}?fields=status`,
+                            request: `aam/v2/user/${id}?fields=status`,
                             payload: { status },
                             response
                         });
@@ -822,7 +822,7 @@
                         }
                     }
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/jwts`, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/jwts`, {
                         type: 'POST',
                         dataType: 'json',
                         data: payload,
@@ -839,7 +839,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: 'aam/v2/service/jwts',
+                                request: 'aam/v2/jwts',
                                 payload,
                                 response
                             });
@@ -871,7 +871,7 @@
                     }
 
                     $.ajax({
-                        url: `${getLocal().rest_base}aam/v2/service/users`,
+                        url: `${getLocal().rest_base}aam/v2/users`,
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -1204,7 +1204,7 @@
                 }
 
                 $.ajax({
-                    url: `${getLocal().rest_base}aam/v2/service/user/${id}`,
+                    url: `${getLocal().rest_base}aam/v2/user/${id}`,
                     type: 'POST',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
@@ -1220,7 +1220,7 @@
                     },
                     error: function (response) {
                         getAAM().notification('danger', response, {
-                            request: `aam/v2/service/user/${id}`,
+                            request: `aam/v2/user/${id}`,
                             payload: { expiration: payload },
                             response
                         });
@@ -1239,7 +1239,7 @@
                 const id = $(_this).attr('data-user-id');
 
                 $.ajax({
-                    url: `${getLocal().rest_base}aam/v2/service/user/${id}`,
+                    url: `${getLocal().rest_base}aam/v2/user/${id}`,
                     type: 'POST',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce,
@@ -1253,7 +1253,7 @@
                     },
                     error: function (response) {
                         getAAM().notification('danger', response, {
-                            request: `aam/v2/service/user/${id}`,
+                            request: `aam/v2/user/${id}`,
                             response
                         });
                     },
@@ -1383,7 +1383,7 @@
                     $(btn).attr('class', 'aam-row-action icon-spin4 animate-spin');
 
                     const endpoint = getAAM().prepareApiEndpoint(
-                        '/service/policy/' + id
+                        '/policy/' + id
                     );
 
                     $.ajax(endpoint, {
@@ -1411,7 +1411,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: '/service/policy/' + id,
+                                request: '/policy/' + id,
                                 payload,
                                 response
                             });
@@ -1435,7 +1435,7 @@
                     };
 
                     const endpoint = getAAM().prepareApiEndpoint(
-                        '/service/policy/' + policy_id, true, {
+                        '/policy/' + policy_id, true, {
                             type: al_type,
                             id: al_id
                         }
@@ -1463,7 +1463,7 @@
              */
             function DeletePolicy(id, btn) {
                 const endpoint = getAAM().prepareApiEndpoint(
-                    '/service/policy/' + id
+                    '/policy/' + id
                 );
 
                 getAAM().queueRequest(function () {
@@ -1509,7 +1509,7 @@
                     $('#policy_reset').bind('click', function () {
                         const btn      = this;
                         const endpoint = getAAM().prepareApiEndpoint(
-                            '/service/policies'
+                            '/policies'
                         );
 
                         getAAM().queueRequest(function () {
@@ -1554,7 +1554,7 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: getAAM().prepareApiEndpoint('/service/policies?fields=excerpt,permissions'),
+                            url: getAAM().prepareApiEndpoint('/policies?fields=excerpt,permissions'),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -1681,7 +1681,7 @@
                     ];
 
                     // Prepare the RESTful API endpoint
-                    let url = `${getLocal().rest_base}aam/v2/service/roles`;
+                    let url = `${getLocal().rest_base}aam/v2/roles`;
 
                     if (url.indexOf('rest_route') === -1) {
                         url += `?fields=${fields.join(',')}`;
@@ -1803,7 +1803,7 @@
                             ];
 
                             $.ajax({
-                                url: `${getLocal().rest_base}aam/v2/service/users`,
+                                url: `${getLocal().rest_base}aam/v2/users`,
                                 type: 'GET',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
@@ -1950,7 +1950,7 @@
                     };
 
                     const endpoint = getAAM().prepareApiEndpoint(
-                        '/service/backend-menu/' + item
+                        '/backend-menu/' + item
                     );
 
                     $.ajax(endpoint, {
@@ -1966,7 +1966,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: '/service/backend-menu/' + encodeURI(item),
+                                request: '/backend-menu/' + encodeURI(item),
                                 payload,
                                 response
                             });
@@ -2067,7 +2067,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/backend-menu`), {
+                            $.ajax(getAAM().prepareApiEndpoint(`/backend-menu`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2083,7 +2083,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: '/service/backend-menu',
+                                        request: '/backend-menu',
                                         response
                                     });
                                 },
@@ -2128,7 +2128,7 @@
                 getAAM().queueRequest(function () {
                     const payload  = { effect: is_hidden ? 'deny' : 'allow' };
                     const endpoint = getAAM().prepareApiEndpoint(
-                        `/service/admin-toolbar/${item}`
+                        `/admin-toolbar/${item}`
                     );
 
                     $.ajax(endpoint, {
@@ -2212,7 +2212,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/admin-toolbar`), {
+                            $.ajax(getAAM().prepareApiEndpoint(`/admin-toolbar`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2228,7 +2228,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: 'aam/v2/service/admin-toolbar',
+                                        request: 'aam/v2/admin-toolbar',
                                         response
                                     });
                                 },
@@ -2305,7 +2305,7 @@
                         screen_id
                     };
 
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/metabox/${slug}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/metabox/${slug}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2318,7 +2318,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `/service/metabox/${slug}`,
+                                request: `/metabox/${slug}`,
                                 payload: data,
                                 response
                             });
@@ -2399,7 +2399,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint(`/service/metaboxes`), {
+                            $.ajax(getAAM().prepareApiEndpoint(`/metaboxes`), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2415,7 +2415,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: '/service/metaboxes',
+                                        request: '/metaboxes',
                                         response
                                     });
                                 },
@@ -2488,7 +2488,7 @@
              */
             function save(slug, is_hidden, cb) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/widget/${slug}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/widget/${slug}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2501,7 +2501,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `aam/v2/service/widget/${slug}`,
+                                request: `aam/v2/widget/${slug}`,
                                 payload: { effect : is_hidden ? 'deny' : 'allow' },
                                 response
                             });
@@ -2562,7 +2562,7 @@
                         const _this = $(this);
 
                         getAAM().queueRequest(function () {
-                            $.ajax(getAAM().prepareApiEndpoint('/service/widgets'), {
+                            $.ajax(getAAM().prepareApiEndpoint('/widgets'), {
                                 type: 'POST',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce,
@@ -2578,7 +2578,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: 'aam/v2/service/widgets',
+                                        request: 'aam/v2/widgets',
                                         response
                                     });
                                 },
@@ -2660,7 +2660,7 @@
                 };
 
                 // Determine endpoint
-                let endpoint = '/service';
+                let endpoint = '';
 
                 if (getAAM().getSubject().type === 'role') {
                     endpoint += '/role/' + encodeURIComponent(getAAM().getSubject().id);
@@ -2709,7 +2709,7 @@
              */
             function deleteCapability(capability, btn) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/capability/${encodeURIComponent(capability)}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/capability/${encodeURIComponent(capability)}`), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -2728,7 +2728,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `/service/capability/${encodeURIComponent(capability)}`,
+                                request: `/capability/${encodeURIComponent(capability)}`,
                                 payload,
                                 response
                             });
@@ -2761,7 +2761,7 @@
                         pagingType: 'simple',
                         serverSide: false,
                         ajax: {
-                            url: getAAM().prepareApiEndpoint('/service/capabilities'),
+                            url: getAAM().prepareApiEndpoint('/capabilities'),
                             type: 'GET',
                             data,
                             headers: {
@@ -2984,7 +2984,7 @@
                             };
 
                             getAAM().queueRequest(function () {
-                                $.ajax(getAAM().prepareApiEndpoint('/service/capabilities'), {
+                                $.ajax(getAAM().prepareApiEndpoint('/capabilities'), {
                                     type: 'POST',
                                     headers: {
                                         'X-WP-Nonce': getLocal().rest_nonce
@@ -3000,7 +3000,7 @@
                                     },
                                     error: function (response) {
                                         getAAM().notification('danger', response, {
-                                            request: 'aam/v2/service/capabilities',
+                                            request: 'aam/v2/capabilities',
                                             payload,
                                             response
                                         });
@@ -3030,7 +3030,7 @@
                             };
 
                             getAAM().queueRequest(function () {
-                                $.ajax(getAAM().prepareApiEndpoint(`/service/capability/${encodeURIComponent(old_slug)}`), {
+                                $.ajax(getAAM().prepareApiEndpoint(`/capability/${encodeURIComponent(old_slug)}`), {
                                     type: 'POST',
                                     headers: {
                                         'X-WP-Nonce': getLocal().rest_nonce,
@@ -3046,7 +3046,7 @@
                                     },
                                     error: function (response) {
                                         getAAM().notification('danger', response, {
-                                            request: `aam/v2/service/capability/${encodeURIComponent(old_slug)}`,
+                                            request: `aam/v2/capability/${encodeURIComponent(old_slug)}`,
                                             payload,
                                             response
                                         });
@@ -3234,7 +3234,7 @@
                     }
 
                     $.ajax(getAAM().prepareApiEndpoint(
-                        `/service/${resource_type}/${resource_id}/${permission}?${query.join('&')}`
+                        `/${resource_type}/${resource_id}/${permission}?${query.join('&')}`
                     ), {
                         type: 'POST',
                         headers: {
@@ -3506,7 +3506,7 @@
                     }
 
                     $.ajax(getAAM().prepareApiEndpoint(
-                        `/service/${resource_type}/${resource_id}?${query.join('&')}`
+                        `/${resource_type}/${resource_id}?${query.join('&')}`
                     ), {
                         type: 'POST',
                         headers: {
@@ -3576,7 +3576,7 @@
             function FetchPostTypeList(cb) {
                 if (cache.post_types === undefined) {
                     // Fetching the list of all registered post types.
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/post_types`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/post_types`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -3618,7 +3618,7 @@
             function FetchTaxonomyList(cb) {
                 // Fetching the list of all registered post types.
                 if (cache.taxonomies === undefined) {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/taxonomies`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/taxonomies`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -3658,7 +3658,7 @@
              */
             function FetchPostList(filters, cb) {
                 // Fetching the list of posts
-                $.ajax(getAAM().prepareApiEndpoint(`/service/posts`), {
+                $.ajax(getAAM().prepareApiEndpoint(`/posts`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
@@ -3714,7 +3714,7 @@
                 }
 
                 // Fetching the list of terms
-                $.ajax(getAAM().prepareApiEndpoint(`/service/terms`), {
+                $.ajax(getAAM().prepareApiEndpoint(`/terms`), {
                     type: 'GET',
                     headers: {
                         'X-WP-Nonce': getLocal().rest_nonce
@@ -4440,7 +4440,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/access-denied'), {
+                    $.ajax(getAAM().prepareApiEndpoint('/redirect/access-denied'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4452,7 +4452,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: '/service/redirect/access-denied',
+                                request: '/redirect/access-denied',
                                 payload,
                                 response
                             });
@@ -4546,7 +4546,7 @@
                     $('#redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/access-denied`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/redirect/access-denied`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -4563,7 +4563,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: '/service/redirect/access-denied',
+                                    request: '/redirect/access-denied',
                                     response
                                 });
                             },
@@ -4597,7 +4597,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/login'), {
+                    $.ajax(getAAM().prepareApiEndpoint('/redirect/login'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4609,7 +4609,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: 'aam/v2/service/redirect/login',
+                                request: 'aam/v2/redirect/login',
                                 payload,
                                 response
                             });
@@ -4674,7 +4674,7 @@
                     $('#login-redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/login`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/redirect/login`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -4691,7 +4691,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: 'aam/v2/service/redirect/login',
+                                    request: 'aam/v2/redirect/login',
                                     response
                                 });
                             },
@@ -4725,7 +4725,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/logout'), {
+                    $.ajax(getAAM().prepareApiEndpoint('/redirect/logout'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4737,7 +4737,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: 'aam/v2/service/redirect/logout',
+                                request: 'aam/v2/redirect/logout',
                                 payload,
                                 response
                             });
@@ -4802,7 +4802,7 @@
                     $('#logout-redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/logout`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/redirect/logout`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -4819,7 +4819,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: 'aam/v2/service/redirect/logout',
+                                    request: 'aam/v2/redirect/logout',
                                     response
                                 });
                             },
@@ -4853,7 +4853,7 @@
              */
             function save(payload, successCallback) {
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint('/service/redirect/not-found'), {
+                    $.ajax(getAAM().prepareApiEndpoint('/redirect/not-found'), {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -4865,7 +4865,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: '/service/redirect/not-found',
+                                request: '/redirect/not-found',
                                 payload,
                                 response
                             });
@@ -4930,7 +4930,7 @@
                     $('#404redirect-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/redirect/not-found`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/redirect/not-found`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -4947,7 +4947,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: '/service/redirect/not-found',
+                                    request: '/redirect/not-found',
                                     response
                                 });
                             },
@@ -4989,7 +4989,7 @@
                         effect: is_restricted ? 'deny' : 'allow'
                     };
 
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/api-route/${id}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/api-route/${id}`), {
                         type: 'POST',
                         dataType: 'json',
                         data: payload,
@@ -5004,7 +5004,7 @@
                             updateBtn(btn, !is_restricted);
 
                             getAAM().notification('danger', response, {
-                                request: `/service/api-route/${id}`,
+                                request: `/api-route/${id}`,
                                 payload,
                                 response
                             });
@@ -5057,7 +5057,7 @@
                         pagingType: 'simple',
                         serverSide: false,
                         ajax: {
-                            url: getAAM().prepareApiEndpoint(`/service/api-routes`),
+                            url: getAAM().prepareApiEndpoint(`/api-routes`),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -5133,7 +5133,7 @@
                     $('#route-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/api-routes`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/api-routes`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -5150,7 +5150,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: '/service/api-routes',
+                                    request: '/api-routes',
                                     response
                                 });
                             },
@@ -5260,7 +5260,7 @@
                     $('#uri-reset').bind('click', function () {
                         const _btn = $(this);
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/urls`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/urls`), {
                             type: 'POST',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce,
@@ -5277,7 +5277,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: 'aam/v2/service/urls',
+                                    request: 'aam/v2/urls',
                                     response
                                 });
                             },
@@ -5339,7 +5339,7 @@
                                 payload.redirect.http_status_code = parseInt(code, 10);
                             }
 
-                            let endpoint = `/service/url`;
+                            let endpoint = `/url`;
 
                             if (editing_url) {
                                 endpoint += '/' + editing_url;
@@ -5388,7 +5388,7 @@
 
                         const url = $('#uri-delete-btn').attr('data-url-id');
 
-                        $.ajax(getAAM().prepareApiEndpoint(`/service/url/${url}`), {
+                        $.ajax(getAAM().prepareApiEndpoint(`/url/${url}`), {
                             type: 'POST',
                             dataType: 'json',
                             headers: {
@@ -5405,7 +5405,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: `aam/v2/service/url/${url}`,
+                                    request: `aam/v2/url/${url}`,
                                     response
                                 });
                             },
@@ -5427,7 +5427,7 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: getAAM().prepareApiEndpoint(`/service/urls`),
+                            url: getAAM().prepareApiEndpoint(`/urls`),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -5610,7 +5610,7 @@
             function SavePermission(permission, is_denied) {
                 if (current_selections.re_init === false) {
                     getAAM().queueRequest(function () {
-                        const endpoint = `/service/identity/${current_selections.identity_type}/${current_selections.identity_id}/${permission}`;
+                        const endpoint = `/identity/${current_selections.identity_type}/${current_selections.identity_id}/${permission}`;
 
                         $.ajax(getAAM().prepareApiEndpoint(endpoint), {
                             type: 'POST',
@@ -5651,7 +5651,7 @@
              */
             function ResetPermissions(cb) {
                 getAAM().queueRequest(function () {
-                    const endpoint = `/service/identity/${current_selections.identity_type}/${current_selections.identity_id}`;
+                    const endpoint = `/identity/${current_selections.identity_type}/${current_selections.identity_id}`;
 
                     $.ajax(getAAM().prepareApiEndpoint(endpoint), {
                         type: 'POST',
@@ -5687,7 +5687,7 @@
                 current_selections.identity_id   = id;
 
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/identity/${type}/${id}`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/identity/${type}/${id}`), {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': $.aam.getLocal().rest_nonce
@@ -5793,7 +5793,7 @@
                         processing: true,
                         ajax: function(filters, cb) {
                             $.ajax({
-                                url: getAAM().prepareApiEndpoint('/service/identity/users'),
+                                url: getAAM().prepareApiEndpoint('/identity/users'),
                                 type: 'GET',
                                 headers: {
                                     'X-WP-Nonce': getLocal().rest_nonce
@@ -5890,7 +5890,7 @@
                         stateSave: true,
                         serverSide: false,
                         ajax: {
-                            url: getAAM().prepareApiEndpoint('/service/identity/roles'),
+                            url: getAAM().prepareApiEndpoint('/identity/roles'),
                             type: 'GET',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -6008,7 +6008,7 @@
                     user_id: getAAM().getSubject().id
                 };
 
-                $.ajax(`${getLocal().rest_base}aam/v2/service/jwt/${id}`, {
+                $.ajax(`${getLocal().rest_base}aam/v2/jwt/${id}`, {
                     type: 'POST',
                     dataType: 'json',
                     data: payload,
@@ -6021,7 +6021,7 @@
                     },
                     error: function (response) {
                         getAAM().notification('danger', response, {
-                            request: `aam/v2/service/jwt/${id}`,
+                            request: `aam/v2/jwt/${id}`,
                             payload,
                             response
                         });
@@ -6082,7 +6082,7 @@
                     });
 
                     // Prepare the URL endpoint
-                    let url  = `${getLocal().rest_base}aam/v2/service/jwts`;
+                    let url  = `${getLocal().rest_base}aam/v2/jwts`;
                         url += `?user_id=${getAAM().getSubject().id}&fields=claims,signed_url`;
 
                     $('#jwt-list').DataTable({
@@ -6240,7 +6240,7 @@
                             console.log(e);
                         }
 
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/jwts?fields=token,signed_url`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/jwts?fields=token,signed_url`, {
                             type: 'POST',
                             dataType: 'json',
                             data: payload,
@@ -6262,7 +6262,7 @@
                             },
                             error: function (response) {
                                 getAAM().notification('danger', response, {
-                                    request: `aam/v2/service/jwts?fields=token,signed_url`,
+                                    request: `aam/v2/jwts?fields=token,signed_url`,
                                     payload,
                                     response
                                 });
@@ -6335,7 +6335,7 @@
                         'class', 'aam-security-audit-step icon-spin4 animate-spin'
                     );
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit`, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/audit`, {
                         type: 'POST',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -6420,7 +6420,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `aam/v2/service/audit`,
+                                request: `aam/v2/audit`,
                                 payload,
                                 response
                             });
@@ -6439,7 +6439,7 @@
                         .prop('disabled', true);
 
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit/report`, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/audit/report`, {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce,
@@ -6452,7 +6452,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `aam/v2/service/audit/report`,
+                                request: `aam/v2/audit/report`,
                                 response
                             });
                         },
@@ -6519,7 +6519,7 @@
                         getAAM().__('Preparing Summary. It May Take Up To 20 Sec...')
                     ).prop('disabled', true);
 
-                    $.ajax(`${getLocal().rest_base}aam/v2/service/audit/summary`, {
+                    $.ajax(`${getLocal().rest_base}aam/v2/audit/summary`, {
                         type: 'GET',
                         headers: {
                             'X-WP-Nonce': getLocal().rest_nonce
@@ -6536,7 +6536,7 @@
                         },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: `aam/v2/service/audit/summary`,
+                                request: `aam/v2/audit/summary`,
                                 response
                             });
                         },
@@ -6622,7 +6622,7 @@
              */
             function Save(param, value) {
                 getAAM().queueRequest(function () {
-                    const endpoint = `${getLocal().rest_base}aam/v2/service/core/config/${param}`;
+                    const endpoint = `${getLocal().rest_base}aam/v2/config/${param}`;
                     const payload  = { value };
 
                     $.ajax(endpoint, {
@@ -6708,7 +6708,7 @@
                         $('#clear-settings').text(getAAM().__('Processing...'));
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/core/reset`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/reset`, {
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: {
@@ -6750,7 +6750,7 @@
                                 ini: editor.getValue()
                             };
 
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/core/configpress`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/configpress`, {
                                 type: 'POST',
                                 dataType: 'json',
                                 data: payload,
@@ -6759,7 +6759,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: 'aam/v2/service/core/configpress',
+                                        request: 'aam/v2/configpress',
                                         payload,
                                         response
                                     });
@@ -6776,7 +6776,7 @@
 
                 $('#export-settings').bind('click', function() {
                     getAAM().queueRequest(function () {
-                        $.ajax(`${getLocal().rest_base}aam/v2/service/core/export`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/core/export`, {
                             dataType: 'json',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -6819,7 +6819,7 @@
 
                             // Import AAM settings
                             getAAM().queueRequest(function () {
-                                $.ajax(`${getLocal().rest_base}aam/v2/service/core/import`, {
+                                $.ajax(`${getLocal().rest_base}aam/v2/core/import`, {
                                     type: 'POST',
                                     dataType: 'json',
                                     contentType: 'application/json; charset=UTF-8',
@@ -6911,7 +6911,7 @@
                 const _this = $(this);
 
                 getAAM().queueRequest(function () {
-                    $.ajax(getAAM().prepareApiEndpoint(`/service/settings`), {
+                    $.ajax(getAAM().prepareApiEndpoint(`/settings`), {
                         type: 'POST',
                         dataType: 'json',
                         headers: {
@@ -6927,7 +6927,7 @@
                     },
                         error: function (response) {
                             getAAM().notification('danger', response, {
-                                request: 'aam/v2/service/settings',
+                                request: 'aam/v2/settings',
                                 response
                             });
                         },

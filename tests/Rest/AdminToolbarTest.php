@@ -31,7 +31,7 @@ final class AdminToolbarTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'GET',
-            '/aam/v2/service/admin-toolbar',
+            '/aam/v2/admin-toolbar',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -63,7 +63,7 @@ final class AdminToolbarTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'GET',
-            '/aam/v2/service/admin-toolbar/about',
+            '/aam/v2/admin-toolbar/about',
             [
                 'query_params' => [
                     'access_level' => 'role',

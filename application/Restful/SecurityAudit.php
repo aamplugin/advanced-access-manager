@@ -53,7 +53,7 @@ class AAM_Restful_SecurityAudit
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Create new support message
-            $this->_register_route('/service/audit', [
+            $this->_register_route('/audit', [
                 'methods'  => WP_REST_Server::CREATABLE,
                 'callback' => array($this, 'run_step'),
                 'args'     => array(
@@ -71,13 +71,13 @@ class AAM_Restful_SecurityAudit
             ], self::PERMISSIONS, false);
 
             // Get complete report
-            $this->_register_route('/service/audit/report', [
+            $this->_register_route('/audit/report', [
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array($this, 'generate_report')
             ], self::PERMISSIONS, false);
 
             // Share complete report
-            $this->_register_route('/service/audit/summary', [
+            $this->_register_route('/audit/summary', [
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array($this, 'prepare_summary')
             ], self::PERMISSIONS, false);

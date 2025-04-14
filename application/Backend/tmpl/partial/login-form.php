@@ -76,7 +76,7 @@ if (defined('AAM_KEY')) { ?>
                             }
                         }
                     });
-                    a.open("POST", "<?php echo get_rest_url(null, 'aam/v2/service/authenticate'); ?>");
+                    a.open("POST", "<?php echo get_rest_url(null, 'aam/v2/authenticate'); ?>");
                     a.setRequestHeader("Content-Type", "application/json");
                     a.setRequestHeader("Accept", "application/json");
                     a.send(JSON.stringify({

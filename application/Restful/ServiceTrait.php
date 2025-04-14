@@ -153,7 +153,7 @@ trait AAM_Restful_ServiceTrait
         }
 
         AAM::api()->rest->register(
-            is_null($ns) ? 'aam/v2/service' : $ns,
+            is_null($ns) ? 'aam/v2' : $ns,
             $route,
             $args,
             $auth

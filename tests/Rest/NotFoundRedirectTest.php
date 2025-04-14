@@ -29,7 +29,7 @@ final class NotFoundRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'GET',
-            '/aam/v2/service/redirect/not-found',
+            '/aam/v2/redirect/not-found',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -52,7 +52,7 @@ final class NotFoundRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'POST',
-            '/aam/v2/service/redirect/not-found',
+            '/aam/v2/redirect/not-found',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -82,7 +82,7 @@ final class NotFoundRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'DELETE',
-            '/aam/v2/service/redirect/not-found',
+            '/aam/v2/redirect/not-found',
             [
                 'query_params' => [
                     'access_level' => 'role',

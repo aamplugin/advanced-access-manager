@@ -29,7 +29,7 @@ final class AccessDeniedRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'GET',
-            '/aam/v2/service/redirect/access-denied',
+            '/aam/v2/redirect/access-denied',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -45,7 +45,7 @@ final class AccessDeniedRedirectTest extends TestCase
         // Test that we can get all areas at once
         $result = $server->dispatch($this->prepareRestRequest(
             'GET',
-            '/aam/v2/service/redirect/access-denied',
+            '/aam/v2/redirect/access-denied',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -73,7 +73,7 @@ final class AccessDeniedRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'POST',
-            '/aam/v2/service/redirect/access-denied',
+            '/aam/v2/redirect/access-denied',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -104,7 +104,7 @@ final class AccessDeniedRedirectTest extends TestCase
         $server = rest_get_server();
         $result = $server->dispatch($this->prepareRestRequest(
             'DELETE',
-            '/aam/v2/service/redirect/access-denied',
+            '/aam/v2/redirect/access-denied',
             [
                 'query_params' => [
                     'access_level' => 'role',
@@ -120,7 +120,7 @@ final class AccessDeniedRedirectTest extends TestCase
         // Test resetting for all areas
         $result = $server->dispatch($this->prepareRestRequest(
             'DELETE',
-            '/aam/v2/service/redirect/access-denied',
+            '/aam/v2/redirect/access-denied',
             [
                 'query_params' => [
                     'access_level' => 'role',

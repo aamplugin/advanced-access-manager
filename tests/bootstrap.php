@@ -24,7 +24,13 @@ spl_autoload_register(function ($class_name) {
 });
 
 // Defining the global constant that disabled AAM internal object cache
-define('AAM_OBJECT_CACHE_ENABLED', false);
+if (!defined('AAM_OBJECT_CACHE_ENABLED')) {
+    define('AAM_OBJECT_CACHE_ENABLED', false);
+}
+
+if (!defined('AAM_FORCE_REST_API_REGISTER')) {
+    define('AAM_FORCE_REST_API_REGISTER', true);
+}
 
 // Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';

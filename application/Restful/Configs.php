@@ -41,13 +41,13 @@ class AAM_Restful_Configs
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get list of all AAM configurations explicitly defined
-            $this->_register_route('/core/configs', array(
+            $this->_register_route('/configs', array(
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array($this, 'get_configurations'),
             ), self::PERMISSIONS, false);
 
             // Get a single configuration
-            $this->_register_route('/core/config/(?P<key>[\w\.]+)', array(
+            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array($this, 'get_configuration'),
                 'args'     => array(
@@ -60,13 +60,13 @@ class AAM_Restful_Configs
             ), self::PERMISSIONS, false);
 
             // Get ConfigPress
-            $this->_register_route('/core/configpress', array(
+            $this->_register_route('/configpress', array(
                 'methods'  => WP_REST_Server::READABLE,
                 'callback' => array($this, 'get_configpress')
             ), self::PERMISSIONS, false);
 
             // Set config
-            $this->_register_route('/core/config/(?P<key>[\w\.]+)', array(
+            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
                 'methods'  => WP_REST_Server::CREATABLE,
                 'callback' => array($this, 'set_configuration'),
                 'args'     => array(
@@ -88,7 +88,7 @@ class AAM_Restful_Configs
             ), self::PERMISSIONS, false);
 
             // Set ConfigPress
-            $this->_register_route('/core/configpress', array(
+            $this->_register_route('/configpress', array(
                 'methods'  => WP_REST_Server::CREATABLE,
                 'callback' => array($this, 'set_configpress'),
                 'args'     => array(
@@ -101,13 +101,13 @@ class AAM_Restful_Configs
             ), self::PERMISSIONS, false);
 
             // Reset AAM configurations
-            $this->_register_route('/core/configs', array(
+            $this->_register_route('/configs', array(
                 'methods'  => WP_REST_Server::DELETABLE,
                 'callback' => array($this, 'reset_configurations')
             ), self::PERMISSIONS, false);
 
             // Reset AAM ConfigPress
-            $this->_register_route('/core/configpress', array(
+            $this->_register_route('/configpress', array(
                 'methods'  => WP_REST_Server::DELETABLE,
                 'callback' => array($this, 'reset_configpress')
             ), self::PERMISSIONS, false);
