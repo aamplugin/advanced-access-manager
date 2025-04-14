@@ -2378,7 +2378,10 @@
                             complete: function () {
                                 $('#init-url-btn').text(getAAM().__('Initialize'));
                                 $('#init-url-modal').modal('hide');
-                                getAAM().fetchContent('main');
+
+                                setTimeout(() => {
+                                    getAAM().fetchContent('main');
+                                }, 1000);
                             }
                         });
                     });
@@ -2748,8 +2751,7 @@
             function initialize() {
                 if ($('#capability-content').length) {
                     const data = {
-                        fields: 'description,permissions,is_granted',
-                        list_all: true
+                        fields: 'description,permissions,is_granted'
                     };
 
                     // Initialize the capability list table
@@ -3023,7 +3025,8 @@
                             // Prepare request payload
                             const payload = {
                                 slug,
-                                ignore_format: ignore
+                                ignore_format: ignore,
+                                globally: true
                             };
 
                             getAAM().queueRequest(function () {
@@ -3061,10 +3064,6 @@
                     });
 
                     $('#delete-capability-btn').bind('click', function () {
-                        if (getAAM().getSubject().type === 'user') {
-                            deleteCapability($(this).attr('data-cap'), $(this));
-                        }
-
                         deleteCapability($(this).attr('data-cap'), $(this));
                     });
                 }
@@ -6623,7 +6622,7 @@
              */
             function Save(param, value) {
                 getAAM().queueRequest(function () {
-                    const endpoint = `${getLocal().rest_base}aam/v2/service/config/${param}`;
+                    const endpoint = `${getLocal().rest_base}aam/v2/service/core/config/${param}`;
                     const payload  = { value };
 
                     $.ajax(endpoint, {
@@ -6709,7 +6708,7 @@
                         $('#clear-settings').text(getAAM().__('Processing...'));
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/reset`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/core/reset`, {
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: {
@@ -6751,7 +6750,7 @@
                                 ini: editor.getValue()
                             };
 
-                            $.ajax(`${getLocal().rest_base}aam/v2/service/configpress`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/service/core/configpress`, {
                                 type: 'POST',
                                 dataType: 'json',
                                 data: payload,
@@ -6760,7 +6759,7 @@
                                 },
                                 error: function (response) {
                                     getAAM().notification('danger', response, {
-                                        request: 'aam/v2/service/configpress',
+                                        request: 'aam/v2/service/core/configpress',
                                         payload,
                                         response
                                     });
@@ -6777,7 +6776,7 @@
 
                 $('#export-settings').bind('click', function() {
                     getAAM().queueRequest(function () {
-                        $.ajax(`${getLocal().rest_base}aam/v2/export`, {
+                        $.ajax(`${getLocal().rest_base}aam/v2/service/core/export`, {
                             dataType: 'json',
                             headers: {
                                 'X-WP-Nonce': getLocal().rest_nonce
@@ -6820,7 +6819,7 @@
 
                             // Import AAM settings
                             getAAM().queueRequest(function () {
-                                $.ajax(`${getLocal().rest_base}aam/v2/import`, {
+                                $.ajax(`${getLocal().rest_base}aam/v2/service/core/import`, {
                                     type: 'POST',
                                     dataType: 'json',
                                     contentType: 'application/json; charset=UTF-8',

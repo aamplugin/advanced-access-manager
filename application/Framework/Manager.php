@@ -47,6 +47,7 @@
  * @property AAM_Framework_Utility_Jwt $jwt
  * @property AAM_Framework_Utility_Policy $policy
  * @property AAM_Framework_Utility_Content $content
+ * @property AAM_Framework_Utility_Rest $rest
  *
  * @package AAM
  * @version 7.0.0
@@ -110,7 +111,8 @@ final class AAM_Framework_Manager
         'access_levels' => AAM_Framework_Utility_AccessLevels::class,
         'jwt'           => AAM_Framework_Utility_Jwt::class,
         'policy'        => AAM_Framework_Utility_Policy::class,
-        'content'       => AAM_Framework_Utility_Content::class
+        'content'       => AAM_Framework_Utility_Content::class,
+        'rest'          => AAM_Framework_Utility_Rest::class
     ];
 
     /**

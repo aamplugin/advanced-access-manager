@@ -19,6 +19,16 @@ class AAM_Restful_Settings
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_settings'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,25 +41,22 @@ class AAM_Restful_Settings
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get list of all AAM settings that are explicitly defined
-            $this->_register_route('/settings', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_settings'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/settings', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_settings')
+            ], self::PERMISSIONS);
 
             // Set settings in bulk
-            $this->_register_route('/settings', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'set_settings'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/settings', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'set_settings')
+            ], self::PERMISSIONS);
 
             // Reset settings
-            $this->_register_route('/settings', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_settings'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/settings', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_settings')
+            ], self::PERMISSIONS);
         });
     }
 
@@ -139,20 +146,6 @@ class AAM_Restful_Settings
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_settings');
     }
 
     /**

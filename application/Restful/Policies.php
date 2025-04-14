@@ -19,6 +19,16 @@ class AAM_Restful_Policies
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_policies'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,11 +41,10 @@ class AAM_Restful_Policies
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of all policies
-            $this->_register_route('/policies', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_policies' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => array(
+            $this->_register_route('/policies', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_policies' ],
+                'args'     => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
@@ -44,14 +53,13 @@ class AAM_Restful_Policies
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Get a single policy
-            $this->_register_route('/policy/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_policy' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/policy/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_policy' ],
+                'args'     => [
                     'id' => [
                         'description' => 'Policy ID',
                         'type'        => 'number',
@@ -65,14 +73,13 @@ class AAM_Restful_Policies
                         }
                     )
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Create new policy
-            $this->_register_route('/policies', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [ $this, 'create_policy' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/policies', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => [ $this, 'create_policy' ],
+                'args'     => [
                     'policy' => [
                         'description' => 'JSON policy',
                         'type'        => 'string',
@@ -109,14 +116,13 @@ class AAM_Restful_Policies
                         }
                     )
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Attach/detach policy
-            $this->_register_route('/policy/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'toggle_policy' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/policy/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'toggle_policy' ],
+                'args'     => [
                     'id' => [
                         'description' => 'Policy ID',
                         'type'        => 'number',
@@ -136,28 +142,26 @@ class AAM_Restful_Policies
                         }
                     )
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Delete policy
-            $this->_register_route('/policy/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'delete_policy' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/policy/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'delete_policy' ],
+                'args'     => [
                     'id' => [
                         'description' => 'Policy ID',
                         'type'        => 'number',
                         'required'    => true
                     ]
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Reset policy settings
-            $this->_register_route('/policies', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_policies' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ));
+            $this->_register_route('/policies', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_policies' ]
+            ], self::PERMISSIONS);
         });
     }
 
@@ -324,20 +328,6 @@ class AAM_Restful_Policies
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_policies');
     }
 
     /**

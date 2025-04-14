@@ -19,6 +19,16 @@ class AAM_Restful_NotFoundRedirect
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_404_redirect'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,18 +41,16 @@ class AAM_Restful_NotFoundRedirect
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get current redirect
-            $this->_register_route('/redirect/not-found', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_redirect'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/redirect/not-found', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_redirect')
+            ], self::PERMISSIONS);
 
             // Create a redirect rule
-            $this->_register_route('/redirect/not-found', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'set_redirect'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/redirect/not-found', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'set_redirect'),
+                'args'     => array(
                     'type' => array(
                         'description' => 'Redirect type',
                         'type'        => 'string',
@@ -75,14 +83,13 @@ class AAM_Restful_NotFoundRedirect
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Delete the redirect rule
-            $this->_register_route('/redirect/not-found', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_redirect'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/redirect/not-found', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_redirect')
+            ], self::PERMISSIONS);
         });
     }
 
@@ -153,20 +160,6 @@ class AAM_Restful_NotFoundRedirect
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_404_redirect');
-    }
-
-    /**
      * Validate the 'url' param
      *
      * @param string $value
@@ -184,7 +177,7 @@ class AAM_Restful_NotFoundRedirect
         if (empty($url)) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The url is not a valid URL', 'advanced-access-manager'),
+                'The url is not a valid URL',
                 array('status'  => 400)
             );
         }
@@ -213,7 +206,7 @@ class AAM_Restful_NotFoundRedirect
             if ($page_id === 0 || get_post($page_id) === null) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The redirect_page_id refers to non-existing page', 'advanced-access-manager'),
+                    'The redirect_page_id refers to non-existing page',
                     array('status'  => 400)
                 );
             }
@@ -242,7 +235,7 @@ class AAM_Restful_NotFoundRedirect
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The redirect_url is not valid URL', 'advanced-access-manager'),
+                'The redirect_url is not valid URL',
                 array('status'  => 400)
             );
         }
@@ -269,7 +262,7 @@ class AAM_Restful_NotFoundRedirect
         if ($rule_type === 'trigger_callback' && is_callable($value, true) === false) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The callback is not valid PHP callback', 'advanced-access-manager'),
+                'The callback is not valid PHP callback',
                 array('status'  => 400)
             );
         }

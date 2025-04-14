@@ -19,6 +19,16 @@ class AAM_Restful_AccessDeniedRedirect
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_access_denied_redirect'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,25 +41,23 @@ class AAM_Restful_AccessDeniedRedirect
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get current access denied redirect rule
-            $this->_register_route('/redirect/access-denied', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_redirect' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/redirect/access-denied', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_redirect' ],
+                'args'     => [
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
                         'required'    => false
                     ]
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Create a redirect rule
-            $this->_register_route('/redirect/access-denied', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [ $this, 'set_redirect' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+            $this->_register_route('/redirect/access-denied', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => [ $this, 'set_redirect' ],
+                'args'     => [
                     'area' => [
                         'description' => 'Access area (frontend,  backend or api)',
                         'type'        => 'string',
@@ -109,22 +117,21 @@ class AAM_Restful_AccessDeniedRedirect
                         }
                     ]
                 ]
-            ));
+            ], self::PERMISSIONS);
 
             // Delete/reset access denied redirect rule for a specific area
             // or all at once
             $this->_register_route('/redirect/access-denied', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_redirect' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_redirect' ],
+                'args'     => [
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
                         'required'    => false
                     ]
                 ]
-            ]);
+            ], self::PERMISSIONS);
         });
     }
 
@@ -187,8 +194,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset_redirect(WP_REST_Request $request)
@@ -206,27 +213,13 @@ class AAM_Restful_AccessDeniedRedirect
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager') &&
-            current_user_can('aam_manage_access_denied_redirect');
-    }
-
-    /**
      * Validate the 'url' param
      *
      * @param string $value
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_url($value)
@@ -252,8 +245,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_redirect_page_id($value, $request)
@@ -282,8 +275,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_redirect_page_slug($value, $request)
@@ -311,8 +304,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_redirect_url($value, $request)
@@ -339,8 +332,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_callback($value, $request)
@@ -368,8 +361,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_message($value, $request)
@@ -395,8 +388,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_http_status_code($value, $request)
@@ -432,8 +425,8 @@ class AAM_Restful_AccessDeniedRedirect
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_AccessDeniedRedirect
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)

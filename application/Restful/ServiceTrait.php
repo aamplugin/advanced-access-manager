@@ -72,19 +72,20 @@ trait AAM_Restful_ServiceTrait
      *
      * @param string  $route
      * @param array   $args
+     * @param mixed   $auth
      * @param boolean $access_level_aware
      * @param string  $ns
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _register_route(
-        $route, $args, $access_level_aware = true, $ns = null
+        $route, $args, $auth, $access_level_aware = true, $ns = null
     ) {
         // Add the common arguments to all routes if needed
-        if ($access_level_aware) {
+        if ($access_level_aware === true) {
             $args = array_merge_recursive(array(
                 'args' => array(
                     'access_level' => array(
@@ -116,14 +117,46 @@ trait AAM_Restful_ServiceTrait
                     )
                 )
             ), $args);
+        } elseif (is_array($access_level_aware)) {
+            // Let's build the additional params
+            $additional_args = [
+                'access_level' => [
+                    'description' => 'Access level for the controls',
+                    'type'        => 'string',
+                    'enum'        => $access_level_aware,
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_access_level($value, $request);
+                    }
+                ]
+            ];
+
+            // Adding more params based on included access levels
+            if (in_array(AAM_Framework_Type_AccessLevel::ROLE, $access_level_aware, true)) {
+                $additional_args['role_id'] = [
+                    'description'       => 'Role ID (aka slug)',
+                    'type'              => 'string',
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_role_id($value, $request);
+                    }
+                ];
+            } elseif (in_array(AAM_Framework_Type_AccessLevel::USER, $access_level_aware, true)) {
+                $additional_args['user_id'] = [
+                    'description'       => 'User ID',
+                    'type'              => 'integer',
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_user_id($value, $request);
+                    }
+                ];
+            }
+
+            $args = array_merge_recursive([ 'args' => $additional_args ], $args);
         }
 
-        $ns = is_null($ns) ? 'aam/v2/service' : $ns;
-
-        register_rest_route(
-            $ns,
+        AAM::api()->rest->register(
+            is_null($ns) ? 'aam/v2/service' : $ns,
             $route,
-            apply_filters('aam_rest_route_args_filter', $args, $route, $ns)
+            $args,
+            $auth
         );
     }
 

@@ -19,11 +19,6 @@ class AAM_Restful_Roles
     use AAM_Restful_ServiceTrait;
 
     /**
-     * The namespace for the collection of endpoints
-     */
-    const API_NAMESPACE = 'aam/v2';
-
-    /**
      * Constructor
      *
      * @return void
@@ -36,14 +31,10 @@ class AAM_Restful_Roles
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of roles
-            $this->_register_route('/service/roles', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_role_list'),
-                'permission_callback' => function() {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_list_roles');
-                },
-                'args'                => array(
+            $this->_register_route('/roles', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_role_list'),
+                'args'     => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
@@ -52,17 +43,13 @@ class AAM_Restful_Roles
                         }
                     )
                 )
-            ));
+            ], [ 'aam_manager', 'aam_list_roles' ], false);
 
             // Get a specific role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_role'),
-                'permission_callback' => function() {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_list_roles');
-                },
-                'args' => array(
+            $this->_register_route('/role/(?P<role_slug>[\w\-%+]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_role'),
+                'args'     => array(
                     'role_slug'   => array(
                         'description' => 'Unique role slug (aka ID)',
                         'type'        => 'string',
@@ -78,17 +65,13 @@ class AAM_Restful_Roles
                         }
                     )
                 )
-            ));
+            ], [ 'aam_manager', 'aam_list_roles' ], false);
 
             // Create new role
-            $this->_register_route('/service/roles', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'create_role'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_create_roles');
-                },
-                'args'                => array(
+            $this->_register_route('/roles', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'create_role'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Unique role slug',
                         'type'        => 'string',
@@ -129,17 +112,13 @@ class AAM_Restful_Roles
                         }
                     )
                 )
-            ));
+            ], [ 'aam_manager', 'aam_create_roles' ], false);
 
             // Update existing role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_role'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_edit_roles');
-                },
-                'args'                => array(
+            $this->_register_route('/role/(?P<role_slug>[\w\-%+]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_role'),
+                'args'     => array(
                     'role_slug'   => array(
                         'description' => 'Unique role slug (aka ID)',
                         'type'        => 'string',
@@ -170,17 +149,13 @@ class AAM_Restful_Roles
                         )
                     )
                 )
-            ));
+            ], [ 'aam_manager', 'aam_edit_roles' ], false);
 
             // Delete role
-            $this->_register_route('/service/role/(?P<role_slug>[\w\-%+]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_role'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_delete_roles');
-                },
-                'args' => array(
+            $this->_register_route('/role/(?P<role_slug>[\w\-%+]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_role'),
+                'args'     => array(
                     'role_slug'   => array(
                         'description' => 'Unique role slug (aka ID)',
                         'type'        => 'string',
@@ -189,7 +164,7 @@ class AAM_Restful_Roles
                         }
                     )
                 )
-            ));
+            ], [ 'aam_manager', 'aam_delete_roles' ], false);
         });
     }
 
@@ -309,7 +284,6 @@ class AAM_Restful_Roles
      * Update existing role
      *
      * @param WP_REST_Request $request
-     *
      * @return WP_REST_Response
      *
      * @version 7.0.0
@@ -351,8 +325,8 @@ class AAM_Restful_Roles
      * Delete existing role
      *
      * @param WP_REST_Request $request
-     *
      * @return WP_REST_Response
+     *
      * @version 7.0.0
      */
     public function delete_role(WP_REST_Request $request)
@@ -378,8 +352,8 @@ class AAM_Restful_Roles
      * @param AAM_Framework_Proxy_Role $parent
      *
      * @return boolean
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _clone_settings($role, $parent)
@@ -490,38 +464,13 @@ class AAM_Restful_Roles
     }
 
     /**
-     * Register new RESTful route
-     *
-     * The method also applies the `aam_rest_route_args_filter` filter that allows
-     * other processes to change the router definition
-     *
-     * @param string $route
-     * @param array  $args
-     *
-     * @return void
-     *
-     * @access private
-     * @version 7.0.0
-     */
-    private function _register_route($route, $args)
-    {
-        register_rest_route(
-            self::API_NAMESPACE,
-            $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
-            )
-        );
-    }
-
-    /**
      * Validate the input field "fields"
      *
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_fields_input($value)
@@ -556,8 +505,8 @@ class AAM_Restful_Roles
      * @param WP_REST_Request $value Current request
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_role_slug_uniqueness($value, WP_REST_Request $request)
@@ -595,8 +544,8 @@ class AAM_Restful_Roles
      * @param array|null $value Input array of values
      *
      * @return bool|WP_Error
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _validate_keys_array_input($value)

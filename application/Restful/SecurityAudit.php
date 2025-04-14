@@ -7,8 +7,6 @@
  * ======================================================================
  */
 
-use function FakerPress\callback;
-
 /**
  * RESTful API for the security audit service
  *
@@ -21,9 +19,14 @@ class AAM_Restful_SecurityAudit
     use AAM_Restful_ServiceTrait;
 
     /**
-     * The namespace for the collection of endpoints
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
      */
-    const API_NAMESPACE = 'aam/v2';
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_trigger_audit'
+    ];
 
     /**
      * Single instance of itself
@@ -50,14 +53,10 @@ class AAM_Restful_SecurityAudit
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Create new support message
-            $this->_register_route('/service/audit', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'run_step'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_trigger_audit');
-                },
-                'args' => array(
+            $this->_register_route('/service/audit', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'run_step'),
+                'args'     => array(
                     'step' => array(
                         'description' => 'Security audit step',
                         'type'        => 'string',
@@ -69,27 +68,19 @@ class AAM_Restful_SecurityAudit
                         'default'     => false
                     ]
                 )
-            ));
+            ], self::PERMISSIONS, false);
 
             // Get complete report
-            $this->_register_route('/service/audit/report', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'generate_report'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_trigger_audit');
-                }
-            ));
+            $this->_register_route('/service/audit/report', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'generate_report')
+            ], self::PERMISSIONS, false);
 
             // Share complete report
-            $this->_register_route('/service/audit/summary', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'prepare_summary'),
-                'permission_callback' => function () {
-                    return current_user_can('aam_manager')
-                        && current_user_can('aam_share_audit_results');
-                }
-            ));
+            $this->_register_route('/service/audit/summary', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'prepare_summary')
+            ], self::PERMISSIONS, false);
         });
     }
 
@@ -359,31 +350,6 @@ class AAM_Restful_SecurityAudit
         }
 
         return $report;
-    }
-
-    /**
-     * Register new RESTful route
-     *
-     * The method also applies the `aam_rest_route_args_filter` filter that allows
-     * other processes to change the router definition
-     *
-     * @param string $route
-     * @param array  $args
-     *
-     * @return void
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _register_route($route, $args)
-    {
-        register_rest_route(
-            self::API_NAMESPACE,
-            $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
-            )
-        );
     }
 
 }

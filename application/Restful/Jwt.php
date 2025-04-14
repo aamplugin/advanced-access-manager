@@ -19,6 +19,16 @@ class AAM_Restful_Jwt
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_jwts'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,11 +41,10 @@ class AAM_Restful_Jwt
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of tokens
-            $this->_register_route('/jwts', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_tokens'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => [
+            $this->_register_route('/jwts', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_tokens'),
+                'args'     => [
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
@@ -44,14 +53,13 @@ class AAM_Restful_Jwt
                         }
                     )
                 ]
-            ));
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
 
             // Create a new jwt token
-            $this->_register_route('/jwts', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'create_token'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/jwts', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'create_token'),
+                'args'     => array(
                     'expires_at' => array(
                         'description' => 'Well formatted date-time when the token expires',
                         'type'        => 'date-time'
@@ -86,14 +94,13 @@ class AAM_Restful_Jwt
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
 
             // Get a token by ID
-            $this->_register_route('/jwt/(?P<id>[\w\-]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_token'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/jwt/(?P<id>[\w\-]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_token'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Token unique ID',
                         'type'        => 'string',
@@ -108,14 +115,13 @@ class AAM_Restful_Jwt
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
 
             // Delete a token
-            $this->_register_route('/jwt/(?P<id>[\w\-]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_token'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/jwt/(?P<id>[\w\-]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_token'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Token unique ID',
                         'type'        => 'string',
@@ -123,14 +129,13 @@ class AAM_Restful_Jwt
                         'required'    => true
                     )
                 )
-            ));
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
 
             // Reset all tokens
-            $this->_register_route('/jwts', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_tokens'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/jwts', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_tokens')
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
         });
     }
 
@@ -287,58 +292,6 @@ class AAM_Restful_Jwt
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_jwts');
-    }
-
-    /**
-     * Register new RESTful route
-     *
-     * The method also applies the `aam_rest_route_args_filter` filter that allows
-     * other processes to change the router definition
-     *
-     * @param string $route
-     * @param array  $args
-     *
-     * @return void
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _register_route($route, $args)
-    {
-        // Add the common arguments to all routes
-        $args = array_merge_recursive(array(
-            'args' => array(
-                'user_id' => array(
-                    'description' => 'User ID',
-                    'type'        => 'integer',
-                    'validate_callback' => function ($value, $request) {
-                        return $this->_validate_user_id($value, $request);
-                    }
-                )
-            )
-        ), $args);
-
-        register_rest_route(
-            'aam/v2/service',
-            $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, 'aam/v2/service'
-            )
-        );
     }
 
     /**

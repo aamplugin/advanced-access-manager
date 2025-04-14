@@ -63,6 +63,7 @@
  * @property AAM_Framework_Utility_Jwt $jwt
  * @property AAM_Framework_Utility_Policy $policy
  * @property AAM_Framework_Utility_Content $content
+ * @property AAM_Framework_Utility_Rest $rest
  *
  * @package AAM
  *

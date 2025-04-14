@@ -19,6 +19,16 @@ class AAM_Restful_Widgets
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_widgets'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,39 +41,36 @@ class AAM_Restful_Widgets
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of all widgets grouped by screen
-            $this->_register_route('/widgets', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_items'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array(
+            $this->_register_route('/widgets', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_items'),
+                'args'     => array(
                     'area' => array(
                         'description' => 'Website area',
                         'type'        => 'string',
                         'enum'        => [ 'dashboard', 'frontend' ]
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Get a widget
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_item'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_item'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Widget unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Update a widget's permission
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Widget unique slug',
                         'type'        => 'string',
@@ -76,35 +83,33 @@ class AAM_Restful_Widgets
                         'enum'        => [ 'allow', 'deny' ]
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Delete a widget's permission
-            $this->_register_route('/widget/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/widget/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Widget unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Reset all or specific screen permissions
-            $this->_register_route('/widgets', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array(
+            $this->_register_route('/widgets', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_permissions'),
+                'args'     => array(
                     'area' => array(
                         'description' => 'Website area',
                         'type'        => 'string',
                         'enum'        => [ 'dashboard', 'frontend' ]
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
         });
     }
 
@@ -240,20 +245,6 @@ class AAM_Restful_Widgets
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_widgets');
     }
 
     /**

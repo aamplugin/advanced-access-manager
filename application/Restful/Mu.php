@@ -19,6 +19,16 @@ class AAM_Restful_Mu
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_admin_toolbar'
+    ];
+
+    /**
      * Construct
      *
      * @return void
@@ -47,34 +57,30 @@ class AAM_Restful_Mu
             return $r;
         }, 10, 3);
 
-        // Few services always available to support AAM UI
-        AAM_Restful_Roles::bootstrap();
-        AAM_Restful_Users::bootstrap();
-        AAM_Restful_Configs::bootstrap();
-        AAM_Restful_Settings::bootstrap();
-
         // Register API endpoint
         add_action('rest_api_init', function() {
+            $permission_cb = function() {
+                return current_user_can('aam_manager')
+                    && AAM::api()->misc->is_super_admin();
+            };
+
             // Reset AAM
-            $this->_register_route('/reset', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ], false, 'aam/v2');
+            $this->_register_route('/core/reset', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset' ]
+            ], $permission_cb, false);
 
             // Export AAM settings, configurations & roles
-            $this->_register_route('/export', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'export' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ], false, 'aam/v2');
+            $this->_register_route('/core/export', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'export' ]
+            ], $permission_cb, false);
 
             // Import AAM settings, configurations & roles
-            $this->_register_route('/import', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'import' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ], false, 'aam/v2');
+            $this->_register_route('/core/import', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'import' ]
+            ], $permission_cb, false);
         });
 
         // Get currently managed "Access Level"
@@ -94,7 +100,18 @@ class AAM_Restful_Mu
         );
 
         // Register a common AAM, access level aware RESTful API endpoint
-        add_action('aam_rest_register_route', [ $this, 'register_route' ], 10, 4);
+        add_action(
+            'aam_rest_register_route',
+            function($route, $args, $auth, $access_level_aware = true, $ns = null) {
+                return $this->_register_route(
+                    $route,
+                    $args,
+                    $auth,
+                    $access_level_aware,
+                    $ns
+                );
+            }, 10, 5
+        );
     }
 
     /**
@@ -144,20 +161,6 @@ class AAM_Restful_Mu
         ]);
     }
 
-     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && AAM::api()->misc->is_super_admin();
-    }
-
     /**
      * Get current access level
      *
@@ -201,25 +204,6 @@ class AAM_Restful_Mu
         }
 
         return $response;
-    }
-
-    /**
-     * Register AAM standard RESTful API route
-     *
-     * @param string $route
-     * @param array  $args
-     * @param bool   $access_level_aware
-     * @param string $ns
-     *
-     * @return void
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function register_route(
-        $route, $args, $access_level_aware = true, $ns = null
-    ) {
-        $this->_register_route($route, $args, $access_level_aware, $ns);
     }
 
 }

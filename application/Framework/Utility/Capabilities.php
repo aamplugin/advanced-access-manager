@@ -51,12 +51,14 @@ class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interf
      * This method returns the combined list of all registered capabilities on the
      * role level as well as caps for the currently logged in user.
      *
+     * @param WP_User|int $user [Optional]
+     *
      * @return array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_all_caps()
+    public function get_all_caps($user = null)
     {
         $result = [];
 
@@ -67,7 +69,9 @@ class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interf
         }
 
         // Also get the list of all capabilities assigned directly to user
-        $user = wp_get_current_user();
+        if (is_numeric($user)) {
+            $user = get_user($user);
+        }
 
         if (is_a($user, WP_User::class)) {
             $result = array_merge($result, array_keys($user->allcaps));

@@ -19,6 +19,16 @@ class AAM_Restful_Metabox
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_metaboxes'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,25 +41,23 @@ class AAM_Restful_Metabox
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of all metaboxes grouped by screen
-            $this->_register_route('/metaboxes', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_items'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args' => array(
+            $this->_register_route('/metaboxes', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_items'),
+                'args'     => array(
                     'screen_id' => array(
                         'description' => 'The screen ID when metabox are rendered',
                         'type'        => 'string',
                         'required'    => false
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Get a metabox
-            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_item'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_item'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Metabox slug',
                         'type'        => 'string',
@@ -61,14 +69,13 @@ class AAM_Restful_Metabox
                         'required'    => false
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Update a metabox's permission
-            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Metabox slug',
                         'type'        => 'string',
@@ -86,14 +93,13 @@ class AAM_Restful_Metabox
                         'enum'        => [ 'allow', 'deny' ]
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Delete a metabox's permission
-            $this->_register_route('/metabox/(?P<slug>[\w]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/metabox/(?P<slug>[\w]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Metabox slug',
                         'type'        => 'string',
@@ -105,13 +111,12 @@ class AAM_Restful_Metabox
                         'required'    => false
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Reset all or specific screen permissions
-            $this->_register_route('/metaboxes', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
+            $this->_register_route('/metaboxes', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_permissions'),
                 'args' => array(
                     'screen_id' => array(
                         'description' => 'The screen ID when metaboxes are rendered',
@@ -119,7 +124,7 @@ class AAM_Restful_Metabox
                         'required'    => false
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
         });
     }
 
@@ -252,27 +257,13 @@ class AAM_Restful_Metabox
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_metaboxes');
-    }
-
-    /**
      * Get framework service
      *
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_Metaboxes
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)

@@ -19,6 +19,16 @@ class AAM_Restful_ApiRoute
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_api_routes'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -32,17 +42,15 @@ class AAM_Restful_ApiRoute
         add_action('rest_api_init', function() {
             // Get the list of routes
             $this->_register_route('/api-routes', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_items'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_items')
+            ), self::PERMISSIONS);
 
             // Get a route
             $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_item'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_item'),
+                'args'     => array(
                     'id' => array(
                         'description'       => 'Based64 encoded API route + method',
                         'type'              => 'string',
@@ -52,14 +60,13 @@ class AAM_Restful_ApiRoute
                         }
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Update a route permission
             $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_item_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_item_permissions'),
+                'args'     => array(
                     'id' => array(
                         'description'       => 'Based64 encoded API route + method',
                         'type'              => 'string',
@@ -75,14 +82,13 @@ class AAM_Restful_ApiRoute
                         'enum'        => [ 'allow', 'deny' ]
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Delete a route permission
             $this->_register_route('/api-route/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_item_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_item_permissions'),
+                'args'     => array(
                     'id' => array(
                         'description'       => 'Based64 encoded API route + method',
                         'type'              => 'string',
@@ -92,14 +98,13 @@ class AAM_Restful_ApiRoute
                         }
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Reset all routes' permissions
             $this->_register_route('/api-routes', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_permissions')
+            ), self::PERMISSIONS);
         });
     }
 
@@ -229,20 +234,6 @@ class AAM_Restful_ApiRoute
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_api_routes');
     }
 
     /**

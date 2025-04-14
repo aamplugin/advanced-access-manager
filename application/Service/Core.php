@@ -266,6 +266,10 @@ class AAM_Service_Core
 
         // Bootstrap RESTful API
         AAM_Restful_Mu::bootstrap();
+        AAM_Restful_Roles::bootstrap();
+        AAM_Restful_Users::bootstrap();
+        AAM_Restful_Configs::bootstrap();
+        AAM_Restful_Settings::bootstrap();
     }
 
     /**

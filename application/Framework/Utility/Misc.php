@@ -462,7 +462,8 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      *
      * The super admin user is determined by the following conditions:
      * - If multi-site, user has to be listed in the site option "site_admins"
-     * - User has to have the administrator role
+     * - User has to have the administrator role OR user's email matches the
+     *   "admin_email" in the _options table
      *
      * @param int $user_id
      *
@@ -479,7 +480,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         if (is_a($user, WP_User::class) && $user->exists()) {
             // Determine if current user is natively a super admin.
             // Note! We are deviating from WP core definition of super admin when it
-            // it not a multi-site. We believe the capability delete_users does not
+            // is not a multi-site. We believe the capability delete_users does not
             // define anyone as super admin
             if (is_multisite()) {
                 $super_admins = get_super_admins();
@@ -489,7 +490,9 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
                 ) {
                     $result = true;
                 }
-            } elseif (in_array('administrator', $user->roles, true)) {
+            } elseif (in_array('administrator', $user->roles, true)
+                || get_option('admin_email') === $user->user_email
+            ) {
                 $result = true;
             }
         }

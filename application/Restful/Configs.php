@@ -19,6 +19,16 @@ class AAM_Restful_Configs
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_configs'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,39 +41,35 @@ class AAM_Restful_Configs
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get list of all AAM configurations explicitly defined
-            $this->_register_route('/configs', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_configurations'),
-                'permission_callback' => array($this, 'check_permissions')
-            ), false);
+            $this->_register_route('/core/configs', array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_configurations'),
+            ), self::PERMISSIONS, false);
 
             // Get a single configuration
-            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_configuration'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/core/config/(?P<key>[\w\.]+)', array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_configuration'),
+                'args'     => array(
                     'key' => array(
                         'description' => 'Configuration key',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ), false);
+            ), self::PERMISSIONS, false);
 
             // Get ConfigPress
-            $this->_register_route('/configpress', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_configpress'),
-                'permission_callback' => array($this, 'check_permissions')
-            ), false);
+            $this->_register_route('/core/configpress', array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_configpress')
+            ), self::PERMISSIONS, false);
 
             // Set config
-            $this->_register_route('/config/(?P<key>[\w\.]+)', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'set_configuration'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/core/config/(?P<key>[\w\.]+)', array(
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'set_configuration'),
+                'args'     => array(
                     'key' => array(
                         'description' => 'Configuration key',
                         'type'        => 'string',
@@ -79,35 +85,32 @@ class AAM_Restful_Configs
                         'required'    => true
                     )
                 )
-            ), false);
+            ), self::PERMISSIONS, false);
 
             // Set ConfigPress
-            $this->_register_route('/configpress', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'set_configpress'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/core/configpress', array(
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'set_configpress'),
+                'args'     => array(
                     'ini' => array(
                         'description' => 'ConfigPress INI',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ), false);
+            ), self::PERMISSIONS, false);
 
             // Reset AAM configurations
-            $this->_register_route('/configs', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_configurations'),
-                'permission_callback' => array($this, 'check_permissions')
-            ), false);
+            $this->_register_route('/core/configs', array(
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_configurations')
+            ), self::PERMISSIONS, false);
 
             // Reset AAM ConfigPress
-            $this->_register_route('/configpress', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_configpress'),
-                'permission_callback' => array($this, 'check_permissions')
-            ), false);
+            $this->_register_route('/core/configpress', array(
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_configpress')
+            ), self::PERMISSIONS, false);
         });
     }
 
@@ -307,20 +310,6 @@ class AAM_Restful_Configs
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_configs');
     }
 
 }

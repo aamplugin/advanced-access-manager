@@ -19,6 +19,16 @@ class AAM_Restful_Urls
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_url_access'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -32,17 +42,15 @@ class AAM_Restful_Urls
         add_action('rest_api_init', function() {
             // Get the list of define URL permissions
             $this->_register_route('/urls', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ]);
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_permissions' ]
+            ], self::PERMISSIONS);
 
             // Define new URL permission
-            $this->_register_route('/urls', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'create_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/urls', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'create_permission'),
+                'args'     => array(
                     'url_schema' => array(
                         'description' => 'URL schema',
                         'type'        => 'string',
@@ -106,28 +114,26 @@ class AAM_Restful_Urls
                         ]
                     ]
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Get a permission
-            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_permission'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded URL schema',
                         'type'        => 'string',
                         'required'    => true
-                    ),
+                    )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Update an existing permission
-            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_permission'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Based64 encoded URL schema',
                         'type'        => 'string',
@@ -195,28 +201,26 @@ class AAM_Restful_Urls
                         ]
                     ]
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Delete a permission
-            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_permission'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded URL schema',
                         'type'        => 'string',
                         'required'    => true
-                    ),
+                    )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Reset all permissions
-            $this->_register_route('/urls', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/urls', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_permissions')
+            ], self::PERMISSIONS);
         });
     }
 
@@ -413,20 +417,6 @@ class AAM_Restful_Urls
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_url_access');
     }
 
     /**

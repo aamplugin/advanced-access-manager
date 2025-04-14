@@ -19,6 +19,16 @@ class AAM_Restful_AdminToolbar
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_admin_toolbar'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -31,32 +41,29 @@ class AAM_Restful_AdminToolbar
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of backend menus
-            $this->_register_route('/admin-toolbar', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_items'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/admin-toolbar', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_items' ],
+            ], self::PERMISSIONS);
 
             // Get a menu
-            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_item'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_item'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Set or update a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
@@ -69,28 +76,26 @@ class AAM_Restful_AdminToolbar
                         'enum'        => [ 'allow', 'deny' ]
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Delete a menu's permission
-            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/admin-toolbar/(?P<slug>[\w\-]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_item_permission'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Toolbar item unique ID',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ));
+            ], self::PERMISSIONS);
 
             // Reset all admin toolbar permissions
-            $this->_register_route('/admin-toolbar', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+            $this->_register_route('/admin-toolbar', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_permissions' ],
+            ], self::PERMISSIONS);
         });
     }
 
@@ -213,20 +218,6 @@ class AAM_Restful_AdminToolbar
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_admin_toolbar');
     }
 
     /**

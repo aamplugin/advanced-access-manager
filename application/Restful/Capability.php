@@ -19,6 +19,16 @@ class AAM_Restful_Capability
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_capabilities'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -32,10 +42,9 @@ class AAM_Restful_Capability
         add_action('rest_api_init', function() {
             // Get list of all registered capabilities
             $this->_register_route('/capabilities', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_list'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_list'),
+                'args'     => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string'
@@ -46,14 +55,16 @@ class AAM_Restful_Capability
                         'default'     => false
                     )
                 )
-            ));
+            ), self::PERMISSIONS, [
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER
+            ]);
 
             // Create new capability
             $this->_register_route('/capabilities', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'create_capability'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'create_capability'),
+                'args'     => array(
                     'slug' => array(
                         'description' => 'Capability slug',
                         'type'        => 'string',
@@ -70,14 +81,16 @@ class AAM_Restful_Capability
                         'default'     => true
                     ]
                 )
-            ));
+            ), self::PERMISSIONS, [
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER
+            ]);
 
             // Update existing capability
             $this->_register_route('/capability/(?P<capability>.+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'update_capability' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'update_capability' ],
+                'args'     => [
                     'capability' => [
                         'description' => 'Existing capability slug',
                         'type'        => 'string',
@@ -99,21 +112,26 @@ class AAM_Restful_Capability
                         'default'     => false
                     ]
                 ]
+            ], self::PERMISSIONS, [
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER
             ]);
 
             // Delete existing capability
             $this->_register_route('/capability/(?P<slug>.+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_capability'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_capability'),
+                'args'     => [
                     'globally' => [
                         'description' => 'Wether this change affect only this access level or all',
                         'type'        => 'boolean',
                         'default'     => false
                     ]
                 ]
-            ));
+            ), self::PERMISSIONS, [
+                AAM_Framework_Type_AccessLevel::ROLE,
+                AAM_Framework_Type_AccessLevel::USER
+            ]);
         });
     }
 
@@ -130,11 +148,12 @@ class AAM_Restful_Capability
     public function get_list(WP_REST_Request $request)
     {
         try {
-            if ($request->get_param('list_all')) {
-                $caps = AAM::api()->caps->get_all_caps();
+            $access_level = $this->_determine_access_level($request);
+
+            if ($access_level->type === AAM_Framework_Type_AccessLevel::USER) {
+                $caps = AAM::api()->caps->get_all_caps($access_level->ID);
             } else {
-                $access_level = $this->_determine_access_level($request);
-                $caps         = $this->_get_access_level_caps($access_level);
+                $caps = AAM::api()->caps->get_all_caps();
             }
 
             // Return a pure and enriched array of capabilities
@@ -214,18 +233,12 @@ class AAM_Restful_Capability
                         $capability, $slug, $ignore_format
                     );
                 }
-
-                // Finally do the same for the current user
-                if (is_user_logged_in()) {
-                    AAM::api()->capabilities()->replace(
-                        $capability, $slug, $ignore_format
-                    );
-                }
-            } else {
-                $this->_get_service($request)->replace(
-                    $capability, $slug, $ignore_format
-                );
             }
+
+            // Finally update the capability for given access level
+            $this->_get_service($request)->replace(
+                $capability, $slug, $ignore_format
+            );
 
             $result = $this->_prepare_output($slug, $request);
         } catch (Exception $e) {
@@ -258,14 +271,10 @@ class AAM_Restful_Capability
                         $capability
                     );
                 }
-
-                // Finally do the same for the current user
-                if (is_user_logged_in()) {
-                    AAM::api()->capabilities()->remove($capability);
-                }
-            } else {
-                $this->_get_service($request)->remove($capability);
             }
+
+            // Finally remove the capability for a given access level
+            $this->_get_service($request)->remove($capability);
 
             $result = [ 'success' => true ];
         } catch (Exception $e) {
@@ -276,27 +285,13 @@ class AAM_Restful_Capability
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_capabilities');
-    }
-
-    /**
      * Get service
      *
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_Capabilities
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service(WP_REST_Request $request)
@@ -308,37 +303,14 @@ class AAM_Restful_Capability
     }
 
     /**
-     * Get array of all capabilities added to given access level
-     *
-     * @param AAM_Framework_AccessLevel_Interface $access_level
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _get_access_level_caps($access_level)
-    {
-        if ($access_level->type === AAM_Framework_Type_AccessLevel::USER) {
-            $result = $access_level->allcaps;
-        } elseif ($access_level->type === AAM_Framework_Type_AccessLevel::ROLE) {
-            $result = $access_level->capabilities;
-        } else {
-            $result = [];
-        }
-
-        return array_keys($result);
-    }
-
-    /**
      * Prepare the output
      *
      * @param string          $capability
      * @param WP_Rest_Request $request
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_output($capability, $request)
@@ -375,8 +347,8 @@ class AAM_Restful_Capability
      * @param AAM_Framework_Service_Capabilities $service
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_permissions($capability, $service)

@@ -19,23 +19,32 @@ class AAM_Restful_SecureLogin
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_admin_toolbar'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.9.27
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Create a redirect rule
-            $this->_register_route('/authenticate', array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array($this, 'authenticate'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+            $this->_register_route('/authenticate', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'authenticate'),
+                'args'     => array(
                         'username' => array(
                         'description' => 'Valid username',
                         'type'        => 'string',
@@ -64,7 +73,7 @@ class AAM_Restful_SecureLogin
                         }
                     )
                 )
-            ));
+            ], function() { return !is_user_logged_in(); }, false);
         });
     }
 
@@ -74,8 +83,8 @@ class AAM_Restful_SecureLogin
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function authenticate(WP_REST_Request $request)
@@ -105,29 +114,14 @@ class AAM_Restful_SecureLogin
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * The access will be denied if user is already authenticated
-     *
-     * @return bool
-     *
-     * @access public
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return get_current_user_id() === 0;
-    }
-
-    /**
      * Prepare user data that is returned
      *
      * @param WP_User         $user
      * @param WP_REST_Request $request
      *
      * @return array
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     private function _prepare_user_data($user, $request)
@@ -155,9 +149,9 @@ class AAM_Restful_SecureLogin
      * @param string|null $value Input value
      *
      * @return bool|WP_Error
-     *
      * @access private
-     * @version 6.9.6
+     *
+     * @version 7.0.0
      */
     private function _validate_fields_input($value)
     {

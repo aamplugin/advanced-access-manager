@@ -19,6 +19,16 @@ class AAM_Restful_Identity
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_identities'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -69,67 +79,60 @@ class AAM_Restful_Identity
 
             // Get the list of roles with permissions
             $this->_register_route('/identity/roles', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_roles' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ]);
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_roles' ]
+            ], self::PERMISSIONS);
 
             // Get a specific role with permissions
             $this->_register_route('/identity/role/(?P<slug>.+)', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_role' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_role' ],
+                'args'     => [
                     'slug' => $role_slug
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Set role identity permissions
             $this->_register_route('/identity/role/(?P<slug>[^/]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'set_role_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'set_role_permissions'),
+                'args'     => [
                     'slug'        => $role_slug,
                     'permissions' => $permissions
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Set a single permission for a role identity
             $this->_register_route('/identity/role/(?P<slug>.+)/(?P<permission>[\w\-]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'set_role_permission' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'set_role_permission' ],
+                'args'     => [
                     'slug'       => $role_slug,
                     'permission' => $permission,
                     'effect'     => $effect
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Reset permissions for all roles
             $this->_register_route('/identity/roles', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_roles_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ]);
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_roles_permissions' ]
+            ], self::PERMISSIONS);
 
             // Reset specific role permissions
             $this->_register_route('/identity/role/(?P<slug>.+)', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_role_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_role_permissions' ],
+                'args'     => [
                     'slug' => $role_slug
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Get the list of user identities
             $this->_register_route('/identity/users', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_users' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_users' ],
+                'args'     => [
                     'search' => [
                         'description' => 'Search string',
                         'type'        => 'string'
@@ -149,57 +152,52 @@ class AAM_Restful_Identity
                         'type'        => 'string'
                     ]
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Get a specific user with permissions
             $this->_register_route('/identity/user/(?P<id>[\d]+)', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_user' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_user' ],
+                'args'     => [
                     'id' => $user_id
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Set user identity permissions
             $this->_register_route('/identity/user/(?P<id>[\d]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'set_user_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'set_user_permissions'),
+                'args'     => [
                     'id'          => $user_id,
                     'permissions' => $permissions
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Set a single permission for a user identity
             $this->_register_route('/identity/user/(?P<id>[\d]+)/(?P<permission>[\w\-]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'set_user_permission' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'set_user_permission' ],
+                'args'     => [
                     'id'         => $user_id,
                     'permission' => $permission,
                     'effect'     => $effect
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Reset permissions for all users
             $this->_register_route('/identity/users', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_users_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ]);
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_users_permissions' ]
+            ], self::PERMISSIONS);
 
             // Reset specific user permissions
             $this->_register_route('/identity/user/(?P<id>[\d]+)', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [ $this, 'reset_user_permissions' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_user_permissions' ],
+                'args'     => [
                     'id' => $user_id
                 ]
-            ]);
+            ], self::PERMISSIONS);
         });
     }
 
@@ -553,20 +551,6 @@ class AAM_Restful_Identity
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-                && current_user_can('aam_manage_identities');
     }
 
     /**

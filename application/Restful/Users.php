@@ -19,11 +19,14 @@ class AAM_Restful_Users
     use AAM_Restful_ServiceTrait;
 
     /**
-     * The namespace for the collection of endpoints
+     * Necessary permissions to access endpoint
      *
      * @version 7.0.0
      */
-    const API_NAMESPACE = 'aam/v2';
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_users'
+    ];
 
     /**
      * Constructor
@@ -38,11 +41,10 @@ class AAM_Restful_Users
         // Register API endpoint
         add_action('rest_api_init', function() {
             // Get the list of users
-            $this->_register_route('/service/users', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_users'),
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => array(
+            $this->_register_route('/users', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_users'),
+                'args'     => array(
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
@@ -69,14 +71,13 @@ class AAM_Restful_Users
                         'type'        => 'string'
                     )
                 )
-            ));
+            ], self::PERMISSIONS, false);
 
             // Get a specific user
-            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_user'),
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args' => array(
+            $this->_register_route('/user/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_user'),
+                'args'     => array(
                     'id'   => array(
                         'description' => 'Unique user id',
                         'type'        => 'number',
@@ -94,14 +95,13 @@ class AAM_Restful_Users
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS, false);
 
             // Update existing user
-            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_user'),
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => array(
+            $this->_register_route('/user/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_user'),
+                'args'     => array(
                     'id'   => array(
                         'description' => 'Unique user id',
                         'type'        => 'number',
@@ -179,14 +179,13 @@ class AAM_Restful_Users
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS, false);
 
             // Reset existing user settings
-            $this->_register_route('/service/user/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_user'),
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => array(
+            $this->_register_route('/user/(?P<id>[\d]+)', [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_user'),
+                'args'     => array(
                     'id'   => array(
                         'description' => 'Unique user id',
                         'type'        => 'number',
@@ -204,7 +203,7 @@ class AAM_Restful_Users
                         }
                     )
                 )
-            ));
+            ], self::PERMISSIONS, false);
         });
     }
 
@@ -368,20 +367,6 @@ class AAM_Restful_Users
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_users');
-    }
-
-    /**
      * Validate the input field "fields"
      *
      * @param string|null $value Input value
@@ -534,31 +519,6 @@ class AAM_Restful_Users
         $fields = !empty($fields) ? wp_parse_list($fields) : [];
 
         return array_unique(array_merge([ 'id' ], $fields));
-    }
-
-    /**
-     * Register new RESTful route
-     *
-     * The method also applies the `aam_rest_route_args_filter` filter that allows
-     * other processes to change the router definition
-     *
-     * @param string $route
-     * @param array  $args
-     *
-     * @return void
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _register_route($route, $args)
-    {
-        register_rest_route(
-            self::API_NAMESPACE,
-            $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, self::API_NAMESPACE
-            )
-        );
     }
 
 }

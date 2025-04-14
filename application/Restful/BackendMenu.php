@@ -19,6 +19,16 @@ class AAM_Restful_BackendMenu
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_backend_menu'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -32,31 +42,28 @@ class AAM_Restful_BackendMenu
         add_action('rest_api_init', function() {
             // Get the list of backend menus
             $this->_register_route('/backend-menu', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_menu_items' ],
-                'permission_callback' => [ $this, 'check_permissions' ]
-            ]);
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_menu_items' ]
+            ], self::PERMISSIONS);
 
             // Get a menu
             $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_menu_item'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_menu_item'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ]);
+            ], self::PERMISSIONS);
 
             // Update a menu's permission
             $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_menu_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_menu_item_permission'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
@@ -69,28 +76,26 @@ class AAM_Restful_BackendMenu
                         'enum'        => [ 'allow', 'deny' ]
                     )
                 )
-            ]);
+            ], self::PERMISSIONS);
 
             // Delete a menu's permission
             $this->_register_route('/backend-menu/(?P<id>[A-Za-z0-9\/\+=]+)', [
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'delete_menu_item_permission'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'delete_menu_item_permission'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded backend menu unique slug',
                         'type'        => 'string',
                         'required'    => true
                     )
                 )
-            ]);
+            ], self::PERMISSIONS);
 
             // Reset all backend menu permissions
             $this->_register_route('/backend-menu', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_permissions'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_permissions')
+            ), self::PERMISSIONS);
         });
     }
 
@@ -230,20 +235,6 @@ class AAM_Restful_BackendMenu
     }
 
     /**
-     * Check if current user has access to the service
-     *
-     * @return bool
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_backend_menu');
-    }
-
-    /**
      * Prepare menu item
      *
      * @param array $menu
@@ -275,8 +266,8 @@ class AAM_Restful_BackendMenu
      * @param WP_REST_Request $request
      *
      * @return AAM_Framework_Service_BackendMenu
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_service($request)

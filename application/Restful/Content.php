@@ -20,6 +20,16 @@ class AAM_Restful_Content
     use AAM_Restful_ServiceTrait;
 
     /**
+     * Necessary permissions to access endpoint
+     *
+     * @version 7.0.0
+     */
+    const PERMISSIONS = [
+        'aam_manager',
+        'aam_manage_content'
+    ];
+
+    /**
      * Constructor
      *
      * @return void
@@ -32,31 +42,28 @@ class AAM_Restful_Content
         add_action('rest_api_init', function() {
             // Get list of all registered post types
             $this->_register_route('/post_types', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [ $this, 'get_post_types' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_post_types' ],
+                'args'     => [
                     'return_all' => [
                         'description' => 'Include all post types or only public',
                         'type'        => 'boolean',
                         'default'     => null
                     ]
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Get list of all registered taxonomies
             $this->_register_route('/taxonomies', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_taxonomies'),
-                'permission_callback' => array($this, 'check_permissions')
-            ));
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_taxonomies')
+            ), self::PERMISSIONS);
 
             // Get list of terms for given taxonomy
             $this->_register_route('/terms', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_terms'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_terms'),
+                'args'     => array(
                     'taxonomy' => array(
                         'description' => 'Scope for specific taxonomy',
                         'type'        => 'string',
@@ -81,14 +88,13 @@ class AAM_Restful_Content
                         'default'     => 10
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Get list of posts for given post type
             $this->_register_route('/posts', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_posts'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_posts'),
+                'args'     => array(
                     'post_type' => array(
                         'description' => 'Unique post type identifier',
                         'type'        => 'string',
@@ -109,28 +115,26 @@ class AAM_Restful_Content
                         'default'     => 10
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Get post permissions
             $this->_register_route('/post/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => array($this, 'get_post'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => array($this, 'get_post'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Update post permissions
             $this->_register_route('/post/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => array($this, 'update_post_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => array($this, 'update_post_permissions'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
@@ -157,14 +161,13 @@ class AAM_Restful_Content
                         )
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
 
             // Update post permission
             $this->_register_route('/post/(?P<id>[\d]+)/(?P<permission>[\w]+)', [
-                'methods'             => WP_REST_Server::EDITABLE,
-                'callback'            => [ $this, 'set_post_permission' ],
-                'permission_callback' => [ $this, 'check_permissions' ],
-                'args'                => [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'set_post_permission' ],
+                'args'     => [
                     'id' => [
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
@@ -182,21 +185,20 @@ class AAM_Restful_Content
                         'enum'     => [ 'allow', 'deny' ]
                     ]
                 ]
-            ]);
+            ], self::PERMISSIONS);
 
             // Reset post permissions
             $this->_register_route('/post/(?P<id>[\d]+)', array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array($this, 'reset_post_permissions'),
-                'permission_callback' => array($this, 'check_permissions'),
-                'args'                => array(
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => array($this, 'reset_post_permissions'),
+                'args'     => array(
                     'id' => array(
                         'description' => 'Unique post identifier',
                         'type'        => 'number',
                         'required'    => true
                     )
                 )
-            ));
+            ), self::PERMISSIONS);
         });
     }
 
@@ -375,8 +377,8 @@ class AAM_Restful_Content
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_terms(WP_REST_Request $request)
@@ -530,20 +532,6 @@ class AAM_Restful_Content
         }
 
         return rest_ensure_response($result);
-    }
-
-    /**
-     * Check permissions
-     *
-     * @return boolean
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function check_permissions()
-    {
-        return current_user_can('aam_manager')
-            && current_user_can('aam_manage_content');
     }
 
     /**
