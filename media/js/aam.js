@@ -4337,6 +4337,8 @@
 
                     // Adjust current list when switching between subjects or pages
                     AdjustList();
+                } else if ($('#aam-access-form-container').length) {
+                    InitializeAccessForm(false);
                 }
 
                 const current_level = CurrentLevel();
