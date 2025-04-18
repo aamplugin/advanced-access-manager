@@ -249,6 +249,10 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
                     $wp_query->query['post_type']
                 );
             }
+        } elseif (isset($_GET['post'])) {
+            $res = get_post(filter_input(INPUT_GET, 'post', FILTER_VALIDATE_INT));
+        } elseif (isset($_POST['post_ID'])) {
+            $res = get_post(filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT));
         }
 
         if (is_a($res, 'WP_Post')) {

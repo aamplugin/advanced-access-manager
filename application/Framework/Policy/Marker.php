@@ -46,7 +46,7 @@ class AAM_Framework_Policy_Marker
         'POLICY_META'       => 'AAM_Framework_Policy_Marker::get_policy_meta',
         'WP_SITE'           => 'AAM_Framework_Policy_Marker::get_site_param',
         'WP_NETWORK_OPTION' => 'AAM_Framework_Policy_Marker::get_network_option',
-        'THE_POST'          => 'AAM_Framework_Policy_Marker::get_current_post_value',
+        'THE_POST'          => 'AAM_Framework_Policy_Marker::get_current_post_prop',
         'JWT'               => 'AAM_Framework_Policy_Marker::get_jwt_claim'
     );
 
@@ -662,11 +662,20 @@ class AAM_Framework_Policy_Marker
      *
      * @version 7.0.0
      */
-    protected static function get_current_post_value($prop)
+    protected static function get_current_post_prop($prop)
     {
-        $post = AAM_Framework_Manager::_()->misc->get_current_post();
+        $result = null;
+        $post   = AAM_Framework_Manager::_()->misc->get_current_post();
 
-        return is_a($post, WP_Post::class) ? $post->{$prop} : null;
+        if (is_a($post, WP_Post::class)) {
+            if (property_exists($post, $prop)) {
+                $result = $post->{$prop};
+            } else { // Let's consider pulling the proper from postmeta
+                $result = get_post_meta($post->ID, $prop, true);
+            }
+        }
+
+        return $result;
     }
 
 }
