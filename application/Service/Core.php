@@ -490,7 +490,7 @@ class AAM_Service_Core
      */
     private function _control_admin_notices()
     {
-        if ($this->_current_user_can('aam_show_admin_notices')) {
+        if (!$this->_current_user_can('aam_show_admin_notices')) {
             remove_all_actions('admin_notices');
             remove_all_actions('network_admin_notices');
             remove_all_actions('user_admin_notices');
