@@ -1,12 +1,13 @@
 <?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
+    <?php $access_level = AAM_Backend_AccessLevel::get_instance(); ?>
+
     <div class="aam-feature" id="identity-content">
         <?php if (AAM::api()->config->get('core.settings.ui.tips')) { ?>
             <div class="row">
                 <div class="col-xs-12">
                     <p class="aam-info">
-                        <?php $access_level = AAM_Backend_AccessLevel::get_instance(); ?>
                         <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('Determine how [%s] can see and manager other users and roles (aka identities). With the premium %sadd-on%s, you have the ability to target all identities at once. To learn more, refer to our official documentation page %shere%s.', 'strong', 'strong'), $access_level->get_display_name(), '<a href="https://aamportal.com/premium?ref=plugin" target="_blank">', '</a>', '<a href="https://aamportal.com/article/users-and-roles-governance?ref=plugin" target="_blank">', '</a>'); ?>
                     </p>
                 </div>
@@ -15,7 +16,7 @@
 
         <div class="row">
             <div class="col-xs-12 aam-container" id="identity_list_container">
-                <table id="role_identity_list" class="table table-striped table-bordered">
+                <table id="role_identity_list" class="table table-striped table-bordered" data-has-default="<?php echo apply_filters('aam_identity_role_default_defined_filter', false, $access_level) ? 'true' : 'false'; ?>">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -26,7 +27,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <table id="user_identity_list" class="table table-striped table-bordered">
+                <table id="user_identity_list" class="table table-striped table-bordered" data-has-default="<?php echo apply_filters('aam_identity_user_default_defined_filter', false, $access_level) ? 'true' : 'false'; ?>">
                     <thead>
                         <tr>
                             <th>ID</th>

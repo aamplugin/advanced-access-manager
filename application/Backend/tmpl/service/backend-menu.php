@@ -83,8 +83,6 @@
 
                                 <?php if (!empty($top_menu_item['children'])) { ?>
                                     <div class="row aam-inner-tab aam-menu-expended-list">
-                                        <?php echo ($top_menu_item['is_restricted'] ? '<div class="aam-lock">' . __('The entire menu is restricted with all submenus', 'advanced-access-manager') . '</div>' : ''); ?>
-
                                         <?php foreach ($top_menu_item['children'] as $j => $child) { ?>
                                             <?php if ($child['slug'] == 'index.php') { ?>
                                                 <div class="col-xs-12 col-md-6 aam-submenu-item">

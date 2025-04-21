@@ -1990,31 +1990,7 @@
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
 
                             Save(_this.data('menu-id'), status, function () {
-                                $('#aam-menu-overwrite').show();
-
-                                if (status) { //locked the menu
-                                    $('.aam-menu-expended-list', target).append(
-                                        $('<div/>', { 'class': 'aam-lock' }).append(
-                                            getAAM().__('The entire menu is restricted with all submenus')
-                                        )
-                                    );
-                                    _this.removeClass('btn-danger').addClass('btn-primary');
-                                    _this.html('<i class="icon-lock-open"></i>' + getAAM().__('Show Menu'));
-
-                                    var ind = $('<i/>', {
-                                        'class': 'aam-panel-title-icon icon-lock text-danger'
-                                    });
-                                    $('.panel-title', target + '-heading').append(ind);
-                                } else {
-                                    _this.removeClass('btn-primary').addClass('btn-danger');
-
-                                    _this.html(
-                                        '<i class="icon-lock"></i>' + getAAM().__('Restrict Menu')
-                                    );
-                                    $('.panel-title .icon-lock', target + '-heading').remove();
-
-                                    getAAM().fetchContent('main');
-                                }
+                                getAAM().fetchContent('main');
                             });
                         });
                     });
@@ -2163,38 +2139,11 @@
                         $(this).bind('click', function () {
                             var _this  = $(this);
                             var status = $('i', $(this)).hasClass('icon-lock');
-                            var target = _this.data('target');
 
                             $('i', _this).attr('class', 'icon-spin4 animate-spin');
 
                             save(_this.data('toolbar'), status, function () {
-                                $('#aam-toolbar-overwrite').show();
-
-                                if (status) { //locked the menu
-                                    $('.aam-menu-expended-list', target).append(
-                                        $('<div/>', { 'class': 'aam-lock' }).append(
-                                            getAAM().__('The entire menu is restricted with all submenus')
-                                        )
-                                    );
-                                    _this.removeClass('btn-danger').addClass('btn-primary');
-                                    _this.html('<i class="icon-lock-open"></i>' + getAAM().__('Show Menu'));
-
-                                    //add menu restricted indicator
-                                    var ind = $('<i/>', {
-                                        'class': 'aam-panel-title-icon icon-lock text-danger'
-                                    });
-                                    $('.panel-title', target + '-heading').append(ind);
-                                } else {
-                                    _this.removeClass('btn-primary').addClass('btn-danger');
-
-                                    _this.html(
-                                        '<i class="icon-lock"></i>' + getAAM().__('Hide Menu')
-                                    );
-
-                                    $('.panel-title .icon-lock', target + '-heading').remove();
-
-                                    getAAM().fetchContent('main');
-                                }
+                                getAAM().fetchContent('main');
                             });
                         });
                     });
@@ -3252,6 +3201,26 @@
                             $('#content_resource_settings').text(JSON.stringify(
                                 response.permissions
                             ));
+
+                            // Update indicator
+                            if (resource_type === 'post_type') {
+                                $.each(cache.post_types.data, (_, p) => {
+                                    if (p[0] === resource_id) {
+                                        p[4].is_customized = true;
+                                    }
+                                });
+                            } else if (resource_type === 'taxonomy') {
+                                $.each(cache.taxonomies.data, (_, p) => {
+                                    if (p[0] === resource_id) {
+                                        p[4].is_customized = true;
+                                    }
+                                });
+                            }
+
+                            $(`#${resource_type}_list`).DataTable().ajax.reload(
+                                null,
+                                false
+                            );
                         },
                         error: function (response) {
                             getAAM().notification('danger', response);
@@ -3526,10 +3495,10 @@
 
                             // Manually update the data in a table because both
                             // Post Types & Taxonomies are static tables
-                            if (['type', 'taxonomy'].includes(resource_type)) {
+                            if (['post_type', 'taxonomy'].includes(resource_type)) {
                                 let row = null;
 
-                                if (resource_type === 'type') {
+                                if (resource_type === 'post_type') {
                                     row = cache.post_types.data.filter(
                                         t => t[0] === resource_id
                                     ).pop();
@@ -3539,7 +3508,8 @@
                                     ).pop();
                                 }
 
-                                row[4].is_inherited = true;
+                                row[4].is_inherited  = true;
+                                row[4].is_customized = false;
                             }
                         },
                         complete: function () {
@@ -3911,8 +3881,8 @@
                 $('#content_list_container .dataTables_wrapper').addClass('hidden');
                 $('#content_list_container .table').addClass('hidden');
 
-                if (!$('#type-list').hasClass('dataTable')) {
-                    $('#type-list').DataTable({
+                if (!$('#post_type_list').hasClass('dataTable')) {
+                    $('#post_type_list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         pagingType: 'simple',
@@ -3934,7 +3904,7 @@
                         },
                         initComplete: function () {
                             // Adding the root level controls
-                            $('#type-list_length').append(RenderTypeTaxonomySwitch());
+                            $('#post_type_list_length').append(RenderTypeTaxonomySwitch());
                         },
                         rowCallback: function(row, data) {
                             let overwritten = '';
@@ -4006,11 +3976,11 @@
                         }
                     });
                 } else {
-                    $('#type-list').DataTable().ajax.reload(null, false);
+                    $('#post_type_list').DataTable().ajax.reload(null, false);
                 }
 
-                $('#type-list_wrapper .table').removeClass('hidden');
-                $('#type-list_wrapper').removeClass('hidden');
+                $('#post_type_list_wrapper .table').removeClass('hidden');
+                $('#post_type_list_wrapper').removeClass('hidden');
             }
 
             /**
@@ -4020,8 +3990,8 @@
                 $('#content_list_container .dataTables_wrapper').addClass('hidden');
                 $('#content_list_container .table').addClass('hidden');
 
-                if (!$('#taxonomy-list').hasClass('dataTable')) {
-                    $('#taxonomy-list').DataTable({
+                if (!$('#taxonomy_list').hasClass('dataTable')) {
+                    $('#taxonomy_list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         pagingType: 'simple',
@@ -4043,7 +4013,7 @@
                         },
                         initComplete: function () {
                             // Adding the root level controls
-                            $('#taxonomy-list_length').append(RenderTypeTaxonomySwitch());
+                            $('#taxonomy_list_length').append(RenderTypeTaxonomySwitch());
                         },
                         rowCallback: function(row, data) {
                             let overwritten = '';
@@ -4116,11 +4086,11 @@
                         }
                     });
                 } else {
-                    $('#taxonomy-list').DataTable().ajax.reload(null, false);
+                    $('#taxonomy_list').DataTable().ajax.reload(null, false);
                 }
 
-                $('#taxonomy-list_wrapper .table').removeClass('hidden');
-                $('#taxonomy-list_wrapper').removeClass('hidden');
+                $('#taxonomy_list_wrapper .table').removeClass('hidden');
+                $('#taxonomy_list_wrapper').removeClass('hidden');
             }
 
             /**
@@ -4130,8 +4100,8 @@
                 $('#content_list_container .dataTables_wrapper').addClass('hidden');
                 $('#content_list_container .table').addClass('hidden');
 
-                if (!$('#post-list').hasClass('dataTable')) {
-                    $('#post-list').DataTable({
+                if (!$('#post_list').hasClass('dataTable')) {
+                    $('#post_list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         processing: true,
@@ -4153,7 +4123,7 @@
                         },
                         initComplete: function () {
                             // Adding the root level controls
-                            RenderPostTaxonomySwitch('#post-list_length');
+                            RenderPostTaxonomySwitch('#post_list_length');
                         },
                         rowCallback: function(row, data) {
                             let overwritten = '';
@@ -4235,13 +4205,13 @@
                     });
                 } else {
                     // Reload list of posts
-                    $('#post-list').DataTable().ajax.reload(null, reload);
+                    $('#post_list').DataTable().ajax.reload(null, reload);
                     // Reload the list of taxonomies
-                    RenderPostTaxonomySwitch('#post-list_length');
+                    RenderPostTaxonomySwitch('#post_list_length');
                 }
 
-                $('#post-list_wrapper .table').removeClass('hidden');
-                $('#post-list_wrapper').removeClass('hidden');
+                $('#post_list_wrapper .table').removeClass('hidden');
+                $('#post_list_wrapper').removeClass('hidden');
             }
 
             /**
@@ -4253,19 +4223,19 @@
                 $('#content_list_container .table').addClass('hidden');
 
                 if (scope && scope.post_type) {
-                    $('#term-list').attr('data-post-type', scope.post_type);
+                    $('#term_list').attr('data-post-type', scope.post_type);
                 } else {
-                    $('#term-list').removeAttr('data-post-type');
+                    $('#term_list').removeAttr('data-post-type');
                 }
 
                 if (scope && scope.taxonomy) {
-                    $('#term-list').attr('data-taxonomy', scope.taxonomy);
+                    $('#term_list').attr('data-taxonomy', scope.taxonomy);
                 } else {
-                    $('#term-list').removeAttr('data-taxonomy');
+                    $('#term_list').removeAttr('data-taxonomy');
                 }
 
-                if (!$('#term-list').hasClass('dataTable')) {
-                    $('#term-list').DataTable({
+                if (!$('#term_list').hasClass('dataTable')) {
+                    $('#term_list').DataTable({
                         autoWidth: false,
                         ordering: false,
                         pagingType: 'simple',
@@ -4301,8 +4271,8 @@
                                 $('td:eq(1)', row).html($('<a/>', {
                                 href: '#'
                             }).bind('click', function () {
-                                const post_type = $('#term-list').attr('data-post-type');
-                                const taxonomy  = $('#term-list').attr('data-taxonomy');
+                                const post_type = $('#term_list').attr('data-post-type');
+                                const taxonomy  = $('#term_list').attr('data-taxonomy');
 
                                 NavigateToAccessForm({
                                     level_type: 'term',
@@ -4324,8 +4294,8 @@
                                         $(container).append($('<i/>', {
                                             'class': 'aam-row-action text-info icon-cog'
                                         }).bind('click', function () {
-                                            const post_type = $('#term-list').attr('data-post-type');
-                                            const taxonomy  = $('#term-list').attr('data-taxonomy');
+                                            const post_type = $('#term_list').attr('data-post-type');
+                                            const taxonomy  = $('#term_list').attr('data-taxonomy');
 
                                             NavigateToAccessForm({
                                                 level_type: 'term',
@@ -4373,11 +4343,11 @@
                         }
                     });
                 } else {
-                    $('#term-list').DataTable().ajax.reload(null, reload);
+                    $('#term_list').DataTable().ajax.reload(null, reload);
                 }
 
-                $('#term-list_wrapper .table').removeClass('hidden');
-                $('#term-list_wrapper').removeClass('hidden');
+                $('#term_list_wrapper .table').removeClass('hidden');
+                $('#term_list_wrapper').removeClass('hidden');
             }
 
             /**
@@ -5669,6 +5639,10 @@
                         },
                         complete: function() {
                             cb();
+
+                            getAAM().triggerHook('identity-permission-reset', {
+                                current_selections
+                            });
                         }
                     });
                 });
@@ -5841,13 +5815,16 @@
                                 $(identity_types_filter).clone(true)
                             );
 
+                            // Determine btn color
+                            const btn_class = $('#user_identity_list').data('has-default') ? 'btn-warning' : 'btn-primary';
+
                             $('#user_identity_list_wrapper > .row:eq(0)').after(`
                                 <div class="row"><div class="col-sm-12"><table class="table table-bordered no-margin-bottom">
                                     <tbody>
                                         <tr class="aam-info">
                                             <td class="text-left"><b>Premium Feature.</b> Set default permissions for all users effortlessly. Each user will automatically inherit these predefined permissions, with the flexibility to customize and override them individually as needed.</td>
                                             <td class="text-center">
-                                                <a href="#" class="btn btn-xs btn-primary" disabled id="set_default_user_permissions">Set Permissions</a>
+                                                <a href="#" class="btn btn-xs ${btn_class}" disabled id="set_default_user_permissions">Set Permissions</a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -5927,13 +5904,16 @@
                                 $(identity_types_filter).clone(true)
                             );
 
+                            // Determine btn color
+                            const btn_class = $('#role_identity_list').data('has-default') ? 'btn-warning' : 'btn-primary';
+
                             $('#role_identity_list_wrapper > .row:eq(0)').after(`
                                 <div class="row"><div class="col-sm-12"><table class="table table-bordered no-margin-bottom">
                                     <tbody>
                                         <tr class="aam-info">
                                             <td class="text-left"><b>Premium Feature.</b> Set default permissions for all roles effortlessly. Roles will automatically inherit these predefined permissions, with the flexibility to customize and override them individually as needed.</td>
                                             <td class="text-center">
-                                                <a href="#" class="btn btn-xs btn-primary" disabled id="set_default_role_permissions">Set Permissions</a>
+                                                <a href="#" class="btn btn-xs ${btn_class}" disabled id="set_default_role_permissions">Set Permissions</a>
                                             </td>
                                         </tr>
                                     </tbody>

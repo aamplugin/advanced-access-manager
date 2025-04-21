@@ -13,7 +13,7 @@
 
         <div class="aam-container">
             <div id="content_list_container">
-                <table id="type-list" class="table table-striped table-bordered hidden">
+                <table id="post_type_list" class="table table-striped table-bordered hidden">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -25,7 +25,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <table id="taxonomy-list" class="table table-striped table-bordered hidden">
+                <table id="taxonomy_list" class="table table-striped table-bordered hidden">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -37,7 +37,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <table id="post-list" class="table table-striped table-bordered hidden">
+                <table id="post_list" class="table table-striped table-bordered hidden">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -49,7 +49,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <table id="term-list" class="table table-striped table-bordered hidden">
+                <table id="term_list" class="table table-striped table-bordered hidden">
                     <thead>
                         <tr>
                             <th>ID</th>
