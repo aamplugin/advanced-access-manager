@@ -3216,11 +3216,6 @@
                                     }
                                 });
                             }
-
-                            $(`#${resource_type}_list`).DataTable().ajax.reload(
-                                null,
-                                false
-                            );
                         },
                         error: function (response) {
                             getAAM().notification('danger', response);

@@ -268,7 +268,7 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
             ]));
         }
 
-        return intval($result);
+        return !is_wp_error($result) ? intval($result) : 0;
     }
 
 }
