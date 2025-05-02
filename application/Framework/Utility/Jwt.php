@@ -726,7 +726,7 @@ class AAM_Framework_Utility_Jwt implements AAM_Framework_Utility_Interface
         $result = json_decode($input, true, 512, JSON_BIGINT_AS_STRING);
 
         if ($errno = json_last_error()) {
-            throw new RuntimeException('Failed to decode JSON with error ' . $errno);
+            throw new RuntimeException('Failed to decode JSON: ' . esc_js($errno));
         } elseif (!is_array($result)) {
             throw new UnexpectedValueException('Unexpected segment value');
         }
@@ -754,7 +754,7 @@ class AAM_Framework_Utility_Jwt implements AAM_Framework_Utility_Interface
         }
 
         if ($errno = json_last_error()) {
-            throw new RuntimeException('Failed to encode JSON with error ' . $errno);
+            throw new RuntimeException('Failed to encode JSON: ' . esc_js($errno));
         } elseif ($json === false) {
             throw new RuntimeException(
                 'Provided object could not be encoded to valid JSON'

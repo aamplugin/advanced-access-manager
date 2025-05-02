@@ -80,6 +80,11 @@ class AAM_Service_Core
             return $this->_aam_initialize_config($configs);
         });
 
+        // Ensuring safely of transactions
+        add_filter('gettext_advanced-access-manager', function($translation) {
+            return esc_js($translation);
+        });
+
         if (is_admin()) {
             $metabox_enabled = AAM::api()->config->get(
                 'core.settings.ui.render_access_metabox'

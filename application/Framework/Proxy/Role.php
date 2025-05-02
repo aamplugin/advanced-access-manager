@@ -237,9 +237,9 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
         $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
+            throw new InvalidArgumentException(sprintf(
+                "Capability '%s' is invalid", esc_js($capability)
+            ));
         }
 
         if ($save_immediately === true) {
@@ -265,9 +265,9 @@ class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
         $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
+            throw new InvalidArgumentException(sprintf(
+                "Capability '%s' is invalid", esc_js($capability)
+            ));
         }
 
         if ($save_immediately === true) {

@@ -176,7 +176,7 @@ class AAM_Restful_SecurityAudit
 
         // Check for errors in the response. This is hard error handling
         if (is_wp_error($result)) {
-            throw new RuntimeException($result->get_error_message());
+            throw new RuntimeException(esc_js($result->get_error_message()));
         }
 
         // Get the response from the server

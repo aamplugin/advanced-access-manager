@@ -59,9 +59,9 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
         }
 
         if (!is_object($result)) {
-            throw new InvalidArgumentException(
-                "Unsupported access level: {$type}"
-            );
+            throw new InvalidArgumentException(sprintf(
+                "Unsupported access level: %s", esc_js($type)
+            ));
         }
 
         return $result;
@@ -84,9 +84,9 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
                 wp_roles()->get_role($role_slug)
             );
         } else {
-            throw new OutOfRangeException(
-                "Role {$role_slug} does not exist"
-            );
+            throw new OutOfRangeException(sprintf(
+                "Role %s does not exist", esc_js($role_slug)
+            ));
         }
 
         // Role access level initialization action to allow other
@@ -115,9 +115,9 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
         if (is_a($user, 'WP_User')) {
             $result = new AAM_Framework_AccessLevel_User($user);
         } else {
-            throw new OutOfRangeException(
-                "User {$identifier} does not exist"
-            );
+            throw new OutOfRangeException(sprintf(
+                "User %s does not exist", esc_js($identifier)
+            ));
         }
 
         // User access level initialization action to allow other
@@ -195,9 +195,9 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
         }
 
         if ($user === false) { // User not found
-            throw new OutOfRangeException(
-                sprintf('Cannot find user by identifier %s', $identifier)
-            );
+            throw new OutOfRangeException(sprintf(
+                'Cannot find user by identifier %s', esc_js($identifier)
+            ));
         }
 
         return $user;

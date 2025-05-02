@@ -338,7 +338,7 @@ final class AAM_Framework_Manager
             }
         } else {
             throw new BadMethodCallException(sprintf(
-                'There is no service %s defined', $name
+                'There is no service %s defined', esc_js($name)
             ));
         }
 
@@ -361,7 +361,7 @@ final class AAM_Framework_Manager
             $result = $this->_utilities[$name]::bootstrap();
         } else {
             throw new BadMethodCallException(sprintf(
-                'There is no utility %s defined', $name
+                'There is no utility %s defined', esc_js($name)
             ));
         }
 

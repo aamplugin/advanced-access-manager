@@ -36,7 +36,7 @@ if (defined('AAM_KEY')) {
                             <div class="inside">
                                 <div class="aam-postbox-inside">
                                     <ul class="aam-error-list">
-                                        <?php foreach (AAM_Core_Console::getAll() as $message) { ?>
+                                        <?php foreach (AAM_Core_Console::get_all() as $message) { ?>
                                             <li><?php echo $message; // Already properly handled in the AAM_Core_Console ?></li>
                                         <?php } ?>
                                     </ul>

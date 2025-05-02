@@ -1,10 +1,10 @@
 === Advanced Access Manager - Restricted Content, Users & Roles, Enhanced Security and More ===
 Contributors: vasyltech
-Tags: security, access control, user roles, role management, backend security, restricted content, jwt, api security
+Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
-Tested up to: 6.6.2
-Stable tag: 6.9.47
+Tested up to: 6.8.0
+Stable tag: 7.0.0
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 

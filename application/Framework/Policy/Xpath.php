@@ -39,7 +39,7 @@ class AAM_Framework_Policy_Xpath
 
         foreach($parsed as $l) {
             if (is_object($value)) {
-                if (property_exists($value, $l)) {
+                if (isset($value->{$l})) {
                     $value = $value->{$l};
                 } elseif (method_exists($value, $l)) {
                     $value = $value->$l();

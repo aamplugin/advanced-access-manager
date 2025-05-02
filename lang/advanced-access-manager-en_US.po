@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Advanced Access Manager\n"
-"POT-Creation-Date: 2025-03-14 09:07-0400\n"
+"POT-Creation-Date: 2025-05-02 10:59-0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: AAM Plugin <support@aamplugin.com>\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;preparePhrase\n"
 "X-Poedit-Basepath: ..\n"
@@ -32,120 +32,106 @@ msgid ""
 "the subscription stays active."
 msgstr ""
 
-#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:47
-#: application/Audit/EditableFileSystemCheck.php:40
-#: application/Audit/ElevatedCoreRoleCheck.php:124
-#: application/Audit/EmptyRoleCheck.php:43
-#: application/Audit/HighPrivilegeContentModeratorCheck.php:67
-#: application/Audit/HighPrivilegeOrElevatedUserCheck.php:132
-#: application/Audit/HighPrivilegeRoleCheck.php:78
-#: application/Audit/HighPrivilegeUserCountCheck.php:85
-#: application/Audit/RestfulAutoDiscoverEndpointCheck.php:40
-#: application/Audit/RoleCapabilityNamingConventionCheck.php:43
-#: application/Audit/RoleIntegrityCheck.php:194
-#: application/Audit/RoleTransparencyCheck.php:43
-#: application/Audit/XmlRpcEndpointCheck.php:40
+#: application/Audit/AuditCheckTrait.php:37
 #, php-format
 msgid "Unexpected application error: %s"
 msgstr ""
 
-#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:82
+#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:85
+#: application/Audit/RoleCapabilityNamingConventionCheck.php:81
 #, php-format
-msgid "Detected role \"%s\" with invalid identifier"
+msgid "Detected role %s (%s) with invalid slug"
 msgstr ""
 
-#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:95
+#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:89
 #, php-format
-msgid "Detected role \"%s\" with invalid properties: %s"
+msgid "Detected role %s (%s) with invalid properties: %s"
 msgstr ""
 
-#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:103
+#: application/Audit/CoreUserRoleOptionIntegrityCheck.php:93
 #, php-format
-msgid "Detected role \"%s\" with missing mandatory properties: %s"
+msgid "Detected role %s (%s) with missing mandatory properties: %s"
 msgstr ""
 
-#: application/Audit/EditableFileSystemCheck.php:74
+#: application/Audit/EditableFileSystemCheck.php:78
 msgid "Detected potentially writable file system"
 msgstr ""
 
-#: application/Audit/ElevatedCoreRoleCheck.php:172
+#: application/Audit/ElevatedCoreRoleCheck.php:162
 #, php-format
-msgid "Detected WordPress core role \"%s\" with elevated capabilities: %s"
+msgid "Detected WordPress core role %s (%s) with elevated caps: %s"
 msgstr ""
 
-#: application/Audit/EmptyRoleCheck.php:77
+#: application/Audit/EmptyUnusedRoleCheck.php:101
 #, php-format
-msgid "Detected role \"%s\" with no capabilities"
+msgid "Detected role %s (%s) with no capabilities"
 msgstr ""
 
-#: application/Audit/HighPrivilegeContentModeratorCheck.php:110
+#: application/Audit/EmptyUnusedRoleCheck.php:105
+#, php-format
+msgid "Detected unused custom role %s (%s)"
+msgstr ""
+
+#: application/Audit/HighPrivilegeContentModeratorCheck.php:105
+#, php-format
+msgid "Detected high-privilege content moderator role %s (%s) with caps: %s"
+msgstr ""
+
+#: application/Audit/HighPrivilegeOrElevatedUserCheck.php:174
+#, php-format
+msgid "Detected high-privilege user %s (ID: %d) with caps: %s"
+msgstr ""
+
+#: application/Audit/HighPrivilegeOrElevatedUserCheck.php:178
+#, php-format
+msgid "Detected user %s (ID: %d) with elevated caps: %s"
+msgstr ""
+
+#: application/Audit/HighPrivilegeRoleCheck.php:116
+#, php-format
+msgid "Detected high-privilege role %s (%s) with caps: %s"
+msgstr ""
+
+#: application/Audit/HighPrivilegeUserCountCheck.php:123
+#, php-format
+msgid "Detected elevated user count (%d) with admin level privileges"
+msgstr ""
+
+#: application/Audit/HighPrivilegeUserCountCheck.php:127
 #, php-format
 msgid ""
-"Detected high-privilege content moderator role \"%s\" with capabilities: %s"
+"Detected elevated user count (%d) with high content moderation privileges"
 msgstr ""
 
-#: application/Audit/HighPrivilegeOrElevatedUserCheck.php:181
+#: application/Audit/RestfulAutoDiscoverEndpointCheck.php:78
+msgid "Detected open to anonymous users REST auto-discover endpoint"
+msgstr ""
+
+#: application/Audit/RoleCapabilityNamingConventionCheck.php:85
 #, php-format
-msgid "Detected high-privilege user \"%s\" (ID: %s) with capabilities: %s"
+msgid "Detected invalid capability %s for %s (%s) role"
 msgstr ""
 
-#: application/Audit/HighPrivilegeOrElevatedUserCheck.php:197
-#, php-format
-msgid "Detected elevated capabilities for user \"%s\" (ID: %s): %s"
-msgstr ""
-
-#: application/Audit/HighPrivilegeRoleCheck.php:121
-#, php-format
-msgid "Detected high-privilege role \"%s\" with capabilities: %s"
-msgstr ""
-
-#: application/Audit/HighPrivilegeUserCountCheck.php:191
-#, php-format
-msgid ""
-"Detected elevated number of users (%d) with administrator level privileges"
-msgstr ""
-
-#: application/Audit/HighPrivilegeUserCountCheck.php:198
-#, php-format
-msgid ""
-"Detected elevated number of users (%d) with high-privilege content "
-"moderation access"
-msgstr ""
-
-#: application/Audit/RestfulAutoDiscoverEndpointCheck.php:83
-msgid "Detected open to unauthenticated users RESTful auto-discover endpoint"
-msgstr ""
-
-#: application/Audit/RoleCapabilityNamingConventionCheck.php:78
-#, php-format
-msgid "Detected role \"%s\" with incorrect identifier"
-msgstr ""
-
-#: application/Audit/RoleCapabilityNamingConventionCheck.php:86
-#, php-format
-msgid "Detected incorrect capability \"%s\" for %s role"
-msgstr ""
-
-#: application/Audit/RoleIntegrityCheck.php:231
+#: application/Audit/RoleIntegrityCheck.php:232
 #, php-format
 msgid "Detected missing WordPress core role(s): %s"
 msgstr ""
 
-#: application/Audit/RoleIntegrityCheck.php:271
+#: application/Audit/RoleIntegrityCheck.php:236
 #, php-format
-msgid "Detected missing WordPress core capabilities for role \"%s\": %s"
+msgid "Detected missing WordPress core caps for role %s (%s): %s"
 msgstr ""
 
-#: application/Audit/RoleTransparencyCheck.php:89
+#: application/Audit/RoleTransparencyCheck.php:81
 #, php-format
 msgid "Detected hidden role(s): %s"
 msgstr ""
 
-#: application/Audit/XmlRpcEndpointCheck.php:76
-msgid "Detected open to unauthenticated users XML-RPC endpoint"
+#: application/Audit/XmlRpcEndpointCheck.php:78
+msgid "Detected open to anonymous users XML-RPC endpoint"
 msgstr ""
 
-#: application/Audit/XmlRpcEndpointCheck.php:86
+#: application/Audit/XmlRpcEndpointCheck.php:82
 msgid "The XML-RPC API is enabled"
 msgstr ""
 
@@ -519,16 +505,16 @@ msgstr ""
 
 #: application/Backend/Feature/Settings/Core.php:71
 #: application/Backend/tmpl/partial/content-access-form.php:83
-#: application/Backend/tmpl/service/identity.php:70
-#: application/Backend/tmpl/service/identity.php:114
+#: application/Backend/tmpl/service/identity.php:71
+#: application/Backend/tmpl/service/identity.php:115
 msgid "Allow"
 msgstr ""
 
 #: application/Backend/Feature/Settings/Core.php:72
 #: application/Backend/tmpl/partial/content-access-form.php:82
 #: application/Backend/tmpl/service/api-route.php:39
-#: application/Backend/tmpl/service/identity.php:71
-#: application/Backend/tmpl/service/identity.php:115
+#: application/Backend/tmpl/service/identity.php:72
+#: application/Backend/tmpl/service/identity.php:116
 msgid "Deny"
 msgstr ""
 
@@ -801,12 +787,12 @@ msgid "Update Capability"
 msgstr ""
 
 #: application/Backend/View/Localization.php:48
-#: application/Backend/tmpl/service/backend-menu.php:149
+#: application/Backend/tmpl/service/backend-menu.php:146
 msgid "Show Menu"
 msgstr ""
 
 #: application/Backend/View/Localization.php:49
-#: application/Backend/tmpl/service/backend-menu.php:158
+#: application/Backend/tmpl/service/backend-menu.php:155
 msgid "Restrict Menu"
 msgstr ""
 
@@ -931,7 +917,7 @@ msgid "Message has been sent"
 msgstr ""
 
 #: application/Backend/View/Localization.php:77
-#: application/Backend/tmpl/metabox/main-iframe.php:161
+#: application/Backend/tmpl/metabox/main-iframe.php:173
 msgid "Download Exported Settings"
 msgstr ""
 
@@ -986,7 +972,7 @@ msgid "Current role"
 msgstr ""
 
 #: application/Backend/View/Localization.php:90
-#: application/Service/Core.php:146
+#: application/Service/Core.php:160
 msgid "Manage Access"
 msgstr ""
 
@@ -1067,13 +1053,13 @@ msgstr ""
 
 #: application/Backend/View/Localization.php:110
 #: application/Backend/tmpl/service/admin-toolbar.php:110
-#: application/Backend/tmpl/service/backend-menu.php:129
+#: application/Backend/tmpl/service/backend-menu.php:126
 msgid "Uncheck to allow"
 msgstr ""
 
 #: application/Backend/View/Localization.php:111
 #: application/Backend/tmpl/service/admin-toolbar.php:110
-#: application/Backend/tmpl/service/backend-menu.php:129
+#: application/Backend/tmpl/service/backend-menu.php:126
 msgid "Check to restrict"
 msgstr ""
 
@@ -1123,6 +1109,7 @@ msgid "Customized Settings"
 msgstr ""
 
 #: application/Backend/View/Localization.php:122
+#: application/Backend/tmpl/metabox/policy-parent-metabox.php:19
 msgid "Parent"
 msgstr ""
 
@@ -1235,7 +1222,7 @@ msgid "All settings has been cleared successfully"
 msgstr ""
 
 #: application/Backend/View/Localization.php:147
-#: application/Backend/tmpl/metabox/main-iframe.php:192
+#: application/Backend/tmpl/metabox/main-iframe.php:204
 msgid "Clear"
 msgstr ""
 
@@ -1285,55 +1272,65 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:62
+#: application/Backend/tmpl/metabox/main-iframe.php:70
 #, php-format
 msgid "Your Security Score: %s %s"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:77
-msgid "Run first security scan to identify your website AAM security score"
+#: application/Backend/tmpl/metabox/main-iframe.php:85
+msgid ""
+"Run your first AAM Security Audit now and uncover hidden vulnerabilities, "
+"elevated privileges, and broken access controls before they become a threat."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:95
+#: application/Backend/tmpl/metabox/main-iframe.php:89
+msgid "Run First Security Scan"
+msgstr ""
+
+#: application/Backend/tmpl/metabox/main-iframe.php:91
+msgid "Review The Report"
+msgstr ""
+
+#: application/Backend/tmpl/metabox/main-iframe.php:107
 msgid "Access"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:100
+#: application/Backend/tmpl/metabox/main-iframe.php:112
 msgid "Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:106
+#: application/Backend/tmpl/metabox/main-iframe.php:118
 msgid "Premium"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:112
+#: application/Backend/tmpl/metabox/main-iframe.php:124
 msgid "Docs"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:126
+#: application/Backend/tmpl/metabox/main-iframe.php:138
 msgid "Export/Import AAM Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:131
+#: application/Backend/tmpl/metabox/main-iframe.php:143
 msgid "Reset AAM Settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:141
+#: application/Backend/tmpl/metabox/main-iframe.php:153
 msgid ""
 "Your browser does not support modern way to work with files. The Export/"
 "Import feature will not work properly. Consider to use the latest Chrome, "
 "Firefox or Safari browser instead."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:145
+#: application/Backend/tmpl/metabox/main-iframe.php:157
 msgid "Export"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:146
+#: application/Backend/tmpl/metabox/main-iframe.php:158
 msgid "Import"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:153
+#: application/Backend/tmpl/metabox/main-iframe.php:165
 #, php-format
 msgid ""
 "Export AAM settings so they can be imported to a different location. To "
@@ -1341,14 +1338,14 @@ msgid ""
 "import AAM settings?\"%s article."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:166
+#: application/Backend/tmpl/metabox/main-iframe.php:178
 msgid ""
 "Select a *.json file with valid AAM settings. All the current AAM settings "
 "will be lost and replaced with imported settings."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:175
-#: application/Backend/tmpl/metabox/main-iframe.php:185
+#: application/Backend/tmpl/metabox/main-iframe.php:187
+#: application/Backend/tmpl/metabox/main-iframe.php:197
 #: application/Backend/tmpl/page/current-subject.php:25
 #: application/Backend/tmpl/page/current-subject.php:33
 #: application/Backend/tmpl/page/subject-panel-advanced.php:8
@@ -1365,9 +1362,9 @@ msgstr ""
 #: application/Backend/tmpl/partial/content-access-form.php:425
 #: application/Backend/tmpl/service/admin-toolbar.php:149
 #: application/Backend/tmpl/service/admin-toolbar.php:175
-#: application/Backend/tmpl/service/backend-menu.php:187
-#: application/Backend/tmpl/service/backend-menu.php:207
-#: application/Backend/tmpl/service/backend-menu.php:233
+#: application/Backend/tmpl/service/backend-menu.php:184
+#: application/Backend/tmpl/service/backend-menu.php:204
+#: application/Backend/tmpl/service/backend-menu.php:230
 #: application/Backend/tmpl/service/capability.php:46
 #: application/Backend/tmpl/service/capability.php:69
 #: application/Backend/tmpl/service/capability.php:79
@@ -1395,29 +1392,28 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:186
+#: application/Backend/tmpl/metabox/main-iframe.php:198
 msgid "Clear all settings"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:189
+#: application/Backend/tmpl/metabox/main-iframe.php:201
 msgid "All AAM settings will be removed."
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:193
+#: application/Backend/tmpl/metabox/main-iframe.php:205
 msgid "Cancel"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:211
+#: application/Backend/tmpl/metabox/main-iframe.php:223
 msgid "Registered License"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:239
-#: application/Backend/tmpl/page/security-audit.php:120
-msgid "Download Latest Report"
+#: application/Backend/tmpl/metabox/policy-parent-metabox.php:11
+msgid "(no parent)"
 msgstr ""
 
-#: application/Backend/tmpl/metabox/main-iframe.php:240
-msgid "Contact Us"
+#: application/Backend/tmpl/metabox/policy-parent-metabox.php:24
+msgid "Order"
 msgstr ""
 
 #: application/Backend/tmpl/metabox/principal-iframe.php:17
@@ -1602,15 +1598,79 @@ msgstr ""
 msgid "You are not allowed to manage any of the existing services."
 msgstr ""
 
-#: application/Backend/tmpl/page/security-audit.php:11
+#: application/Backend/tmpl/page/security-audit.php:20
 msgid "Run the Security Scan"
 msgstr ""
 
-#: application/Backend/tmpl/page/security-audit.php:94
-msgid "Learn more"
+#: application/Backend/tmpl/page/security-audit.php:24
+msgid "Get Executive Summary"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:27
+msgid "Download Latest Report"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:37
+msgid ""
+"This service provides an executive-level security overview, helping you "
+"strengthen access controls with clear, actionable insights. The data we use "
+"is fully anonymized and cannot be linked back to your website."
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:38
+msgid ""
+"To generate this report, we only get partial audit results and a list of "
+"installed plugins — nothing about your server, website, or users is shared."
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:39
+msgid ""
+"You will get, promptly, valuable security recommendations, making it a safe "
+"and effective way to improve your website security posture."
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:43
+msgid "Prepare My Executive Summary"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:57
+msgid "Critical Findings"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:68
+msgid "Additional Concerns"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:79
+msgid "Recommendations"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:90
+msgid "References"
 msgstr ""
 
 #: application/Backend/tmpl/page/security-audit.php:101
+msgid ""
+"Need help interpreting your security scan report and identifying the next "
+"steps to address critical issues?"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:102
+msgid ""
+"Schedule a free 30-minute consultation with us, and we’ll work with you to "
+"find the best possible solution tailored to your specific WordPress website "
+"requirements."
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:103
+msgid "Schedule a Consultation"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:185
+msgid "Learn more"
+msgstr ""
+
+#: application/Backend/tmpl/page/security-audit.php:196
 msgid "Detected Issues"
 msgstr ""
 
@@ -1620,7 +1680,7 @@ msgstr ""
 
 #: application/Backend/tmpl/page/subject-panel-advanced.php:18
 #: application/Backend/tmpl/page/subject-panel-advanced.php:61
-#: application/Backend/tmpl/service/identity.php:22
+#: application/Backend/tmpl/service/identity.php:23
 msgid "Role Name"
 msgstr ""
 
@@ -1732,8 +1792,8 @@ msgstr ""
 #: application/Backend/tmpl/service/access-denied-redirect.php:24
 #: application/Backend/tmpl/service/admin-toolbar.php:24
 #: application/Backend/tmpl/service/backend-menu.php:26
-#: application/Backend/tmpl/service/identity.php:48
-#: application/Backend/tmpl/service/identity.php:92
+#: application/Backend/tmpl/service/identity.php:49
+#: application/Backend/tmpl/service/identity.php:93
 #: application/Backend/tmpl/service/login-redirect.php:19
 #: application/Backend/tmpl/service/logout-redirect.php:25
 #: application/Backend/tmpl/service/metabox.php:35
@@ -1748,8 +1808,8 @@ msgstr ""
 #: application/Backend/tmpl/service/admin-toolbar.php:25
 #: application/Backend/tmpl/service/api-route.php:26
 #: application/Backend/tmpl/service/backend-menu.php:27
-#: application/Backend/tmpl/service/identity.php:49
-#: application/Backend/tmpl/service/identity.php:93
+#: application/Backend/tmpl/service/identity.php:50
+#: application/Backend/tmpl/service/identity.php:94
 #: application/Backend/tmpl/service/login-redirect.php:20
 #: application/Backend/tmpl/service/logout-redirect.php:26
 #: application/Backend/tmpl/service/metabox.php:36
@@ -1975,13 +2035,12 @@ msgid ""
 "[refreshable]."
 msgstr ""
 
-#: application/Backend/tmpl/partial/loading-content.php:5
+#: application/Backend/tmpl/partial/loading-content.php:6
 msgid ""
-"[Loading AAM UI]. Please wait. If content will not load within next 30 "
-"seconds, clear your browser cache and reload the page. If still nothing, it "
-"is most likely some sort of JavaScript or CSS conflict with one your active "
-"plugins or theme. Try to deactivate all plugins and switch to any default "
-"WordPress theme to find out what causes the issue."
+"[Loading AAM UI...] Please wait. If the content does not load within 30 "
+"seconds, try clearing your browser cache and reloading the page. If the "
+"issue persists, it may be a server-side error. Check your PHP error log and "
+"contact us immediately."
 msgstr ""
 
 #: application/Backend/tmpl/partial/login-form.php:12
@@ -2177,7 +2236,7 @@ msgid "Item ID:"
 msgstr ""
 
 #: application/Backend/tmpl/service/admin-toolbar.php:91
-#: application/Backend/tmpl/service/backend-menu.php:110
+#: application/Backend/tmpl/service/backend-menu.php:108
 #: application/Backend/tmpl/service/metabox.php:97
 #: application/Backend/tmpl/service/widget.php:105
 msgid "more details"
@@ -2196,7 +2255,7 @@ msgid "Item Details"
 msgstr ""
 
 #: application/Backend/tmpl/service/admin-toolbar.php:156
-#: application/Backend/tmpl/service/backend-menu.php:214
+#: application/Backend/tmpl/service/backend-menu.php:211
 msgid "Name"
 msgstr ""
 
@@ -2245,17 +2304,13 @@ msgstr ""
 msgid "Menu URL:"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:86
-msgid "The entire menu is restricted with all submenus"
-msgstr ""
-
-#: application/Backend/tmpl/service/backend-menu.php:165
+#: application/Backend/tmpl/service/backend-menu.php:162
 msgid ""
 "The \"Dashboard\" menu cannot be restricted because it is the default page "
 "all users are redirected to after login."
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:176
+#: application/Backend/tmpl/service/backend-menu.php:173
 msgid ""
 "Please try refreshing the page. If the issue persists, the current user "
 "might not have the required privileges to access backend menu items. Another "
@@ -2265,15 +2320,15 @@ msgid ""
 "our best to assist you."
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:188
+#: application/Backend/tmpl/service/backend-menu.php:185
 msgid "Dashboard Lockdown"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:192
+#: application/Backend/tmpl/service/backend-menu.php:189
 msgid "You cannot restrict access to the Dashboard Home page."
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:193
+#: application/Backend/tmpl/service/backend-menu.php:190
 #, php-format
 msgid ""
 "The [Dashboard Home] is the default page every user redirects to after "
@@ -2281,27 +2336,27 @@ msgid ""
 "down WordPress backend%s Q&A."
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:197
+#: application/Backend/tmpl/service/backend-menu.php:194
 msgid "OK"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:208
+#: application/Backend/tmpl/service/backend-menu.php:205
 msgid "Menu Details"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:218
+#: application/Backend/tmpl/service/backend-menu.php:215
 #: application/Backend/tmpl/service/metabox.php:192
 msgid "Slug"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:222
+#: application/Backend/tmpl/service/backend-menu.php:219
 #: application/Backend/tmpl/service/capability.php:33
 #: application/Backend/tmpl/service/capability.php:57
 #: application/Backend/tmpl/service/capability.php:90
 msgid "Capability"
 msgstr ""
 
-#: application/Backend/tmpl/service/backend-menu.php:226
+#: application/Backend/tmpl/service/backend-menu.php:223
 msgid "Path"
 msgstr ""
 
@@ -2395,12 +2450,12 @@ msgstr ""
 
 #: application/Backend/tmpl/service/content.php:68
 #: application/Backend/tmpl/service/content.php:75
-#: application/Backend/tmpl/service/identity.php:43
-#: application/Backend/tmpl/service/identity.php:87
+#: application/Backend/tmpl/service/identity.php:44
+#: application/Backend/tmpl/service/identity.php:88
 msgid "Go Back"
 msgstr ""
 
-#: application/Backend/tmpl/service/identity.php:10
+#: application/Backend/tmpl/service/identity.php:11
 #, php-format
 msgid ""
 "Determine how [%s] can see and manager other users and roles (aka "
@@ -2409,12 +2464,12 @@ msgid ""
 "%shere%s."
 msgstr ""
 
-#: application/Backend/tmpl/service/identity.php:23
-#: application/Backend/tmpl/service/identity.php:34
+#: application/Backend/tmpl/service/identity.php:24
+#: application/Backend/tmpl/service/identity.php:35
 msgid "Manage"
 msgstr ""
 
-#: application/Backend/tmpl/service/identity.php:33
+#: application/Backend/tmpl/service/identity.php:34
 msgid "User Display Name"
 msgstr ""
 
@@ -2701,42 +2756,41 @@ msgid "Introduction"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:14
-msgid "Navigating the AAM UI: A Quick Guide"
+msgid "1. Navigating the AAM UI: A Quick Guide"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:40
-msgid "Fine-Tuning AAM for Optimal Performance"
+msgid "2. Fine-Tuning AAM for Optimal Performance"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:66
-msgid "Understanding Access Levels in AAM"
+msgid "3. Understanding Access Levels in AAM"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:92
-msgid "Understanding Access Controls & Preferences Inheritance"
+msgid "4. Understanding Access Controls & Preferences Inheritance"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:118
-msgid "Master WordPress Roles & Capabilities With AAM"
+msgid "5. Master WordPress Roles & Capabilities With AAM"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:144
-msgid "Manage User Accounts with AAM | WordPress Access Control"
+msgid "6. Manage User Accounts with AAM | WordPress Access Control"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:170
 msgid ""
-"Mastering Access Control in WordPress: Back-End Menu, Admin Toolbar, "
-"Metaboxes & Widgets"
+"7. Mastering Access for Backend Menu, Admin Toolbar, Metaboxes & Widgets"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:196
-msgid "Mastering WordPress Content Access with Posts and Terms in AAM"
+msgid "8. Mastering WordPress Content Access with Posts and Terms in AAM"
 msgstr ""
 
 #: application/Backend/tmpl/service/welcome.php:222
 msgid ""
-"Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects"
+"9. Understanding AAM Redirects: Access Denied, Login, Logout & 404 Redirects"
 msgstr ""
 
 #: application/Backend/tmpl/service/widget.php:14
@@ -2814,7 +2868,7 @@ msgstr ""
 msgid "Invalid Title"
 msgstr ""
 
-#: application/Framework/Service/BackendMenu.php:446
+#: application/Framework/Service/BackendMenu.php:462
 msgid "No Label"
 msgstr ""
 
@@ -2829,46 +2883,32 @@ msgstr ""
 msgid "Access Denied"
 msgstr ""
 
-#: application/Restful/LoginRedirect.php:187
-#: application/Restful/LogoutRedirect.php:185
-#: application/Restful/NotFoundRedirect.php:187
-msgid "The url is not a valid URL"
+#: application/Restful/SecurityAudit.php:205
+msgid "Hm, something went wrong. Please try again later."
 msgstr ""
 
-#: application/Restful/LoginRedirect.php:216
-#: application/Restful/LogoutRedirect.php:214
-#: application/Restful/NotFoundRedirect.php:216
-#: application/Restful/Urls.php:537
-msgid "The redirect_page_id refers to non-existing page"
-msgstr ""
-
-#: application/Restful/LoginRedirect.php:245
-msgid "The redirect_url is not a valid URL"
-msgstr ""
-
-#: application/Restful/LoginRedirect.php:272
-#: application/Restful/LogoutRedirect.php:270
-#: application/Restful/NotFoundRedirect.php:272
-#: application/Restful/Urls.php:597
-msgid "The callback is not valid PHP callback"
-msgstr ""
-
-#: application/Restful/LogoutRedirect.php:243
-#: application/Restful/NotFoundRedirect.php:245
-#: application/Restful/Urls.php:567
-msgid "The redirect_url is not valid URL"
-msgstr ""
-
-#: application/Restful/ServiceTrait.php:183
+#: application/Restful/ServiceTrait.php:216
 msgid "The role_id is required"
 msgstr ""
 
-#: application/Restful/ServiceTrait.php:193
+#: application/Restful/ServiceTrait.php:226
 msgid "The user_id is required"
 msgstr ""
 
-#: application/Restful/Urls.php:507
+#: application/Restful/Urls.php:497
 msgid "The custom_message cannot be empty or be unsafe"
+msgstr ""
+
+#: application/Restful/Urls.php:527
+msgid "The redirect_page_id refers to non-existing page"
+msgstr ""
+
+#: application/Restful/Urls.php:557
+msgid "The redirect_url is not valid URL"
+msgstr ""
+
+#: application/Restful/Urls.php:587
+msgid "The callback is not valid PHP callback"
 msgstr ""
 
 #: application/Service/Capability.php:91
@@ -3189,11 +3229,11 @@ msgstr ""
 msgid "Access Manager"
 msgstr ""
 
-#: application/Service/Core.php:117
+#: application/Service/Core.php:131
 msgid "Manager Access"
 msgstr ""
 
-#: application/Service/Core.php:192
+#: application/Service/Core.php:206
 msgid "RESTful API is disabled"
 msgstr ""
 
@@ -3201,7 +3241,11 @@ msgstr ""
 msgid "Access Policy Document"
 msgstr ""
 
-#: application/Service/Policies.php:163
+#: application/Service/Policies.php:162
+msgid "Parent Policy"
+msgstr ""
+
+#: application/Service/Policies.php:175
 msgid "Access Policy Assignee"
 msgstr ""
 
@@ -3209,35 +3253,35 @@ msgstr ""
 msgid "Exceeded maximum number for login attempts."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:197
+#: application/Service/SecurityAudit.php:208
 msgid "Verify WordPress Core Roles Integrity"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:201
+#: application/Service/SecurityAudit.php:212
 msgid ""
 "Maintaining the integrity of WordPress core roles is essential. Altering or "
 "removing default roles can cause conflicts with plugins, lead to failed user "
-"registrations, and introduce security risks. This check ensures that the "
+"registrations, and introduce integrity risks. This check ensures that the "
 "core roles remain intact, keeping your website stable and secure."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:205
+#: application/Service/SecurityAudit.php:216
 msgid "Validate WordPress Roles & Capabilities Core Option Integrity"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:209
+#: application/Service/SecurityAudit.php:220
 msgid ""
-"The core \"_user_roles\" option manages WordPress roles and capabilities. "
+"The core \"_user_roles\" option contains WordPress roles and capabilities. "
 "Altering its structure can break functionality, introduce vulnerabilities, "
 "and complicate updates. This check ensures that role modifications adhere to "
 "WordPress built-in APIs and do not compromise the underlying structure."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:213
-msgid "Enforce Roles & Capabilities Naming Standards"
+#: application/Service/SecurityAudit.php:224
+msgid "Verify Roles & Capabilities Naming Standards"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:217
+#: application/Service/SecurityAudit.php:228
 msgid ""
 "Adhering to WordPress naming conventions for roles and capabilities is vital "
 "for maintaining consistency, reducing errors, and ensuring compatibility "
@@ -3245,34 +3289,34 @@ msgid ""
 "help improve security and collaboration."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:221
-msgid "Ensure Registered Roles Transparency"
+#: application/Service/SecurityAudit.php:232
+msgid "Verify Roles Transparency"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:225
+#: application/Service/SecurityAudit.php:236
 msgid ""
-"Hidden roles can obscure access controls and create security risks by making "
-"it difficult to audit user permissions. This check flags hidden roles, "
+"Hidden roles can obscure access controls and create security concerns by "
+"making it difficult to audit permissions. This check flags hidden roles, "
 "helping you ensure full transparency and control over user access."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:229
+#: application/Service/SecurityAudit.php:240
 msgid "Identify Empty or Unused Roles"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:233
+#: application/Service/SecurityAudit.php:244
 msgid ""
-"Empty roles, which lack any assigned capabilities, can pose security risks "
-"if misused by plugins or themes. This check identifies such roles, enabling "
-"administrators to audit and remove them to avoid confusion and security "
-"vulnerabilities."
+"Empty roles, which lack any assigned capabilities, or unused custom roles "
+"can pose some concerns if misused by plugins or themes. This check "
+"identifies such roles, enabling administrators to audit and remove them to "
+"avoid confusion."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:237
+#: application/Service/SecurityAudit.php:248
 msgid "Detect High-Privilege Roles"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:241
+#: application/Service/SecurityAudit.php:252
 msgid ""
 "Roles with high-level privileges carry significant risks. Users with access "
 "to core settings, file uploads, or theme/plugin management can introduce "
@@ -3280,11 +3324,11 @@ msgid ""
 "privilege roles that may need review."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:245
+#: application/Service/SecurityAudit.php:256
 msgid "Identify High-Privilege Users & Elevated Access"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:249
+#: application/Service/SecurityAudit.php:260
 msgid ""
 "Assigning high-privilege capabilities directly to users or expanding the "
 "number of users in high-privilege roles increases the potential attack "
@@ -3292,11 +3336,11 @@ msgid ""
 "roles and capabilities are properly managed, minimizing security risks."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:253
+#: application/Service/SecurityAudit.php:264
 msgid "Identify High-Privilege Content Moderator Roles"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:257
+#: application/Service/SecurityAudit.php:268
 msgid ""
 "Assigning high-privilege content moderation capabilities in WordPress, poses "
 "significant security risks if granted to untrusted roles. These capabilities "
@@ -3306,11 +3350,11 @@ msgid ""
 "your website from potential cyber threats while ensuring content integrity."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:261
-msgid "Identified Elevated Number of High-Privilege Users"
+#: application/Service/SecurityAudit.php:272
+msgid "Identify Elevated Number of High-Privilege Users"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:265
+#: application/Service/SecurityAudit.php:276
 msgid ""
 "Having too many Administrator or high-privilege content moderation accounts "
 "on a WordPress site can seriously compromise security, as such account "
@@ -3323,11 +3367,11 @@ msgid ""
 "malware injection if an account is breached."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:269
+#: application/Service/SecurityAudit.php:280
 msgid "Flag Elevated Privileges for Core Roles"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:273
+#: application/Service/SecurityAudit.php:284
 msgid ""
 "Modifying core WordPress roles like Editor or Subscriber by granting extra "
 "capabilities can lead to security vulnerabilities. This check ensures that "
@@ -3335,11 +3379,11 @@ msgid ""
 "extended functionality."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:277
+#: application/Service/SecurityAudit.php:288
 msgid "Audit RESTful API Discovery Endpoint"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:281
+#: application/Service/SecurityAudit.php:292
 msgid ""
 "The \"/wp-json/\" endpoint, part of WordPress RESTful API, can expose "
 "sensitive information to unauthorized users. This check audits the API "
@@ -3347,22 +3391,22 @@ msgid ""
 "of exploitation."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:285
+#: application/Service/SecurityAudit.php:296
 msgid "Audit XML-RPC Endpoint Access"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:289
+#: application/Service/SecurityAudit.php:300
 msgid ""
 "The outdated XML-RPC endpoint can be a target for brute-force attacks and "
 "other exploits. This check assesses whether the endpoint is still enabled "
 "and recommends disabling it to strengthen site security."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:293
+#: application/Service/SecurityAudit.php:304
 msgid "Check Editable File System Permissions"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:297
+#: application/Service/SecurityAudit.php:308
 msgid ""
 "Writable WordPress file systems can lead to malware injection or backdoor "
 "installation. This check ensures that critical directories, like \"/wp-"
@@ -3370,15 +3414,15 @@ msgid ""
 "prevent unauthorized modifications."
 msgstr ""
 
-#: application/Service/SecurityAudit.php:342
+#: application/Service/SecurityAudit.php:381
 msgid "Excellent"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:347
+#: application/Service/SecurityAudit.php:386
 msgid "Poor"
 msgstr ""
 
-#: application/Service/SecurityAudit.php:349
+#: application/Service/SecurityAudit.php:388
 msgid "Moderate"
 msgstr ""
 

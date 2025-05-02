@@ -368,7 +368,7 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
                 }
             }
         } else {
-            throw new RuntimeException($result->get_error_message());
+            throw new RuntimeException(esc_js($result->get_error_message()));
         }
 
         return $result;

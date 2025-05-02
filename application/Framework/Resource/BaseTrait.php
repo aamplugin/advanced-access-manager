@@ -193,7 +193,9 @@ trait AAM_Framework_Resource_BaseTrait
             );
         } else {
             throw new BadMethodCallException(sprintf(
-                'Method %s does not exist in %s resource', $name, static::class
+                'Method %s does not exist in %s resource',
+                esc_js($name),
+                static::class
             ));
         }
 

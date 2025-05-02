@@ -61,7 +61,9 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
     public function get_role($slug)
     {
         if (!$this->is_role($slug)) {
-            throw new OutOfRangeException(sprintf('Role %s does not exist', $slug));
+            throw new OutOfRangeException(sprintf(
+                'Role %s does not exist', esc_js($slug)
+            ));
         }
 
         $roles = wp_roles();
@@ -175,7 +177,9 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
         }
 
         if ($this->is_role($slug)) {
-            throw new LogicException("Role {$slug} already exists");
+            throw new LogicException(sprintf(
+                'Role %s already exists', esc_js($slug)
+            ));
         }
 
         // Sanitize the list of capabilities and make sure that the list
@@ -186,7 +190,9 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
             }
 
             if (!is_string($cap) || strlen($cap) === 0) {
-                throw new InvalidArgumentException("Capability '{$cap}' is invalid");
+                throw new InvalidArgumentException(sprintf(
+                    "Capability '%s' is invalid", esc_js($cap)
+                ));
             }
 
             return $cap;

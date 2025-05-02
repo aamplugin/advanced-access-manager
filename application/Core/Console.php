@@ -44,7 +44,7 @@ class AAM_Core_Console
     {
         //prepare search patterns
         $num    = func_num_args();
-        $search = ($num > 1 ? array_fill(0, ($num - 1) * 2, null) : array());
+        $search = ($num > 1 ? array_fill(0, ($num - 1) * 2, null) : []);
 
         array_walk($search, function (&$value, $index) {
             $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
@@ -62,11 +62,11 @@ class AAM_Core_Console
      * Get list of all warnings
      *
      * @return array
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public static function getAll()
+    public static function get_all()
     {
         return self::$_messages;
     }

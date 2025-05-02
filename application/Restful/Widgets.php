@@ -285,7 +285,7 @@ class AAM_Restful_Widgets
 
         if (empty($match)) {
             throw new OutOfRangeException(sprintf(
-                'Widget with slug %s does not exist or is not indexed', $slug
+                'Widget with slug %s does not exist or is not indexed', esc_js($slug)
             ));
         } else {
             $result = array_shift($match);

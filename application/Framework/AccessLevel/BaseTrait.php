@@ -168,7 +168,7 @@ trait AAM_Framework_AccessLevel_BaseTrait
                 );
             } else {
                 throw new RuntimeException(
-                    sprintf('Method %s does not exist', $name)
+                    sprintf('Method %s does not exist', esc_js($name))
                 );
             }
         }
