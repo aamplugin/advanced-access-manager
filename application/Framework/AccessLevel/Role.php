@@ -8,67 +8,69 @@
  */
 
 /**
- * Role subject
+ * Role access level
+ *
+ * @property array $capabilities
  *
  * @package AAM
- *
- * @version 6.9.34
+ * @version 7.0.0
  */
-class AAM_Framework_AccessLevel_Role extends AAM_Framework_AccessLevel_Abstract
+class AAM_Framework_AccessLevel_Role implements AAM_Framework_AccessLevel_Interface
 {
 
+    use AAM_Framework_AccessLevel_BaseTrait;
+
     /**
-     * Collection of siblings
-     *
-     * Sibling is access level that is on the same level. For example, access level
-     * role can have siblings when user is assigned to multiple roles.
-     *
-     * @var array
-     *
-     * @version 6.9.34
+     * @inheritDoc
      */
-    private $_siblings = [];
+    protected $type = AAM_Framework_Type_AccessLevel::ROLE;
 
     /**
      * @inheritDoc
      */
     public function get_parent()
     {
-        $levels = AAM_Framework_Manager::access_levels();
-
         return apply_filters(
             'aam_get_parent_access_level_filter',
-            $levels->get(AAM_Framework_Type_AccessLevel::ALL),
+            AAM_Framework_Manager::_()->access_levels->get(
+                AAM_Framework_Type_AccessLevel::ALL
+            ),
             $this
         );
     }
 
     /**
-     * Add new siblings to the collection
-     *
-     * @param AAM_Framework_AccessLevel_Role $role
-     *
-     * @return void
-     *
-     * @access public
-     * @version 6.9.34
+     * @inheritDoc
      */
-    public function add_sibling(AAM_Framework_AccessLevel_Role $role)
+    public function get_id()
     {
-        array_push($this->_siblings, $role);
+        return $this->_proxy_instance->slug;
     }
 
     /**
-     * Check if there are any siblings
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.34
+     * @inheritDoc
      */
-    public function has_siblings()
+    public function get_display_name()
     {
-        return count($this->_siblings) > 0;
+        return $this->_proxy_instance->display_name;
+    }
+
+    /**
+     * Initialize the access level
+     *
+     * @param WP_Role $core_instance
+     *
+     * @return void
+     *
+     * @access protected
+     * @version 7.0.0
+     */
+    protected function initialize($core_instance)
+    {
+        $this->_proxy_instance = new AAM_Framework_Proxy_Role(
+            wp_roles()->role_names[$core_instance->name],
+            $core_instance
+        );
     }
 
 }

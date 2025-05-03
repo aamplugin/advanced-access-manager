@@ -1,4 +1,4 @@
-<?php /** @version 6.0.0 */ ?>
+<?php /** @version 7.0.0 */ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature settings" id="settings-services-content">
@@ -7,8 +7,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th width="80%"><?php echo __('Service Name/Description', AAM_KEY); ?></th>
-                    <th><?php echo __('Status', AAM_KEY); ?></th>
+                    <th width="80%"><?php echo __('Service Name/Description', 'advanced-access-manager'); ?></th>
+                    <th><?php echo __('Status', 'advanced-access-manager'); ?></th>
                 </tr>
             </thead>
             <tbody></tbody>

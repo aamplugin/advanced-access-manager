@@ -6,13 +6,16 @@
  */
 
 // Autoloader for the PHPUnit Framework
-spl_autoload_register(function ($classname) {
+spl_autoload_register(function ($class_name) {
     $filepath = null;
 
-    if (strpos($classname, 'PHPUnit') === 0) {
-        $filepath = __DIR__ . '\\' . $classname . '.php';
-    } elseif (strpos($classname, 'AAM\UnitTest') === 0) {
-        $filepath = __DIR__ . str_replace(array('AAM\UnitTest', '\\'), array('', '/'), $classname) . '.php';
+    if (strpos($class_name, 'PHPUnit') === 0) {
+        $filepath = __DIR__ . '\\' . $class_name . '.php';
+    } elseif (strpos($class_name, 'AAM\UnitTest') === 0) {
+        $filepath  = __DIR__;
+        $filepath .= str_replace(
+            [ 'AAM\UnitTest', '\\' ], [ '', '/' ], $class_name
+        ) . '.php';
     }
 
     if ($filepath && file_exists($filepath)) {
@@ -20,84 +23,42 @@ spl_autoload_register(function ($classname) {
     }
 });
 
-// Set the placeholder for the emulated headers
-$GLOBALS['UT_HTTP_HEADERS'] = array();
+// Defining the global constant that disabled AAM internal object cache
+if (!defined('AAM_OBJECT_CACHE_ENABLED')) {
+    define('AAM_OBJECT_CACHE_ENABLED', false);
+}
 
-/**
- * Mock the wp_redirect
- *
- * @param string  $location
- * @param integer $status
- * @param string  $x_redirect_by
- *
- * @return void
- */
-function wp_redirect($location) {
-    if (!isset($GLOBALS['UT_HTTP_HEADERS'])) {
-        $GLOBALS['UT_HTTP_HEADERS'] = array();
-    }
-
-    array_push($GLOBALS['UT_HTTP_HEADERS'], 'Location: ' . $location);
+if (!defined('AAM_FORCE_REST_API_REGISTER')) {
+    define('AAM_FORCE_REST_API_REGISTER', true);
 }
 
 // Load the WordPress library & some additional files.
 require_once dirname(__DIR__) . '/../../../wp-load.php';
-require_once ABSPATH . '/wp-admin/includes/user.php';
+require_once ABSPATH . 'wp-admin/includes/admin.php';
 
-// Prepare the list of users
-global $wpdb;
+// This will hook up to RESTful API dispatch to properly authenticate user
+add_filter('rest_pre_dispatch', function($result, $server, $request) {
+    $headers = $request->get_headers();
 
-// Resetting all users
-$wpdb->query("TRUNCATE TABLE {$wpdb->users}");
-$wpdb->query("TRUNCATE TABLE {$wpdb->usermeta}");
+    if (array_key_exists('authorization', $headers)) {
+        $token = str_replace('Bearer ', '', $headers['authorization'][0]);
 
-// Inserting the default user
-$admin_user_id = wp_insert_user(array(
-    'user_login' => AAM_UNITTEST_ADMIN_USERNAME,
-    'user_email' => 'admin@testing.local',
-    'first_name' => 'Default',
-    'last_name'  => 'Administrator',
-    'role'       => 'administrator',
-    'user_pass'  => AAM_UNITTEST_ADMIN_PASSWORD
-));
+        if (AAM::api()->jwt->is_valid($token)) {
+            $claims = AAM::api()->jwt->decode($token);
 
-if (!is_wp_error($admin_user_id)) {
-    define('AAM_UNITTEST_ADMIN_USER_ID', $admin_user_id);
-    define('AAM_UNITTEST_USERNAME', AAM_UNITTEST_ADMIN_USERNAME);
-    define('AAM_UNITTEST_PASSWORD', AAM_UNITTEST_ADMIN_PASSWORD);
+            // Setting current user
+            wp_set_current_user($claims['user_id']);
+        }
+    }
+
+    return $result;
+}, 10, 3);
+
+// Create a somewhat a clone of the administrator role to test functionality that
+// can be restricted to not super admin user
+if (!wp_roles()->is_role('subadmin')) {
+    wp_roles()->add_role(
+        'subadmin',
+        'Sub Administrator', wp_roles()->get_role('administrator')->capabilities
+    );
 }
-
-// Creating a user with multiple roles
-$multi_role_user_id = wp_insert_user(array(
-    'user_login' => 'ut_multirole',
-    'user_email' => 'utmultirole@testing.local',
-    'first_name' => 'Multirole',
-    'last_name'  => 'User',
-    'role'       => 'subscriber',
-    'user_pass'  => wp_generate_password()
-));
-
-if ($multi_role_user_id) {
-    get_user_by('ID', $multi_role_user_id)->add_role('author');
-
-    define('AAM_UNITTEST_MULTIROLE_USER_ID', $multi_role_user_id);
-}
-
-// Create an editor user
-$editor_user_id = wp_insert_user(array(
-    'user_login' => 'ut_editor',
-    'user_email' => 'uteditor@testing.local',
-    'first_name' => 'Editor',
-    'last_name'  => 'User',
-    'role'       => 'editor',
-    'user_pass'  => wp_generate_password()
-));
-
-if ($editor_user_id) {
-    get_user_by('ID', $editor_user_id)->add_cap('edit_users', true);
-
-    define('AAM_UNITTEST_USER_EDITOR_USER_ID', $editor_user_id);
-}
-
-// Very important to allow to test headers
-ob_start();

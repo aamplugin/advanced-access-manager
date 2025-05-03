@@ -8,27 +8,55 @@
  */
 
 /**
- * Visitor subject
+ * Visitor access level
  *
  * @package AAM
  *
  * @version 6.9.34
  */
-class AAM_Framework_AccessLevel_Visitor extends AAM_Framework_AccessLevel_Abstract
+class AAM_Framework_AccessLevel_Visitor implements AAM_Framework_AccessLevel_Interface
 {
+
+    use AAM_Framework_AccessLevel_BaseTrait;
+
+    /**
+     * @inheritDoc
+     */
+    protected $type = AAM_Framework_Type_AccessLevel::VISITOR;
 
     /**
      * @inheritDoc
      */
     public function get_parent()
     {
-        $levels = AAM_Framework_Manager::access_levels();
-
         return apply_filters(
             'aam_get_parent_access_level_filter',
-            $levels->get(AAM_Framework_Type_AccessLevel::ALL),
+            AAM_Framework_Manager::_()->access_levels->get(
+                AAM_Framework_Type_AccessLevel::ALL
+            ),
             $this
         );
+    }
+
+    /**
+     * Check if access level has specific capability
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_cap()
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_display_name()
+    {
+        return __('Visitors', 'advanced-access-manager');
     }
 
 }

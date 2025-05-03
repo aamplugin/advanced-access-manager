@@ -11,7 +11,7 @@
  * Audit check trait with common methods
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 trait AAM_Audit_AuditCheckTrait
 {
@@ -78,7 +78,8 @@ trait AAM_Audit_AuditCheckTrait
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _determine_check_status(&$result)
     {
@@ -114,7 +115,8 @@ trait AAM_Audit_AuditCheckTrait
      *
      * @access private
      * @static
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _filter_by_issue_type($failures, $issue_type)
     {
@@ -155,23 +157,17 @@ trait AAM_Audit_AuditCheckTrait
      * Read user_roles option from DB
      *
      * @return array
-     *
      * @access private
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     private static function _read_role_key_option()
     {
         global $wpdb;
 
-        $role_key = $wpdb->get_blog_prefix(get_current_blog_id()) . 'user_roles';
-
-        if (is_multisite()) {
-            $result = get_blog_option(get_current_blog_id(), $role_key, []);
-        } else {
-            $result = get_option($role_key, []);
-        }
-
-        return $result;
+        return AAM::api()->db->read(
+            $wpdb->get_blog_prefix(get_current_blog_id()) . 'user_roles'
+        );
     }
 
 }

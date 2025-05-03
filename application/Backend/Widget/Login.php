@@ -10,42 +10,37 @@
 /**
  * Secure login widget
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.0.0 Initial implementation of the method
- *
  * @package AAM
- * @version 6.7.9
+ * @version 7.0.0
  */
 class AAM_Backend_Widget_Login extends WP_Widget
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Widget arguments
      *
      * @var array
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public $args = array();
+    public $args = [];
 
     /**
      * Constructor
      *
      * @access public
-     *
      * @return void
+     *
      * @version 6.0.0
      */
     public function __construct()
     {
         $options = array(
-            'description' => __('AAM Secure Login Widget', AAM_KEY)
+            'description' => __('AAM Secure Login Widget', 'advanced-access-manager')
         );
 
-        parent::__construct(false, __('AAM Secure Login', AAM_KEY), $options);
+        parent::__construct(false, __('AAM Secure Login', 'advanced-access-manager'), $options);
     }
 
     /**
@@ -55,15 +50,15 @@ class AAM_Backend_Widget_Login extends WP_Widget
      * @param array $instance
      *
      * @access public
-     *
      * @return string
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function widget($args, $instance)
     {
         $this->args = array_merge($args, $this->normalize($instance));
 
-        require AAM_Framework_Manager::configs()->get_config(
+        require AAM::api()->config->get(
             'service.secureLogin.settings.widget.template',
             realpath(dirname(__DIR__) . '/tmpl/widget/login-frontend.php')
         );
@@ -75,9 +70,9 @@ class AAM_Backend_Widget_Login extends WP_Widget
      * @param array $instance
      *
      * @access public
-     *
      * @return void
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function form($instance)
     {
@@ -92,24 +87,24 @@ class AAM_Backend_Widget_Login extends WP_Widget
      * @param array $instance
      *
      * @return array
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.7.9
+     *
+     * @version 7.0.0
      */
     protected function normalize($instance)
     {
         if (empty($instance['login-title'])) {
-            $instance['login-title'] = __('Login', AAM_KEY);
+            $instance['login-title'] = __('Login', 'advanced-access-manager');
         }
 
         if (empty($instance['user-title'])) {
-            $instance['user-title'] = __('Howdy, %username%', AAM_KEY);
+            $instance['user-title'] = __(
+                'Howdy, %username%',
+                'advanced-access-manager'
+            );
         }
 
-        $instance['redirect'] = $this->getFromQuery('redirect_to');
+        $instance['redirect'] = filter_input(INPUT_GET, 'redirect_to');
 
         return $instance;
     }

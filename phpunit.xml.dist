@@ -2,27 +2,42 @@
 <phpunit
     bootstrap="tests/bootstrap.php"
     backupGlobals="false"
-    colors="true"
     failOnDeprecation="true"
     failOnWarning="true"
     failOnNotice="true"
+    colors="true"
 >
     <testsuites>
+        <testsuite name="FrameworkPolicy">
+            <directory suffix="Test.php">./tests/Framework/Policy</directory>
+        </testsuite>
+        <testsuite name="FrameworkResource">
+            <directory suffix="Test.php">./tests/Framework/Resource</directory>
+        </testsuite>
+         <testsuite name="FrameworkPreference">
+            <directory suffix="Test.php">./tests/Framework/Preference</directory>
+        </testsuite>
+        <testsuite name="FrameworkService">
+            <directory suffix="Test.php">./tests/Framework/Service</directory>
+        </testsuite>
+        <testsuite name="FrameworkUtility">
+            <directory suffix="Test.php">./tests/Framework/Utility</directory>
+        </testsuite>
+        <testsuite name="FrameworkManager">
+            <directory suffix="Test.php">./tests/Framework/Manager</directory>
+        </testsuite>
+        <testsuite name="Service">
+            <directory suffix="Test.php">./tests/Service</directory>
+        </testsuite>
+        <testsuite name="Rest">
+            <directory suffix="Test.php">./tests/Rest</directory>
+        </testsuite>
         <testsuite name="Core">
             <directory suffix="Test.php">./tests/Core</directory>
         </testsuite>
-        <testsuite name="Services">
-            <directory suffix="Test.php">./tests/Service</directory>
-        </testsuite>
-        <testsuite name="Addons">
-            <directory suffix="Test.php">./tests/Addon</directory>
-        </testsuite>
     </testsuites>
     <php>
-        <const name="AAM_UNITTEST_RESET_DB" value="1" />
-        <const name="AAM_UNITTEST_RUNNING" value="1" />
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
-        <const name="AAM_UNITTEST_ADMIN_USERNAME" value="admin" />
-        <const name="AAM_UNITTEST_ADMIN_PASSWORD" value="123456" />
+        <const name="AAM_UNITTEST_DEFAULT_ADMIN_PASS" value="123456" />
     </php>
 </phpunit>

@@ -1,45 +1,14 @@
-<?php
-/**
- * @since 6.9.24 https://github.com/aamplugin/advanced-access-manager/issues/350
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.2  https://github.com/aamplugin/advanced-access-manager/issues/229
- * @since 6.9.1  https://github.com/aamplugin/advanced-access-manager/issues/228
- * @since 6.8.4  https://github.com/aamplugin/advanced-access-manager/issues/212
- * @since 6.2.2  Slightly changed the way errors are displayed
- * @since 6.2.0  Escaping backslashes to avoid issue with JSON validation
- * @since 6.1.1  Removing the backslashes before displaying the policy
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.24
- */
+<?php /** @version 7.0.0 **/
+
 if (defined('AAM_KEY')) { ?>
     <div>
-        <style type="text/css">.aam-alert-danger{border-radius:0;margin:10px 0;color:#a94442;background-color:#f2dede;border-color:#ebccd1;padding:15px;border:1px solid transparent}.aam-infobox{border-left:5px solid #257fad;padding:20px;background-color:#d9edf7;margin-bottom:0}</style>
-
         <?php
             if (!empty($params->post->post_content)) {
-                // Validate the policy
-                $validator = new AAM_Core_Policy_Validator(htmlspecialchars_decode($params->post->post_content));
-                $errors    = $validator->validate();
+                $json = htmlspecialchars_decode($params->post->post_content);
             } else {
-                $params->post->post_content = AAM_Backend_Feature_Main_Policy::getDefaultPolicy();
-                $errors = array();
+                $json = AAM_Service_Policies::bootstrap()->get_boilerplate_policy();
             }
         ?>
-
-        <div class="aam-alert-danger<?php echo (empty($errors) ? ' hidden' : ''); ?>" id="policy-parsing-error">
-            <?php
-                $list = array();
-                foreach($errors as $error) {
-                    $list[] = '<li>- ' . $error . ';</li>';
-                }
-
-                if (!empty($list)) {
-                    echo '<ul>' . implode('', $list) . '</ul>';
-                }
-            ?>
-        </div>
 
         <textarea
             id="aam-policy-editor"
@@ -47,10 +16,7 @@ if (defined('AAM_KEY')) { ?>
             class="policy-editor"
             style="border: 1px solid #CCCCCC; width: 100%"
             rows="10"
-        ><?php echo is_string($params->post->post_content) ? esc_textarea(stripslashes($params->post->post_content)) : ''; ?></textarea>
-
-        <p class="aam-infobox">
-            <?php echo sprintf(AAM_Backend_View_Helper::preparePhrase('To learn more about Access &amp; Security policy document, please check  [%sAccess &amp; Security Policy%s] page.', 'b'), '<a href="https://aamportal.com/reference/json-access-policy/?ref=plugin" target="_blank">', '</a>'); ?>
-        </p>
+        ><?php echo esc_textarea(stripslashes($json)); ?></textarea>
+        <style>#aam_policy .inside { padding: 0; margin: 0 } .CodeMirror-lines { padding: 0; }</style>
     </div>
 <?php }

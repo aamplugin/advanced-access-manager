@@ -10,211 +10,351 @@
 /**
  * AAM service for Admin Toolbar
  *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
- * @since 6.9.13 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
-class AAM_Framework_Service_AdminToolbar
+class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
+     * DB cache option
+     *
+     * @version 7.0.0
+     */
+    const CACHE_OPTION = 'aam_admin_toolbar';
+
+    /**
+     * Initialized Admin Toolbar items
+     *
+     * @var array
+     *
+     * @access private
+     * @version 7.0.0
+     */
+    private $_toolbar_items = null;
+
+    /**
      * Return the complete admin toolbar item list with permissions
      *
-     * @param array $inline_context Context
-     *
      * @return array
-     *
      * @access public
-     * @version 6.9.13
+     *
+     * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
-    public function get_item_list($inline_context = null)
+    public function get_items()
     {
         try {
-            $result  = array();
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->reloadObject(
-                AAM_Core_Object_Toolbar::OBJECT_TYPE
-            );
+            $result = [];
 
-            // Getting the menu cache so we can build the list
-            $cache = AAM_Service_Toolbar::getInstance()->getToolbarCache();
+            // Getting the admin toolbar cache so we can build the list
+            $cache = $this->_get_raw_menu();
 
             if (!empty($cache) && is_array($cache)) {
                 foreach($cache as $branch) {
-                    array_push(
-                        $result,
-                        $this->_prepare_item_branch($branch, $object, true)
-                    );
+                    array_push($result, $this->_prepare_item_branch($branch));
                 }
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
+    }
+
+    /**
+     * Alias for the get_items method
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
+     */
+    public function items()
+    {
+        return $this->get_items();
     }
 
     /**
      * Get existing menu by ID
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param array $inline_context Runtime context
+     * @param string $slug
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.13
-     * @throws OutOfRangeException If menu does not exist
+     *
+     * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
      */
-    public function get_item_by_id($id, $inline_context = null)
+    public function get_item($slug)
     {
         try {
-            $result = false;
+            $result = $this->_find_item_by_slug($slug, $this->get_items());
 
-            foreach($this->get_item_list($inline_context) as $menu) {
-                if ($menu['id'] === $id) {
-                    $result = $menu;
-                } elseif (isset($menu['children'])) {
-                    foreach($menu['children'] as $child) {
-                        if ($child['id'] === $id) {
-                            $result = $child;
-                        }
+            if ($result === null) {
+                throw new OutOfRangeException('Admin toolbar item does not exist');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for the get_item method
+     *
+     * @param string $item_id
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     * @todo - Move to AAM_Service_AdminToolbar
+     */
+    public function item($item_id)
+    {
+        return $this->get_item($item_id);
+    }
+
+    /**
+     * Restrict/hide menu item
+     *
+     * @param string $item_id
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function deny($item_id)
+    {
+        try {
+            $result = $this->_update_item_permission(
+                $this->_normalize_resource_identifier($item_id),
+                true
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Allow menu item
+     *
+     * @param string $item_id
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function allow($item_id)
+    {
+        try {
+            $result = $this->_update_item_permission(
+                $this->_normalize_resource_identifier($item_id),
+                false
+            );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Reset admin toolbar permissions
+     *
+     * @param string $item_id [Optional]
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset($item_id = null)
+    {
+        try {
+            if (!empty($resource_identifier)) {
+                $result = $this->_remove_item_permission(
+                    $this->_normalize_resource_identifier($item_id)
+                );
+            } else {
+                $result = $this->_get_resource()->reset();
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if toolbar item is denied
+     *
+     * @param string $slug
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_denied($slug)
+    {
+        $result = null;
+
+        try {
+            // Getting all the defined permissions
+            $resource   = $this->_get_resource();
+            $permission = $resource->get_permission(
+                $this->_normalize_resource_identifier($slug),
+                'list'
+            );
+
+            // Step #1. Checking if provided item has any access controls defined
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            }
+
+            // Step #2. Checking if item has parent item and if so, determining if
+            // parent item is restricted
+            if (is_null($result)) {
+                // Find the item so we can check if it is a subitem
+                $item = $this->_find_item_by_slug($slug, $this->_get_raw_menu());
+
+                if (!empty($item['parent_id'])) {
+                    $permission = $resource->get_permission(
+                        $this->_normalize_resource_identifier($item['parent_id']),
+                        'list'
+                    );
+
+                    if (!empty($permission)) {
+                        $result = $permission['effect'] !== 'allow';
                     }
                 }
             }
 
-            if ($result === false) {
-                throw new OutOfRangeException(
-                    'Admin toolbar menu item does not exist'
-                );
-            }
+            // Step #3. Allow third-party implementations to integrate with the
+            // decision making process
+            $result = apply_filters(
+                'aam_admin_toolbar_is_denied_filter',
+                $result,
+                $slug,
+                $resource
+            );
+
+            // Prepare the final answer
+            $result = is_bool($result) ? $result : false;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
+    }
+
+    /**
+     * Check if menu item is allowed
+     *
+     * @param string $item_id
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_allowed($item_id)
+    {
+        $result = $this->is_denied($item_id);
+
+        return is_bool($result) ? !$result : $result;
+    }
+
+    /**
+     * Get Admin Toolbar resource
+     *
+     * @return AAM_Framework_Resource_AdminToolbar
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::TOOLBAR
+        );
     }
 
     /**
      * Update existing item permission
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param bool  $is_hidden      Is hidden or not
-     * @param array $inline_context Runtime context
+     * @param string $item_id
+     * @param bool   $is_hidden [Optional]
      *
      * @return array
+     * @access private
      *
-     * @access public
-     * @version 6.9.13
-     * @throws RuntimeException If fails to persist changes
+     * @version 7.0.0
      */
-    public function update_item_permission(
-        $id, $is_hidden = true, $inline_context = null
-    ) {
-        try {
-            $menu    = $this->get_item_by_id($id);
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
-
-            if ($object->store($menu['slug'], $is_hidden) === false) {
-                throw new RuntimeException('Failed to persist settings');
-            }
-
-            $result = $this->get_item_by_id($id);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
+    private function _update_item_permission($item_id, $is_hidden = true)
+    {
+        return $this->_get_resource()->set_permission(
+            $this->_normalize_resource_identifier($item_id),
+            'list',
+            $is_hidden
+        );
     }
 
     /**
      * Delete item permission
      *
-     * @param int   $id             Sudo-id for the menu item
-     * @param array $inline_context Runtime context
+     * @param string $item_id Menu item id
      *
-     * @return array
+     * @return bool
+     * @access private
      *
-     * @access public
-     * @version 6.9.13
-     * @throws OutOfRangeException If rule does not exist
-     * @throws Exception If fails to persist a rule
+     * @version 7.0.0
      */
-    public function delete_item_permission($id, $inline_context = null)
+    private function _remove_item_permission($item_id)
     {
-        try {
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
-            $menu    = $this->get_item_by_id($id);
-
-            // Note! User can delete only explicitly set rule (overwritten rule)
-            if ($menu['is_inherited'] === false) {
-                $found       = false;
-                $new_options = array();
-
-                foreach($object->getExplicitOption() as $slug => $is_restricted) {
-                    if ($slug === $menu['slug']) {
-                        $found = true;
-                    } else {
-                        $new_options[$slug] = $is_restricted;
-                    }
-                }
-
-                if ($found) {
-                    $success = $object->setExplicitOption($new_options)->save();
-                } else {
-                    throw new OutOfRangeException(
-                        'Setting for the menu item does not exist'
-                    );
-                }
-            } else {
-                $success = true;
-            }
-
-            if (!$success) {
-                throw new RuntimeException('Failed to persist settings');
-            }
-
-            $result = $this->get_item_by_id($id);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
+        return $this->_get_resource()->remove_permission(
+            $this->_normalize_resource_identifier($item_id),
+            'list'
+        );
     }
 
     /**
-     * Reset all permissions
+     * Find item by slug
      *
-     * @param array $inline_context Runtime context
+     * @param string $slug
+     * @param array  $items
      *
-     * @return array
+     * @return array|null
+     * @access private
      *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.13 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.35
+     * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    private function _find_item_by_slug($slug, $items)
     {
-        try {
-            // Reset the object
-            $subject = $this->_get_subject($inline_context);
-            $object  = $subject->getObject(AAM_Core_Object_Toolbar::OBJECT_TYPE);
+        $result = null;
 
-            // Resetting settings to default
-            $object->reset();
-
-            $result = $this->get_item_list($inline_context);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+        foreach($items as $item) {
+            if ($item['slug'] === $slug) {
+                $result = $item;
+                break;
+            } elseif (isset($item['children'])) {
+                foreach($item['children'] as $child) {
+                    if ($child['slug'] === $slug) {
+                        $result = $child;
+                        break;
+                    }
+                }
+            }
         }
 
         return $result;
@@ -223,27 +363,22 @@ class AAM_Framework_Service_AdminToolbar
     /**
      * Prepare the item branch
      *
-     * @param object                  $branch
-     * @param AAM_Core_Object_Toolbar $object
-     * @param boolean                 $is_top_level
+     * @param array $branch
      *
      * @return array
-     *
      * @access private
-     * @version 6.9.13
+     *
+     * @version 7.0.0
      */
-    private function _prepare_item_branch($branch, $object, $is_top_level = false)
+    private function _prepare_item_branch($branch)
     {
-        $response = $this->_prepare_item($branch, $object, $is_top_level);
+        $response = $this->_prepare_item($branch);
 
-        if ($is_top_level) {
-            $response['children'] = array();
+        if (empty($branch['parent_id'])) {
+            $response['children'] = [];
 
             foreach($branch['children'] as $child) {
-                array_push(
-                    $response['children'],
-                    $this->_prepare_item($child, $object)
-                );
+                array_push($response['children'], $this->_prepare_item($child));
             }
         }
 
@@ -253,31 +388,25 @@ class AAM_Framework_Service_AdminToolbar
     /**
      * Normalize and prepare the menu item model
      *
-     * @param object               $menu_item
-     * @param AAM_Core_Object_Menu $object,
-     * @param bool                 $is_top_level
+     * @param array $item
      *
      * @return array
-     *
      * @access private
-     * @version 6.9.13
+     *
+     * @version 7.0.0
      */
-    private function _prepare_item($item, $object, $is_top_level = false)
+    private function _prepare_item($item)
     {
-        // Add toolbar- prefix to define that this is the top level menu.
-        // WordPress by default gives the same menu id to the first
-        // submenu
-        $slug     = ($is_top_level ? 'toolbar-' : '') . $item['id'];
-        $explicit = $object->getExplicitOption();
-
-        $response = array(
-            'id'            => abs(crc32($slug)),
-            'slug'          => $slug,
+        $response = [
+            'slug'          => $item['slug'],
             'uri'           => $this->_prepare_item_uri($item['href']),
-            'name'          => $this->_prepare_item_name($item),
-            'is_hidden'     => $object->isHidden($slug),
-            'is_inherited'  => !array_key_exists($slug, $explicit)
-        );
+            'name'          => base64_decode($item['title']),
+            'is_restricted' => $this->is_denied($item['slug'])
+        ];
+
+        if (!empty($item['parent_id'])) {
+            $response['parent_id'] = $item['parent_id'];
+        }
 
         return $response;
     }
@@ -288,9 +417,9 @@ class AAM_Framework_Service_AdminToolbar
      * @param string $href
      *
      * @return string
-     *
      * @access private
-     * @version 6.9.13
+     *
+     * @version 7.0.0
      */
     private function _prepare_item_uri($href)
     {
@@ -298,25 +427,154 @@ class AAM_Framework_Service_AdminToolbar
     }
 
     /**
-     * Normalize the item title
+     * Get raw Admin Menu
      *
-     * @param object $item
+     * This method also caches the admin menu for future usage
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_raw_menu()
+    {
+        global $wp_admin_bar;
+
+        $response = [];
+
+        if (!is_null($this->_toolbar_items)) {
+            $response = $this->_toolbar_items;
+        } elseif (is_object($wp_admin_bar)) {
+            $admin_bar = new ReflectionClass(get_class($wp_admin_bar));
+
+            if ($admin_bar->hasProperty('nodes')) {
+                // The "bound" property at this point is already set to true, so we
+                // cannot get the list of nodes. This is why we use Reflection
+                $prop = $admin_bar->getProperty('nodes');
+                $prop->setAccessible(true);
+
+                $nodes = $prop->getValue($wp_admin_bar);
+
+                if (array_key_exists('root', $nodes)) {
+                    foreach ($nodes['root']->children as $node) {
+                        $response = array_merge($response, $node->children);
+                    }
+
+                    // Do some cleanup
+                    foreach ($response as $i => $node) {
+                        if ($node->id === 'menu-toggle') {
+                            unset($response[$i]);
+                        }
+                    }
+
+                    $response = $this->_toolbar_items = $this->_normalize_items(
+                        $response
+                    );
+
+                    $this->cache->set(self::CACHE_OPTION, $response, 31536000);
+                }
+            }
+        }
+
+        if (empty($response)) { // Try to pull it from the cache
+            $response = $this->cache->get(self::CACHE_OPTION, []);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Prepare the item branch
+     *
+     * @param array $items
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_items($items)
+    {
+        $response = [];
+
+        // Make a copy of the admin toolbar items before traversing to avoid any
+        // modifications
+        foreach (json_decode(json_encode($items), true) as $branch) {
+            array_push($response, array(
+                'slug'     => $branch['id'],
+                'href'     => $branch['href'],
+                'title'    => $this->_prepare_item_title($branch),
+                'children' => $this->_get_branch_children($branch, $branch['id'])
+            ));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Get list of child items
+     *
+     * @param array  $branch
+     * @param string $parent_id
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_branch_children($branch, $parent_id)
+    {
+        $children = [];
+
+        foreach ($branch['children'] as $child) {
+            $type = empty($child['type']) ? '' : $child['type'];
+
+            // Ignore groups and containers. These are special types for the admin
+            // toolbar menu and are used only to organize toolbar items, so - ignore
+            // them
+            if (!in_array($type, [ 'container', 'group' ], true)) {
+                $children[] = array(
+                    'slug'      => $child['id'],
+                    'href'      => $child['href'],
+                    'title'     => $this->_prepare_item_title($child),
+                    // Persist the parent ID so we can easier identify if parent item
+                    // is hidden during access control check
+                    'parent_id' => $parent_id
+                );
+            }
+
+            if (!empty($child['children'])) {
+                $children = array_merge(
+                    $children,
+                    $this->_get_branch_children($child, $parent_id)
+                );
+            }
+        }
+
+        return $children;
+    }
+
+    /**
+     * Filter item title
+     *
+     * Strip any HTML tags from the item name and also remove the trailing numbers
+     *
+     * @param array $item
      *
      * @return string
-     *
-     * @since 6.9.27 https://github.com/aamplugin/advanced-access-manager/issues/362
-     * @since 6.9.13 Initial implementation of the method
-     *
      * @access private
-     * @version 6.9.27
+     *
+     * @version 7.0.0
      */
-    private function _prepare_item_name($item)
+    private function _prepare_item_title($item)
     {
-        $title = wp_strip_all_tags(
-            !empty($item['title']) ? base64_decode($item['title']) : $item['id']
-        );
+        if (isset($item['title']) && is_string($item['title'])) {
+            $filtered = trim(wp_strip_all_tags($item['title'], true));
+        } else {
+            $filtered = __('Invalid Title', 'advanced-access-manager');
+        }
 
-        return ucwords(trim(preg_replace('/[\d]/', '', $title)));
+        return base64_encode(preg_replace('/([\d]+)$/', '', $filtered));
     }
 
 }

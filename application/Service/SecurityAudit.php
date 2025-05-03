@@ -11,18 +11,11 @@
  * Security Audit service
  *
  * @package AAM
- * @version 6.9.40
+ * @version 7.0.0
  */
 class AAM_Service_SecurityAudit
 {
-    use AAM_Core_Contract_ServiceTrait;
-
-    /**
-     * AAM configuration setting that is associated with the service
-     *
-     * @version 6.9.40
-     */
-    const FEATURE_FLAG = 'service.security_audit.enabled';
+    use AAM_Service_BaseTrait;
 
     /**
      * Security audit result
@@ -60,49 +53,27 @@ class AAM_Service_SecurityAudit
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
-        add_filter('aam_get_config_filter', function($result, $key) {
-            if ($key === self::FEATURE_FLAG && is_null($result)) {
-                $result = true;
-            }
+        add_filter('aam_security_scan_enabled_filter', function() {
+            return AAM::api()->config->get(AAM::SERVICES[__CLASS__], true);
+        });
 
-            return $result;
-        }, 10, 2);
 
-        if (is_admin()) {
-            // Hook that returns the detailed information about the nature of the
-            // service. This is used to display information about service on the
-            // Settings->Services tab
-            add_filter('aam_service_list_filter', function ($services) {
-                $services[] = array(
-                    'title'       => __('Security Scan', AAM_KEY),
-                    'description' => __('This automated security scan service conducts a series of checks to verify the integrity of your website\'s configurations and detect any potential elevated privileges for users and roles.', AAM_KEY),
-                    'setting'     => self::FEATURE_FLAG
-                );
-
-                return $services;
-            }, 1);
+        // Register cron-job
+        if (wp_next_scheduled('aam_security_audit_cron') === false) {
+            wp_schedule_event(time(), 'daily', 'aam_security_audit_cron');
         }
 
-        $enabled = AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG);
+        add_action('aam_security_audit_cron', function() {
+            $this->_run_audit();
+        });
 
-        if ($enabled) {
-            // Register cron-job
-            if (wp_next_scheduled('aam_security_audit_cron') === false) {
-                wp_schedule_event(time(), 'daily', 'aam_security_audit_cron');
-            }
-
-            add_action('aam_security_audit_cron', function() {
-                $this->_run_audit();
-            });
-        }
-
-        add_action('aam-uninstall-action', function() {
+        add_action('aam_uninstall_action', function() {
             wp_unschedule_event(
                 wp_next_scheduled('aam_security_audit_cron'),
                 'aam_security_audit_cron'
@@ -111,21 +82,7 @@ class AAM_Service_SecurityAudit
 
         // Keep the support RESTful service enabled at all times because it is used
         // by issue reporting feature as well
-        AAM_Restful_SecurityAuditService::bootstrap();
-    }
-
-    /**
-     * Determine if service is enabled
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.40
-     */
-    public function is_enabled()
-    {
-        return AAM_Framework_Manager::configs()->get_config(self::FEATURE_FLAG)
-            && current_user_can('aam_trigger_audit');
+        AAM_Restful_SecurityAudit::bootstrap();
     }
 
     /**
@@ -138,9 +95,9 @@ class AAM_Service_SecurityAudit
      */
     public function reset()
     {
-        return AAM_Core_API::deleteOption(self::DB_OPTION)
-            && AAM_Core_API::deleteOption(self::DB_SCOPE_OPTION)
-            && AAM_Core_API::deleteOption(self::DB_SUMMARY_OPTION);
+        return AAM::api()->db->delete(self::DB_OPTION)
+            && AAM::api()->db->delete(self::DB_SCOPE_OPTION)
+            && AAM::api()->db->delete(self::DB_SUMMARY_OPTION);
     }
 
     /**
@@ -153,7 +110,7 @@ class AAM_Service_SecurityAudit
      */
     public function read()
     {
-        return AAM_Core_API::getOption(self::DB_OPTION, []);
+        return AAM::api()->db->read(self::DB_OPTION, []);
     }
 
     /**
@@ -185,9 +142,11 @@ class AAM_Service_SecurityAudit
         }
 
         if (array_key_exists($check, $checks)) {
+            $executor =  $checks[$check]['executor'];
+
             // Exclude already captures list of issues
             $result = call_user_func(
-                $checks[$check]['executor'] . '::run',
+                $executor . '::run',
                 array_filter($current_result, function($k) {
                     return $k !== 'issues';
                 }, ARRAY_FILTER_USE_KEY)
@@ -208,7 +167,7 @@ class AAM_Service_SecurityAudit
             $report[$check]           = array_merge($current_result, $result);
             $report[$check]['issues'] = $issues;
 
-            AAM_Core_API::updateOption(self::DB_OPTION, $report, false);
+            AAM::api()->db->write(self::DB_OPTION, $report, false);
 
             // Recalculate the score
             $score    = 100;
@@ -226,10 +185,8 @@ class AAM_Service_SecurityAudit
                 $score -= self::ISSUE_WEIGHT[$type];
             }
 
-            AAM_Core_API::updateOption(
-                self::DB_SCOPE_OPTION,
-                $score > 0 ? $score : 0,
-                true
+            AAM::api()->db->write(
+                self::DB_SCOPE_OPTION, $score > 0 ? $score : 0
             );
         }
 
@@ -240,9 +197,9 @@ class AAM_Service_SecurityAudit
      * Get security audit steps (checks)
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public function get_steps()
     {
@@ -358,15 +315,15 @@ class AAM_Service_SecurityAudit
      * Check if report exists
      *
      * @return boolean
-     *
      * @access public
-     * @version 6.9.40
+     *
+     * @version 7.0.0
      */
     public function has_report()
     {
-        $score = AAM_Core_API::getOption(self::DB_SCOPE_OPTION, null);
+        $report = AAM::api()->db->read(self::DB_SCOPE_OPTION);
 
-        return !empty($score);
+        return !empty($report);
     }
 
     /**
@@ -394,10 +351,10 @@ class AAM_Service_SecurityAudit
      */
     public function get_summary()
     {
-        return AAM_Core_API::getOption(self::DB_SUMMARY_OPTION, null);
+        return AAM::api()->db->read(self::DB_SUMMARY_OPTION);
     }
 
-     /**
+    /**
      * Read the latest score
      *
      * @return int|null
@@ -407,7 +364,7 @@ class AAM_Service_SecurityAudit
      */
     public function get_score()
     {
-        return AAM_Core_API::getOption(self::DB_SCOPE_OPTION, null);
+        return AAM::api()->db->read(self::DB_SCOPE_OPTION);
     }
 
     /**
@@ -421,14 +378,14 @@ class AAM_Service_SecurityAudit
     public function get_score_grade()
     {
         $score  = $this->get_score();
-        $result = __('Excellent', AAM_KEY);
+        $result = __('Excellent', 'advanced-access-manager');
 
         if (empty($score)) {
             $result = '';
         } elseif ($score < 75) {
-            $result = __('Poor', AAM_KEY);
+            $result = __('Poor', 'advanced-access-manager');
         } elseif ($score <= 90) {
-            $result = __('Moderate', AAM_KEY);
+            $result = __('Moderate', 'advanced-access-manager');
         }
 
         return $result;
@@ -440,7 +397,7 @@ class AAM_Service_SecurityAudit
      * @return void
      * @access private
      *
-     * @version 6.9.46
+     * @version 7.0.0
      */
     private function _run_audit()
     {
@@ -459,8 +416,4 @@ class AAM_Service_SecurityAudit
         } while (!empty($steps));
     }
 
-}
-
-if (defined('AAM_KEY')) {
-    AAM_Service_SecurityAudit::bootstrap();
 }

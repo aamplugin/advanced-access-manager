@@ -11,7 +11,7 @@
  * AAM service for Capabilities
  *
  * @package AAM
- * @version 6.9.33
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Capabilities
 {
@@ -19,688 +19,369 @@ class AAM_Framework_Service_Capabilities
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Get all capabilities
+     * Get list of dynamic capabilities
      *
-     * @param array $inline_context
+     * Note! This method return only list of dynamically assigned capabilities to
+     * access level. It does not return capabilities stored in WordPress core.
      *
-     * @return array
+     * This is an artificial abstraction layer on top of the WordPress core
+     * capabilities to allow capabilities adjustment through JSON access policies
+     * and dynamic manipulations.
      *
+     * @return array|WP_Error
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    public function get_all_capabilities(array $inline_context = [])
+    public function get_list()
     {
         try {
-            // Now, just get capability slugs and prepare capability models
-            $result = [];
+            $result   = [];
+            $resource = $this->_get_resource();
 
-            foreach($this->_prepare_all_role_capabilities() as $slug) {
-                $result[$slug] = $this->_prepare_capability($slug);
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get role capabilities
-     *
-     * @param string  $role_slug
-     * @param boolean $return_all
-     * @param array   $inline_context
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function get_role_capabilities(
-        $role_slug, $return_all = false, array $inline_context = []
-    ) {
-        try {
-            $roles = wp_roles()->role_objects;
-
-            // Get the list of capabilities that are explicitly granted to give role
-            if (array_key_exists($role_slug, $roles)) {
-                $role_caps = wp_roles()->role_objects[$role_slug]->capabilities;
-
-                if ($return_all) {
-                    $result = array_map(function($c) {
-                        return array_merge($c, [
-                            'is_assigned' => false,
-                            'is_granted'  => false
-                        ]);
-                    }, $this->get_all_capabilities($inline_context));
-                } else {
-                    $result = [];
+            foreach($resource->get_permissions() as $cap => $permissions) {
+                if (apply_filters('aam_is_capability_filter', true, $cap)) {
+                    $result[$cap] = $permissions['assume']['effect'] === 'allow';
                 }
-
-                foreach($role_caps as $slug => $granted) {
-                    $result[$slug] = $this->_prepare_capability(
-                        $slug, $granted, true
-                    );
-                }
-            } else {
-                throw new OutOfRangeException("Role {$role_slug} does not exist");
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Get user capabilities
+     * Alias for the get_all
      *
-     * @param mixed   $user_identifier
-     * @param boolean $return_all
-     * @param array   $inline_context
-     *
-     * @return array
-     *
+     * @return array|WP_Error
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    public function get_user_capabilities(
-        $user_identifier, $return_all = false, array $inline_context = []
-    ) {
-        try {
-            $user = $this->_get_user_by_identifier($user_identifier);
-
-            // Get the list of capabilities that are explicitly granted to give role
-            if ($return_all) {
-                $result = array_map(function($c) {
-                    return array_merge($c, [
-                        'is_assigned' => false,
-                        'is_granted'  => false
-                    ]);
-                }, $this->get_all_capabilities($inline_context));
-            } else {
-                $result = [];
-            }
-
-            foreach(array_keys($user->allcaps) as $slug) {
-                $result[$slug] = $this->_prepare_capability(
-                    $slug, $user->has_cap($slug), isset($user->caps[$slug])
-                );
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check if capability exists
-     *
-     * @param string     $capability
-     * @param string     $assignee_type
-     * @param string|int $assignee_id
-     * @param array      $inline_context
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function exists(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
-        try {
-            // If there no assignee type, combine all the role capabilities + current
-            // user capabilities
-            if ($assignee_type === null) {
-                $all_caps = array_merge(
-                    $this->_prepare_all_role_capabilities(),
-                    array_keys(wp_get_current_user()->caps)
-                );
-            } elseif ($assignee_type === 'role') {
-                if (wp_roles()->is_role($assignee_id)) {
-                    $all_caps = array_keys(
-                        wp_roles()->role_objects[$assignee_id]->capabilities
-                    );
-                } else {
-                    throw new OutOfRangeException(
-                        "Role {$assignee_id} does not exist"
-                    );
-                }
-            } elseif ($assignee_type === 'user') {
-                $user     = $this->_get_user_by_identifier($assignee_id);
-                $all_caps = array_keys($user->caps);
-            }
-
-            $result = in_array($capability, $all_caps, true);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create new capability
-     *
-     * Assign newly created capability to the "Administrator" role and role that
-     * was explicitly stated in the $assign_to_role
-     *
-     * @param string     $capability
-     * @param string     $assignee_type
-     * @param string|int $assignee_id
-     * @param array      $inline_context
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function create(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
-        try {
-            $slug = trim($capability);
-
-            if (empty($slug)) {
-                throw new InvalidArgumentException(
-                    "The capability {$capability} is not valid"
-                );
-            }
-
-            $result = $this->add_to_role(
-                'administrator', $slug, $inline_context
-            );
-
-            switch ($assignee_type) {
-                case 'role':
-                    $result = $this->add_to_role(
-                        $assignee_id, $slug, $inline_context
-                    );
-                    break;
-
-                case 'user':
-                    $result = $this->add_to_user(
-                        $assignee_id, $slug, $inline_context
-                    );
-                    break;
-
-                default:
-                    break;
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Replace old capability with new
-     *
-     * @param string     $old_capability
-     * @param string     $new_capability
-     * @param string     $assignee_type
-     * @param string|int $assignee_id
-     * @param array      $inline_context
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function update(
-        $old_capability,
-        $new_capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
-        try {
-            $slug = trim($new_capability);
-
-            if (empty($slug)) {
-                throw new InvalidArgumentException(
-                    "The capability slug {$new_capability} is not valid"
-                );
-            } elseif ($this->exists(
-                $slug, $assignee_type, $assignee_id, $inline_context
-            )) {
-                throw new InvalidArgumentException(
-                    "The {$slug} capability already exists"
-                );
-            }
-
-            // Determine the scope of changes
-            if ($assignee_type === null) {
-                $updates = $this->_update_capability_for_all_roles(
-                    $old_capability, $slug
-                );
-
-                if ($updates === 0) {
-                    throw new OutOfRangeException(
-                        "The capability {$old_capability} does not exist"
-                    );
-                }
-
-                $result = $this->_prepare_capability($slug);
-            } elseif ($assignee_type === 'role') {
-                $result = $this->_update_capability_for_role(
-                    $old_capability, $slug, $assignee_id
-                );
-            } elseif ($assignee_type === 'user') {
-                $result = $this->_update_capability_for_user(
-                    $old_capability, $slug, $assignee_id
-                );
-            } else {
-                throw new InvalidArgumentException(
-                    "The assignee type {$assignee_type} is invalid"
-                );
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Delete existing capability
-     *
-     * @param string     $capability
-     * @param string     $assignee_type
-     * @param string|int $assignee_id
-     * @param array      $inline_context
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function delete(
-        $capability,
-        $assignee_type = null,
-        $assignee_id = null,
-        array $inline_context = []
-    ) {
-        try {
-            if (empty($capability)) {
-                throw new InvalidArgumentException(
-                    "The capability slug {$capability} is not valid"
-                );
-            }
-
-            // Determine the scope of changes
-            if ($assignee_type === null) {
-                $updates = $this->_delete_capability_from_all_roles($capability);
-            } elseif ($assignee_type === 'role') {
-                $updates = $this->_delete_capability_from_role(
-                    $capability, $assignee_id
-                );
-            } elseif ($assignee_type === 'user') {
-                $updates = $this->_delete_capability_from_user(
-                    $capability, $assignee_id
-                );
-            } else {
-                throw new InvalidArgumentException(
-                    "The assignee type {$assignee_type} is invalid"
-                );
-            }
-
-            if (empty($updates)) {
-                throw new OutOfRangeException(
-                    "The capability {$capability} does not exist"
-                );
-            }
-
-            $result = true;
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Add capability to the role
-     *
-     * @param string $role_slug
-     * @param string $capability
-     * @param array  $inline_context
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function add_to_role(
-        $role_slug, $capability, array $inline_context = []
-    ) {
-        try {
-            $roles = wp_roles();
-
-            if (array_key_exists($role_slug, $roles->role_objects)) {
-                $role = $roles->role_objects[$role_slug];
-
-                $role->add_cap($capability);
-            } else {
-                throw new OutOfRangeException(
-                    "Role {$role_slug} does not exist"
-                );
-            }
-
-            $result = $this->_prepare_capability($capability, true, true);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Add capability to the user
-     *
-     * @param mixed  $user_identifier
-     * @param string $capability
-     * @param array  $inline_context
-     *
-     * @return array
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function add_to_user(
-        $user_identifier, $capability, array $inline_context = []
-    ) {
-        try {
-            $user = $this->_get_user_by_identifier($user_identifier);
-
-            $user->add_cap($capability);
-
-            $result = $this->_prepare_capability($capability, true, true);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get user by its identifier
-     *
-     * @param mixed $identifier
-     *
-     * @return WP_User
-     *
-     * @access private
-     * @version 6.9.33
-     */
-    private function _get_user_by_identifier($identifier)
+    public function list()
     {
-        if (is_numeric($identifier)) { // Get user by ID
-            $user = get_user_by('id', $identifier);
-        } elseif (is_string($identifier)) {
-            if (strpos($identifier, '@') > 0) { // Email?
-                $user = get_user_by('email', $identifier);
-            } else {
-                $user = get_user_by('login', $identifier);
-            }
-        } elseif (is_a($identifier, 'WP_User')) {
-            $user = $identifier;
-        } else {
-            $user = false;
-        }
-
-        if (!is_a($user, 'WP_User')){
-            throw new OutOfRangeException(
-                'The user identifier is invalid or user does not exist'
-            );
-        }
-
-        return $user;
+        return $this->get_list();
     }
 
     /**
-     * Prepare capability model
+     * Add capability to the access level
      *
-     * @param string  $slug
-     * @param boolean $is_granted
-     * @param boolean $is_assigned
+     * The method will trigger RuntimeException exception is current access level is
+     * not either Role or User.
      *
-     * @return array
+     * @param string $capability
+     * @param bool   $is_granted    [Optional]
+     * @param bool   $ignore_format [Optional]
      *
-     * @access private
-     * @version 6.9.33
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
      */
-    private function _prepare_capability(
-        $slug, $is_granted = null, $is_assigned = null
-    ) {
-        $result = [
-            'slug'        => $slug,
-            'description' => apply_filters(
-                'aam_capability_description_filter', null, $slug
-            )
-        ];
+    public function add($capability, $is_granted = true, $ignore_format = false)
+    {
+        try {
+            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+/', $capability)) {
+                throw new InvalidArgumentException(
+                    'Valid capability slug is required'
+                );
+            }
 
-        if ($is_granted !== null) {
-            $result['is_granted'] = $is_granted;
-        }
+            // Neither WP_Role nor WP_User return result, so do nothing here and
+            // assume that capability was added
+            $result       = true;
+            $access_level = $this->_get_access_level();
 
-        if ($is_assigned !== null) {
-            $result['is_assigned'] = $is_assigned;
+            if ($this->_is_acceptable_access_level()) {
+                $this->_get_access_level()->add_cap($capability, $is_granted);
+            } else {
+                throw new RuntimeException(sprintf(
+                    'The access level %s cannot have capabilities',
+                    $access_level->type
+                ));
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Iterate over all roles and update capability
+     * Remove capability from the access level
+     *
+     * The method will trigger RuntimeException exception is current access level is
+     * not either Role or User. The `null` value will be returned if current access
+     * level does not have the capability. Otherwise boolean value is returned when
+     * true indicates that capability was removed successfully.
+     *
+     * @param string $capability
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function remove($capability)
+    {
+        try {
+            $access_level = $this->_get_access_level();
+
+            if ($this->_is_acceptable_access_level()) {
+                $this->_get_access_level()->remove_cap($capability);
+
+                $result = !$this->_get_access_level()->has_cap($capability);
+            } else {
+                throw new RuntimeException(sprintf(
+                    'The access level %s cannot have capabilities',
+                    $access_level->type
+                ));
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Deprive access level from given capability
+     *
+     * This method DOES NOT remove capability from the list of access level
+     * capabilities but rather set it's flag to false
+     *
+     * @param string $capability
+     * @param bool   $ignore_format [Optional]
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function deny($capability, $ignore_format = false)
+    {
+        return $this->add($capability, false, $ignore_format);
+    }
+
+    /**
+     * Grant capability to the access level
+     *
+     * @param string $capability
+     * @param bool   $ignore_format [Optional]
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function allow($capability, $ignore_format = false)
+    {
+        return $this->add($capability, true, $ignore_format);
+    }
+
+    /**
+     * Replace a capability with new slug
      *
      * @param string $old_slug
      * @param string $new_slug
+     * @param bool   $ignore_format [Optional]
      *
-     * @return int
+     * @return bool|WP_Error
+     * @access public
      *
-     * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
-    private function _update_capability_for_all_roles($old_slug, $new_slug)
+    public function replace($old_slug, $new_slug, $ignore_format = false)
     {
-        $updates = 0; // Count number of updates
-
-        // Iterating of the list of all roles and update old cap with new
-        foreach(wp_roles()->role_objects as $role) {
-            // Increment the number of updates so we know that something was
-            // actually changed
-            try {
-                $this->_update_capability_for_role(
-                    $old_slug, $new_slug, $role->name
+        try {
+            // Step #1. Validate new slug before we do anything funky
+            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+/', $new_slug)) {
+                throw new InvalidArgumentException(
+                    'Valid new capability slug is required'
                 );
-
-                $updates++;
-            } catch (OutOfRangeException $e) {
-                // Do nothing. This is expected behavior if role does not have
-                // a capability
             }
-        }
 
-        return $updates;
-    }
+            // Replace only if capability actually assigned to the access level
+            if ($this->_is_acceptable_access_level() && $this->_exists($old_slug)) {
+                // Step #2. Determine if old capability is granted to current access
+                // level
+                $is_granted = $this->_is_allowed($old_slug);
 
-    /**
-     * Update capability for role
-     *
-     * @param string $old_slug
-     * @param string $new_slug
-     * @param string $role_slug
-     *
-     * @return array|boolean
-     *
-     * @access private
-     * @version 6.9.33
-     */
-    private function _update_capability_for_role($old_slug, $new_slug, $role_slug)
-    {
-        if (!wp_roles()->is_role($role_slug)) {
-            throw new OutOfRangeException("Role {$role_slug} does not exist");
-        }
+                // Step #3. Remove old capability
+                $this->_get_access_level()->remove_cap($old_slug);
 
-        $role = wp_roles()->role_objects[$role_slug];
+                // Step #4. Add new capability
+                $this->_get_access_level()->add_cap($new_slug, $is_granted);
 
-        if (array_key_exists($old_slug, $role->capabilities)) {
-            // Persist the granted flag
-            $granted = $role->capabilities[$old_slug];
-
-            // Use core functions to add/remove cap to take into consideration
-            // setups were roles and capabilities are not coming form DB
-            // The global $wp_user_roles
-            $role->remove_cap($old_slug);
-            $role->add_cap($new_slug, $granted);
-
-            $result = $this->_prepare_capability($new_slug, $granted, true);
-        } else {
-            throw new OutOfRangeException(
-                "Capability {$old_slug} does not exist for role {$role_slug}"
-            );
+                // Neither WP_Role nor WP_User return result, so do nothing here and
+                // assume that capability was added
+                $result = true;
+            } else {
+                $result = false;
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Update capability for user
+     * Check if capability is explicitly assigned
      *
-     * @param string $old_slug
-     * @param string $new_slug
-     * @param mixed  $user_identifier
+     * Capability is considered as explicitly assigned when it is explicitly added
+     * to the access level. It does not matter if it is granted or deprived.
      *
-     * @return int
+     * @param string $capability
      *
-     * @access private
-     * @version 6.9.33
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
      */
-    private function _update_capability_for_user(
-        $old_slug, $new_slug, $user_identifier
-    ) {
-        $user = $this->_get_user_by_identifier($user_identifier);
-
-        if (array_key_exists($old_slug, $user->caps)) {
-            // Persist the granted flag
-            $granted = $user->caps[$old_slug];
-
-            // Use core functions to add/remove cap to take into consideration
-            // setups were roles and capabilities are not coming form DB
-            // The global $wp_user_roles
-            $user->remove_cap($old_slug);
-            $user->add_cap($new_slug, $granted);
-
-            $result = $this->_prepare_capability($new_slug, $granted, true);
-        } else {
-            throw new OutOfRangeException(
-                "Capability {$old_slug} does not exist for user {$user->ID}"
-            );
+    public function exists($capability)
+    {
+        try {
+            $result = $this->_exists($capability);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Iterate over all roles and delete existing capability
+     * Check if capability is granted to the access level
      *
      * @param string $capability
      *
-     * @return int
+     * @return bool|WP_Error
+     * @access public
      *
-     * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
-    private function _delete_capability_from_all_roles($capability)
+    public function is_allowed($capability)
     {
-        $updates = 0; // Count number of updates
-
-        // Iterating of the list of all roles and update old cap with new
-        foreach(wp_roles()->role_objects as $role) {
-            // Increment the number of updates so we know that something was
-            // actually changed
-            $updates += $this->_delete_capability_from_role(
-                $capability, $role->name
-            );
+        try {
+            $result = $this->_is_allowed($capability);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        return $updates;
+        return $result;
     }
 
     /**
-     * Delete capability from role
+     * Check if capability is deprived from the access level
      *
      * @param string $capability
-     * @param string $role_slug
      *
-     * @return boolean
+     * @return bool|WP_Error
+     * @access public
      *
-     * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
-    private function _delete_capability_from_role($capability, $role_slug)
+    public function is_denied($capability)
     {
-        if ($this->exists($capability, 'role', $role_slug)) {
-            $role = wp_roles()->role_objects[$role_slug];
+        $result = $this->is_allowed($capability);
 
-            $role->remove_cap($capability);
-        }
-
-        return true;
+        return is_bool($result) ? !$result : $result;
     }
 
     /**
-     * Delete capability for user
+     * Check if capability is explicitly assigned
      *
      * @param string $capability
-     * @param string $new_slug
-     * @param mixed  $user_identifier
      *
-     * @return int
-     *
+     * @return bool
      * @access private
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    private function _delete_capability_from_user($capability, $user_identifier)
+    private function _exists($capability)
     {
-        if ($this->exists($capability, 'user', $user_identifier)) {
-            $user = $this->_get_user_by_identifier($user_identifier);
+        $access_level = $this->_get_access_level();
 
-            $user->remove_cap($capability);
+        if ($access_level->type === AAM_Framework_Type_AccessLevel::USER) {
+            $caps = $access_level->caps;
+        } elseif ($access_level->type === AAM_Framework_Type_AccessLevel::ROLE) {
+            $caps = $access_level->capabilities;
+        } else {
+            $caps = [];
         }
 
-        return true;
+        return array_key_exists($capability, $caps);
     }
 
     /**
-     * Prepare the list of all capabilities registered for roles
+     * Determine if capability is allowed
      *
-     * @return array
+     * @param string $capability
      *
+     * @return bool
      * @access private
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    private function _prepare_all_role_capabilities()
+    private function _is_allowed($capability)
     {
-        $all_caps = [];
+        $result     = null;
+        $resource   = $this->_get_resource();
+        $permission = $resource->get_permission($capability, 'assume');
 
-        foreach (wp_roles()->role_objects as $role) {
-            if (is_array($role->capabilities)) {
-                $all_caps = array_merge($all_caps, $role->capabilities);
-            }
+        // Determine if capability is explicitly granted with AAM
+        if (!empty($permission)) {
+            $result = $permission['effect'] === 'allow';
         }
 
-        return array_unique(array_keys($all_caps));
+        // Allow third-party implementation to influence the decision
+        $result = apply_filters(
+            'aam_capability_is_allowed_filter',
+            $result,
+            $capability,
+            $resource
+        );
+
+        // Otherwise - default to WP core
+        if (is_null($result) && $this->_is_acceptable_access_level()) {
+            $result = $this->_get_access_level()->has_cap($capability);
+        }
+
+        return is_bool($result) ? $result : false;
+    }
+
+    /**
+     * Making sure the access level is acceptable to work with capabilities
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _is_acceptable_access_level()
+    {
+        $access_level = $this->_get_access_level();
+
+        return in_array($access_level->type, [
+            AAM_Framework_Type_AccessLevel::USER,
+            AAM_Framework_Type_AccessLevel::ROLE
+        ], true);
+    }
+
+    /**
+     * Get capability resource
+     *
+     * @return AAM_Framework_Resource_Capability
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::CAPABILITY
+        );
     }
 
 }

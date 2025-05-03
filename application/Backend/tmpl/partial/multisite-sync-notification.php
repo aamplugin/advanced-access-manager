@@ -1,4 +1,4 @@
-<?php /** @version 6.0.0 */ ?>
+<?php /** @version 7.0.0 */ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="metabox-holder shared-metabox">

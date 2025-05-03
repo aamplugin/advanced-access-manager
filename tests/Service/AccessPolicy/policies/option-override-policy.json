@@ -1,9 +1,0 @@
-{
-    "Version": "1.0.0",
-    "Param": [
-        {
-            "Key": "option:unittest",
-            "Value": "unititest.me"
-        }
-    ]
-}

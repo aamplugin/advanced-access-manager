@@ -1,11 +1,4 @@
-<?php
-    /**
-     * @since 6.9.2 https://github.com/aamplugin/advanced-access-manager/issues/229
-     * @since 6.0.0 Initial implementation of the template
-     *
-     * @version 6.9.2
-     * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php $features = AAM_Backend_Feature::retrieveList($params->type); ?>
@@ -27,18 +20,18 @@
                 <div class="col-xs-12 col-md-8">
                     <?php
                     foreach ($features as $feature) {
-                        echo $feature->view->getContent();
+                        echo call_user_func($feature->view);
                     }
                     ?>
                 </div>
             </div>
         <?php } else {
-            echo array_pop($features)->view->getContent();
+            echo call_user_func(array_pop($features)->view);
         } ?>
     <?php } else { ?>
         <div class="col-xs-12">
             <p class="aam-notification text-larger text-center">
-                <?php echo __('You are not allowed to manage any of the existing services.', AAM_KEY); ?>
+                <?php echo __('You are not allowed to manage any of the existing services.', 'advanced-access-manager'); ?>
             </p>
         </div>
     <?php } ?>

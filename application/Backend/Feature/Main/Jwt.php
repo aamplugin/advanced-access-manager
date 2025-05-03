@@ -10,31 +10,23 @@
 /**
  * JWT UI manager
  *
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
- * @since 6.9.0  https://github.com/aamplugin/advanced-access-manager/issues/221
- * @since 6.7.9  https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.10
+ * @version 7.0.0
  */
-class AAM_Backend_Feature_Main_Jwt
-    extends AAM_Backend_Feature_Abstract implements AAM_Backend_Feature_ISubjectAware
+class AAM_Backend_Feature_Main_Jwt extends AAM_Backend_Feature_Abstract
 {
-
-    use AAM_Core_Contract_RequestTrait;
 
     /**
      * Default access capability to the service
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const ACCESS_CAPABILITY = 'aam_manage_jwt';
 
     /**
      * HTML template to render
      *
-     * @version 6.0.0
+     * @version 7.0.0
      */
     const TEMPLATE = 'service/jwt.php';
 
@@ -42,22 +34,22 @@ class AAM_Backend_Feature_Main_Jwt
      * Register JWT service UI
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public static function register()
     {
         AAM_Backend_Feature::registerFeature((object) array(
-            'uid'        => 'jwt',
-            'position'   => 65,
-            'title'      => __('JWT Tokens', AAM_KEY),
-            'capability' => self::ACCESS_CAPABILITY,
-            'type'       => 'main',
-            'subjects'   => array(
-                AAM_Core_Subject_User::UID
-            ),
-            'view'       => __CLASS__
+            'uid'           => 'jwt',
+            'position'      => 65,
+            'title'         => __('JWT Tokens', 'advanced-access-manager'),
+            'capability'    => self::ACCESS_CAPABILITY,
+            'type'          => 'main',
+            'view'          => __CLASS__,
+            'access_levels' => array(
+                AAM_Framework_Type_AccessLevel::USER
+            )
         ));
     }
 

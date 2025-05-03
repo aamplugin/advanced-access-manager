@@ -8,364 +8,564 @@
  */
 
 /**
- * AAM framework manager
+ * AAM Framework manager
+ *
+ * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Roles roles(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Users users(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
+ *
+ * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
+ * @property AAM_Framework_Utility_Capabilities $caps
+ * @property AAM_Framework_Utility_Capabilities $capabilities
+ * @property AAM_Framework_Utility_Config $config
+ * @property AAM_Framework_Utility_Misc $misc
+ * @property AAM_Framework_Utility_Redirect $redirect
+ * @property AAM_Framework_Utility_Roles $roles
+ * @property AAM_Framework_Utility_Users $users
+ * @property AAM_Framework_Utility_Db $db
+ * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
+ * @property AAM_Framework_Utility_Policy $policy
+ * @property AAM_Framework_Utility_Content $content
+ * @property AAM_Framework_Utility_Rest $rest
  *
  * @package AAM
- *
- * @since 6.9.32 https://github.com/aamplugin/advanced-access-manager/issues/390
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/383
- * @since 6.9.28 https://github.com/aamplugin/advanced-access-manager/issues/369
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/309
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/302
- *               https://github.com/aamplugin/advanced-access-manager/issues/301
- *               https://github.com/aamplugin/advanced-access-manager/issues/293
- * @since 6.9.12 https://github.com/aamplugin/advanced-access-manager/issues/285
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/273
- *               https://github.com/aamplugin/advanced-access-manager/issues/274
- * @since 6.9.9  https://github.com/aamplugin/advanced-access-manager/issues/266
- * @since 6.9.6  Initial implementation of the class
- *
- * @version 6.9.32
+ * @version 7.0.0
  */
-class AAM_Framework_Manager
+final class AAM_Framework_Manager
 {
 
     /**
-     * Default context shared by all services
+     * Single instance of itself
+     *
+     * @var AAM_Framework_Manager
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
+
+    /**
+     * Default access level
+     *
+     * The access level that is used if non are provided during service invocation
+     *
+     * @var AAM_Framework_AccessLevel_Interface
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_default_access_level = null;
+
+    /**
+     * Default settings that are used for all services
      *
      * @var array
-     *
      * @access private
-     * @static
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    private static $_default_context = [];
+    private $_default_settings = [
+        'error_handling' => 'wp_trigger_error'
+    ];
 
     /**
-     * Get roles service
+     * Collection of utilities
      *
-     * @return AAM_Framework_Service_Roles
+     * @var array
+     * @access private
      *
-     * @access public
-     * @version 6.9.6
+     * @version 7.0.0
      */
-    public static function roles(array $runtime_context = [])
+    private $_utilities = [
+        'cache'         => AAM_Framework_Utility_Cache::class,
+        'object_cache'  => AAM_Framework_Utility_ObjectCache::class,
+        'misc'          => AAM_Framework_Utility_Misc::class,
+        'config'        => AAM_Framework_Utility_Config::class,
+        'redirect'      => AAM_Framework_Utility_Redirect::class,
+        'capabilities'  => AAM_Framework_Utility_Capabilities::class,
+        'caps'          => AAM_Framework_Utility_Capabilities::class,
+        'roles'         => AAM_Framework_Utility_Roles::class,
+        'users'         => AAM_Framework_Utility_Users::class,
+        'db'            => AAM_Framework_Utility_Db::class,
+        'access_levels' => AAM_Framework_Utility_AccessLevels::class,
+        'jwt'           => AAM_Framework_Utility_Jwt::class,
+        'policy'        => AAM_Framework_Utility_Policy::class,
+        'content'       => AAM_Framework_Utility_Content::class,
+        'rest'          => AAM_Framework_Utility_Rest::class
+    ];
+
+    /**
+     * Collection of utilities
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_services = [
+        'urls'                   => AAM_Framework_Service_Urls::class,
+        'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
+        'jwts'                   => AAM_Framework_Service_Jwts::class,
+        'login_redirect'         => AAM_Framework_Service_LoginRedirect::class,
+        'logout_redirect'        => AAM_Framework_Service_LogoutRedirect::class,
+        'not_found_redirect'     => AAM_Framework_Service_NotFoundRedirect::class,
+        'backend_menu'           => AAM_Framework_Service_BackendMenu::class,
+        'admin_toolbar'          => AAM_Framework_Service_AdminToolbar::class,
+        'metaboxes'              => AAM_Framework_Service_Metaboxes::class,
+        'widgets'                => AAM_Framework_Service_Widgets::class,
+        'access_denied_redirect' => AAM_Framework_Service_AccessDeniedRedirect::class,
+        'roles'                  => AAM_Framework_Service_Roles::class,
+        'users'                  => AAM_Framework_Service_Users::class,
+        'posts'                  => AAM_Framework_Service_Posts::class,
+        'terms'                  => AAM_Framework_Service_Terms::class,
+        'post_types'             => AAM_Framework_Service_PostTypes::class,
+        'taxonomies'             => AAM_Framework_Service_Taxonomies::class,
+        'capabilities'           => AAM_Framework_Service_Capabilities::class,
+        'caps'                   => AAM_Framework_Service_Capabilities::class,
+        'settings'               => AAM_Framework_Service_Settings::class,
+        'policies'               => AAM_Framework_Service_Policies::class,
+        'hooks'                  => AAM_Framework_Service_Hooks::class
+    ];
+
+    /**
+     * Collection of resources
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_resources = [
+        AAM_Framework_Type_Resource::TOOLBAR      => AAM_Framework_Resource_AdminToolbar::class,
+        AAM_Framework_Type_Resource::API_ROUTE    => AAM_Framework_Resource_ApiRoute::class,
+        AAM_Framework_Type_Resource::BACKEND_MENU => AAM_Framework_Resource_BackendMenu::class,
+        AAM_Framework_Type_Resource::POST         => AAM_Framework_Resource_Post::class,
+        AAM_Framework_Type_Resource::POST_TYPE    => AAM_Framework_Resource_PostType::class,
+        AAM_Framework_Type_Resource::TAXONOMY     => AAM_Framework_Resource_Taxonomy::class,
+        AAM_Framework_Type_Resource::TERM         => AAM_Framework_Resource_Term::class,
+        AAM_Framework_Type_Resource::USER         => AAM_Framework_Resource_User::class,
+        AAM_Framework_Type_Resource::ROLE         => AAM_Framework_Resource_Role::class,
+        AAM_Framework_Type_Resource::METABOX      => AAM_Framework_Resource_Metabox::class,
+        AAM_Framework_Type_Resource::URL          => AAM_Framework_Resource_Url::class,
+        AAM_Framework_Type_Resource::WIDGET       => AAM_Framework_Resource_Widget::class,
+        AAM_Framework_Type_Resource::HOOK         => AAM_Framework_Resource_Hook::class,
+        AAM_Framework_Type_Resource::POLICY       => AAM_Framework_Resource_Policy::class,
+        AAM_Framework_Type_Resource::CAPABILITY   => AAM_Framework_Resource_Capability::class
+    ];
+
+    /**
+     * Collection of preferences
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_preferences = [
+        AAM_Framework_Type_Preference::ACCESS_DENIED_REDIRECT => AAM_Framework_Preference_AccessDeniedRedirect::class,
+        AAM_Framework_Type_Preference::LOGIN_REDIRECT         => AAM_Framework_Preference_LoginRedirect::class,
+        AAM_Framework_Type_Preference::LOGOUT_REDIRECT        => AAM_Framework_Preference_LogoutRedirect::class,
+        AAM_Framework_Type_Preference::NOT_FOUND_REDIRECT     => AAM_Framework_Preference_NotFoundRedirect::class
+    ];
+
+    /**
+     * Construct
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.0
+     */
+    protected function __construct()
     {
-        return AAM_Framework_Service_Roles::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
+        add_action('init', function () {
+            if ($this->config->get('service.policies.enabled', true)) {
+                // Register JSON Access Policy CPT
+                register_post_type(AAM_Framework_Service_Policies::CPT, [
+                    'label'        => 'Access Policy',
+                    'labels'       => [
+                        'name'          => 'Access Policies',
+                        'edit_item'     => 'Edit Policy',
+                        'singular_name' => 'Policy',
+                        'add_new_item'  => 'Add New Policy',
+                        'new_item'      => 'New Policy'
+                    ],
+                    'public'              => false,
+                    'show_ui'             => true,
+                    'show_in_rest'        => true,
+                    'show_in_menu'        => false,
+                    'exclude_from_search' => true,
+                    'publicly_queryable'  => false,
+                    'hierarchical' => true,
+                    'supports'     => [
+                        'title', 'excerpt', 'revisions', 'custom-fields'
+                    ],
+                    'delete_with_user' => false,
+                    'capabilities' => [
+                        'edit_post'         => 'aam_edit_policy',
+                        'read_post'         => 'aam_read_policy',
+                        'delete_post'       => 'aam_delete_policy',
+                        'delete_posts'      => 'aam_delete_policies',
+                        'edit_posts'        => 'aam_edit_policies',
+                        'edit_others_posts' => 'aam_edit_others_policies',
+                        'publish_posts'     => 'aam_publish_policies',
+                    ]
+                ]);
+            }
+        });
+
+        // Dynamically adjust user account if JSON Access Policies are enabled
+        add_action('set_current_user', function() {
+            if ($this->config->get('service.policies.enabled', true)) {
+                $this->_dynamically_adjust_user_account();
+            }
+        }, 999);
+
+        // Load list of resources & preferences that framework manages
+        // Register the resource
+        add_filter(
+            'aam_get_resource_filter',
+            function($result, $access_level, $resource_type) {
+                if (is_null($result)) {
+                    if (array_key_exists($resource_type, $this->_resources)) {
+                        $result = new $this->_resources[$resource_type](
+                            $access_level
+                        );
+                    } else {
+                        $result = new AAM_Framework_Resource_Generic(
+                            $access_level,
+                            $resource_type
+                        );
+                    }
+                }
+
+                return $result;
+            }, 10, 3
+        );
+
+        add_filter(
+            'aam_get_preference_filter',
+            function($result, $access_level, $preference_type) {
+                if (is_null($result)) {
+                    if (array_key_exists($preference_type, $this->_preferences)) {
+                        $result = new $this->_preferences[$preference_type](
+                            $access_level
+                        );
+                    } else {
+                        $result = new AAM_Framework_Preference_Generic(
+                            $access_level, $preference_type
+                        );
+                    }
+                }
+
+                return $result;
+            }, 10, 3
+        );
     }
 
     /**
-     * Get the URL Access service
+     * Prevent from fatal errors
      *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_Urls
-     *
-     * @access public
-     * @version 6.9.9
-     */
-    public static function urls(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Urls::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the API Routes service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_ApiRoutes
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public static function api_routes(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_ApiRoutes::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the JWT Token service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_Jwts
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public static function jwts(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Jwts::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Login Redirect service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_LoginRedirect
-     *
-     * @access public
-     * @version 6.9.12
-     */
-    public static function login_redirect(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_LoginRedirect::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Logout Redirect service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_LogoutRedirect
-     *
-     * @access public
-     * @version 6.9.12
-     */
-    public static function logout_redirect(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_LogoutRedirect::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the 404 Redirect service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_NotFoundRedirect
-     *
-     * @access public
-     * @version 6.9.12
-     */
-    public static function not_found_redirect(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_NotFoundRedirect::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Backend Menu service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_BackendMenu
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public static function backend_menu(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_BackendMenu::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Admin Toolbar service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_AdminToolbar
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public static function admin_toolbar(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_AdminToolbar::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get Metaboxes & Widgets (aka Components) service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_Components
-     *
-     * @access public
-     * @version 6.9.13
-     */
-    public static function components(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Components::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Access Denied Redirect service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_AccessDeniedRedirect
-     *
-     * @access public
-     * @version 6.9.14
-     */
-    public static function access_denied_redirect(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_AccessDeniedRedirect::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the User Governance service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_IdentityGovernance
-     *
-     * @access public
-     * @version 6.9.28
-     */
-    public static function identity_governance(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_IdentityGovernance::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Content service
-     *
-     * @param array $runtime_context
-     *
-     * @return AAM_Framework_Service_Content
-     *
-     * @access public
-     * @version 6.9.31
-     */
-    public static function content(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Content::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the Users service
-     *
-     * @return AAM_Framework_Service_Users
-     *
-     * @access public
-     * @version 6.9.32
-     */
-    public static function users(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Users::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the subject service
-     *
-     * @return AAM_Framework_Service_Subject
-     *
-     * @access public
-     * @version 6.9.9
-     */
-    public static function subject(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Subject::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the capabilities service
-     *
-     * @return AAM_Framework_Service_Capabilities
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public static function capabilities(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Capabilities::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the configuration service
-     *
-     * @return AAM_Framework_Service_Configs
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public static function configs(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Configs::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the settings service
-     *
-     * @return AAM_Framework_Service_Settings
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public static function settings(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_Settings::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Get the subject service
-     *
-     * @return AAM_Framework_Service_AccessLevel
-     *
-     * @access public
-     * @version 6.9.34
-     */
-    public static function access_levels(array $runtime_context = [])
-    {
-        return AAM_Framework_Service_AccessLevel::get_instance(array_merge(
-            self::$_default_context, $runtime_context
-        ));
-    }
-
-    /**
-     * Setup the framework manager
-     *
-     * @param array $default_context
+     * @param string $name
+     * @param array  $args
      *
      * @return void
      *
      * @access public
-     * @static
-     * @version 6.9.33
+     * @version 7.0.0
      */
-    public static function setup(array $default_context = [])
+    public function __call($name, $args)
     {
-        if (is_array($default_context)) {
-            self::$_default_context = $default_context;
+        $result = null;
+
+        if (array_key_exists($name, $this->_services)) {
+            $acl      = array_shift($args);
+            $settings = array_shift($args);
+
+            if (!is_array($settings)) {
+                $settings = [];
+            }
+
+            // Parse the incoming context and determine correct access level
+            if (empty($acl)) { // Use default access level
+                $acl = $this->_default_access_level;
+            } elseif (is_string($acl)) {
+                $acl = $this->_string_to_access_level($acl);
+            }
+
+            if (!is_a($acl, AAM_Framework_AccessLevel_Interface::class)) {
+                throw new InvalidArgumentException(
+                    'Invalid access level provided'
+                );
+            }
+
+            // Prepare settings for the service
+            $settings  = array_replace($this->_default_settings, $settings);
+
+            // Work with cache
+            $cache_key = [ $acl->type, $acl->get_id(), $name, $settings ];
+            $result    = $this->object_cache->get($cache_key);
+
+            if (empty($result)) {
+                $result = call_user_func(
+                    "{$this->_services[$name]}::get_instance",
+                    $acl,
+                    $settings
+                );
+
+                $this->object_cache->set($cache_key, $result);
+            }
+        } else {
+            throw new BadMethodCallException(sprintf(
+                'There is no service %s defined', esc_js($name)
+            ));
         }
+
+        return $result;
+    }
+
+    /**
+     * Get utility instance
+     *
+     * @param string $name
+     *
+     * @return AAM_Framework_Utility_Interface
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->_utilities)) {
+            $result = $this->_utilities[$name]::bootstrap();
+        } else {
+            throw new BadMethodCallException(sprintf(
+                'There is no utility %s defined', esc_js($name)
+            ));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if provided service name is registered
+     *
+     * @param string $name
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_service($name)
+    {
+        return array_key_exists($name, $this->_services);
+    }
+
+    /**
+     * Check if provided utility name is registered
+     *
+     * @param string $name
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function has_utility($name)
+    {
+        return array_key_exists($name, $this->_utilities);
+    }
+
+    /**
+     * Dynamically adjust user roles & capabilities
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _dynamically_adjust_user_account()
+    {
+        if (is_user_logged_in()) {
+            $this->_update_user_capabilities();
+            $this->_update_user_roles();
+        }
+    }
+
+    /**
+     * Dynamically adjust user capabilities with JSON access policies
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _update_user_capabilities()
+    {
+        $current_user = wp_get_current_user();
+
+        // Iterate over the list of all capabilities and properly adjust them for
+        // current user
+        foreach($this->caps()->list() as $cap => $is_granted) {
+            $current_user->caps[$cap]    = $is_granted;
+            $current_user->allcaps[$cap] = $is_granted;
+        }
+    }
+
+    /**
+     * Dynamically adjust user roles with JSON access policies
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _update_user_roles()
+    {
+        $user      = wp_get_current_user();
+        $role_list = $user->roles;
+        $assumed   = $this->roles()->get_list();
+
+        foreach($assumed as $slug => $is_assumed) {
+            if ($is_assumed) {
+                array_push($role_list, $slug);
+            } else {
+                $role_list = array_filter($role_list, function($r) use ($slug) {
+                    return $r !== $slug;
+                });
+
+                // Making sure role is also deleted from the caps
+                $user->caps = array_filter($user->caps, function($c) use ($slug) {
+                    return $c !== $slug;
+                }, ARRAY_FILTER_USE_KEY);
+
+                $user->allcaps = array_filter($user->allcaps, function($c) use ($slug) {
+                    return $c !== $slug;
+                }, ARRAY_FILTER_USE_KEY);
+            }
+        }
+
+        // Set new list of roles
+        if (!empty($assumed)) {
+            $user->roles = $role_list;
+
+            // Assign these roles to caps also, to allow WP core to do the rest
+            foreach($role_list as $slug) {
+                $user->caps[$slug] = true;
+            }
+
+            // Recalibrate user
+            $user->get_role_caps();
+            $user->update_user_level_from_caps();
+        }
+    }
+
+    /**
+     * Convert a string to a context
+     *
+     * @param string $str
+     *
+     * @return AAM_Framework_AccessLevel_Interface
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _string_to_access_level($str)
+    {
+        // Trying to parse the context and extract the access level
+        if (in_array($str, [ 'visitor', 'anonymous', 'guest'], true)) {
+            $result = $this->access_levels->get_visitor();
+        } elseif (in_array($str, [ 'default', 'all', 'anyone', 'everyone' ], true)) {
+            $result = $this->access_levels->get_default();
+        } elseif (strpos($str, ':')) {
+            list($type, $id) = explode(':', $str, 2);
+
+            if ($type === 'role') {
+                $result = $this->access_levels->get_role($id);
+            } elseif ($type === 'user') {
+                $result = $this->access_levels->get_user($id);
+            }
+        }
+
+        if (!is_a($result, AAM_Framework_AccessLevel_Interface::class)) {
+            throw new InvalidArgumentException(
+                'Unsupported access level string value'
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @param AAM_Framework_AccessLevel_Interface $default_access_level
+     * @param array                               $default_settings     [Optional]
+     *
+     * @return AAM_Framework_Manager
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function setup(
+        $default_access_level = null, $default_settings = []
+    ) {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        // Capture the default access level
+        if (!empty($default_access_level)) {
+            self::$_instance->_default_access_level = $default_access_level;
+        }
+
+        // Set the default context if it is not empty
+        if (!empty($default_settings)) {
+            self::$_instance->_default_settings = array_replace(
+                self::$_instance->_default_settings,
+                $default_settings
+            );
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get instance of the framework manager without providing context
+     *
+     * @return AAM_Framework_Manager
+     *
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function _()
+    {
+        return self::setup();
     }
 
 }

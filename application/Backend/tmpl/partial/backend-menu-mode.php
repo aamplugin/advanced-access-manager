@@ -1,11 +1,4 @@
-<?php
-/**
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.13 Initial implementation of the template
- *
- * @version 6.9.14
- * */
-?>
+<?php /** @version 7.0.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature-top-actions text-right">
@@ -19,8 +12,8 @@
                         <input
                             data-toggle="toggle"
                             type="checkbox"
-                            data-on="<i class='icon-lock'></i> <?php echo __('Enabled', AAM_KEY); ?>"
-                            data-off="<?php echo __('Disabled', AAM_KEY); ?>"
+                            data-on="<i class='icon-lock'></i> <?php echo __('Enabled', 'advanced-access-manager'); ?>"
+                            data-off="<?php echo __('Disabled', 'advanced-access-manager'); ?>"
                             data-size="small"
                             data-onstyle="danger"
                             disabled

@@ -10,22 +10,17 @@
 /**
  * AAM WP_Role proxy
  *
- * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
- * @since 6.9.6  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.38
+ * @version 7.0.0
  */
-class AAM_Framework_Proxy_Role
+class AAM_Framework_Proxy_Role implements AAM_Framework_Proxy_Interface
 {
 
     /**
      * Role unique slug (aka ID)
      *
      * @var string
-     * @since 6.9.6
+     * @since 7.0.0
      */
     private $_slug;
 
@@ -33,7 +28,7 @@ class AAM_Framework_Proxy_Role
      * Role display name
      *
      * @var string
-     * @since 6.9.6
+     * @since 7.0.0
      */
     private $_display_name;
 
@@ -41,7 +36,7 @@ class AAM_Framework_Proxy_Role
      * Original role object
      *
      * @var WP_Role
-     * @since 6.9.6
+     * @since 7.0.0
      */
     private $_role;
 
@@ -54,7 +49,7 @@ class AAM_Framework_Proxy_Role
      * @var array
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private static $_user_index = null;
 
@@ -65,12 +60,9 @@ class AAM_Framework_Proxy_Role
      * @param WP_Role $role Role core object
      *
      * @return void
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @access public
-     * @since 6.9.35
+     *
+     * @version 7.0.0
      */
     public function __construct($name, WP_Role $role)
     {
@@ -82,14 +74,24 @@ class AAM_Framework_Proxy_Role
     }
 
     /**
+     * @inheritDoc
+     *
+     * @return WP_Role
+     */
+    public function get_core_instance()
+    {
+        return $this->_role;
+    }
+
+    /**
      * Update role
      *
      * @param array $attributes
      *
      * @return boolean
-     *
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     public function update(array $attributes = [])
     {
@@ -108,19 +110,24 @@ class AAM_Framework_Proxy_Role
         }
 
         // Adding the list of capabilities
-        if (isset($attributes['add_caps']) && is_array($attributes['add_caps'])) {
-            array_walk($attributes['add_caps'], function($cap) {
-                $this->add_capability($cap);
-            });
+        if (isset($attributes['add_caps'])) {
+            foreach($attributes['add_caps'] as $capability) {
+                $this->_role->add_cap($capability, true);
+            }
+        }
+
+        // Depriving the list of capabilities
+        if (isset($attributes['deprive_caps'])) {
+            foreach($attributes['deprive_caps'] as $capability) {
+                $this->_role->add_cap($capability, false);
+            }
         }
 
         // Removing the list of capabilities
-        if (isset($attributes['remove_caps'])
-            && is_array($attributes['remove_caps'])
-        ) {
-            array_walk($attributes['remove_caps'], function($cap) {
-                $this->remove_capability($cap);
-            });
+        if (isset($attributes['remove_caps'])) {
+            foreach($attributes['remove_caps'] as $capability) {
+                $this->_role->remove_cap($capability);
+            }
         }
 
         $roles = wp_roles()->roles;
@@ -169,14 +176,9 @@ class AAM_Framework_Proxy_Role
      * @param string $slug Unique role slug (aka ID)
      *
      * @return void
-     *
      * @access public
-     * @throws InvalidArgumentException
      *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/271
-     * @since 6.9.6  Initial implementation of the method
-     *
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public function set_slug($slug)
     {
@@ -204,10 +206,9 @@ class AAM_Framework_Proxy_Role
      * @param string $display_name Role name (aka display name)
      *
      * @return void
-     *
      * @access public
-     * @throws InvalidArgumentException
-     * @since 6.9.6
+     *
+     * @since 7.0.0
      */
     public function set_display_name($display_name)
     {
@@ -227,22 +228,18 @@ class AAM_Framework_Proxy_Role
      * @param boolean $save_immediately Wether save in DB immediately or not
      *
      * @return void
-     *
-     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @access public
-     * @throws InvalidArgumentException
-     * @since 6.9.38
+     *
+     * @since 7.0.0
      */
     public function add_capability($capability, $save_immediately = false)
     {
         $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
+            throw new InvalidArgumentException(sprintf(
+                "Capability '%s' is invalid", esc_js($capability)
+            ));
         }
 
         if ($save_immediately === true) {
@@ -259,22 +256,18 @@ class AAM_Framework_Proxy_Role
      * @param boolean $save_immediately Wether save in DB immediately or not
      *
      * @return void
-     *
-     * @since 6.9.38 https://github.com/aamplugin/advanced-access-manager/issues/418
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @access public
-     * @throws InvalidArgumentException
-     * @since 6.9.38
+     *
+     * @since 7.0.0
      */
     public function remove_capability($capability, $save_immediately = false)
     {
         $sanitized = trim($capability);
 
         if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
+            throw new InvalidArgumentException(sprintf(
+                "Capability '%s' is invalid", esc_js($capability)
+            ));
         }
 
         if ($save_immediately === true) {
@@ -285,32 +278,15 @@ class AAM_Framework_Proxy_Role
     }
 
     /**
-     * Return role attributes as array
-     *
-     * @return array
-     *
-     * @access public
-     * @since 6.9.6
-     */
-    public function to_array()
-    {
-        return array(
-            'slug'         => $this->_slug,
-            'name'         => $this->_display_name,
-            'capabilities' => $this->_role->capabilities
-        );
-    }
-
-    /**
      * Proxy method to the original object
      *
      * @param string $name
      * @param array  $arguments
      *
      * @return mixed
-     *
      * @access public
-     * @since 6.9.6
+     *
+     * @version 7.0.0
      */
     public function __call($name, $arguments)
     {
@@ -335,9 +311,9 @@ class AAM_Framework_Proxy_Role
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
-     * @since 6.9.6
+     *
+     * @version 7.0.0
      */
     public function __get($name)
     {
@@ -367,9 +343,9 @@ class AAM_Framework_Proxy_Role
      * @param mixed  $value
      *
      * @return void
-     *
      * @access public
-     * @since 6.9.6
+     *
+     * @version 7.0.0
      */
     public function __set($name, $value)
     {
@@ -388,9 +364,9 @@ class AAM_Framework_Proxy_Role
      * Get user count for the current role
      *
      * @return int
-     *
      * @access private
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     private function _get_user_count()
     {

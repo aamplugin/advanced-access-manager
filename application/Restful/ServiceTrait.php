@@ -10,11 +10,8 @@
 /**
  * RESTful API service trait
  *
- * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
- * @since 6.9.10 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.37
+ * @version 7.0.0
  */
 trait AAM_Restful_ServiceTrait
 {
@@ -22,7 +19,7 @@ trait AAM_Restful_ServiceTrait
     /**
      * Map of REST & HTTP status codes
      *
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private $_exception_map = [
         InvalidArgumentException::class => [
@@ -32,6 +29,10 @@ trait AAM_Restful_ServiceTrait
         DomainException::class => [
             'rest_code'   => 'rest_unauthorized',
             'http_status' => 401
+        ],
+        UnexpectedValueException::class => [
+            'rest_code'   => 'rest_unauthorized',
+            'http_status' => 406
         ],
         LogicException::class => [
             'rest_code'   => 'rest_workflow_error',
@@ -58,6 +59,8 @@ trait AAM_Restful_ServiceTrait
      *
      * @access private
      * @static
+     *
+     * @version 7.0.0
      */
     private static $_instance = null;
 
@@ -69,28 +72,31 @@ trait AAM_Restful_ServiceTrait
      *
      * @param string  $route
      * @param array   $args
+     * @param mixed   $auth
      * @param boolean $access_level_aware
+     * @param string  $ns
      *
      * @return void
-     *
      * @access private
-     * @version 6.9.10
+     *
+     * @version 7.0.0
      */
-    private function _register_route($route, $args, $access_level_aware = true)
-    {
+    private function _register_route(
+        $route, $args, $auth, $access_level_aware = true, $ns = null
+    ) {
         // Add the common arguments to all routes if needed
-        if ($access_level_aware) {
+        if ($access_level_aware === true) {
             $args = array_merge_recursive(array(
                 'args' => array(
                     'access_level' => array(
                         'description' => 'Access level for the controls',
                         'type'        => 'string',
-                        'enum'        => array(
-                            AAM_Core_Subject_Role::UID,
-                            AAM_Core_Subject_User::UID,
-                            AAM_Core_Subject_Visitor::UID,
-                            AAM_Core_Subject_Default::UID
-                        ),
+                        'enum'        => [
+                            AAM_Framework_Type_AccessLevel::ROLE,
+                            AAM_Framework_Type_AccessLevel::USER,
+                            AAM_Framework_Type_AccessLevel::VISITOR,
+                            AAM_Framework_Type_AccessLevel::DEFAULT
+                        ],
                         'validate_callback' => function ($value, $request) {
                             return $this->_validate_access_level($value, $request);
                         }
@@ -111,14 +117,46 @@ trait AAM_Restful_ServiceTrait
                     )
                 )
             ), $args);
+        } elseif (is_array($access_level_aware)) {
+            // Let's build the additional params
+            $additional_args = [
+                'access_level' => [
+                    'description' => 'Access level for the controls',
+                    'type'        => 'string',
+                    'enum'        => $access_level_aware,
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_access_level($value, $request);
+                    }
+                ]
+            ];
+
+            // Adding more params based on included access levels
+            if (in_array(AAM_Framework_Type_AccessLevel::ROLE, $access_level_aware, true)) {
+                $additional_args['role_id'] = [
+                    'description'       => 'Role ID (aka slug)',
+                    'type'              => 'string',
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_role_id($value, $request);
+                    }
+                ];
+            } elseif (in_array(AAM_Framework_Type_AccessLevel::USER, $access_level_aware, true)) {
+                $additional_args['user_id'] = [
+                    'description'       => 'User ID',
+                    'type'              => 'integer',
+                    'validate_callback' => function ($value, $request) {
+                        return $this->_validate_user_id($value, $request);
+                    }
+                ];
+            }
+
+            $args = array_merge_recursive([ 'args' => $additional_args ], $args);
         }
 
-        register_rest_route(
-            'aam/v2/service',
+        AAM::api()->rest->register(
+            is_null($ns) ? 'aam/v2' : $ns,
             $route,
-            apply_filters(
-                'aam_rest_route_args_filter', $args, $route, 'aam/v2/service'
-            )
+            $args,
+            $auth
         );
     }
 
@@ -127,31 +165,31 @@ trait AAM_Restful_ServiceTrait
      *
      * @param WP_REST_Request $request
      *
-     * @return AAM_Core_Subject|null
+     * @return AAM_Framework_AccessLevel_Interface|null
      *
      * @access private
-     * @since 6.9.10
+     * @since 7.0.0
      */
-    private function _determine_subject(WP_REST_Request $request)
+    private function _determine_access_level(WP_REST_Request $request)
     {
-        $subject      = null;
+        $result       = null;
         $access_level = $request->get_param('access_level');
 
         if ($access_level) {
-            $subject_id   = null;
+            $access_level_id = null;
 
-            if ($access_level === AAM_Core_Subject_Role::UID) {
-                $subject_id = $request->get_param('role_id');
-            } elseif ($access_level === AAM_Core_Subject_User::UID) {
-                $subject_id = $request->get_param('user_id');
+            if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
+                $access_level_id = $request->get_param('role_id');
+            } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
+                $access_level_id = $request->get_param('user_id');
             }
 
-            $subject = AAM_Framework_Manager::subject()->get(
-                $access_level, $subject_id
+            $result = AAM::api()->access_levels->get(
+                $access_level, $access_level_id
             );
         }
 
-        return $subject;
+        return $result;
     }
 
     /**
@@ -163,29 +201,29 @@ trait AAM_Restful_ServiceTrait
      * @return boolean|WP_Error
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _validate_access_level($access_level, $request)
     {
         $response = true;
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             $role_id = $request->get_param('role_id');
 
             if (empty($role_id)) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The role_id is required', AAM_KEY),
+                    __('The role_id is required', 'advanced-access-manager'),
                     array('status'  => 400)
                 );
             }
-        } elseif ($access_level === AAM_Core_Subject_User::UID) {
+        } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
             $user_id = $request->get_param('user_id');
 
             if (empty($user_id)) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The user_id is required', AAM_KEY),
+                    __('The user_id is required', 'advanced-access-manager'),
                     array('status'  => 400)
                 );
             }
@@ -203,14 +241,14 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_role_id($value, $request)
     {
         $response     = true;
         $access_level = $request->get_param('access_level');
 
-        if ($access_level === AAM_Core_Subject_Role::UID) {
+        if ($access_level === AAM_Framework_Type_AccessLevel::ROLE) {
             // Verifying that the role exists and is accessible
             $response = $this->_validate_role_accessibility($value);
         }
@@ -227,7 +265,7 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_user_id($value, $request)
     {
@@ -236,7 +274,7 @@ trait AAM_Restful_ServiceTrait
         if (is_numeric($value)) {
             $access_level = $request->get_param('access_level');
 
-            if ($access_level === AAM_Core_Subject_User::UID) {
+            if ($access_level === AAM_Framework_Type_AccessLevel::USER) {
                 // Verifying that the user exists and is accessible
                 $response = $this->_validate_user_accessibility(
                     intval($value), $request->get_method()
@@ -254,23 +292,17 @@ trait AAM_Restful_ServiceTrait
      *
      * @return bool|WP_Error
      *
-     * @since 6.9.37 https://github.com/aamplugin/advanced-access-manager/issues/413
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access private
-     * @version 6.9.37
+     * @version 7.0.0
      */
     private function _validate_role_accessibility($slug)
     {
         $response = true;
 
         try {
-            $slug    = urldecode($slug);
-            $service = AAM_Framework_Manager::roles([
-                'error_handling' => 'exception'
-            ]);
+            $slug = urldecode($slug);
 
-            if (!$service->is_editable_role($slug)) {
+            if (!AAM::api()->roles->is_editable_role($slug)) {
                 $response = new WP_Error(
                     'rest_not_found',
                     "Role {$slug} is not editable to current user",
@@ -280,10 +312,7 @@ trait AAM_Restful_ServiceTrait
         } catch (Exception $_) {
             $response = new WP_Error(
                 'rest_not_found',
-                sprintf(
-                    __("The role '%s' does not exist or is not editable"),
-                    $slug
-                ),
+                sprintf("The role '%s' does not exist or is not editable", $slug),
                 [ 'status'  => 404 ]
             );
         }
@@ -300,7 +329,7 @@ trait AAM_Restful_ServiceTrait
      * @return bool|WP_Error
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _validate_user_accessibility($user_id, $http_method)
     {
@@ -312,7 +341,7 @@ trait AAM_Restful_ServiceTrait
 
         // Now, depending on the HTTP Method, do additional check
         if ($http_method === WP_REST_Server::READABLE) {
-            $cap = 'aam_list_users';
+            $cap = 'list_users';
         } else {
             $cap = 'edit_user';
         }
@@ -324,7 +353,7 @@ trait AAM_Restful_ServiceTrait
             $response = new WP_Error(
                 'rest_not_found',
                 sprintf(
-                    __("The user with ID '%s' does not exist or is not editable"),
+                    "The user with ID '%s' does not exist or is not editable",
                     $user_id
                 ),
                 [ 'status'  => 404 ]
@@ -344,7 +373,7 @@ trait AAM_Restful_ServiceTrait
      * @return WP_REST_Response
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _prepare_error_response($ex, $code = null, $status = null)
     {
@@ -380,7 +409,7 @@ trait AAM_Restful_ServiceTrait
      * @return array
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _determine_response_attributes($exception, $code, $status)
     {
@@ -404,7 +433,7 @@ trait AAM_Restful_ServiceTrait
      * @return static::class
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
     public static function bootstrap()
     {

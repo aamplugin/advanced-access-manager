@@ -8,13 +8,10 @@
  */
 
 /**
- * AAM service user manager
- *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
- * @since 6.9.32 Initial implementation of the class
+ * AAM Users Governance service
  *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Users
 {
@@ -22,91 +19,195 @@ class AAM_Framework_Service_Users
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Return paginated list of user
+     * Deny one or multiple permissions
      *
-     * @return array Array of AAM_Framework_Proxy_User
+     * @param mixed        $user_identifier
+     * @param string|array $permission
      *
+     * @return bool
      * @access public
-     * @version 6.9.32
+     *
+     * @version 7.0.0
      */
-    public function get_user_list(array $args = [])
+    public function deny($user_identifier, $permission)
     {
         try {
-            $args = array_merge([
-                'blog_id'        => get_current_blog_id(),
-                'fields'         => 'all',
-                'number'         => 10,
-                'offset'         => 0,
-                'search'         => '',
-                'result_type'    => 'full',
-                'search_columns' => [ 'user_login', 'user_email', 'display_name' ],
-                'orderby'        => 'display_name'
-            ], $args);
+            $resource  = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
 
-            $query  = new WP_User_Query($args);
-            $result = [];
+            if (is_string($permission)) {
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'deny'
+                );
+            } elseif (is_array($permission)) {
+                $result = true;
 
-            if ($args['result_type'] !== 'summary') {
-                $result['list'] = [];
-
-                foreach ($query->get_results() as $user) {
-                    array_push($result['list'], $this->_prepare_user(
-                        new AAM_Framework_Proxy_User($user))
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'deny'
                     );
                 }
-            }
-
-            if (in_array($args['result_type'], ['full', 'summary'], true)) {
-                $result['summary'] = [
-                    'total_count'    => count_users()['total_users'],
-                    'filtered_count' => $query->get_total()
-                ];
+            } else {
+                throw new InvalidArgumentException('Invalid permission type');
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
 
-        return $args['result_type'] === 'list' ? $result['list'] : $result;
+        return $result;
     }
 
     /**
-     * Get user by its identifier
+     * Allow one or multiple permissions
      *
-     * The identifier can be either ID, user_login or user_email.
+     * @param mixed        $user_identifier
+     * @param string|array $permission
      *
-     * @param int|string $identifier
-     * @param boolean    $return_proxy
-     *
-     * @return array|AAM_Framework_Proxy_User
-     *
+     * @return bool
      * @access public
-     * @version 6.9.32
-     * @throws OutOfRangeException
+     *
+     * @version 7.0.0
      */
-    public function get_user($identifier, $return_proxy = true)
+    public function allow($user_identifier, $permission)
     {
         try {
-            if (is_numeric($identifier)) { // Get user by ID
-                $user = get_user_by('id', $identifier);
-            } elseif (is_string($identifier) && $identifier !== '*') {
-                if (strpos($identifier, '@') > 0) { // Email?
-                    $user = get_user_by('email', $identifier);
-                } else {
-                    $user = get_user_by('login', $identifier);
+            $resource  = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
+
+            if (is_string($permission)) {
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'allow'
+                );
+            } elseif (is_array($permission)) {
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'allow'
+                    );
                 }
             } else {
-                $user = $identifier;
+                throw new InvalidArgumentException('Invalid permission type');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if permission is denied for a given user
+     *
+     * This method is façade as it also does additional validation for each user's
+     * role to ensure proper protection
+     *
+     * @param mixed  $user_identifier
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_denied_to($user_identifier, $permission)
+    {
+        try {
+            $result     = null;
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($user_identifier);
+            $data       = $resource->get_permission($identifier, $permission);
+
+            if (!empty($data)) {
+                $result = $data['effect'] !== 'allow';
+            } else { // Get the list of all user roles and properly merge permissions
+                $user_roles    = array_values($identifier->roles);
+                $multi_support = $this->config->get(
+                    'core.settings.multi_access_levels'
+                );
+
+                // Determine the final list of roles
+                $roles = $multi_support ? $user_roles : [ array_shift($user_roles) ];
+
+                // Iterate over the list of roles and merge permissions properly
+                $permissions = [];
+                $acl         = $resource->get_access_level();
+
+                foreach($roles as $slug) {
+                    if (wp_roles()->is_role($slug)) { // Ignore invalid roles
+                        $permissions = $this->misc->merge_permissions(
+                            $acl->get_resource(
+                                AAM_Framework_Type_Resource::ROLE
+                            )->get_permissions(wp_roles()->get_role($slug)),
+                            $permissions,
+                            AAM_Framework_Type_Resource::ROLE
+                        );
+                    }
+                }
+
+                if (isset($permissions[$permission])) {
+                    $result = $permissions[$permission]['effect'] !== 'allow';
+                }
             }
 
-            if (!is_a($user, 'WP_User')) {
-                throw new OutOfRangeException(
-                    "User with identifier {$identifier} does not exist"
+            // Making sure that other implementations can affect the decision
+            $result = apply_filters(
+                'aam_user_is_denied_to_filter',
+                $result,
+                $permission,
+                $resource
+            );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if permission is allowed
+     *
+     * @param mixed  $user_identifier
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_allowed_to($user_identifier, $permission)
+    {
+        $decision = $this->is_denied_to($user_identifier, $permission);
+
+        return is_bool($decision) ? !$decision : $decision;
+    }
+
+    /**
+     * Reset permissions
+     *
+     * Reset user permissions or permissions to all users if $user_identifier is not
+     * provided
+     *
+     * @param mixed $user_identifier [Optional]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset($user_identifier = null)
+    {
+        try {
+            if (!empty($user_identifier)) {
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($user_identifier)
                 );
             } else {
-                $user = new AAM_Framework_Proxy_User($user);
+                $result = $this->_get_resource()->reset();
             }
-
-            $result = $return_proxy ? $user : $this->_prepare_user($user);
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -115,161 +216,123 @@ class AAM_Framework_Service_Users
     }
 
     /**
-     * Update user
+     * Check if user is hidden
      *
-     * @param int|string $identifier
-     * @param array      $data
-     * @param boolean    $return_proxy
+     * @param mixed $user_identifier
      *
-     * @return array|AAM_Framework_Proxy_User
-     *
+     * @return boolean
      * @access public
-     * @version 6.9.32
+     *
+     * @version 7.0.0
      */
-    public function update($identifier, $data, $return_proxy = true)
+    public function is_hidden($user_identifier)
     {
-        try {
-            $user = $this->get_user($identifier);
-            $user->update($data);
-
-            $result = $return_proxy ? $user : $this->_prepare_user($user);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->is_denied_to($user_identifier, 'list_user');
     }
 
     /**
-     * Reset user
+     * Hide user
      *
-     * @param int|string $identifier
-     * @param boolean    $return_proxy
+     * @param mixed $user_identifier
      *
-     * @return array|AAM_Framework_Proxy_User
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/401
-     * @since 6.9.32 Initial implementation of the method
-     *
+     * @return bool
      * @access public
-     * @version 6.9.35
+     *
+     * @version 7.0.0
      */
-    public function reset($identifier, $return_proxy = true)
+    public function hide($user_identifier)
     {
-        try {
-            $user = $this->get_user($identifier);
-
-            $user->reset();
-
-            $result = $return_proxy ? $user : $this->_prepare_user($user);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->deny($user_identifier, 'list_user');
     }
 
     /**
-     * Verify that user is active, not expired and simply can be logged in
+     * Show user
      *
-     * @param int|string|WP_User|AAM_Framework_Proxy_User $identifier
+     * @param mixed $user_identifier
      *
-     * @return mixed
-     *
+     * @return bool
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    public function verify_user_state($identifier)
+    public function show($user_identifier)
     {
-        try {
-            $user = $this->get_user($identifier);
-
-            // Step #1. Verify that user is active
-            if (!$user->is_user_active()) {
-                throw new DomainException(__(
-                    '[ERROR]: User is inactive. Contact website administrator.',
-                    AAM_KEY
-                ));
-            }
-
-            // Step #2. Verify that user is not expired
-            if ($user->is_user_access_expired()) {
-                throw new DomainException(__(
-                    '[ERROR]: User access is expired. Contact website administrator.',
-                    AAM_KEY
-                ));
-            }
-
-            $result = $user;
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e);
-        }
-
-        return $result;
+        return $this->allow($user_identifier, 'list_user');
     }
 
     /**
-     * Prepare user data
+     * Aggregate all users' permissions
      *
-     * @param AAM_Framework_Proxy_User $wp_user
+     * This method returns all explicitly defined permissions for all the users. It
+     * also includes permissions defined with JSON access policies, if the service
+     * is enabled.
      *
      * @return array
+     * @access public
      *
-     * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
-    private function _prepare_user(AAM_Framework_Proxy_User $user)
+    public function aggregate()
     {
-        $response = [
-            'id'                    => $user->ID,
-            'user_login'            => $user->user_login,
-            'display_name'          => $user->display_name,
-            'user_email'            => $user->user_email,
-            'user_level'            => intval($user->user_level),
-            'roles'                 => $this->_prepare_user_roles($user->roles),
-            'assigned_capabilities' => $user->caps,
-            'all_capabilities'      => $user->allcaps,
-            'status'                => $user->status
-        ];
-
-        $expires_at = $user->expires_at;
-
-        if (!empty($expires_at)) {
-            $response['expiration'] = [
-                'expires_at'           => $user->expires_at->format(DateTime::RFC3339),
-                'expires_at_timestamp' => $user->expires_at->getTimestamp(),
-                'trigger'              => $user->expiration_trigger
-            ];
+        try {
+            $result = $this->_get_resource()->get_permissions();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        return apply_filters('aam_get_user_filter', $response, $user);
+        return $result;
     }
 
     /**
-     * Prepare list of roles
+     * Get user resource
      *
-     * @param array $roles
-     *
-     * @return array
-     *
+     * @return AAM_Framework_Resource_User
      * @access private
-     * @version 6.9.32
+     *
+     * @version 7.0.0
      */
-    private function _prepare_user_roles($roles)
+    private function _get_resource()
     {
-        $response = array();
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::USER
+        );
+    }
 
-        $names = wp_roles()->get_names();
+    /**
+     * @inheritDoc
+     *
+     * @return WP_User
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
 
-        if (is_array($roles)) {
-            foreach ($roles as $role) {
-                if (array_key_exists($role, $names)) {
-                    $response[] = translate_user_role($names[$role]);
-                }
+        if (is_a($resource_identifier, WP_User::class)) {
+            $result = $resource_identifier;
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_User::class)) {
+            $result = $resource_identifier->get_core_instance();
+        } else {
+            $user = AAM_Framework_Manager::_()->users->get_user(
+                $resource_identifier
+            );
+
+            if (is_a($user, AAM_Framework_Proxy_User::class)) {
+                $result = $user->get_core_instance();
             }
         }
 
-        return $response;
+        $result = apply_filters(
+            'aam_normalize_user_identifier_filter',
+            $result,
+            $resource_identifier
+        );
+
+        // Allow wildcard support
+        if (!is_object($result) || !property_exists($result, 'ID')) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
 }

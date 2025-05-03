@@ -10,85 +10,133 @@
 /**
  * AAM service 404 Redirect manager
  *
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.12 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.26
+ * @version 7.0.0
  */
 class AAM_Framework_Service_NotFoundRedirect
+implements
+    AAM_Framework_Service_Interface
 {
 
-    use AAM_Framework_Service_BaseTrait,
-        AAM_Framework_Service_RedirectTrait;
+    use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Redirect type
+     * List of allowed redirect types
      *
-     * @version 6.9.12
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE = '404';
+    const ALLOWED_REDIRECT_TYPES = [
+        'default',
+        'page_redirect',
+        'url_redirect',
+        'trigger_callback',
+        'login_redirect'
+    ];
 
     /**
-     * Object type
+     * Get the 404 redirect
      *
-     * @version 6.9.33
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
      */
-    const OBJECT_TYPE = AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE;
-
-    /**
-     * Redirect type aliases
-     *
-     * To be a bit more verbose, we are renaming the legacy rule types to something
-     * that is more intuitive
-     *
-     * @version 6.9.26
-     */
-    const REDIRECT_TYPE_ALIAS = array(
-        'default'  => 'default',
-        'page'     => 'page_redirect',
-        'url'      => 'url_redirect',
-        'callback' => 'trigger_callback',
-        'login'    => 'login_redirect'
-    );
-
-    /**
-     * Array of allowed HTTP status codes
-     *
-     * @version 6.9.26
-     */
-    const HTTP_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => array('3xx'),
-        'url_redirect'     => array('3xx'),
-        'login_redirect'   => null,
-        'trigger_callback' => array('3xx', '4xx', '5xx')
-    );
-
-    /**
-     * Array of default HTTP status codes
-     *
-     * @version 6.9.26
-     */
-    const HTTP_DEFAULT_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => 307,
-        'url_redirect'     => 307,
-        'login_redirect'   => null,
-        'trigger_callback' => 404
-    );
-
-    /**
-     * Get object
-     *
-     * @param array $inline_context
-     *
-     * @return AAM_Core_Object
-     */
-    private function _get_object($inline_context)
+    public function get_redirect()
     {
-        return $this->_get_subject($inline_context)->getObject(
-            AAM_Core_Object_NotFoundRedirect::OBJECT_TYPE
+        try {
+            $result = $this->_get_container()->get_preferences();
+
+            if (empty($result)) {
+                $result = [ 'type' => 'default' ];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Set the 404 redirect
+     *
+     * @param array $redirect
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function set_redirect(array $redirect)
+    {
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $sanitized = $this->redirect->sanitize_redirect(
+                $redirect,
+                self::ALLOWED_REDIRECT_TYPES
+            );
+
+            if (!$this->_get_container()->set_preferences($sanitized)) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->get_redirect();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Reset the redirect rule
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset()
+    {
+        try {
+            $result = $this->_get_container()->reset();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if 404 redirect preferences are customized
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_customized()
+    {
+        try {
+            $result = $this->_get_container()->is_customized();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get Not Found Redirect preference resource
+     *
+     * @return AAM_Framework_Preference_NotFoundRedirect
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_container()
+    {
+        return $this->_get_access_level()->get_preference(
+            AAM_Framework_Type_Preference::NOT_FOUND_REDIRECT
         );
     }
 

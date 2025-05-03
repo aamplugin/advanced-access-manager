@@ -1,12 +1,4 @@
-<?php
-
-/**
- * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/332
- * @since 6.0.0  Initial implementation of the template
- *
- * @version 6.9.21
- * */
+<?php /** @version 7.0.0 **/
 
 if (defined('AAM_KEY')) { ?>
     <?php if (!is_user_logged_in()) { ?>
@@ -17,13 +9,13 @@ if (defined('AAM_KEY')) { ?>
 
         <div id="login-form-<?php echo esc_js($params->id); ?>">
             <p>
-                <label for="user_login"><?php echo __('Username or Email Address', AAM_KEY); ?><br>
+                <label for="user_login"><?php echo __('Username or Email Address', 'advanced-access-manager'); ?><br>
                     <input id="aam-login-username-<?php echo esc_js($params->id); ?>" class="input login-input" type="text" />
                 </label>
             </p>
 
             <p>
-                <label for="user_pass"><?php echo __('Password', AAM_KEY); ?><br>
+                <label for="user_pass"><?php echo __('Password', 'advanced-access-manager'); ?><br>
                     <input id="aam-login-password-<?php echo esc_js($params->id); ?>" class="input login-input" type="password" />
                 </label>
             </p>
@@ -32,12 +24,12 @@ if (defined('AAM_KEY')) { ?>
 
             <p class="forgetmenot">
                 <label for="aam-login-remember-<?php echo esc_js($params->id); ?>">
-                    <input id="aam-login-remember-<?php echo esc_js($params->id); ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', AAM_KEY); ?>
+                    <input id="aam-login-remember-<?php echo esc_js($params->id); ?>" value="forever" type="checkbox" /> <?php echo __('Remember Me', 'advanced-access-manager'); ?>
                 </label>
             </p>
 
             <p class="submit">
-                <input class="button button-primary button-large" id="aam-login-submit-<?php echo esc_js($params->id); ?>" value="<?php echo __('Log In', AAM_KEY); ?>" type="submit" />
+                <input class="button button-primary button-large" id="aam-login-submit-<?php echo esc_js($params->id); ?>" value="<?php echo __('Log In', 'advanced-access-manager'); ?>" type="submit" />
                 <input id="aam-login-redirect-<?php echo esc_js($params->id); ?>" value="<?php echo esc_js($params->redirect); ?>" type="hidden" />
             </p>
         </div>
@@ -45,12 +37,12 @@ if (defined('AAM_KEY')) { ?>
         <p>
             <?php
             if (get_option('users_can_register')) {
-                $registration_url = sprintf('<a href="%s">%s</a>', esc_url(wp_registration_url()), __('Register', AAM_KEY));
+                $registration_url = sprintf('<a href="%s">%s</a>', esc_url(wp_registration_url()), __('Register', 'advanced-access-manager'));
                 echo apply_filters('register', $registration_url);
                 echo esc_html(apply_filters('login_link_separator', ' | '));
             }
             ?>
-            <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"><?php echo __('Lost your password?', AAM_KEY); ?></a>
+            <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"><?php echo __('Lost your password?', 'advanced-access-manager'); ?></a>
         </p>
         <script>
             (function() {
@@ -68,11 +60,19 @@ if (defined('AAM_KEY')) { ?>
                         if (4 === this.readyState) {
                             c.disabled = !1;
                             var a = JSON.parse(this.responseText);
-                            if (200 === this.status) a.redirect ? location.href = a.redirect : location.reload();
-                            else {
+
+                            if (200 === this.status) {
+                                a.redirect_to ? location.href = a.redirect_to : location.reload();
+                            } else {
                                 var b = document.getElementById("aam-login-error-<?php echo esc_js($params->id); ?>");
-                                b.innerHTML = a.reason;
-                                b.style.display = "block"
+
+                                if (a.reason !== undefined) {
+                                    b.innerHTML = a.reason;
+                                } else if (a.errors !== undefined) {
+                                    b.innerHTML = a.errors[Object.keys(a.errors)[0]][0];
+                                }
+
+                                b.style.display = "block";
                             }
                         }
                     });
@@ -84,7 +84,8 @@ if (defined('AAM_KEY')) { ?>
                         password: document.getElementById("aam-login-password-<?php echo esc_js($params->id); ?>").value,
                         redirect: document.getElementById("aam-login-redirect-<?php echo esc_js($params->id); ?>").value,
                         remember: document.getElementById("aam-login-remember-<?php echo esc_js($params->id); ?>").checked,
-                        returnAuthCookies: true
+                        return_auth_cookies: true,
+                        return_login_redirect: true
                     }))
                 })
             })();
@@ -93,14 +94,14 @@ if (defined('AAM_KEY')) { ?>
     <?php } else { ?>
         <div style="display: table; width: 100%;">
             <div style="display:table-cell; width: 30%; text-align: center; vertical-align: middle;">
-                <?php echo get_avatar(AAM::getUser()->ID, 50); ?>
+                <?php echo get_avatar(AAM::current_user()->ID, 50); ?>
             </div>
             <div style="display:table-cell;">
-                <?php if (AAM_Core_API::isAAMCapabilityAllowed('aam_access_dashboard')) { ?>
-                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', AAM_KEY); ?></a><br />
-                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', AAM_KEY); ?></a><br />
+                <?php if (AAM::api()->caps->exists('aam_access_dashboard') && current_user_can('aam_access_dashboard')) { ?>
+                    <a href="<?php echo esc_url(get_admin_url()); ?>"><?php echo __('Dashboard', 'advanced-access-manager'); ?></a><br />
+                    <a href="<?php echo esc_url(get_admin_url(null, 'profile.php')); ?>"><?php echo __('Edit My Profile', 'advanced-access-manager'); ?></a><br />
                 <?php } ?>
-                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out', AAM_KEY); ?></a>
+                <a href="<?php echo esc_url(wp_logout_url()); ?>"><?php echo __('Log Out', 'advanced-access-manager'); ?></a>
             </div>
         </div>
     <?php } ?>

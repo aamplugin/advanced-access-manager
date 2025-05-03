@@ -10,17 +10,70 @@
 /**
  * AAM core API gateway
  *
- * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/249
- * @since 6.1.0 Significant improvement of the inheritance mechanism
- * @since 6.0.0 Initial implementation of the class
+ * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Roles roles(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Users users(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
+ *
+ * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
+ * @property AAM_Framework_Utility_Capabilities $caps
+ * @property AAM_Framework_Utility_Capabilities $capabilities
+ * @property AAM_Framework_Utility_Config $config
+ * @property AAM_Framework_Utility_Misc $misc
+ * @property AAM_Framework_Utility_Redirect $redirect
+ * @property AAM_Framework_Utility_Roles $roles
+ * @property AAM_Framework_Utility_Users $users
+ * @property AAM_Framework_Utility_Db $db
+ * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
+ * @property AAM_Framework_Utility_Policy $policy
+ * @property AAM_Framework_Utility_Content $content
+ * @property AAM_Framework_Utility_Rest $rest
  *
  * @package AAM
- * @version 6.9.6
+ * @version 7.0.0
  */
 final class AAM_Core_Gateway
 {
 
-    use AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var AAM_Core_Gateway
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
+
+    /**
+     * Constructor
+     *
+     * @access protected
+     * @return void
+     *
+     * @version 7.0.0
+     */
+    protected function __construct() {}
 
     /**
      * Prevent from fatal errors
@@ -28,22 +81,51 @@ final class AAM_Core_Gateway
      * @param string $name
      * @param array  $args
      *
-     * @return void
-     *
+     * @return AAM_Framework_Service_Interface
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function __call($name, $args)
     {
-        $result = null;
+        return AAM_Framework_Manager::_()->{$name}(...$args);
+    }
 
-        if (method_exists('AAM_Framework_Manager', $name)) {
-            $result = call_user_func_array("AAM_Framework_Manager::{$name}", $args);
+    /**
+     * Get utility instance
+     *
+     * @param string $name
+     *
+     * @return AAM_Framework_Utility_Interface
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function __get($name)
+    {
+        return $this->utility($name);
+    }
+
+    /**
+     * Get user by their's identifier
+     *
+     * If no identifier provided, the current user will be return. If user is not
+     * authenticated, the visitor access level will be returned.
+     *
+     * @param mixed $identifier
+     *
+     * @return AAM_Framework_AccessLevel_User|AAM_Framework_AccessLevel_Visitor
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function user($identifier = null)
+    {
+        if (is_null($identifier)) {
+            $result = AAM::current_user();
         } else {
-            _doing_it_wrong(
-                __CLASS__ . '::' . __METHOD__,
-                "The method {$name} is not defined in the AAM API",
-                AAM_VERSION
+            $result = $this->access_levels->get(
+                AAM_Framework_Type_AccessLevel::USER, $identifier
             );
         }
 
@@ -51,293 +133,171 @@ final class AAM_Core_Gateway
     }
 
     /**
-     * Get AAM configuration option
+     * Get role access level
      *
-     * @param string $option
-     * @param mixed  $default
+     * @param string $role_slug
      *
-     * @return mixed
-     *
+     * @return AAM_Framework_AccessLevel_Role
      * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->get_config instead
+     *
+     * @version 7.0.0
      */
-    public function getConfig($option, $default = null)
+    public function role($role_slug)
     {
-        return AAM_Framework_Manager::configs()->get_config($option, $default);
+        return $this->access_levels->get(
+            AAM_Framework_Type_AccessLevel::ROLE, $role_slug
+        );
     }
 
     /**
-     * Update AAM configuration option
+     * Get visitor access level
      *
-     * @param string $option
-     * @param mixed  $value
-     *
-     * @return boolean
-     *
+     * @return AAM_Framework_AccessLevel_Visitor
      * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->set_config instead
+     *
+     * @version 7.0.0
      */
-    public function updateConfig($option, $value)
+    public function visitor()
     {
-        return AAM_Framework_Manager::configs()->set_config($option, $value);
+        return $this->access_levels->get(AAM_Framework_Type_AccessLevel::VISITOR);
     }
 
     /**
-     * Delete AAM configuration option
+     * Get visitor access level
      *
-     * @param string $option
-     *
-     * @return boolean
-     *
+     * @return AAM_Framework_AccessLevel_Visitor
      * @access public
-     * @version 6.0.0
-     * @deprecated 6.9.34 Use AAM_Framework_Manager::configs()->reset_config instead
+     *
+     * @version 7.0.0
      */
-    public function deleteConfig($option)
+    public function anonymous()
     {
-        return AAM_Framework_Manager::configs()->reset_config($option);
+        return $this->visitor();
     }
 
     /**
-     * Get user
+     * Get visitor access level
      *
-     * If no $id specified, current user will be returned
-     *
-     * @param int $id
-     *
-     * @return AAM_Core_Subject
-     *
+     * @return AAM_Framework_AccessLevel_Visitor
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function getUser($id = null)
+    public function guest()
     {
-        if (!empty($id)) {
-            $user = new AAM_Core_Subject_User($id);
-            $user->initialize();
-        } else {
-            $user = AAM::getUser();
-        }
-
-        return $user;
+        return $this->visitor();
     }
 
     /**
-     * Get role subject
+     * Get default access level
      *
-     * @param string $id
-     *
-     * @return AAM_Core_Subject_Role
-     *
+     * @return AAM_Framework_AccessLevel_Default
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function getRole($id)
+    public function default()
     {
-        return new AAM_Core_Subject_Role($id);
+        return $this->access_levels->get(AAM_Framework_Type_AccessLevel::DEFAULT);
     }
 
     /**
-     * Get visitor subject
+     * Get default access level
      *
-     * @return AAM_Core_Subject_Visitor
-     *
+     * @return AAM_Framework_AccessLevel_Default
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function getVisitor()
+    public function all()
     {
-        if (is_user_logged_in()) {
-            $visitor = new AAM_Core_Subject_Visitor();
-        } else {
-            $visitor = AAM::getUser();
-        }
-
-        return $visitor;
+        return $this->default();
     }
 
     /**
-     * Get default subject
+     * Get default access level
      *
-     * @return AAM_Core_Subject_Default
-     *
+     * @return AAM_Framework_AccessLevel_Default
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function getDefault()
+    public function everyone()
     {
-        return AAM_Core_Subject_Default::getInstance();
+        return $this->default();
     }
 
     /**
-     * Log any critical message
+     * Get default access level
      *
-     * @param string $message
-     * @param string $markers...
-     *
+     * @return AAM_Framework_AccessLevel_Default
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function log()
+    public function anyone()
     {
-        call_user_func_array('AAM_Core_Console::add', func_get_args());
+        return $this->default();
     }
 
     /**
-     * Prepare Access Policy manager but only if service is enabled
+     * Get default access level
      *
-     * @param AAM_Core_Subject $subject
-     * @param boolean          $skipInheritance
-     *
-     * @return AAM_Core_Policy_Manager|null
-     *
-     * @since 6.1.0 Added $skipInheritance flag to insure proper settings inheritance
-     * @since 6.0.0 Initial implementation of the method
-     *
+     * @return AAM_Framework_AccessLevel_Default
      * @access public
-     * @version 6.1.0
+     *
+     * @version 7.0.0
      */
-    public function getAccessPolicyManager(
-        AAM_Core_Subject $subject = null, $skipInheritance = false
-    ) {
-        if (is_null($subject)) {
-            $subject = AAM::getUser();
-        }
-
-        if (AAM_Framework_Manager::configs()->get_config(
-            AAM_Service_AccessPolicy::FEATURE_FLAG, true
-        )) {
-            $manager = AAM_Core_Policy_Factory::get($subject, $skipInheritance);
-        } else {
-            $manager = null;
-        }
-
-        return $manager;
+    public function any()
+    {
+        return $this->default();
     }
 
     /**
-     * Reset all AAM settings and configurations
+     * Return utility instance
+     *
+     * @param string $utility_name
+     *
+     * @return AAM_Framework_Utility_Interface
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function utility($utility_name)
+    {
+        return AAM_Framework_Manager::_()->{$utility_name};
+    }
+
+    /**
+     * Setup the framework manager
+     *
+     * @param AAM_Framework_AccessLevel_Interface $access_level
      *
      * @return void
-     *
      * @access public
      *
-     * @version 6.9.6
+     * @version 7.0.0
      */
-    public function reset()
+    public function setup($access_level)
     {
-        AAM_Core_API::clearSettings();
+        AAM_Framework_Manager::setup($access_level);
     }
 
     /**
-     * Merge two set of access settings into one
+     * Get single instance of itself
      *
-     * The merging method also takes in consideration the access settings preference
-     * defined in ConfigPress
-     *
-     * @param array  $set1
-     * @param array  $set2
-     * @param string $objectType
-     * @param string $preference
-     *
-     * @return array
-     *
+     * @return AAM_Core_Gateway
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public function mergeSettings($set1, $set2, $objectType, $preference = null)
+    public static function get_instance()
     {
-        $merged = array();
-
-        // If preference is not explicitly defined, fetch it from the AAM configs
-        if (is_null($preference)) {
-            $default_preference = $this->configs()->get_config(
-                'core.settings.merge.preference'
-            );
-
-            $preference = $this->configs()->get_config(
-                "core.settings.{$objectType}.merge.preference",
-                $default_preference
-            );
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
         }
 
-        // First get the complete list of unique keys
-        $keys = array_keys($set1);
-        foreach (array_keys($set2) as $key) {
-            if (!in_array($key, $keys, true)) {
-                $keys[] = $key;
-            }
-        }
-
-        foreach ($keys as $key) {
-            // There can be only two types of preferences: "deny" or "allow". Based
-            // on that, choose access settings that have proper effect as following:
-            //
-            //   - If set1 and set2 have two different preferences, get the one that
-            //     has correct preference;
-            //   - If set1 and set2 have two the same preferences, choose the set2
-            //   - If only set1 has access settings, use set1 as-is
-            //   - If only set2 has access settings, use set2 as-is
-            //   - If set1 and set2 have different effect than preference, choose
-            //     set2
-            $effect1 = $this->computeAccessOptionEffect($set1, $key);
-            $effect2 = $this->computeAccessOptionEffect($set2, $key);
-            $effect  = ($preference === 'deny');
-
-            // Access Option is either boolean true or array with "enabled" key
-            // set as boolean true
-            if ($effect1 === $effect2) { // both equal
-                $merged[$key] = $set2[$key];
-            } elseif ($effect1 === $effect) { // set1 matches preference
-                $merged[$key] = $set1[$key];
-            } elseif ($effect2 === $effect) { // set2 matches preference
-                $merged[$key] = $set2[$key];
-            } else {
-                if ($preference === 'allow') {
-                    $option = isset($set2[$key]) ? $set2[$key] : $set1[$key];
-                    if (is_array($option)) {
-                        $option['enabled'] = false;
-                    } else {
-                        $option = false;
-                    }
-                    $merged[$key] = $option;
-                } elseif (is_null($effect1)) {
-                    $merged[$key] = $set2[$key];
-                } elseif (is_null($effect2)) {
-                    $merged[$key] = $set1[$key];
-                }
-            }
-        }
-
-        return $merged;
-    }
-
-    /**
-     * Determine correct access option effect
-     *
-     * There can be two possible types of the access settings: straight boolean and
-     * array with "enabled" flag. If provided key is not a part of the access options,
-     * the null is returned, otherwise boolean true of false.
-     *
-     * @param array  $opts
-     * @param string $key
-     *
-     * @return null|boolean
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected function computeAccessOptionEffect($opts, $key)
-    {
-        $effect = null; // nothing is defined
-
-        if (isset($opts[$key])) {
-            $effect = is_array($opts[$key]) ? $opts[$key]['enabled'] : $opts[$key];
-        }
-
-        return $effect;
+        return self::$_instance;
     }
 
 }

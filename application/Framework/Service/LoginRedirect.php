@@ -10,57 +10,131 @@
 /**
  * AAM service Login Redirect manager
  *
- * @since 6.9.26 https://github.com/aamplugin/advanced-access-manager/issues/360
- * @since 6.9.12 Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.26
+ * @version 7.0.0
  */
-class AAM_Framework_Service_LoginRedirect
+class AAM_Framework_Service_LoginRedirect implements AAM_Framework_Service_Interface
 {
 
-    use AAM_Framework_Service_BaseTrait,
-        AAM_Framework_Service_RedirectTrait;
+    use AAM_Framework_Service_BaseTrait;
 
     /**
-     * Redirect type
+     * List of allowed redirect types
      *
-     * @version 6.9.12
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE = 'login';
+    const ALLOWED_REDIRECT_TYPES = [
+        'default',
+        'page_redirect',
+        'url_redirect',
+        'trigger_callback'
+    ];
 
     /**
-     * Object type
+     * Get the login redirect
      *
-     * @version 6.9.33
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
      */
-    const OBJECT_TYPE = AAM_Core_Object_LoginRedirect::OBJECT_TYPE;
+    public function get_redirect()
+    {
+        try {
+            $result = $this->_get_container()->get_preferences();
+
+            if (empty($result)) {
+                $result = [ 'type' => 'default' ];
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
 
     /**
-     * Redirect type aliases
+     * Set the login redirect
      *
-     * To be a bit more verbose, we are renaming the legacy rule types to
-     * something that is more intuitive
+     * @param array $redirect Redirect settings
      *
-     * @version 6.9.26
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
      */
-    const REDIRECT_TYPE_ALIAS = array(
-        'default'  => 'default',
-        'page'     => 'page_redirect',
-        'url'      => 'url_redirect',
-        'callback' => 'trigger_callback'
-    );
+    public function set_redirect(array $redirect)
+    {
+        try {
+            // Validating that incoming data is correct and normalize is for storage
+            $sanitized = $this->redirect->sanitize_redirect(
+                $redirect,
+                self::ALLOWED_REDIRECT_TYPES
+            );
+
+            if (!$this->_get_container()->set_preferences($sanitized)) {
+                throw new RuntimeException('Failed to persist settings');
+            }
+
+            $result = $this->get_redirect();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
 
     /**
-     * Array of allowed HTTP status codes
+     * Reset the redirect rule
      *
-     * @version 6.9.26
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.0
      */
-    const HTTP_STATUS_CODES = array(
-        'default'          => null,
-        'page_redirect'    => null,
-        'url_redirect'     => null,
-        'trigger_callback' => null
-    );
+    public function reset()
+    {
+        try {
+            $result = $this->_get_container()->reset();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if login redirect preferences are customized
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_customized()
+    {
+        try {
+            $result = $this->_get_container()->is_customized();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get login redirect preference container
+     *
+     * @return AAM_Framework_Preference_LoginRedirect
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_container()
+    {
+        return $this->_get_access_level()->get_preference(
+            AAM_Framework_Type_Preference::LOGIN_REDIRECT
+        );
+    }
 
 }

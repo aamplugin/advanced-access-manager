@@ -12,26 +12,19 @@
 /**
  * AAM shortcode handler for content visibility
  *
- * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/333
- * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
- *               https://github.com/aamplugin/advanced-access-manager/issues/317
- * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/96
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.19
+ * @version 7.0.0
  */
 class AAM_Service_Shortcode_Handler_Content
-    implements AAM_Core_Contract_ShortcodeInterface
 {
 
     /**
      * Shortcode arguments
      *
      * @var array
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected $args;
 
@@ -39,9 +32,9 @@ class AAM_Service_Shortcode_Handler_Content
      * Wrapped by shortcode content
      *
      * @var string
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected $content;
 
@@ -58,9 +51,9 @@ class AAM_Service_Shortcode_Handler_Content
      * @param string $content
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function __construct($args, $content)
     {
@@ -72,32 +65,28 @@ class AAM_Service_Shortcode_Handler_Content
      * Process shortcode
      *
      * @return string
-     *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
-     * @since 6.5.0  https://github.com/aamplugin/advanced-access-manager/issues/96
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.16
+     *
+     * @version 7.0.0
      */
     public function run()
     {
         // Prepare list of subjects
         if (get_current_user_id()) {
-            $roles = array_merge(AAM::getUser()->roles);
+            $roles = array_merge(AAM::current_user()->roles);
 
             // Build the list of assigned capabilities
             $caps = array();
-            foreach(AAM::getUser()->allcaps as $key => $effect) {
+            foreach(AAM::current_user()->allcaps as $key => $effect) {
                 if (!empty($effect)) {
                     $caps[] = $key;
                 }
             }
 
-            if (AAM::api()->configs()->get_config('core.settings.multiSubject')) {
-                $parts = array_merge(array((string) AAM::getUser()->ID), $roles);
+            if (AAM::api()->config->get('core.settings.multi_access_levels')) {
+                $parts = array_merge([ (string) AAM::current_user()->ID ], $roles);
             } else {
-                $parts = array((string) AAM::getUser()->ID, array_shift($roles));
+                $parts = [ (string) AAM::current_user()->ID, array_shift($roles) ];
             }
 
             $parts = array_merge($parts, $caps);
@@ -137,12 +126,9 @@ class AAM_Service_Shortcode_Handler_Content
      * @param array $conditions
      *
      * @return boolean
-     *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/317
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.16
+     *
+     * @version 7.0.0
      */
     protected function check($subject, $conditions)
     {
@@ -176,12 +162,9 @@ class AAM_Service_Shortcode_Handler_Content
      * @param string $userIp
      *
      * @return boolean
-     *
-     * @since 6.3.0 https://github.com/aamplugin/advanced-access-manager/issues/38
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.3.0
+     *
+     * @version 7.0.0
      */
     protected function checkIP($ip, $userIp)
     {
@@ -213,30 +196,24 @@ class AAM_Service_Shortcode_Handler_Content
      * Get access preference by type
      *
      * @return array
-     *
-     * @since 6.9.19 https://github.com/aamplugin/advanced-access-manager/issues/333
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.19
+     *
+     * @version 7.0.0
      */
     public function getAccess($type)
     {
         $access = (isset($this->args[$type]) ? $this->args[$type] : null);
 
-        return is_string($access) ? array_map('trim', explode(',', $access)) : array();
+        return is_string($access) ? array_map('trim', explode(',', $access)) : [];
     }
 
     /**
      * Get replacement message
      *
      * @return string|null
-     *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.16
+     *
+     * @version 7.0.0
      */
     public function getMessage()
     {

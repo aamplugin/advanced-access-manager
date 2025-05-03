@@ -10,75 +10,100 @@
 /**
  * Abstract base for all services
  *
+ * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_NotFoundRedirect not_found_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_BackendMenu backend_menu(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AdminToolbar admin_toolbar(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Metaboxes metaboxes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Widgets widgets(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_AccessDeniedRedirect access_denied_redirect(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Roles roles(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Users users(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Posts posts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Terms terms(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_PostTypes post_types(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Taxonomies taxonomies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities capabilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Capabilities caps(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Settings settings(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Policies policies(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Hooks hooks(mixed $access_level = null, array $settings = [])
+ *
+ * @property AAM_Framework_Utility_Cache $cache
+ * @property AAM_Framework_Utility_ObjectCache $object_cache
+ * @property AAM_Framework_Utility_Capabilities $caps
+ * @property AAM_Framework_Utility_Capabilities $capabilities
+ * @property AAM_Framework_Utility_Config $config
+ * @property AAM_Framework_Utility_Misc $misc
+ * @property AAM_Framework_Utility_Redirect $redirect
+ * @property AAM_Framework_Utility_Roles $roles
+ * @property AAM_Framework_Utility_Users $users
+ * @property AAM_Framework_Utility_Db $db
+ * @property AAM_Framework_Utility_AccessLevels $access_levels
+ * @property AAM_Framework_Utility_Jwt $jwt
+ * @property AAM_Framework_Utility_Policy $policy
+ * @property AAM_Framework_Utility_Content $content
+ * @property AAM_Framework_Utility_Rest $rest
+ *
  * @package AAM
- *
- * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
- * @since 6.9.10 Initial implementation of the class
- *
- * @version 6.9.31
+ * @version 7.0.0
  */
 trait AAM_Framework_Service_BaseTrait
 {
 
     /**
-     * Single instance of itself
-     *
-     * @var static::class
-     *
-     * @access private
-     * @static
-     * @version 6.9.10
-     */
-    private static $_instance = null;
-
-    /**
      * Collection of extended methods
      *
      * @var array
-     *
      * @access private
-     * @version 6.9.31
+     *
+     * @version 7.0.0
      */
     private $_extended_methods = [];
 
     /**
-     * The runtime context
+     * Service's access level
      *
-     * This context typically contains information about current subject
-     *
-     * @var array
-     *
+     * @var AAM_Framework_AccessLevel_Interface
      * @access private
-     * @version 6.9.10
-     */
-    private $_runtime_context = null;
-
-    /**
-     * Context subject
      *
-     * @var AAM_Core_Subject
-     *
-     * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private $_access_level = null;
 
     /**
+     * Service's runtime settings
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_settings = null;
+
+    /**
      * Instantiate the service
      *
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param array                               $settings
+     *
      * @return void
-     *
-     * @since 6.9.31 https://github.com/aamplugin/advanced-access-manager/issues/387
-     * @since 6.9.10 Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.31
+     *
+     * @version 7.0.0
      */
-    protected function __construct()
+    protected function __construct($access_level, $settings)
     {
+        $this->_access_level = $access_level;
+        $this->_settings     = $settings;
+
         // Extend the service instance with additional methods
         $closures = apply_filters(
-            'aam_framework_service_closures_filter', [], $this
+            'aam_framework_service_methods_filter', [], $this
         );
 
         if (is_array($closures)) {
@@ -101,26 +126,26 @@ trait AAM_Framework_Service_BaseTrait
      * @param array  $args
      *
      * @return mixed
-     *
      * @access public
-     * @version 6.9.31
+     *
+     * @version 7.0.0
      */
     public function __call($name, $args)
     {
         try {
             if ($this->_extended_method_exists($name)) {
-                    $result = call_user_func_array(
-                        $this->_extended_methods[$name], $args
-                    );
+                $result = call_user_func_array(
+                    $this->_extended_methods[$name], $args
+                );
+            } elseif (AAM_Framework_Manager::_()->has_service($name)) {
+                $result = AAM_Framework_Manager::_()->{$name}(...$args);
             } else {
-                throw new BadMethodCallException("Method {$name} does not exist");
+                throw new BadMethodCallException(
+                    "Method {$name} does not exist"
+                );
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error(
-                $e,
-                // The last argument in any framework method call is context, always!
-                is_array($args) ? array_pop($args) : null
-            );
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -132,15 +157,19 @@ trait AAM_Framework_Service_BaseTrait
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
     public function __get($name)
     {
+        $result = null;
+
         try {
             if ($name === 'access_level') {
                 $result = $this->_access_level;
+            } elseif (AAM_Framework_Manager::_()->has_utility($name)) {
+                $result = AAM_Framework_Manager::_()->{$name};
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -150,44 +179,57 @@ trait AAM_Framework_Service_BaseTrait
     }
 
     /**
-     * Get current subject
+     * Are permissions customized for current access level
      *
-     * @param mixed $inline_context Runtime context
+     * Determine if permissions for the resource are customized for the current
+     * access level. Permissions are considered customized if there is at least one
+     * permission explicitly allowed or denied.
      *
-     * @return AAM_Core_Subject
+     * @return bool
+     * @access public
      *
-     * @access private
-     * @version 6.9.33
+     * @version 7.0.0
+     * @todo Consider to remove
      */
-    private function _get_subject($inline_context = null)
+    public function is_customized()
     {
-        $result = null;
-
-        // Determine if the access level and subject ID are either part of the
-        // inline arguments or runtime context when service is requested through the
-        // framework service manager
-        if (is_array($inline_context)) {
-            $context = $inline_context;
-        } elseif (is_array($this->_runtime_context)) {
-            $context = $this->_runtime_context;
-        } else {
-            throw new BadMethodCallException('No context provided');
+        try {
+            $result = $this->_get_resource()->is_customized();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
-
-        if (isset($context['subject'])
-            && is_a($context['subject'], AAM_Core_Subject::class)) {
-            $result = $context['subject'];
-        } elseif (!empty($context['access_level'])) {
-            $result = AAM_Framework_Manager::subject()->get(
-                $context['access_level'],
-                isset($context['subject_id']) ? $context['subject_id'] : null
-            );
-        }
-
-        // Persist the current access level so it can be assessed as property
-        $this->_access_level = $result;
 
         return $result;
+    }
+
+    /**
+     * Normalize resource identifier
+     *
+     * Convert resource identifier into proper shape for resource layer to consume
+     *
+     * @param mixed $resource_identifier
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        return $resource_identifier;
+    }
+
+    /**
+     * Get current subject
+     *
+     * @return AAM_Framework_AccessLevel_Interface
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_access_level()
+    {
+        return $this->_access_level;
     }
 
     /**
@@ -196,9 +238,9 @@ trait AAM_Framework_Service_BaseTrait
      * @param string $name
      *
      * @return boolean
-     *
      * @access private
-     * @version 6.9.31
+     *
+     * @version 7.0.0
      */
     private function _extended_method_exists($name)
     {
@@ -210,26 +252,19 @@ trait AAM_Framework_Service_BaseTrait
      * Handle error
      *
      * @param Exception $exception
-     * @param array     $runtime_context
      *
      * @return mixed
-     *
      * @access private
-     * @version 6.9.33
+     *
+     * @version 7.0.0
      */
-    private function _handle_error($exception, $runtime_context = null)
+    private function _handle_error($exception)
     {
         $response = null;
 
-        if (empty($runtime_context)) {
-            $context = static::$_instance->_runtime_context;
-        } else {
-            $context = $runtime_context;
-        }
-
         // Determine what is the proper error handling strategy to pick
-        if (!empty($context['error_handling'])) {
-            $strategy = $context['error_handling'];
+        if (!empty($this->_settings['error_handling'])) {
+            $strategy = $this->_settings['error_handling'];
         } else {
             // Do not rely on WP_DEBUG as many website owners forget to turn off
             // debug mode in production
@@ -250,23 +285,21 @@ trait AAM_Framework_Service_BaseTrait
     /**
      * Bootstrap and return an instance of the service
      *
-     * @param array $runtime_context
+     * @param AAM_Framework_AccessLevel_Interface $access_level
+     * @param array                               $settings
      *
      * @return static::class
      *
      * @access public
      * @static
-     * @version 6.9.10
+     *
+     * @version 7.0.0
      */
-    public static function get_instance($runtime_context = [])
-    {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
-        }
-
-        self::$_instance->_runtime_context = $runtime_context;
-
-        return self::$_instance;
+    public static function get_instance(
+        AAM_Framework_AccessLevel_Interface$access_level,
+        $settings
+    ) {
+        return new self($access_level, $settings);
     }
 
 }

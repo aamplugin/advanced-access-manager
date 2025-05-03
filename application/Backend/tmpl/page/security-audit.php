@@ -35,8 +35,8 @@
                 <div id="executive_summary_prompt" class="<?php echo empty($has_summary) ? '' : 'hidden'; ?>">
                     <div class="alert alert-info text-larger">
                         <?php echo __('This service provides an executive-level security overview, helping you strengthen access controls with clear, actionable insights. The data we use is fully anonymized and cannot be linked back to your website.', 'advanced-access-manager'); ?><br/><br/>
-                        <?php echo __('To generate this report, we only collect partial audit results and a list of installed plugins — nothing about your server, website, or users is shared.', 'advanced-access-manager'); ?><br/><br/>
-                        <?php echo __('This highly aggregated data ensures you get valuable security recommendations without exposing any sensitive information, making it a safe and effective way to assess your website’s security posture.', 'advanced-access-manager'); ?>
+                        <?php echo __('To generate this report, we only get partial audit results and a list of installed plugins — nothing about your server, website, or users is shared.', 'advanced-access-manager'); ?><br/><br/>
+                        <?php echo __('You will get, promptly, valuable security recommendations, making it a safe and effective way to improve your website security posture.', 'advanced-access-manager'); ?>
                     </div>
 
                     <a href="#" class="btn aam-mt-2 btn-lg btn-success" id="prepare_executive_summary">
@@ -89,8 +89,8 @@
                     <div id="executive_summary_references" class="<?php echo empty($summary['references']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('References', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php if (!empty($summary['references'])) { ?>
-                                <?php foreach($summary['references'] as $reference) { ?>
+                            <?php if (!empty($summary['recommendations'])) { ?>
+                                <?php foreach($summary['recommendations'] as $reference) { ?>
                                 <li><a href="<?php echo esc_attr($reference); ?>" target="_blank"><?php echo esc_js($reference); ?></a></li>
                                 <?php } ?>
                             <?php } ?>
@@ -105,16 +105,6 @@
                 </div>
             </div>
         </div>
-
-        <?php if (empty($has_summary) && !empty($has_report)) { ?>
-        <div class="alert alert-info text-larger aam-mb-2">
-            <strong><?php echo __('What\'s next?', 'advanced-access-manager'); ?></strong><br/>
-            <ol class="list-of-items">
-                <li><?php echo __('Review your scan results below. Click each item for details.', 'advanced-access-manager'); ?></li>
-                <li><?php echo __('Get the executive summary with the list of highlighted issues and recommendations to mitigate them.', 'advanced-access-manager'); ?></li>
-            </ol>
-        </div>
-        <?php } ?>
 
         <div class="panel-group" id="audit-checks" role="tablist" aria-multiselectable="true">
             <?php foreach(AAM_Service_SecurityAudit::bootstrap()->get_steps() as $i => $step) { ?>

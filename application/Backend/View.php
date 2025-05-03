@@ -13,36 +13,72 @@
  * This class is used to manage all AAM UI templates and interaction of the UI with
  * AAM backend core
  *
- * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
- * @since 6.6.0 Allow partial to be loaded more than once
- * @since 6.0.5 Removed prepareIframeWPAssetsURL method
- * @since 6.0.0 Initial implementation of the class
- *
  * @package AAM
- * @version 6.7.9
+ * @version 7.0.0
  */
 class AAM_Backend_View
 {
 
-    use AAM_Core_Contract_RequestTrait,
-        AAM_Core_Contract_SingletonTrait;
+    /**
+     * Single instance of itself
+     *
+     * @var object
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private static $_instance = null;
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
-        $subject = AAM_Backend_Subject::getInstance();
-
         // Allow other plugins to register new AAM UI tabs/features
         do_action(
-            'aam_init_ui_action', 'AAM_Backend_Feature::registerFeature', $subject
+            'aam_initialize_ui_action',
+            function($feature) { AAM_Backend_Feature::registerFeature($feature); },
+            AAM_Backend_AccessLevel::get_instance()
         );
+    }
+
+    /**
+     * Replace sprintf string with URLs to aamportal.com
+     *
+     * @param string $str
+     * @param string ...$url
+     *
+     * @return string
+     *
+     * @access public
+     * @static
+     *
+     * @version 7.0.0
+     */
+    public static function replace_aam_urls($str)
+    {
+        $args = array_slice(func_get_args(), 1);
+
+        if (!empty($args)) {
+            // Preparing the array of arguments for the sprintf
+            $replace_args = [$str];
+
+            foreach($args as $relative_url) {
+                array_push($replace_args,
+                    '<a href="https://aamportal.com' . $relative_url . '?ref=plugin" target="_blank">',
+                    '</a>'
+                );
+            }
+
+            $str = call_user_func_array('sprintf', $replace_args);
+        }
+
+        return $str;
     }
 
     /**
@@ -54,8 +90,8 @@ class AAM_Backend_View
      * @param array  $params
      *
      * @return string|null
-     *
      * @access public
+     *
      * @version 6.0.0
      */
     public static function loadPartial($tmpl, $params = array())
@@ -79,11 +115,8 @@ class AAM_Backend_View
      * @param object $params
      *
      * @return string
-     *
-     * @since 6.6.0 Fixed the way the partial is loaded
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
+     *
      * @version 6.6.0
      */
     public static function loadTemplate($file_path, $params =  null)
@@ -102,20 +135,17 @@ class AAM_Backend_View
      * Process the ajax call
      *
      * @return string
-     *
-     * @since 6.7.9 https://github.com/aamplugin/advanced-access-manager/issues/192
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
+     *
      * @version 6.7.9
      */
     public function processAjax()
     {
         $response = null;
 
-        $action  = $this->getFromPost('sub_action');
-        $parts   = explode('.', $action);
-        $subject = AAM_Backend_Subject::getInstance();
+        $action       = AAM::api()->misc->get($_POST, 'sub_action');
+        $parts        = explode('.', $action);
+        $access_level = AAM_Backend_AccessLevel::get_instance();
 
         if (count($parts) === 2) {
             $id = 'AAM_Backend_Feature_' . $parts[0];
@@ -127,13 +157,16 @@ class AAM_Backend_View
             }
 
             $response = apply_filters(
-                'aam_ajax_filter', $response, $subject->getSubject(), $action
+                'aam_ajax_filter',
+                $response,
+                $access_level->get_access_level(),
+                $action
             );
         } elseif ($action === 'renderContent') {
-            $partial  = $this->getFromPost('partial');
+            $partial  = AAM::api()->misc->get($_POST, 'partial');
             $response = $this->renderContent((!empty($partial) ? $partial : 'main'));
 
-            $accept = AAM_Core_Request::server('HTTP_ACCEPT_ENCODING');
+            $accept = AAM::api()->misc->get($_SERVER, 'HTTP_ACCEPT_ENCODING');
             header('Content-Type: text/html; charset=UTF-8');
 
             $compressed = count(array_intersect(
@@ -173,8 +206,8 @@ class AAM_Backend_View
      * Run AAM iFrame
      *
      * @return string
-     *
      * @access public
+     *
      * @version 6.0.0
      */
     public function renderIFrame($type)
@@ -186,16 +219,16 @@ class AAM_Backend_View
                 echo $this->loadTemplate(
                     $basedir . 'post-iframe.php',
                     (object) array(
-                        'objectId'    => $this->getFromQuery('id'),
-                        'objectType'  => $this->getFromQuery('type'),
-                        'postManager' => new AAM_Backend_Feature_Main_Post()
+                        'objectId'    => filter_input(INPUT_GET, 'id'),
+                        'objectType'  => filter_input(INPUT_GET, 'type'),
+                        'postManager' => new AAM_Backend_Feature_Main_Content()
                     )
                 );
             } elseif ($type === 'user' && current_user_can('aam_manage_users')) {
                 echo $this->loadTemplate(
                     $basedir . 'user-iframe.php',
                     (object) array(
-                        'user' => new WP_User($this->getFromQuery('id')),
+                        'user' => new WP_User(filter_input(INPUT_GET, 'id')),
                         'type' => 'main'
                     )
                 );
@@ -228,27 +261,6 @@ class AAM_Backend_View
     }
 
     /**
-     * Render Access Manager metabox iFrame element for terms
-     *
-     * @param WP_Term $term
-     *
-     * @return string
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public static function renderTermMetabox($term)
-    {
-        return static::loadTemplate(
-            dirname(__FILE__) . '/tmpl/metabox/term-metabox.php',
-            (object) array(
-                'term'     => $term,
-                'postType' => filter_input(INPUT_GET, 'post_type')
-            )
-        );
-    }
-
-    /**
      * Render Access Manager metabox iFrame element for user
      *
      * @param WP_User $term
@@ -275,16 +287,41 @@ class AAM_Backend_View
      *
      * @access public
      * @global WP_Post $post
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    public static function renderPolicyMetabox()
+    public function render_policy_metabox()
     {
         global $post;
 
         if (is_a($post, 'WP_Post')) {
-            $content = static::loadTemplate(
+            $content = $this->loadTemplate(
                 dirname(__FILE__) . '/tmpl/metabox/policy-metabox.php',
                 (object) array('post' => $post)
+            );
+        } else {
+            $content = null;
+        }
+
+        return  $content;
+    }
+
+    /**
+     * Render policy parent metabox
+     *
+     * @return string
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function render_policy_parent_metabox()
+    {
+        global $post;
+
+        if (is_a($post, 'WP_Post')) {
+            $content = $this->loadTemplate(
+                dirname(__FILE__) . '/tmpl/metabox/policy-parent-metabox.php',
+                (object) [ 'post' => $post ]
             );
         } else {
             $content = null;
@@ -360,18 +397,18 @@ class AAM_Backend_View
                 }
                 break;
 
+            case 'content-access-form':
+                $manager = new AAM_Backend_Feature_Main_Content();
+                $content = $manager->render_content_access_form(
+                    AAM::api()->misc->get($_POST, 'resource_id'),
+                    AAM::api()->misc->get($_POST, 'resource_type')
+                );
+                break;
+
             case 'audit':
                 if (current_user_can('aam_trigger_audit')) {
                     $content = $this->loadTemplate($basedir . 'security-audit.php');
                 }
-                break;
-
-            case 'post-access-form':
-                $type    = $this->getFromPost('type'); // Type of object to load
-                $id      = $this->getFromPost('id'); // Object Id
-
-                $manager = new AAM_Backend_Feature_Main_Post();
-                $content = $manager->getAccessForm($id, $type);
                 break;
 
             default:
@@ -382,6 +419,36 @@ class AAM_Backend_View
         }
 
         return $content;
+    }
+
+    /**
+     * Bootstrap the object
+     *
+     * @return AAM_Backend_View
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function bootstrap()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
+
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Backend_View
+     *
+     * @access public
+     * @version 7.0.0
+     */
+    public static function get_instance()
+    {
+        return self::bootstrap();
     }
 
 }

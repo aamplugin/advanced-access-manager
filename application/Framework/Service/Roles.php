@@ -8,14 +8,10 @@
  */
 
 /**
- * AAM service role manage
- *
- * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
- * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/275
- * @since 6.9.6  Initial implementation of the class
+ * AAM Roles Governance service
  *
  * @package AAM
- * @version 6.9.35
+ * @version 7.0.0
  */
 class AAM_Framework_Service_Roles
 {
@@ -23,337 +19,331 @@ class AAM_Framework_Service_Roles
     use AAM_Framework_Service_BaseTrait;
 
     /**
-     * WP core roles object
+     * Get list of dynamic roles
      *
-     * @var WP_Roles
+     * Note! This method return only list of dynamically assumed roles to
+     * access level. It does not return roles stored in WordPress core.
      *
-     * @access private
-     * @version 6.9.6
-     */
-    private $_wp_roles = null;
-
-    /**
-     * Return list of roles
+     * This is an artificial abstraction layer on top of the WordPress core
+     * roles and capabilities to allow roles adjustment through JSON access policies
+     * and dynamic manipulations.
      *
-     * @return array Array of AAM_Framework_Proxy_Role
-     *
+     * @return array|WP_Error
      * @access public
-     * @version 6.9.6
+     *
+     * @version 7.0.0
      */
-    public function get_all_roles(array $inline_context = [])
+    public function get_list()
     {
         try {
-            $result = [];
-            $roles  = $this->_get_wp_roles();
+            $result   = [];
+            $resource = $this->_get_resource();
 
-            foreach($roles->role_objects as $role) {
-                array_push($result, new AAM_Framework_Proxy_Role(
-                    $roles->role_names[$role->name],
-                    $role
-                ));
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get list of editable roles
-     *
-     * @return array Array of AAM_Framework_Proxy_Role
-     *
-     * @access public
-     * @version 6.9.6
-     */
-    public function get_editable_roles(array $inline_context = [])
-    {
-        try {
-            $result = array();
-            $roles  = $this->_get_wp_roles();
-
-            if (function_exists('get_editable_roles')) {
-                $all = get_editable_roles();
-            } else {
-                $all = apply_filters('editable_roles', $roles->roles);
-            }
-
-            foreach(array_keys($all) as $slug) {
-                array_push($result, new AAM_Framework_Proxy_Role(
-                    $roles->role_names[$slug],
-                    $roles->get_role($slug)
-                ));
-            }
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get role by slug
-     *
-     * @param string  $slug  Unique role slug (aka ID)
-     *
-     * @return AAM_Framework_Proxy_Role|null
-     *
-     * @access public
-     * @throws OutOfRangeException
-     * @version 6.9.6
-     */
-    public function get_role($slug, array $inline_context = [])
-    {
-        try {
-            $all   = $this->get_all_roles();
-            $match = array_filter($all, function($role) use ($slug) {
-                return $role->slug === $slug;
-            });
-
-            if (count($match) === 0) {
-                throw new OutOfRangeException(
-                    "Role '{$slug}' does not exist or is not editable"
-                );
-            }
-
-            $result = array_shift($match);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check if provided slug is a role
-     *
-     * @param string $slug
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function is_role($slug, array $inline_context = [])
-    {
-        try {
-            $result = $this->_get_wp_roles()->is_role($slug);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Check if role is editable
-     *
-     * @param string $slug
-     * @param array  $inline_context
-     *
-     * @return boolean
-     *
-     * @since 6.9.35 https://github.com/aamplugin/advanced-access-manager/issues/400
-     * @since 6.9.33 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.35
-     */
-    public function is_editable_role($slug, array $inline_context = [])
-    {
-        try {
-            $roles = $this->_get_wp_roles();
-
-            if (function_exists('get_editable_roles')) {
-                $editable_roles = get_editable_roles();
-            } else {
-                $editable_roles = apply_filters('editable_roles', $roles->roles);
-            }
-
-            // Making sure that all role slugs are string. It is possible that some
-            // role names are just numbers
-            $slugs  = array_map('trim', array_keys($editable_roles));
-            $result = in_array($slug, $slugs, true);
-        } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create new role
-     *
-     * The method sanitizes and validates all the input values before creating a new
-     * role. Additionally, verifies that there is no slug overlap with any existing
-     * roles. In case of any validation issues, the method throws the
-     * InvalidArgumentException exception.
-     *
-     * The only required argument is `$displayName`. If `$slug` is not provided, the
-     * random number is generated with `uniqid` function.
-     *
-     * @param string $display_name Role name
-     * @param string $slug         optional Role slug
-     * @param array  $capabilities optional Array of capabilities
-     *
-     * @return AAM_Framework_Proxy_Role
-     * @throws InvalidArgumentException
-     *
-     * @since 6.9.10 https://github.com/aamplugin/advanced-access-manager/issues/275
-     * @since 6.9.6  Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.10
-     */
-    public function create_role(
-        $display_name,
-        $slug = null,
-        array $capabilities = [],
-        array $inline_context = []
-    ) {
-        try {
-            $name  = sanitize_text_field($display_name);
-            $roles = $this->_get_wp_roles();
-
-            if (is_string($name) && strlen($name) > 0) {
-                // Verify that if role slug is provided and it is valid
-                if (is_string($slug) && strlen($slug) > 0) {
-                    $slug = sanitize_key($slug);
-
-                    if (strlen($slug) === 0) {
-                        throw new InvalidArgumentException(
-                            'Role slug is invalid'
-                        );
+            foreach($resource->get_permissions() as $slug => $perms) {
+                if (wp_roles()->is_role($slug)) { // Ignore invalid roles
+                    if (isset($perms['assume_role'])) {
+                        $result[$slug] = $perms['assume_role']['effect'] === 'allow';
                     }
-                } else {
-                    // First, try to normalize the roles name into slug and if
-                    // nothing, then generate the random number
-                    $slug = str_replace(' ', '_', sanitize_key($name));
-                    $slug = empty($slug) ? strtolower(uniqid()) : $slug;
                 }
-
-                if ($roles->is_role($slug)) {
-                    throw new LogicException("Role {$slug} already exists");
-                }
-
-                // Sanitize the list of capabilities and make sure that the list
-                // contains unique caps
-
-                $caps = array_unique(array_map(function($cap) {
-                    $result = sanitize_key($cap);
-
-                    if (!is_string($result) || strlen($result) === 0) {
-                        throw new InvalidArgumentException(
-                            "Capability '{$cap}' is invalid"
-                        );
-                    }
-
-                    return $result;
-                }, $capabilities));
-
-                // Creating new role
-                $result = new AAM_Framework_Proxy_Role(
-                    $name,
-                    $roles->add_role($slug, $name, array_fill_keys($caps, true))
-                );
-            } else {
-                throw new InvalidArgumentException('Role name is invalid');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Update role attributes
+     * Alias for the get_list
      *
-     * @param AAM_Framework_Proxy_Role $role
-     *
-     * @return AAM_Framework_Proxy_Role
-     *
+     * @return array|WP_Error
      * @access public
-     * @version 6.9.6
+     *
+     * @version 7.0.0
      */
-    public function update_role(
-        $slug, array $data = [], array $inline_context = []
-    ) {
-        try {
-            $role = $this->get_role($slug, $inline_context);
+    public function list()
+    {
+        return $this->get_list();
+    }
 
-            if ($role->update($data)) {
-                $result = $role;
+    /**
+     * Deny one or multiple permissions
+     *
+     * @param mixed        $role_identifier
+     * @param string|array $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function deny($role_identifier, $permission)
+    {
+        try {
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
+
+            if (is_string($permission)) {
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'deny'
+                );
+            } elseif (is_array($permission)) {
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'deny'
+                    );
+                }
             } else {
-                throw new RuntimeException('Failed to persist changes');
+                throw new InvalidArgumentException('Invalid permission type');
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Delete existing role
+     * Allow one or multiple permissions
      *
-     * @param string $slug
+     * @param mixed        $role_identifier
+     * @param string|array $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function allow($role_identifier, $permission)
+    {
+        try {
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
+
+            if (is_string($permission)) {
+                $result = $resource->set_permission(
+                    $identifier, $permission, 'allow'
+                );
+            } elseif (is_array($permission)) {
+                $result = true;
+
+                foreach($permission as $p) {
+                    $result = $result && $resource->set_permission(
+                        $identifier, $p, 'allow'
+                    );
+                }
+            } else {
+                throw new InvalidArgumentException('Invalid permission type');
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if permission is denied
+     *
+     * @param mixed  $role_identifier
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_denied_to($role_identifier, $permission)
+    {
+        try {
+            $result     = null;
+            $resource   = $this->_get_resource();
+            $identifier = $this->_normalize_resource_identifier($role_identifier);
+            $permission = $resource->get_permission($identifier, $permission);
+
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            }
+
+            // Making sure that other implementations can affect the decision
+            $result = apply_filters(
+                'aam_role_is_denied_to_filter',
+                $result,
+                $permission,
+                $resource
+            );
+
+            // Prepare the final result
+            $result = is_bool($result) ? $result : false;
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if permission is allowed
+     *
+     * @param mixed  $role_identifier
+     * @param string $permission
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function is_allowed_to($role_identifier, $permission)
+    {
+        $decision = $this->is_denied_to($role_identifier, $permission);
+
+        return is_bool($decision) ? !$decision : $decision;
+    }
+
+    /**
+     * Check if role is hidden
+     *
+     * @param mixed $role_identifier
      *
      * @return boolean
-     *
      * @access public
-     * @throws LogicException
-     * @version 6.9.6
+     *
+     * @version 7.0.0
      */
-    public function delete_role($slug, array $inline_context = []
-    ) {
+    public function is_hidden($role_identifier)
+    {
+        return $this->is_denied_to($role_identifier, 'list_role');
+    }
+
+    /**
+     * Hide role
+     *
+     * @param mixed $role_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function hide($role_identifier)
+    {
+        return $this->deny($role_identifier, 'list_role');
+    }
+
+    /**
+     * Show role
+     *
+     * @param mixed $role_identifier
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function show($role_identifier)
+    {
+        return $this->allow($role_identifier, 'list_role');
+    }
+
+    /**
+     * Reset permissions
+     *
+     * Reset role permissions or permissions to all roles if $role_identifier is not
+     * provided
+     *
+     * @param mixed $role_identifier [Optional]
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function reset($role_identifier = null)
+    {
         try {
-            $roles = $this->_get_wp_roles();
-            $role  = $this->get_role($slug, $inline_context);
-
-            // Verifying that role has not users assigned. Otherwise reject
-            if ($role->user_count > 0) {
-                throw new LogicException('Cannot delete role with users');
-            }
-
-            $roles->remove_role($role->slug);
-
-            $result = !$roles->is_role($role->slug);
-
-            if ($result === false) {
-                throw new RuntimeException('Failed to delete role');
+            if (!empty($role_identifier)) {
+                $result = $this->_get_resource()->reset(
+                    $this->_normalize_resource_identifier($role_identifier)
+                );
+            } else {
+                $result = $this->_get_resource()->reset();
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Get the list of WordPress roles as WP_Roles object
+     * Aggregate all roles' permissions
      *
-     * @return WP_Roles
+     * This method returns all explicitly defined permissions for all the roles. It
+     * also includes permissions defined with JSON access policies, if the service
+     * is enabled.
      *
-     * @access private
-     * @version 6.9.33
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
      */
-    private function _get_wp_roles()
+    public function aggregate()
     {
-        global $wp_roles;
-
-        if (is_null($this->_wp_roles)) {
-            if (function_exists('wp_roles')) {
-                $this->_wp_roles = wp_roles();
-            } elseif (isset($wp_roles)) {
-                $this->_wp_roles = $wp_roles;
-            } else {
-                $this->_wp_roles = new WP_Roles();
-            }
+        try {
+            $result = $this->_get_resource()->get_permissions();
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
-        return $this->_wp_roles;
+        return $result;
+    }
+
+    /**
+     * Get role resource
+     *
+     * @return AAM_Framework_Resource_Role
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_resource()
+    {
+        return $this->_get_access_level()->get_resource(
+            AAM_Framework_Type_Resource::ROLE
+        );
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_Role
+     */
+    private function _normalize_resource_identifier($resource_identifier)
+    {
+        $result = null;
+
+        if (is_a($resource_identifier, WP_Role::class)) {
+            $result = $resource_identifier;
+        } elseif (is_a($resource_identifier, AAM_Framework_Proxy_Role::class)) {
+            $result = $resource_identifier->get_core_instance();
+        } elseif (is_string($resource_identifier)) {
+            $result = wp_roles()->get_role($resource_identifier);
+        }
+
+        $result = apply_filters(
+            'aam_normalize_role_identifier_filter',
+            $result,
+            $resource_identifier
+        );
+
+        // Allow wildcard support
+        if (!is_object($result) || !property_exists($result, 'name')) {
+            throw new OutOfRangeException('The resource identifier is invalid');
+        }
+
+        return $result;
     }
 
 }

@@ -1,6 +1,4 @@
-<?php
-
-/** @version 6.9.35 */
+<?php /** @version 7.0.0 */
 
 if (defined('AAM_KEY')) {
     $params    = isset($params) ? $params : (object) [];

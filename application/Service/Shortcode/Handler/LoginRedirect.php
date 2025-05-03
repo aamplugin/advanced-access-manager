@@ -10,23 +10,19 @@
 /**
  * AAM shortcode strategy for login button
  *
- * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.16
+ * @version 7.0.0
  */
 class AAM_Service_Shortcode_Handler_LoginRedirect
-    implements AAM_Core_Contract_ShortcodeInterface
 {
 
     /**
      * Shortcode arguments
      *
      * @var array
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected $args;
 
@@ -34,9 +30,9 @@ class AAM_Service_Shortcode_Handler_LoginRedirect
      * Wrapped by shortcode content
      *
      * @var string
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected $content;
 
@@ -51,9 +47,9 @@ class AAM_Service_Shortcode_Handler_LoginRedirect
      * @param type $content
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     public function __construct($args, $content)
     {
@@ -65,16 +61,13 @@ class AAM_Service_Shortcode_Handler_LoginRedirect
      * Process the shortcode
      *
      * @return string
-     *
-     * @since 6.9.16 https://github.com/aamplugin/advanced-access-manager/issues/316
-     * @since 6.0.0  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.16
+     *
+     * @version 7.0.0
      */
     public function run()
     {
-        $redirect = AAM_Core_Request::server('REQUEST_URI');
+        $redirect = AAM::api()->misc->get($_SERVER, 'REQUEST_URI');
         $class    = (isset($this->args['class']) ? $this->args['class'] : '');
         $url      = add_query_arg('reason', 'restricted', wp_login_url($redirect));
 
@@ -82,7 +75,7 @@ class AAM_Service_Shortcode_Handler_LoginRedirect
             if (!empty($this->args['label'])) {
                 $label = $this->args['label'];
             } else {
-                $label = __('Login to continue', AAM_KEY);
+                $label = __('Login to continue', 'advanced-access-manager');
             }
         } else {
             $label = $this->content;

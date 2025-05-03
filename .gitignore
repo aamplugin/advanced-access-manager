@@ -1,5 +1,6 @@
 phpunit
 .phpunit.result.cache
+.default.setup.json
 sami.phar
 build
 cache

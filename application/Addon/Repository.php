@@ -10,55 +10,38 @@
 /**
  * Addon repository
  *
- * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/305
- *               https://github.com/aamplugin/advanced-access-manager/issues/308
- * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
- * @since 6.9.6  https://github.com/aamplugin/advanced-access-manager/issues/255
- * @since 6.9.5  https://github.com/aamplugin/advanced-access-manager/issues/243
- * @since 6.9.3  https://github.com/aamplugin/advanced-access-manager/issues/237
- * @since 6.7.6  https://github.com/aamplugin/advanced-access-manager/issues/177
- * @since 6.7.5  https://github.com/aamplugin/advanced-access-manager/issues/173
- * @since 6.4.3  https://github.com/aamplugin/advanced-access-manager/issues/92
- * @since 6.4.2  https://github.com/aamplugin/advanced-access-manager/issues/88
- * @since 6.4.1  https://github.com/aamplugin/advanced-access-manager/issues/81
- * @since 6.2.0  Bug fixing that is related to unwanted PHP notices
- * @since 6.0.5  Refactored the license managements. Fixed couple bugs with license
- *               information displaying
- * @since 6.0.0  Initial implementation of the class
- *
  * @package AAM
- * @version 6.9.14
+ * @version 7.0.0
  */
 class AAM_Addon_Repository
 {
 
-    use AAM_Core_Contract_SingletonTrait;
-
     /**
-     * DB options name
+     * Single instance of itself
      *
-     * @version 6.0.0
-     * @deprecated
-     * @todo Remove in the end of 2023
+     * @var object
+     * @access private
+     *
+     * @version 7.0.0
      */
-    const DB_OPTION = 'aam_addons';
+    private static $_instance = null;
 
     /**
      * The latest know premium release
      *
      * Note! This is the latest version at the time of AAM publishing
      *
-     * @version 6.9.13
+     * @version 7.0.0
      */
-    const LATEST_PREMIUM_VERSION = '6.1.13';
+    const LATEST_PREMIUM_VERSION = '7.0.0';
 
     /**
      * Constructor
      *
      * @return void
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
     protected function __construct()
     {
@@ -71,27 +54,23 @@ class AAM_Addon_Repository
      * Get premium data
      *
      * @return array
-     *
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/308
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
-     * @since 6.9.6  Initial implementation of the method
-     *
      * @access public
-     * @version 6.9.14
+     *
+     * @version 7.0.0
      */
-    public function getPremiumData()
+    public function get_premium_data()
     {
         // Determining if there is newer version
-        $slug      = 'aam-complete-package';
-        $version   = $this->getPluginVersion("{$slug}/bootstrap.php");
-        $hasUpdate = $this->hasPluginUpdate("{$slug}/bootstrap.php", $version);
+        $slug       = 'aam-complete-package';
+        $version    = $this->get_plugin_version("{$slug}/bootstrap.php");
+        $has_update = $this->has_plugin_update("{$slug}/bootstrap.php", $version);
 
         return array(
-            'title'       => 'AAM Complete Package',
+            'title'       => 'Advanced Access Manager - Premium Add-On',
             'version'     => $version,
-            'hasUpdate'   => $hasUpdate,
-            'license'     => $this->getPluginLicense($slug),
-            'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', AAM_KEY),
+            'hasUpdate'   => $has_update,
+            'license'     => $this->get_premium_license_key($slug),
+            'description' => __('The complete list of all premium features in one package. All the future features will be available for download for no additional cost as long as the subscription stays active.', 'advanced-access-manager'),
             'url'         => 'https://aamportal.com/premium?ref=plugin'
         );
     }
@@ -99,69 +78,21 @@ class AAM_Addon_Repository
     /**
      * Get list of all registered licenses
      *
-     * @return array
-     *
-     * @since 6.9.6 https://github.com/aamplugin/advanced-access-manager/issues/255
-     * @since 6.9.3 Initial implementation of the method
-     *
+     * @return string|null
      * @access public
-     * @version 6.9.6
-     * @todo Remove support of "registry"
+     *
+     * @version 7.0.0
      */
-    public function getRegisteredLicenseList()
+    public function get_premium_license_key()
     {
-        $response = array();
-        $registry = $this->getRegistry();
-
-        foreach($registry as $v) {
-            if (isset($v['license'])) {
-                array_push($response, $v['license']);
-            }
-        }
+        $result = null;
 
         // New way to handle the licensing
-        if (defined('AAM_COMPLETE_PACKAGE_LICENSE')
-            && !in_array(AAM_COMPLETE_PACKAGE_LICENSE, $response, true)) {
-                array_push($response, AAM_COMPLETE_PACKAGE_LICENSE);
+        if (defined('AAM_COMPLETE_PACKAGE_LICENSE')) {
+            $result = AAM_COMPLETE_PACKAGE_LICENSE;
         }
 
-        return $response;
-    }
-
-    /**
-     * Get license registry
-     *
-     * @param boolean $license_only
-     *
-     * @return array
-     *
-     * @since 6.9.3 https://github.com/aamplugin/advanced-access-manager/issues/237
-     * @since 6.7.6 https://github.com/aamplugin/advanced-access-manager/issues/177
-     * @since 6.4.2 https://github.com/aamplugin/advanced-access-manager/issues/81
-     * @since 6.3.0 Fixed bug that causes PHP Notice about license index is missing.
-     *              Optimized for Multisite setup
-     * @since 6.0.5 Added the $license_only argument
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access public
-     * @version 6.9.3
-     */
-    public function getRegistry()
-    {
-        $response = array();
-        $registry = AAM_Core_API::getOption(
-            self::DB_OPTION, array(), AAM_Core_API::getMainSiteId()
-        );
-
-        if (is_array($registry)) {
-            foreach($registry as $id => $data) {
-                if (!empty($data['license'])) {
-                    $response[$id] = $data;
-                }
-            }
-        }
-
-        return $response;
+        return $result;
     }
 
     /**
@@ -171,15 +102,11 @@ class AAM_Addon_Repository
      * @param string $current_version
      *
      * @return boolean
-     *
-     * @since 6.9.14 https://github.com/aamplugin/advanced-access-manager/issues/305
-     * @since 6.9.13 https://github.com/aamplugin/advanced-access-manager/issues/303
-     * @since 6.0.5  Initial implementation of the method
-     *
      * @access protected
-     * @version 6.9.14
+     *
+     * @version 7.0.0
      */
-    protected function hasPluginUpdate($id, $current_version)
+    protected function has_plugin_update($id, $current_version)
     {
         $has_update = false;
         $plugins    = get_site_transient('update_plugins');
@@ -203,14 +130,14 @@ class AAM_Addon_Repository
      *
      * @param string $plugin
      *
-     * @return string
+     * @return string|null
+     * @access protected
      *
-     * @access public
-     * @version 6.0.0
+     * @version 7.0.0
      */
-    public function getPluginVersion($plugin)
+    protected function get_plugin_version($plugin)
     {
-        $data    = $this->getPluginData($plugin);
+        $data    = $this->get_plugin_data($plugin);
         $version = (isset($data['Version']) ? $data['Version'] : null);
 
         return (!empty($version) ? $version : null);
@@ -222,11 +149,11 @@ class AAM_Addon_Repository
      * @param string $plugin
      *
      * @return array|null
-     *
      * @access protected
-     * @version 6.0.0
+     *
+     * @version 7.0.0
      */
-    protected function getPluginData($plugin)
+    protected function get_plugin_data($plugin)
     {
         $filename = WP_PLUGIN_DIR . '/' . $plugin;
 
@@ -240,23 +167,33 @@ class AAM_Addon_Repository
     }
 
     /**
-     * Get plugin license key
+     * Bootstrap the object
      *
-     * @param string $plugin
+     * @return AAM_Addon_Repository
+     * @access public
      *
-     * @return string|null
-     *
-     * @since 6.2.0 Fixed bug with PHP notice when `license` is not defined
-     * @since 6.0.0 Initial implementation of the method
-     *
-     * @access protected
-     * @version 6.2.0
+     * @version 7.0.0
      */
-    protected function getPluginLicense($plugin)
+    public static function bootstrap()
     {
-        $r = $this->getRegistry();
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
+        }
 
-        return (isset($r[$plugin]['license']) ? $r[$plugin]['license'] : null);
+        return self::$_instance;
+    }
+
+    /**
+     * Get single instance of itself
+     *
+     * @return AAM_Addon_Repository
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public static function get_instance()
+    {
+        return self::bootstrap();
     }
 
 }

@@ -11,7 +11,7 @@
  * Check for the elevated number of high privilege users
  *
  * @package AAM
- * @version 6.9.43
+ * @version 7.0.0
  */
 class AAM_Audit_HighPrivilegeUserCountCheck
 {
@@ -28,7 +28,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
     /**
      * List of core capabilities that can cause damage to the site through content
      *
-     * @version 6.9.43
+     * @version 7.0.0
      */
     const CONTENT_HIGH_CAPS = [
         'manage_categories',
@@ -41,7 +41,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
     /**
      * List of core capabilities that can cause damage to the site
      *
-     * @version 6.9.43
+     * @version 7.0.0
      */
     const SITE_HIGH_CAPS = [
         'edit_themes',
@@ -68,7 +68,8 @@ class AAM_Audit_HighPrivilegeUserCountCheck
      *
      * @access public
      * @static
-     * @version 6.9.43
+     *
+     * @version 7.0.0
      */
     public static function run()
     {
@@ -136,7 +137,8 @@ class AAM_Audit_HighPrivilegeUserCountCheck
      *
      * @return array
      * @access private
-     * @version 6.9.43
+     *
+     * @version 7.0.0
      */
     private static function _get_high_privilege_roles($db_roles)
     {
@@ -176,7 +178,8 @@ class AAM_Audit_HighPrivilegeUserCountCheck
      *
      * @access private
      * @static
-     * @version 6.9.43
+     *
+     * @version 7.0.0
      */
     private static function _identify_elevated_user_count($elevated_roles)
     {
@@ -199,7 +202,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
             }
         }
 
-        $suggested_admins = AAM::api()->configs()->get_config(
+        $suggested_admins = AAM::api()->config->get(
             'service.security_audit.recommended_admins_count', 1
         );
 
@@ -212,7 +215,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
         // Let's be real here. How many articles one senior editor can review per
         // biz day? Let's put an arbitrary number 4 with 250 working days, it may be
         // max 1,000 articles per year.
-        $suggested_editors = AAM::api()->configs()->get_config(
+        $suggested_editors = AAM::api()->config->get(
             'service.security_audit.recommended_editors_count', ceil($total / 1000)
         );
 

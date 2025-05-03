@@ -11,142 +11,281 @@
  * AAM service for JWT Tokens
  *
  * @package AAM
- * @version 6.9.10
+ * @version 7.0.0
+ *
+ * @link https://github.com/firebase/php-jwt
  */
-class AAM_Framework_Service_Jwts
+class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
 {
 
     use AAM_Framework_Service_BaseTrait;
 
     /**
+     * JWT Registry DB option
+     *
+     * @version 7.0.0
+     */
+    const DB_OPTION = 'aam_jwt_registry';
+
+    /**
+     * Cache token registry
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private $_registry = null;
+
+    /**
      * Return list of tokens
      *
-     * @param array $inline_context Context
-     *
      * @return array
-     *
      * @access public
-     * @version 6.9.10
+     *
+     * @version 7.0.0
      */
-    public function get_token_list($inline_context = null)
+    public function get_tokens()
     {
         try {
             $result = [];
-            $user   = $this->_get_subject($inline_context);
-            $tokens = AAM_Service_Jwt::getInstance()->getTokenRegistry($user->ID);
 
-            foreach($tokens as $token) {
+            foreach($this->_get_registry() as $token) {
                 array_push($result, $this->_prepare_token($token));
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Get existing token by ID
-     *
-     * @param string $id             Token ID
-     * @param array  $inline_context Runtime context
+     * Alias for the get_tokens method
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.10
-     * @throws OutOfRangeException If token does not exist
+     *
+     * @version 7.0.0
      */
-    public function get_token_by_id($id, $inline_context = null)
+    public function tokens()
+    {
+        return $this->get_tokens();
+    }
+
+    /**
+     * Find token by the field
+     *
+     * @param mixed  $search
+     * @param string $claim  [Optional]
+     *
+     * @return array|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function get_token_by($search, $claim = null)
     {
         try {
-            $result = false;
+            $found = null;
 
-            foreach($this->get_token_list($inline_context) as $token) {
-                if ($token['id'] === $id) {
-                    $result = $token;
+            if (is_string($claim)) {
+                foreach($this->_get_registry() as $token) {
+                    $claims = $this->jwt->decode($token);
+
+                    if (array_key_exists($claim, $claims)
+                        && $claims[$claim] === $search
+                    ) {
+                        $found = $token;
+                        break;
+                    }
                 }
+            } else {
+                $filtered = array_filter(
+                    $this->_get_registry(),
+                    function($t) use ($search) {
+                        return $t === $search;
+                    }
+                );
+
+                $found = count($filtered) ? array_shift($filtered) : null;
             }
 
-            if ($result === false) {
+            if (is_null($found)) {
                 throw new OutOfRangeException('Token does not exist');
+            } else {
+                $result = $this->_prepare_token($found);
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
+    }
+
+    /**
+     * Alias for the get_token_by method
+     *
+     * @param mixed  $search
+     * @param string $claim  [Optional]
+     *
+     * @return string|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function token_by($search, $claim = null)
+    {
+        return $this->get_token_by($search, $claim);
     }
 
     /**
      * Create new token
      *
-     * @param array $claims         Token claims
-     * @param array $inline_context Runtime context
+     * @param array $claims         [Optional]
+     * @param array $settings       [Optional]
      *
-     * @return array
+     * @return array|WP_Error
      *
      * @access public
-     * @version 6.9.10
-     * @throws RuntimeException If fails to persist token
+     * @version 7.0.0
      */
-    public function create_token(array $claims, $inline_context = null)
+    public function issue(array $claims = [], array $settings = [])
     {
         try {
-            $subject = $this->_get_subject($inline_context);
+            $user   = $this->_get_access_level();
+            $config = array_merge([
+                'revocable'   => true,
+                'refreshable' => false,
+                'ttl'         => $this->config->get(
+                    'service.jwt.expires_in', '+24 hours'
+                )
+            ], $settings);
 
-            // Adding user ID to the list of claims
-            $claims['userId'] = $subject->ID;
 
-            // Generating token
-            $token = AAM_Core_Jwt_Manager::getInstance()->encode($claims);
-
-            // Register token
-            $result = AAM_Service_Jwt::getInstance()->registerToken(
-                $subject->ID, $token->token
-            );
-
-            if (!$result) {
-                throw new RuntimeException('Failed to register token');
+            if (is_numeric($config['ttl'])) {
+                $config['ttl'] = "+{$settings['ttl']} seconds";
+            } elseif (!is_string($config['ttl'])) {
+                throw new InvalidArgumentException('Invalid token ttl');
             }
 
-            $result = $this->_prepare_token($token->token);
+            if (!is_bool($config['revocable'])) {
+                throw new InvalidArgumentException('Invalid revocable indicator');
+            }
+
+            if (!is_bool($config['refreshable'])) {
+                throw new InvalidArgumentException('Invalid refreshable indicator');
+            }
+
+            $claims = apply_filters('aam_jwt_claims_filter', array_merge(
+                $claims,
+                [
+                    'revocable'   => $config['revocable'],
+                    'refreshable' => $config['refreshable']
+                ]
+            ));
+
+            // Generate a token
+            $result = array_merge(
+                $this->jwt->issue($user->ID, $claims, $config['ttl']),
+                [ 'is_valid' => true ]
+            );
+
+            // Register token
+            if ($config['revocable']) {
+                $this->_add_to_registry($result['token']);
+            }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
         }
 
         return $result;
     }
 
     /**
-     * Delete token
+     * Revoke JWT token
      *
-     * @param string $id             Token ID
-     * @param array  $inline_context Runtime context
+     * @param string $token
      *
      * @return array
-     *
      * @access public
-     * @version 6.9.10
-     * @throws RuntimeException If fails to revoke a token
+     *
+     * @version 7.0.0
      */
-    public function delete_token($id, $inline_context = null)
+    public function revoke($token)
     {
         try {
-            // Find the token that we are deleting
-            $found = $this->get_token_by_id($id, $inline_context);
-            $user  = $this->_get_subject($inline_context);
+            $result = $this->_remove_from_registry($token);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
 
-            // Revoking the token
-            $result = AAM_Service_Jwt::getInstance()->revokeUserToken(
-                $user->ID, $found['token']
-            );
+        return $result;
+    }
 
-            if (!$result) {
-                throw new RuntimeException('Failed to revoke the token');
+    /**
+     * Refresh existing token (if allowed)
+     *
+     * @param string $token
+     *
+     * @return array
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function refresh($token)
+    {
+        try {
+            // Validating the token first
+            $result = $this->_validate($token);
+
+            if (!is_wp_error($result)) {
+                $claims = $this->jwt->decode($token);
+
+                if (!empty($claims['refreshable'])) {
+                    // Determine tokens ttl
+                    $ttl = $claims['exp'] - $claims['iat'];
+
+                    // Add time when token was refreshed
+                    $claims['rat'] = time();
+
+                    // Issue new token with the same duration
+                    $result = $this->jwt->issue($claims['user_id'], $claims, $ttl);
+
+                    // Revoke given token && add new one
+                    if ($claims['revocable']) {
+                        $this->_remove_from_registry($token);
+                        $this->_add_to_registry($result['token']);
+                    }
+                } else {
+                    throw new LogicException('The given token is not refreshable');
+                }
+            } else {
+                throw new RuntimeException($result->get_error_message());
             }
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Validate JWT token
+     *
+     * @param string $token
+     *
+     * @return bool|WP_Error
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function validate($token)
+    {
+        try {
+            $result = $this->_validate($token);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -155,26 +294,179 @@ class AAM_Framework_Service_Jwts
     /**
      * Reset all tokens
      *
-     * @param array $inline_context Runtime context
-     *
-     * @return array
+     * @return bool
      *
      * @access public
-     * @version 6.9.10
+     * @version 7.0.0
      */
-    public function reset($inline_context = null)
+    public function reset()
     {
         try {
-            $user = $this->_get_subject($inline_context);
+            // Save token
+            $result = delete_user_option(
+                $this->_get_access_level()->ID, self::DB_OPTION
+            );
 
-            // Reset
-            if (!AAM_Service_Jwt::getInstance()->resetTokenRegistry($user->ID)) {
-                throw new RuntimeException('Failed to reset tokens');
-            } else {
-                $result = $this->get_token_list($inline_context);
-            }
+            // Reset internal registry
+            $this->_registry = null;
         } catch (Exception $e) {
-            $result = $this->_handle_error($e, $inline_context);
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Verify that service is properly configured
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.0
+     */
+    protected function initialize_hooks()
+    {
+        $access_level = $this->_get_access_level();
+
+        if ($access_level->type !== AAM_Framework_Type_AccessLevel::USER) {
+            throw new LogicException(
+                'The JWT service expects ONLY user access level'
+            );
+        }
+    }
+
+    /**
+     * Validate given token
+     *
+     * @param string $token
+     *
+     * @return bool|WP_Error
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _validate($token)
+    {
+        // Step #1. Let's verify that token is properly signed and not expired
+        $result = $this->jwt->validate($token);
+
+        if (!is_wp_error($result)) {
+            // Step #2. Let's verify that token is part of registry if it is
+            // revocable
+            $claims = $this->jwt->decode($token);
+
+            if (!empty($claims['revocable'])) {
+                $filtered = array_filter(
+                    $this->_get_registry(),
+                    function($t) use ($token) {
+                        return $t === $token;
+                    }
+                );
+
+                if (empty($filtered)) {
+                    throw new RuntimeException('Unregistered token');
+                }
+            }
+        } else {
+            throw new RuntimeException(esc_js($result->get_error_message()));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get list of tokens issued for a given user
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _get_registry()
+    {
+        if (is_null($this->_registry)) {
+            $registry = get_user_option(
+                self::DB_OPTION, $this->_get_access_level()->ID
+            );
+
+            // Making sure the registry is not corrupted
+            $this->_registry = is_array($registry) ? $registry : [];
+        }
+
+        return $this->_registry;
+    }
+
+    /**
+     * Persist token in DB
+     *
+     * @param string $token
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _add_to_registry($token)
+    {
+        $registry      = $this->_get_registry();
+        $registry_size = $this->config->get('service.jwt.registry_size', 10);
+
+        // Make sure that we do not overload the user meta
+        if (count($registry) >= $registry_size) {
+            array_shift($registry);
+        }
+
+        // Add new token to the registry
+        $registry[] = $token;
+
+        // Update local registry cache
+        $this->_registry = $registry;
+
+        // Save token
+        $result = update_user_option(
+            $this->_get_access_level()->ID, self::DB_OPTION, $this->_registry
+        );
+
+        if (!$result) {
+            throw new RuntimeException('Failed to register a token');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Remove a token from the registry
+     *
+     * @param string $token
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.0
+     */
+    private function _remove_from_registry($token)
+    {
+        // Filter out token that we are deleting
+        $tokens   = $this->_get_registry();
+        $filtered = array_filter($tokens, function($t) use ($token) {
+            return $t !== $token;
+        });
+
+        // Did we actually remove a token?
+        if (count($tokens) === count($filtered)) {
+            throw new OutOfRangeException('Provided token is not registered');
+        }
+
+        // Save token
+        $result = update_user_option(
+            $this->_get_access_level()->ID, self::DB_OPTION, $filtered
+        );
+
+        // Update a local cache
+        $this->_registry = $filtered;
+
+        if (!$result) {
+            throw new RuntimeException('Failed to revoke the token');
         }
 
         return $result;
@@ -188,38 +480,24 @@ class AAM_Framework_Service_Jwts
      * @return array
      *
      * @access private
-     * @version 6.9.10
+     * @version 7.0.0
      */
     private function _prepare_token($token)
     {
-        $response = array();
+        $is_valid = $this->jwt->validate($token);
+        $claims   = $this->jwt->decode($token);
 
-        $manager = AAM_Core_Jwt_Manager::getInstance();
-        $claims  = $manager->validate($token);
+        $result = [
+            'token'    => $token,
+            'claims'   => $claims,
+            'is_valid' => $is_valid === true
+        ];
 
-        if (!is_wp_error($claims)) {
-            $response['id']         = $claims->jti;
-            $response['is_valid']   = true;
-            $response['claims']     = $claims;
-            $response['signed_url'] = add_query_arg(
-                'aam-jwt', $token, site_url()
-            );
-        } else {
-            $response['is_valid'] = false;
-            $response['error']    = $claims->get_error_message();
-
-            // Otherwise just try to extract claims
-            $claims = $manager->extractClaims($token);
-
-            if ($claims !== null) {
-                $response['id']     = $claims->jti;
-                $response['claims'] = $claims;
-            }
+        if (is_wp_error($is_valid)) {
+            $result['error'] = $is_valid->get_error_message();
         }
 
-        $response['token'] = $token;
-
-        return $response;
+        return $result;
     }
 
 }

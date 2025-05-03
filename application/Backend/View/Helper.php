@@ -21,7 +21,7 @@ class AAM_Backend_View_Helper
 {
 
     /**
-     * Was resizer libary already loaded?
+     * Was resizer library already loaded?
      *
      * @var boolean
      *
@@ -57,7 +57,7 @@ class AAM_Backend_View_Helper
         }
 
         // Localize the phase first
-        return preg_replace($search, $replace, __($phrase, AAM_KEY), 1);
+        return preg_replace($search, $replace, __($phrase, 'advanced-access-manager'), 1);
     }
 
     /**

@@ -11,22 +11,22 @@
  * AAM WP_User proxy
  *
  * @package AAM
- * @version 6.9.32
+ * @version 7.0.0
  */
-class AAM_Framework_Proxy_User
+class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
 {
 
     /**
      * User status: ACTIVE
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     const STATUS_ACTIVE = 'active';
 
     /**
      * User status: INACTIVE
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     const STATUS_INACTIVE = 'inactive';
 
@@ -35,7 +35,7 @@ class AAM_Framework_Proxy_User
      *
      * @var array
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     const ALLOWED_USER_STATUSES = [
         self::STATUS_ACTIVE,
@@ -47,11 +47,10 @@ class AAM_Framework_Proxy_User
      *
      * @var array
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     const ALLOWED_EXPIRATION_TRIGGERS = [
         'logout',
-        'delete',
         'change_role',
         'lock'
     ];
@@ -60,16 +59,16 @@ class AAM_Framework_Proxy_User
      * Original user object
      *
      * @var WP_User
-     * @version 6.9.32
+     * @version 7.0.0
      */
-    private $_wp_user;
+    private $_user;
 
     /**
      * User status
      *
      * @var string
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private $_status = self::STATUS_ACTIVE;
 
@@ -79,7 +78,7 @@ class AAM_Framework_Proxy_User
      * @var DateTime
      * @access private
      *
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private $_expires_at = null;
 
@@ -89,7 +88,7 @@ class AAM_Framework_Proxy_User
      * @var array
      *
      * @access private
-     * @version 6.9.32
+     * @version 7.0.0
      */
     private $_expiration_trigger = null;
 
@@ -108,17 +107,27 @@ class AAM_Framework_Proxy_User
      * @return void
      *
      * @access public
-     * @since 6.9.32
+     * @since 7.0.0
      */
     public function __construct(WP_User $user)
     {
-        $this->_wp_user = $user;
+        $this->_user = $user;
 
         // Init user expiration state
         $this->_init_user_expiration();
 
         // Init user status
         $this->_init_user_status();
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @return WP_User
+     */
+    public function get_core_instance()
+    {
+        return $this->_user;
     }
 
     /**
@@ -129,8 +138,7 @@ class AAM_Framework_Proxy_User
      * @return AAM_Framework_Proxy_User
      *
      * @access public
-     * @version 6.9.33
-     * @throws RuntimeException
+     * @version 7.0.0
      */
     public function update($data)
     {
@@ -186,11 +194,15 @@ class AAM_Framework_Proxy_User
             }
         }
 
+        if (isset($data['deprive_caps'])) {
+            foreach($data['deprive_caps'] as $capability) {
+                $this->add_cap($capability, false);
+            }
+        }
+
         if (isset($data['remove_caps'])) {
             foreach($data['remove_caps'] as $capability) {
-                // Note! Yes, adding capability to ensure that user will not inherit
-                // this capability from their parent role(s)
-                $this->add_cap($capability, false);
+                $this->remove_cap($capability);
             }
         }
 
@@ -205,14 +217,14 @@ class AAM_Framework_Proxy_User
      * @return void
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function reset($attributes = null)
     {
         if (is_null($attributes)) {
-            $attributes = ['expiration', 'status'];
-        } elseif (is_array($attributes)) {
-            $attributes = [$attributes];
+            $attributes = [ 'expiration', 'status' ];
+        } elseif (is_string($attributes)) {
+            $attributes = [ $attributes ];
         }
 
         // Reset user expiration
@@ -234,7 +246,7 @@ class AAM_Framework_Proxy_User
      * @return boolean
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function is_user_active()
     {
@@ -247,7 +259,7 @@ class AAM_Framework_Proxy_User
      * @return boolean
      *
      * @access public
-     * @version 6.9.33
+     * @version 7.0.0
      */
     public function is_user_access_expired()
     {
@@ -262,77 +274,6 @@ class AAM_Framework_Proxy_User
     }
 
     /**
-     * Grant capability to user
-     *
-     * @param string  $capability       Capability slug
-     * @param boolean $save_immediately Wether save in DB immediately or not
-     *
-     * @return void
-     *
-     * @access public
-     * @throws InvalidArgumentException
-     * @since 6.9.6
-     */
-    public function add_capability($capability, $save_immediately = false)
-    {
-        $sanitized = sanitize_key($capability);
-
-        if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
-        }
-
-        if ($save_immediately === true) {
-            $this->_wp_user->add_cap($sanitized, true);
-        } else {
-            $this->_wp_user->caps[$sanitized] = true;
-        }
-    }
-
-    /**
-     * Deprive capability from a user
-     *
-     * @param string  $capability       Capability slug
-     * @param boolean $save_immediately Wether save in DB immediately or not
-     *
-     * @return void
-     *
-     * @access public
-     * @throws InvalidArgumentException
-     * @since 6.9.32
-     */
-    public function remove_capability($capability, $save_immediately = false)
-    {
-        $sanitized = sanitize_key($capability);
-
-        if (!is_string($sanitized) || strlen($sanitized) === 0) {
-            throw new InvalidArgumentException(
-                "Capability '{$capability}' is invalid"
-            );
-        }
-
-        if ($save_immediately === true) {
-            $this->_wp_user->remove_cap($sanitized);
-        } elseif (isset($this->_wp_user->capabilities[$sanitized])) {
-            unset($this->_wp_user->caps[$sanitized]);
-        }
-    }
-
-    /**
-     * Return user attributes as array
-     *
-     * @return array
-     *
-     * @access public
-     * @since 6.9.32
-     */
-    public function to_array()
-    {
-        return $this->_wp_user->data;
-    }
-
-    /**
      * Proxy method to the original object
      *
      * @param string $name
@@ -341,15 +282,15 @@ class AAM_Framework_Proxy_User
      * @return mixed
      *
      * @access public
-     * @since 6.9.32
+     * @since 7.0.0
      */
     public function __call($name, $arguments)
     {
         $response = null;
 
-        if (method_exists($this->_wp_user, $name)) {
+        if (method_exists($this->_user, $name)) {
             $response = call_user_func_array(
-                array($this->_wp_user, $name), $arguments
+                array($this->_user, $name), $arguments
             );
         } else {
             _doing_it_wrong(
@@ -370,7 +311,7 @@ class AAM_Framework_Proxy_User
      * @return mixed
      *
      * @access public
-     * @since 6.9.32
+     * @since 7.0.0
      */
     public function __get($name)
     {
@@ -379,7 +320,7 @@ class AAM_Framework_Proxy_User
         if (property_exists($this, "_{$name}")) {
             $response = $this->{"_{$name}"};
         } else {
-            $response = $this->_wp_user->{$name};
+            $response = $this->_user->{$name};
         }
 
         return $response;
@@ -394,24 +335,11 @@ class AAM_Framework_Proxy_User
      * @return void
      *
      * @access public
-     * @since 6.9.32
+     * @since 7.0.0
      */
     public function __set($name, $value)
     {
-        $this->_wp_user->{$name} = $value;
-    }
-
-    /**
-     * Get WordPress core user object
-     *
-     * @return WP_User
-     *
-     * @access public
-     * @version 6.9.33
-     */
-    public function get_wp_user()
-    {
-        return $this->_wp_user;
+        $this->_user->{$name} = $value;
     }
 
     /**
@@ -420,7 +348,7 @@ class AAM_Framework_Proxy_User
      * @return void
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _init_user_expiration()
     {
@@ -457,7 +385,7 @@ class AAM_Framework_Proxy_User
      * @return void
      *
      * @access private
-     * @version 6.9.33
+     * @version 7.0.0
      */
     private function _init_user_status()
     {

@@ -1,10 +1,10 @@
 === Advanced Access Manager - Restricted Content, Users & Roles, Enhanced Security and More ===
 Contributors: vasyltech
-Tags: security, access control, user roles, role management, backend security, restricted content, jwt, api security
-Requires at least: 5.2.0
+Tags: security, access control, user roles, restricted content, api security
+Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.0
-Stable tag: 6.9.51
+Stable tag: 7.0.0
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -60,36 +60,7 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 
 == Changelog ==
 
-= 6.9.51 =
-* Fixed: PHP Notice: Function _load_textdomain_just_in_time [https://github.com/aamplugin/advanced-access-manager/issues/442](https://github.com/aamplugin/advanced-access-manager/issues/442)
-* Fixed: The Access Manager Metabox does not initialize correctly [https://github.com/aamplugin/advanced-access-manager/issues/441](https://github.com/aamplugin/advanced-access-manager/issues/441)
-* Fixed: Incorrectly invoked translation function [https://github.com/aamplugin/advanced-access-manager/issues/440](https://github.com/aamplugin/advanced-access-manager/issues/440)
-* Fixed: Download audit report issue [https://github.com/aamplugin/advanced-access-manager/issues/438](https://github.com/aamplugin/advanced-access-manager/issues/438)
-
-= 6.9.49 =
-* Fixed: Resetting all settings does not actually reset them all [https://github.com/aamplugin/advanced-access-manager/issues/436](https://github.com/aamplugin/advanced-access-manager/issues/436)
-* New: Allow to prepare the executive audit report [https://github.com/aamplugin/advanced-access-manager/issues/437](https://github.com/aamplugin/advanced-access-manager/issues/437)
-
-= 6.9.48 =
-* Fixed: Notice in WordPress if the none-default language is active [https://github.com/aamplugin/advanced-access-manager/issues/435](https://github.com/aamplugin/advanced-access-manager/issues/435)
-* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
-* New: Give the ability to share security audit report [https://github.com/aamplugin/advanced-access-manager/issues/434](https://github.com/aamplugin/advanced-access-manager/issues/434)
-
-= 6.9.47 =
-* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
-
-= 6.9.46 =
-* Added: Run AAM Audit periodically [https://github.com/aamplugin/advanced-access-manager/issues/432](https://github.com/aamplugin/advanced-access-manager/issues/432)
-* Added: Allow the ability to jump to a specific AAM tab [https://github.com/aamplugin/advanced-access-manager/issues/431](https://github.com/aamplugin/advanced-access-manager/issues/431)
-
-= 6.9.45 =
-* Added: Introduce AAM Security Score Widget [https://github.com/aamplugin/advanced-access-manager/issues/430](https://github.com/aamplugin/advanced-access-manager/issues/430)
-
-= 6.9.44 =
-* Removed: AI Chatbot service. We are moving it all to [aamportal.com](https://aamportal.com) website as Virtual assistant
-* Removed: Contact form. We are changing our customer support policy and directing customers to the [contact us](https://aamportal.com/contact-us) page instead
-
-= 6.9.43 =
+= 6.9.43=
 * Fixed: Can't update roles with whitespaces in slug [https://github.com/aamplugin/advanced-access-manager/issues/428](https://github.com/aamplugin/advanced-access-manager/issues/428)
 * Added: Enhance Security Scan with additional steps [https://github.com/aamplugin/advanced-access-manager/issues/427](https://github.com/aamplugin/advanced-access-manager/issues/427)
 
@@ -381,6 +352,7 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 = 6.8.0 =
 * Changed: Enhanced security pasture by escaping potentially harmful output, if information was directly modified in the DB or not escaped during storing AAM settings, reported by WordPress Plugin Review Team
 * Fixed: Cleared potentially corrupted data about status of premium add-ons.
+* Changed: Re-opened direct communication with the AAM developer through the Slack channel [https://aamplugin.com/support](https://aamplugin.com/support)
 
 = 6.7.9 =
 * Changed: Enhanced security pasture by escaping potentially harmful input from users that do not have unfiltered_html capability, reported by WordPress Plugin Review Team [https://github.com/aamplugin/advanced-access-manager/issues/192](https://github.com/aamplugin/advanced-access-manager/issues/192)

@@ -1,9 +1,0 @@
-{
-    "Statement": [
-        {
-            "Effect": "deny",
-            "Resource": "Term:category:plus-package-category:posts",
-            "Action": "List"
-        }
-    ]
-}
