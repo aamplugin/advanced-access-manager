@@ -55,7 +55,7 @@ class AAM_Service_LogoutRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     protected function initialize_hooks()
     {
@@ -63,23 +63,48 @@ class AAM_Service_LogoutRedirect
         add_action('clear_auth_cookie', function() {
             $redirect = AAM::api()->logout_redirect()->get_redirect();
 
-            if (empty($redirect) || $redirect['type'] === 'default') {
-                $this->_last_user_redirect = [
-                    'type'         => 'url_redirect',
-                    'redirect_url' => '/'
-                ];
-            } else {
+            if (!empty($redirect) && $redirect['type'] !== 'default') {
                 $this->_last_user_redirect = $redirect;
             }
         });
 
         // Fired after the user has been logged out successfully
         add_action('wp_logout', function() {
-            AAM::api()->redirect->do_redirect($this->_last_user_redirect);
+            if (!empty($this->_last_user_redirect)) {
+                AAM::api()->redirect->do_redirect($this->_last_user_redirect);
+            }
         }, PHP_INT_MAX);
 
         // Register RESTful API
         AAM_Restful_LogoutRedirect::bootstrap();
+    }
+
+    /**
+     * Get default logout redirect
+     *
+     * @return string
+     * @access private
+     *
+     * @version 7.0.1
+     */
+    private function _get_default_logout_redirect()
+    {
+        $requested_redirect_to = '';
+        $redirect_to           = AAM::api()->misc->get($_REQUEST, 'redirect_to');
+        $user                  = wp_get_current_user();
+
+        if (!empty($redirect_to) && is_string($redirect_to)) {
+			$result = $requested_redirect_to = $redirect_to;
+		} else {
+			$result = add_query_arg([
+                'loggedout' => 'true',
+                'wp_lang'   => get_user_locale(wp_get_current_user())
+            ], wp_login_url());
+		}
+
+		return apply_filters(
+            'logout_redirect', $result, $requested_redirect_to, $user
+        );
     }
 
 }

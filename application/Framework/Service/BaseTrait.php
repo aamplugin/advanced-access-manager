@@ -256,30 +256,11 @@ trait AAM_Framework_Service_BaseTrait
      * @return mixed
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     private function _handle_error($exception)
     {
-        $response = null;
-
-        // Determine what is the proper error handling strategy to pick
-        if (!empty($this->_settings['error_handling'])) {
-            $strategy = $this->_settings['error_handling'];
-        } else {
-            // Do not rely on WP_DEBUG as many website owners forget to turn off
-            // debug mode in production
-            $strategy = 'wp_trigger_error';
-        }
-
-        if ($strategy === 'exception') {
-            throw $exception;
-        } elseif ($strategy === 'wp_error') {
-            $response = new WP_Error('error', $exception->getMessage());
-        } else {
-            wp_trigger_error(static::class, $exception->getMessage());
-        }
-
-        return $response;
+        return $this->misc->handle_error($exception, $this->_settings);
     }
 
     /**

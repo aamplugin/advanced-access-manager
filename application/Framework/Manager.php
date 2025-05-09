@@ -291,55 +291,58 @@ final class AAM_Framework_Manager
      * @param array  $args
      *
      * @return void
-     *
      * @access public
-     * @version 7.0.0
+     *
+     * @version 7.0.1
      */
     public function __call($name, $args)
     {
-        $result = null;
+        $result   = null;
+        $acl      = array_shift($args);
+        $settings = array_shift($args);
 
-        if (array_key_exists($name, $this->_services)) {
-            $acl      = array_shift($args);
-            $settings = array_shift($args);
+        if (!is_array($settings)) {
+            $settings = [];
+        }
 
-            if (!is_array($settings)) {
-                $settings = [];
+        // Prepare settings for the service
+        $settings = array_replace($this->_default_settings, $settings);
+
+        try {
+            if (array_key_exists($name, $this->_services)) {
+                // Parse the incoming context and determine correct access level
+                if (empty($acl)) { // Use default access level
+                    $acl = $this->_default_access_level;
+                } elseif (is_string($acl)) {
+                    $acl = $this->_string_to_access_level($acl);
+                }
+
+                if (!is_a($acl, AAM_Framework_AccessLevel_Interface::class)) {
+                    throw new InvalidArgumentException(
+                        'Invalid access level provided'
+                    );
+                }
+
+                // Work with cache
+                $cache_key = [ $acl->type, $acl->get_id(), $name, $settings ];
+                $result    = $this->object_cache->get($cache_key);
+
+                if (empty($result)) {
+                    $result = call_user_func(
+                        "{$this->_services[$name]}::get_instance",
+                        $acl,
+                        $settings
+                    );
+
+                    $this->object_cache->set($cache_key, $result);
+                }
+            } else {
+                throw new BadMethodCallException(sprintf(
+                    'There is no service %s defined', esc_js($name)
+                ));
             }
-
-            // Parse the incoming context and determine correct access level
-            if (empty($acl)) { // Use default access level
-                $acl = $this->_default_access_level;
-            } elseif (is_string($acl)) {
-                $acl = $this->_string_to_access_level($acl);
-            }
-
-            if (!is_a($acl, AAM_Framework_AccessLevel_Interface::class)) {
-                throw new InvalidArgumentException(
-                    'Invalid access level provided'
-                );
-            }
-
-            // Prepare settings for the service
-            $settings  = array_replace($this->_default_settings, $settings);
-
-            // Work with cache
-            $cache_key = [ $acl->type, $acl->get_id(), $name, $settings ];
-            $result    = $this->object_cache->get($cache_key);
-
-            if (empty($result)) {
-                $result = call_user_func(
-                    "{$this->_services[$name]}::get_instance",
-                    $acl,
-                    $settings
-                );
-
-                $this->object_cache->set($cache_key, $result);
-            }
-        } else {
-            throw new BadMethodCallException(sprintf(
-                'There is no service %s defined', esc_js($name)
-            ));
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e, $settings);
         }
 
         return $result;
@@ -353,16 +356,20 @@ final class AAM_Framework_Manager
      * @return AAM_Framework_Utility_Interface
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     public function __get($name)
     {
-        if (array_key_exists($name, $this->_utilities)) {
-            $result = $this->_utilities[$name]::bootstrap();
-        } else {
-            throw new BadMethodCallException(sprintf(
-                'There is no utility %s defined', esc_js($name)
-            ));
+        try {
+            if (array_key_exists($name, $this->_utilities)) {
+                $result = $this->_utilities[$name]::bootstrap();
+            } else {
+                throw new BadMethodCallException(sprintf(
+                    'There is no utility %s defined', esc_js($name)
+                ));
+            }
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
         }
 
         return $result;
@@ -376,11 +383,17 @@ final class AAM_Framework_Manager
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     public function has_service($name)
     {
-        return array_key_exists($name, $this->_services);
+        try {
+            $result = array_key_exists($name, $this->_services);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
     }
 
     /**
@@ -391,11 +404,17 @@ final class AAM_Framework_Manager
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     public function has_utility($name)
     {
-        return array_key_exists($name, $this->_utilities);
+        try {
+            $result = array_key_exists($name, $this->_utilities);
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
     }
 
     /**
@@ -516,6 +535,24 @@ final class AAM_Framework_Manager
         }
 
         return $result;
+    }
+
+    /**
+     * Handle error
+     *
+     * @param Exception $exception
+     * @param array     $settings
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.1
+     */
+    private function _handle_error($exception, $settings = [])
+    {
+        return $this->misc->handle_error(
+            $exception, array_replace($this->_default_settings, $settings)
+        );
     }
 
     /**

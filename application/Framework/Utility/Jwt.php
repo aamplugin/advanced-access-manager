@@ -59,8 +59,8 @@ class AAM_Framework_Utility_Jwt implements AAM_Framework_Utility_Interface
      * @param int|string $ttl     [Optional]
      *
      * @return array
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function issue($user_id, array $claims = [], $ttl = null)

@@ -131,6 +131,20 @@ class AAM_Restful_Jwt
                 )
             ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
 
+            // Refresh a token
+            $this->_register_route('/jwt/(?P<id>[\w\-]+)', [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'refresh_token'],
+                'args'     => [
+                    'id' => [
+                        'description' => 'Token unique ID',
+                        'type'        => 'string',
+                        'format'      => 'uuid',
+                        'required'    => true
+                    ]
+                ]
+            ], self::PERMISSIONS, [ AAM_Framework_Type_AccessLevel::USER ]);
+
             // Reset all tokens
             $this->_register_route('/jwts', [
                 'methods'  => WP_REST_Server::DELETABLE,
@@ -242,6 +256,34 @@ class AAM_Restful_Jwt
                 $service->get_token_by($request->get_param('id'), 'jti'),
                 $request->get_param('fields')
             );
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Refresh a token
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     * @access public
+     *
+     * @version 7.0.0
+     */
+    public function refresh_token(WP_REST_Request $request)
+    {
+        try {
+            $service = $this->_get_service($request);
+            $token   = $service->get_token_by($request->get_param('id'), 'jti');
+
+            if (!empty($token['is_valid'])) {
+                $result = $service->refresh($token['token']);
+            } else {
+                throw new OutOfRangeException('Token is invalid or does not exist');
+            }
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

@@ -20,6 +20,45 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
     use AAM_Framework_Utility_BaseTrait;
 
     /**
+     * Handle framework error
+     *
+     * @param Exception $exception
+     * @param array     $settings
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.1
+     */
+    public function handle_error($exception, $settings = [])
+    {
+        $response = null;
+
+        // Determine what is the proper error handling strategy to pick
+        if (!empty($settings['error_handling'])) {
+            $strategy = $settings['error_handling'];
+        } else {
+            // Do not rely on WP_DEBUG as many website owners forget to turn off
+            // debug mode in production
+            $strategy = 'wp_trigger_error';
+        }
+
+        if ($strategy === 'exception') {
+            throw $exception;
+        } elseif ($strategy === 'wp_error') {
+            $response = new WP_Error('error', $exception->getMessage());
+        } elseif (function_exists('wp_trigger_error')) {
+            wp_trigger_error(static::class, $exception->getMessage());
+        } else {
+            trigger_error(sprintf(
+                '%s(): %s', static::class, $exception->getMessage()
+            ), E_USER_NOTICE);
+        }
+
+        return $response;
+    }
+
+    /**
      * Confirm that provided value is base64 encoded string
      *
      * @param string $str
@@ -274,7 +313,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return array
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     public function merge_permissions($incoming, $base, $resource_type)
     {
@@ -288,10 +327,10 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         );
 
         // First get the complete list of unique keys
-        $permission_keys = array_unique([
-            ...array_keys($incoming),
-            ...array_keys($base)
-        ]);
+        $permission_keys = array_unique(array_merge(
+            array_keys($incoming),
+            array_keys($base)
+        ));
 
         foreach($permission_keys as $permission_key) {
             $result[$permission_key] = self::_merge_permissions(
@@ -446,13 +485,14 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return string
      * @access public
      *
-     * @version 7.0.0
+     *
+     * @version 7.0.1
      */
     public function get_current_area()
     {
         if (is_admin()) {
             $result = 'backend';
-        } elseif (wp_is_rest_endpoint() || defined('REST_REQUEST')) {
+        } elseif ($this->_is_rest_endpoint()) {
             $result = 'api';
         } else {
             $result = 'frontend';
@@ -536,5 +576,33 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         return $cache[$cache_key];
     }
 
+    /**
+     * Check if REST request is processed
+     *
+     * Keep it compatible with older WP versions
+     *
+     * @return bool
+     * @access private
+     *
+     * @version 7.0.1
+     */
+    private function _is_rest_endpoint()
+    {
+	    global $wp_rest_server;
+
+        if (function_exists('wp_is_rest_endpoint')) {
+            $result = wp_is_rest_endpoint();
+        } else {
+            $result = defined('REST_REQUEST') && REST_REQUEST;
+
+            if (!$result && is_a($wp_rest_server, WP_REST_Server::class)) {
+                $result = $wp_rest_server->is_dispatching();
+            }
+
+            $result = apply_filters('wp_is_rest_endpoint', $result);
+        }
+
+        return $result;
+    }
 
 }

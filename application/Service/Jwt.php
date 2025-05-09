@@ -132,14 +132,20 @@ class AAM_Service_Jwt
      */
     private function _prepare_login_response($response, $request, $user)
     {
-        $issue_jwt             = $request->get_param('issue_jwt');
-        $issue_refreshable_jwt = $request->get_param('issue_refreshable_jwt');
+        $issue_jwt = $this->_get_backward_compatible_request_param(
+            'issue_jwt', 'issueJWT', $request
+        );
+        $issue_refreshable_jwt = $this->_get_backward_compatible_request_param(
+            'issue_refreshable_jwt',
+            'refreshableJWT',
+            $request
+        );
 
         if (is_array($response) && ($issue_jwt || $issue_refreshable_jwt)) {
             if ($issue_refreshable_jwt) {
                 if (current_user_can('aam_issue_refreshable_jwt')) {
                     throw new DomainException(
-                        'Current user is not allowed to issue refreshable JWT token'
+                        'You are not allowed to issue refreshable JWT token'
                     );
                 }
             }
@@ -148,13 +154,46 @@ class AAM_Service_Jwt
                 'refreshable' => $issue_refreshable_jwt
             ]);
 
-            $response['jwt'] = array(
+            $response['jwt'] = [
                 'token'         => $result['token'],
                 'token_expires' => $result['claims']['exp']
-            );
+            ];
         }
 
         return $response;
+    }
+
+    /**
+     * Get backward compatible param from request
+     *
+     * @param string          $new_param
+     * @param string          $legacy_param
+     * @param WP_REST_Request $request
+     * @param bool            $default
+     *
+     * @return string|null
+     * @access private
+     *
+     * @version 7.0.1
+     */
+    private function _get_backward_compatible_request_param(
+        $new_param, $legacy_param, $request, $default = false
+    ) {
+        $result = $request->get_param($new_param);
+
+        if (empty($result)) {
+            $result = $request->get_param($legacy_param);
+
+            if (!empty($result)) {
+                _deprecated_argument('/authenticate', AAM_VERSION, sprintf(
+                    'The REST %s parameter is deprecated. Replace it with %s',
+                    $legacy_param,
+                    $new_param
+                ));
+            }
+        }
+
+        return is_null($result) ? $default : $result;
     }
 
     /**
@@ -185,27 +224,32 @@ class AAM_Service_Jwt
                     }
 
                     // Get JWT service and verify that token is valid
-                    $is_valid = AAM::api()->jwts(
-                        'user:' . $cuid, [ 'error_handling' => 'wp_error' ]
-                    )->validate($token->jwt);
+                    $service  = AAM::api()->jwts(
+                        'user:' . $cuid,
+                        [ 'error_handling' => 'wp_error' ]
+                    );
 
-                    if ($is_valid === true) {
-                        $is_active = $this->_verify_user_status($cuid);
+                    if (!is_wp_error($service)) {
+                        $is_valid = $service->validate($token->jwt);
 
-                        if ($is_active === true) {
-                            if (in_array(
-                                $token->method,
-                                [ 'get', 'query', 'query_param' ],
-                                true
-                            )) {
-                                // Also authenticate user if token comes from query
-                                // param
-                                add_action('init', function() use ($cuid, $claims) {
-                                    $this->_authenticate_user($cuid, $claims);
-                                }, 1);
+                        if ($is_valid === true) {
+                            $is_active = $this->_verify_user_status($cuid);
+
+                            if ($is_active === true) {
+                                if (in_array(
+                                    $token->method,
+                                    [ 'get', 'query', 'query_param' ],
+                                    true
+                                )) {
+                                    // Also authenticate user if token comes from query
+                                    // param
+                                    add_action('init', function() use ($cuid, $claims) {
+                                        $this->_authenticate_user($cuid, $claims);
+                                    }, 1);
+                                }
+
+                                $user_id = $cuid;
                             }
-
-                            $user_id = $cuid;
                         }
                     }
                 }

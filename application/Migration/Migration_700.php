@@ -278,7 +278,7 @@ final class AAM_Migration_700
         if ($type === 'role') {
             $exists = wp_roles()->is_role($id);
         } else {
-            $exists = is_a(get_user($id), WP_User::class);
+            $exists = is_a(get_user_by('id', $id), WP_User::class);
         }
 
         return $exists;
@@ -916,7 +916,9 @@ final class AAM_Migration_700
                 $areas = $this->_prepare_visibility_areas($settings);
 
                 $item = [
-                    'effect' => $this->_convert_to_effect($settings),
+                    'effect' => !empty($areas) && $this->_convert_to_effect(
+                        $settings
+                    ),
                     'on'     => $areas
                 ];
 
@@ -1038,7 +1040,7 @@ final class AAM_Migration_700
             } elseif ($action === 'hidden') {
                 $result['list'] = [
                     'effect' => $this->_convert_to_effect($settings),
-                    'on'     =>  $this->_prepare_visibility_areas($settings)
+                    'on'     => $this->_prepare_visibility_areas($settings)
                 ];
             } elseif (in_array($action, ['create', 'edit', 'delete', 'assign'], true)) {
                 $result[$action] = [

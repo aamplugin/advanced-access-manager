@@ -199,7 +199,7 @@ class AAM_Service_Identity
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     private function _prepare_filter_args($args)
     {
@@ -228,11 +228,11 @@ class AAM_Service_Identity
         }
 
         if (!empty($args['include'])) {
-            $include         = array_diff($args['include'], $users_not_in);
+            $include         = array_diff((array) $args['include'], $users_not_in);
             $args['include'] = empty($include) ? [ 0 ] : $include;
         } elseif (!empty($args['exclude'])) {
             $args['exclude'] = array_unique(array_merge(
-                $args['exclude'],
+                (array) $args['exclude'],
                 $users_not_in
             ));
         } else {
@@ -242,11 +242,11 @@ class AAM_Service_Identity
         // Customize the user query accordingly to the permissions defined above
         if (!empty($args['role__in'])) {
             // Remove roles that are hidden
-            $role__in         = array_diff($args['role__in'], $roles_not_in);
+            $role__in         = array_diff((array) $args['role__in'], $roles_not_in);
             $args['role__in'] = empty($role__in) ? [ 'do_not_allow' ] : $role__in;
         } elseif (!empty($args['role__not_in'])) {
             $args['role__not_in'] = array_unique(array_merge(
-                $args['role__not_in'],
+                (array) $args['role__not_in'],
                 $roles_not_in
             ));
         } else {

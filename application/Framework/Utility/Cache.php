@@ -39,8 +39,8 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
      * Core cache
      *
      * @var array
-     *
      * @access protected
+     *
      * @version 7.0.0
      */
     private $_cache = null;
@@ -101,8 +101,8 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
      * @param int    $ttl   [Optional]
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function set($key, $value, $ttl = 86400)
@@ -133,8 +133,8 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
      * @param int    $ttl   [Optional]
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update($key, $value, $ttl = null)
@@ -155,8 +155,8 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
      * Reset cache
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset()
@@ -185,13 +185,13 @@ class AAM_Framework_Utility_Cache implements AAM_Framework_Utility_Interface
      * @param mixed $data
      *
      * @return bool
-     *
      * @access private
-     * @version 7.0.0
+     *
+     * @version 7.0.1
      */
     private function _update($data)
     {
-        return AAM_Framework_Manager::_()->db->write(self::DB_OPTION, $data);
+        return AAM_Framework_Manager::_()->db->write(self::DB_OPTION, $data, false);
     }
 
 }

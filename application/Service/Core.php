@@ -275,6 +275,7 @@ class AAM_Service_Core
         AAM_Restful_Users::bootstrap();
         AAM_Restful_Configs::bootstrap();
         AAM_Restful_Settings::bootstrap();
+        AAM_Restful_BackwardCompatibility::bootstrap();
     }
 
     /**
@@ -565,11 +566,11 @@ class AAM_Service_Core
      * @return void
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
     private function _control_admin_area_access()
     {
-        if (is_user_logged_in()) {
+        if (is_user_logged_in() && is_admin()) {
             // Check if user is allowed to see backend
             if (!$this->_current_user_can('aam_access_dashboard')) {
                 // If this is the AJAX call, still allow it because it will break

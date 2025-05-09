@@ -43,36 +43,36 @@ class AAM_Restful_SecureLogin
             // Create a redirect rule
             $this->_register_route('/authenticate', [
                 'methods'  => WP_REST_Server::CREATABLE,
-                'callback' => array($this, 'authenticate'),
-                'args'     => array(
-                        'username' => array(
+                'callback' => [ $this, 'authenticate' ],
+                'args'     => [
+                        'username' => [
                         'description' => 'Valid username',
                         'type'        => 'string',
                         'required'    => true
-                    ),
-                    'password' => array(
+                    ],
+                    'password' => [
                         'description' => 'Valid password',
                         'type'        => 'string',
                         'required'    => true
-                    ),
-                    'remember' => array(
+                    ],
+                    'remember' => [
                         'description' => 'Prolong the user session.',
                         'type'        => 'boolean',
                         'default'     => false
-                    ),
-                    'return_auth_cookies' => array(
+                    ],
+                    'return_auth_cookies' => [
                         'description' => 'Return auth cookies.',
                         'type'        => 'boolean',
                         'default'     => false
-                    ),
-                    'fields' => array(
+                    ],
+                    'fields' => [
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',
                         'validate_callback' => function ($value) {
                             return $this->_validate_fields_input($value);
                         }
-                    )
-                )
+                    ]
+                ]
             ], function() { return !is_user_logged_in(); }, false);
         });
     }
@@ -95,11 +95,11 @@ class AAM_Restful_SecureLogin
                 add_filter('send_auth_cookies', '__return_false');
             }
 
-            $user = wp_signon(array(
+            $user = wp_signon([
                 'user_login'    => $request->get_param('username'),
                 'user_password' => $request->get_param('password'),
                 'remember'      => $request->get_param('remember')
-            ));
+            ]);
 
             if (!is_wp_error($user)) {
                 $result = $this->_prepare_user_data($user, $request);
@@ -170,7 +170,7 @@ class AAM_Restful_SecureLogin
                 $response = new WP_Error(
                     'rest_invalid_param',
                     sprintf('Invalid fields: %s', implode(', ', $invalid_fields)),
-                    array('status'  => 400)
+                    [ 'status'  => 400 ]
                 );
             }
         }

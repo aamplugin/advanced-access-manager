@@ -27,9 +27,9 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
      * @return void
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.1
      */
-    public function do_redirect(array $redirect)
+    public function do_redirect($redirect)
     {
         // Determine redirect HTTP status code and use it if applicable for given
         // redirect type

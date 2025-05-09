@@ -70,7 +70,7 @@ class AAM_Framework_Utility_Capabilities implements AAM_Framework_Utility_Interf
 
         // Also get the list of all capabilities assigned directly to user
         if (is_numeric($user)) {
-            $user = get_user($user);
+            $user = get_user_by('id', $user);
         }
 
         if (is_a($user, WP_User::class)) {

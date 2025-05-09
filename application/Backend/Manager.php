@@ -149,9 +149,10 @@ class AAM_Backend_Manager
         $premium = AAM_Addon_Repository::get_instance()->get_premium_data();
 
         if (!is_null($premium['version']) && $premium['hasUpdate']) {
-            AAM_Core_Console::add(
-                __('The new version of premium add-on is available. Go to your license page to download the latest release.', 'advanced-access-manager')
-            );
+            AAM_Core_Console::add(__(
+                'The new version of premium add-on is available. Go to your license page to download the latest release.',
+                'advanced-access-manager'
+            ));
         }
     }
 

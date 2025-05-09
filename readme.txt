@@ -4,7 +4,7 @@ Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.0
-Stable tag: 7.0.0
+Stable tag: 7.0.1
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,48 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.1 =
+* Fixed: Access Denied message when aam_access_dashboard capability is created [https://github.com/aamplugin/advanced-access-manager/issues/451](https://github.com/aamplugin/advanced-access-manager/issues/451)
+* Fixed: PHP Warning: array_diff(): Expected parameter 1 to be an array, string given in /.../Service/Identity.php on line 245 [https://github.com/aamplugin/advanced-access-manager/issues/449](https://github.com/aamplugin/advanced-access-manager/issues/449)
+* Fixed: Framework Manager error handling [https://github.com/aamplugin/advanced-access-manager/issues/448](https://github.com/aamplugin/advanced-access-manager/issues/448)
+* Fixed: Error type E_PARSE in .../Framework/Utility/Misc.php on line 292. Error message: syntax error, unexpected ‘…’ [https://github.com/aamplugin/advanced-access-manager/issues/447](https://github.com/aamplugin/advanced-access-manager/issues/447)
+* Fixed: PHP Fatal error. undefined function get_user [https://github.com/aamplugin/advanced-access-manager/issues/446](https://github.com/aamplugin/advanced-access-manager/issues/446)
+* Fixed: PHP Fatal error. undefined function wp_is_rest_endpoint [https://github.com/aamplugin/advanced-access-manager/issues/445](https://github.com/aamplugin/advanced-access-manager/issues/445)
+* Fixed: v2 api broken [https://github.com/aamplugin/advanced-access-manager/issues/444](https://github.com/aamplugin/advanced-access-manager/issues/444)
+* Changed: Default to WordPress default logout redirect [https://github.com/aamplugin/advanced-access-manager/issues/450](https://github.com/aamplugin/advanced-access-manager/issues/450)
+
+= 7.0.0 =
+* Official 7.0.0
+
+= 6.9.51 =
+* Fixed: PHP Notice: Function _load_textdomain_just_in_time [https://github.com/aamplugin/advanced-access-manager/issues/442](https://github.com/aamplugin/advanced-access-manager/issues/442)
+* Fixed: The Access Manager Metabox does not initialize correctly [https://github.com/aamplugin/advanced-access-manager/issues/441](https://github.com/aamplugin/advanced-access-manager/issues/441)
+* Fixed: Incorrectly invoked translation function [https://github.com/aamplugin/advanced-access-manager/issues/440](https://github.com/aamplugin/advanced-access-manager/issues/440)
+* Fixed: Download audit report issue [https://github.com/aamplugin/advanced-access-manager/issues/438](https://github.com/aamplugin/advanced-access-manager/issues/438)
+
+= 6.9.49 =
+* Fixed: Resetting all settings does not actually reset them all [https://github.com/aamplugin/advanced-access-manager/issues/436](https://github.com/aamplugin/advanced-access-manager/issues/436)
+* New: Allow to prepare the executive audit report [https://github.com/aamplugin/advanced-access-manager/issues/437](https://github.com/aamplugin/advanced-access-manager/issues/437)
+
+= 6.9.48 =
+* Fixed: Notice in WordPress if the none-default language is active [https://github.com/aamplugin/advanced-access-manager/issues/435](https://github.com/aamplugin/advanced-access-manager/issues/435)
+* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
+* New: Give the ability to share security audit report [https://github.com/aamplugin/advanced-access-manager/issues/434](https://github.com/aamplugin/advanced-access-manager/issues/434)
+
+= 6.9.47 =
+* Fixed: PHP Warning: Array to string conversion in /.../RoleTransparencyCheck.php on line 83 [https://github.com/aamplugin/advanced-access-manager/issues/433](https://github.com/aamplugin/advanced-access-manager/issues/433)
+
+= 6.9.46 =
+* Added: Run AAM Audit periodically [https://github.com/aamplugin/advanced-access-manager/issues/432](https://github.com/aamplugin/advanced-access-manager/issues/432)
+* Added: Allow the ability to jump to a specific AAM tab [https://github.com/aamplugin/advanced-access-manager/issues/431](https://github.com/aamplugin/advanced-access-manager/issues/431)
+
+= 6.9.45 =
+* Added: Introduce AAM Security Score Widget [https://github.com/aamplugin/advanced-access-manager/issues/430](https://github.com/aamplugin/advanced-access-manager/issues/430)
+
+= 6.9.44 =
+* Removed: AI Chatbot service. We are moving it all to [aamportal.com](https://aamportal.com) website as Virtual assistant
+* Removed: Contact form. We are changing our customer support policy and directing customers to the [contact us](https://aamportal.com/contact-us) page instead
 
 = 6.9.43=
 * Fixed: Can't update roles with whitespaces in slug [https://github.com/aamplugin/advanced-access-manager/issues/428](https://github.com/aamplugin/advanced-access-manager/issues/428)
@@ -322,323 +364,6 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 * Fixed: Revoking JWT token via UI causes current user to logout [https://github.com/aamplugin/advanced-access-manager/issues/224](https://github.com/aamplugin/advanced-access-manager/issues/224)
 * Fixed: Notice: Undefined variable: cache [https://github.com/aamplugin/advanced-access-manager/issues/223](https://github.com/aamplugin/advanced-access-manager/issues/223)
 * Changed: Update JWT vendor [https://github.com/aamplugin/advanced-access-manager/issues/221](https://github.com/aamplugin/advanced-access-manager/issues/221)
-
-= 6.8.5 =
-* Fixed: Redirect may not always work [https://github.com/aamplugin/advanced-access-manager/issues/214](https://github.com/aamplugin/advanced-access-manager/issues/214)
-* Fixed: PHP Notice: Undefined index: 404.redirect.** [https://github.com/aamplugin/advanced-access-manager/issues/215](https://github.com/aamplugin/advanced-access-manager/issues/215)
-* Changed: Update DataTables to 1.12.1 [https://github.com/aamplugin/advanced-access-manager/issues/217](https://github.com/aamplugin/advanced-access-manager/issues/217)
-* Added New: Allow value chaining for PHP_GLOBAL marker [https://github.com/aamplugin/advanced-access-manager/issues/216](https://github.com/aamplugin/advanced-access-manager/issues/216)
-* Added New: Add the ability to filter assigned/unassigned capabilities [https://github.com/aamplugin/advanced-access-manager/issues/218](https://github.com/aamplugin/advanced-access-manager/issues/218)
-
-= 6.8.4 =
-* Fixed: PHP Notice: Undefined property: stdClass::$override [https://github.com/aamplugin/advanced-access-manager/issues/211](https://github.com/aamplugin/advanced-access-manager/issues/211)
-* Changed: Upgraded iFrame resizer library [https://github.com/aamplugin/advanced-access-manager/issues/213](https://github.com/aamplugin/advanced-access-manager/issues/213)
-* Changed: Replace CodeMirror with WP default instance [https://github.com/aamplugin/advanced-access-manager/issues/212](https://github.com/aamplugin/advanced-access-manager/issues/212)
-
-= 6.8.3 =
-* Fixed: PHP Deprecated: filter_var(): Passing null to parameter [https://github.com/aamplugin/advanced-access-manager/issues/208](https://github.com/aamplugin/advanced-access-manager/issues/208)
-* Added New: Extend CALLBACK to support inline arguments [https://github.com/aamplugin/advanced-access-manager/issues/206](https://github.com/aamplugin/advanced-access-manager/issues/206)
-* Added New: Add support for the THE_POST token [https://github.com/aamplugin/advanced-access-manager/issues/205](https://github.com/aamplugin/advanced-access-manager/issues/205)
-* Added New: Add support for new resource types Filter & Action [https://github.com/aamplugin/advanced-access-manager/issues/207](https://github.com/aamplugin/advanced-access-manager/issues/207)
-
-= 6.8.2 =
-* Fixed: Fix jquery 1.9 incompatibility with attr 'checked' by @Tofandel [https://github.com/aamplugin/advanced-access-manager/pull/204](https://github.com/aamplugin/advanced-access-manager/pull/204)
-
-= 6.8.1 =
-* Fixed: Translation issues [https://github.com/aamplugin/advanced-access-manager/issues/199](https://github.com/aamplugin/advanced-access-manager/issues/199)
-* Fixed: Undefined class constant 'DB_VIOLATION_OPTION' [https://github.com/aamplugin/advanced-access-manager/issues/198](https://github.com/aamplugin/advanced-access-manager/issues/198)
-* Changed: Add "Free" tab to the add-ons page [https://github.com/aamplugin/advanced-access-manager/issues/203](https://github.com/aamplugin/advanced-access-manager/issues/203)
-
-= 6.8.0 =
-* Changed: Enhanced security pasture by escaping potentially harmful output, if information was directly modified in the DB or not escaped during storing AAM settings, reported by WordPress Plugin Review Team
-* Fixed: Cleared potentially corrupted data about status of premium add-ons.
-* Changed: Re-opened direct communication with the AAM developer through the Slack channel [https://aamplugin.com/support](https://aamplugin.com/support)
-
-= 6.7.9 =
-* Changed: Enhanced security pasture by escaping potentially harmful input from users that do not have unfiltered_html capability, reported by WordPress Plugin Review Team [https://github.com/aamplugin/advanced-access-manager/issues/192](https://github.com/aamplugin/advanced-access-manager/issues/192)
-* Changed: Disabling the "User Role Filter" by default for all new AAM installations [https://github.com/aamplugin/advanced-access-manager/issues/193](https://github.com/aamplugin/advanced-access-manager/issues/193)
-
-= 6.7.8 =
-* Changed: Adjusted suite of automated tests, confirmed that AAM is compatible with the latest WP version
-
-= 6.7.7 =
-* Changed: A notice "Object of class WP_User…" reported by @it4joy [https://github.com/aamplugin/advanced-access-manager/issues/184](https://github.com/aamplugin/advanced-access-manager/issues/184)
-
-= 6.7.6 =
-* Fixed Bug: Incorrectly handled "Add User" for with multisite setup by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/179](https://github.com/aamplugin/advanced-access-manager/issues/179)
-* Fixed Bug: WP Notice in logs for fread by @terrance-orletsky-d7 [https://github.com/aamplugin/advanced-access-manager/issues/177](https://github.com/aamplugin/advanced-access-manager/issues/177)
-
-= 6.7.5 =
-* Fixed Bug: Access Policy breaks Broadcaster Plugin by @SEA-NET [https://github.com/aamplugin/advanced-access-manager/issues/170](https://github.com/aamplugin/advanced-access-manager/issues/170)
-* Changed: Enhanced the premium life-cycle management [https://github.com/aamplugin/advanced-access-manager/issues/173](https://github.com/aamplugin/advanced-access-manager/issues/173)
-
-= 6.7.4 =
-* Fixed Bug: Access settings are not saved, reported by @argolein [https://github.com/aamplugin/advanced-access-manager/issues/167](https://github.com/aamplugin/advanced-access-manager/issues/167)
-* Changed: INI format warning, reported by @dannysummerlinjstartorg [https://github.com/aamplugin/advanced-access-manager/issues/160](https://github.com/aamplugin/advanced-access-manager/issues/160)
-* Changed: Minor change. Improved the UI consistency between views.
-
-= 6.7.3 =
-* Fixed Bug: Incorrectly handled .attr('checked') by the latest jQuery update [https://github.com/aamplugin/advanced-access-manager/issues/166](https://github.com/aamplugin/advanced-access-manager/issues/166)
-
-= 6.7.2 =
-* Fixed Bug: PHP Warning: preg_match(): Compilation failed [https://github.com/aamplugin/advanced-access-manager/issues/163](https://github.com/aamplugin/advanced-access-manager/issues/163)
-* Added New: Thx to [@sigysmund](https://github.com/sigysmund). Support for OpenSSL RSA private keys, to have a passphrase [https://github.com/aamplugin/advanced-access-manager/issues/165](https://github.com/aamplugin/advanced-access-manager/issues/165)
-* Changed: Remove Support Message Modal from UI [https://github.com/aamplugin/advanced-access-manager/issues/164](https://github.com/aamplugin/advanced-access-manager/issues/164)
-
-= 6.7.1 =
-* Fixed Bug: PHP Fatal error: Uncaught Error: Class name must be a valid object or a string [https://github.com/aamplugin/advanced-access-manager/issues/156](https://github.com/aamplugin/advanced-access-manager/issues/156)
-
-= 6.7.0 =
-* Fixed Bug: Incorrectly merged settings with multi-role enabled [https://github.com/aamplugin/advanced-access-manager/issues/152](https://github.com/aamplugin/advanced-access-manager/issues/152)
-* Changed: Simplify the Route service [https://github.com/aamplugin/advanced-access-manager/issues/153](https://github.com/aamplugin/advanced-access-manager/issues/153)
-* Changed: Unexpected Application Error Message Misleads [https://github.com/aamplugin/advanced-access-manager/issues/151](https://github.com/aamplugin/advanced-access-manager/issues/151)
-* Added New: AAM CLI: Allow the ability import/export settings [https://github.com/aamplugin/advanced-access-manager/issues/150](https://github.com/aamplugin/advanced-access-manager/issues/150)
-
-= 6.6.4 =
-* Fixed Bug: DataTables warning: table id=post-ipcheck-list - Cannot reinitialise DataTable [https://github.com/aamplugin/advanced-access-manager/issues/149](https://github.com/aamplugin/advanced-access-manager/issues/149)
-* Changed: User Level Filter Service: Performance Request by @dannysummerlinjstartorg [https://github.com/aamplugin/advanced-access-manager/issues/142](https://github.com/aamplugin/advanced-access-manager/issues/142)
-
-= 6.6.3 =
-* Fixed Bug: Initial access settings for post are not loaded [https://github.com/aamplugin/advanced-access-manager/issues/143](https://github.com/aamplugin/advanced-access-manager/issues/143)
-
-= 6.6.2 =
-* Fixed Bug: Reported by Wordfence research team issue with multi-role support [https://github.com/aamplugin/advanced-access-manager/issues/138](https://github.com/aamplugin/advanced-access-manager/issues/138)
-* Changed: Simplify `aam/v2/authenticate` output [https://github.com/aamplugin/advanced-access-manager/issues/139](https://github.com/aamplugin/advanced-access-manager/issues/139)
-
-= 6.6.1 =
-* Fixed Bug: register_rest_route was called incorrectly in WP 5.5 [https://github.com/aamplugin/advanced-access-manager/issues/136](https://github.com/aamplugin/advanced-access-manager/issues/136)
-* Fixed Bug: When AAM is active, the Password Protected cannot be set [https://github.com/aamplugin/advanced-access-manager/issues/137](https://github.com/aamplugin/advanced-access-manager/issues/137)
-
-= 6.6.0 =
-* Fixed Bug: No ability to "allow" API Route [https://github.com/aamplugin/advanced-access-manager/issues/131](https://github.com/aamplugin/advanced-access-manager/issues/131)
-* Fixed Bug: Passwordless login sets cookie that might logout issues [https://github.com/aamplugin/advanced-access-manager/issues/129](https://github.com/aamplugin/advanced-access-manager/issues/129)
-* Fixed Bug: AAM does not retain selected time [https://github.com/aamplugin/advanced-access-manager/issues/133](https://github.com/aamplugin/advanced-access-manager/issues/133)
-* Changed: Logout user automatically if JWT token is revoked [https://github.com/aamplugin/advanced-access-manager/issues/118](https://github.com/aamplugin/advanced-access-manager/issues/118)
-* Changed: Enhance Backend Menu service [https://github.com/aamplugin/advanced-access-manager/issues/114](https://github.com/aamplugin/advanced-access-manager/issues/114)
-* Added New: The ability to export/import access policies [https://github.com/aamplugin/advanced-access-manager/issues/130](https://github.com/aamplugin/advanced-access-manager/issues/130)
-* Added New: Add `roles` claim to the issued JWT token [https://github.com/aamplugin/advanced-access-manager/issues/100](https://github.com/aamplugin/advanced-access-manager/issues/100)
-* Added New: [aam-login] shortcode that renders AAM secure login form [https://github.com/aamplugin/advanced-access-manager/issues/90](https://github.com/aamplugin/advanced-access-manager/issues/90)
-
-= 6.5.4 =
-* Fixed Bug: Incorectly evaluated best candidate for the conditional statement [https://github.com/aamplugin/advanced-access-manager/issues/128](https://github.com/aamplugin/advanced-access-manager/issues/128)
-
-= 6.5.3 =
-* Fixed Bug: PHP Warning: Parameter must be an array or an object that implements Countable in /service/core.php [https://github.com/aamplugin/advanced-access-manager/issues/126](https://github.com/aamplugin/advanced-access-manager/issues/126)
-* Added New: Allow to target the same resource with multiple statements [https://github.com/aamplugin/advanced-access-manager/issues/124](https://github.com/aamplugin/advanced-access-manager/issues/124)
-* Added New: Enhance "In" condition for the access policies [https://github.com/aamplugin/advanced-access-manager/issues/123](https://github.com/aamplugin/advanced-access-manager/issues/123)
-* Changed: Change the access policy initialization order [https://github.com/aamplugin/advanced-access-manager/issues/122](https://github.com/aamplugin/advanced-access-manager/issues/122)
-
-= 6.5.2 =
-* Fixed Bug: Passwordless authentication disregards "redirect_to" query param [https://github.com/aamplugin/advanced-access-manager/issues/117](https://github.com/aamplugin/advanced-access-manager/issues/117)
-* Fixed Bug: Failing to reset user expiration settings [https://github.com/aamplugin/advanced-access-manager/issues/119](https://github.com/aamplugin/advanced-access-manager/issues/119)
-* Fixed Bug: IP Check: Inherited rule cannot be deleted [https://github.com/aamplugin/advanced-access-manager/issues/116](https://github.com/aamplugin/advanced-access-manager/issues/116)
-
-= 6.5.1 =
-* Fixed Bug: edit_category_form_fields is deprecated since version 3.0.0! [https://github.com/aamplugin/advanced-access-manager/issues/115](https://github.com/aamplugin/advanced-access-manager/issues/115)
-* Fixed Bug: Incorrectly loading iframe resizer [https://github.com/aamplugin/advanced-access-manager/issues/113](https://github.com/aamplugin/advanced-access-manager/issues/113)
-
-= 6.5.0 =
-* Fixed Bug: No visual loading process in the Post Access metabox [https://github.com/aamplugin/advanced-access-manager/issues/111](https://github.com/aamplugin/advanced-access-manager/issues/111)
-* Fixed Bug: Safari browser cropps the modals [https://github.com/aamplugin/advanced-access-manager/issues/107](https://github.com/aamplugin/advanced-access-manager/issues/107)
-* Fixed Bug: Backend menu IDs with upper-case letters fail to restrict [https://github.com/aamplugin/advanced-access-manager/issues/105](https://github.com/aamplugin/advanced-access-manager/issues/105)
-* Fixed Bug: Deleting role does not reload the main panel [https://github.com/aamplugin/advanced-access-manager/issues/102](https://github.com/aamplugin/advanced-access-manager/issues/102)
-* Fixed Bug: Incorrect user login redirect with passworless URL [https://github.com/aamplugin/advanced-access-manager/issues/98](https://github.com/aamplugin/advanced-access-manager/issues/98)
-* Added New: The ability to reset access settings for any specific subject [https://github.com/aamplugin/advanced-access-manager/issues/109](https://github.com/aamplugin/advanced-access-manager/issues/109)
-* Added New: Slug to the Posts & Terms tab [https://github.com/aamplugin/advanced-access-manager/issues/108](https://github.com/aamplugin/advanced-access-manager/issues/108)
-* Added New: Use `Authorization` header with fallback to `Authentication` [https://github.com/aamplugin/advanced-access-manager/issues/99](https://github.com/aamplugin/advanced-access-manager/issues/99)
-* Added New: Filter post's content with [aam] shortcode and capability [https://github.com/aamplugin/advanced-access-manager/issues/96](https://github.com/aamplugin/advanced-access-manager/issues/96)
-* Added New: The ability to manage access to navigation menu[https://github.com/aamplugin/advanced-access-manager/issues/89](https://github.com/aamplugin/advanced-access-manager/issues/89)
-* Changed: Simplify support message payload [https://github.com/aamplugin/advanced-access-manager/issues/106](https://github.com/aamplugin/advanced-access-manager/issues/106)
-* Changed: Update bootstrap to 3.4.1 [https://github.com/aamplugin/advanced-access-manager/issues/95](https://github.com/aamplugin/advanced-access-manager/issues/95)
-* Changed: Dynamically adjust AAM iFrame to its content [https://github.com/aamplugin/advanced-access-manager/issues/104](https://github.com/aamplugin/advanced-access-manager/issues/104)
-* Changed: Enhance role cloning feature [https://github.com/aamplugin/advanced-access-manager/issues/97](https://github.com/aamplugin/advanced-access-manager/issues/97)
-
-= 6.4.3 =
-* Fixed Bug: Invalid AAM notifications [https://github.com/aamplugin/advanced-access-manager/issues/92](https://github.com/aamplugin/advanced-access-manager/issues/92)
-* Fixed Bug: HTTP redirect status code must be a redirection code, 3xx [https://github.com/aamplugin/advanced-access-manager/issues/94](https://github.com/aamplugin/advanced-access-manager/issues/94)
-* Fixed Bug: PHP Deprecated: contextual_help is "deprecated" since version 3.3.0 [https://github.com/aamplugin/advanced-access-manager/issues/93](https://github.com/aamplugin/advanced-access-manager/issues/93)
-
-= 6.4.2 =
-* Fixed Bug: Plus Package add-on: Call to undefined function wp_parse_list() [https://github.com/aamplugin/advanced-access-manager/issues/87](https://github.com/aamplugin/advanced-access-manager/issues/87)
-* Added New: Backward compatibility, return v1/authenticate endpoint [https://github.com/aamplugin/advanced-access-manager/issues/91](https://github.com/aamplugin/advanced-access-manager/issues/91)
-* Added New: Implement "New update is available" feature [https://github.com/aamplugin/advanced-access-manager/issues/88](https://github.com/aamplugin/advanced-access-manager/issues/88)
-
-= 6.4.1 =
-* Fixed Bug: Access Policy does not allow to use token in the param's value [https://github.com/aamplugin/advanced-access-manager/issues/84](https://github.com/aamplugin/advanced-access-manager/issues/84)
-* Fixed Bug: Warning: count(): Parameter must be an array or an object that implements Countable [https://github.com/aamplugin/advanced-access-manager/issues/82](https://github.com/aamplugin/advanced-access-manager/issues/82)
-* Fixed Bug: Fatal error: Call to undefined function get_main_site_id() [https://github.com/aamplugin/advanced-access-manager/issues/81](https://github.com/aamplugin/advanced-access-manager/issues/81)
-* Fixed Bug: Plus Package add-on: Incorrect handling of tags with white space [https://github.com/aamplugin/advanced-access-manager/issues/86](https://github.com/aamplugin/advanced-access-manager/issues/86)
-* Added New: Plus Package add-on: Define multiple default terms (including tags) [https://github.com/aamplugin/advanced-access-manager/issues/83](https://github.com/aamplugin/advanced-access-manager/issues/83)
-
-= 6.4.0 =
-* Fixed Bug: URI Access: Changing existing URI rule puts it in the end of the list [https://github.com/aamplugin/advanced-access-manager/issues/74](https://github.com/aamplugin/advanced-access-manager/issues/74)
-* Fixed Bug: URI Access: Incorrect handling of the inherited rules [https://github.com/aamplugin/advanced-access-manager/issues/77](https://github.com/aamplugin/advanced-access-manager/issues/77)
-* Fixed Bug: CSS issue with add-on button when it is inactive [https://github.com/aamplugin/advanced-access-manager/issues/78](https://github.com/aamplugin/advanced-access-manager/issues/78)
-* Fixed Bug: IP Check add-on: Failure to delete rules [https://github.com/aamplugin/advanced-access-manager/issues/65](https://github.com/aamplugin/advanced-access-manager/issues/65)
-* Fixed Bug: IP Check add-on: Incorrectly evaluated multiple rules [https://github.com/aamplugin/advanced-access-manager/issues/66](https://github.com/aamplugin/advanced-access-manager/issues/66)
-* Fixed Bug: Plus Package add-on: Warning: Invalid argument supplied for foreach() in ...ContentHooks.php on line 800 [https://github.com/aamplugin/advanced-access-manager/issues/73](https://github.com/aamplugin/advanced-access-manager/issues/73)
-* Fixed Bug: Plus Package add-on: Terms & Taxonomies settings take effect when Post & Terms service is off [https://github.com/aamplugin/advanced-access-manager/issues/69](https://github.com/aamplugin/advanced-access-manager/issues/69)
-* Added New: Plus Package add-on: Support for the "ADD NEW" term access option to access policy [https://github.com/aamplugin/advanced-access-manager/issues/57](https://github.com/aamplugin/advanced-access-manager/issues/57)
-* Added New: Plus Package add-on: Wildcard support for the API Routes in access policies [https://github.com/aamplugin/advanced-access-manager/issues/56](https://github.com/aamplugin/advanced-access-manager/issues/56)
-* Added New: Plus Package add-on: More granular access to taxonomy/term visibility [https://github.com/aamplugin/advanced-access-manager/issues/54](https://github.com/aamplugin/advanced-access-manager/issues/54)
-* Added New: IP Check add-on: Integration with Access Policy [https://github.com/aamplugin/advanced-access-manager/issues/68](https://github.com/aamplugin/advanced-access-manager/issues/68)
-* Added New: The ability to define "Access Denied Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/61](https://github.com/aamplugin/advanced-access-manager/issues/61)
-* Added New: The ability to define "Login Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/62](https://github.com/aamplugin/advanced-access-manager/issues/62)
-* Added New: The ability to define "Logout Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/63](https://github.com/aamplugin/advanced-access-manager/issues/63)
-* Added New: The ability to define "404 Redirect" rules with access policy [https://github.com/aamplugin/advanced-access-manager/issues/64](https://github.com/aamplugin/advanced-access-manager/issues/64)
-* Added New: Allow the ability to programmatically get AAM service [https://github.com/aamplugin/advanced-access-manager/issues/71](https://github.com/aamplugin/advanced-access-manager/issues/71)
-* Added New: The ability to change role's slug [https://github.com/aamplugin/advanced-access-manager/issues/72](https://github.com/aamplugin/advanced-access-manager/issues/72)
-* Added New: The ability to issue refreshable JWT token through RESTful API [https://github.com/aamplugin/advanced-access-manager/issues/16](https://github.com/aamplugin/advanced-access-manager/issues/16)
-* Added New: The "Manage Access" toolbar menu item [https://github.com/aamplugin/advanced-access-manager/issues/26](https://github.com/aamplugin/advanced-access-manager/issues/26)
-* Added New: AAM [WP-CLI add-on](https://github.com/aamplugin/aam-cli). Allows to install premium AAM add-ons and access policies. Check [for more details](https://aamplugin.com/reference/plugin#wp-cli-commands)
-* Changed:   Use slugs instead of post/term IDs during policy generation [https://github.com/aamplugin/advanced-access-manager/issues/80](https://github.com/aamplugin/advanced-access-manager/issues/80)
-* Changed:   Policy Generate button does not have tooltip [https://github.com/aamplugin/advanced-access-manager/issues/79](https://github.com/aamplugin/advanced-access-manager/issues/79)
-* Changed:   Access Policy Generator split across services [https://github.com/aamplugin/advanced-access-manager/issues/76](https://github.com/aamplugin/advanced-access-manager/issues/76)
-* Changed:   Enhanced AAM API [https://github.com/aamplugin/advanced-access-manager/issues/75](https://github.com/aamplugin/advanced-access-manager/issues/75)
-* Changed:   The 404 (Not Found) Redirect now is allowed to be customized per user and role [https://github.com/aamplugin/advanced-access-manager/issues/64](https://github.com/aamplugin/advanced-access-manager/issues/64)
-
-= 6.3.3 =
-* Change: Updated core to allow geolocation functionality with IP Check
-* Change: Enhanced [IP Check](https://aamplugin.com/pricing/ip-check) add-on with ability to define geolocation rules [https://aamplugin.com/article/how-to-manage-access-to-wordpress-website-based-on-location](https://aamplugin.com/article/how-to-manage-access-to-wordpress-website-based-on-location)
-* Change: Enhanced [Plus Package](https://aamplugin.com/pricing/plus-package)
-
-= 6.3.2 =
-* Fixed Bug: *_OTHERS posts & terms access options malfunction [https://github.com/aamplugin/advanced-access-manager/issues/52](https://github.com/aamplugin/advanced-access-manager/issues/52)
-
-= 6.3.1 =
-* Fixed Bug: Draft policy still applicable if attached to user or role [https://github.com/aamplugin/advanced-access-manager/issues/49](https://github.com/aamplugin/advanced-access-manager/issues/49)
-* Fixed Bug: Resetting all AAM settings still keep legacy settings in DB [https://github.com/aamplugin/advanced-access-manager/issues/48](https://github.com/aamplugin/advanced-access-manager/issues/48)
-* Fixed Bug: PHP Warning: Invalid argument supplied for foreach() in .../Repository.php on line 71 [https://github.com/aamplugin/advanced-access-manager/issues/47](https://github.com/aamplugin/advanced-access-manager/issues/47)
-* Fixed Bug: User's capabilities, populated through policy, are gone when rebased [https://github.com/aamplugin/advanced-access-manager/issues/45](https://github.com/aamplugin/advanced-access-manager/issues/45)
-* Fixed Bug: Cannot lock user with AAM UI [https://github.com/aamplugin/advanced-access-manager/issues/43](https://github.com/aamplugin/advanced-access-manager/issues/43)
-* Fixed Bug: Teaser Message modified with added backslashes to single and double quotes [https://github.com/aamplugin/advanced-access-manager/issues/42](https://github.com/aamplugin/advanced-access-manager/issues/42)
-
-= 6.3.0 =
-* Fixed Bug: PHP Notice about missing license key [https://github.com/aamplugin/advanced-access-manager/issues/12](https://github.com/aamplugin/advanced-access-manager/issues/12)
-* Fixed Bug: Fatal error: Allowed memory size of XXX bytes exhausted [https://github.com/aamplugin/advanced-access-manager/issues/15](https://github.com/aamplugin/advanced-access-manager/issues/15)
-* Fixed Bug: PHP Notice: Undefined index: path [https://github.com/aamplugin/advanced-access-manager/issues/18](https://github.com/aamplugin/advanced-access-manager/issues/18)
-* Fixed Bug: PHP Notice: Undefined index: password [https://github.com/aamplugin/advanced-access-manager/issues/31](https://github.com/aamplugin/advanced-access-manager/issues/31)
-* Fixed Bug: NGIX compatibility for URI Access [https://github.com/aamplugin/advanced-access-manager/issues/33](https://github.com/aamplugin/advanced-access-manager/issues/33)
-* Fixed Bug: URI Access service does not protect the homepage [https://github.com/aamplugin/advanced-access-manager/issues/17](https://github.com/aamplugin/advanced-access-manager/issues/17)
-* Fixed Bug: New rule is created if URI Access endpoint is updated [https://github.com/aamplugin/advanced-access-manager/issues/35](https://github.com/aamplugin/advanced-access-manager/issues/35)
-* Fixed Bug: Conflict with Jatpack plugin [https://github.com/aamplugin/advanced-access-manager/issues/25](https://github.com/aamplugin/advanced-access-manager/issues/25)
-* Fixed Bug: Potentially incorrectly used PHP core `list` function [https://github.com/aamplugin/advanced-access-manager/issues/38](https://github.com/aamplugin/advanced-access-manager/issues/38)
-* Added New: Access Policy token [PHP_GLOBAL](https://aamplugin.com/reference/policy#php_global)
-* Added New: Access Policy token [WP_NETWORK_OPTION](https://aamplugin.com/reference/policy#wp_network_option)
-* Added New: Allow to attach Access Policies to Default subject [https://github.com/aamplugin/advanced-access-manager/issues/13](https://github.com/aamplugin/advanced-access-manager/issues/13)
-* Added New: Ability to create new access policy from generated [https://github.com/aamplugin/advanced-access-manager/issues/27](https://github.com/aamplugin/advanced-access-manager/issues/27)
-
-= 6.2.2 =
-* Fixed Bug: Backend Dashboard index.php still could be restricted with Backend Menu service
-* Fixed Bug: Policy Generator - Fatal error with PHP lower than 7.0.0
-* Fixed Bug: Policy Validator - Improper dependency validation when if it is not installed
-* Fixed Bug: Default access settings not propagated to user that does not have any roles (multisite setup)
-* Fixed Bug: Reset settings where not synced across all subsites in multisite setup
-* Added New: Ability to define wildcard [BackendMenu](https://aamplugin.com/reference/policy#backendmenu) resource with Access Policy
-* Added New: Ability to define wildcard [Metabox](https://aamplugin.com/reference/policy#metabox) resource with Access Policy
-* Added New: Ability to define wildcard [Widget](https://aamplugin.com/reference/policy#widget) resource with Access Policy
-* Added New: Ability to define wildcard [Toolbar](https://aamplugin.com/reference/policy#toolbar) resource with Access Policy
-
-= 6.2.1 =
-* Fixed Bug: Very minor UI issue with Access Policy Delete pop-up
-* Added New: Enhanced Access Policy with new [POLICY_META](https://aamplugin.com/reference/policy#policy_meta) token
-* Change: Access Policy post type supports custom fields now
-
-= 6.2.0 =
-* Fixed Bug: Access policy was not applied to visitors
-* Fixed Bug: Bug fixing that is related to unwanted PHP notices [https://forum.aamplugin.com/d/456-notice-undefined-index-expire](https://forum.aamplugin.com/d/456-notice-undefined-index-expire)
-* Fixed Bug: Failing to delete multiple Access URI rules without reloading the page
-* Added New: Ability to generate Access Policy from user's or role's settings [https://forum.aamplugin.com/d/446-announcement-about-upcoming-features/2](https://forum.aamplugin.com/d/446-announcement-about-upcoming-features/2)
-* Added New: More granular control over the HIDDEN access option [https://forum.aamplugin.com/d/446-announcement-about-upcoming-features](https://forum.aamplugin.com/d/446-announcement-about-upcoming-features)
-* Added New: Export/Import AAM settings [https://aamplugin.com/article/how-to-export-and-import-aam-settings](https://aamplugin.com/article/how-to-export-and-import-aam-settings)
-* Added New: Ability to send support request from the AAM UI
-* Added New: Multisite Settings Sync service that allows to sync access settings changes across all sites
-* Added New: New hook `aam_updated_access_settings` that is triggered when access settings are stored
-* Added New: New data type casting (*date) for Access Policy [https://aamplugin.com/reference/policy#markers](https://aamplugin.com/reference/policy#markers)
-* Added New: New POLICY_PARAM access policy token [https://aamplugin.com/reference/policy#policy_param](https://aamplugin.com/reference/policy#policy_param)
-* Added New: New WP_SITE access policy token [https://aamplugin.com/reference/policy#wp_site](https://aamplugin.com/reference/policy#wp_site)
-* Change: [DATETIME](https://aamplugin.com/reference/policy#marker-datetime) access policy token returns time in UTC timezone
-* Change: Enhanced security over AAM UI
-* Change: Multiple internal simplifications and refactoring
-
-= 6.1.1 =
-* Fixed Bug: Unnecessary backslashes before displaying the access policy [https://forum.aamplugin.com/d/432-access-policy-ui-escaping-slashes](https://forum.aamplugin.com/d/432-access-policy-ui-escaping-slashes)
-* Fixed Bug: aam_access_dashboard custom capability caused "Access Denied"
-* Change: Enforcing default `307` Temporary Redirect code if none is provided for any AAM redirect functionality
-* Change: Persisting the last managed role, user or visitor on the AAM page
-* Change: Improved safety by using the last role on the list instead of the default Administrator role
-* Change: Optimized access policy service. Changed the way it is applied to any given object
-* Added New: Migration script that clears previously detected migration errors
-
-= 6.1.0 =
-* Fixed Bug: Access Policy UI - the "Attach to Default" button was not rendering correctly
-* Fixed Bug: Role Management UI - the PHP notice where `Undefined variable: parent`
-* Fixed Bug: AAM UI page - improperly compressed HTML response if server config does not match PHP executable INI settings
-* Fixed Bug: Login Redirect Settings - incorrectly merged settings for multi-role support
-* Fixed Bug: Logout Redirect Settings - incorrectly merged settings for multi-role support
-* Fixed Bug: Access Denied Redirect Settings - incorrectly merged settings for multi-role support
-* Fixed Bug: API Route Settings - incorrectly halted inheritance mechanism
-* Fixed Bug: Admin Toolbar Settings - incorrectly halted inheritance mechanism
-* Fixed Bug: URI Access Settings - incorrectly halted inheritance mechanism
-* Fixed Bug: Content Visibility Settings - incorrectly merged settings for multi-role support
-* Fixed Bug: Access Policy Core - incorrectly managed internal cache
-* Fixed Bug: AAM Core - incorrectly managed internal object cache
-* Fixed Bug: Content Service - incorrectly mapped `do_not_allow` capability if any of the registered post types have it
-* Fixed Bug: Content Service - fatal error `Cannot use object of type Closure as array` [https://forum.aamplugin.com/d/354-php-fatal-error-cannot-use-object-of-type-closure-as-array](https://forum.aamplugin.com/d/354-php-fatal-error-cannot-use-object-of-type-closure-as-array)
-* Fixed Bug: The `aam_show_toolbar` capability was not taken in consideration
-* Fixed Bug: Logout Redirect Service - White screen occurs if "Default" option is explicitly selected [https://wordpress.org/support/topic/blank-log-out-page-on-6-0-5/](https://wordpress.org/support/topic/blank-log-out-page-on-6-0-5/)
-* Change: Refactored internal inheritance mechanism where AAM objects no longer responsible to check for inheritance flag. This eliminates several constrains that we discovered recently.
-* Change: Multiple minor changes to the codebase to consume internal AAM API in more consistent way
-* Change: JWT & Secure Login Services - enriched RESTful API error responses with more details about an error
-* Change: Content Service - optimization improvements
-* Added New: Implemented new filter `aam_token_typecast_filter` for Access Policy for custom type casting
-* Added New: Implemented support for the `=>` (map to) operator for the Access Policy
-* Added New: Implemented support for the AAM_CONFIG marker for the Access Policy
-
-= 6.0.5 =
-* Fixed Bug: Refactored the license managements. Fixed bugs with license registration https://forum.aamplugin.com/d/356-unregistered-version-message
-* Fixed Bug: Some servers do not allow WP core string concatenation. This was causing 403 https://forum.aamplugin.com/d/389-message-loading-aam-ui-please-wait-403-forbidden
-* Fixed Bug: Media list on Posts & Terms tab is not rendered correctly due to improperly managed DB query for post type `attachment`
-* Fixed Bug: AAM core getOption method did not deserialized settings properly in some cases
-* Fixed Bug: Access Manager metabox was rendered for users that have ability to manage other users https://forum.aamplugin.com/d/371-you-are-not-allowed-to-manage-any-aam-subject
-* Fixed Bug: Logout redirect was no working properly https://forum.aamplugin.com/d/339-problem-with-login-shortcode-and-widget
-* Fixed Bug: The Drill-Down button was not working on Posts & Terms tab
-* Fixed Bug: Access policy Action "Create" was not converted at all for the PostType resource
-* Change:    Simplified the first migration script by removing all error emissions. We captured enough migration logs to be confident about proper migration of the most critical settings
-* Change:    Changed verbiage for the Enterprise Package on the Add-ons area
-* Change:    Added info notification to the Posts & Terms tab for proper Media access controls
-* Change:    Merge internal Settings service with Core service
-* Change:    Added new migration script that fixed issues with legacy names for premium add-ons
-* Change:    Added new internal AddOn manager class
-* Added New: Added the ability to check for new add-on updates from the Add-ons area
-* Added New: Published free AAM add-on AAM Protected Media Files https://wordpress.org/plugins/aam-protected-media-files/
-
-= 6.0.4 =
-* Fixed Bug: https://forum.aamplugin.com/d/367-authentication-jwt-expires-fatal-error
-* Fixed Bug: JWT validation endpoint did not check token's expiration based on UTC timezone
-* Fixed Bug: Removed unnecessary console.log invocations from the aam.js library
-* Fixed Bug: Fixed the potential bug with improperly merged options when access policy Param's Value is defined as multi-dimensional array
-* Fixed Bug: https://forum.aamplugin.com/d/339-problem-with-login-shortcode-and-widget
-* Fixed Bug: https://forum.aamplugin.com/d/371-you-are-not-allowed-to-manage-any-aam-subject
-* Fixed Bug: Incompatibility with plugins that are extremely aggressive and modify the WP_Query "suppress_filters" flag. Shame on you guys!
-
-= 6.0.3 =
-* Fixed Bug: Fatal Error - Class 'AAM_Core_Server' not found. https://forum.aamplugin.com/d/358-uncaught-error-class-aam-core-server-not-found
-* Fixed Bug: Fixed the bug where post types that do not have Gutenberg enabled are not shown on the Metaboxes & Widgets tab https://wordpress.org/support/topic/in-metaboxes-widgets-no-pages/
-* Fixed Bug: Not all possible post types are shown on the Posts & Terms tab
-
-= 6.0.2 =
-* Fixed Bug: https://forum.aamplugin.com/d/361-uncaught-error-call-to-a-member-function-settimezone-on-boolean
-* Fixed Bug: https://forum.aamplugin.com/d/378-aam-6-0-1-conflict-with-acf-advanced-custom-fields
-* Fixed Bug: Migration script, fixed couple more minor bugs that were causing warnings
-
-= 6.0.1 =
-* Fixed Bug: Numerous bugs fixed in the migration script. New script prepared to do additional clean-up and fix corrupted data
-* Fixed Bug: https://forum.aamplugin.com/d/369-notice-undefined-offset-1-service-content-php-on-line-509
-* Fixed Bug: https://wordpress.org/support/topic/6-0-issues/
-* Fixed Bug: https://forum.aamplugin.com/d/353-comment-system-activated
-* Fixed Bug: Migration script was skipping access settings conversion for roles that have white space in slug
-* Added New: Additional migration script for clean-up and fixing corrupted data
 
 = 6.0.0 =
 * Complete rewrite of the entire plugin. For more information, check [this article](https://aamplugin.com/article/advanced-access-manager-next-generation)
