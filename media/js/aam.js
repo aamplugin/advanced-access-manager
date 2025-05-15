@@ -1505,7 +1505,7 @@
                 var container = '#policy-content';
 
                 if ($(container).length) {
-                    //reset button
+                    // Reset button
                     $('#policy_reset').bind('click', function () {
                         const btn      = this;
                         const endpoint = getAAM().prepareApiEndpoint(
@@ -2343,7 +2343,7 @@
                         });
                     });
 
-                    //reset button
+                    // Reset button
                     $('#metabox-reset').bind('click', function () {
                         const _this = $(this);
 
@@ -5094,7 +5094,7 @@
                         }
                     });
 
-                    //reset button
+                    // Reset button
                     $('#route-reset').bind('click', function () {
                         const _btn = $(this);
 
@@ -5221,7 +5221,7 @@
                         });
                     });
 
-                    //reset button
+                    // Reset button
                     $('#uri-reset').bind('click', function () {
                         const _btn = $(this);
 
@@ -5295,6 +5295,10 @@
                                     callback: $.trim(
                                         $('#url_access_trigger_callback_value').val()
                                     )
+                                }
+                            } else if (type === 'login_redirect') {
+                                payload.redirect = {
+                                    type
                                 }
                             }
 
@@ -6683,7 +6687,7 @@
                         $('#clear-settings').text(getAAM().__('Processing...'));
 
                         getAAM().queueRequest(function () {
-                            $.ajax(`${getLocal().rest_base}aam/v2/reset`, {
+                            $.ajax(`${getLocal().rest_base}aam/v2/core/reset`, {
                                 type: 'POST',
                                 dataType: 'json',
                                 headers: {

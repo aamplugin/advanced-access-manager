@@ -202,7 +202,7 @@ class AAM_Service_Widgets
      * @return void
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _filter_dashboard_widgets()
     {
@@ -214,7 +214,7 @@ class AAM_Service_Widgets
             foreach ($wp_meta_boxes['dashboard'] as $priority => $groups) {
                 foreach($groups as $widgets) {
                     foreach($widgets as $widget) {
-                        if ($service->is_denied($widget)) {
+                        if (!empty($widget) && $service->is_denied($widget)) {
                             remove_meta_box($widget['id'], 'dashboard', $priority);
                         }
                     }

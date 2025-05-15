@@ -85,7 +85,7 @@ class AAM_Service_Metaboxes
      * @return void
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _initialize_metaboxes($post_type)
     {
@@ -105,6 +105,12 @@ class AAM_Service_Metaboxes
                             $slug = AAM::api()->misc->callable_to_slug(
                                 $box['callback']
                             );
+
+                            // If $args contain taxonomy - prepend it to ensure that
+                            // it is unique
+                            if (!empty($box['args']['taxonomy'])) {
+                                $slug = $box['args']['taxonomy'] . '_' . $slug;
+                            }
 
                             // If Closure is used for callback, use the ID instead
                             if (empty($slug)){
@@ -184,7 +190,7 @@ class AAM_Service_Metaboxes
      * @return void
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _filter_zones($zones, $screen_id)
     {
@@ -192,10 +198,8 @@ class AAM_Service_Metaboxes
 
         foreach ($zones as $zone => $priorities) {
             foreach ($priorities as $metaboxes) {
-                foreach ($metaboxes as $id => $metabox) {
-                    if (!empty($metabox)
-                        && $service->is_denied($metabox, $screen_id) === true
-                    ) {
+                foreach ($metaboxes as $id => $mbox) {
+                    if (!empty($mbox) && $service->is_denied($mbox, $screen_id)) {
                         remove_meta_box($id, $screen_id, $zone);
                     }
                 }

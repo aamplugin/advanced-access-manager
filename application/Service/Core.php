@@ -62,7 +62,7 @@ class AAM_Service_Core
      * @access protected
      * @return void
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     protected function __construct()
     {
@@ -82,7 +82,7 @@ class AAM_Service_Core
 
         // Ensuring safely of transactions
         add_filter('gettext_advanced-access-manager', function($translation) {
-            return esc_js($translation);
+            return esc_html($translation);
         });
 
         if (is_admin()) {

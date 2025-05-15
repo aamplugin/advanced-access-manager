@@ -356,33 +356,33 @@ class AAM_Framework_Service_BackendMenu
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _get_raw_menu()
     {
         static $_cache = [];
         global $menu, $submenu;
 
-        if (empty($_cache)) {
+        if ((defined('DOING_AJAX') && DOING_AJAX)
+            || $this->misc->get_current_area() === 'api'
+        ) {
+           $result = $_cache = $this->cache->get(self::CACHE_OPTION);
+        } elseif (empty($_cache)) {
             $result        = [];
             $persist_cache = false;
 
             if (!empty($menu)) {
-                $result['menu'] = $this->_filter_menu_items($menu);
+                $result['menu'] = $this->_prepare_menu_items($menu);
                 $persist_cache  = true;
             }
 
             if (!empty($submenu)) {
-                $result['submenu'] = $this->_filter_submenu_items($submenu);
+                $result['submenu'] = $this->_prepare_submenu_items($submenu);
                 $persist_cache     = true;
             }
 
             if ($persist_cache) {
                 $this->cache->set(self::CACHE_OPTION, $result, 31536000);
-            }
-
-            if (empty($result)) { // Either AJAX or RESTful API call
-                $result = $this->cache->get(self::CACHE_OPTION);
             }
 
             $_cache = $result; // Avoid doing the same thing over & over again
@@ -394,16 +394,16 @@ class AAM_Framework_Service_BackendMenu
     }
 
     /**
-     * Filter menu items
+     * Prepare menu items to be cached
      *
      * @param array $items
      *
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
-    private function _filter_menu_items($items)
+    private function _prepare_menu_items($items)
     {
         $response = [];
 
@@ -417,16 +417,16 @@ class AAM_Framework_Service_BackendMenu
     }
 
     /**
-     * Filter submenu item list
+     * Prepare submenu item list
      *
      * @param array $items
      *
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
-    private function _filter_submenu_items($items)
+    private function _prepare_submenu_items($items)
     {
         $response = [];
 

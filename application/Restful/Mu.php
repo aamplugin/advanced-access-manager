@@ -61,7 +61,7 @@ class AAM_Restful_Mu
         add_action('rest_api_init', function() {
             $permission_cb = function() {
                 return current_user_can('aam_manager')
-                    && AAM::api()->misc->is_super_admin();
+                    && AAM::api()->misc->is_admin();
             };
 
             // Reset AAM

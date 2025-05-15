@@ -262,12 +262,14 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
 
         $res = $post;
 
-        if (get_the_ID()) {
-            $res = get_post(get_the_ID());
+        if ($wp_query->is_post_type_archive) {
+            // Getting a slug of a browsing page and try to fetch a page
+            // by the slug
+            $res = get_page_by_path(trim($this->get($_SERVER, 'REQUEST_URI'), '/'));
         } elseif (!empty($wp_query->queried_object)) {
             $res = $wp_query->queried_object;
-        } elseif (!empty($wp_query->post)) {
-            $res = $wp_query->post;
+        } elseif (!empty($wp_query->queried_object_id)) {
+            $res = get_post($wp_query->queried_object_id);
         } elseif (!empty($wp_query->query_vars['p'])) {
             $res = get_post($wp_query->query_vars['p']);
         } elseif (!empty($wp_query->query_vars['page_id'])) {
@@ -292,6 +294,10 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
             $res = get_post(filter_input(INPUT_GET, 'post', FILTER_VALIDATE_INT));
         } elseif (isset($_POST['post_ID'])) {
             $res = get_post(filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT));
+        } elseif (!empty($wp_query->post)) {
+            $res = $wp_query->post;
+        } elseif (get_the_ID()) {
+            $res = get_post(get_the_ID());
         }
 
         if (is_a($res, 'WP_Post')) {
@@ -539,6 +545,28 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
             ) {
                 $result = true;
             }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Determine if given user is an administrator
+     *
+     * @param int $user_id
+     *
+     * @return boolean
+     * @access public
+     *
+     * @version 7.0.2
+     */
+    public function is_admin($user_id = null)
+    {
+        $result = false;
+        $user   = empty($user_id) ? wp_get_current_user() : get_userdata($user_id);
+
+        if (is_a($user, WP_User::class) && $user->exists()) {
+            $result = in_array('administrator', $user->roles, true);
         }
 
         return $result;

@@ -372,13 +372,17 @@ class AAM_Framework_Service_Metaboxes
      * @return string
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _prepare_metabox_slug($metabox)
     {
         // Determining metabox slug
         if (is_array($metabox) && isset($metabox['callback'])) {
             $result = $this->misc->callable_to_slug($metabox['callback']);
+
+            if (!empty($metabox['args']['taxonomy'])) {
+                $result = $metabox['args']['taxonomy'] . '_' . $result;
+            }
 
             // Taking into consideration Closures
             if (empty($result)) {

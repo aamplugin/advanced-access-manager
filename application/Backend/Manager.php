@@ -366,16 +366,18 @@ class AAM_Backend_Manager
      * Handle Ajax calls to AAM
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     *
+     * @version 7.0.2
      */
     public function ajax()
     {
         check_ajax_referer('aam_ajax');
 
         // Clean buffer to make sure that nothing messing around with system
-        while (@ob_end_clean()) { /* Close all the open buffers and flush them */ }
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
 
         // Process ajax request
         if (current_user_can('aam_manager')) {

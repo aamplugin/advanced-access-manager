@@ -65,7 +65,7 @@ class AAM_Service_Identity
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     protected function initialize_hooks()
     {
@@ -102,7 +102,7 @@ class AAM_Service_Identity
             return $this->_allow_password_reset($result, $user_id);
         }, 10, 2);
         add_action('check_passwords', function($login, &$pwd1, &$pwd2) {
-            if (!AAM::api()->misc->is_super_admin()) {
+            if (!AAM::api()->misc->is_admin()) {
                 $this->_check_passwords($login, $pwd1, $pwd2);
             }
         }, 10, 3);

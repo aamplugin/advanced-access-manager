@@ -121,7 +121,11 @@ class AAM_Service_Content
             add_action('wp', function() {
                 global $wp_query;
 
-                if ($wp_query->is_single || $wp_query->is_page) {
+                if (is_single()
+                    || is_page()
+                    || is_post_type_archive()
+                    || $wp_query->is_posts_page
+                ) {
                     $this->_authorize_post_access();
                 }
             }, PHP_INT_MAX);
@@ -208,7 +212,7 @@ class AAM_Service_Content
      * @access private
      * @global WP_Query $wp_query
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _authorize_post_access()
     {
@@ -221,6 +225,11 @@ class AAM_Service_Content
                 AAM::api()->redirect->do_access_denied_redirect();
             } elseif ($service->is_redirected($post)) {
                 AAM::api()->redirect->do_redirect($service->get_redirect($post));
+            } elseif ($service->is_teaser_message_set($post)) {
+                AAM::api()->redirect->do_redirect([
+                    'type'    => 'custom_message',
+                    'message' => $service->get_teaser_message($post)
+                ]);
             }
         }
     }
@@ -516,7 +525,7 @@ class AAM_Service_Content
      * @access public
      * @return WP_REST_Response
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _authorize_post_rest_access($response, $post, $request)
     {
@@ -558,6 +567,12 @@ class AAM_Service_Content
             $response->set_data([
                 'code'    => 'rest_unauthorized',
                 'message' => 'The content is restricted.'
+            ]);
+        } elseif ($service->is_teaser_message_set($post)) {
+            $response->set_status(401);
+            $response->set_data([
+                'code'    => 'rest_unauthorized',
+                'message' => $service->get_teaser_message($post)
             ]);
         }
 
@@ -817,7 +832,7 @@ class AAM_Service_Content
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.2
      */
     private function _map_read_post_caps($caps, $post_id, $password = null)
     {
@@ -828,6 +843,8 @@ class AAM_Service_Content
                 $caps[] = 'do_not_allow';
             }
         } elseif ($service->is_restricted($post_id)) {
+            $caps[] = 'do_not_allow';
+        } elseif ($service->is_teaser_message_set($post_id)) {
             $caps[] = 'do_not_allow';
         }
 
