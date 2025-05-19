@@ -68,14 +68,18 @@ class AAM_Framework_Policy_Condition
      * @return boolean
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     public function execute($conditions, $args = [])
     {
-        $res = true;
-
         // Determine if we have a logical operator defined
-        $operator = isset($conditions['Operator']) ? $conditions['Operator'] : 'AND';
+        if (isset($conditions['Operator'])) {
+            $operator = strtoupper($conditions['Operator']);
+        } else {
+            $operator = 'AND';
+        }
+
+       $res = ($operator === 'OR' ? null : true); // Making sure that OR is handled
 
         foreach ($conditions as $type => $group) {
             $type = strtolower($type);

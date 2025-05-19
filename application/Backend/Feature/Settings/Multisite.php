@@ -36,18 +36,23 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
      * @return array
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     public static function getList()
     {
         $configs  = AAM::api()->config;
-        $settings = array(
-            'core.settings.multisite.members_only' => array(
+        $settings = [
+            'core.settings.multisite.members_only' => [
                 'title'       => __('Non-Member Access Restriction', 'advanced-access-manager'),
                 'description' => __('Limit subsite access to only members within the WordPress multisite network', 'advanced-access-manager'),
                 'value'       => $configs->get('core.settings.multisite.members_only')
-            )
-        );
+            ],
+            'core.settings.multisite.sync' => [
+                'title'       => __('Unified Multisite Configuration Sync', AAM_KEY),
+                'description' => __('Effortlessly synchronize role and capability lists, along with all access settings (when configured)', AAM_KEY),
+                'value'       => $configs->get('core.settings.multisite.sync')
+            ],
+        ];
 
         return apply_filters('aam_settings_list_filter', $settings, 'multisite');
     }

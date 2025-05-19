@@ -41,12 +41,12 @@ class AAM_Framework_Service_Settings
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     protected function initialize_hooks()
     {
         $this->_data = apply_filters(
-            'aam_init_access_level_settings_filter',
+            'aam_init_settings_filter',
             $this->db->read(self::DB_OPTION, []),
             $this
         );

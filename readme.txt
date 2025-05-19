@@ -4,7 +4,7 @@ Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.0
-Stable tag: 7.0.2
+Stable tag: 7.0.3
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,12 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.3 =
+* Fixed: The Condition block is not handled properly when Operator is OR [https://github.com/aamplugin/advanced-access-manager/issues/464](https://github.com/aamplugin/advanced-access-manager/issues/464)
+* Fixed: Can Not Edit Password Protected Block Pages [https://github.com/aamplugin/advanced-access-manager/issues/463](https://github.com/aamplugin/advanced-access-manager/issues/463)
+* Fixed: Uncaught Error: Cannot use object of type WP_Post_Type as array in /../Metaboxes.php on line 383 [https://github.com/aamplugin/advanced-access-manager/issues/461](https://github.com/aamplugin/advanced-access-manager/issues/461)
+* Feature Request: Re-introduce the "Unified Multisite Configuration Sync" option [https://github.com/aamplugin/advanced-access-manager/issues/462](https://github.com/aamplugin/advanced-access-manager/issues/462)
 
 = 7.0.2 =
 * Fixed: Restricted post with Teaser Message is not enforced [https://github.com/aamplugin/advanced-access-manager/issues/460](https://github.com/aamplugin/advanced-access-manager/issues/460)

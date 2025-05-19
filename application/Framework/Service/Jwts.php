@@ -146,8 +146,8 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @param array $settings       [Optional]
      *
      * @return array|WP_Error
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function issue(array $claims = [], array $settings = [])
@@ -295,8 +295,8 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * Reset all tokens
      *
      * @return bool
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset()
@@ -478,8 +478,8 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @param string $token
      *
      * @return array
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _prepare_token($token)

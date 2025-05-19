@@ -41,7 +41,7 @@ class AAM_Framework_Utility_Config implements AAM_Framework_Utility_Interface
     protected function __construct()
     {
         $this->_configs = apply_filters(
-            'aam_initialize_config', $this->_read_config()
+            'aam_init_config_filter', $this->_read_config()
         );
     }
 

@@ -85,7 +85,7 @@ class AAM_Service_Metaboxes
      * @return void
      * @access private
      *
-     * @version 7.0.2
+     * @version 7.0.3
      */
     private function _initialize_metaboxes($post_type)
     {
@@ -108,8 +108,10 @@ class AAM_Service_Metaboxes
 
                             // If $args contain taxonomy - prepend it to ensure that
                             // it is unique
-                            if (!empty($box['args']['taxonomy'])) {
-                                $slug = $box['args']['taxonomy'] . '_' . $slug;
+                            $tax = AAM::api()->misc->get($box, 'args.taxonomy');
+
+                            if (!empty($tax) && is_string($tax)) {
+                                $slug = $tax . '_' . $slug;
                             }
 
                             // If Closure is used for callback, use the ID instead

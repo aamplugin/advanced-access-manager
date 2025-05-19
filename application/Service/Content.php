@@ -212,7 +212,7 @@ class AAM_Service_Content
      * @access private
      * @global WP_Query $wp_query
      *
-     * @version 7.0.2
+     * @version 7.0.3
      */
     private function _authorize_post_access()
     {
@@ -225,11 +225,6 @@ class AAM_Service_Content
                 AAM::api()->redirect->do_access_denied_redirect();
             } elseif ($service->is_redirected($post)) {
                 AAM::api()->redirect->do_redirect($service->get_redirect($post));
-            } elseif ($service->is_teaser_message_set($post)) {
-                AAM::api()->redirect->do_redirect([
-                    'type'    => 'custom_message',
-                    'message' => $service->get_teaser_message($post)
-                ]);
             }
         }
     }
@@ -477,7 +472,7 @@ class AAM_Service_Content
      * @return mixed
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     private function _rest_request_before_callbacks($response, $request)
     {
@@ -485,9 +480,13 @@ class AAM_Service_Content
         foreach (get_post_types(array('show_in_rest' => true)) as $type) {
             add_filter(
                 "rest_prepare_{$type}", function($response, $post, $request) {
-                    return $this->_authorize_post_rest_access(
-                        $response, $post, $request
-                    );
+                    if ($request->get_param('context') !== 'edit') {
+                        $response = $this->_authorize_post_rest_access(
+                            $response, $post, $request
+                        );
+                    }
+
+                    return $response;
                 }, 10, 3
             );
         }
@@ -525,7 +524,7 @@ class AAM_Service_Content
      * @access public
      * @return WP_REST_Response
      *
-     * @version 7.0.2
+     * @version 7.0.3
      */
     private function _authorize_post_rest_access($response, $post, $request)
     {
@@ -567,12 +566,6 @@ class AAM_Service_Content
             $response->set_data([
                 'code'    => 'rest_unauthorized',
                 'message' => 'The content is restricted.'
-            ]);
-        } elseif ($service->is_teaser_message_set($post)) {
-            $response->set_status(401);
-            $response->set_data([
-                'code'    => 'rest_unauthorized',
-                'message' => $service->get_teaser_message($post)
             ]);
         }
 

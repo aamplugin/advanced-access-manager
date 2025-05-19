@@ -30,16 +30,21 @@ class AAM_Service_Core
     /**
      * Default configurations
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     const DEFAULT_CONFIG = [
-        'core.settings.ui.tips'                  => true,
-        'core.settings.multi_access_levels'      => false,
-        'core.settings.ui.render_access_metabox' => false,
-        'core.settings.xmlrpc_enabled'           => true,
-        'core.settings.restful_enabled'          => true,
-        'core.settings.multisite.members_only'   => false,
-        'core.settings.merge.preference'         => 'deny'
+        'core.settings.ui.tips'                    => true,
+        'core.settings.multi_access_levels'        => false,
+        'core.settings.ui.render_access_metabox'   => false,
+        'core.settings.xmlrpc_enabled'             => true,
+        'core.settings.restful_enabled'            => true,
+        'core.settings.multisite.members_only'     => false,
+        'core.settings.multisite.sync'             => false,
+        'core.settings.merge.preference'           => 'deny',
+        'core.settings.multisite.ignore_resources' => [
+            AAM_Framework_Type_Resource::POST,
+            AAM_Framework_Type_Resource::TERM
+        ]
     ];
 
     /**
@@ -62,7 +67,7 @@ class AAM_Service_Core
      * @access protected
      * @return void
      *
-     * @version 7.0.2
+     * @version 7.0.3
      */
     protected function __construct()
     {
@@ -76,7 +81,7 @@ class AAM_Service_Core
 
         // Hook into AAM config initialization and enrich it with ConfigPress
         // settings
-        add_filter('aam_initialize_config', function($configs) {
+        add_filter('aam_init_config_filter', function($configs) {
             return $this->_aam_initialize_config($configs);
         });
 
@@ -145,7 +150,7 @@ class AAM_Service_Core
             add_action('admin_bar_menu', function($wp_admin_bar) {
                 $blog_count = 0;
 
-                if (is_a($wp_admin_bar->user, 'stdClass')) {
+                if (is_object($wp_admin_bar->user)) {
                     if (is_iterable($wp_admin_bar->user->blogs)) {
                         $blog_count = count($wp_admin_bar->user->blogs);
                     }
@@ -176,6 +181,9 @@ class AAM_Service_Core
             add_action('wp', function() {
                 $this->_control_multisite_members_only();
             }, 999);
+
+            // Control access controls & configurations sync
+            $this->_control_multisite_settings_sync();
         }
 
         // Check if user has ability to perform certain task based on provided
@@ -634,6 +642,132 @@ class AAM_Service_Core
     }
 
     /**
+     * Controlling how access controls & settings are sync
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.3
+     */
+    private function _control_multisite_settings_sync()
+    {
+        $enabled = AAM::api()->config->get('core.settings.multisite.sync');
+
+        if ($enabled && get_current_blog_id() !== get_main_site_id()) {
+            // Sync roles & capabilities. Note! We only sync roles & caps and do not
+            // bother syncing user caps
+            add_filter('pre_option_' . wp_roles()->role_key, function() {
+                $main_site_roles = new WP_Roles(get_main_site_id());
+
+                return $main_site_roles->roles;
+            });
+
+            add_filter('aam_init_settings_filter', function($settings) {
+                $base = AAM::api()->db->read(
+                    AAM_Framework_Service_Settings::DB_OPTION,
+                    [],
+                    get_main_site_id()
+                );
+
+                $response = [];
+
+                // Now, let's merge main site settings with settings for a current
+                // blog
+                $levels = array_unique(array_merge(
+                    is_array($settings) ? array_keys($settings) : [],
+                    is_array($base) ? array_keys($base) : []
+                ));
+
+                foreach ($levels as $level) {
+                    if (in_array($level, [
+                        AAM_Framework_Type_AccessLevel::DEFAULT,
+                        AAM_Framework_Type_AccessLevel::VISITOR
+                    ])) {
+                        $response[$level] = $this->_merge_settings(
+                            isset($settings[$level]) ? $settings[$level] : [],
+                            isset($base[$level]) ? $base[$level] : []
+                        );
+                    } else {
+                        $response[$level] = $this->_merge_identity_settings(
+                            isset($settings[$level]) ? $settings[$level] : [],
+                            isset($base[$level]) ? $base[$level] : []
+                        );
+                    }
+                }
+
+                return $response;
+            });
+        }
+    }
+
+    /**
+     * Merge to set of settings into one
+     *
+     * @param array $settings
+     * @param array $base_settings
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.3
+     */
+    private function _merge_settings($settings, $base_settings)
+    {
+        $response = [];
+        $ignore   = AAM::api()->config->get(
+            'core.settings.multisite.ignore_resources'
+        );
+
+        // Get unique list of resource types
+        $types = array_unique(array_merge(
+            is_array($settings) ? array_keys($settings) : [],
+            is_array($base_settings) ? array_keys($base_settings) : []
+        ));
+
+        foreach($types as $type) {
+            if (!in_array($type, $ignore)) {
+                $response[$type] = array_replace(
+                    isset($base_settings[$type]) ? $base_settings[$type] : [],
+                    isset($settings[$type]) ? $settings[$type] : []
+                );
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Merge role or user settings
+     *
+     * @param array $settings
+     * @param array $base_settings
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.3
+     */
+    private function _merge_identity_settings($settings, $base_settings)
+    {
+        $response = [];
+
+        // Get unique list of identity ids
+        $ids = array_unique(array_merge(
+            is_array($settings) ? array_keys($settings) : [],
+            is_array($base_settings) ? array_keys($base_settings) : []
+        ));
+
+        foreach($ids as $id) {
+            $response[$id] = $this->_merge_settings(
+                isset($settings[$id]) ? $settings[$id] : [],
+                isset($base_settings[$id]) ? $base_settings[$id] : []
+            );
+        }
+
+        return $response;
+    }
+
+    /**
      * Initialize configurations by adding ConfigPress settings
      *
      * @param array $configs
@@ -641,11 +775,38 @@ class AAM_Service_Core
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.3
      */
     private function _aam_initialize_config($configs)
     {
-        $configpress = AAM::api()->db->read(self::DB_OPTION);
+        $response = $this->_enhance_with_configpress($configs);
+
+        if (is_multisite() && get_current_blog_id() !== get_main_site_id()) {
+            $base = $this->_enhance_with_configpress(AAM::api()->db->read(
+                AAM_Framework_Utility_Config::DB_OPTION,
+                [],
+                get_main_site_id()
+            ), get_main_site_id());
+
+            $response = array_replace($base, $response);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Enhance configuration with ConfigPress
+     *
+     * @param array $configs
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.3
+     */
+    private function _enhance_with_configpress($configs, $blog_id = null)
+    {
+        $configpress = AAM::api()->db->read(self::DB_OPTION, null, $blog_id);
 
         if (!empty($configpress) && is_string($configpress)) {
             $result = parse_ini_string($configpress, true, INI_SCANNER_TYPED);
