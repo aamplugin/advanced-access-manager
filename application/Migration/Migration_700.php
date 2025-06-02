@@ -916,9 +916,8 @@ final class AAM_Migration_700
                 $areas = $this->_prepare_visibility_areas($settings);
 
                 $item = [
-                    'effect' => !empty($areas) && $this->_convert_to_effect(
-                        $settings
-                    ),
+                    'effect' => !empty($areas) ?
+                        $this->_convert_to_effect($settings) : 'allow',
                     'on'     => $areas
                 ];
 

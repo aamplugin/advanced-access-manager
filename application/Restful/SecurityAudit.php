@@ -169,8 +169,6 @@ class AAM_Restful_SecurityAudit
             ]
         ]);
 
-        // print_r($result);
-
         // Get HTTP code
         $http_code = wp_remote_retrieve_response_code($result);
 

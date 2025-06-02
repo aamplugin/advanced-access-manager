@@ -31,21 +31,16 @@ class AAM_Service_Widgets
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Widget::register();
-            });
-        }
-
         // Register RESTful API endpoints
         AAM_Restful_Widgets::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -84,11 +79,16 @@ class AAM_Service_Widgets
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
         if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Widget::register();
+            });
+
             // Manager WordPress metaboxes
             add_action('in_admin_header', function () {
                 $screen = get_current_screen();

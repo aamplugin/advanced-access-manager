@@ -34,26 +34,24 @@ class AAM_Service_LoginRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
-            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+            if (empty($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
                 $result = self::DEFAULT_CONFIG[$key];
             }
 
             return $result;
         }, 10, 2);
 
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_LoginRedirect::register();
-            });
-        }
+        // Register RESTful API
+        AAM_Restful_LoginRedirect::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -62,10 +60,17 @@ class AAM_Service_LoginRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_LoginRedirect::register();
+            });
+        }
+
         // AAM Secure Login hooking
         add_filter(
             'aam_rest_authenticated_user_data_filter',
@@ -76,9 +81,6 @@ class AAM_Service_LoginRedirect
 
         // WP Core login redirect hook
         add_filter('login_redirect', [ $this, 'get_login_redirect' ], 10, 3);
-
-        // Register RESTful API
-        AAM_Restful_LoginRedirect::bootstrap();
     }
 
     /**

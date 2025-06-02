@@ -42,21 +42,16 @@ class AAM_Service_Identity
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Identity::register();
-            });
-        }
-
         // Register RESTful API endpoints
         AAM_Restful_Identity::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -65,10 +60,17 @@ class AAM_Service_Identity
      * @return void
      * @access protected
      *
-     * @version 7.0.2
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Identity::register();
+            });
+        }
+
         // Control the list of editable roles
         add_filter('editable_roles', function($roles) {
             return $this->_filter_editable_roles($roles);

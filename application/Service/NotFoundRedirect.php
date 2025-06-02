@@ -23,18 +23,16 @@ class AAM_Service_NotFoundRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_NotFoundRedirect::register();
-            });
-        }
+        // Register the RESTful API
+        AAM_Restful_NotFoundRedirect::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -43,10 +41,17 @@ class AAM_Service_NotFoundRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_NotFoundRedirect::register();
+            });
+        }
+
         add_action('wp', function() {
             global $wp_query;
 
@@ -58,9 +63,6 @@ class AAM_Service_NotFoundRedirect
                 }
             }
         });
-
-        // Register the RESTful API
-        AAM_Restful_NotFoundRedirect::bootstrap();
     }
 
 }

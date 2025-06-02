@@ -43,18 +43,41 @@ class AAM_Service_Jwt
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
-            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+            if (empty($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
                 $result = self::DEFAULT_CONFIG[$key];
             }
 
             return $result;
         }, 10, 2);
 
+        // WP Core current user definition
+        add_filter('determine_current_user', function($user_id){
+            return $this->_determine_current_user($user_id);
+        }, PHP_INT_MAX);
+
+        // Register RESTful API
+        AAM_Restful_Jwt::bootstrap();
+
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
+    }
+
+    /**
+     * Initialize service hooks
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.4
+     */
+    protected function initialize_hooks()
+    {
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
             add_action('aam_initialize_ui_action', function () {
@@ -70,19 +93,6 @@ class AAM_Service_Jwt
             });
         }
 
-        $this->initialize_hooks();
-    }
-
-    /**
-     * Initialize service hooks
-     *
-     * @return void
-     * @access protected
-     *
-     * @version 7.0.0
-     */
-    protected function initialize_hooks()
-    {
         add_action('aam_reset_action', function() {
             global $wpdb;
 
@@ -92,20 +102,12 @@ class AAM_Service_Jwt
             ]);
         });
 
-        // Register RESTful API
-        AAM_Restful_Jwt::bootstrap();
-
         add_filter(
             'aam_rest_authenticated_user_data_filter',
             function($result, $request, $user) {
                 return $this->_prepare_login_response($result, $request, $user);
             }, 10, 3
         );
-
-        // WP Core current user definition
-        add_filter('determine_current_user', function($user_id){
-            return $this->_determine_current_user($user_id);
-        }, PHP_INT_MAX);
 
         // Allow other implementations to work with JWT token
         add_filter('aam_current_jwt_filter', function($result) {
@@ -204,7 +206,7 @@ class AAM_Service_Jwt
      * @return int
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     private function _determine_current_user($user_id)
     {
@@ -213,7 +215,6 @@ class AAM_Service_Jwt
 
             if (!empty($token)) {
                 $claims = AAM::api()->jwt->decode($token->jwt);
-
 
                 if (!is_wp_error($claims)) {
                     // Backward compatibility
@@ -233,20 +234,8 @@ class AAM_Service_Jwt
                         $is_valid = $service->validate($token->jwt);
 
                         if ($is_valid === true) {
-                            $is_active = $this->_verify_user_status($cuid);
-
-                            if ($is_active === true) {
-                                if (in_array(
-                                    $token->method,
-                                    [ 'get', 'query', 'query_param' ],
-                                    true
-                                )) {
-                                    // Also authenticate user if token comes from query
-                                    // param
-                                    add_action('init', function() use ($cuid, $claims) {
-                                        $this->_authenticate_user($cuid, $claims);
-                                    }, 1);
-                                }
+                            if ($this->_is_user_active($cuid)) {
+                                $this->_maybe_authenticate($cuid, $token, $claims);
 
                                 $user_id = $cuid;
                             }
@@ -257,6 +246,25 @@ class AAM_Service_Jwt
         }
 
         return $user_id;
+    }
+
+    /**
+     * Determine if JWT token is used in password-less URL and if so - authenticate
+     *
+     * @param int    $user_id
+     * @param object $token
+     * @param array  $claims
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.4
+     */
+    private function _maybe_authenticate($user_id, $token, $claims)
+    {
+        if (in_array($token->method, [ 'get', 'query', 'query_param' ], true)) {
+            $this->_authenticate_user($user_id, $claims);
+        }
     }
 
     /**
@@ -319,12 +327,12 @@ class AAM_Service_Jwt
      * @return object|null
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     private function _extract_token()
     {
         $configs   = AAM::api()->config;
-        $container = wp_parse_list($configs->get('service.jwt.bearer'));
+        $container = wp_parse_list($configs->get('service.jwt.bearer', ''));
 
         foreach ($container as $method) {
             switch (strtolower(trim($method))) {
@@ -393,33 +401,17 @@ class AAM_Service_Jwt
      *
      * @param int $user_id
      *
-     * @return bool|WP_Error
+     * @return bool
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
-    private function _verify_user_status($user_id)
+    private function _is_user_active($user_id)
     {
-        $result = true;
-        $user   = AAM::api()->user($user_id);
+        $user = AAM::api()->user($user_id);
 
-        // Step #1. Verify that user is active
-        if (!$user->is_user_active()) {
-            $result = new WP_Error(
-                'inactive_user',
-                '[ERROR]: User is inactive. Contact the administrator.'
-            );
-        }
-
-        // Step #2. Verify that user is not expired
-        if ($user->is_user_access_expired()) {
-            $result = new WP_Error(
-                'inactive_user',
-                '[ERROR]: User access is expired. Contact the administrator.'
-            );
-        }
-
-        return $result;
+        // Verify that user is active and is not expired
+        return $user->is_user_active() && !$user->is_user_access_expired();
     }
 
 }

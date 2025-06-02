@@ -23,28 +23,16 @@ class AAM_Service_Policies
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Policy::register();
-            });
+        // Register RESTful API
+        AAM_Restful_Policies::bootstrap();
 
-            // Register custom access control metabox
-            add_action('add_meta_boxes', function() {
-                $this->_add_meta_boxes();
-            });
-
-            // Access policy save
-            add_filter('wp_insert_post_data', function($data) {
-                return $this->_wp_insert_post_data($data);
-            });
-        }
-
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -78,14 +66,28 @@ class AAM_Service_Policies
      * Initialize hooks
      *
      * @return void
-     *
      * @access protected
-     * @version 7.0.0
+     *
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
-        // Register RESTful API
-        AAM_Restful_Policies::bootstrap();
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_Policy::register();
+            });
+
+            // Register custom access control metabox
+            add_action('add_meta_boxes', function() {
+                $this->_add_meta_boxes();
+            });
+
+            // Access policy save
+            add_filter('wp_insert_post_data', function($data) {
+                return $this->_wp_insert_post_data($data);
+            });
+        }
 
         // Override role list permissions
         add_filter('aam_rest_role_output_filter', function($result, $role) {

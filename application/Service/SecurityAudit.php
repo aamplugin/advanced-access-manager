@@ -55,14 +55,32 @@ class AAM_Service_SecurityAudit
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
+    {
+        // Keep the support RESTful service enabled at all times because it is used
+        // by issue reporting feature as well
+        AAM_Restful_SecurityAudit::bootstrap();
+
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
+    }
+
+    /**
+     * Initialize service hooks
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.4
+     */
+    protected function initialize_hooks()
     {
         add_filter('aam_security_scan_enabled_filter', function() {
             return AAM::api()->config->get(AAM::SERVICES[__CLASS__], true);
         });
-
 
         // Register cron-job
         if (wp_next_scheduled('aam_security_audit_cron') === false) {
@@ -79,10 +97,6 @@ class AAM_Service_SecurityAudit
                 'aam_security_audit_cron'
             );
         });
-
-        // Keep the support RESTful service enabled at all times because it is used
-        // by issue reporting feature as well
-        AAM_Restful_SecurityAudit::bootstrap();
     }
 
     /**

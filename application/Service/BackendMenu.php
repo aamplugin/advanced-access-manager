@@ -23,21 +23,16 @@ class AAM_Service_BackendMenu
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_BackendMenu::register();
-            });
-        }
-
         // Register RESTful API endpoints
         AAM_Restful_BackendMenu::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -46,11 +41,16 @@ class AAM_Service_BackendMenu
      * @return void
      * @access protected
      *
-     * @version 7.0.2
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
         if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_BackendMenu::register();
+            });
+
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
             add_filter('parent_file', function($parent_file) {

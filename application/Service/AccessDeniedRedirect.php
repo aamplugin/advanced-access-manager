@@ -24,21 +24,16 @@ class AAM_Service_AccessDeniedRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_AccessDeniedRedirect::register();
-            });
-        }
-
         // Register RESTful API endpoints
         AAM_Restful_AccessDeniedRedirect::bootstrap();
 
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -47,10 +42,17 @@ class AAM_Service_AccessDeniedRedirect
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
+        if (is_admin()) {
+            // Hook that initialize the AAM UI part of the service
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_AccessDeniedRedirect::register();
+            });
+        }
+
         add_action('aam_access_denied_redirect_handler_filter', function($handler) {
             if (is_null($handler)) {
                 $handler = function() {

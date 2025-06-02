@@ -4,7 +4,7 @@ Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.0
-Stable tag: 7.0.3
+Stable tag: 7.0.4
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,9 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.4 =
+* Change: Making sure that all AAM hooks are triggered only after init [https://github.com/aamplugin/advanced-access-manager/issues/465](https://github.com/aamplugin/advanced-access-manager/issues/465)
 
 = 7.0.3 =
 * Fixed: The Condition block is not handled properly when Operator is OR [https://github.com/aamplugin/advanced-access-manager/issues/464](https://github.com/aamplugin/advanced-access-manager/issues/464)

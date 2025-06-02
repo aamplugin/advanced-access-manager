@@ -520,9 +520,9 @@ final class MarkerTest extends TestCase
         // Emulate JWT token to be passed in POST data
         $_POST['aam-jwt'] = $token['token'];
 
-        $this->assertEquals(
-            'yes', AAM_Framework_Policy_Marker::get_marker_value('${JWT.test}')
-        );
+        $this->assertEquals('yes', AAM_Framework_Policy_Marker::get_marker_value(
+            '${JWT.test}'
+        ));
 
         // Unset test data
         unset($_POST['aam-jwt']);

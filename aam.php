@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 7.0.3
+ * Version: 7.0.4
  * Author: VasylTech LLC <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
@@ -287,7 +287,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '7.0.3');
+    define('AAM_VERSION', '7.0.4');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor
@@ -297,12 +297,9 @@ if (defined('ABSPATH')) {
     require(__DIR__ . '/autoloader.php');
     AAM_Autoloader::register();
 
-    // Keep this as the lowest priority
-    add_action('plugins_loaded', 'AAM::on_plugins_loaded', -999);
-
-    // The highest priority (higher the core)
-    // this is important to have to catch events like register core post types
-    add_action('init', 'AAM::on_init', -1);
+    // Load AAM service and register all the necessary initializations
+    add_action('plugins_loaded', 'AAM::on_plugins_loaded');
+    add_action('init', 'AAM::on_init');
 
     // Activation & deactivation hooks
     register_activation_hook(__FILE__, array('AAM', 'activate'));

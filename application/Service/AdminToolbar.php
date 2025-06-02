@@ -24,27 +24,16 @@ class AAM_Service_AdminToolbar
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
-        if (is_admin()) {
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_AdminToolbar::register();
-            });
-        }
-
         // Register RESTful API endpoints
         AAM_Restful_AdminToolbar::bootstrap();
 
-        // Cache admin toolbar
-        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
-            add_action('wp_after_admin_bar_render', function() {
-                AAM::api()->admin_toolbar()->get_items();
-            });
-        }
-
-        $this->initialize_hooks();
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
     }
 
     /**
@@ -53,10 +42,23 @@ class AAM_Service_AdminToolbar
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function initialize_hooks()
     {
+        if (is_admin()) {
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Main_AdminToolbar::register();
+            });
+        }
+
+        // Cache admin toolbar
+        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
+            add_action('wp_after_admin_bar_render', function() {
+                AAM::api()->admin_toolbar()->get_items();
+            });
+        }
+
         add_action('wp_before_admin_bar_render', function () {
             $this->_filter_admin_toolbar();
         }, PHP_INT_MAX, 0, true);

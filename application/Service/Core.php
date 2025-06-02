@@ -67,18 +67,46 @@ class AAM_Service_Core
      * @access protected
      * @return void
      *
-     * @version 7.0.3
+     * @version 7.0.4
      */
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
-            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+            if (empty($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
                 $result = self::DEFAULT_CONFIG[$key];
             }
 
             return $result;
         }, 10, 2);
 
+        // Control user's status
+        add_action('set_current_user', function() {
+            $this->_control_user_account();
+        });
+
+        // Bootstrap RESTful API
+        AAM_Restful_Mu::bootstrap();
+        AAM_Restful_Roles::bootstrap();
+        AAM_Restful_Users::bootstrap();
+        AAM_Restful_Configs::bootstrap();
+        AAM_Restful_Settings::bootstrap();
+        AAM_Restful_BackwardCompatibility::bootstrap();
+
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
+    }
+
+    /**
+     * Initialize service hooks
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.4
+     */
+    protected function initialize_hooks()
+    {
         // Hook into AAM config initialization and enrich it with ConfigPress
         // settings
         add_filter('aam_init_config_filter', function($configs) {
@@ -224,11 +252,6 @@ class AAM_Service_Core
             return $response;
         }, PHP_INT_MAX);
 
-        // Control user's status
-        add_action('set_current_user', function() {
-            $this->_control_user_account();
-        });
-
         // Control admin notifications
         add_action(
             'admin_notices',
@@ -269,21 +292,11 @@ class AAM_Service_Core
         );
 
         // Control access to the backend area
-        add_action('init', function() {
-            $this->_control_admin_area_access();
-            $this->_control_admin_toolbar();
+        $this->_control_admin_area_access();
+        $this->_control_admin_toolbar();
 
-            // Run upgrades if available
-            AAM_Core_Migration::run();
-        }, 1);
-
-        // Bootstrap RESTful API
-        AAM_Restful_Mu::bootstrap();
-        AAM_Restful_Roles::bootstrap();
-        AAM_Restful_Users::bootstrap();
-        AAM_Restful_Configs::bootstrap();
-        AAM_Restful_Settings::bootstrap();
-        AAM_Restful_BackwardCompatibility::bootstrap();
+        // Run upgrades if available
+        AAM_Core_Migration::run();
     }
 
     /**

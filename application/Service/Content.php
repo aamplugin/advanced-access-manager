@@ -50,19 +50,36 @@ class AAM_Service_Content
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.4
      */
     protected function __construct()
     {
         add_filter('aam_get_config_filter', function($result, $key) {
-            if (is_null($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
+            if (empty($result) && array_key_exists($key, self::DEFAULT_CONFIG)) {
                 $result = self::DEFAULT_CONFIG[$key];
             }
 
             return $result;
         }, 10, 2);
 
+        // Register RESTful API
+        AAM_Restful_Content::bootstrap();
 
+        add_action('init', function() {
+            $this->initialize_hooks();
+        }, PHP_INT_MAX);
+    }
+
+    /**
+     * Initialize Content service hooks
+     *
+     * @return void
+     * @access protected
+     *
+     * @version 7.0.4
+     */
+    protected function initialize_hooks()
+    {
         if (is_admin()) {
             // Hook that initialize the AAM UI part of the service
             add_action('aam_initialize_ui_action', function () {
@@ -85,22 +102,6 @@ class AAM_Service_Content
             }
         }
 
-        // Register RESTful API
-        AAM_Restful_Content::bootstrap();
-
-        $this->initialize_hooks();
-    }
-
-    /**
-     * Initialize Content service hooks
-     *
-     * @return void
-     * @access protected
-     *
-     * @version 7.0.0
-     */
-    protected function initialize_hooks()
-    {
         if (!is_admin()) {
             // Password protected filter
             add_filter('post_password_required', function($result, $post) {
@@ -170,9 +171,9 @@ class AAM_Service_Content
         );
 
         // Audit all registered post types and adjust access controls accordingly
-        add_action('registered_post_type', function ($post_type, $obj) {
+        foreach(get_post_types([], 'objects') as $post_type) {
             // REST API. Control if user is allowed to publish content
-            add_filter("rest_pre_insert_{$post_type}", function ($post, $request) {
+            add_filter("rest_pre_insert_{$post_type->name}", function ($post, $request) {
                 $status = (isset($request['status']) ? $request['status'] : null);
 
                 if (in_array($status, array('publish', 'future'), true)) {
@@ -181,8 +182,8 @@ class AAM_Service_Content
                     if (AAM::api()->posts()->is_denied_to($post_id, 'publish')) {
                         $post = new WP_Error(
                             'rest_cannot_publish',
-                            __('You are not allowed to publish this content', 'advanced-access-manager'),
-                            array('status' => rest_authorization_required_code())
+                            'You are not allowed to publish this content',
+                            [ 'status' => rest_authorization_required_code() ]
                         );
                     }
                 }
@@ -192,7 +193,7 @@ class AAM_Service_Content
 
             // Populate the collection of post type caps
             foreach ([ 'edit_post', 'read_post', 'delete_post', 'publish_posts' ] as $cap) {
-                $meta_cap = $obj->cap->{$cap};
+                $meta_cap = $post_type->cap->{$cap};
 
                 if (!empty($meta_cap)
                     && !in_array($meta_cap, $this->_content_capabilities, true)
@@ -201,7 +202,7 @@ class AAM_Service_Content
                     $this->_content_capabilities[] = $cap;
                 }
             }
-        }, 10, 2);
+        }
     }
 
     /**
