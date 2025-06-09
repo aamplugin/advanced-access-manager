@@ -589,8 +589,8 @@ class AAM_Framework_Service_Policies
      * Get access policy resource
      *
      * @return AAM_Framework_Resource_Policy
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_resource()
@@ -608,7 +608,7 @@ class AAM_Framework_Service_Policies
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.5
      */
     private function _parse_policy($policy)
     {
@@ -621,7 +621,7 @@ class AAM_Framework_Service_Policies
         ), true);
 
         // Do not load the policy if any errors
-        if (json_last_error() === JSON_ERROR_NONE) {
+        if (json_last_error() === JSON_ERROR_NONE && is_array($raw)) {
             $result = [
                 'Statement' => $this->_get_array_of_arrays($raw, 'Statement'),
                 'Param'     => $this->_get_array_of_arrays($raw, 'Param'),
@@ -632,9 +632,7 @@ class AAM_Framework_Service_Policies
             // Make sure that this is noticed
             _doing_it_wrong(
                 __CLASS__ . '::' . __METHOD__,
-                sprintf(
-                    'Access policy %d error %s', $policy->ID, json_last_error_msg()
-                ),
+                sprintf('Invalid access policy (ID: %d)', $policy->ID),
                 AAM_VERSION
             );
         }

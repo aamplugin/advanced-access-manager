@@ -79,6 +79,12 @@ class AAM_Service_Core
             return $result;
         }, 10, 2);
 
+        // Hook into AAM config initialization and enrich it with ConfigPress
+        // settings
+        add_filter('aam_init_config_filter', function($configs) {
+            return $this->_aam_initialize_config($configs);
+        });
+
         // Control user's status
         add_action('set_current_user', function() {
             $this->_control_user_account();
@@ -107,12 +113,6 @@ class AAM_Service_Core
      */
     protected function initialize_hooks()
     {
-        // Hook into AAM config initialization and enrich it with ConfigPress
-        // settings
-        add_filter('aam_init_config_filter', function($configs) {
-            return $this->_aam_initialize_config($configs);
-        });
-
         // Ensuring safely of transactions
         add_filter('gettext_advanced-access-manager', function($translation) {
             return esc_html($translation);

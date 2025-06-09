@@ -14,7 +14,7 @@
  * @version 7.0.0
  */
 class AAM_Framework_Preference_AccessDeniedRedirect
-implements AAM_Framework_Preference_Interface, ArrayAccess
+implements AAM_Framework_Preference_Interface
 {
 
     use AAM_Framework_Preference_BaseTrait;

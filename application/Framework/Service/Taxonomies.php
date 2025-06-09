@@ -10,6 +10,15 @@
 /**
  * Taxonomies framework service
  *
+ * @method bool is_hidden_on(mixed $resource_identifier, string $website_area) **[Premium Feature]**
+ * @method bool is_hidden(mixed $resource_identifier) **[Premium Feature]**
+ * @method bool is_denied_to(mixed $resource_identifier, string $permission) **[Premium Feature]**
+ * @method bool is_allowed_to(mixed $resource_identifier, string $permission) **[Premium Feature]**
+ * @method bool deny(mixed $resource_identifier, string|array $permission) **[Premium Feature]**
+ * @method bool allow(mixed $resource_identifier, string|array $permission) **[Premium Feature]**
+ * @method bool hide(mixed $resource_identifier, string|array $website_area = null) **[Premium Feature]**
+ * @method bool show(mixed $resource_identifier, string|array $website_area = null) **[Premium Feature]**
+ *
  * @package AAM
  * @version 7.0.0
  */

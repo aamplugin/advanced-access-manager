@@ -650,9 +650,7 @@ class AAM_Framework_Service_Posts
         try {
             $resource   = $this->_get_resource();
             $identifier = $this->_normalize_resource_identifier($post_identifier);
-            $permission = [
-                'effect' => 'deny'
-            ];
+            $permission = [ 'effect' => 'deny' ];
 
             // Determine the list of areas for list permission
             if (is_string($website_area)) {
@@ -684,37 +682,25 @@ class AAM_Framework_Service_Posts
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.5
      */
     public function show($post_identifier, $website_area = null)
     {
         try {
             $resource   = $this->_get_resource($post_identifier);
             $identifier = $this->_normalize_resource_identifier($post_identifier);
-            $permission = [
-                'effect' => 'deny'
-            ];
+            $permission = [ 'effect' => 'allow' ];
 
             // Determine the list of areas for list permission
             if (is_string($website_area)) {
-                $on = [ trim($website_area) ];
+                $permission['on'] = [ trim($website_area) ];
             } elseif (is_array($website_area)) {
-                $on = array_map('trim', $website_area);
-            } else {
-                $on = null;
+                $permission['on'] = array_map('trim', $website_area);
             }
 
-            if (is_null($on) || count($on) === 3) {
-                $result = $resource->remove_permission($identifier, 'list');
-            } else {
-                $permission['on'] = array_diff(
-                    [ 'frontend', 'backend', 'api' ], $on
-                );
-
-                $result = $resource->set_permission(
-                    $identifier, 'list', $permission
-                );
-            }
+            $result = $resource->set_permission(
+                $identifier, 'list', $permission
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }

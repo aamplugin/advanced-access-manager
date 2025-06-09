@@ -162,7 +162,6 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
                 )
             ], $settings);
 
-
             if (is_numeric($config['ttl'])) {
                 $config['ttl'] = "+{$settings['ttl']} seconds";
             } elseif (!is_string($config['ttl'])) {

@@ -634,7 +634,7 @@ class AAM_Restful_Content
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.5
      */
     private function _prepare_term_output($access_level, $term)
     {
@@ -649,7 +649,7 @@ class AAM_Restful_Content
             'is_customized'   => $resource->is_customized($term)
         ];
 
-        if (!empty($post_type_scope)) {
+        if (!empty($term->post_type)) {
             $is_default = $term->taxonomy === 'category'
                 && intval(get_option('default_category')) === $term->term_id;
 
@@ -658,7 +658,7 @@ class AAM_Restful_Content
             );
 
             // Also adding post type scope to the output
-            $result['post_type'] = $post_type_scope;
+            $result['post_type'] = $term->post_type;
         }
 
         return $result;

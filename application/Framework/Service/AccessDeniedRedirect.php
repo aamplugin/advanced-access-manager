@@ -134,7 +134,7 @@ implements
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.5
      */
     public function reset($area = null)
     {
@@ -145,8 +145,12 @@ implements
             if (empty($area)) {
                 $result = $container->reset();
             } else {
-                if ($container[$area]) {
-                    unset($container[$area]);
+                $preferences = $container->get_preferences();
+
+                if (isset($preferences[$area])) {
+                    unset($preferences[$area]);
+
+                    $container->set_preferences($preferences);
                 }
             }
         } catch (Exception $e) {

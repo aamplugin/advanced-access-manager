@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
-Tested up to: 6.8.0
-Stable tag: 7.0.4
+Tested up to: 6.8.1
+Stable tag: 7.0.5
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,11 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.5 =
+* Fixed: ConfigPress are not taken into consideration before init hook [https://github.com/aamplugin/advanced-access-manager/issues/468](https://github.com/aamplugin/advanced-access-manager/issues/468)
+* Fixed: AAM does not display default terms pin anymore [https://github.com/aamplugin/advanced-access-manager/issues/467] (https://github.com/aamplugin/advanced-access-manager/issues/467)
+* Fixed: Uncaught TypeError: array_key_exists(): Argument #2 ($array) must be of type array, null given in /../Framework/Service/Policies.php:661 [https://github.com/aamplugin/advanced-access-manager/issues/466](https://github.com/aamplugin/advanced-access-manager/issues/466)
 
 = 7.0.4 =
 * Change: Making sure that all AAM hooks are triggered only after init [https://github.com/aamplugin/advanced-access-manager/issues/465](https://github.com/aamplugin/advanced-access-manager/issues/465)

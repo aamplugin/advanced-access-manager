@@ -10,6 +10,28 @@
 /**
  * Post Types framework service
  *
+ * @method bool is_hidden_on(string|WP_Post_Type $post_type, string $website_area) **[Premium Feature]**
+ * @method bool is_hidden(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method bool is_password_protected(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method bool is_restricted(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method bool is_redirected(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method bool is_teaser_message_set(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method bool is_denied_to(string|WP_Post_Type $post_type, string $permission) **[Premium Feature]**
+ * @method bool is_allowed_to(string|WP_Post_Type $post_type, string $permission) **[Premium Feature]**
+ * @method bool is_access_expired(string|WP_Post_Type $post_type, string $permission) **[Premium Feature]**
+ * @method bool set_password(string|WP_Post_Type $post_type, string $password, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool set_teaser_message(string|WP_Post_Type $post_type, string $message, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool set_redirect(string|WP_Post_Type $post_type, array $redirect, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool set_expiration(string|WP_Post_Type $post_type, int $timestamp, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool deny(string|WP_Post_Type $post_type, string|array $permission, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool allow(string|WP_Post_Type $post_type, string|array $permission, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool hide(string|WP_Post_Type $post_type, string|array $website_area = null, bool $exclude_authors = false) **[Premium Feature]**
+ * @method bool show(string|WP_Post_Type $post_type, string|array $website_area = null) **[Premium Feature]**
+ * @method string|null get_password(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method string|null get_teaser_message(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method array|null get_redirect(string|WP_Post_Type $post_type) **[Premium Feature]**
+ * @method int|null get_expiration(string|WP_Post_Type $post_type) **[Premium Feature]**
+ *
  * @package AAM
  * @version 7.0.0
  */

@@ -10,7 +10,6 @@
 /**
  * Terms framework service
  *
- * @method urls(mixed $access_level = null, array $settings = []) **[Premium Feature]**
  * @method bool is_hidden_on(mixed $resource_identifier, string $website_area) **[Premium Feature]**
  * @method bool is_hidden(mixed $resource_identifier) **[Premium Feature]**
  * @method bool is_denied_to(mixed $resource_identifier, string $permission) **[Premium Feature]**
