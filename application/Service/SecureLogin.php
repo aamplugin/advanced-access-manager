@@ -38,7 +38,7 @@ class AAM_Service_SecureLogin
      * @return void
      * @access protected
      *
-     * @version 7.0.4
+     * @version 7.0.6
      */
     protected function __construct()
     {
@@ -53,6 +53,11 @@ class AAM_Service_SecureLogin
         // Register custom RESTful API endpoint for login
         AAM_Restful_SecureLogin::bootstrap();
 
+        // Register custom frontend Login widget
+        add_action('widgets_init', function () {
+            register_widget('AAM_Backend_Widget_Login');
+        });
+
         add_action('init', function() {
             $this->initialize_hooks();
         }, PHP_INT_MAX);
@@ -64,7 +69,7 @@ class AAM_Service_SecureLogin
      * @return void
      * @access protected
      *
-     * @version 7.0.4
+     * @version 7.0.6
      */
     protected function initialize_hooks()
     {
@@ -74,11 +79,6 @@ class AAM_Service_SecureLogin
                 AAM_Backend_Feature_Settings_Security::register();
             });
         }
-
-        // Register custom frontend Login widget
-        add_action('widgets_init', function () {
-            register_widget('AAM_Backend_Widget_Login');
-        });
 
         // Redefine the wp-login.php header message
         add_filter('login_message', function($message) {

@@ -277,7 +277,7 @@ class AAM_Restful_AccessDeniedRedirect
      * @return boolean|WP_Error
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _validate_redirect_page_slug($value, $request)
     {
@@ -285,7 +285,9 @@ class AAM_Restful_AccessDeniedRedirect
         $rule_type = $request->get_param('type');
 
         if ($rule_type === 'page_redirect') {
-            if (get_page_by_path($value) === null) {
+            $result = AAM::api()->misc->get_post_by_slug($value);
+
+            if (empty($result)) {
                 $response = new WP_Error(
                     'rest_invalid_param',
                     'The redirect_page_slug refers to non-existing page',

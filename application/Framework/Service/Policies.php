@@ -1106,8 +1106,9 @@ class AAM_Framework_Service_Policies
 
     /**
      * @inheritDoc
-     *
      * @return WP_Post
+     *
+     * @version 7.0.6
      */
     private function _normalize_resource_identifier($resource_identifier)
     {
@@ -1129,11 +1130,7 @@ class AAM_Framework_Service_Policies
                 }
 
                 if (!empty($post_name)) {
-                    $result = get_page_by_path(
-                        $post_name,
-                        OBJECT,
-                        self::CPT
-                    );
+                    $result = $this->misc->get_post_by_slug($post_name, self::CPT);
                 }
             }
 

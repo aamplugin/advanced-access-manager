@@ -4,7 +4,7 @@ Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.1
-Stable tag: 7.0.5
+Stable tag: 7.0.6
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,13 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.6 =
+* Fixed: Incorrectly handling subpages with policies [https://github.com/aamplugin/advanced-access-manager/issues/473](https://github.com/aamplugin/advanced-access-manager/issues/473)
+* Fixed: AAM removes slashes in JSON access policy [https://github.com/aamplugin/advanced-access-manager/issues/472](https://github.com/aamplugin/advanced-access-manager/issues/472)
+* Fixed: URL Access service does not handle URLs with query params correctly [https://github.com/aamplugin/advanced-access-manager/issues/470](https://github.com/aamplugin/advanced-access-manager/issues/470)
+* Fixed: The aam_backend_login widget is unavailable [https://github.com/aamplugin/advanced-access-manager/issues/469](https://github.com/aamplugin/advanced-access-manager/issues/469)
+* Changes: Improve clarity around premium add-on status [https://github.com/aamplugin/advanced-access-manager/issues/471](https://github.com/aamplugin/advanced-access-manager/issues/471)
 
 = 7.0.5 =
 * Fixed: ConfigPress are not taken into consideration before init hook [https://github.com/aamplugin/advanced-access-manager/issues/468](https://github.com/aamplugin/advanced-access-manager/issues/468)

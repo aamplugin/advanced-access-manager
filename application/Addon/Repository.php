@@ -31,9 +31,9 @@ class AAM_Addon_Repository
      *
      * Note! This is the latest version at the time of AAM publishing
      *
-     * @version 7.0.5
+     * @version 7.0.6
      */
-    const LATEST_PREMIUM_VERSION = '7.0.4';
+    const LATEST_PREMIUM_VERSION = '7.0.5';
 
     /**
      * Constructor

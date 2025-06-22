@@ -863,7 +863,7 @@ final class AAM_Migration_700
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _convert_legacy_post_object($data)
     {
@@ -914,12 +914,11 @@ final class AAM_Migration_700
             if (in_array($action, ['hidden', 'hidden_others'], true)) {
                 // Determine the areas the post is hidden on
                 $areas = $this->_prepare_visibility_areas($settings);
+                $item  = [ 'effect' => $this->_convert_to_effect($settings) ];
 
-                $item = [
-                    'effect' => !empty($areas) ?
-                        $this->_convert_to_effect($settings) : 'allow',
-                    'on'     => $areas
-                ];
+                if (!empty($areas)) {
+                    $item['on'] = $areas;
+                }
 
                 if ($action !== 'hidden') {
                     $item['exclude_authors'] = true;

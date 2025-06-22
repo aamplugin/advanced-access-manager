@@ -1,4 +1,4 @@
-<?php /** @version 7.0.0 **/
+<?php /** @version 7.0.6 **/
 
 $perks = array(
     array(
@@ -38,59 +38,66 @@ $perks = array(
 
 <?php if (defined('AAM_KEY')) { ?>
     <div id="extension-content" class="extension-container">
-        <h1><?php echo __('Upgrade to Premium Risk Free and Enjoy All The Features!', 'advanced-access-manager'); ?></h1>
+        <?php $license = AAM_Addon_Repository::get_instance()->get_premium_license_key(); ?>
 
-        <hr />
+        <?php if (!empty($license)) { ?>
+            <h1><?php echo __('You have premium add-on already installed!', 'advanced-access-manager'); ?></h1>
 
-        <h3><?php echo __('Here is the list of perks that you get with out premium add-on:', 'advanced-access-manager'); ?></h3>
+            <p class="aam-info aam-mt-2 text-larger">
+                <?php echo sprintf(__('To manage domain activations or subscription go to your %slicense page%s.', 'advanced-access-manager'), '<a href="https://aamportal.com/license/' . esc_attr($license) . '?ref=plugin" target="_blank">', '</a>'); ?>
+            </p>
 
-        <div class="panel-group" id="premium-perks" role="tablist" aria-multiselectable="true">
-            <?php foreach($perks as $i => $perk) { ?>
-                <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="menu-perk-<?php echo intval($i); ?>-heading">
-                        <h4 class="panel-title">
-                            <a
-                                role="button"
-                                data-toggle="collapse"
-                                data-parent="#premium-perks"
-                                href="#menu-perk-<?php echo intval($i); ?>"
-                                aria-controls="menu-perk-<?php echo intval($i); ?>"
-                            >
-                                <i class="icon-ok-circled text-success"></i>
-                                <?php echo esc_js($perk['title']); ?>
-                            </a>
-                        </h4>
-                    </div>
+            <div>
+                <h3>FAQs</h3>
 
-                    <div
-                        id="menu-perk-<?php echo intval($i); ?>"
-                        class="panel-collapse collapse"
-                        role="tabpanel"
-                        aria-labelledby="menu-perk-a-heading"
-                    >
-                        <div class="panel-body text-larger">
-                            <?php echo esc_js($perk['description']); ?>
+                <ul>
+                    <li><a href="https://aamportal.com/question/when-can-i-find-changelog-for-premium-addon" target="_blank">Where can I find the changelog for premium add-on?</a></li>
+                    <li><a href="http://aamportal.com/question/how-can-i-download-an-invoice-for-my-purchase" target="_blank">How can I download an invoice for my purchase?</a></li>
+                    <li><a href="http://aamportal.com/question/how-does-the-pricing-work" target="_blank">How does the pricing work?</a></li>
+                </ul>
+            </div>
+        <?php } else { ?>
+            <h1><?php echo __('Upgrade to Premium Risk Free and Enjoy All The Features!', 'advanced-access-manager'); ?></h1>
+
+            <hr />
+
+            <h3><?php echo __('Here is the list of perks that you get with out premium add-on:', 'advanced-access-manager'); ?></h3>
+
+            <div class="panel-group" id="premium-perks" role="tablist" aria-multiselectable="true">
+                <?php foreach($perks as $i => $perk) { ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="menu-perk-<?php echo intval($i); ?>-heading">
+                            <h4 class="panel-title">
+                                <a
+                                    role="button"
+                                    data-toggle="collapse"
+                                    data-parent="#premium-perks"
+                                    href="#menu-perk-<?php echo intval($i); ?>"
+                                    aria-controls="menu-perk-<?php echo intval($i); ?>"
+                                >
+                                    <i class="icon-ok-circled text-success"></i>
+                                    <?php echo esc_js($perk['title']); ?>
+                                </a>
+                            </h4>
+                        </div>
+
+                        <div
+                            id="menu-perk-<?php echo intval($i); ?>"
+                            class="panel-collapse collapse"
+                            role="tabpanel"
+                            aria-labelledby="menu-perk-a-heading"
+                        >
+                            <div class="panel-body text-larger">
+                                <?php echo esc_js($perk['description']); ?>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php } ?>
-        </div>
+                <?php } ?>
+            </div>
 
-        <?php if (!defined('AAM_COMPLETE_PACKAGE')) { ?>
             <p class="text-center">
                 <a href="https://aamportal.com/premium?ref=plugin" target="_blank" class="btn btn-danger"><?php echo __('Get Premium Addon', 'advanced-access-manager'); ?></a>
             </p>
         <?php } ?>
-
-        <div>
-            <h3>FAQs</h3>
-
-            <ul>
-                <li><a href="https://aamportal.com/question/how-to-install-premium-complete-package-addon" target="_blank">How to install the premium add-on?</a></li>
-                <li><a href="https://aamportal.com/question/when-can-i-find-changelog-for-premium-addon" target="_blank">Where can I find the changelog for premium add-on?</a></li>
-                <li><a href="http://aamportal.com/question/how-can-i-download-an-invoice-for-my-purchase" target="_blank">How can I download an invoice for my purchase?</a></li>
-                <li><a href="http://aamportal.com/question/how-does-the-pricing-work" target="_blank">How does the pricing work?</a></li>
-            </ul>
-        </div>
     </div>
 <?php }

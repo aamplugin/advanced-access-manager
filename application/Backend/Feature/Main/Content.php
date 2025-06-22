@@ -40,7 +40,7 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
      * @return string
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function render_content_access_form($resource_id, $resource_type)
     {
@@ -67,24 +67,32 @@ class AAM_Backend_Feature_Main_Content extends AAM_Backend_Feature_Abstract
             $resource_identifier = get_post_type_object($resource_id);
         }
 
-        $resource = $access_level->get_resource($resource_type);
-        $args     = [
-            'resource'            => $resource,
-            'resource_identifier' => $resource_identifier,
-            'resource_id'         => $resource_id,
-            'access_controls'     => $this->_prepare_access_controls(
-                $resource, $resource_identifier
-            ),
-            // TODO: Consider removing the Backend Access Level
-            'access_level'        => AAM_Backend_AccessLevel::get_instance()
-        ];
+        // Do not render anything for illegal resource or resource that does not
+        // exist anymore
+        if (!is_wp_error($resource_id) && is_object($resource_identifier)) {
+            $resource = $access_level->get_resource($resource_type);
+            $args     = [
+                'resource'            => $resource,
+                'resource_identifier' => $resource_identifier,
+                'resource_id'         => $resource_id,
+                'access_controls'     => $this->_prepare_access_controls(
+                    $resource, $resource_identifier
+                ),
+                // TODO: Consider removing the Backend Access Level
+                'access_level'        => AAM_Backend_AccessLevel::get_instance()
+            ];
 
-        // Do the SSR for the access form
-        return apply_filters(
-            "aam_{$resource_type}_access_form_filter",
-            $this->_load_partial('content-access-form', (object) $args),
-            (object) $args
-        );
+            // Do the SSR for the access form
+            $result = apply_filters(
+                "aam_{$resource_type}_access_form_filter",
+                $this->_load_partial('content-access-form', (object) $args),
+                (object) $args
+            );
+        } else {
+            $result = null;
+        }
+
+        return $result;
     }
 
     /**

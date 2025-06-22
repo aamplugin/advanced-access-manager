@@ -106,7 +106,7 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
      * @return string
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function to_redirect_url($redirect, $default = '/')
     {
@@ -120,9 +120,11 @@ class AAM_Framework_Utility_Redirect implements AAM_Framework_Utility_Interface
             if (!empty($redirect['redirect_page_id'])) {
                 $result = get_page_link($redirect['redirect_page_id']);
             } elseif (!empty($redirect['redirect_page_slug'])) {
-                $result = get_page_link(
-                    get_page_by_path($redirect['redirect_page_slug'])
+                $page = AAM_Framework_Manager::_()->misc->get_post_by_slug(
+                    $redirect['redirect_page_slug']
                 );
+
+                $result = !empty($page) ? get_page_link($page) : null;
             }
         } elseif ($redirect['type'] === 'url_redirect') {
             $result = AAM_Framework_Manager::_()->misc->sanitize_url(

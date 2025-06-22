@@ -43,6 +43,8 @@ implements AAM_Framework_Resource_Interface
 
     /**
      * @inheritDoc
+     *
+     * @version 7.0.6
      */
     private function _apply_policy()
     {
@@ -56,7 +58,7 @@ implements AAM_Framework_Resource_Interface
                 if (is_numeric($bits[2])) {
                     $id = "{$bits[2]}|{$bits[1]}";
                 } else {
-                    $post = get_page_by_path($bits[2], OBJECT, $bits[1]);
+                    $post = $this->misc->get_post_by_slug($bits[2], $bits[1]);
 
                     if (is_a($post, WP_Post::class)) {
                         $id = "{$post->ID}|{$post->post_type}";

@@ -166,7 +166,7 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
      * @return Generator
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function get_terms($query_args = [], $post_type_scope = null)
     {
@@ -178,19 +178,25 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
             [ 'fields' => 'ids', 'suppress_filters' => true ]
         ));
 
-        $result = function () use ($terms, $post_type_scope) {
-            foreach ($terms as $term_id) {
-                $term = get_term($term_id);
+        if (!is_wp_error($terms)) {
+            $cb = function () use ($terms, $post_type_scope) {
+                foreach ($terms as $term_id) {
+                    $term = get_term($term_id);
 
-                if (!empty($post_type_scope)) {
-                    $term->post_type = $post_type_scope;
+                    if (!empty($post_type_scope)) {
+                        $term->post_type = $post_type_scope;
+                    }
+
+                    yield $term;
                 }
+            };
 
-                yield $term;
-            }
-        };
+            $result = $cb();
+        } else {
+            $result = [];
+        }
 
-        return $result();
+        return $result;
     }
 
     /**

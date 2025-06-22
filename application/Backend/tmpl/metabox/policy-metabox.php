@@ -1,4 +1,4 @@
-<?php /** @version 7.0.0 **/
+<?php /** @version 7.0.6 **/
 
 if (defined('AAM_KEY')) { ?>
     <div>
@@ -16,7 +16,7 @@ if (defined('AAM_KEY')) { ?>
             class="policy-editor"
             style="border: 1px solid #CCCCCC; width: 100%"
             rows="10"
-        ><?php echo esc_textarea(stripslashes($json)); ?></textarea>
+        ><?php echo esc_textarea($json); ?></textarea>
         <style>#aam_policy .inside { padding: 0; margin: 0 } .CodeMirror-lines { padding: 0; }</style>
     </div>
 <?php }

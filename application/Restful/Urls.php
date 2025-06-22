@@ -34,7 +34,7 @@ class AAM_Restful_Urls
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     protected function __construct()
     {
@@ -43,13 +43,13 @@ class AAM_Restful_Urls
             // Get the list of define URL permissions
             $this->_register_route('/urls', [
                 'methods'  => WP_REST_Server::READABLE,
-                'callback' => [ $this, 'get_permissions' ]
+                'callback' => [ $this, 'get_rules' ]
             ], self::PERMISSIONS);
 
             // Define new URL permission
             $this->_register_route('/urls', [
                 'methods'  => WP_REST_Server::CREATABLE,
-                'callback' => array($this, 'create_permission'),
+                'callback' => [ $this, 'create_rule' ],
                 'args'     => array(
                     'url_schema' => array(
                         'description' => 'URL schema',
@@ -119,7 +119,7 @@ class AAM_Restful_Urls
             // Get a permission
             $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'  => WP_REST_Server::READABLE,
-                'callback' => array($this, 'get_permission'),
+                'callback' => [ $this, 'get_rule' ],
                 'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded URL schema',
@@ -132,7 +132,7 @@ class AAM_Restful_Urls
             // Update an existing permission
             $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'  => WP_REST_Server::EDITABLE,
-                'callback' => array($this, 'update_permission'),
+                'callback' => array($this, 'update_rule'),
                 'args'     => array(
                     'id' => array(
                         'description' => 'Based64 encoded URL schema',
@@ -206,7 +206,7 @@ class AAM_Restful_Urls
             // Delete a permission
             $this->_register_route('/url/(?P<id>[A-Za-z0-9\/\+=]+)', [
                 'methods'  => WP_REST_Server::DELETABLE,
-                'callback' => array($this, 'delete_permission'),
+                'callback' => [ $this, 'delete_rule' ],
                 'args'     => array(
                     'id' => array(
                         'description' => 'Base64 encoded URL schema',
@@ -219,7 +219,7 @@ class AAM_Restful_Urls
             // Reset all permissions
             $this->_register_route('/urls', [
                 'methods'  => WP_REST_Server::DELETABLE,
-                'callback' => array($this, 'reset_permissions')
+                'callback' => [ $this, 'reset' ]
             ], self::PERMISSIONS);
         });
     }
@@ -232,9 +232,9 @@ class AAM_Restful_Urls
      * @return WP_REST_Response
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
-    public function get_permissions(WP_REST_Request $request)
+    public function get_rules(WP_REST_Request $request)
     {
         try {
             $result = $this->_get_permissions($request);
@@ -251,11 +251,11 @@ class AAM_Restful_Urls
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 7.0.0
+     *
+     * @version 7.0.6
      */
-    public function create_permission(WP_REST_Request $request)
+    public function create_rule(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -296,9 +296,9 @@ class AAM_Restful_Urls
      * @return WP_REST_Response
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
-    public function get_permission(WP_REST_Request $request)
+    public function get_rule(WP_REST_Request $request)
     {
         try {
             // Prepare result
@@ -322,9 +322,9 @@ class AAM_Restful_Urls
      * @return WP_REST_Response
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
-    public function update_permission(WP_REST_Request $request)
+    public function update_rule(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -370,11 +370,11 @@ class AAM_Restful_Urls
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 7.0.0
+     *
+     * @version 7.0.6
      */
-    public function delete_permission(WP_REST_Request $request)
+    public function delete_rule(WP_REST_Request $request)
     {
         try {
             $service    = $this->_get_service($request);
@@ -398,11 +398,11 @@ class AAM_Restful_Urls
      * @param WP_REST_Request $request
      *
      * @return WP_REST_Response
-     *
      * @access public
-     * @version 7.0.0
+     *
+     * @version 7.0.6
      */
-    public function reset_permissions(WP_REST_Request $request)
+    public function reset(WP_REST_Request $request)
     {
         try {
             $service = $this->_get_service($request);
@@ -480,9 +480,9 @@ class AAM_Restful_Urls
      * @param WP_REST_Request $request
      *
      * @return boolean|WP_Error
-     *
      * @access private
-     * @version 7.0.0
+     *
+     * @version 7.0.6
      */
     private function _validate_message($value, $request)
     {
@@ -494,8 +494,8 @@ class AAM_Restful_Urls
         if ($rule_type === 'custom_message' && strlen($message) === 0) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The custom_message cannot be empty or be unsafe', 'advanced-access-manager'),
-                array('status'  => 400)
+                'The custom_message cannot be empty or be unsafe',
+                [ 'status'  => 400 ]
             );
         }
 
@@ -511,7 +511,7 @@ class AAM_Restful_Urls
      * @return boolean|WP_Error
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _validate_redirect_page_id($value, $request)
     {
@@ -524,8 +524,8 @@ class AAM_Restful_Urls
             if ($page_id === 0 || get_post($page_id) === null) {
                 $response = new WP_Error(
                     'rest_invalid_param',
-                    __('The redirect_page_id refers to non-existing page', 'advanced-access-manager'),
-                    array('status'  => 400)
+                    'The redirect_page_id refers to non-existing page',
+                    [ 'status'  => 400 ]
                 );
             }
         }
@@ -542,7 +542,7 @@ class AAM_Restful_Urls
      * @return boolean|WP_Error
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _validate_redirect_url($value, $request)
     {
@@ -554,7 +554,7 @@ class AAM_Restful_Urls
         if ($rule_type === 'url_redirect' && empty($url)) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The redirect_url is not valid URL', 'advanced-access-manager'),
+                'The redirect_url is not valid URL',
                 array('status'  => 400)
             );
         }
@@ -571,7 +571,7 @@ class AAM_Restful_Urls
      * @return boolean|WP_Error
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _validate_callback($value, $request)
     {
@@ -584,8 +584,8 @@ class AAM_Restful_Urls
         ) {
             $response = new WP_Error(
                 'rest_invalid_param',
-                __('The callback is not valid PHP callback', 'advanced-access-manager'),
-                array('status'  => 400)
+                'The callback is not valid PHP callback',
+                [ 'status'  => 400 ]
             );
         }
 

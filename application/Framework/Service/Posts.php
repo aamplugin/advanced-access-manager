@@ -914,8 +914,9 @@ class AAM_Framework_Service_Posts
 
     /**
      * @inheritDoc
-     *
      * @return WP_Post
+     *
+     * @version 7.0.6
      */
     private function _normalize_resource_identifier($resource_identifier)
     {
@@ -937,9 +938,8 @@ class AAM_Framework_Service_Posts
                 }
 
                 if (!empty($post_name) && isset($resource_identifier['post_type'])) {
-                    $result = get_page_by_path(
+                    $result = $this->misc->get_post_by_slug(
                         $post_name,
-                        OBJECT,
                         $resource_identifier['post_type']
                     );
                 }

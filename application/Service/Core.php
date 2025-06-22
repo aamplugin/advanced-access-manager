@@ -353,7 +353,7 @@ class AAM_Service_Core
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function import($dataset)
     {
@@ -365,9 +365,8 @@ class AAM_Service_Core
                 $insert = true;
 
                 if (!empty($policy['slug'])) {
-                    $existing = get_page_by_path(
+                    $existing = AAM::api()->misc->get_post_by_slug(
                         $policy['slug'],
-                        OBJECT,
                         AAM_Framework_Service_Policies::CPT
                     );
 

@@ -201,7 +201,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return array|bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function parse_url($url)
     {
@@ -221,7 +221,12 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
             }
 
             // Compile relative path
-            $path = empty($parsed['path']) ? '/' : rtrim($parsed['path'], '/');
+            if (empty($parsed['path']) || $parsed['path'] === '/') {
+                $path = '/';
+            } else {
+                // Remove trailing forward slash
+                $path = rtrim($parsed['path'], '/');
+            }
 
             // Adding query params if provided
             if (isset($parsed['query'])) {
@@ -254,7 +259,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return WP_Post|null
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     public function get_current_post()
     {
@@ -284,9 +289,8 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
                     }
                 }
             } elseif (!empty($wp_query->query['post_type'])) {
-                $res = get_page_by_path(
+                $res = $this->get_post_by_slug(
                     $wp_query->query['name'],
-                    OBJECT,
                     $wp_query->query['post_type']
                 );
             }
@@ -307,6 +311,28 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         }
 
         return $result;
+    }
+
+    /**
+     * Get a single post by slug
+     *
+     * @param string $slug
+     * @param string $post_type [Optional]
+     *
+     * @return WP_Post|null
+     * @access public
+     *
+     * @version 7.0.6
+     */
+    public function get_post_by_slug($slug, $post_type = 'page')
+    {
+        $results = get_posts([
+            'post_name__in'  => [ $slug ],
+            'post_type'      => $post_type,
+            'posts_per_page' => 1
+        ]);
+
+        return !empty($results[0]) ? $results[0] : null;
     }
 
     /**

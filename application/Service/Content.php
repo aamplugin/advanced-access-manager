@@ -21,11 +21,12 @@ class AAM_Service_Content
     /**
      * Default configurations
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     const DEFAULT_CONFIG = [
         'service.post_types.manage_all' => false,
-        'service.taxonomies.manage_all' => false
+        'service.taxonomies.manage_all' => false,
+        'service.posts.decorate_teaser' => true
     ];
 
     /**
@@ -581,7 +582,7 @@ class AAM_Service_Content
      * @return string
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.6
      */
     private function _the_content($content)
     {
@@ -602,7 +603,9 @@ class AAM_Service_Content
                     ));
 
                     // Decorate message
-                    $content = apply_filters('the_content', $content);
+                    if (AAM::api()->config->get('service.posts.decorate_teaser')) {
+                        $content = apply_filters('the_content', $content);
+                    }
                 }
             }
 
