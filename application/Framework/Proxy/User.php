@@ -136,8 +136,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @param array $data
      *
      * @return AAM_Framework_Proxy_User
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function update($data)
@@ -215,8 +215,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @param string|array|null $attributes
      *
      * @return void
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function reset($attributes = null)
@@ -244,8 +244,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * Check if user is active
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_user_active()
@@ -257,8 +257,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * Check if user's access is expired
      *
      * @return boolean
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function is_user_access_expired()
@@ -280,8 +280,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @param array  $arguments
      *
      * @return mixed
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __call($name, $arguments)
@@ -309,8 +309,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @param string $name
      *
      * @return mixed
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __get($name)
@@ -333,8 +333,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @param mixed  $value
      *
      * @return void
-     *
      * @access public
+     *
      * @since 7.0.0
      */
     public function __set($name, $value)
@@ -346,8 +346,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * Init user expiration state
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _init_user_expiration()
@@ -383,8 +383,8 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * Initialize user's status
      *
      * @return void
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _init_user_status()

@@ -7,7 +7,11 @@
  * ======================================================================
  */
 
-use Vectorface\Whip\Whip;
+use Vectorface\Whip\Whip,
+    DeviceDetector\ClientHints,
+    DeviceDetector\DeviceDetector,
+    DeviceDetector\Parser\Client\Browser,
+    DeviceDetector\Parser\OperatingSystem;
 
 /**
  * AAM access policy marker evaluator
@@ -24,10 +28,11 @@ class AAM_Framework_Policy_Marker
      * @var array
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
     protected static $map = array(
         'USER'              => 'AAM_Framework_Policy_Marker::get_user_value',
+        'USER_AGENT'        => 'AAM_Framework_Policy_Marker::get_user_agent',
         'USER_OPTION'       => 'AAM_Framework_Policy_Marker::get_user_option_value',
         'USER_META'         => 'AAM_Framework_Policy_Marker::get_user_meta_value',
         'DATETIME'          => 'AAM_Framework_Policy_Marker::get_datetime',
@@ -36,8 +41,7 @@ class AAM_Framework_Policy_Marker
         'HTTP_POST'         => 'AAM_Framework_Policy_Marker::get_post',
         'HTTP_COOKIE'       => 'AAM_Framework_Policy_Marker::get_cookie',
         'PHP_SERVER'        => 'AAM_Framework_Policy_Marker::get_server',
-        'PHP_GLOBAL'        => 'AAM_Framework_Policy_Marker::get_global_variable',
-        'ARGS'              => 'AAM_Framework_Policy_Marker::get_arg_value',
+        'CALLBACK'          => 'AAM_Framework_Policy_Marker::get_from_callback',
         'ENV'               => 'getenv',
         'CONST'             => 'AAM_Framework_Policy_Marker::get_constant',
         'WP_OPTION'         => 'AAM_Framework_Policy_Marker::get_wp_option',
@@ -47,44 +51,82 @@ class AAM_Framework_Policy_Marker
         'WP_SITE'           => 'AAM_Framework_Policy_Marker::get_site_param',
         'WP_NETWORK_OPTION' => 'AAM_Framework_Policy_Marker::get_network_option',
         'THE_POST'          => 'AAM_Framework_Policy_Marker::get_current_post_prop',
-        'JWT'               => 'AAM_Framework_Policy_Marker::get_jwt_claim'
+        'JWT'               => 'AAM_Framework_Policy_Marker::get_jwt_claim',
+        // Below markers can have complex xpath - they are treated differently
+        'PHP_GLOBAL'        => 'AAM_Framework_Policy_Marker::get_global_variable',
+        'ARGS'              => 'AAM_Framework_Policy_Marker::get_arg_value',
+        'AAM_API'           => 'AAM_Framework_Policy_Marker::get_api',
     );
 
     /**
      * Evaluate expression and replace markers
      *
+     * The following method takes into consideration the following scenarios:
+     * - Literal values: 1, "hello", true, 3.4 or [1,2,3]
+     * - Single marker: "${PHP_GLOBAL.env}"
+     * - Single marker with static addition: "${PHP_QUERY.ref}-more"
+     * - Multiple marker with or without addition: "${WP_USER.first}-${WP_USER.last}"
+     * - All above with typecast
+     *
      * @param string  $exp
      * @param array   $args
-     * @param boolean $type_cast [Optional]
+     * @param boolean $typecast [Optional]
      *
      * @return mixed
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
-    public static function execute($exp, $args = [], $type_cast = true)
+    public static function execute($exp, $args = [], $typecast = true)
     {
-        if (preg_match_all('/(\$\{[^}]+\})/', $exp, $match)) {
-            foreach ($match[1] as $marker) {
-                $value = self::get_marker_value($marker, $args);
-                $value = is_null($value) ? '' : $value;
+        if (is_string($exp)) { // Evaluate only strings
+            // Removing typecast so we have a clean marker set
+            $clean        = preg_replace('/^\(\*([\w]+)\)/i', '', $exp);
+            $has_typecast = strlen($clean) !== strlen($exp);
 
-                // Replace marker in the expression BUT ONLY if there are multiple
-                // markers in the expression
-                if (count($match[1]) > 1) {
-                    $exp = str_replace(
-                        $marker,
-                        (is_scalar($value) ? $value : json_encode($value)),
-                        $exp
-                    );
-                } else {
-                    $exp = $value;
+            if (preg_match_all('/(\$\{[^}]+\})/', $clean, $match)) {
+                // Iterate over each marker in the expression and concatenate it
+                // all into one string. Take into consideration that some markers may
+                // return not a scalar value
+                $multi_markers = count($match[1]) > 1;
+                $result        = $multi_markers ? $clean : '';
+
+                foreach ($match[1] as $marker) {
+                    $token = self::get_marker_value($marker, $args);
+
+                    // If multiple markers are in the expression, apply a specific way
+                    // of merging them into one string
+                    if ($multi_markers) {
+                        if (is_bool($token)) {
+                            $token = $token ? 'true' : 'false';
+                        } elseif (is_null($token)) {
+                            $token = '';
+                        } elseif (is_scalar($token)) {
+                            $token = (string) $token;
+                        } else {
+                            $token = json_encode($token);
+                        }
+
+                        $result = str_replace($marker, $token, $result);
+                    } elseif (strlen($clean) !== strlen($marker)) { // Has addition?
+                        $result = str_replace($marker, (string) $token, $clean);
+                    } else {
+                        $result = $token;
+                    }
                 }
+            } else { // Just pass whatever is (e.g. "(*int)5" or "true")
+                $result = $clean;
             }
+
+            // Perform type casting if necessary
+            if ($has_typecast && $typecast) {
+                $result = AAM_Framework_Policy_Typecast::execute($exp, $result);
+            }
+        } else {
+            $result = $exp;
         }
 
-        // Perform type casting if necessary
-        return $type_cast ? AAM_Framework_Policy_Typecast::execute($exp) : $exp;
+        return $result;
     }
 
     /**
@@ -96,105 +138,45 @@ class AAM_Framework_Policy_Marker
      * @return mixed
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
     public static function get_marker_value($marker, $args = [])
     {
-        $parts = explode('.', preg_replace('/^\$\{([^}]+)\}$/', '${1}', $marker), 2);
+        // Stripping the marker wrapper if present ${}
+        if (strpos($marker, '${') === 0) {
+            $marker = trim($marker, '${}');
+        }
 
-        if (array_key_exists($parts[0], self::$map)) {
-            if ($parts[0] === 'ARGS') {
-                $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
+        // Splitting marker into
+        $segments = explode('.', $marker, 2);
+
+        if (count($segments) === 2) { // Marker has to have source and xpath
+            if (array_key_exists($segments[0], self::$map)) {
+                $value = call_user_func(
+                    self::$map[$segments[0]],
+                    $segments[1],
+                    $args
+                );
             } else {
-                $value = call_user_func(self::$map[$parts[0]], $parts[1], $args);
+                $value = apply_filters(
+                    'aam_policy_marker_value_filter',
+                    null,
+                    $segments[0],
+                    $segments[1],
+                    $args
+                );
             }
-        } elseif ($parts[0] === 'CALLBACK') {
-            $value = self::evaluate_callback($parts[1], $args);
         } else {
-            $value = apply_filters(
-                'aam_policy_marker_value_filter', null, $parts[0], $parts[1], $args
+            _doing_it_wrong(
+                __CLASS__ . '::' . __METHOD__,
+                sprintf('Invalid marker: %s', $marker),
+                AAM_VERSION
             );
+
+            $value = null;
         }
 
         return $value;
-    }
-
-    /**
-     * Evaluate CALLBACK expression
-     *
-     * @param string $exp
-     * @param array  $args
-     *
-     * @return mixed
-     * @access protected
-     *
-     * @version 7.0.0
-     */
-    protected static function evaluate_callback($exp, $args)
-    {
-        $response = null;
-        $cb       = self::_parse_function($exp, $args);
-
-        if (!is_null($cb)) {
-            if (is_callable($cb['func']) || function_exists($cb['func'])) {
-                $result = call_user_func_array($cb['func'], $cb['args']);
-
-                if (!empty($cb['xpath'])) {
-                    $response = AAM_Framework_Policy_Xpath::get_value_by_xpath(
-                        $result, $cb['xpath']
-                    );
-                } else {
-                    $response = $result;
-                }
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Parse CALLBACK expression
-     *
-     * @param string $exp
-     * @param array  $args
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private static function _parse_function($exp, $args)
-    {
-        $response = null;
-        $regex    = '/^([^(]+)\(?([^)]*)\)?(.*)$/i';
-
-        if (preg_match($regex, $exp, $match)) {
-            // The second part is the collection of arguments that we pass to
-            // the function
-            $markers = array_map('trim', explode(',', $match[2]));
-            $values  = [];
-
-            foreach($markers as $marker) {
-                if (preg_match('/^\'.*\'$/', $marker) === 1) { // This is literal string
-                    array_push($values, trim($marker, '\''));
-                } elseif (strpos($marker, '.') !== false) { // Potentially another marker
-                    array_push(
-                        $values,
-                        self::get_marker_value('${' . $marker . '}', $args)
-                    );
-                } else {
-                    array_push($values, $marker);
-                }
-            }
-
-            $response = array(
-                'func'  => trim($match[1]),
-                'args'  => $values,
-                'xpath' => trim($match[3])
-            );
-        }
-
-        return $response;
     }
 
     /**
@@ -248,6 +230,44 @@ class AAM_Framework_Policy_Marker
                     $user, $xpath
                 );
                 break;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get USER_AGENT value
+     *
+     * This marker utilizes the Device Detector functionality
+     *
+     * @param string $xpath
+     *
+     * @return string
+     * @access protected
+     *
+     * @version 7.0.7
+     */
+    protected static function get_user_agent($xpath)
+    {
+        $detector = new DeviceDetector(
+            AAM_Framework_Manager::_()->misc->get($_SERVER, 'HTTP_USER_AGENT'),
+            ClientHints::factory($_SERVER)
+        );
+
+        $detector->parse();
+
+        // Normalize the path
+        $prop = strtolower($xpath);
+
+        // If xpath starts with "is", assume methods like isSmartphone or isTv
+        if (strpos($xpath, 'is') === 0) {
+            $value = call_user_func([$detector, $xpath]);
+        } elseif (in_array($prop, [ 'getosfamily', 'osfamily' ], true)) {
+            $value = OperatingSystem::getOsFamily($detector->getOs('name'));
+        }  elseif (in_array($prop, [ 'getbrowserfamily', 'browserfamily' ], true)) {
+            $value = Browser::getBrowserFamily($detector->getClient('name'));
+        } else {
+            $value = null;
         }
 
         return $value;
@@ -312,22 +332,6 @@ class AAM_Framework_Policy_Marker
         }
 
         return $result;
-    }
-
-    /**
-     * Get inline argument
-     *
-     * @param string $xpath
-     * @param array  $args
-     *
-     * @return mixed
-     * @access protected
-     *
-     * @version 7.0.0
-     */
-    protected static function get_arg_value($xpath, $args)
-    {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($args, $xpath);
     }
 
     /**
@@ -551,21 +555,6 @@ class AAM_Framework_Policy_Marker
     }
 
     /**
-     * Get global variable's value
-     *
-     * @param string $xpath
-     *
-     * @return mixed
-     * @access protected
-     *
-     * @version 7.0.0
-     */
-    protected static function get_global_variable($xpath)
-    {
-        return AAM_Framework_Policy_Xpath::get_value_by_xpath($GLOBALS, $xpath);
-    }
-
-    /**
      * Get value from query params
      *
      * @param string $xpath
@@ -676,6 +665,229 @@ class AAM_Framework_Policy_Marker
         }
 
         return $result;
+    }
+
+    /**
+     * Evaluate CALLBACK expression
+     *
+     * @param string $xpath
+     * @param array  $args
+     *
+     * @return mixed
+     * @access protected
+     *
+     * @version 7.0.7
+     */
+    protected static function get_from_callback($xpath, $args)
+    {
+        $value = null;
+        $cb    = self::_parse_callback($xpath, $args);
+
+        if (!is_null($cb)) {
+            if (is_callable($cb['func']) || function_exists($cb['func'])) {
+                $value = call_user_func_array($cb['func'], $cb['args']);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get global variable's value
+     *
+     * @param string $xpath
+     * @param array  $args
+     *
+     * @return mixed
+     * @access protected
+     *
+     * @version 7.0.7
+     */
+    protected static function get_global_variable($xpath, $args)
+    {
+        return self::_resolve_complex_chain($GLOBALS, $xpath, $args);
+    }
+
+    /**
+     * Get AAM API
+     *
+     * @param string $xpath
+     * @param array  $args
+     *
+     * @return mixed
+     * @access protected
+     *
+     * @version 7.0.7
+     */
+    protected static function get_api($xpath, $args)
+    {
+        return self::_resolve_complex_chain(AAM::api(), $xpath, $args);
+    }
+
+    /**
+     * Get inline argument
+     *
+     * @param string $xpath
+     * @param array  $args
+     *
+     * @return mixed
+     * @access protected
+     *
+     * @version 7.0.7
+     */
+    protected static function get_arg_value($xpath, $args)
+    {
+        return self::_resolve_complex_chain($args, $xpath, $args);
+    }
+
+    /**
+     * Resolve complex marker
+     *
+     * @param mixed  $source
+     * @param string $xpath
+     * @param array  $args
+     *
+     * @return mixed
+     * @access private
+     * @static
+     *
+     * @version 7.0.7
+     */
+    private static function _resolve_complex_chain($source, $xpath, $args)
+    {
+        $result = $source;
+
+        // Splitting the xpath into sub-segments
+        foreach(self::_parse_to_segments($xpath) as $segment) {
+            if (strpos($segment, '(') !== false) { // This segment calls method
+                if (is_object($result)) {
+                    $cb = self::_parse_callback($segment, $args);
+
+                    if ($cb !== null) {
+                        $result = call_user_func_array(
+                            [ $result, $cb['func'] ],
+                            $cb['args']
+                        );
+                    } else {
+                        $result = null;
+                    }
+                } else {
+                    $result = null;
+                }
+            } else {
+                $result = AAM_Framework_Policy_Xpath::get_value_by_xpath(
+                    $result, $segment
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parse callback expression
+     *
+     * @param string $exp
+     * @param array  $args
+     *
+     * @return array
+     * @access private
+     *
+     * @version 7.0.7
+     */
+    private static function _parse_callback($exp, $args)
+    {
+        $response = null;
+        $regex    = '/^([^(]+)\(?([^)]*)\)?(.*)$/i';
+
+        if (preg_match($regex, $exp, $match)) {
+            // The second part is the collection of arguments that we pass to
+            // the function
+            $markers = array_map('trim', explode(',', $match[2]));
+            $values  = [];
+
+            foreach($markers as $marker) {
+                if (preg_match('/^\'.*\'$/', $marker) === 1) { // This is literal string
+                    array_push($values, trim($marker, '\''));
+                } elseif (strpos($marker, '.') !== false) { // Potentially another marker
+                    array_push($values, self::get_marker_value($marker, $args));
+                } else {
+                    array_push($values, $marker);
+                }
+            }
+
+            $response = [
+                'func'  => trim($match[1]),
+                'args'  => $values
+            ];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Parse marker into segments that will be used to get value
+     *
+     * Example of markers:
+     *  - CALLBACK.MyApp\Auth::isRegistered
+     *  - CALLBACK.is_admin
+     *  - CALLBACK.is_network_active()
+     *  - PHP_GLOBAL.Players[0].profile.name
+     *  - USER.address["physical"].zip
+     *  - PHP_GLOBAL.Country[USA][NC][Charlotte]
+     *  - MARKER.0929431.amount
+     *  - AAM_API.posts.is_restricted(abc)
+     *  - PHP_GLOBAL.user.get_order(45).is_fulfilled
+     *  - CALLBACK.sanitize_title(USER.display_name)
+     *  - CALLBACK.sanitize_title(USER.roles[3].is_active, true)
+     *  - CALLBACK.current_user_can('edit_post', 10)
+     *
+     * @param string $str
+     * @return array
+     *
+     * @access private
+     * @static
+     *
+     * @version 7.0.7
+     */
+    private static function _parse_to_segments($str)
+    {
+        $in_args = $in_index = $in_str = false;
+        $results = [];
+        $segment = '';
+
+        for($i = 0; $i < strlen($str); $i++) {
+            $chr = $str[$i];
+
+            if ($chr === '.') {
+                if (!$in_args && !$in_index && !$in_str) {
+                    array_push($results, $segment);
+                    $segment = '';
+                } else {
+                    $segment .= $chr;
+                }
+            } else {
+                if (in_array($chr, ['"', "'"], true)) {
+                    $in_str = !$in_str;
+                } elseif ($chr === '[') {
+                    $in_index = true;
+                } elseif ($chr === ']') {
+                    $in_index = false;
+                } elseif ($chr === '(') {
+                    $in_args = true;
+                } elseif ($chr === ')') {
+                    $in_args = false;
+                }
+
+                $segment .= $chr;
+            }
+        }
+
+        if (!empty($segment)) {
+            array_push($results, $segment);
+        }
+
+        return $results;
     }
 
 }

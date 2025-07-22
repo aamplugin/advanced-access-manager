@@ -528,4 +528,96 @@ final class MarkerTest extends TestCase
         unset($_POST['aam-jwt']);
     }
 
+    /**
+     * Testing literal values execution
+     *
+     * @return void
+     */
+    public function testLiteralMarkersExecution()
+    {
+        $this->assertEquals(5, AAM_Framework_Policy_Marker::execute('(*int)5'));
+        $this->assertTrue(AAM_Framework_Policy_Marker::execute('(*bool)true'));
+        $this->assertEquals('a', AAM_Framework_Policy_Marker::execute('a'));
+        $this->assertEquals([1,2], AAM_Framework_Policy_Marker::execute([1,2]));
+        $this->assertEquals([3,4], AAM_Framework_Policy_Marker::execute('(*array)[3,4]'));
+    }
+
+    /**
+     * Testing single marker execution
+     *
+     * @return void
+     */
+    public function testSingleMarkerExecution()
+    {
+        $GLOBALS['single']   = 4;
+        $GLOBALS['single_b'] = true;
+
+        $this->assertEquals(4, AAM_Framework_Policy_Marker::execute('(*int)${PHP_GLOBAL.single}'));
+        $this->assertEquals('4', AAM_Framework_Policy_Marker::execute('${PHP_GLOBAL.single}'));
+        $this->assertTrue(AAM_Framework_Policy_Marker::execute('(*bool)${PHP_GLOBAL.single_b}'));
+        $this->assertTrue(AAM_Framework_Policy_Marker::execute('${PHP_GLOBAL.single_b}'));
+
+        // Reset to default
+        unset($GLOBALS['single']);
+        unset($GLOBALS['single_b']);
+    }
+
+    /**
+     * Testing single marker with static addition execution
+     *
+     * @return void
+     */
+    public function testSingleMarkerWithAdditionExecution()
+    {
+        $GLOBALS['single'] = 4;
+
+        $this->assertEquals('4-3', AAM_Framework_Policy_Marker::execute('${PHP_GLOBAL.single}-3'));
+        $this->assertEquals(43, AAM_Framework_Policy_Marker::execute('(*int)${PHP_GLOBAL.single}3'));
+        $this->assertEquals('ab-4', AAM_Framework_Policy_Marker::execute('ab-${PHP_GLOBAL.single}'));
+
+        // Reset to default
+        unset($GLOBALS['single']);
+    }
+
+    /**
+     * Testing multi-marker with and without static addition execution
+     *
+     * @return void
+     */
+    public function testMultiMarkerExecution()
+    {
+        $GLOBALS['a'] = 'a';
+        $GLOBALS['b'] = 'b';
+        $GLOBALS['c'] = [1,2];
+
+        $this->assertEquals('a-test-b', AAM_Framework_Policy_Marker::execute('${PHP_GLOBAL.a}-test-${PHP_GLOBAL.b}'));
+        $this->assertEquals('a-[1,2]', AAM_Framework_Policy_Marker::execute('${PHP_GLOBAL.a}-${PHP_GLOBAL.c}'));
+
+        // Reset to default
+        unset($GLOBALS['a']);
+        unset($GLOBALS['b']);
+        unset($GLOBALS['c']);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function testComplexMarkers()
+    {
+        $post_a = $this->createPost();
+
+        // Set permissions to a post A
+        AAM::api()->posts()->hide($post_a, 'frontend');
+
+        $this->assertTrue(AAM_Framework_Policy_Marker::get_marker_value(
+            sprintf('AAM_API.posts().is_hidden_on(%d, frontend)', $post_a)
+        ));
+
+        $this->assertFalse(AAM_Framework_Policy_Marker::get_marker_value(
+            sprintf('AAM_API.posts().is_hidden_on(%d, "backend")', $post_a)
+        ));
+    }
+
 }

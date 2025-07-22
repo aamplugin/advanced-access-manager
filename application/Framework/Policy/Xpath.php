@@ -25,8 +25,8 @@ class AAM_Framework_Policy_Xpath
      * @param string|array $xpath
      *
      * @return mixed
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     public static function get_value_by_xpath($source, $xpath)
@@ -74,9 +74,7 @@ class AAM_Framework_Policy_Xpath
     public static function parse_xpath($xpath)
     {
         $result = trim(
-            str_replace(
-                array('["', '[', '"]', ']', '..'), '.', $xpath
-            ),
+            str_replace([ '["', '[', '"]', ']', '..' ], '.', $xpath),
             ' .' // white space is important!
         );
 

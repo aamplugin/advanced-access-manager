@@ -20,25 +20,29 @@ class AAM_Framework_Policy_Typecast
      * Execute type casting
      *
      * @param string $expression
+     * @param mixed  $value
      *
      * @return mixed
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
-    public static function execute($expression)
+    public static function execute($expression, $value)
     {
-        $regex = '/^\(\*([\w]+)\)(.*)/i';
-
         // Note! It make no sense to have multiple type casting for one expression
-        // due to the fact that they all would have to be concatenated as a string
+        // due to the fact that they all would have to be concatenated as a string.
+        // This is why we only extracted a typecast mentioned at the beginning of the
+        // expression
+        $regex = '/^\(\*([\w]+)\)(.*)/i';
 
         // If there is type casting, perform it
         if (preg_match($regex, $expression, $scale)) {
-            $expression = self::_typecast($scale[2], $scale[1]);
+            $result = self::_typecast($value, $scale[1]);
+        } else {
+            $result = $value;
         }
 
-        return $expression;
+        return $result;
     }
 
 
@@ -51,7 +55,7 @@ class AAM_Framework_Policy_Typecast
      * @return mixed
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
     private static function _typecast($value, $type)
     {
@@ -97,7 +101,12 @@ class AAM_Framework_Policy_Typecast
                 break;
 
             case 'array':
-                $value = is_string($value) ? json_decode($value, true) : (array) $value;
+                if (is_string($value)) {
+                    $candidate = json_decode($value, true);
+                    $value     = is_null($candidate) ? [] : (array) $candidate;
+                }  else {
+                    $value = (array) $value;
+                }
                 break;
 
             case 'null':

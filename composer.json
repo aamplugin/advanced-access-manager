@@ -1,0 +1,7 @@
+{
+    "require": {
+        "vectorface/whip": "^0.5.0",
+        "matomo/device-detector": "^6.4",
+        "composer/semver": "^3.4"
+    }
+}

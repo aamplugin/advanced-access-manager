@@ -354,22 +354,24 @@ class AAM_Restful_Roles
      * @return boolean
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
     private function _clone_settings($role, $parent)
     {
-        $service = AAM::api()->settings([
-            'access_level_type' => AAM_Framework_Type_AccessLevel::ROLE,
-            'access_level_id'   => $role->slug
-        ]);
+        // Base role
+        $service = AAM::api()->settings(sprintf('%s:%s',
+            AAM_Framework_Type_AccessLevel::ROLE,
+            $role->slug
+        ));
 
-        $cloned = $service->get_settings([
-            'access_level_type' => AAM_Framework_Type_AccessLevel::ROLE,
-            'access_level_id'   => $parent->slug
-        ]);
+        // From role
+        $from = AAM::api()->settings(sprintf('%s:%s',
+            AAM_Framework_Type_AccessLevel::ROLE,
+            $parent->slug
+        ));
 
         // Clone the settings
-        return $service->set_settings($cloned);
+        return $service->set_settings($from->get_settings());
     }
 
     /**

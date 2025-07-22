@@ -31,12 +31,12 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
     /**
      * Get access level
      *
-     * @param string  $type
-     * @param mixed   $identifier
+     * @param string $type
+     * @param mixed  $identifier
      *
      * @return AAM_Framework_AccessLevel_Interface
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get($type, $identifier = null)
@@ -73,8 +73,8 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
      * @param string $role_slug
      *
      * @return AAM_Framework_AccessLevel_Role
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_role($role_slug)
@@ -103,8 +103,8 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
      * @param mixed $identifier
      *
      * @return AAM_Framework_AccessLevel_User
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_user($identifier)
@@ -132,8 +132,8 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
      * Get visitor access level
      *
      * @return AAM_Framework_AccessLevel_Visitor
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_visitor()
@@ -152,8 +152,8 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
      * Get default access level
      *
      * @return AAM_Framework_AccessLevel_Default
-     *
      * @access public
+     *
      * @version 7.0.0
      */
     public function get_default()
@@ -174,8 +174,8 @@ class AAM_Framework_Utility_AccessLevels implements AAM_Framework_Utility_Interf
      * @param string|int|WP_User $identifier
      *
      * @return WP_User
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _determine_user_core_instance($identifier)

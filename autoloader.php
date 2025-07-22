@@ -36,25 +36,9 @@ class AAM_Autoloader
      * @var array
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.0.7
      */
-    protected static $class_map = array(
-        'Psr\Http\Message\MessageInterface'                 => self::PSRHM_BASEDIR . '/MessageInterface.php',
-        'Psr\Http\Message\RequestInterface'                 => self::PSRHM_BASEDIR . '/RequestInterface.php',
-        'Psr\Http\Message\ResponseInterface'                => self::PSRHM_BASEDIR . '/ResponseInterface.php',
-        'Psr\Http\Message\ServerRequestInterface'           => self::PSRHM_BASEDIR . '/ServerRequestInterface.php',
-        'Psr\Http\Message\StreamInterface'                  => self::PSRHM_BASEDIR . '/StreamInterface.php',
-        'Psr\Http\Message\UploadedFileInterface'            => self::PSRHM_BASEDIR . '/UploadedFileInterface.php',
-        'Psr\Http\Message\UriInterface'                     => self::PSRHM_BASEDIR . '/UriInterface.php',
-        'Vectorface\Whip\IpRange\IpRange'                   => self::WHIP_BASEDIR . '/IpRange/IpRange.php',
-        'Vectorface\Whip\IpRange\IpWhitelist'               => self::WHIP_BASEDIR . '/IpRange/IpWhitelist.php',
-        'Vectorface\Whip\IpRange\Ipv4Range'                 => self::WHIP_BASEDIR . '/IpRange/Ipv4Range.php',
-        'Vectorface\Whip\IpRange\Ipv6Range'                 => self::WHIP_BASEDIR . '/IpRange/Ipv6Range.php',
-        'Vectorface\Whip\Request\Psr7RequestAdapter'        => self::WHIP_BASEDIR . '/Request/Psr7RequestAdapter.php',
-        'Vectorface\Whip\Request\RequestAdapter'            => self::WHIP_BASEDIR . '/Request/RequestAdapter.php',
-        'Vectorface\Whip\Request\SuperglobalRequestAdapter' => self::WHIP_BASEDIR . '/Request/SuperglobalRequestAdapter.php',
-        'Vectorface\Whip\Whip'                              => self::WHIP_BASEDIR . '/Whip.php',
-    );
+    protected static $class_map = [];
 
     /**
      * Add new index

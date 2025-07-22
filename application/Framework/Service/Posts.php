@@ -901,8 +901,8 @@ class AAM_Framework_Service_Posts
      * Get post resource
      *
      * @return AAM_Framework_Resource_Post
-     *
      * @access private
+     *
      * @version 7.0.0
      */
     private function _get_resource()

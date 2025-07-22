@@ -3,6 +3,5 @@ phpunit
 .default.setup.json
 sami.phar
 build
-cache
 sonarqube
 .scannerwork
