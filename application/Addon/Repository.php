@@ -33,7 +33,7 @@ class AAM_Addon_Repository
      *
      * @version 7.0.6
      */
-    const LATEST_PREMIUM_VERSION = '7.0.5';
+    const LATEST_PREMIUM_VERSION = '7.0.6';
 
     /**
      * Constructor

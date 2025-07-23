@@ -48,9 +48,9 @@ class AAM
         AAM_Service_Capability::class           => 'service.capability.enabled',
         AAM_Service_SecurityAudit::class        => 'service.security_audit.enabled',
         AAM_Service_Welcome::class              => 'service.welcome.enabled',
-        AAM_Service_Policies::class             => 'service.policies.enabled',
         AAM_Service_Hooks::class                => 'service.hooks.enabled',
-        AAM_Service_Shortcodes::class           => 'service.shortcodes.enabled'
+        AAM_Service_Shortcodes::class           => 'service.shortcodes.enabled',
+        AAM_Service_Policies::class             => 'service.policies.enabled'
     ];
 
     /**

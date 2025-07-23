@@ -4,7 +4,7 @@ Tags: security, access control, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.8.1
-Stable tag: 7.0.7
+Stable tag: 7.0.8
 
 Your WordPress security starts within — with AAM. Take control of your WordPress website and solve security gaps today.
 
@@ -59,6 +59,9 @@ AAM is trusted by over 150,000 websites to deliver enterprise-grade security wit
 11. Improve your website security
 
 == Changelog ==
+
+= 7.0.8 =
+* Changed: Move to PHP composer for vendor dependencies [https://github.com/aamplugin/advanced-access-manager/issues/480](https://github.com/aamplugin/advanced-access-manager/issues/480)
 
 = 7.0.7 =
 * Fixed: Uncaught Error: preg_match(): Argument #2 ($subject) must be of type string, array given in /.../Framework/Policy/Typecast.php on line 37 [https://github.com/aamplugin/advanced-access-manager/issues/474](https://github.com/aamplugin/advanced-access-manager/issues/474)
