@@ -43,7 +43,7 @@ class Psr7RequestAdapter implements RequestAdapter
      *
      * @var string[]
      */
-    private array $headers;
+    private $headers;
 
     /**
      * Create a new adapter for a superglobal $_SERVER-style array.
@@ -55,13 +55,13 @@ class Psr7RequestAdapter implements RequestAdapter
         $this->request = $request;
     }
 
-    public function getRemoteAddr() : ?string
+    public function getRemoteAddr()
     {
         $server = $this->request->getServerParams();
-        return $server['REMOTE_ADDR'] ?? null;
+        return !empty($server['REMOTE_ADDR']) ? $server['REMOTE_ADDR'] : null;
     }
 
-    public function getHeaders() : array
+    public function getHeaders()
     {
         if (!isset($this->headers)) {
             $this->headers = [];

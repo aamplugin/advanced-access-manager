@@ -117,15 +117,19 @@ final class AAM_Core_Gateway
      * @return AAM_Framework_AccessLevel_User|AAM_Framework_AccessLevel_Visitor
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.9
      */
     public function user($identifier = null)
     {
         if (is_null($identifier)) {
             $result = AAM::current_user();
-        } else {
+        } elseif (!empty($identifier)) { // User ID can be 0 (zero)
             $result = $this->access_levels->get(
                 AAM_Framework_Type_AccessLevel::USER, $identifier
+            );
+        } else {
+            $result = $this->access_levels->get(
+                AAM_Framework_Type_AccessLevel::VISITOR
             );
         }
 

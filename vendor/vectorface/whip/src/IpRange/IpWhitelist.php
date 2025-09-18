@@ -40,10 +40,10 @@ class IpWhitelist
     const IPV6 = 'ipv6';
 
     /** an array of Ipv4Range items */
-    private array $ipv4Whitelist;
+    private $ipv4Whitelist;
 
     /** an array of Ipv6Range items */
-    private array $ipv6Whitelist;
+    private $ipv6Whitelist;
 
     /**
      * Constructor for the class.
@@ -71,7 +71,7 @@ class IpWhitelist
      * @return bool Returns true if the IP address matches one of the
      *         whitelisted IP ranges and false otherwise.
      */
-    public function isIpWhitelisted(string $ipAddress) : bool
+    public function isIpWhitelisted($ipAddress)
     {
         // determine whether this IP is IPv4 or IPv6
         $isIpv4Address = filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
@@ -93,7 +93,7 @@ class IpWhitelist
      *        specified $class.
      * @return array Returns an array of Ipv4Range or Ipv6Range elements.
      */
-    private function constructWhiteListForKey(array $whitelist, string $key, string $class) : array
+    private function constructWhiteListForKey(array $whitelist, $key, $class)
     {
         if (!isset($whitelist[$key]) || !is_array($whitelist[$key])) {
             return [];
@@ -111,7 +111,7 @@ class IpWhitelist
      * @return bool Returns true if the IP address is in the whitelist and
      *         false otherwise.
      */
-    private function isIpInWhitelist(array $whitelist, string $ipAddress) : bool
+    private function isIpInWhitelist(array $whitelist, $ipAddress)
     {
         foreach ($whitelist as $ipRange) {
             if ($ipRange->containsIp($ipAddress)) {

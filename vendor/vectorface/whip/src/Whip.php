@@ -63,7 +63,7 @@ class Whip
     const CUSTOM_HEADERS     = 128;
 
     /** The array of mapped header strings. */
-    private static array $headers = [
+    private static $headers = [
         self::CUSTOM_HEADERS => [],
         self::INCAPSULA_HEADERS => [
             'incap-client-ip'
@@ -83,10 +83,10 @@ class Whip
     ];
 
     /** the bitmask of enabled methods */
-    private int $enabled;
+    private $enabled;
 
     /** the array of IP whitelist ranges to check against */
-    private array $whitelist;
+    private $whitelist;
 
     /**
      * An object holding the source of addresses we will check
@@ -102,7 +102,7 @@ class Whip
      * @param array $whitelists The array of IP ranges to be whitelisted.
      * @param mixed|null $source A supported source of IP data.
      */
-    public function __construct(int $enabled = self::ALL_METHODS, array $whitelists = [], mixed $source = null)
+    public function __construct($enabled = self::ALL_METHODS, array $whitelists = [], $source = null)
     {
         $this->enabled = $enabled;
         if (isset($source)) {
@@ -121,7 +121,7 @@ class Whip
      * @param string $header The custom header to add.
      * @return static
      */
-    public function addCustomHeader(string $header) : static
+    public function addCustomHeader($header)
     {
         self::$headers[self::CUSTOM_HEADERS][] = $this->normalizeHeaderName($header);
         return $this;
@@ -133,7 +133,7 @@ class Whip
      * @param mixed $source The source array.
      * @return static
      */
-    public function setSource(mixed $source) : static
+    public function setSource($source)
     {
         $this->source = $this->getRequestAdapter($source);
         return $this;
@@ -148,7 +148,7 @@ class Whip
      * @return string|false Returns the IP address as a string or false if no
      *         IP address could be found.
      */
-    public function getIpAddress(mixed $source = null) : string|false
+    public function getIpAddress($source = null)
     {
         $source = $this->getRequestAdapter($this->coalesceSources($source));
         $remoteAddr = $source->getRemoteAddr();
@@ -180,7 +180,7 @@ class Whip
      * @return string|false Returns the IP address (as a string) of the client or false
      *         if no valid IP address was found.
      */
-    public function getValidIpAddress(mixed $source = null) : string|false
+    public function getValidIpAddress($source = null)
     {
         $ipAddress = $this->getIpAddress($source);
         if (false === $ipAddress || false === @inet_pton($ipAddress)) {
@@ -197,7 +197,7 @@ class Whip
      * @param string $header The original header name.
      * @return string The normalized header name.
      */
-    private function normalizeHeaderName(string $header) : string
+    private function normalizeHeaderName($header)
     {
         if (str_starts_with($header, 'HTTP_')) {
             $header = str_replace('_', '-', substr($header, 5));
@@ -217,7 +217,7 @@ class Whip
      * @return string|false Returns the IP address as a string or false if no IP
      *         IP address was found.
      */
-    private function extractAddressFromHeaders(array $requestHeaders, array $headers) : string|false
+    private function extractAddressFromHeaders(array $requestHeaders, array $headers)
     {
         foreach ($headers as $header) {
             if (!empty($requestHeaders[$header])) {
@@ -240,7 +240,7 @@ class Whip
      *         otherwise. Returns true if the source does not have a whitelist
      *         specified.
      */
-    private function isMethodUsable(string $key, ?string $ipAddress) : bool
+    private function isMethodUsable($key, $ipAddress = null)
     {
         if (!($key & $this->enabled)) {
             return false;
@@ -257,7 +257,7 @@ class Whip
      * @param mixed $source A supported source of request data.
      * @return RequestAdapter A RequestAdapter implementation for the given source.
      */
-    private function getRequestAdapter(mixed $source): RequestAdapter
+    private function getRequestAdapter($source): RequestAdapter
     {
         if ($source instanceof RequestAdapter) {
             return $source;
@@ -276,7 +276,7 @@ class Whip
      * @param mixed|null $source A source data argument, if available.
      * @return mixed The best available source, after fallbacks.
      */
-    private function coalesceSources(mixed $source = null) : mixed
+    private function coalesceSources($source = null)
     {
         if (isset($source)) {
             return $source;

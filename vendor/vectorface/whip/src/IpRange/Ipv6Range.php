@@ -34,10 +34,10 @@ namespace Vectorface\Whip\IpRange;
 class Ipv6Range implements IpRange
 {
     /** The size of the IPv6 range mask. */
-    private string|false $mask;
+    private $mask;
 
     /** The binary substring of the range minus the mask. */
-    private string $rangeSubstring;
+    private $rangeSubstring;
 
     /**
      * Constructor for the class.
@@ -46,7 +46,7 @@ class Ipv6Range implements IpRange
      *        - CIDR notation (2400:cb00::/32)
      *        - a specific IP address (::1)
      */
-    public function __construct(string $range)
+    public function __construct($range)
     {
         $this->extractNetworkAndMaskFromRange($range);
     }
@@ -58,7 +58,7 @@ class Ipv6Range implements IpRange
      * @return bool Returns true if the IP address falls within the range
      *         and false otherwise.
      */
-    public function containsIp(string $ipAddress) : bool
+    public function containsIp($ipAddress)
     {
         // if the mask is false this means we have a full IP address as a
         // range so compare against the whole string
@@ -81,7 +81,7 @@ class Ipv6Range implements IpRange
      *
      * @param string $range The IPv6 range as a string.
      */
-    private function extractNetworkAndMaskFromRange(string $range) : void
+    private function extractNetworkAndMaskFromRange($range)
     {
         if (str_contains($range, '/')) {
             // handle the CIDR notation
@@ -106,7 +106,7 @@ class Ipv6Range implements IpRange
      * @param string $address The IPv6 address in standard notation.
      * @return string Returns the address as a string of bits.
      */
-    private function convertToBinaryString(string $address) : string
+    private function convertToBinaryString($address)
     {
         return implode('', array_map(
             [__CLASS__, 'hexToBinary'],
@@ -119,7 +119,7 @@ class Ipv6Range implements IpRange
      * @param string $hex The hexadecimal character.
      * @return string Returns a 4-digit binary string.
      */
-    private static function hexToBinary(string $hex) : string
+    private static function hexToBinary($hex)
     {
         return str_pad(base_convert($hex, 16, 2), 4, '0', STR_PAD_LEFT);
     }

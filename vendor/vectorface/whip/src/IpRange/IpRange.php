@@ -40,5 +40,5 @@ interface IpRange
      * @return bool Returns true if the IP address falls within the range
      *         and false otherwise.
      */
-    public function containsIp(string $ipAddress) : bool;
+    public function containsIp($ipAddress);
 }

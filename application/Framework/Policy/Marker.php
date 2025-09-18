@@ -226,9 +226,7 @@ class AAM_Framework_Policy_Marker
                 break;
 
             default:
-                $value = AAM_Framework_Policy_Xpath::get_value_by_xpath(
-                    $user, $xpath
-                );
+                $value = AAM_Framework_Manager::_()->misc->get($user, $xpath);
                 break;
         }
 

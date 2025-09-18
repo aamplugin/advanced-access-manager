@@ -12,6 +12,9 @@
  *
  * @package AAM
  * @version 7.0.0
+ *
+ * @deprecated 7.0.7
+ * @todo Remove this class in favor of utility misc()->get
  */
 class AAM_Framework_Policy_Xpath
 {
