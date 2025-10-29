@@ -689,7 +689,7 @@ class AAM_Service_Content
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.10
      */
     private function __map_post_type_caps(
         WP_Post_Type $post_type,
@@ -739,7 +739,6 @@ class AAM_Service_Content
 
             case 'read_post':
             case 'read_private_posts':
-            case 'read':
                 $password = (isset($args[1]) ? $args[1] : null);
                 $caps     = $this->_map_read_post_caps($caps, $post->ID, $password);
                 break;

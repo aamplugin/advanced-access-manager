@@ -85,12 +85,15 @@ class AAM_Framework_Service_Posts
     /**
      * Determine if current post is password protected
      *
+     * It is important to note that if user has the ability to edit a post, it can't
+     * be password protected
+     *
      * @param mixed $post_identifier
      *
      * @return bool
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.0.10
      */
     public function is_password_protected($post_identifier)
     {
@@ -100,32 +103,34 @@ class AAM_Framework_Service_Posts
             $identifier = $this->_normalize_resource_identifier($post_identifier);
             $permission = $resource->get_permission($identifier, 'read');
 
-            // First, let's check that current post does not have password set
-            // natively
-            $native_password = $identifier->post_password;
-            $result          = !empty($native_password) ? true : null;
+            if (!current_user_can('edit_post', $identifier->ID)) {
+                // First, let's check that current post does not have password set
+                // natively
+                $native_password = $identifier->post_password;
+                $result          = !empty($native_password) ? true : null;
 
-            if (is_null($result) && !is_null($permission)) {
-                if (!empty($permission['restriction_type'])) {
-                    $restriction_type = $permission['restriction_type'];
-                } else {
-                    $restriction_type = null;
+                if (is_null($result) && !is_null($permission)) {
+                    if (!empty($permission['restriction_type'])) {
+                        $restriction_type = $permission['restriction_type'];
+                    } else {
+                        $restriction_type = null;
+                    }
+
+                    if ($restriction_type === 'password_protected') {
+                        $result = $permission['effect'] !== 'allow'
+                            && !empty($permission['password']);
+                    }
                 }
 
-                if ($restriction_type === 'password_protected') {
-                    $result = $permission['effect'] !== 'allow'
-                        && !empty($permission['password']);
-                }
+                // Making sure that other implementations can affect the decision
+                $result = apply_filters(
+                    'aam_post_permission_result_filter',
+                    $result,
+                    $permission,
+                    $identifier,
+                    'read'
+                );
             }
-
-            // Making sure that other implementations can affect the decision
-            $result = apply_filters(
-                'aam_post_permission_result_filter',
-                $result,
-                $permission,
-                $identifier,
-                'read'
-            );
 
             // Prepare the final result
             $result = is_bool($result) ? $result : false;

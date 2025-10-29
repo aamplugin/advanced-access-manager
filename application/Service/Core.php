@@ -67,7 +67,7 @@ class AAM_Service_Core
      * @access protected
      * @return void
      *
-     * @version 7.0.4
+     * @version 7.0.10
      */
     protected function __construct()
     {
@@ -101,6 +101,11 @@ class AAM_Service_Core
         add_action('init', function() {
             $this->initialize_hooks();
         }, PHP_INT_MAX);
+
+        if (is_multisite()) {
+            // Control access controls & configurations sync
+            $this->_control_multisite_settings_sync();
+        }
     }
 
     /**
