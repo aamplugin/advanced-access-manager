@@ -38,4 +38,14 @@ class AAM_Framework_Resource_PostType implements AAM_Framework_Resource_Interfac
         return $identifier->name;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        return get_post_type_object($id);
+    }
+
 }

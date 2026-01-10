@@ -38,4 +38,14 @@ class AAM_Framework_Resource_Taxonomy implements AAM_Framework_Resource_Interfac
         return $resource_identifier->name;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        return get_taxonomy($id);
+    }
+
 }

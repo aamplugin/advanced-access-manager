@@ -38,4 +38,14 @@ class AAM_Framework_Resource_Policy implements AAM_Framework_Resource_Interface
         return $resource_identifier->ID;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        return get_post($id);
+    }
+
 }

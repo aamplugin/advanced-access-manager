@@ -485,6 +485,21 @@ trait AAM_Framework_Resource_BaseTrait
                 $this->_permissions[$resource_id] = $permissions;
             }
         }
+
+        $this->_post_init_hook();
+    }
+
+    /**
+     * Allow to implement a custom post initialization
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.11
+     */
+    private function _post_init_hook()
+    {
+
     }
 
     /**
@@ -602,7 +617,7 @@ trait AAM_Framework_Resource_BaseTrait
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.0.11
      */
     private function _inherit_from_parent($resource_identifier = null)
     {
@@ -636,6 +651,14 @@ trait AAM_Framework_Resource_BaseTrait
                     ));
 
                     foreach($resource_ids as $id) {
+                        // Pulling the exact permissions inherited from the vertical
+                        // tree of permissions. This is done to take into consideration
+                        // complex combination of permissions when it comes to multi
+                        // access level support
+                        $sib_perms[$id] = $sibling->get_resource(
+                            $this->type
+                        )->get_permissions($this->_get_resource_identifier($id));
+
                         $result[$id] = $this->_add_acl_attributes(
                             $this->misc->merge_permissions(
                                 isset($sib_perms[$id]) ? $sib_perms[$id] : [],
@@ -726,13 +749,28 @@ trait AAM_Framework_Resource_BaseTrait
      * @param mixed $identifier
      *
      * @return mixed
-     * @access public
+     * @access private
      *
      * @version 7.0.0
      */
     private function _get_resource_id($identifier)
     {
         return (string) $identifier;
+    }
+
+    /**
+     * Reverse method to _get_resource_id
+     *
+     * @param string $id
+     *
+     * @return mixed
+     * @access private
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        return (string) $id;
     }
 
     /**

@@ -70,7 +70,7 @@ class AAM_Audit_HighPrivilegeContentModeratorCheck
                 ...self::_scan_for_high_privilege_roles(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(
+            array_push($issues, self::_format_issue(
                 'APPLICATION_ERROR',
                 [
                     'message' => $e->getMessage()

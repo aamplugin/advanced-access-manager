@@ -88,7 +88,7 @@ class AAM_Audit_HighPrivilegeUserCountCheck
                 ...self::_identify_elevated_user_count($identified_roles)
             );
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(
+            array_push($issues, self::_format_issue(
                 'APPLICATION_ERROR',
                 [
                     'message' => $e->getMessage()

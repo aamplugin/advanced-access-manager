@@ -135,7 +135,7 @@ class AAM_Audit_HighPrivilegeOrElevatedUserCheck
                 $result['progress'] = $result['offset'] / $result['total_count'];
             }
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(
+            array_push($issues, self::_format_issue(
                 'APPLICATION_ERROR',
                 [
                     'message' => $e->getMessage()

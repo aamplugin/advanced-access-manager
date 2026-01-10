@@ -27,6 +27,48 @@ implements AAM_Framework_Resource_Interface
     protected $type = AAM_Framework_Type_Resource::POST;
 
     /**
+     * Post cache index
+     *
+     * This is done to avoid executing large volume of individual MySQL queries to DB
+     * to pull post data with get_post(x) when initializing post permissions
+     *
+     * @var array
+     *
+     * @version 7.0.11
+     */
+    private $_post_cache_index = [];
+
+    /**
+     * Allow to implement a custom post initialization
+     *
+     * @return void
+     * @access private
+     *
+     * @version 7.0.11
+     */
+    private function _post_init_hook()
+    {
+        global $wpdb;
+
+        if (!empty($this->_permissions)) {
+            // Getting list of all defined post IDs
+            $ids = array_map(function($k) {
+                $parts = explode('|', $k);
+
+                return intval($parts[0]);
+            }, array_keys($this->_permissions));
+
+            // Querying the list of all posts
+            $query = 'SELECT ID, post_type, post_author FROM '
+                .  $wpdb->posts . ' WHERE ID IN (' . implode(',', $ids) . ')';
+
+            foreach($this->db->get_results($query) as $result) {
+                $this->_post_cache_index[$result['ID']] = $result;
+            }
+        }
+    }
+
+    /**
      * Determine correct resource identifier based on provided data
      *
      * @param WP_Post $resource_identifier
@@ -39,6 +81,24 @@ implements AAM_Framework_Resource_Interface
     private function _get_resource_id($resource_identifier)
     {
         return "{$resource_identifier->ID}|{$resource_identifier->post_type}";
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        $parts = explode('|', $id);
+
+        if (array_key_exists($parts[0], $this->_post_cache_index)) {
+            $result = new WP_Post($this->_post_cache_index[$parts[0]]);
+        } else {
+            $result = get_post($parts[0]);
+        }
+
+        return $result;
     }
 
     /**

@@ -46,7 +46,7 @@ class AAM_Audit_RoleTransparencyCheck
                 ...self::_validate_roles_transparency(self::_read_role_key_option())
             );
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(
+            array_push($issues, self::_format_issue(
                 'APPLICATION_ERROR',
                 [
                     'message' => $e->getMessage()

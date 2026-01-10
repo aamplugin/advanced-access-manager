@@ -74,4 +74,19 @@ class AAM_Framework_Resource_Metabox implements AAM_Framework_Resource_Interface
         return $result;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        $parts = explode('|', $id);
+
+        return (object) [
+            'slug'      => $parts[0],
+            'screen_id' => !empty($parts[1]) ? $parts[1] : null
+        ];
+    }
+
 }

@@ -19,6 +19,16 @@ class AAM_Framework_Utility_Db implements AAM_Framework_Utility_Interface
     use AAM_Framework_Utility_BaseTrait;
 
     /**
+     * Internal cache
+     *
+     * @var array
+     * @access private
+     *
+     * @version 7.0.11
+     */
+    private $_cache = [];
+
+    /**
      * Read option from DB
      *
      * @param string $option
@@ -96,6 +106,36 @@ class AAM_Framework_Utility_Db implements AAM_Framework_Utility_Interface
             $result = delete_blog_option(get_current_blog_id(), $option);
         } else {
             $result = delete_option($option);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Query DB
+     *
+     * @param string $query
+     *
+     * @return array|null
+     * @access public
+     *
+     * @version 7.0.11
+     */
+    public function get_results($query)
+    {
+        global $wpdb;
+
+        // Checking if we have results already cached
+        $cache_key = md5($query);
+
+        if (array_key_exists($cache_key, $this->_cache)) {
+            $result = $this->_cache[$cache_key];
+        } else {
+            $result = $wpdb->get_results($query, ARRAY_A);
+
+            if ($result !== null) {
+                $this->_cache[$cache_key] = $result;
+            }
         }
 
         return $result;

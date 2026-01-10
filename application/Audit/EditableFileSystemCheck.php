@@ -43,7 +43,7 @@ class AAM_Audit_EditableFileSystemCheck
         try {
             array_push($issues, ...self::_check_file_system_permissions());
         } catch (Exception $e) {
-            array_push($failure, self::_format_issue(
+            array_push($issues, self::_format_issue(
                 'APPLICATION_ERROR',
                 [
                     'message' => $e->getMessage()

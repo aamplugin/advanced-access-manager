@@ -603,9 +603,7 @@
                                 } else if (!$(this).prop('disabled')) {
                                     const v = $.trim($(this).val());
 
-                                    if (v) {
-                                        data[$(this).attr('name')] = v;
-                                    }
+                                    data[$(this).attr('name')] = v;
                                 }
                             }
                         });

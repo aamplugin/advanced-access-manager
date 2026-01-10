@@ -76,4 +76,19 @@ class AAM_Framework_Resource_Hook implements AAM_Framework_Resource_Interface
         return $identifier->name . '|' . $identifier->priority;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        list($name, $priority) = explode('|', $id);
+
+        return (object) [
+            'name'     => $name,
+            'priority' => $priority
+        ];
+    }
+
 }

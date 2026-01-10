@@ -45,6 +45,16 @@ class AAM_Framework_Resource_Role implements AAM_Framework_Resource_Interface
 
     /**
      * @inheritDoc
+     *
+     * @version 7.0.11
+     */
+    private function _get_resource_identifier($id)
+    {
+        return wp_roles()->get_role($id);
+    }
+
+    /**
+     * @inheritDoc
      */
     private function _apply_policy()
     {

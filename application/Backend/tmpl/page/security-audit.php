@@ -89,8 +89,8 @@
                     <div id="executive_summary_references" class="<?php echo empty($summary['references']) ? 'hidden' : ''; ?>">
                         <h3 class="aam-mt-4"><?php echo __('References', 'advanced-access-manager'); ?></h3>
                         <ul class="list-of-items">
-                            <?php if (!empty($summary['recommendations'])) { ?>
-                                <?php foreach($summary['recommendations'] as $reference) { ?>
+                            <?php if (!empty($summary['references'])) { ?>
+                                <?php foreach($summary['references'] as $reference) { ?>
                                 <li><a href="<?php echo esc_attr($reference); ?>" target="_blank"><?php echo esc_js($reference); ?></a></li>
                                 <?php } ?>
                             <?php } ?>
