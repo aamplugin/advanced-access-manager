@@ -11,7 +11,7 @@
  * AAM service for JWT Tokens
  *
  * @package AAM
- * @version 7.0.0
+ * @version 7.1.0
  *
  * @link https://github.com/firebase/php-jwt
  */
@@ -82,7 +82,7 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @return array|WP_Error
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     public function get_token_by($search, $claim = null)
     {
@@ -91,7 +91,9 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
 
             if (is_string($claim)) {
                 foreach($this->_get_registry() as $token) {
-                    $claims = $this->jwt->decode($token);
+                    $claims = $this->jwt->decode(
+                        is_array($token) ? $token['token'] : $token
+                    );
 
                     if (array_key_exists($claim, $claims)
                         && $claims[$claim] === $search
@@ -104,7 +106,9 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
                 $filtered = array_filter(
                     $this->_get_registry(),
                     function($t) use ($search) {
-                        return $t === $search;
+                        $token = is_array($t) ? $t['token'] : $t;
+
+                        return $token === $search;
                     }
                 );
 
@@ -148,7 +152,7 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @return array|WP_Error
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     public function issue(array $claims = [], array $settings = [])
     {
@@ -190,9 +194,16 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
                 [ 'is_valid' => true ]
             );
 
+            // Normalize description, if exists
+            if (isset($settings['description']) && is_string($settings['description'])) {
+                $description = trim($settings['description']);
+            } else {
+                $description = null;
+            }
+
             // Register token
             if ($config['revocable']) {
-                $this->_add_to_registry($result['token']);
+                $this->_add_to_registry($result['token'], $description);
             }
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
@@ -342,7 +353,7 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @return bool|WP_Error
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     private function _validate($token)
     {
@@ -358,7 +369,9 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
                 $filtered = array_filter(
                     $this->_get_registry(),
                     function($t) use ($token) {
-                        return $t === $token;
+                        $a = is_array($t) ? $t['token'] : $t;
+
+                        return $a === $token;
                     }
                 );
 
@@ -399,13 +412,14 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * Persist token in DB
      *
      * @param string $token
+     * @param string $description [Optional]
      *
      * @return bool
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
-    private function _add_to_registry($token)
+    private function _add_to_registry($token, $description = null)
     {
         $registry      = $this->_get_registry();
         $registry_size = $this->config->get('service.jwt.registry_size', 10);
@@ -416,7 +430,14 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
         }
 
         // Add new token to the registry
-        $registry[] = $token;
+        if (empty($description)) {
+            $registry[] = $token;
+        } else {
+            $registry[] = [
+                'token'       => $token,
+                'description' => $description
+            ];
+        }
 
         // Update local registry cache
         $this->_registry = $registry;
@@ -441,14 +462,16 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
      * @return bool
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     private function _remove_from_registry($token)
     {
         // Filter out token that we are deleting
         $tokens   = $this->_get_registry();
         $filtered = array_filter($tokens, function($t) use ($token) {
-            return $t !== $token;
+            $a = is_array($t) ? $t['token'] : $t;
+
+            return $a !== $token;
         });
 
         // Did we actually remove a token?
@@ -474,23 +497,36 @@ class AAM_Framework_Service_Jwts implements AAM_Framework_Service_Interface
     /**
      * Prepare token model
      *
-     * @param string $token
+     * @param string|array $token
      *
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     private function _prepare_token($token)
     {
-        $is_valid = $this->jwt->validate($token);
-        $claims   = $this->jwt->decode($token);
+        // Determine if we are dealing with a single token or token with description
+        if (is_array($token)) {
+            $jwt         = $token['token'];
+            $description = $token['description'];
+        } else {
+            $jwt         = $token;
+            $description = null;
+        }
+
+        $is_valid = $this->jwt->validate($jwt);
+        $claims   = $this->jwt->decode($jwt);
 
         $result = [
-            'token'    => $token,
+            'token'    => $jwt,
             'claims'   => $claims,
             'is_valid' => $is_valid === true
         ];
+
+        if (!empty($description)) {
+            $result['description'] = $description;
+        }
 
         if (is_wp_error($is_valid)) {
             $result['error'] = $is_valid->get_error_message();

@@ -11,7 +11,7 @@
  * Shortcode factory for the [aam] shortcode
  *
  * @package AAM
- * @version 7.0.0
+ * @version 7.1.0
  */
 class AAM_Service_Shortcode_Factory
 {
@@ -35,7 +35,7 @@ class AAM_Service_Shortcode_Factory
      * @return void
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     public function __construct($args, $content)
     {
@@ -51,8 +51,6 @@ class AAM_Service_Shortcode_Factory
             );
         } elseif ($cnt === 'loginform') {
             $this->handler = new AAM_Service_Shortcode_Handler_LoginForm($args);
-        } elseif ($cnt === 'postlist') {
-            $this->handler = new AAM_Service_Shortcode_Handler_PostList($args);
         } else {
             $this->handler = apply_filters(
                 'aam_shortcode_filter', null, $cnt, $args, $content
@@ -66,14 +64,19 @@ class AAM_Service_Shortcode_Factory
      * @return string
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     public function process()
     {
         $handler = $this->handler;
 
-        return is_object($handler)
-            && method_exists($handler, 'run') ? $handler->run() : '';
+        if (is_object($handler) && method_exists($handler, 'run')) {
+            $result = $handler->run();
+        } elseif (is_string($this->handler)) {
+            $result = $this->handler;
+        }
+
+        return $result;
     }
 
 }

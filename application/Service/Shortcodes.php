@@ -11,7 +11,7 @@
  * AAM custom shortcodes service
  *
  * @package AAM
- * @version 7.0.0
+ * @version 7.1.0
  */
 class AAM_Service_Shortcodes
 {
@@ -24,7 +24,7 @@ class AAM_Service_Shortcodes
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     protected function __construct()
     {
@@ -37,14 +37,6 @@ class AAM_Service_Shortcodes
 
             add_shortcode('aam-login', function($args, $content) {
                 $shortcode = new AAM_Service_Shortcode_Handler_LoginForm(
-                    $args, $content
-                );
-
-                return $shortcode->run();
-            });
-
-            add_shortcode('aam-post-list', function($args, $content) {
-                $shortcode = new AAM_Service_Shortcode_Handler_PostList(
                     $args, $content
                 );
 

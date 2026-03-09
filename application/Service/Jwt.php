@@ -11,7 +11,7 @@
  * JWT Token service
  *
  * @package AAM
- * @version 7.0.0
+ * @version 7.1.0
  */
 class AAM_Service_Jwt
 {
@@ -74,7 +74,7 @@ class AAM_Service_Jwt
      * @return void
      * @access protected
      *
-     * @version 7.0.4
+     * @version 7.1.0
      */
     protected function initialize_hooks()
     {
@@ -85,7 +85,7 @@ class AAM_Service_Jwt
             });
 
             add_action('aam_post_edit_user_modal_action', function () {
-                if (current_user_can('aam_manage_jwt')) {
+                if (current_user_can(AAM_Backend_Feature_Main_Jwt::ACCESS_CAPABILITY)) {
                     echo AAM_Backend_View::get_instance()->loadPartial(
                         'jwt-login-url'
                     );

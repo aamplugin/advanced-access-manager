@@ -1,4 +1,4 @@
-<?php /** @version 7.0.0 **/ ?>
+<?php /** @version 7.1.0 **/ ?>
 
 <?php if (defined('AAM_KEY')) { ?>
     <div class="aam-feature" id="jwt-content">
@@ -13,6 +13,7 @@
                             <th width="8%">&nbsp;</th>
                             <th width="70%"><?php echo __('ID/Status', 'advanced-access-manager'); ?></th>
                             <th><?php echo __('Actions', 'advanced-access-manager'); ?></th>
+                            <th>Description</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -53,13 +54,24 @@
                         </table>
 
                         <div class="form-group jwt-claims-container">
+                            <label for="aam-jwt-token-description" class="aam-block">
+                                <?php echo __('Token Description (Optional)', 'advanced-access-manager'); ?>
+                            </label>
+                            <textarea
+                                id="aam-jwt-token-description"
+                                style="border: 1px solid #CCCCCC; width: 100%"
+                                rows="2"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group jwt-claims-container">
                             <label for="aam-jwt-claims-editor" class="aam-block">
-                                <?php echo __('JWT Additional Claims', 'advanced-access-manager'); ?>
+                                <?php echo __('JWT Additional Claims (Optional)', 'advanced-access-manager'); ?>
                             </label>
                             <textarea
                                 id="aam-jwt-claims-editor"
                                 style="border: 1px solid #CCCCCC; width: 100%"
-                                rows="5"
+                                rows="3"
                             ></textarea>
                             <small><?php echo __('Additional claims to include in the token.', 'advanced-access-manager'); ?></small>
                         </div>

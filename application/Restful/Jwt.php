@@ -21,11 +21,11 @@ class AAM_Restful_Jwt
     /**
      * Necessary permissions to access endpoint
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     const PERMISSIONS = [
         'aam_manager',
-        'aam_manage_jwts'
+        AAM_Backend_Feature_Main_Jwt::ACCESS_CAPABILITY
     ];
 
     /**
@@ -43,7 +43,7 @@ class AAM_Restful_Jwt
             // Get the list of tokens
             $this->_register_route('/jwts', [
                 'methods'  => WP_REST_Server::READABLE,
-                'callback' => array($this, 'get_tokens'),
+                'callback' => [ $this, 'get_tokens' ],
                 'args'     => [
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -85,6 +85,11 @@ class AAM_Restful_Jwt
                         'description' => 'Any additional claims to include in the token',
                         'type'        => [ 'string', 'object' ],
                         'default'     => []
+                    ),
+                    'description' => array(
+                        'description' => 'JWT token description',
+                        'type'        => 'string',
+                        'required'    => false
                     ),
                     'fields' => array(
                         'description' => 'List of additional fields to return',
@@ -225,7 +230,8 @@ class AAM_Restful_Jwt
             $token_data = $service->issue($claims, [
                 'ttl'         => $ttl,
                 'revocable'   => $request->get_param('is_revocable'),
-                'refreshable' => $request->get_param('is_refreshable')
+                'refreshable' => $request->get_param('is_refreshable'),
+                'description' => $request->get_param('description')
             ]);
 
             $result = $this->_prepare_token_output(
@@ -409,7 +415,7 @@ class AAM_Restful_Jwt
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     private function _prepare_token_output($token_data, $fields)
     {
@@ -418,6 +424,12 @@ class AAM_Restful_Jwt
             'token'    => $token_data['token'],
             'is_valid' => $token_data['is_valid']
         ];
+
+        // Include also description is available
+        // This is done because token description feature was added in AAM 7.1.0
+        if (array_key_exists('description', $token_data)) {
+            $output['description'] = $token_data['description'];
+        }
 
         if ($token_data['is_valid']) {
             foreach((!empty($fields) ? wp_parse_list($fields) : []) as $field) {

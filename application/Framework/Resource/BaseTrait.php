@@ -57,7 +57,7 @@
  * @property AAM_Framework_Utility_Rest $rest
  *
  * @package AAM
- * @version 7.0.0
+ * @version 7.1.0
  */
 trait AAM_Framework_Resource_BaseTrait
 {
@@ -617,7 +617,7 @@ trait AAM_Framework_Resource_BaseTrait
      * @return array
      * @access private
      *
-     * @version 7.0.11
+     * @version 7.1.0
      */
     private function _inherit_from_parent($resource_identifier = null)
     {
@@ -654,10 +654,13 @@ trait AAM_Framework_Resource_BaseTrait
                         // Pulling the exact permissions inherited from the vertical
                         // tree of permissions. This is done to take into consideration
                         // complex combination of permissions when it comes to multi
+                        // TODO: Find a better way to identify accurate permissions
+                        // for a post to avoid memory allocation issues with large
+                        // volume of defined access controls
                         // access level support
-                        $sib_perms[$id] = $sibling->get_resource(
-                            $this->type
-                        )->get_permissions($this->_get_resource_identifier($id));
+                        // $sib_perms[$id] = $sibling->get_resource(
+                        //     $this->type
+                        // )->get_permissions($this->_get_resource_identifier($id));
 
                         $result[$id] = $this->_add_acl_attributes(
                             $this->misc->merge_permissions(

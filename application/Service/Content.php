@@ -784,15 +784,18 @@ class AAM_Service_Content
      * @return array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     private function _map_edit_post_caps($caps, $post_id)
     {
-        $post     = get_post($post_id);
-        $is_draft = $post->post_status === 'auto-draft';
+        $post = get_post($post_id);
 
-        if (!$is_draft && (AAM::api()->posts()->is_denied_to($post, 'edit'))) {
-            $caps[] = 'do_not_allow';
+        if (is_a($post, WP_Post::class)) {
+            $is_draft = $post->post_status === 'auto-draft';
+
+            if (!$is_draft && (AAM::api()->posts()->is_denied_to($post, 'edit'))) {
+                $caps[] = 'do_not_allow';
+            }
         }
 
         return $caps;

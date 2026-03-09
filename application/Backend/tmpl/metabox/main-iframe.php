@@ -1,4 +1,4 @@
-<?php /** @version 7.0.0 **/
+<?php /** @version 7.1.0 **/
 
 if (defined('AAM_KEY')) {
     wp_enqueue_style('aam-vendor', AAM_MEDIA . '/css/vendor.min.css', [], AAM_VERSION);
@@ -119,7 +119,7 @@ if (defined('AAM_KEY')) {
                                     </a>
                                 <?php } ?>
                                 <?php if (current_user_can('aam_view_help_btn')) { ?>
-                                    <a href="https://aamportal.com/support?ref=plugin" target="_blank" title="Documentation">
+                                    <a href="https://aamportal.com/documentation?ref=plugin" target="_blank" title="Documentation">
                                         <i class="icon-help-circled"></i>
                                         <span><?php echo __('Docs', 'advanced-access-manager'); ?></span>
                                     </a>

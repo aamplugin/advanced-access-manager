@@ -95,7 +95,7 @@ class AAM_Restful_Configs
                     'ini' => array(
                         'description' => 'ConfigPress INI',
                         'type'        => 'string',
-                        'required'    => true
+                        'required'    => false
                     )
                 )
             ), self::PERMISSIONS, false);
@@ -234,7 +234,7 @@ class AAM_Restful_Configs
      * @return WP_REST_Response
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.0
      */
     public function set_configpress(WP_REST_Request $request)
     {
@@ -247,8 +247,8 @@ class AAM_Restful_Configs
                 $parsed = [];
             }
 
-            if (empty($parsed)) {
-                throw new InvalidArgumentException('The ConfigPress value is empty');
+            if (empty($parsed)) { // If empty - delete ConfigPress settings
+                $result = AAM::api()->db->delete(AAM_Service_Core::DB_OPTION);
             } else {
                 $result = AAM::api()->db->write(
                     AAM_Service_Core::DB_OPTION, $raw

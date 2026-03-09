@@ -6096,7 +6096,8 @@
                                         token.signed_url || '',
                                         token.is_valid,
                                         details,
-                                        'view,delete'
+                                        'view,delete',
+                                        token.description || ''
                                     ]);
                                 });
 
@@ -6113,7 +6114,7 @@
                             lengthMenu: '_MENU_'
                         },
                         columnDefs: [
-                            { visible: false, targets: [0, 1, 2] },
+                            { visible: false, targets: [0, 1, 2, 6] },
                             { orderable: false, targets: [0, 1, 2, 3, 5] }
                         ],
                         initComplete: function () {
@@ -6139,10 +6140,16 @@
                                 );
                             }
 
-                            // Token details
-                            $('td:eq(1)', row).html(
-                                data[0] + '<br/><small>' + data[4] + '</small>'
-                            )
+                            // Prepare Token details
+                            const details = [ data[0] ]; // JTI
+
+                            if (data[6]) {
+                                details.push(`<small><strong>${data[6]}</strong></small>`); // Description
+                            }
+
+                            details.push(`<small>${data[4]}</small>`); // Status
+
+                            $('td:eq(1)', row).html(details.join('<br/>'));
 
                             var actions = data[5].split(',');
 
@@ -6204,7 +6211,8 @@
                         const payload = {
                             user_id: getAAM().getSubject().id,
                             is_refreshable: $('#jwt-refreshable').is(':checked'),
-                            expires_at: $('#jwt-expires').val()
+                            expires_at: $('#jwt-expires').val(),
+                            description: $('#aam-jwt-token-description').val()
                         }
 
                         try {
