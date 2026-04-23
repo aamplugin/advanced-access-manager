@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
-Tested up to: 6.9.1
-Stable tag: 7.1.0
+Tested up to: 6.9.4
+Stable tag: 7.1.1
 
 Access Governance for WordPress. Control roles, users, content, admin areas, and APIs to prevent broken access controls and excessive privileges.
 
@@ -64,6 +64,11 @@ Just **security you can reason about, audit, and trust**.
 11. Improve your website security
 
 == Changelog ==
+
+= 7.1.1 =
+* Fixed: Incorrectly handled URL with encoded characters [https://github.com/aamplugin/advanced-access-manager/issues/500](https://github.com/aamplugin/advanced-access-manager/issues/500)
+* Fixed: Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 [https://github.com/aamplugin/advanced-access-manager/issues/499](https://github.com/aamplugin/advanced-access-manager/issues/499)
+* Fixed: Super-Admin is unable to create users in WordPress Multisite --> subsites, when Multiple Roles Support is enabled [https://github.com/aamplugin/advanced-access-manager/issues/498](https://github.com/aamplugin/advanced-access-manager/issues/498)
 
 = 7.1.0 =
 * Fixed: Warning: Undefined array key "effect" in /../application/Framework/Utility/Misc.php on line 483 [https://github.com/aamplugin/advanced-access-manager/issues/497](https://github.com/aamplugin/advanced-access-manager/issues/497)

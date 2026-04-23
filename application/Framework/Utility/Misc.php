@@ -208,7 +208,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
         $result = false;
         $parsed = wp_parse_url(call_user_func(
             function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower',
-            is_string($url) ? htmlspecialchars_decode(rtrim($url,  '/')) : ''
+            is_string($url) ? urldecode(rtrim($url,  '/')) : ''
         ));
 
         if ($parsed !== false) {
@@ -401,7 +401,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return mixed
      * @access public
      *
-     * @version 7.0.0
+     * @version 7.1.1
      */
     public function get($source, $xpath, $default = null)
     {
@@ -414,7 +414,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
 
         foreach($parsed as $l) {
             if (is_object($value)) {
-                if (property_exists($value, $l)) {
+                if (property_exists($value, $l) || isset($value->{$l})) {
                     $value = $value->{$l};
                 } elseif (method_exists($value, $l)) {
                     $value = $value->$l();

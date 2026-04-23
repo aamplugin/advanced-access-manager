@@ -37,7 +37,7 @@
         </testsuite>
     </testsuites>
     <php>
-        <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/HHnsCwCYB/mysql/mysqld.sock" />
+        <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/JI-Q6E_q6/mysql/mysqld.sock" />
         <const name="AAM_UNITTEST_DEFAULT_ADMIN_PASS" value="123456" />
     </php>
 </phpunit>

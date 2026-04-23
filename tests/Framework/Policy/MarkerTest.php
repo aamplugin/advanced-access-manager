@@ -29,7 +29,10 @@ final class MarkerTest extends TestCase
      */
     public function testUserMarker()
     {
-        $user_a = $this->createUser([ 'role' => 'editor' ]);
+        $user_a = $this->createUser([
+            'role'       => 'editor',
+            'user_email' => 'test@aamplugin.com'
+        ]);
 
         // Set current user
         wp_set_current_user($user_a);
@@ -51,6 +54,10 @@ final class MarkerTest extends TestCase
         );
         $this->assertIsArray(
             AAM_Framework_Policy_Marker::get_marker_value('${USER.capabilities}')
+        );
+        $this->assertEquals(
+            'test@aamplugin.com',
+            AAM_Framework_Policy_Marker::get_marker_value('${USER.user_email}')
         );
 
         // Emulating remote IP address

@@ -275,7 +275,7 @@ class AAM_Backend_Manager
             $newRoles = array_intersect($roles, array_keys(get_editable_roles()));
 
             if (!empty($newRoles)) {
-                // remove all current roles and then set new
+                // Remove all current roles and then set new
                 $user->set_role('');
 
                 foreach ($newRoles as $role) {

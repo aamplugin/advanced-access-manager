@@ -194,18 +194,18 @@ class AAM_Framework_Service_Policies
     }
 
     /**
-     * Create new policy and attach it to current access level if specified
+     * Create new policy and apply it to current access level if specified
      *
      * @param string|array $policy
      * @param string       $status [Optional]
-     * @param bool         $attach [Optional]
+     * @param bool         $apply  [Optional]
      *
      * @return int|WP_Error
      * @access public
      *
      * @version 7.0.0
      */
-    public function create($policy, $status = 'publish', $attach = true)
+    public function create($policy, $status = 'publish', $apply = true)
     {
         try {
             $post_data = [];
@@ -253,7 +253,7 @@ class AAM_Framework_Service_Policies
 
             if (is_wp_error($result)) {
                 throw new RuntimeException($result->get_error_message());
-            } elseif ($attach) {
+            } elseif ($apply) {
                 if (!$this->_update($result, 'attach')) {
                     throw new RuntimeException('Failed to attach created policy');
                 }

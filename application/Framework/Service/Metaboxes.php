@@ -318,6 +318,19 @@ class AAM_Framework_Service_Metaboxes
             $result = $permission['effect'] !== 'allow';
         }
 
+        // One more check. If screen_id is defined & no permissions found, also
+        // check the metabox slug itself as lower precedence definition
+        if (!empty($screen_id)) {
+            $permission = $resource->get_permission(
+                $this->_normalize_resource_identifier($metabox, null),
+                'list'
+            );
+
+            if (!empty($permission)) {
+                $result = $permission['effect'] !== 'allow';
+            }
+        }
+
         // Allow third-party implementations to integrate with the
         // decision making process
         $result = apply_filters(
