@@ -42,9 +42,7 @@ class AAM_Service_LogoutRedirect
         // Register RESTful API
         AAM_Restful_LogoutRedirect::bootstrap();
 
-        add_action('init', function() {
-            $this->initialize_hooks();
-        }, PHP_INT_MAX);
+        $this->initialize_hooks();
     }
 
     /**
@@ -77,6 +75,17 @@ class AAM_Service_LogoutRedirect
         add_action('wp_logout', function() {
             if (!empty($this->_last_user_redirect)) {
                 AAM::api()->redirect->do_redirect($this->_last_user_redirect);
+            } else {
+                $redirect = AAM::api()->logout_redirect()->get_redirect();
+
+                if (empty($redirect) || $redirect['type'] === 'default') {
+                    $redirect = [
+                        'type'         => 'url_redirect',
+                        'redirect_url' => $this->_get_default_logout_redirect()
+                    ];
+                }
+
+                AAM::api()->redirect->do_redirect($redirect);
             }
         }, PHP_INT_MAX);
     }

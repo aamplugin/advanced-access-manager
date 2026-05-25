@@ -145,7 +145,7 @@ class AAM_Service_Jwt
 
         if (is_array($response) && ($issue_jwt || $issue_refreshable_jwt)) {
             if ($issue_refreshable_jwt) {
-                if (current_user_can('aam_issue_refreshable_jwt')) {
+                if (!current_user_can('aam_issue_refreshable_jwt')) {
                     throw new DomainException(
                         'You are not allowed to issue refreshable JWT token'
                     );

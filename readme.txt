@@ -4,7 +4,7 @@ Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
 Tested up to: 6.9.4
-Stable tag: 7.1.1
+Stable tag: 7.1.2
 
 Access Governance for WordPress. Control roles, users, content, admin areas, and APIs to prevent broken access controls and excessive privileges.
 
@@ -64,6 +64,11 @@ Just **security you can reason about, audit, and trust**.
 11. Improve your website security
 
 == Changelog ==
+
+= 7.1.2 =
+* Fixed: "Sorry, you are not allowed to give users that role." when Multi-Role Support is enabled and default_role is not in get_editable_roles() [https://github.com/aamplugin/advanced-access-manager/issues/501](https://github.com/aamplugin/advanced-access-manager/issues/501)
+* Fixed: Incorrectly handled aam_issue_refreshable_jwt capability [https://github.com/aamplugin/advanced-access-manager/issues/503](https://github.com/aamplugin/advanced-access-manager/issues/503)
+* Fixed: The resource identifier is invalid on the users page [https://github.com/aamplugin/advanced-access-manager/issues/502](https://github.com/aamplugin/advanced-access-manager/issues/502)
 
 = 7.1.1 =
 * Fixed: Incorrectly handled URL with encoded characters [https://github.com/aamplugin/advanced-access-manager/issues/500](https://github.com/aamplugin/advanced-access-manager/issues/500)

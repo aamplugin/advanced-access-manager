@@ -268,7 +268,7 @@ trait AAM_Framework_Resource_BaseTrait
 
             $result = $this->settings()->set_setting(
                 $this->_get_settings_ns(),
-                $this->_remove_sys_attributes($this->_explicit_permissions)
+                $this->_explicit_permissions
             );
         } else {
             $this->_explicit_permissions  = [];
@@ -294,7 +294,7 @@ trait AAM_Framework_Resource_BaseTrait
 
         // Remove empty permission containers
         return array_filter(
-            $this->_remove_sys_attributes($result),
+            $result,
             function($perms) { return !empty($perms); }
         );
     }
@@ -326,7 +326,7 @@ trait AAM_Framework_Resource_BaseTrait
         // Store changes in DB
         $result = $this->settings()->set_setting(
             $this->_get_settings_ns(),
-            $this->_remove_sys_attributes($this->_explicit_permissions)
+            $this->_explicit_permissions
         );
 
         return $result;
@@ -363,7 +363,7 @@ trait AAM_Framework_Resource_BaseTrait
         // Store changes in DB
         $result = $this->settings()->set_setting(
             $this->_get_settings_ns(),
-            $this->_remove_sys_attributes($this->_explicit_permissions)
+            $this->_explicit_permissions
         );
 
         // Also sync it with final set of permissions
@@ -391,7 +391,7 @@ trait AAM_Framework_Resource_BaseTrait
             $result = $permissions[$permission_key];
         }
 
-        return is_array($result) ? $this->_remove_sys_attributes($result) : null;
+        return is_array($result) ? $result : null;
     }
 
     /**
@@ -416,7 +416,7 @@ trait AAM_Framework_Resource_BaseTrait
             // Store changes in DB
             $result = $this->settings()->set_setting(
                 $this->_get_settings_ns(),
-                $this->_remove_sys_attributes($this->_explicit_permissions)
+                $this->_explicit_permissions
             );
         }
 
@@ -442,8 +442,6 @@ trait AAM_Framework_Resource_BaseTrait
 
         if (!is_array($permissions)) { // Deal with corrupted data
             $permissions = [];
-        } else {
-            $permissions = $this->_add_sys_attributes($permissions);
         }
 
         // Store explicit permissions separately from final set of permissions
@@ -455,7 +453,7 @@ trait AAM_Framework_Resource_BaseTrait
         // JSON Access Policy is deeply embedded in the framework, thus take it into
         // consideration during resource initialization
         if ($this->_should_apply_policies()) {
-            $policy_permissions = $this->_add_sys_attributes($this->_apply_policy());
+            $policy_permissions = $this->_apply_policy();
 
             foreach ($policy_permissions as $resource_id => $permissions) {
                 if (array_key_exists($resource_id, $this->_permissions)) {
@@ -470,10 +468,7 @@ trait AAM_Framework_Resource_BaseTrait
         }
 
         // Pre-load all explicitly defined permissions
-        $inherited_permissions = $this->_add_sys_attributes(
-            $this->_trigger_inheritance(),
-            [ '__inherited' => true ]
-        );
+        $inherited_permissions = $this->_trigger_inheritance();
 
         foreach ($inherited_permissions as $resource_id => $permissions) {
             if (array_key_exists($resource_id, $this->_permissions)) {
@@ -661,24 +656,17 @@ trait AAM_Framework_Resource_BaseTrait
                         // $sib_perms[$id] = $sibling->get_resource(
                         //     $this->type
                         // )->get_permissions($this->_get_resource_identifier($id));
-
-                        $result[$id] = $this->_add_acl_attributes(
-                            $this->misc->merge_permissions(
-                                isset($sib_perms[$id]) ? $sib_perms[$id] : [],
-                                isset($result[$id]) ? $result[$id] : [],
-                                $this->type
-                            ),
-                            $parent
+                        $result[$id] = $this->misc->merge_permissions(
+                            isset($sib_perms[$id]) ? $sib_perms[$id] : [],
+                            isset($result[$id]) ? $result[$id] : [],
+                            $this->type
                         );
                     }
                 } else {
-                    $result = $this->_add_acl_attributes(
-                        $this->misc->merge_permissions(
-                            $sib_perms,
-                            $result,
-                            $this->type
-                        ),
-                        $parent
+                    $result =$this->misc->merge_permissions(
+                        $sib_perms,
+                        $result,
+                        $this->type
                     );
                 }
             }
@@ -787,86 +775,6 @@ trait AAM_Framework_Resource_BaseTrait
     private function _apply_policy()
     {
         return apply_filters('aam_apply_policy_filter', [], $this);
-    }
-
-    /**
-     * Add some system attributes to each permission
-     *
-     * @param array $data
-     * @param array $additional [Optional]
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _add_sys_attributes($data, $additional = [])
-    {
-        foreach($data as $resource_id => $permissions) {
-            $data[$resource_id] = $this->_add_acl_attributes(
-                $permissions,
-                $this->get_access_level(),
-                $additional
-            );
-        }
-
-        return $data;
-    }
-
-    /**
-     * Add system attributes to collection of resource permissions
-     *
-     * @param array $data
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _remove_sys_attributes($data)
-    {
-        $result = [];
-
-        foreach($data as $key => $value) {
-            if (is_array($value)) {
-                $result[$key] = $this->_remove_sys_attributes($value);
-            } elseif (strpos($key, '__') !== 0) {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Add access level attributes to a specific resource permissions
-     *
-     * @param array                               $permissions
-     * @param AAM_Framework_AccessLevel_Interface $acl
-     * @param array                               $additional  [Optional]
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _add_acl_attributes($permissions, $acl, $additional = [])
-    {
-        foreach($permissions as $key => $permission) {
-            if (!isset($permission['__access_level'])) {
-                $permission['__access_level'] = $acl->type;
-
-                $acl_id = $acl->get_id();
-
-                if (!empty($acl_id)) {
-                    $permission['__access_level_id'] = $acl_id;
-                }
-            }
-
-            $permissions[$key] = array_merge($permission, $additional);
-        }
-
-        return $permissions;
     }
 
 }

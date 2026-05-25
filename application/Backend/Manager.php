@@ -46,7 +46,7 @@ class AAM_Backend_Manager
             add_action('edit_user_profile', function($user) {
                 $this->_update_user_profile_form($user);
             });
-            add_action('user_new_form', array($this, 'addNewUserPage'));
+            add_action('user_new_form', array($this, 'user_new_form'));
 
             // User profile update action
             add_action('profile_update', array($this, 'profileUpdate'));
@@ -230,11 +230,11 @@ class AAM_Backend_Manager
      * @param string $param
      *
      * @return void
-     *
      * @access public
-     * @version 6.0.0
+     * 
+     * @version 7.1.2
      */
-    public function addNewUserPage($param)
+    public function user_new_form($param)
     {
         require dirname(__FILE__) . '/tmpl/user/multiple-roles.php';
     }

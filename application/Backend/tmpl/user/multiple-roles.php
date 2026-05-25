@@ -2,13 +2,21 @@
 
 <?php if (defined('AAM_KEY')) { ?>
     <?php if ((!defined('IS_PROFILE_PAGE') || !IS_PROFILE_PAGE) && !is_network_admin() && (empty($user) || current_user_can('promote_user', $user->ID))) { ?>
+        <?php
+            $editable_role  = get_option('default_role');
+            $editable_roles = array_keys(get_editable_roles());
+
+            if (empty($editable_role) || !in_array($editable_role, $editable_roles)) {
+                $editable_role  = !empty($editable_roles) ? $editable_roles[0] : '';
+            }
+        ?>
         <table class="form-table">
             <tr>
                 <th><?php echo __('User Roles', 'advanced-access-manager'); ?></th>
                 <td>
                     <div class="wp-tab-panel">
                         <ul>
-                            <?php $roles = (!empty($user) ? $user->roles : [ get_option('default_role') ]); ?>
+                            <?php $roles = (!empty($user) ? $user->roles : [ $editable_role ]); ?>
                             <?php foreach (get_editable_roles() as $id => $role) { ?>
                                 <li>
                                     <label for="aam_user_role_<?php echo esc_attr($id); ?>">
@@ -24,7 +32,7 @@
                                 </li>
                             <?php } ?>
                         </ul>
-                        <input type="hidden" value="<?php echo esc_js(get_option('default_role')); ?>" name="role" />
+                        <input type="hidden" value="<?php echo esc_js($editable_role); ?>" name="role" />
                     </div>
                 </td>
             </tr>

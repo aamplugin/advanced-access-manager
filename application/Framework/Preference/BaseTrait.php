@@ -173,7 +173,7 @@ trait AAM_Framework_Preference_BaseTrait
             $result = [];
         }
 
-        return $this->_remove_sys_attributes($result);
+        return $result;
     }
 
     /**
@@ -213,8 +213,6 @@ trait AAM_Framework_Preference_BaseTrait
 
         if (!is_array($preferences)) { // Deal with corrupted data
             $preferences = [];
-        } else {
-            $preferences = $this->_add_sys_attributes($preferences);
         }
 
         $this->_explicit_preferences = $preferences;
@@ -223,7 +221,7 @@ trait AAM_Framework_Preference_BaseTrait
         // consideration during resource initialization
         if (AAM_Framework_Manager::_()->config->get('service.policies.enabled', true)) {
             $preferences = array_replace(
-                $this->_add_sys_attributes($this->_apply_policy()),
+                $this->_apply_policy(),
                 $preferences
             );
         }
@@ -237,10 +235,7 @@ trait AAM_Framework_Preference_BaseTrait
 
         // Trigger inheritance mechanism
         $this->_preferences = array_replace(
-            $this->_add_sys_attributes(
-                $this->_inherit_from_parent(),
-                [ '__inherited' => true ]
-            ),
+            $this->_inherit_from_parent(),
             $preferences
         );
     }
@@ -326,56 +321,8 @@ trait AAM_Framework_Preference_BaseTrait
             $this->get_access_level()
         )->set_setting(
             $this->_get_settings_ns(),
-            $this->_remove_sys_attributes($preferences)
+            $preferences
         );
-    }
-
-    /**
-     * Add some system attributes to each permission
-     *
-     * @param array $data
-     * @param array $additional [Optional]
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _add_sys_attributes($data, $additional = [])
-    {
-        if (!empty($data)) {
-            $acl    = $this->get_access_level();
-            $acl_id = $acl->get_id();
-
-            $to_merge = [ '__access_level' => $acl->type ];
-
-            if (!empty($acl_id)) {
-                $to_merge['__access_level_id'] = $acl_id;
-            }
-
-            $result = array_merge($data, $to_merge, $additional);
-        } else {
-            $result = [];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Add system attributes
-     *
-     * @param array $data
-     *
-     * @return array
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _remove_sys_attributes($data)
-    {
-        return array_filter($data, function($k) {
-            return strpos($k, '__') !== 0;
-        }, ARRAY_FILTER_USE_KEY);
     }
 
 }

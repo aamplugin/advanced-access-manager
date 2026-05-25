@@ -153,7 +153,7 @@ class AAM_Service_Identity
         $service = AAM::api()->roles();
 
         foreach(array_keys($views) as $slug) {
-            if ($slug !== 'all' && $service->is_hidden($slug)) {
+            if (!in_array($slug, ['all', 'none']) && $service->is_hidden($slug)) {
                 unset($views[$slug]);
             }
         }
