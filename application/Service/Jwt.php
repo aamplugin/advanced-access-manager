@@ -206,7 +206,7 @@ class AAM_Service_Jwt
      * @return int
      * @access private
      *
-     * @version 7.0.4
+     * @version 7.1.3
      */
     private function _determine_current_user($user_id)
     {
@@ -220,24 +220,30 @@ class AAM_Service_Jwt
                     // Backward compatibility
                     if (array_key_exists('userId', $claims)) {
                         $cuid = $claims['userId'];
-                    } else {
+                    } elseif (array_key_exists('user_id', $claims)) {
                         $cuid = $claims['user_id'];
+                    } else {
+                        $cuid = null;
                     }
 
-                    // Get JWT service and verify that token is valid
-                    $service  = AAM::api()->jwts(
-                        'user:' . $cuid,
-                        [ 'error_handling' => 'wp_error' ]
-                    );
+                    if (!empty($cuid)) {
+                        // Get JWT service and verify that token is valid
+                        $service  = AAM::api()->jwts(
+                            'user:' . $cuid,
+                            [ 'error_handling' => 'wp_error' ]
+                        );
 
-                    if (!is_wp_error($service)) {
-                        $is_valid = $service->validate($token->jwt);
+                        if (!is_wp_error($service)) {
+                            $is_valid = $service->validate($token->jwt);
 
-                        if ($is_valid === true) {
-                            if ($this->_is_user_active($cuid)) {
-                                $this->_maybe_authenticate($cuid, $token, $claims);
+                            if ($is_valid === true) {
+                                if ($this->_is_user_active($cuid)) {
+                                    $this->_maybe_authenticate(
+                                        $cuid, $token, $claims
+                                    );
 
-                                $user_id = $cuid;
+                                    $user_id = $cuid;
+                                }
                             }
                         }
                     }

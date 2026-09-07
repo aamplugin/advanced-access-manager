@@ -92,4 +92,22 @@ final class MiscTest extends TestCase
         );
     }
 
+    /**
+     * Test sanitize_url method with canonical URL
+     *
+     * @return void
+     */
+    public function testSanitizeCanonicalUrl()
+    {
+        $this->assertEquals(
+            '/another-page/',
+            AAM::api()->misc->sanitize_url(home_url('/another-page/'))
+        );
+
+        $this->assertEquals(
+            AAM::api()->misc->sanitize_url(home_url('/another-page/')),
+            '/another-page/'
+        );
+    }
+
 }

@@ -249,24 +249,28 @@ class AAM_Framework_Service_Settings
      * @return null|array
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.3
      */
     private function _get_settings_pointer()
     {
-        $result       = null;
+        $result       = [];
         $access_level = $this->_get_access_level();
         $type         = $access_level->type;
         $id           = $access_level->get_id();
 
+        // If access level is Role or User, then we need to check for the ID as well, 
+        // otherwise just return the type
         if (in_array(
             $type,
             [
                 AAM_Framework_Type_AccessLevel::USER,
                 AAM_Framework_Type_AccessLevel::ROLE
             ],
-            true) && isset($this->_data[$type][$id])
+            true)
         ) {
-            $result = $this->_data[$type][$id];
+            if (isset($this->_data[$type][$id])) {
+                $result = $this->_data[$type][$id];
+            }
         } elseif (isset($this->_data[$type])) {
             $result = $this->_data[$type];
         }

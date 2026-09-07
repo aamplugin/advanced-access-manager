@@ -147,7 +147,7 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
      * @return bool|string
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.3
      */
     public function sanitize_url($url)
     {
@@ -185,6 +185,12 @@ class AAM_Framework_Utility_Misc implements AAM_Framework_Utility_Interface
                     $result = false;
                 }
             }
+        }
+
+        // Making sure we retain canonical URL representation if trailing forward slash 
+        // is present in the original URL
+        if ($result !== false && substr($url, -1) === '/') {
+            $result = rtrim($result, '/') . '/';
         }
 
         return $result;

@@ -434,7 +434,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
      * @return array
      * @access private
      *
-     * @version 7.1.1
+     * @version 7.1.3
      */
     private function _get_raw_menu()
     {
@@ -451,6 +451,14 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
                 // The "bound" property at this point is already set to true, so we
                 // cannot get the list of nodes. This is why we use Reflection
                 $prop  = $admin_bar->getProperty('nodes');
+
+                // PHP compatibility
+                if (method_exists($prop, 'setAccessible') 
+                    && version_compare(PHP_VERSION, '8.5.0') < 0
+                ) {
+                    $prop->setAccessible(true);
+                }
+
                 $nodes = $prop->getValue($wp_admin_bar);
 
                 if (array_key_exists('root', $nodes)) {

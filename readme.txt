@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 5.6.0
-Tested up to: 6.9.4
-Stable tag: 7.1.2
+Tested up to: 7.1.0
+Stable tag: 7.1.3
 
 Access Governance for WordPress. Control roles, users, content, admin areas, and APIs to prevent broken access controls and excessive privileges.
 
@@ -64,6 +64,14 @@ Just **security you can reason about, audit, and trust**.
 11. Improve your website security
 
 == Changelog ==
+
+= 7.1.3 =
+* Fixed: Login redirect drops scheme and trailing slash, breaking sites behind a reverse proxy [https://github.com/aamplugin/advanced-access-manager/issues/506](https://github.com/aamplugin/advanced-access-manager/issues/506)
+* Fixed: Duplicated role settings [https://github.com/aamplugin/advanced-access-manager/issues/509](https://github.com/aamplugin/advanced-access-manager/issues/509)
+* Fixed: Undefined array key "user_id" warning in Service/Jwt.php line 224 [https://github.com/aamplugin/advanced-access-manager/issues/510](https://github.com/aamplugin/advanced-access-manager/issues/510)
+* Fixed: PHP Notice: Cannot access non-public member WP_Admin_Bar::$nodes [https://github.com/aamplugin/advanced-access-manager/issues/505](https://github.com/aamplugin/advanced-access-manager/issues/505)
+* Changed: Remove AAM Policy post type from REST API [https://github.com/aamplugin/advanced-access-manager/issues/511](https://github.com/aamplugin/advanced-access-manager/issues/511) 
+* New: Add the ability to track application passwords per user [https://github.com/aamplugin/advanced-access-manager/issues/508](https://github.com/aamplugin/advanced-access-manager/issues/508)
 
 = 7.1.2 =
 * Fixed: "Sorry, you are not allowed to give users that role." when Multi-Role Support is enabled and default_role is not in get_editable_roles() [https://github.com/aamplugin/advanced-access-manager/issues/501](https://github.com/aamplugin/advanced-access-manager/issues/501)

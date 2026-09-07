@@ -195,7 +195,7 @@ final class AAM_Framework_Manager
      * @return void
      * @access protected
      *
-     * @version 7.0.0
+     * @version 7.1.3
      */
     protected function __construct()
     {
@@ -213,7 +213,7 @@ final class AAM_Framework_Manager
                     ],
                     'public'              => false,
                     'show_ui'             => true,
-                    'show_in_rest'        => true,
+                    'show_in_rest'        => false,
                     'show_in_menu'        => false,
                     'exclude_from_search' => true,
                     'publicly_queryable'  => false,
@@ -509,10 +509,12 @@ final class AAM_Framework_Manager
      * @return AAM_Framework_AccessLevel_Interface
      * @access private
      *
-     * @version 7.0.0
+     * @version 7.1.3
      */
     private function _string_to_access_level($str)
     {
+        $result = null;
+
         // Trying to parse the context and extract the access level
         if (in_array($str, [ 'visitor', 'anonymous', 'guest'], true)) {
             $result = $this->access_levels->get_visitor();

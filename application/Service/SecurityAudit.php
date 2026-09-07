@@ -133,7 +133,7 @@ class AAM_Service_SecurityAudit
      * @param string $check
      * @param bool   $reset
      *
-     * @return void
+     * @return array
      * @access public
      *
      * @version 7.0.0
@@ -257,6 +257,14 @@ class AAM_Service_SecurityAudit
                 'executor'    => AAM_Audit_EmptyUnusedRoleCheck::class,
                 'description' => __('Empty roles, which lack any assigned capabilities, or unused custom roles can pose some concerns if misused by plugins or themes. This check identifies such roles, enabling administrators to audit and remove them to avoid confusion.', 'advanced-access-manager'),
                 'article'     => 'https://aamportal.com/article/risks-registered-empty-roles-wordpress'
+            ),
+            AAM_Audit_ApplicationPasswordCheck::ID => array(
+                'title'       => __('Application Passwords Enabled', 'advanced-access-manager'),
+                'step'        => AAM_Audit_ApplicationPasswordCheck::ID,
+                'category'    => 'General Security Consideration',
+                'executor'    => AAM_Audit_ApplicationPasswordCheck::class,
+                'description' => __('Application passwords provide a secure way to authenticate API requests without using user credentials. This check ensures that website owner has full visibility on who has application passwords enabled.', 'advanced-access-manager'),
+                'article'     => 'https://aamportal.com/article/wordpress-application-passwords-invisible-credentials-to-monitor'
             ),
             AAM_Audit_HighPrivilegeRoleCheck::ID => array(
                 'title'       => __('Detect High-Privilege Roles', 'advanced-access-manager'),
