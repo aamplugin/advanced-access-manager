@@ -151,11 +151,12 @@ class AAM_Service_LoginRedirect
     {
         $redirect = AAM::api()->user($user->ID)->login_redirect()->get_redirect();
 
+        // The default target is WordPress's own admin URL, which is already
+        // canonical and safe. Return it verbatim: routing it through the
+        // redirect pipeline normalises it via Misc::parse_url, whose output is
+        // a comparison key with the scheme, host and trailing slash stripped.
         if ($redirect['type'] === 'default') {
-            $redirect = [
-                'type'         => 'url_redirect',
-                'redirect_url' => admin_url()
-            ];
+            return admin_url();
         }
 
         return AAM::api()->redirect->to_redirect_url($redirect);
