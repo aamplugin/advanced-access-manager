@@ -72,10 +72,10 @@ $GLOBALS['policies'] = new PolicyStatements();
 $resource = new AAM_Framework_Resource_Ability();
 $method = new ReflectionMethod($resource, '_apply_policy');
 $method->setAccessible(true);
-$server_resource = new AAM_Framework_Resource_MCPServer();
+$server_resource = new AAM_Framework_Resource_McpServer();
 $server_method = new ReflectionMethod($server_resource, '_apply_policy');
 $server_method->setAccessible(true);
-$tool_resource = new AAM_Framework_Resource_MCPTool();
+$tool_resource = new AAM_Framework_Resource_McpTool();
 $tool_method = new ReflectionMethod($tool_resource, '_apply_policy');
 $tool_method->setAccessible(true);
 
