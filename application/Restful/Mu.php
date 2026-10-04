@@ -24,8 +24,7 @@ class AAM_Restful_Mu
      * @version 7.0.0
      */
     const PERMISSIONS = [
-        'aam_manager',
-        'aam_manage_admin_toolbar'
+        'aam_manager'
     ];
 
     /**
@@ -63,6 +62,22 @@ class AAM_Restful_Mu
                 return current_user_can('aam_manager')
                     && AAM::api()->misc->is_admin();
             };
+
+            // Load the workspace for a selected access level and service.
+            $this->_register_route('/preload', [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'preload' ],
+                'args' => [
+                    'access_level' => [
+                        'type' => 'string',
+                        'required' => true,
+                        'enum' => [ 'role', 'user', 'visitor', 'default' ]
+                    ],
+                    'role_id' => [ 'type' => 'string' ],
+                    'user_id' => [ 'type' => 'integer' ],
+                    'screen' => [ 'type' => 'string' ]
+                ]
+            ], self::PERMISSIONS, false);
 
             // Reset AAM
             $this->_register_route('/core/reset', [
@@ -112,6 +127,30 @@ class AAM_Restful_Mu
                 );
             }, 10, 5
         );
+    }
+
+    /** Load a workspace context using REST query parameters. */
+    public function preload(WP_REST_Request $request)
+    {
+        $type = sanitize_key($request->get_param('access_level'));
+        $id = $type === 'role' ? sanitize_text_field((string) $request->get_param('role_id'))
+            : ($type === 'user' ? absint($request->get_param('user_id')) : null);
+
+        try {
+            AAM_Backend_React::validate_context($type, $id);
+            $access_level = AAM::api()->access_levels->get($type, $id);
+
+            return rest_ensure_response(AAM_Backend_React::payload(
+                sanitize_key($request->get_param('screen') ?: 'admin_menu'),
+                $access_level
+            ));
+        } catch (Throwable $exception) {
+            return new WP_Error(
+                'rest_forbidden',
+                $exception->getMessage(),
+                [ 'status' => 403 ]
+            );
+        }
     }
 
     /**

@@ -64,12 +64,9 @@ class AAM_Service_LoginRedirect
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_LoginRedirect::register();
-            });
-        }
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_LoginRedirect::register();
+        });
 
         // AAM Secure Login hooking
         add_filter(

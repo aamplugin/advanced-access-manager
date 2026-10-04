@@ -78,20 +78,9 @@ class AAM_Service_Jwt
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Jwt::register();
-            });
-
-            add_action('aam_post_edit_user_modal_action', function () {
-                if (current_user_can(AAM_Backend_Feature_Main_Jwt::ACCESS_CAPABILITY)) {
-                    echo AAM_Backend_View::get_instance()->loadPartial(
-                        'jwt-login-url'
-                    );
-                }
-            });
-        }
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_Jwt::register();
+        });
 
         add_action('aam_reset_action', function() {
             global $wpdb;

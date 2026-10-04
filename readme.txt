@@ -2,9 +2,9 @@
 Contributors: vasyltech
 Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
-Requires PHP: 5.6.0
+Requires PHP: 8.0
 Tested up to: 7.1.0
-Stable tag: 7.1.3
+Stable tag: 8.0.0
 
 Access Governance for WordPress. Control roles, users, content, admin areas, and APIs to prevent broken access controls and excessive privileges.
 
@@ -64,6 +64,11 @@ Just **security you can reason about, audit, and trust**.
 11. Improve your website security
 
 == Changelog ==
+
+= 8.0.0 =
+* New: Completely new UI
+* New: The Abilities & MCP service
+* New: Security Audit implementation
 
 = 7.1.3 =
 * Fixed: Login redirect drops scheme and trailing slash, breaking sites behind a reverse proxy [https://github.com/aamplugin/advanced-access-manager/issues/506](https://github.com/aamplugin/advanced-access-manager/issues/506)

@@ -1,0 +1,348 @@
+#aam_policy .inside {
+  margin: 0;
+  padding: 0;
+}
+
+.aam-policy-document {
+  color: #31283b;
+}
+
+.aam-policy-document-intro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px 20px;
+  border-bottom: 1px solid #e8e1ee;
+  background: linear-gradient(110deg, #faf5ff, #fff 70%);
+}
+
+.aam-policy-document-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ece0f8;
+  color: #6d3da5;
+}
+
+.aam-policy-document-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.aam-policy-document-intro strong {
+  display: block;
+  font-size: 14px;
+}
+
+.aam-policy-document-intro p {
+  margin: 3px 0 0;
+  color: #6a6370;
+  line-height: 1.4;
+}
+
+.aam-policy-document-intro-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.aam-policy-document-intro-actions > a,
+.aam-policy-document-intro-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 11px;
+  border: 1px solid #d9c9eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #603493;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.aam-policy-document-intro-actions > button {
+  cursor: pointer;
+}
+
+.aam-policy-document-intro-actions .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.aam-policy-document-intro-actions > a:hover,
+.aam-policy-document-intro-actions > a:focus-visible,
+.aam-policy-document-intro-actions > button:hover,
+.aam-policy-document-intro-actions > button:focus-visible {
+  border-color: #8a5eb8;
+  color: #4b267b;
+}
+.aam-policy-document :is(a, button):focus {
+  outline: none;
+  box-shadow: none;
+}
+.aam-policy-document :is(a, button):focus-visible {
+  filter: brightness(0.88);
+}
+
+.aam-policy-document-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 27%);
+  gap: 0;
+}
+
+.aam-policy-document-layout.is-guide-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.aam-policy-document-guide[hidden] {
+  display: none;
+}
+
+.aam-policy-document-main {
+  min-width: 0;
+  padding: 18px 20px 20px;
+}
+
+.aam-policy-document-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.aam-policy-document-toolbar label {
+  font-weight: 600;
+}
+
+.aam-policy-document-toolbar .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  border-radius: 7px;
+}
+
+.aam-policy-document-toolbar .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 1 !important;
+}
+
+#aam-policy-editor {
+  display: block;
+  width: 100%;
+  min-height: 440px;
+  padding: 14px;
+  border: 1px solid #dcd6e3;
+  border-radius: 8px;
+  background: #fff;
+  color: #2c2631;
+  font:
+    13px/1.6 Consolas,
+    Monaco,
+    monospace;
+  tab-size: 2;
+}
+
+.aam-policy-document-main .CodeMirror {
+  height: 440px;
+  border: 1px solid #dcd6e3;
+  border-radius: 8px;
+  background: #fff;
+  font:
+    13px/1.6 Consolas,
+    Monaco,
+    monospace;
+}
+
+.aam-policy-document-main .CodeMirror-focused {
+  border-color: #8a5eb8;
+  box-shadow: 0 0 0 2px #8a5eb833;
+}
+
+.aam-policy-document-main .CodeMirror-gutters {
+  border-right: 1px solid #e8e3ed;
+  background: #faf8fc;
+}
+
+.aam-policy-document-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: 9px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.aam-policy-document-status .dashicons {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+
+.aam-policy-document-status.is-valid {
+  background: #ebf7ee;
+  color: #24683c;
+}
+
+.aam-policy-document-status.is-warning {
+  background: #fff7e7;
+  color: #7a560d;
+}
+
+.aam-policy-document-status.is-invalid {
+  background: #fff0f0;
+  color: #9c292d;
+}
+
+.aam-policy-document-status .button-link {
+  margin-left: auto;
+  color: inherit;
+  font-weight: 600;
+}
+
+.aam-policy-document-guide {
+  padding: 20px;
+  border-left: 1px solid #e8e1ee;
+  background: #fbf9fd;
+}
+
+.aam-policy-document-guide-label {
+  color: #7952a1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.aam-policy-document-guide h3 {
+  margin: 7px 0 8px;
+  font-size: 15px;
+}
+
+.aam-policy-document-guide p {
+  margin: 0 0 12px;
+  color: #655d69;
+  line-height: 1.5;
+}
+
+.aam-policy-document-guide ol {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px 19px;
+}
+
+.aam-policy-document-guide li {
+  padding-left: 2px;
+  line-height: 1.4;
+}
+
+.aam-policy-document-example {
+  overflow: hidden;
+  border: 1px solid #e4dbec;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.aam-policy-document-example > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ece6f1;
+  font-size: 12px;
+}
+
+.aam-policy-document-example button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ded2e9;
+  border-radius: 6px;
+  background: #faf6ff;
+  color: #633795;
+  cursor: pointer;
+}
+
+.aam-policy-document-example button:hover {
+  border-color: #8a5eb8;
+}
+
+.aam-policy-document-example button .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.aam-policy-document-example pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 10px;
+  color: #44364f;
+  font:
+    11px/1.5 Consolas,
+    Monaco,
+    monospace;
+}
+
+.aam-policy-document-example small {
+  display: block;
+  padding: 0 10px 9px;
+  color: #736b79;
+  line-height: 1.35;
+}
+
+.aam-policy-document-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.aam-policy-document-links a {
+  color: #603493;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.aam-policy-document-links a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .aam-policy-document-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .aam-policy-document-guide {
+    border-top: 1px solid #e8e1ee;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .aam-policy-document-intro {
+    flex-wrap: wrap;
+  }
+
+  .aam-policy-document-intro-actions {
+    margin-left: 49px;
+  }
+}

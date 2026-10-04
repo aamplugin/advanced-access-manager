@@ -21,13 +21,15 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
 
     /**
      * Get list of editable roles
+     * 
+     * @param bool $raw_list
      *
-     * @return Generator
+     * @return Generator|array
      * @access public
      *
      * @version 7.0.0
      */
-    public function get_editable_roles()
+    public function get_editable_roles($raw_list = false)
     {
         $wp_roles = wp_roles();
 
@@ -37,15 +39,19 @@ class AAM_Framework_Utility_Roles implements AAM_Framework_Utility_Interface
             $all = apply_filters('editable_roles', $wp_roles->roles);
         }
 
-        $result = function () use ($all, $wp_roles) {
-            foreach(array_keys($all) as $slug) {
-                yield new AAM_Framework_Proxy_Role(
-                    $wp_roles->role_names[$slug], $wp_roles->get_role($slug)
-                );
-            }
-        };
+        if ($raw_list) {
+            $result = $all;
+        } else {
+            $result = (function () use ($all, $wp_roles) {
+                foreach(array_keys($all) as $slug) {
+                    yield new AAM_Framework_Proxy_Role(
+                        $wp_roles->role_names[$slug], $wp_roles->get_role($slug)
+                    );
+                }
+            })();
+        }
 
-        return $result();
+        return $result;
     }
 
     /**

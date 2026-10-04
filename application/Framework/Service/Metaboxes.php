@@ -459,6 +459,10 @@ class AAM_Framework_Service_Metaboxes
             'is_restricted' => $this->_is_denied(
                 $metabox['slug'],
                 $screen_id ? $screen_id : $metabox['screen_id']
+            ),
+            'is_customized' => $this->is_customized(
+                $metabox['slug'],
+                $screen_id ? $screen_id : $metabox['screen_id']
             )
         ];
     }

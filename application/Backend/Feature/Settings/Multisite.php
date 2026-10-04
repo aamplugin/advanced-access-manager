@@ -28,7 +28,6 @@ class AAM_Backend_Feature_Settings_Multisite extends AAM_Backend_Feature_Abstrac
      *
      * @version 7.0.0
      */
-    const TEMPLATE = 'settings/multisite.php';
 
     /**
      * Get list of options

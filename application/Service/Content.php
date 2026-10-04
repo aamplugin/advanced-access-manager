@@ -81,12 +81,11 @@ class AAM_Service_Content
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Content::register();
-            });
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_Content::register();
+        });
 
+        if (is_admin()) {
             // Check if Access Manager metabox feature is enabled
             $metaboxEnabled = AAM::api()->config->get(
                 'core.settings.ui.render_access_metabox'
@@ -100,6 +99,33 @@ class AAM_Service_Content
                         $this->_register_access_manager_metabox();
                     }
                 );
+                add_action('admin_enqueue_scripts', function($hook) {
+                    if (in_array($hook, ['post.php', 'post-new.php'], true)
+                        && AAM_Backend_React::enabled()
+                        && current_user_can('aam_manager')
+                        && current_user_can('aam_manage_content')
+                    ) {
+                        AAM_Backend_React::enqueue_post_metabox();
+                    }
+                });
+                add_action('admin_enqueue_scripts', function($hook) {
+                    if ($hook !== 'term.php' || !AAM_Backend_React::enabled()
+                        || !current_user_can('aam_manager')
+                        || !current_user_can('aam_manage_content')) {
+                        return;
+                    }
+                    $screen = get_current_screen();
+                    if (!$screen || !$screen->taxonomy) {
+                        return;
+                    }
+                    AAM_Backend_React::enqueue_term_access();
+                    add_action("{$screen->taxonomy}_edit_form", function($term) {
+                        if ($term instanceof WP_Term
+                            && current_user_can('edit_term', $term->term_id)) {
+                            echo AAM_Backend_View::renderTermAccess($term);
+                        }
+                    });
+                });
             }
         }
 
@@ -333,10 +359,13 @@ class AAM_Service_Content
     {
         global $post;
 
-        if (is_a($post, 'WP_Post')) {
+        if (is_a($post, 'WP_Post') && current_user_can('aam_manager')
+            && current_user_can('aam_manage_content')) {
             add_meta_box(
                 'aam-access-manager',
-                __('Access Manager', 'advanced-access-manager'),
+                AAM_Backend_React::enabled()
+                    ? __('Access Controls', 'advanced-access-manager')
+                    : __('Access Manager', 'advanced-access-manager'),
                 function () {
                     global $post;
 

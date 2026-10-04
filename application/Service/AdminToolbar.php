@@ -46,11 +46,9 @@ class AAM_Service_AdminToolbar
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_AdminToolbar::register();
-            });
-        }
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_AdminToolbar::register();
+        });
 
         // Cache admin toolbar
         if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {

@@ -82,7 +82,7 @@ class AAM_Framework_Service_Capabilities
     public function add($capability, $is_granted = true, $ignore_format = false)
     {
         try {
-            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+/', $capability)) {
+            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+\z/', $capability)) {
                 throw new InvalidArgumentException(
                     'Valid capability slug is required'
                 );
@@ -196,7 +196,7 @@ class AAM_Framework_Service_Capabilities
     {
         try {
             // Step #1. Validate new slug before we do anything funky
-            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+/', $new_slug)) {
+            if (!$ignore_format && !preg_match('/^[a-z\d\-_]+\z/', $new_slug)) {
                 throw new InvalidArgumentException(
                     'Valid new capability slug is required'
                 );

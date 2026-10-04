@@ -1,0 +1,8 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "phpVersion": "8.3",
+  "plugins": [
+    "https://downloads.wordpress.org/plugin/mcp-adapter.0.7.0.zip",
+    "."
+  ]
+}

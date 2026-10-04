@@ -72,15 +72,28 @@ class AAM_Service_Policies
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Policy::register();
-            });
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_Policy::register();
+        });
 
+        if (is_admin()) {
             // Register custom access control metabox
             add_action('add_meta_boxes', function() {
                 $this->_add_meta_boxes();
+            });
+
+            add_action('admin_enqueue_scripts', function($hook) {
+                $post_id = absint($_GET['post'] ?? $_POST['post_ID'] ?? 0);
+                if (in_array($hook, ['post.php', 'post-new.php'], true)
+                    && AAM_Backend_React::enabled()
+                    && current_user_can('aam_manager')
+                    && current_user_can('aam_manage_policies')
+                    && $post_id
+                    && get_post_type($post_id) === AAM_Framework_Service_Policies::CPT
+                    && get_post_status($post_id) === 'publish'
+                ) {
+                    AAM_Backend_React::enqueue_policy_assignee_metabox($post_id);
+                }
             });
 
             // Access policy save

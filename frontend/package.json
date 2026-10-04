@@ -1,0 +1,19 @@
+{
+    "name": "aam-react-admin",
+    "version": "7.1.4-react.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "node build.mjs",
+        "i18n:extract": "node i18n/extract.mjs",
+        "test": "node --test tests/*.test.mjs",
+        "typecheck": "tsc -p tsconfig.json",
+        "format": "prettier --write src build.mjs tests ../media/css/react-admin.css"
+    },
+    "devDependencies": {
+        "@babel/parser": "^7.27.7",
+        "esbuild": "0.28.2",
+        "prettier": "3.6.2",
+        "typescript": "7.0.2"
+    }
+}

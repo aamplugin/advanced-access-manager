@@ -3,7 +3,9 @@
 /**
  * Plugin Name: Advanced Access Manager – Access Governance for WordPress
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 7.1.3
+ * Version: 8.0.0
+ * Requires at least: 6.2
+ * Requires PHP: 8.0
  * Author: VasylTech LLC <support@aamplugin.com>
  * Author URI: https://aamportal.com
  * Text Domain: advanced-access-manager
@@ -41,8 +43,11 @@ class AAM
         AAM_Service_Widgets::class              => 'service.widgets.enabled',
         AAM_Service_AdminToolbar::class         => 'service.admin_toolbar.enabled',
         AAM_Service_ApiRoute::class             => 'service.api_route.enabled',
+        AAM_Service_Ability::class              => 'service.ability.enabled',
+        AAM_Service_Mcp::class                  => 'service.ability.enabled',
         AAM_Service_Identity::class             => 'service.identity.enabled',
         AAM_Service_Content::class              => 'service.content.enabled',
+        AAM_Service_ApplicationPasswords::class => 'service.application_passwords.enabled',
         AAM_Service_SecureLogin::class          => 'service.secure_login.enabled',
         AAM_Service_Jwt::class                  => 'service.jwt.enabled',
         AAM_Service_Capability::class           => 'service.capability.enabled',
@@ -226,8 +231,8 @@ class AAM
         global $wp_version;
 
         // Check PHP Version
-        if (version_compare(PHP_VERSION, '5.6.40') === -1) {
-            exit(__('PHP 5.6.40 or higher is required.', 'advanced-access-manager'));
+        if (version_compare(PHP_VERSION, '8.0.0') === -1) {
+            exit(__('PHP 8.0.0 or higher is required.', 'advanced-access-manager'));
         } elseif (version_compare($wp_version, '5.8.0') === -1) {
             exit(__('WP 5.8.0 or higher is required.', 'advanced-access-manager'));
         }
@@ -284,7 +289,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '7.1.3');
+    define('AAM_VERSION', '8.0.0');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

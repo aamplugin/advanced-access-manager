@@ -78,7 +78,8 @@ final class AdminToolbarTest extends TestCase
             "uri"           => "/wp-admin/about.php",
             "name"          => "About WordPress",
             "is_restricted" => false,
-            "parent_id"     => "wp-logo"
+            "parent_id"     => "wp-logo",
+            "is_customized" => false
         ], $result->get_data());
     }
 

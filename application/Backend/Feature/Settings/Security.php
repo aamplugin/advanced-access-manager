@@ -28,7 +28,6 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
      *
      * @version 7.0.0
      */
-    const TEMPLATE = 'settings/security.php';
 
     /**
      * Get list of security options

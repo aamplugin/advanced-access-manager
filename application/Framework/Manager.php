@@ -12,6 +12,11 @@
  *
  * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Abilities abilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpServers mcp_servers(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpTools mcp_tools(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpPrompts mcp_prompts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpResources mcp_resources(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
@@ -126,6 +131,11 @@ final class AAM_Framework_Manager
     private $_services = [
         'urls'                   => AAM_Framework_Service_Urls::class,
         'api_routes'             => AAM_Framework_Service_ApiRoutes::class,
+        'abilities'              => AAM_Framework_Service_Abilities::class,
+        'mcp_servers'            => AAM_Framework_Service_McpServers::class,
+        'mcp_tools'              => AAM_Framework_Service_McpTools::class,
+        'mcp_prompts'            => AAM_Framework_Service_McpPrompts::class,
+        'mcp_resources'          => AAM_Framework_Service_McpResources::class,
         'jwts'                   => AAM_Framework_Service_Jwts::class,
         'login_redirect'         => AAM_Framework_Service_LoginRedirect::class,
         'logout_redirect'        => AAM_Framework_Service_LogoutRedirect::class,
@@ -159,6 +169,11 @@ final class AAM_Framework_Manager
     private $_resources = [
         AAM_Framework_Type_Resource::TOOLBAR      => AAM_Framework_Resource_AdminToolbar::class,
         AAM_Framework_Type_Resource::API_ROUTE    => AAM_Framework_Resource_ApiRoute::class,
+        AAM_Framework_Type_Resource::ABILITY      => AAM_Framework_Resource_Ability::class,
+        AAM_Framework_Type_Resource::MCP_SERVER   => AAM_Framework_Resource_MCPServer::class,
+        AAM_Framework_Type_Resource::MCP_TOOL     => AAM_Framework_Resource_MCPTool::class,
+        AAM_Framework_Type_Resource::MCP_PROMPT   => AAM_Framework_Resource_MCPPrompt::class,
+        AAM_Framework_Type_Resource::MCP_RESOURCE => AAM_Framework_Resource_MCPResource::class,
         AAM_Framework_Type_Resource::BACKEND_MENU => AAM_Framework_Resource_BackendMenu::class,
         AAM_Framework_Type_Resource::POST         => AAM_Framework_Resource_Post::class,
         AAM_Framework_Type_Resource::POST_TYPE    => AAM_Framework_Resource_PostType::class,

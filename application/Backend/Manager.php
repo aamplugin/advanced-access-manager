@@ -36,10 +36,7 @@ class AAM_Backend_Manager
      */
     protected function __construct()
     {
-        // Print required JS & CSS
-        add_action('aam_iframe_footer_action', function() {
-            $this->_print_js();
-        });
+        AAM_Backend_React::boot();
 
         // Alter user edit screen with support for multiple roles
         if (AAM::api()->config->get('core.settings.multi_access_levels')) {
@@ -61,9 +58,6 @@ class AAM_Backend_Manager
             add_action('_admin_menu', array($this, 'adminMenu'));
         }
 
-        // Manager AAM Ajax Requests
-        add_action('wp_ajax_aam', array($this, 'ajax'));
-
         // Manager user search on the AAM page
         add_filter('user_search_columns', function($columns) {
             $columns[] = 'display_name';
@@ -72,9 +66,6 @@ class AAM_Backend_Manager
 
         // Footer thank you
         add_filter('admin_footer_text', array($this, 'thankYou'), 999);
-
-        // Control admin area
-        add_action('admin_init', array($this, 'adminInit'));
 
         // Check for pending migration scripts
         if (current_user_can('update_plugins')) {
@@ -89,17 +80,76 @@ class AAM_Backend_Manager
                 $settings = wp_enqueue_code_editor(
                     array('type' => 'application/json')
                 );
+                $base = plugins_url('media/', AAM_BASEDIR . '/aam.php');
+                $style = AAM_BASEDIR . '/media/css/policy-document.css';
+                $script = AAM_BASEDIR . '/media/js/policy-document.js';
 
-                if ( false !== $settings ) { // In case Codemirror is disabled
-                    wp_add_inline_script(
-                        'code-editor',
-                        sprintf(
-                            'jQuery(() => wp.codeEditor.initialize("%s", %s));',
-                            'aam-policy-editor',
-                            wp_json_encode($settings)
-                        )
-                    );
+                wp_enqueue_style('aam-policy-document', $base . 'css/policy-document.css',
+                    [], filemtime($style) ?: '1');
+                wp_enqueue_script('aam-policy-document', $base . 'js/policy-document.js',
+                    false !== $settings ? ['code-editor', 'wp-i18n'] : ['wp-i18n'],
+                    filemtime($script) ?: '1', true);
+
+                $known = [
+                    'abilities' => null,
+                    'servers' => null,
+                    'tools' => null,
+                    'resources' => null,
+                    'prompts' => null,
+                    'wildcards' => (bool) apply_filters(
+                        'aam_ui_policy_wildcards_available_filter', false
+                    )
+                ];
+                if (function_exists('wp_get_abilities')) {
+                    $known['abilities'] = array_map(function($ability) {
+                        return $ability->get_name();
+                    }, wp_get_abilities());
                 }
+                if (class_exists('\\WP\\MCP\\Core\\McpAdapter')) {
+                    $known['servers'] = [];
+                    $known['tools'] = [];
+                    $known['resources'] = [];
+                    $known['prompts'] = [];
+                    foreach (\WP\MCP\Core\McpAdapter::instance()->get_servers() as $server) {
+                        $id = $server->get_server_id();
+                        $schema = null;
+                        if (method_exists($server, 'get_schemas')) {
+                            $versions = \WP\McpSchema\Schemas::supportedVersions();
+                            $schema = $server->get_schemas()->forVersion(end($versions));
+                        }
+                        $tools = $schema ? $server->get_tools($schema)
+                            : $server->get_tools();
+                        $resources = $schema ? $server->get_resources($schema)
+                            : $server->get_resources();
+                        $prompts = $schema ? $server->get_prompts($schema)
+                            : $server->get_prompts();
+                        $known['servers'][] = $id;
+                        foreach ($tools as $tool) {
+                            $known['tools'][] = [
+                                'server' => $id,
+                                'name' => $tool->getName()
+                            ];
+                        }
+                        foreach ($resources as $resource) {
+                            $known['resources'][] = [
+                                'server' => $id,
+                                'name' => $resource->getUri()
+                            ];
+                        }
+                        foreach ($prompts as $prompt) {
+                            $known['prompts'][] = [
+                                'server' => $id,
+                                'name' => $prompt->getName()
+                            ];
+                        }
+                    }
+                }
+                wp_add_inline_script('aam-policy-document',
+                    'window.aamPolicyEditorSettings = ' . wp_json_encode($settings) . ';'
+                    . 'window.aamPolicyKnownResources = ' . wp_json_encode($known) . ';',
+                    'before');
+                wp_set_script_translations('aam-policy-document',
+                    'advanced-access-manager', AAM_BASEDIR . '/lang');
             }
         });
 
@@ -153,55 +203,6 @@ class AAM_Backend_Manager
                 'The new version of premium add-on is available. Go to your license page to download the latest release.',
                 'advanced-access-manager'
             ));
-        }
-    }
-
-    /**
-     * Print all the necessary JS assets for the AAM UI
-     *
-     * @return void
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    private function _print_js()
-    {
-        if ((is_admin() && filter_input(INPUT_GET, 'page') === 'aam')) {
-            $access_level = AAM_Backend_AccessLevel::get_instance()->get_access_level();
-            $ui           = filter_input(INPUT_GET, 'aamframe');
-
-            // Prepare the JS locals
-            $locals = apply_filters('aam_js_localization_filter', array(
-                'nonce'      => wp_create_nonce('aam_ajax'),
-                'rest_nonce' => wp_create_nonce('wp_rest'),
-                'rest_base'  => esc_url_raw(rest_url()),
-                'ajaxurl'    => esc_url(admin_url('admin-ajax.php')),
-                'ui'         => empty($ui) ? 'main' : $ui,
-                'url' => array(
-                    'editUser'  => esc_url(admin_url('user-edit.php')),
-                    'addUser'   => esc_url(admin_url('user-new.php')),
-                    'editPost'  => esc_url(admin_url('post.php')),
-                    'editTerm'  => esc_url(admin_url('term.php')),
-                    'addPolicy' => esc_url(admin_url('post-new.php?post_type=aam_policy'))
-                ),
-                'subject'   => array(
-                    'type'  => $access_level->type,
-                    'id'    => $access_level->get_id(),
-                    'name'  => $access_level->get_display_name()
-                ),
-                'translation' => AAM_Backend_View_Localization::get(),
-                'caps'        => array(
-                    'create_roles'    => current_user_can('aam_create_roles'),
-                    'create_users'    => current_user_can('create_users'),
-                    'manage_policies' => is_main_site()
-                )
-            ));
-
-            echo '<script type="text/javascript">';
-            echo 'var aamLocal = ' . wp_json_encode($locals) . "\n";
-            echo file_get_contents(AAM_BASEDIR . '/media/js/vendor.js') . "\n";
-            echo file_get_contents(AAM_BASEDIR . '/media/js/aam.js');
-            echo '</script>';
         }
     }
 
@@ -272,7 +273,9 @@ class AAM_Backend_Manager
             $roles = (is_array($roles) ? $roles : array());
 
             // prepare the final list of roles that needs to be set
-            $newRoles = array_intersect($roles, array_keys(get_editable_roles()));
+            $newRoles = array_intersect($roles, array_keys(
+                AAM::api()->roles->get_editable_roles(true)
+            ));
 
             if (!empty($newRoles)) {
                 // Remove all current roles and then set new
@@ -282,23 +285,6 @@ class AAM_Backend_Manager
                     $user->add_role($role);
                 }
             }
-        }
-    }
-
-    /**
-     * Render AAM iframe content if specified
-     *
-     * @return void
-     * @access public
-     *
-     * @version 7.0.0
-     */
-    public function adminInit()
-    {
-        $frame = filter_input(INPUT_GET, 'aamframe');
-
-        if ($frame) {
-            AAM_Backend_View::get_instance()->renderIFrame($frame);
         }
     }
 
@@ -356,37 +342,10 @@ class AAM_Backend_Manager
             ($cap_exists ? 'aam_manager' : 'administrator'),
             'aam',
             function() {
-                echo AAM_Backend_View::get_instance()->renderPage();
+                AAM_Backend_React::render();
             },
             file_get_contents(AAM_BASEDIR . '/media/active-menu.data')
         );
-    }
-
-    /**
-     * Handle Ajax calls to AAM
-     *
-     * @return void
-     * @access public
-     *
-     * @version 7.0.2
-     */
-    public function ajax()
-    {
-        check_ajax_referer('aam_ajax');
-
-        // Clean buffer to make sure that nothing messing around with system
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        // Process ajax request
-        if (current_user_can('aam_manager')) {
-            echo AAM_Backend_View::get_instance()->processAjax();
-        } else {
-            echo -1;
-        }
-
-        exit;
     }
 
     /**

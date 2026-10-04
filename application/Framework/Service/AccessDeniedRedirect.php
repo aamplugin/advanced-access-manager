@@ -35,7 +35,7 @@ implements
     ];
 
     /**
-     * Allowed redirect areas
+     * Frontend, backend, and API access areas
      *
      * @version 7.0.0
      */
@@ -58,7 +58,10 @@ implements
     public function get_redirect($area = null)
     {
         try {
-            $preferences = $this->_get_container()->get_preferences();
+            $preferences = array_intersect_key(
+                $this->_get_container()->get_preferences(),
+                array_flip(self::ALLOWED_AREAS)
+            );
 
             if (empty($area)) {
                 $result = array_replace(
@@ -97,7 +100,7 @@ implements
      *    "http_status_code": "numeric"
      * }
      *
-     * @param string $area     Redirect area: frontend, backend or api
+     * @param string $area     Frontend, backend, or API
      * @param array  $redirect Redirect settings
      *
      * @return array
@@ -108,8 +111,17 @@ implements
     public function set_redirect($area, array $redirect)
     {
         try {
-            if (empty($area)) {
-                throw new InvalidArgumentException('Non-empty area is required');
+            if (!in_array($area, self::ALLOWED_AREAS, true)) {
+                throw new InvalidArgumentException('Choose a supported access area');
+            }
+
+            if ($area === 'api'
+                && !in_array($redirect['type'] ?? null, [
+                    'default', 'custom_message', 'trigger_callback'
+                ], true)) {
+                throw new InvalidArgumentException(
+                    'API denial responses support default, custom message, or PHP callback behavior'
+                );
             }
 
             // Sanitize the incoming redirect data
