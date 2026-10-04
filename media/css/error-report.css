@@ -1,0 +1,46 @@
+.aam-error-report {
+  position: fixed;
+  z-index: 100100;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(540px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 17px 18px;
+  border: 1px solid #e9c9c5;
+  border-left: 4px solid #bd463e;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(28, 35, 43, .18);
+  color: #253447;
+  font-size: 13px;
+}
+.aam-error-report > .dashicons {
+  flex: none;
+  color: #bd463e;
+  font-size: 21px;
+}
+.aam-error-report-content { flex: 1; min-width: 0; }
+.aam-error-report-content strong { display: block; margin-bottom: 4px; font-size: 14px; }
+.aam-error-report-content p { margin: 0; line-height: 1.45; }
+.aam-error-report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.aam-error-report-actions button {
+  padding: 5px 9px;
+  border: 1px solid #c7d4df;
+  border-radius: 6px;
+  background: #fff;
+  color: #23415a;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.aam-error-report-actions .aam-error-report-download { border-color: #275c7d; background: #275c7d; color: #fff; }
+.aam-error-report-actions button:hover { filter: brightness(.93); }
+.aam-error-report-actions button:focus { outline: none; box-shadow: none; }
+.aam-error-report-actions button:focus-visible { filter: brightness(.82); }
+.aam-error-report-actions .aam-error-report-close { padding: 3px; border: 0; background: transparent; }
+@media (max-width: 600px) {
+  .aam-error-report { right: 12px; bottom: 12px; flex-wrap: wrap; }
+}

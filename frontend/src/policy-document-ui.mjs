@@ -1,4 +1,7 @@
 import { validatePolicyJson, formatPolicyJson } from "./policy-document.mjs";
+import { installErrorHandling } from "./error-report.mjs";
+
+installErrorHandling();
 
 const t = (text) => wp.i18n.__(text, "advanced-access-manager");
 

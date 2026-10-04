@@ -86,6 +86,8 @@ class AAM_Backend_Manager
 
                 wp_enqueue_style('aam-policy-document', $base . 'css/policy-document.css',
                     [], filemtime($style) ?: '1');
+                wp_enqueue_style('aam-error-report', $base . 'css/error-report.css',
+                    [], filemtime(AAM_BASEDIR . '/media/css/error-report.css') ?: '1');
                 wp_enqueue_script('aam-policy-document', $base . 'js/policy-document.js',
                     false !== $settings ? ['code-editor', 'wp-i18n'] : ['wp-i18n'],
                     filemtime($script) ?: '1', true);

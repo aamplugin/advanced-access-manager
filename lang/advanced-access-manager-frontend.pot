@@ -192,7 +192,7 @@ msgstr ""
 msgid "A clearer path to stronger access security"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:182
+#. Source: frontend/src/index.tsx:168
 #: media/js/react-admin.js
 msgid "A good first session"
 msgstr ""
@@ -202,7 +202,7 @@ msgstr ""
 msgid "A guide for review, not a security guarantee"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:323
+#. Source: frontend/src/term-access.tsx:324
 #: media/js/term-access.js
 msgid "A preview of term access"
 msgstr ""
@@ -237,7 +237,12 @@ msgstr ""
 msgid "AAM Premium adds detailed access rules for post types, taxonomies and terms. The controls appear here as soon as the add-on is active."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:537
+#. Source: frontend/src/error-report.mjs:72
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "AAM ran into a problem"
+msgstr ""
+
+#. Source: frontend/src/index.tsx:523
 #: media/js/react-admin.js
 msgid "AAM sections"
 msgstr ""
@@ -307,24 +312,24 @@ msgstr ""
 msgid "Access"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:578
+#. Source: frontend/src/index.tsx:564
 #: media/js/react-admin.js
 msgid "Access context"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:663
-#. Source: frontend/src/term-access.tsx:319
-#. Source: frontend/src/term-access.tsx:355
+#. Source: frontend/src/post-metabox.tsx:664
+#. Source: frontend/src/term-access.tsx:320
+#. Source: frontend/src/term-access.tsx:356
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Access controls"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:541
+#. Source: frontend/src/index.tsx:527
 #: media/js/react-admin.js
 msgid "Access Controls"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:525
+#. Source: frontend/src/term-access.tsx:526
 #: media/js/term-access.js
 msgid "Access controls could not be loaded."
 msgstr ""
@@ -368,12 +373,12 @@ msgstr ""
 msgid "Access ends (your local time)"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:917
+#. Source: frontend/src/index.tsx:903
 #: media/js/react-admin.js
 msgid "Access governance for WordPress"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:522
+#. Source: frontend/src/index.tsx:508
 #: media/js/react-admin.js
 msgid "Access Governance for WordPress"
 msgstr ""
@@ -383,16 +388,16 @@ msgstr ""
 msgid "Access level"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:241
-#. Source: frontend/src/post-metabox.tsx:486
+#. Source: frontend/src/policy-assignee-metabox.tsx:242
+#. Source: frontend/src/post-metabox.tsx:487
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js
 msgid "Access level type"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:787
-#. Source: frontend/src/post-metabox.tsx:478
-#. Source: frontend/src/post-metabox.tsx:480
-#. Source: frontend/src/term-access.tsx:365
+#. Source: frontend/src/index.tsx:773
+#. Source: frontend/src/post-metabox.tsx:479
+#. Source: frontend/src/post-metabox.tsx:481
+#. Source: frontend/src/term-access.tsx:366
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Access levels"
 msgstr ""
@@ -423,23 +428,23 @@ msgstr ""
 msgid "Access rule for"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:832
+#. Source: frontend/src/post-metabox.tsx:833
 #: media/js/post-access-metabox.js
 msgid "Access rules could not be loaded"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:259
+#. Source: frontend/src/post-metabox.tsx:260
 #: media/js/post-access-metabox.js
 msgid "Access rules could not be loaded."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:419
-#. Source: frontend/src/post-metabox.tsx:432
+#. Source: frontend/src/post-metabox.tsx:420
+#. Source: frontend/src/post-metabox.tsx:433
 #: media/js/post-access-metabox.js
 msgid "Access rules could not be reset."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:407
+#. Source: frontend/src/post-metabox.tsx:408
 #: media/js/post-access-metabox.js
 msgid "Access rules could not be saved. Review the current settings; some changes may have been saved."
 msgstr ""
@@ -454,17 +459,17 @@ msgstr ""
 msgid "ACCESS SECURITY SCORE"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:867
+#. Source: frontend/src/index.tsx:853
 #: media/js/react-admin.js
 msgid "Access services"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:866
+#. Source: frontend/src/index.tsx:852
 #: media/js/react-admin.js
 msgid "ACCESS SERVICES"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:850
+#. Source: frontend/src/index.tsx:836
 #: media/js/react-admin.js
 msgid "Access Settings"
 msgstr ""
@@ -546,7 +551,7 @@ msgstr ""
 msgid "Activate Premium"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:330
+#. Source: frontend/src/term-access.tsx:331
 #: media/js/term-access.js
 msgid "Activate Premium to manage this term."
 msgstr ""
@@ -640,7 +645,7 @@ msgstr ""
 msgid "Admin Toolbar"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:523
+#. Source: frontend/src/index.tsx:509
 #: media/js/react-admin.js
 msgid "Advanced Access Manager"
 msgstr ""
@@ -708,7 +713,7 @@ msgid "All users"
 msgstr ""
 
 #. Source: frontend/src/access-rule-control.tsx:36
-#. Source: frontend/src/core.tsx:253
+#. Source: frontend/src/core.tsx:291
 #. Source: frontend/src/permissions.tsx:556
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Allow"
@@ -794,7 +799,7 @@ msgstr ""
 msgid "API Routes"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:506
+#. Source: frontend/src/core.tsx:544
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Applications using these tokens will lose access. New tokens will be needed."
 msgstr ""
@@ -804,17 +809,17 @@ msgstr ""
 msgid "Applications using this token will lose access and need a new credential."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:347
+#. Source: frontend/src/policy-assignee-metabox.tsx:348
 #: media/js/policy-assignee-metabox.js
 msgid "Apply as a baseline for everyone unless a more specific rule takes precedence."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:232
+#. Source: frontend/src/policy-assignee-metabox.tsx:233
 #: media/js/policy-assignee-metabox.js
 msgid "Apply this policy to"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:345
+#. Source: frontend/src/policy-assignee-metabox.tsx:346
 #: media/js/policy-assignee-metabox.js
 msgid "Apply to people who are not signed in."
 msgstr ""
@@ -824,7 +829,7 @@ msgstr ""
 msgid "Ask people to sign in first."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:214
+#. Source: frontend/src/policy-assignee-metabox.tsx:215
 #. Source: frontend/src/rules.tsx:872
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Attach"
@@ -835,7 +840,7 @@ msgstr ""
 msgid "Attach JSON policies to the current access level."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:359
+#. Source: frontend/src/policy-assignee-metabox.tsx:360
 #: media/js/policy-assignee-metabox.js
 msgid "Attach policy"
 msgstr ""
@@ -896,17 +901,17 @@ msgstr ""
 msgid "Backend Menu"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:131
+#. Source: frontend/src/index.tsx:117
 #: media/js/react-admin.js
 msgid "Backend menu access"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:651
+#. Source: frontend/src/post-metabox.tsx:652
 #: media/js/post-access-metabox.js
 msgid "Baseline rules for everyone without a more specific rule."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:486
+#. Source: frontend/src/term-access.tsx:487
 #: media/js/term-access.js
 msgid "Baseline rules without a more specific rule."
 msgstr ""
@@ -917,22 +922,22 @@ msgstr ""
 msgid "Behavior"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:45
+#. Source: frontend/src/post-metabox.tsx:46
 #: media/js/post-access-metabox.js
 msgid "Block comments"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:63
+#. Source: frontend/src/post-metabox.tsx:64
 #: media/js/post-access-metabox.js
 msgid "Block deletion"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:51
+#. Source: frontend/src/post-metabox.tsx:52
 #: media/js/post-access-metabox.js
 msgid "Block editing"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:57
+#. Source: frontend/src/post-metabox.tsx:58
 #: media/js/post-access-metabox.js
 msgid "Block publishing"
 msgstr ""
@@ -942,7 +947,7 @@ msgstr ""
 msgid "Browse"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:255
+#. Source: frontend/src/index.tsx:241
 #: media/js/react-admin.js
 msgid "Browse all documentation"
 msgstr ""
@@ -972,7 +977,7 @@ msgstr ""
 msgid "Browse terms"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:391
+#. Source: frontend/src/core.tsx:429
 #. Source: frontend/src/people.tsx:1223
 #. Source: frontend/src/people.tsx:894
 #. Source: frontend/src/permissions.tsx:697
@@ -1057,12 +1062,12 @@ msgstr ""
 msgid "Change user passwords"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:567
+#. Source: frontend/src/term-access.tsx:568
 #: media/js/term-access.js
 msgid "Changes to this access level have not been saved."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:792
+#. Source: frontend/src/post-metabox.tsx:793
 #: media/js/post-access-metabox.js
 msgid "Changes to this post are saved separately from the post editor."
 msgstr ""
@@ -1072,7 +1077,7 @@ msgstr ""
 msgid "Check these resource names or actions before publishing:"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:333
+#. Source: frontend/src/term-access.tsx:334
 #: media/js/term-access.js
 msgid "Checking effective access…"
 msgstr ""
@@ -1107,25 +1112,25 @@ msgstr ""
 msgid "Choose a JSON backup to replace the current AAM settings. You can review the choice before confirming."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:800
+#. Source: frontend/src/index.tsx:786
 #. Source: frontend/src/people.tsx:1046
 #. Source: frontend/src/people.tsx:86
 #: media/js/react-admin.js
 msgid "Choose a role"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:800
+#. Source: frontend/src/index.tsx:786
 #. Source: frontend/src/people.tsx:86
 #: media/js/react-admin.js
 msgid "Choose a user"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:195
+#. Source: frontend/src/index.tsx:181
 #: media/js/react-admin.js
 msgid "Choose an access level"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:361
+#. Source: frontend/src/term-access.tsx:362
 #: media/js/term-access.js
 msgid "Choose an access level, then set its rules for this term. Changes save separately from the term details."
 msgstr ""
@@ -1135,7 +1140,7 @@ msgstr ""
 msgid "Choose an attribute"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:351
+#. Source: frontend/src/post-metabox.tsx:352
 #: media/js/post-access-metabox.js
 msgid "Choose an expiration date and time before saving."
 msgstr ""
@@ -1186,17 +1191,17 @@ msgstr ""
 msgid "Choose who can manage this identity"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:233
+#. Source: frontend/src/policy-assignee-metabox.tsx:234
 #: media/js/policy-assignee-metabox.js
 msgid "Choose who receives these rules."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:335
+#. Source: frontend/src/term-access.tsx:336
 #: media/js/term-access.js
 msgid "Choose who you want to manage."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:147
+#. Source: frontend/src/index.tsx:133
 #: media/js/react-admin.js
 msgid "Choose whose access you are managing, set one rule, and review the result. These short resources explain the ideas as you go."
 msgstr ""
@@ -1251,7 +1256,7 @@ msgstr ""
 msgid "Comparison"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:364
+#. Source: frontend/src/post-metabox.tsx:365
 #: media/js/post-access-metabox.js
 msgid "Complete all conditional restriction fields before saving."
 msgstr ""
@@ -1335,7 +1340,7 @@ msgstr ""
 msgid "Control content visibility"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:40
+#. Source: frontend/src/post-metabox.tsx:41
 #: media/js/post-access-metabox.js
 msgid "Control reading and downloads."
 msgstr ""
@@ -1422,17 +1427,17 @@ msgstr ""
 msgid "Could not create the sign-in link."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:339
+#. Source: frontend/src/term-access.tsx:340
 #: media/js/term-access.js
 msgid "Could not load this access level."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:307
+#. Source: frontend/src/policy-assignee-metabox.tsx:308
 #: media/js/policy-assignee-metabox.js
 msgid "Could not load this list. Try again"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:732
+#. Source: frontend/src/index.tsx:718
 #: media/js/react-admin.js
 msgid "Could not open the role editor."
 msgstr ""
@@ -1538,14 +1543,14 @@ msgstr ""
 msgid "Custom message"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:337
-#. Source: frontend/src/term-access.tsx:501
+#. Source: frontend/src/term-access.tsx:338
+#. Source: frontend/src/term-access.tsx:502
 #: media/js/term-access.js
 msgid "Customized"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:707
 #. Source: frontend/src/post-metabox.tsx:708
+#. Source: frontend/src/post-metabox.tsx:709
 #. Source: frontend/src/resource-visuals.tsx:33
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Customized access rules"
@@ -1567,21 +1572,21 @@ msgid "deactivated"
 msgstr ""
 
 #. Source: frontend/src/content-browser.tsx:79
-#. Source: frontend/src/index.tsx:1007
-#. Source: frontend/src/index.tsx:504
+#. Source: frontend/src/index.tsx:490
+#. Source: frontend/src/index.tsx:993
 #. Source: frontend/src/people.tsx:560
-#. Source: frontend/src/policy-assignee-metabox.tsx:20
-#. Source: frontend/src/post-metabox.tsx:72
-#. Source: frontend/src/term-access.tsx:31
+#. Source: frontend/src/policy-assignee-metabox.tsx:21
+#. Source: frontend/src/post-metabox.tsx:73
+#. Source: frontend/src/term-access.tsx:32
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Default"
 msgstr ""
 
 #. Source: frontend/src/abilities.tsx:567
-#. Source: frontend/src/index.tsx:601
-#. Source: frontend/src/policy-assignee-metabox.tsx:341
-#. Source: frontend/src/post-metabox.tsx:133
-#. Source: frontend/src/term-access.tsx:89
+#. Source: frontend/src/index.tsx:587
+#. Source: frontend/src/policy-assignee-metabox.tsx:342
+#. Source: frontend/src/post-metabox.tsx:134
+#. Source: frontend/src/term-access.tsx:90
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Default access"
 msgstr ""
@@ -1655,9 +1660,9 @@ msgstr ""
 msgid "Delete policy"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:774
-#. Source: frontend/src/index.tsx:979
-#. Source: frontend/src/index.tsx:980
+#. Source: frontend/src/index.tsx:760
+#. Source: frontend/src/index.tsx:965
+#. Source: frontend/src/index.tsx:966
 #. Source: frontend/src/people.tsx:386
 #. Source: frontend/src/people.tsx:389
 #. Source: frontend/src/people.tsx:530
@@ -1671,7 +1676,7 @@ msgstr ""
 msgid "Delete the policy"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:1013
+#. Source: frontend/src/index.tsx:999
 #. Source: frontend/src/people.tsx:567
 #: media/js/react-admin.js
 msgid "Delete the role"
@@ -1685,7 +1690,7 @@ msgstr ""
 #. Source: frontend/src/access-rule-control.tsx:37
 #. Source: frontend/src/content.tsx:304
 #. Source: frontend/src/content.tsx:635
-#. Source: frontend/src/core.tsx:253
+#. Source: frontend/src/core.tsx:291
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Deny"
 msgstr ""
@@ -1705,13 +1710,13 @@ msgstr ""
 msgid "Destination"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:214
+#. Source: frontend/src/policy-assignee-metabox.tsx:215
 #. Source: frontend/src/rules.tsx:872
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Detach"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:359
+#. Source: frontend/src/policy-assignee-metabox.tsx:360
 #: media/js/policy-assignee-metabox.js
 msgid "Detach policy"
 msgstr ""
@@ -1726,7 +1731,7 @@ msgstr ""
 msgid "Direct access restriction"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:34
+#. Source: frontend/src/post-metabox.tsx:35
 #: media/js/post-access-metabox.js
 msgid "Direct links can still work."
 msgstr ""
@@ -1742,19 +1747,24 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:806
+#. Source: frontend/src/post-metabox.tsx:807
 #: media/js/post-access-metabox.js
 msgid "Discard"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:560
+#. Source: frontend/src/term-access.tsx:561
 #: media/js/term-access.js
 msgid "Discard and continue"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:559
+#. Source: frontend/src/term-access.tsx:560
 #: media/js/term-access.js
 msgid "Discard unsaved access changes?"
+msgstr ""
+
+#. Source: frontend/src/error-report.mjs:90
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "Dismiss error notice"
 msgstr ""
 
 #. Source: frontend/src/toast.tsx:65
@@ -1769,7 +1779,7 @@ msgstr ""
 msgid "Dismiss premium suggestion"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:533
+#. Source: frontend/src/index.tsx:519
 #: media/js/react-admin.js
 msgid "Documentation"
 msgstr ""
@@ -1789,6 +1799,11 @@ msgstr ""
 #. Source: frontend/src/settings.tsx:547
 #: media/js/react-admin.js
 msgid "Download JSON backup"
+msgstr ""
+
+#. Source: frontend/src/error-report.mjs:81
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "Download report"
 msgstr ""
 
 #. Source: frontend/src/settings.tsx:1138
@@ -1811,13 +1826,13 @@ msgstr ""
 msgid "Edit post in WordPress"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:648
+#. Source: frontend/src/index.tsx:634
 #: media/js/react-admin.js
 msgid "Edit profile"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:655
-#. Source: frontend/src/index.tsx:663
+#. Source: frontend/src/index.tsx:641
+#. Source: frontend/src/index.tsx:649
 #. Source: frontend/src/people.tsx:328
 #. Source: frontend/src/people.tsx:330
 #. Source: frontend/src/people.tsx:732
@@ -1840,7 +1855,7 @@ msgstr ""
 msgid "Edit users"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:595
+#. Source: frontend/src/index.tsx:581
 #: media/js/react-admin.js
 msgid "EDITING ACCESS FOR"
 msgstr ""
@@ -1851,7 +1866,7 @@ msgstr ""
 msgid "Editor screen"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:328
+#. Source: frontend/src/term-access.tsx:329
 #: media/js/term-access.js
 msgid "Enable Posts & Terms to manage this term."
 msgstr ""
@@ -1869,7 +1884,7 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:375
+#. Source: frontend/src/post-metabox.tsx:376
 #: media/js/post-access-metabox.js
 msgid "Enter a content password before saving."
 msgstr ""
@@ -1884,12 +1899,12 @@ msgstr ""
 msgid "Enter a message to preview it."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:316
+#. Source: frontend/src/post-metabox.tsx:317
 #: media/js/post-access-metabox.js
 msgid "Enter a redirect URL before saving."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:328
+#. Source: frontend/src/post-metabox.tsx:329
 #: media/js/post-access-metabox.js
 msgid "Enter a registered callback before saving."
 msgstr ""
@@ -1909,7 +1924,7 @@ msgstr ""
 msgid "Enter a value to compare"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:340
+#. Source: frontend/src/post-metabox.tsx:341
 #: media/js/post-access-metabox.js
 msgid "Enter an access denied message before saving."
 msgstr ""
@@ -1995,12 +2010,12 @@ msgstr ""
 msgid "Explain why the API request was denied."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:346
+#. Source: frontend/src/term-access.tsx:347
 #: media/js/term-access.js
 msgid "Explore controls"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:294
+#. Source: frontend/src/index.tsx:280
 #: media/js/react-admin.js
 msgid "Explore Posts & Terms"
 msgstr ""
@@ -2017,13 +2032,13 @@ msgstr ""
 msgid "Export settings"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:109
+#. Source: frontend/src/index.tsx:95
 #: media/js/react-admin.js
 msgid "Extension service"
 msgstr ""
 
 #. Source: frontend/src/extensions.tsx:11
-#. Source: frontend/src/index.tsx:557
+#. Source: frontend/src/index.tsx:543
 #: media/js/react-admin.js
 msgid "Extensions"
 msgstr ""
@@ -2048,9 +2063,9 @@ msgstr ""
 msgid "Find a conditional metabox"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:262
-#. Source: frontend/src/post-metabox.tsx:515
-#. Source: frontend/src/term-access.tsx:394
+#. Source: frontend/src/policy-assignee-metabox.tsx:263
+#. Source: frontend/src/post-metabox.tsx:516
+#. Source: frontend/src/term-access.tsx:395
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/term-access.js
 msgid "Find a role"
 msgstr ""
@@ -2065,9 +2080,9 @@ msgstr ""
 msgid "Find a setting"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:262
-#. Source: frontend/src/post-metabox.tsx:516
-#. Source: frontend/src/term-access.tsx:394
+#. Source: frontend/src/policy-assignee-metabox.tsx:263
+#. Source: frontend/src/post-metabox.tsx:517
+#. Source: frontend/src/term-access.tsx:395
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/term-access.js
 msgid "Find a user"
 msgstr ""
@@ -2135,7 +2150,7 @@ msgstr ""
 msgid "findings to review"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:132
+#. Source: frontend/src/index.tsx:118
 #: media/js/react-admin.js
 msgid "Follow a practical example for a role or user."
 msgstr ""
@@ -2273,7 +2288,7 @@ msgstr ""
 msgid "Hide from"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:33
+#. Source: frontend/src/post-metabox.tsx:34
 #: media/js/post-access-metabox.js
 msgid "Hide from lists"
 msgstr ""
@@ -2309,7 +2324,7 @@ msgstr ""
 msgid "HTTP response code"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:612
+#. Source: frontend/src/index.tsx:598
 #: media/js/react-admin.js
 msgid "ID"
 msgstr ""
@@ -2394,13 +2409,13 @@ msgstr ""
 msgid "inherited"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:337
-#. Source: frontend/src/term-access.tsx:501
+#. Source: frontend/src/term-access.tsx:338
+#. Source: frontend/src/term-access.tsx:502
 #: media/js/term-access.js
 msgid "Inherited"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:509
+#. Source: frontend/src/core.tsx:547
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Inherited settings may take effect after these rules are removed. This change cannot be undone."
 msgstr ""
@@ -2430,17 +2445,17 @@ msgstr ""
 msgid "Installed version"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:119
+#. Source: frontend/src/index.tsx:105
 #: media/js/react-admin.js
 msgid "Introduction to AAM"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:168
+#. Source: frontend/src/index.tsx:154
 #: media/js/react-admin.js
 msgid "Introduction to Advanced Access Manager"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:51
+#. Source: frontend/src/core.tsx:81
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Invalid resource identifier."
 msgstr ""
@@ -2470,7 +2485,7 @@ msgstr ""
 msgid "Issue a token for this user"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:348
+#. Source: frontend/src/core.tsx:386
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "items"
 msgstr ""
@@ -2549,7 +2564,7 @@ msgstr ""
 msgid "Keep current settings"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:561
+#. Source: frontend/src/term-access.tsx:562
 #: media/js/term-access.js
 msgid "Keep editing"
 msgstr ""
@@ -2559,8 +2574,8 @@ msgstr ""
 msgid "Keep open"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:866
-#. Source: frontend/src/term-access.tsx:578
+#. Source: frontend/src/post-metabox.tsx:867
+#. Source: frontend/src/term-access.tsx:579
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Keep overrides"
 msgstr ""
@@ -2570,7 +2585,7 @@ msgstr ""
 msgid "Keep policy"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:981
+#. Source: frontend/src/index.tsx:967
 #. Source: frontend/src/people.tsx:532
 #: media/js/react-admin.js
 msgid "Keep role"
@@ -2581,7 +2596,7 @@ msgstr ""
 msgid "Keep rule"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:501
+#. Source: frontend/src/core.tsx:539
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Keep settings"
 msgstr ""
@@ -2596,7 +2611,7 @@ msgstr ""
 msgid "Keep token"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:501
+#. Source: frontend/src/core.tsx:539
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Keep tokens"
 msgstr ""
@@ -2611,12 +2626,12 @@ msgstr ""
 msgid "Know what to fix first"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:246
+#. Source: frontend/src/index.tsx:232
 #: media/js/react-admin.js
 msgid "Learn at your pace"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:126
+#. Source: frontend/src/index.tsx:112
 #: media/js/react-admin.js
 msgid "Learn what WordPress grants before adding AAM rules."
 msgstr ""
@@ -2626,7 +2641,7 @@ msgstr ""
 msgid "Learn why this matters"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:889
+#. Source: frontend/src/index.tsx:875
 #: media/js/react-admin.js
 msgid "Least privilege. More control."
 msgstr ""
@@ -2687,22 +2702,22 @@ msgstr ""
 msgid "List users"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:536
+#. Source: frontend/src/term-access.tsx:537
 #: media/js/term-access.js
 msgid "Loading access controls…"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:295
+#. Source: frontend/src/policy-assignee-metabox.tsx:296
 #: media/js/policy-assignee-metabox.js
 msgid "Loading access levels…"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:691
+#. Source: frontend/src/post-metabox.tsx:692
 #: media/js/post-access-metabox.js
 msgid "Loading access rules…"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:902
+#. Source: frontend/src/index.tsx:888
 #: media/js/react-admin.js
 msgid "Loading access workspace…"
 msgstr ""
@@ -2712,14 +2727,14 @@ msgstr ""
 msgid "Loading user tools…"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:586
-#. Source: frontend/src/term-access.tsx:439
+#. Source: frontend/src/post-metabox.tsx:587
+#. Source: frontend/src/term-access.tsx:440
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Loading users…"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:146
-#. Source: frontend/src/policy-assignee-metabox.tsx:324
+#. Source: frontend/src/core.tsx:184
+#. Source: frontend/src/policy-assignee-metabox.tsx:325
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Loading…"
 msgstr ""
@@ -2780,7 +2795,7 @@ msgstr ""
 msgid "Logout Redirect"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:143
+#. Source: frontend/src/index.tsx:129
 #: media/js/react-admin.js
 msgid "Make your first access decision with confidence."
 msgstr ""
@@ -2789,7 +2804,7 @@ msgstr ""
 #. Source: frontend/src/content-browser.tsx:145
 #. Source: frontend/src/content-browser.tsx:536
 #. Source: frontend/src/people.tsx:306
-#. Source: frontend/src/term-access.tsx:345
+#. Source: frontend/src/term-access.tsx:346
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Manage access"
 msgstr ""
@@ -2844,7 +2859,7 @@ msgstr ""
 msgid "Manage term visibility"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:359
+#. Source: frontend/src/term-access.tsx:360
 #: media/js/term-access.js
 msgid "Manage this term's access"
 msgstr ""
@@ -2869,7 +2884,7 @@ msgstr ""
 msgid "Manage your subscription, site activations, and add-on downloads from your license page."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:496
+#. Source: frontend/src/term-access.tsx:497
 #: media/js/term-access.js
 msgid "MANAGING"
 msgstr ""
@@ -2928,7 +2943,7 @@ msgstr ""
 msgid "MCP server"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:525
+#. Source: frontend/src/core.tsx:563
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "MCP server, tool, resource, and prompt rules reset for %s."
 msgstr ""
@@ -3008,12 +3023,12 @@ msgstr ""
 msgid "New items are restricted unless you allow them individually."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:942
+#. Source: frontend/src/index.tsx:928
 #: media/js/react-admin.js
 msgid "New role created and preselected for you."
 msgstr ""
 
-#. Source: frontend/src/core.tsx:365
+#. Source: frontend/src/core.tsx:403
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Next"
 msgstr ""
@@ -3063,9 +3078,9 @@ msgstr ""
 msgid "No matching items"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:312
-#. Source: frontend/src/post-metabox.tsx:581
-#. Source: frontend/src/term-access.tsx:432
+#. Source: frontend/src/policy-assignee-metabox.tsx:313
+#. Source: frontend/src/post-metabox.tsx:582
+#. Source: frontend/src/term-access.tsx:433
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/term-access.js
 msgid "No matching roles"
 msgstr ""
@@ -3080,9 +3095,9 @@ msgstr ""
 msgid "No matching settings"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:313
-#. Source: frontend/src/post-metabox.tsx:633
-#. Source: frontend/src/term-access.tsx:474
+#. Source: frontend/src/policy-assignee-metabox.tsx:314
+#. Source: frontend/src/post-metabox.tsx:634
+#. Source: frontend/src/term-access.tsx:475
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/term-access.js
 msgid "No matching users"
 msgstr ""
@@ -3204,7 +3219,7 @@ msgstr ""
 msgid "Note (optional)"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:174
+#. Source: frontend/src/core.tsx:212
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Nothing here yet"
 msgstr ""
@@ -3230,17 +3245,17 @@ msgstr ""
 msgid "of"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:765
+#. Source: frontend/src/post-metabox.tsx:766
 #: media/js/post-access-metabox.js
 msgid "Off"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:765
+#. Source: frontend/src/post-metabox.tsx:766
 #: media/js/post-access-metabox.js
 msgid "On"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:469
+#. Source: frontend/src/post-metabox.tsx:470
 #: media/js/post-access-metabox.js
 msgid "Once the post has an ID, you can define access rules for roles, users, visitors, and defaults here."
 msgstr ""
@@ -3250,7 +3265,7 @@ msgstr ""
 msgid "Only the selected role or user will lose this capability. Other roles and users keep their existing grants."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:594
+#. Source: frontend/src/term-access.tsx:595
 #: media/js/term-access.js
 msgid "Only this term's rules for the selected access level are affected."
 msgstr ""
@@ -3260,7 +3275,7 @@ msgstr ""
 msgid "Open"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:207
+#. Source: frontend/src/index.tsx:193
 #: media/js/react-admin.js
 msgid "Open a service and make one change for the access level you selected."
 msgstr ""
@@ -3270,7 +3285,7 @@ msgstr ""
 msgid "Open AAM Settings"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:216
+#. Source: frontend/src/index.tsx:202
 #: media/js/react-admin.js
 msgid "Open access controls"
 msgstr ""
@@ -3290,7 +3305,7 @@ msgstr ""
 msgid "Open settings"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:340
+#. Source: frontend/src/term-access.tsx:341
 #: media/js/term-access.js
 msgid "Open to review this term's access rules."
 msgstr ""
@@ -3402,7 +3417,7 @@ msgstr ""
 msgid "Policy"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:172
+#. Source: frontend/src/policy-assignee-metabox.tsx:173
 #: media/js/policy-assignee-metabox.js
 msgid "Policy assignment could not be saved."
 msgstr ""
@@ -3412,7 +3427,7 @@ msgstr ""
 msgid "Policy assignments reset for %1$s."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:353
+#. Source: frontend/src/policy-assignee-metabox.tsx:354
 #. Source: frontend/src/resource-visuals.tsx:36
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Policy attached"
@@ -3423,7 +3438,7 @@ msgstr ""
 msgid "Policy attached to %1$s."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:166
+#. Source: frontend/src/policy-assignee-metabox.tsx:167
 #: media/js/policy-assignee-metabox.js
 msgid "Policy attached to this access level."
 msgstr ""
@@ -3438,12 +3453,12 @@ msgstr ""
 msgid "Policy detached from %1$s."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:167
+#. Source: frontend/src/policy-assignee-metabox.tsx:168
 #: media/js/policy-assignee-metabox.js
 msgid "Policy detached from this access level."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:354
+#. Source: frontend/src/policy-assignee-metabox.tsx:355
 #: media/js/policy-assignee-metabox.js
 msgid "Policy not attached"
 msgstr ""
@@ -3459,17 +3474,17 @@ msgstr ""
 msgid "Post"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:662
+#. Source: frontend/src/post-metabox.tsx:663
 #: media/js/post-access-metabox.js
 msgid "POST ACCESS"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:658
+#. Source: frontend/src/post-metabox.tsx:659
 #: media/js/post-access-metabox.js
 msgid "Post access controls"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:392
+#. Source: frontend/src/post-metabox.tsx:393
 #: media/js/post-access-metabox.js
 msgid "Post access rules saved for %s."
 msgstr ""
@@ -3511,7 +3526,7 @@ msgstr ""
 msgid "Premium adds post type, taxonomy and term access rules when you need them."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:331
+#. Source: frontend/src/term-access.tsx:332
 #: media/js/term-access.js
 msgid "Premium adds visibility, browsing and editing rules."
 msgstr ""
@@ -3546,7 +3561,7 @@ msgstr ""
 msgid "Preparing your summary…"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:52
+#. Source: frontend/src/post-metabox.tsx:53
 #: media/js/post-access-metabox.js
 msgid "Prevent changes in admin and API."
 msgstr ""
@@ -3561,12 +3576,12 @@ msgstr ""
 msgid "Prevent comments on this content."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:46
+#. Source: frontend/src/post-metabox.tsx:47
 #: media/js/post-access-metabox.js
 msgid "Prevent new comments."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:58
+#. Source: frontend/src/post-metabox.tsx:59
 #: media/js/post-access-metabox.js
 msgid "Prevent new published versions."
 msgstr ""
@@ -3581,12 +3596,12 @@ msgstr ""
 msgid "Prevent trashing or deleting this content."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:64
+#. Source: frontend/src/post-metabox.tsx:65
 #: media/js/post-access-metabox.js
 msgid "Prevent trashing or deleting."
 msgstr ""
 
-#. Source: frontend/src/core.tsx:355
+#. Source: frontend/src/core.tsx:393
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Previous"
 msgstr ""
@@ -3646,7 +3661,7 @@ msgstr ""
 msgid "Rate limited"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:233
+#. Source: frontend/src/index.tsx:219
 #: media/js/react-admin.js
 msgid "Read the guide"
 msgstr ""
@@ -3750,6 +3765,11 @@ msgstr ""
 msgid "Related"
 msgstr ""
 
+#. Source: frontend/src/error-report.mjs:85
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "Reload page"
+msgstr ""
+
 #. Source: frontend/src/permissions.tsx:1035
 #: media/js/react-admin.js
 msgid "Remove"
@@ -3776,7 +3796,7 @@ msgstr ""
 msgid "Remove claim"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:597
+#. Source: frontend/src/term-access.tsx:598
 #: media/js/term-access.js
 msgid "Remove custom rules for"
 msgstr ""
@@ -3786,7 +3806,7 @@ msgstr ""
 msgid "Remove default"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:541
+#. Source: frontend/src/core.tsx:579
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Remove explicit"
 msgstr ""
@@ -3801,7 +3821,7 @@ msgstr ""
 msgid "Remove from all roles"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:874
+#. Source: frontend/src/post-metabox.tsx:875
 #: media/js/post-access-metabox.js
 msgid "Remove the custom post rules for"
 msgstr ""
@@ -3852,6 +3872,11 @@ msgstr ""
 msgid "Replace settings"
 msgstr ""
 
+#. Source: frontend/src/error-report.mjs:106
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "Request bodies, headers, cookies, and URL query strings are excluded."
+msgstr ""
+
 #. Source: frontend/src/permissions.tsx:103
 #: media/js/react-admin.js
 msgid "Required capability"
@@ -3892,7 +3917,7 @@ msgstr ""
 msgid "Reset Access Policies"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:849
+#. Source: frontend/src/index.tsx:835
 #: media/js/react-admin.js
 msgid "Reset access settings"
 msgstr ""
@@ -3943,14 +3968,14 @@ msgstr ""
 msgid "Reset Metaboxes"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:816
-#. Source: frontend/src/post-metabox.tsx:865
-#. Source: frontend/src/term-access.tsx:577
+#. Source: frontend/src/post-metabox.tsx:817
+#. Source: frontend/src/post-metabox.tsx:866
+#. Source: frontend/src/term-access.tsx:578
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Reset overrides"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:864
+#. Source: frontend/src/post-metabox.tsx:865
 #: media/js/post-access-metabox.js
 msgid "Reset post access overrides"
 msgstr ""
@@ -3960,7 +3985,7 @@ msgstr ""
 msgid "Reset rule"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:576
+#. Source: frontend/src/term-access.tsx:577
 #: media/js/term-access.js
 msgid "Reset term access overrides?"
 msgstr ""
@@ -4024,9 +4049,9 @@ msgstr ""
 msgid "REST API"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:669
-#. Source: frontend/src/term-access.tsx:286
-#. Source: frontend/src/term-access.tsx:515
+#. Source: frontend/src/post-metabox.tsx:670
+#. Source: frontend/src/term-access.tsx:287
+#. Source: frontend/src/term-access.tsx:516
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Restoring selected user…"
 msgstr ""
@@ -4052,7 +4077,7 @@ msgid "Restrict deletion"
 msgstr ""
 
 #. Source: frontend/src/content.tsx:81
-#. Source: frontend/src/post-metabox.tsx:39
+#. Source: frontend/src/post-metabox.tsx:40
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Restrict direct access"
 msgstr ""
@@ -4099,7 +4124,7 @@ msgstr ""
 msgid "Restricted"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:337
+#. Source: frontend/src/term-access.tsx:338
 #: media/js/term-access.js
 msgid "restricted actions"
 msgstr ""
@@ -4141,7 +4166,7 @@ msgstr ""
 msgid "Review finding"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:222
+#. Source: frontend/src/index.tsx:208
 #: media/js/react-admin.js
 msgid "Review inheritance"
 msgstr ""
@@ -4156,7 +4181,7 @@ msgstr ""
 msgid "Review the detailed checks below or discuss the plan with an AAM specialist."
 msgstr ""
 
-#. Source: frontend/src/core.tsx:413
+#. Source: frontend/src/core.tsx:451
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Review this change"
 msgstr ""
@@ -4176,7 +4201,7 @@ msgstr ""
 msgid "Revoke all JWT tokens"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:536
+#. Source: frontend/src/core.tsx:574
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Revoke all JWT tokens for"
 msgstr ""
@@ -4199,10 +4224,10 @@ msgstr ""
 msgid "role"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:601
+#. Source: frontend/src/index.tsx:587
 #. Source: frontend/src/people.tsx:108
-#. Source: frontend/src/post-metabox.tsx:69
-#. Source: frontend/src/term-access.tsx:284
+#. Source: frontend/src/post-metabox.tsx:70
+#. Source: frontend/src/term-access.tsx:285
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Role"
 msgstr ""
@@ -4222,7 +4247,7 @@ msgstr ""
 msgid "Role %1$s updated."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:970
+#. Source: frontend/src/index.tsx:956
 #: media/js/react-admin.js
 msgid "Role %s updated."
 msgstr ""
@@ -4248,22 +4273,22 @@ msgstr ""
 msgid "roles"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:501
+#. Source: frontend/src/index.tsx:487
 #. Source: frontend/src/people.tsx:1267
 #. Source: frontend/src/people.tsx:155
-#. Source: frontend/src/policy-assignee-metabox.tsx:17
-#. Source: frontend/src/post-metabox.tsx:545
-#. Source: frontend/src/term-access.tsx:28
+#. Source: frontend/src/policy-assignee-metabox.tsx:18
+#. Source: frontend/src/post-metabox.tsx:546
+#. Source: frontend/src/term-access.tsx:29
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Roles"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:125
+#. Source: frontend/src/index.tsx:111
 #: media/js/react-admin.js
 msgid "Roles and capabilities"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:66
+#. Source: frontend/src/policy-assignee-metabox.tsx:67
 #: media/js/policy-assignee-metabox.js
 msgid "Roles could not be loaded."
 msgstr ""
@@ -4279,8 +4304,8 @@ msgstr ""
 msgid "Rule"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:649
-#. Source: frontend/src/term-access.tsx:485
+#. Source: frontend/src/post-metabox.tsx:650
+#. Source: frontend/src/term-access.tsx:486
 #: media/js/post-access-metabox.js media/js/term-access.js
 msgid "Rules for people who are not signed in."
 msgstr ""
@@ -4306,7 +4331,7 @@ msgstr ""
 msgid "Run your registered PHP callback."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:825
+#. Source: frontend/src/post-metabox.tsx:826
 #: media/js/post-access-metabox.js
 msgid "Save access rules"
 msgstr ""
@@ -4327,7 +4352,7 @@ msgstr ""
 msgid "Save configuration"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:453
+#. Source: frontend/src/index.tsx:439
 #: media/js/react-admin.js
 msgid "Save failed. Your change has not been confirmed."
 msgstr ""
@@ -4337,7 +4362,7 @@ msgstr ""
 msgid "Save Geo Lookup settings"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:277
+#. Source: frontend/src/post-metabox.tsx:278
 #: media/js/post-access-metabox.js
 msgid "Save or discard your changes before switching access levels."
 msgstr ""
@@ -4372,12 +4397,12 @@ msgstr ""
 msgid "Save rule"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:466
+#. Source: frontend/src/post-metabox.tsx:467
 #: media/js/post-access-metabox.js
 msgid "Save this post as a draft first"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:825
+#. Source: frontend/src/post-metabox.tsx:826
 #. Source: frontend/src/settings.tsx:1357
 #: media/js/post-access-metabox.js media/js/react-admin.js
 msgid "Saving…"
@@ -4417,19 +4442,19 @@ msgid "Search roles"
 msgstr ""
 
 #. Source: frontend/src/people.tsx:1296
-#. Source: frontend/src/policy-assignee-metabox.tsx:274
-#. Source: frontend/src/post-metabox.tsx:529
-#. Source: frontend/src/term-access.tsx:401
+#. Source: frontend/src/policy-assignee-metabox.tsx:275
+#. Source: frontend/src/post-metabox.tsx:530
+#. Source: frontend/src/term-access.tsx:402
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Search roles…"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:312
+#. Source: frontend/src/core.tsx:350
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Search this list"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:641
+#. Source: frontend/src/post-metabox.tsx:642
 #: media/js/post-access-metabox.js
 msgid "Search to find more users"
 msgstr ""
@@ -4442,14 +4467,14 @@ msgid "Search users"
 msgstr ""
 
 #. Source: frontend/src/people.tsx:1296
-#. Source: frontend/src/policy-assignee-metabox.tsx:274
-#. Source: frontend/src/post-metabox.tsx:530
-#. Source: frontend/src/term-access.tsx:401
+#. Source: frontend/src/policy-assignee-metabox.tsx:275
+#. Source: frontend/src/post-metabox.tsx:531
+#. Source: frontend/src/term-access.tsx:402
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Search users…"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:547
+#. Source: frontend/src/index.tsx:533
 #. Source: frontend/src/settings.tsx:1132
 #: media/js/react-admin.js
 msgid "Security Audit"
@@ -4465,12 +4490,12 @@ msgstr ""
 msgid "Security check"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:120
+#. Source: frontend/src/index.tsx:106
 #: media/js/react-admin.js
 msgid "See how access levels and services fit together."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:225
+#. Source: frontend/src/index.tsx:211
 #: media/js/react-admin.js
 msgid "See how default, role, and user settings combine before adding more rules."
 msgstr ""
@@ -4503,22 +4528,22 @@ msgstr ""
 msgid "Select a page before saving."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:304
+#. Source: frontend/src/post-metabox.tsx:305
 #: media/js/post-access-metabox.js
 msgid "Select a redirect page before saving."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:925
+#. Source: frontend/src/index.tsx:911
 #: media/js/react-admin.js
 msgid "Select a role"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:519
+#. Source: frontend/src/term-access.tsx:520
 #: media/js/term-access.js
 msgid "Select a role or user to review their access to this term."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:679
+#. Source: frontend/src/post-metabox.tsx:680
 #: media/js/post-access-metabox.js
 msgid "Select a role to see its rules"
 msgstr ""
@@ -4528,7 +4553,7 @@ msgstr ""
 msgid "Select a role to view and change its access rules."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:925
+#. Source: frontend/src/index.tsx:911
 #: media/js/react-admin.js
 msgid "Select a user"
 msgstr ""
@@ -4538,12 +4563,12 @@ msgstr ""
 msgid "Select a user to manage their individual access rules."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:680
+#. Source: frontend/src/post-metabox.tsx:681
 #: media/js/post-access-metabox.js
 msgid "Select a user to see their rules"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:287
+#. Source: frontend/src/term-access.tsx:288
 #: media/js/term-access.js
 msgid "Select an access level"
 msgstr ""
@@ -4650,7 +4675,7 @@ msgstr ""
 msgid "Set on this role or user"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:204
+#. Source: frontend/src/index.tsx:190
 #: media/js/react-admin.js
 msgid "Set one clear rule"
 msgstr ""
@@ -4685,13 +4710,13 @@ msgstr ""
 msgid "settings"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:552
+#. Source: frontend/src/index.tsx:538
 #. Source: frontend/src/settings.tsx:325
 #: media/js/react-admin.js
 msgid "Settings"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:542
+#. Source: frontend/src/core.tsx:580
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "settings for"
 msgstr ""
@@ -4721,7 +4746,7 @@ msgstr ""
 msgid "Show guide"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:324
+#. Source: frontend/src/policy-assignee-metabox.tsx:325
 #: media/js/policy-assignee-metabox.js
 msgid "Show more users"
 msgstr ""
@@ -4756,7 +4781,7 @@ msgstr ""
 msgid "Site-wide configuration. These settings do not belong to the selected role or user."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:283
+#. Source: frontend/src/index.tsx:269
 #: media/js/react-admin.js
 msgid "Some videos show an earlier AAM interface. The access concepts still apply."
 msgstr ""
@@ -4766,17 +4791,17 @@ msgstr ""
 msgid "Start from an existing role"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:152
+#. Source: frontend/src/index.tsx:138
 #: media/js/react-admin.js
 msgid "Start managing access"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:189
+#. Source: frontend/src/index.tsx:175
 #: media/js/react-admin.js
 msgid "Start small; refine as you learn."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:166
+#. Source: frontend/src/index.tsx:152
 #: media/js/react-admin.js
 msgid "Start with a video"
 msgstr ""
@@ -4786,7 +4811,7 @@ msgstr ""
 msgid "Start with no capabilities"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:892
+#. Source: frontend/src/index.tsx:878
 #: media/js/react-admin.js
 msgid "Start with what each identity needs. Review access regularly."
 msgstr ""
@@ -4807,12 +4832,12 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:783
+#. Source: frontend/src/index.tsx:769
 #: media/js/react-admin.js
 msgid "SWITCH ACCESS LEVEL"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:570
+#. Source: frontend/src/term-access.tsx:571
 #: media/js/term-access.js
 msgid "Switching access levels or closing this dialog will discard the current draft."
 msgstr ""
@@ -4857,29 +4882,29 @@ msgstr ""
 msgid "Term"
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:167
-#. Source: frontend/src/term-access.tsx:177
+#. Source: frontend/src/term-access.tsx:168
+#. Source: frontend/src/term-access.tsx:178
 #: media/js/term-access.js
 msgid "Term access could not be loaded."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:248
-#. Source: frontend/src/term-access.tsx:276
+#. Source: frontend/src/term-access.tsx:249
+#. Source: frontend/src/term-access.tsx:277
 #: media/js/term-access.js
 msgid "Term access could not be saved."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:267
+#. Source: frontend/src/term-access.tsx:268
 #: media/js/term-access.js
 msgid "Term access reset for %s."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:268
+#. Source: frontend/src/term-access.tsx:269
 #: media/js/term-access.js
 msgid "Term access saved for %s."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:492
+#. Source: frontend/src/term-access.tsx:493
 #: media/js/term-access.js
 msgid "Term access settings"
 msgstr ""
@@ -4894,7 +4919,7 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:385
+#. Source: frontend/src/post-metabox.tsx:386
 #: media/js/post-access-metabox.js
 msgid "The access change was not saved."
 msgstr ""
@@ -4934,12 +4959,12 @@ msgstr ""
 msgid "The inherited URL behavior will apply after this override is removed."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:181
+#. Source: frontend/src/post-metabox.tsx:182
 #: media/js/post-access-metabox.js
 msgid "The last selected user could not be loaded."
 msgstr ""
 
-#. Source: frontend/src/core.tsx:164
+#. Source: frontend/src/core.tsx:202
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "The latest data could not be loaded. Showing the previous results."
 msgstr ""
@@ -4964,7 +4989,7 @@ msgstr ""
 msgid "The Premium Add-On adds broader content controls, role inheritance, and advanced access rules."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:393
+#. Source: frontend/src/index.tsx:379
 #: media/js/react-admin.js
 msgid "The previous service is unavailable at this access level. An available service has been selected."
 msgstr ""
@@ -4979,17 +5004,17 @@ msgstr ""
 msgid "The review could not be saved."
 msgstr ""
 
-#. Source: frontend/src/term-access.tsx:131
+#. Source: frontend/src/term-access.tsx:132
 #: media/js/term-access.js
 msgid "The selected user could not be loaded."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:141
+#. Source: frontend/src/policy-assignee-metabox.tsx:142
 #: media/js/policy-assignee-metabox.js
 msgid "The server did not confirm this change."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:432
+#. Source: frontend/src/index.tsx:418
 #: media/js/react-admin.js
 msgid "The server did not confirm this change. Please review the settings and retry."
 msgstr ""
@@ -5020,7 +5045,7 @@ msgstr ""
 msgid "These rules govern the selected subject’s access to this identity."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:871
+#. Source: frontend/src/post-metabox.tsx:872
 #: media/js/post-access-metabox.js
 msgid "This access level will inherit its post rules again. Other access levels are not affected."
 msgstr ""
@@ -5045,7 +5070,7 @@ msgstr ""
 msgid "This essential menu item cannot be changed."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:110
+#. Source: frontend/src/index.tsx:96
 #: media/js/react-admin.js
 msgid "This extension has not registered a workspace view."
 msgstr ""
@@ -5055,12 +5080,12 @@ msgstr ""
 msgid "This MCP server restricts the tool regardless of its own tool rule."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:424
+#. Source: frontend/src/post-metabox.tsx:425
 #: media/js/post-access-metabox.js
 msgid "This post now inherits access for %s."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:665
+#. Source: frontend/src/post-metabox.tsx:666
 #: media/js/post-access-metabox.js
 msgid "This post only"
 msgstr ""
@@ -5080,13 +5105,13 @@ msgstr ""
 msgid "This role cannot be deleted."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:750
+#. Source: frontend/src/index.tsx:736
 #. Source: frontend/src/people.tsx:372
 #: media/js/react-admin.js
 msgid "This role has users assigned to it."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:709
+#. Source: frontend/src/index.tsx:695
 #: media/js/react-admin.js
 msgid "This role is no longer available."
 msgstr ""
@@ -5096,14 +5121,14 @@ msgstr ""
 msgid "This role or user does not have this capability"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:983
+#. Source: frontend/src/index.tsx:969
 #. Source: frontend/src/people.tsx:534
 #: media/js/react-admin.js
 msgid "This role will no longer be available. This change cannot be undone."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:70
-#: media/js/react-admin.js
+#. Source: frontend/src/core.tsx:49
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "This screen could not be displayed."
 msgstr ""
 
@@ -5127,7 +5152,7 @@ msgstr ""
 msgid "This server has no registered tools."
 msgstr ""
 
-#. Source: frontend/src/core.tsx:544
+#. Source: frontend/src/core.tsx:582
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "this service"
 msgstr ""
@@ -5147,7 +5172,7 @@ msgstr ""
 msgid "This user has no stored JWT tokens."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:185
+#. Source: frontend/src/index.tsx:171
 #: media/js/react-admin.js
 msgid "Three steps to get oriented"
 msgstr ""
@@ -5218,10 +5243,11 @@ msgstr ""
 msgid "True / false"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:154
-#. Source: frontend/src/core.tsx:167
-#. Source: frontend/src/post-metabox.tsx:853
-#. Source: frontend/src/term-access.tsx:531
+#. Source: frontend/src/core.tsx:192
+#. Source: frontend/src/core.tsx:205
+#. Source: frontend/src/core.tsx:51
+#. Source: frontend/src/post-metabox.tsx:854
+#. Source: frontend/src/term-access.tsx:532
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Try again"
 msgstr ""
@@ -5273,7 +5299,7 @@ msgstr ""
 msgid "Type a title to search all published pages."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:406
+#. Source: frontend/src/index.tsx:392
 #: media/js/react-admin.js
 msgid "Unable to change context."
 msgstr ""
@@ -5288,7 +5314,7 @@ msgstr ""
 msgid "Unavailable"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:301
+#. Source: frontend/src/index.tsx:287
 #: media/js/react-admin.js
 msgid "Understand roles and capabilities"
 msgstr ""
@@ -5308,7 +5334,7 @@ msgstr ""
 msgid "unsaved"
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:790
+#. Source: frontend/src/post-metabox.tsx:791
 #: media/js/post-access-metabox.js
 msgid "Unsaved changes"
 msgstr ""
@@ -5333,7 +5359,7 @@ msgstr ""
 msgid "Update this role’s details. Its access rules remain available to its members."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:640
+#. Source: frontend/src/post-metabox.tsx:641
 #: media/js/post-access-metabox.js
 msgid "Updating results…"
 msgstr ""
@@ -5405,7 +5431,7 @@ msgstr ""
 msgid "Use the request's standard denial message."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:198
+#. Source: frontend/src/index.tsx:184
 #: media/js/react-admin.js
 msgid "Use the selector above to choose a role, user, visitors, or default access."
 msgstr ""
@@ -5425,9 +5451,9 @@ msgstr ""
 msgid "Use this credential for API requests."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:601
-#. Source: frontend/src/post-metabox.tsx:70
-#. Source: frontend/src/term-access.tsx:284
+#. Source: frontend/src/index.tsx:587
+#. Source: frontend/src/post-metabox.tsx:71
+#. Source: frontend/src/term-access.tsx:285
 #: media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "User"
 msgstr ""
@@ -5457,29 +5483,29 @@ msgstr ""
 msgid "USER TOOLS"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:329
+#. Source: frontend/src/policy-assignee-metabox.tsx:330
 #: media/js/policy-assignee-metabox.js
 msgid "users"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:502
+#. Source: frontend/src/index.tsx:488
 #. Source: frontend/src/people.tsx:1268
 #. Source: frontend/src/people.tsx:155
 #. Source: frontend/src/people.tsx:214
-#. Source: frontend/src/policy-assignee-metabox.tsx:18
-#. Source: frontend/src/post-metabox.tsx:545
-#. Source: frontend/src/term-access.tsx:29
+#. Source: frontend/src/policy-assignee-metabox.tsx:19
+#. Source: frontend/src/post-metabox.tsx:546
+#. Source: frontend/src/term-access.tsx:30
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Users"
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:113
-#. Source: frontend/src/term-access.tsx:215
+#. Source: frontend/src/policy-assignee-metabox.tsx:114
+#. Source: frontend/src/term-access.tsx:216
 #: media/js/policy-assignee-metabox.js media/js/term-access.js
 msgid "Users could not be loaded."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:220
+#. Source: frontend/src/post-metabox.tsx:221
 #: media/js/post-access-metabox.js
 msgid "Users could not be loaded. Try searching again."
 msgstr ""
@@ -5496,7 +5522,7 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:271
+#. Source: frontend/src/index.tsx:257
 #: media/js/react-admin.js
 msgid "Video"
 msgstr ""
@@ -5512,21 +5538,21 @@ msgstr ""
 msgid "View token and sign-in URL"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:1007
-#. Source: frontend/src/index.tsx:503
-#. Source: frontend/src/index.tsx:601
+#. Source: frontend/src/index.tsx:489
+#. Source: frontend/src/index.tsx:587
+#. Source: frontend/src/index.tsx:993
 #. Source: frontend/src/people.tsx:560
-#. Source: frontend/src/policy-assignee-metabox.tsx:19
-#. Source: frontend/src/policy-assignee-metabox.tsx:341
-#. Source: frontend/src/post-metabox.tsx:133
-#. Source: frontend/src/post-metabox.tsx:71
-#. Source: frontend/src/term-access.tsx:30
-#. Source: frontend/src/term-access.tsx:89
+#. Source: frontend/src/policy-assignee-metabox.tsx:20
+#. Source: frontend/src/policy-assignee-metabox.tsx:342
+#. Source: frontend/src/post-metabox.tsx:134
+#. Source: frontend/src/post-metabox.tsx:72
+#. Source: frontend/src/term-access.tsx:31
+#. Source: frontend/src/term-access.tsx:90
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Visitors"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:365
+#. Source: frontend/src/index.tsx:351
 #: media/js/react-admin.js
 msgid "Wait for the current operation to finish before changing context."
 msgstr ""
@@ -5537,12 +5563,12 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:248
+#. Source: frontend/src/index.tsx:234
 #: media/js/react-admin.js
 msgid "Watch and explore"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:170
+#. Source: frontend/src/index.tsx:156
 #: media/js/react-admin.js
 msgid "Watch introduction"
 msgstr ""
@@ -5557,7 +5583,7 @@ msgstr ""
 msgid "Website widgets"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:141
+#. Source: frontend/src/index.tsx:127
 #: media/js/react-admin.js
 msgid "Welcome to AAM"
 msgstr ""
@@ -5628,14 +5654,19 @@ msgstr ""
 msgid "WordPress page"
 msgstr ""
 
-#. Source: frontend/src/index.tsx:288
+#. Source: frontend/src/index.tsx:274
 #: media/js/react-admin.js
 msgid "Working with content?"
 msgstr ""
 
-#. Source: frontend/src/core.tsx:446
+#. Source: frontend/src/core.tsx:484
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
 msgid "Working…"
+msgstr ""
+
+#. Source: frontend/src/error-report.mjs:74
+#: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js media/js/react-admin.js media/js/term-access.js
+msgid "You can try again. If it keeps happening, download the report and email it to support@aamplugin.com."
 msgstr ""
 
 #. Source: frontend/src/people.tsx:586
@@ -5645,25 +5676,25 @@ msgstr ""
 msgid "You cannot edit this user."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:748
+#. Source: frontend/src/index.tsx:734
 #. Source: frontend/src/people.tsx:368
 #: media/js/react-admin.js
 msgid "You do not have permission to delete roles."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:656
+#. Source: frontend/src/index.tsx:642
 #: media/js/react-admin.js
 msgid "You do not have permission to edit roles."
 msgstr ""
 
-#. Source: frontend/src/index.tsx:716
+#. Source: frontend/src/index.tsx:702
 #. Source: frontend/src/people.tsx:316
 #: media/js/react-admin.js
 msgid "You do not have permission to edit this role."
 msgstr ""
 
-#. Source: frontend/src/policy-assignee-metabox.tsx:371
-#. Source: frontend/src/post-metabox.tsx:474
+#. Source: frontend/src/policy-assignee-metabox.tsx:372
+#. Source: frontend/src/post-metabox.tsx:475
 #: media/js/policy-assignee-metabox.js media/js/post-access-metabox.js
 msgid "You do not have permission to manage any access levels."
 msgstr ""
@@ -5678,7 +5709,7 @@ msgstr ""
 msgid "Your changes take effect after you save."
 msgstr ""
 
-#. Source: frontend/src/post-metabox.tsx:684
+#. Source: frontend/src/post-metabox.tsx:685
 #: media/js/post-access-metabox.js
 msgid "Your changes will apply only to the audience you choose."
 msgstr ""

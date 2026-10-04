@@ -27,8 +27,11 @@ export async function indexScreens(
 ) {
   const failures = [];
   for (let i = 0; i < urls.length; i += 1) {
+    let requested = false;
+    let url;
     try {
-      const url = screenIndexUrl(urls[i], adminUrl, kind);
+      url = screenIndexUrl(urls[i], adminUrl, kind);
+      requested = true;
       const response = await request(url, { credentials: "same-origin" });
       const finalUrl = new URL(response.url || url);
       const base = new URL(adminUrl);
@@ -37,12 +40,16 @@ export async function indexScreens(
         finalUrl.origin !== base.origin ||
         !finalUrl.pathname.startsWith(base.pathname)
       ) {
-        throw new Error("The admin screen could not be indexed.");
+        const error = new Error("The admin screen could not be indexed.");
+        error.status = response.status || null;
+        throw error;
       }
     } catch (error) {
+      if (requested) recordFailure(apiFailure(url, "GET", error));
       failures.push({ url: urls[i], error });
     }
     onProgress?.(i + 1, urls.length);
   }
   return { total: urls.length, failures };
 }
+import { apiFailure, recordFailure } from "./error-report.mjs";

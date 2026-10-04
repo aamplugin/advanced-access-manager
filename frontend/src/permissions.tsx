@@ -735,8 +735,8 @@ export function Capabilities() {
     slug !== "" && !ignore && standardCapabilitySlug.exec(slug)?.[0] !== slug;
   const write = useWrite();
   const { boot, busy } = useWorkspace();
-  const toggle = (row: any) =>
-    write(
+  const toggle = async (row: any) => {
+    const saved = await write(
       "/" + boot.subject.type + "/" + encodeURIComponent(boot.subject.id),
       "PATCH",
       {
@@ -746,6 +746,8 @@ export function Capabilities() {
       },
       false,
     );
+    if (saved) r.refresh();
+  };
   return (
     <>
       <Title

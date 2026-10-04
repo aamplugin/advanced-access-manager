@@ -4,6 +4,13 @@ import {
   subscribeResourceRefresh,
 } from "./resource-refresh.mjs";
 import { resetResources } from "./reset-resources.mjs";
+import {
+  apiFailure,
+  installErrorHandling,
+  javascriptFailure,
+  recordFailure,
+} from "./error-report.mjs";
+installErrorHandling();
 export const {
   useState,
   useEffect,
@@ -25,6 +32,29 @@ export const {
   ToggleControl,
 } = wp.components;
 export const t = (s: string) => wp.i18n.__(s, "advanced-access-manager");
+export class FrontendErrorBoundary extends wp.element.Component {
+  state = { error: null };
+  static getDerivedStateFromError(error: any) {
+    return { error };
+  }
+  componentDidCatch(error: any, info: any) {
+    recordFailure(javascriptFailure(error, "render", {
+      componentStack: info?.componentStack || "",
+    }));
+  }
+  render() {
+    if (this.state.error)
+      return (
+        <Notice status="error" isDismissible={false}>
+          {t("This screen could not be displayed.")} {this.state.error.message}{" "}
+          <Button variant="secondary" onClick={() => this.setState({ error: null })}>
+            {t("Try again")}
+          </Button>
+        </Notice>
+      );
+    return this.props.children;
+  }
+}
 export type Subject = {
   type: "role" | "user" | "visitor" | "default";
   id: string | number | null;
@@ -51,9 +81,17 @@ export function base64Path(id: string) {
     throw new Error(t("Invalid resource identifier."));
   return id;
 }
+async function apiRequest(options: any) {
+  try {
+    return await wp.apiFetch(options);
+  } catch (error) {
+    recordFailure(apiFailure(options.path || options.url, options.method, error));
+    throw error;
+  }
+}
 export const request = (path: string, extra: any = {}) =>
-  wp.apiFetch({ path, ...extra });
-export const mutate = createMutationQueue((request) => wp.apiFetch(request));
+  apiRequest({ path, ...extra });
+export const mutate = createMutationQueue(apiRequest);
 const preloads = new Map();
 export function seed(boot: any) {
   if (boot.preload) preloads.set(boot.preload.path, boot.preload.data);

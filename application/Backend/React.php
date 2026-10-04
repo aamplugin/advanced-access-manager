@@ -54,6 +54,7 @@ class AAM_Backend_React
         $style_version = filemtime(AAM_BASEDIR . '/media/css/react-admin.css') ?: AAM_VERSION;
         $script_version = filemtime(AAM_BASEDIR . '/media/js/react-admin.js') ?: AAM_VERSION;
         self::enqueue_confirmation_style();
+        self::enqueue_error_report_style();
         wp_enqueue_style('wp-components');
         wp_enqueue_style('aam-react', $base . 'css/react-admin.css', ['aam-confirm-dialog'], $style_version);
         wp_enqueue_script(
@@ -100,6 +101,7 @@ class AAM_Backend_React
         $style = AAM_BASEDIR . '/media/css/post-access-metabox.css';
         $script = AAM_BASEDIR . '/media/js/post-access-metabox.js';
 
+        self::enqueue_error_report_style();
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             'aam-post-access',
@@ -148,6 +150,7 @@ class AAM_Backend_React
             ]
         ]);
         self::enqueue_confirmation_style();
+        self::enqueue_error_report_style();
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             'aam-term-access-base',
@@ -215,6 +218,18 @@ class AAM_Backend_React
         );
     }
 
+    /** Load the shared frontend recovery notice for AAM screens. */
+    private static function enqueue_error_report_style()
+    {
+        $path = AAM_BASEDIR . '/media/css/error-report.css';
+        wp_enqueue_style(
+            'aam-error-report',
+            plugins_url('media/css/error-report.css', AAM_BASEDIR . '/aam.php'),
+            [],
+            filemtime($path) ?: AAM_VERSION
+        );
+    }
+
     /** Load the policy assignee selector on published access policies. */
     public static function enqueue_policy_assignee_metabox($policy_id)
     {
@@ -236,6 +251,7 @@ class AAM_Backend_React
                     ? AAM::api()->policies('default')->is_attached($policy_id) : false
             ]
         ];
+        self::enqueue_error_report_style();
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             'aam-policy-assignee',

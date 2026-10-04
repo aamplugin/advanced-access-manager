@@ -12,6 +12,7 @@ import {
   request,
   mutate,
   pathFor,
+  FrontendErrorBoundary,
 } from "./core";
 import { ContentCustomizations } from "./content";
 import { needsPageSelection } from "./page-picker.mjs";
@@ -894,9 +895,11 @@ if (root) {
   wp.element
     .createRoot(root)
     .render(
-      <PostAccessMetabox
-        postId={Number(root.dataset.postId) || 0}
-        boot={window.aamPostAccessBootstrap || { roles: [], levels: {} }}
-      />,
+      <FrontendErrorBoundary>
+        <PostAccessMetabox
+          postId={Number(root.dataset.postId) || 0}
+          boot={window.aamPostAccessBootstrap || { roles: [], levels: {} }}
+        />
+      </FrontendErrorBoundary>,
     );
 }

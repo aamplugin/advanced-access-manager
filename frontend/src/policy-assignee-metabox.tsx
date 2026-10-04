@@ -10,6 +10,7 @@ import {
   request,
   mutate,
   pathFor,
+  FrontendErrorBoundary,
 } from "./core";
 import { Toast } from "./toast";
 
@@ -391,9 +392,11 @@ if (root) {
   wp.element
     .createRoot(root)
     .render(
-      <PolicyAssignee
-        policyId={Number(root.dataset.policyId)}
-        boot={window.aamPolicyAssigneeBootstrap || { levels: {}, attached: {} }}
-      />,
+      <FrontendErrorBoundary>
+        <PolicyAssignee
+          policyId={Number(root.dataset.policyId)}
+          boot={window.aamPolicyAssigneeBootstrap || { levels: {}, attached: {} }}
+        />
+      </FrontendErrorBoundary>,
     );
 }

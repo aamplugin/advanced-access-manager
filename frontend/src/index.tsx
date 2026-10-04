@@ -20,6 +20,7 @@ import {
   request,
   arr,
   plain,
+  FrontendErrorBoundary,
 } from "./core";
 import { PermissionList, Capabilities } from "./permissions";
 import { Redirect, UrlRules, Policies, Tokens } from "./rules";
@@ -58,21 +59,6 @@ const icons: any = {
   redirect: "randomize",
   welcome: "welcome-learn-more",
 };
-class ErrorBoundary extends wp.element.Component {
-  state = { error: null };
-  static getDerivedStateFromError(error) {
-    return { error };
-  }
-  render() {
-    if (this.state.error)
-      return (
-        <Notice status="error" isDismissible={false}>
-          {t("This screen could not be displayed.")} {this.state.error.message}
-        </Notice>
-      );
-    return this.props.children;
-  }
-}
 function Screen({ id }: any) {
   if (["admin_menu", "toolbar", "metabox", "widget", "route"].includes(id))
     return <PermissionList id={id} />;
@@ -902,14 +888,14 @@ function App() {
                 {t("Loading access workspace…")}
               </div>
             ) : (
-              <ErrorBoundary
+              <FrontendErrorBoundary
                 key={subject.type + ":" + subject.id + ":" + boot.screen}
               >
                 <Screen
                   key={subject.type + ":" + subject.id + ":" + boot.screen}
                   id={boot.screen}
                 />
-              </ErrorBoundary>
+              </FrontendErrorBoundary>
             )}
           </main>
         </div>
@@ -1028,7 +1014,7 @@ function App() {
 }
 seed(window.aamReactBootstrap);
 wp.element.createRoot(document.getElementById("aam-react-root")).render(
-  <ErrorBoundary>
+  <FrontendErrorBoundary>
     <App />
-  </ErrorBoundary>,
+  </FrontendErrorBoundary>,
 );

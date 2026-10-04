@@ -13,6 +13,7 @@ import {
   request,
   mutate,
   pathFor,
+  FrontendErrorBoundary,
 } from "./core";
 import { ScopedContentForm, ContentPremiumPrompt } from "./content";
 import { Toast } from "./toast";
@@ -616,11 +617,13 @@ if (root) {
   wp.element
     .createRoot(root)
     .render(
-      <TermAccess
-        termId={Number(root.dataset.termId)}
-        taxonomy={root.dataset.taxonomy}
-        termName={root.dataset.termName}
-        boot={window.aamTermAccessBootstrap || { roles: [], levels: {} }}
-      />,
+      <FrontendErrorBoundary>
+        <TermAccess
+          termId={Number(root.dataset.termId)}
+          taxonomy={root.dataset.taxonomy}
+          termName={root.dataset.termName}
+          boot={window.aamTermAccessBootstrap || { roles: [], levels: {} }}
+        />
+      </FrontendErrorBoundary>,
     );
 }
