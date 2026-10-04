@@ -139,7 +139,8 @@ trait AAM_Restful_ServiceTrait
                         return $this->_validate_role_id($value, $request);
                     }
                 ];
-            } elseif (in_array(AAM_Framework_Type_AccessLevel::USER, $access_level_aware, true)) {
+            }
+            if (in_array(AAM_Framework_Type_AccessLevel::USER, $access_level_aware, true)) {
                 $additional_args['user_id'] = [
                     'description'       => 'User ID',
                     'type'              => 'integer',
@@ -193,7 +194,8 @@ trait AAM_Restful_ServiceTrait
     }
 
     /**
-     * Validate if additional values are passed depending on access level
+     * Validate if additional values are passed depending on access level and
+     * current user has the ability to manage proviced access level
      *
      * @param string          $access_level
      * @param WP_REST_Request $request
@@ -217,6 +219,14 @@ trait AAM_Restful_ServiceTrait
                     array('status'  => 400)
                 );
             }
+
+            if (current_user_can('aam_manage_roles') === false) {
+                $response = new WP_Error(
+                    'rest_forbidden',
+                    __('You are not allowed to manage roles', 'advanced-access-manager'),
+                    array('status'  => 403)
+                );
+            }
         } elseif ($access_level === AAM_Framework_Type_AccessLevel::USER) {
             $user_id = $request->get_param('user_id');
 
@@ -225,6 +235,30 @@ trait AAM_Restful_ServiceTrait
                     'rest_invalid_param',
                     __('The user_id is required', 'advanced-access-manager'),
                     array('status'  => 400)
+                );
+            }
+
+            if (current_user_can('aam_manage_users') === false) {
+                $response = new WP_Error(
+                    'rest_forbidden',
+                    __('You are not allowed to manage users', 'advanced-access-manager'),
+                    array('status'  => 403)
+                );
+            }
+        } elseif ($access_level === AAM_Framework_Type_AccessLevel::VISITOR) {
+            if (current_user_can('aam_manage_visitors') === false) {
+                $response = new WP_Error(
+                    'rest_forbidden',
+                    __('You are not allowed to manage visitors', 'advanced-access-manager'),
+                    array('status'  => 403)
+                );
+            }
+        } elseif ($access_level === AAM_Framework_Type_AccessLevel::DEFAULT) {
+            if (current_user_can('aam_manage_default') === false) {
+                $response = new WP_Error(
+                    'rest_forbidden',
+                    __('You are not allowed to manage default access level', 'advanced-access-manager'),
+                    array('status'  => 403)
                 );
             }
         }
@@ -438,7 +472,7 @@ trait AAM_Restful_ServiceTrait
     public static function bootstrap()
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new self;
+            self::$_instance = new static;
         }
 
         return self::$_instance;

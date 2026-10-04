@@ -21,18 +21,6 @@ class AAM_Backend_View_Helper
 {
 
     /**
-     * Was resizer library already loaded?
-     *
-     * @var boolean
-     *
-     * @access protected
-     * @static
-     *
-     * @version 6.8.4
-     */
-    protected static $isResizerLoaded = false;
-
-    /**
      * Prepare phrase or label
      *
      * @param string $phrase
@@ -74,35 +62,6 @@ class AAM_Backend_View_Helper
     public static function prepareWalk(&$value, $index)
     {
         $value = '/\\' . ($index % 2 ? ']' : '[') . '/';
-    }
-
-    /**
-     * Prepare and print iframe HTML markup
-     *
-     * @param string $url
-     * @param string $style
-     * @param string $id
-     *
-     * @return void
-     *
-     * @since 6.9.21 https://github.com/aamplugin/advanced-access-manager/issues/341
-     * @since 6.8.4  Initial implementation of the method
-     *
-     * @access public
-     * @static
-     *
-     * @version 6.9.21
-     */
-    public static function loadIframe($url, $style = null, $id = 'aam-iframe')
-    {
-        echo '<iframe src="' . esc_url($url) . '" width="100%" id="' . esc_attr($id) . '" style="' . esc_attr($style) . '"></iframe>';
-
-        if (!self::$isResizerLoaded) {
-            echo '<script>' . file_get_contents(AAM_BASEDIR . '/media/js/iframe-resizer.js') . '</script>';
-            self::$isResizerLoaded = true;
-        }
-
-        echo '<script>iFrameResize({ log: false  }, "#' . $id . '");</script>';
     }
 
 }

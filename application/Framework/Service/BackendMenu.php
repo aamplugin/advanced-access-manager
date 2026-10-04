@@ -463,7 +463,9 @@ class AAM_Framework_Service_BackendMenu
             // Capability
             $item[1],
             // Slug
-            $item[2]
+            $item[2],
+            // WordPress stores the top-level menu icon at index 6.
+            $item[6] ?? null
         ];
     }
 
@@ -488,10 +490,12 @@ class AAM_Framework_Service_BackendMenu
             'path'          => $this->_prepare_admin_uri($menu_item[2]),
             'name'          => $this->_filter_menu_name($menu_item[0]),
             'capability'    => $menu_item[1],
-            'is_restricted' => $this->is_denied($slug)
+            'is_restricted' => $this->is_denied($slug),
+            'is_customized' => $this->_get_resource()->is_customized($slug)
         );
 
         if ($is_top_level) {
+            $response['icon'] = $menu_item[3] ?? null;
             $menu = $this->_get_raw_menu();
 
             $response['children'] = $this->_get_submenu(
@@ -552,13 +556,13 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Get parent menu
      *
-     * @param string $slug
+     * @param string $search
      *
      * @return string|null
      * @access private
      * @global array $submenu
      *
-     * @version 7.0.0
+     * @version 8.0.0
      */
     private function _get_parent_slug($search)
     {
@@ -578,6 +582,12 @@ class AAM_Framework_Service_BackendMenu
                 isset($menu['submenu']) ? $menu['submenu'] : [],
                 $search
             );
+        }
+
+        // At last, if still nothing, then prefix it with 'menu/' to cover scenario
+        // where a menu has only one item
+        if (is_null($result))  {
+            $result = 'menu/' . $search;
         }
 
         return $result;
@@ -664,7 +674,7 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Prepare filtered submenu
      *
-     * @param string $menu
+     * @param string $parent_slug
      * @param array  $submenu,
      *
      * @return array

@@ -12,6 +12,9 @@
  *
  * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Abilities abilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpServers mcp_servers(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpTools mcp_tools(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
@@ -185,16 +188,20 @@ trait AAM_Framework_Service_BaseTrait
      * access level. Permissions are considered customized if there is at least one
      * permission explicitly allowed or denied.
      *
+     * @param mixed $resource_identifier [Optional] Resource to inspect
+     *
      * @return bool
      * @access public
      *
      * @version 7.0.0
      * @todo Consider to remove
      */
-    public function is_customized()
+    public function is_customized($resource_identifier = null)
     {
         try {
-            $result = $this->_get_resource()->is_customized();
+            $result = $this->_get_resource()->is_customized(
+                $this->_normalize_resource_identifier($resource_identifier)
+            );
         } catch (Exception $e) {
             $result = $this->_handle_error($e);
         }
@@ -280,7 +287,7 @@ trait AAM_Framework_Service_BaseTrait
         AAM_Framework_AccessLevel_Interface$access_level,
         $settings
     ) {
-        return new self($access_level, $settings);
+        return new static($access_level, $settings);
     }
 
 }

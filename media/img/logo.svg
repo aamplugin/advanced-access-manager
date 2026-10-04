@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1280" viewBox="0 0 1280 1280" role="img" aria-labelledby="title desc">
+  <title id="title">The Access Revolution — angular A logo</title>
+  <desc id="desc">A purple-to-orange circular ring surrounding a split angular letter A with an open doorway at its center.</desc>
+  <defs>
+    <linearGradient id="ringGradient" x1="120" y1="270" x2="1135" y2="995" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5424FF"/>
+      <stop offset="0.28" stop-color="#A72AF4"/>
+      <stop offset="0.56" stop-color="#F13B99"/>
+      <stop offset="0.78" stop-color="#FF5D3D"/>
+      <stop offset="1" stop-color="#FF8A00"/>
+    </linearGradient>
+    <linearGradient id="leftGradient" x1="330" y1="830" x2="690" y2="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5526FF"/>
+      <stop offset="0.48" stop-color="#9C2DF4"/>
+      <stop offset="1" stop-color="#F6409F"/>
+    </linearGradient>
+    <linearGradient id="rightGradient" x1="690" y1="625" x2="885" y2="850" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E93DAE"/>
+      <stop offset="0.58" stop-color="#FF5D45"/>
+      <stop offset="1" stop-color="#FF8A00"/>
+    </linearGradient>
+    <linearGradient id="bridgeGradient" x1="585" y1="735" x2="718" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5424FF"/>
+      <stop offset="1" stop-color="#A92BEC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent background -->
+  <circle cx="625" cy="616" r="510" fill="none" stroke="url(#ringGradient)" stroke-width="45"/>
+
+  <!-- Rising left stroke and crown -->
+  <path fill="url(#leftGradient)" d="M303 853 L434 853 L624 523 L660 603 L729 496 L639 338 C633 327 617 327 611 338 Z"/>
+
+  <!-- Interior bridge -->
+  <path fill="url(#bridgeGradient)" d="M588 733 L674 640 L716 708 L671 733 Z"/>
+
+  <!-- Separate signal stroke -->
+  <path fill="url(#rightGradient)" d="M753 541 L674 640 L794 853 L927 853 Z"/>
+</svg>

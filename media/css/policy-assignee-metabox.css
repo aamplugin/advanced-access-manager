@@ -1,0 +1,319 @@
+#aam-policy-assignee-root {
+  --aam-policy-purple: #6337a6;
+  --aam-policy-line: #e7e0ed;
+  color: #292331;
+  font:
+    13px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+#aam-policy-assignee-root * {
+  box-sizing: border-box;
+}
+#aam-policy-assignee-root p {
+  margin: 0;
+}
+#aam-policy-assignee-root button {
+  font-family: inherit;
+}
+#aam-policy-assignee-root button:focus {
+  outline: none;
+  box-shadow: none;
+}
+#aam-policy-assignee-root button:focus-visible {
+  filter: brightness(0.88);
+}
+.aam-policy-assignee-toast-region button:focus {
+  outline: none;
+  box-shadow: none;
+}
+.aam-policy-assignee-toast-region button:focus-visible {
+  background: #edf0f3;
+}
+#aam-policy-assignee-root .aam-policy-assignee {
+  display: grid;
+  gap: 13px;
+  padding: 2px 0 4px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-intro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-intro strong {
+  font-size: 13px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-intro p {
+  margin-top: 2px;
+  color: #726b7a;
+  font-size: 11px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #efe6fa;
+  color: #684193;
+  font-size: 17px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--aam-policy-line);
+  border-radius: 9px;
+  background: #f8f6fa;
+}
+#aam-policy-assignee-root .aam-policy-assignee-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #635b6c;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+}
+#aam-policy-assignee-root .aam-policy-assignee-tabs button:hover {
+  background: #eee7f5;
+}
+#aam-policy-assignee-root .aam-policy-assignee-tabs button.is-active {
+  border-color: #ded0ec;
+  background: #fff;
+  box-shadow: 0 1px 4px #38214f17;
+  color: var(--aam-policy-purple);
+}
+#aam-policy-assignee-root .aam-policy-assignee-tabs .dashicons {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-directory {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+#aam-policy-assignee-root .aam-policy-assignee-directory > label {
+  color: #574e60;
+  font-size: 11px;
+  font-weight: 700;
+}
+#aam-policy-assignee-root .aam-policy-assignee-search {
+  position: relative;
+}
+#aam-policy-assignee-root .aam-policy-assignee-search .dashicons {
+  position: absolute;
+  top: 8px;
+  left: 9px;
+  width: 16px;
+  height: 16px;
+  color: #8a7e96;
+  font-size: 16px;
+  pointer-events: none;
+}
+#aam-policy-assignee-root .aam-policy-assignee-search input {
+  width: 100%;
+  min-height: 33px;
+  padding: 5px 8px 5px 31px;
+  border: 1px solid #d8cce8;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 12px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-search input:focus {
+  border-color: var(--aam-policy-purple);
+  box-shadow: 0 0 0 1px var(--aam-policy-purple);
+}
+#aam-policy-assignee-root .aam-policy-assignee-list {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 45px;
+  padding: 6px 8px;
+  border: 1px solid var(--aam-policy-line);
+  border-radius: 8px;
+  background: #fff;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row.is-attached {
+  border-color: #d9c9e9;
+  background: #fcf9ff;
+}
+#aam-policy-assignee-root .aam-policy-assignee-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: #f0eafa;
+  color: #74509c;
+}
+#aam-policy-assignee-root .aam-policy-assignee-avatar .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row-copy strong,
+#aam-policy-assignee-root .aam-policy-assignee-row-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row-copy strong {
+  font-size: 11px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-row-copy small {
+  margin-top: 2px;
+  color: #7b7382;
+  font-size: 10px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-toggle {
+  flex: none;
+  margin: 0;
+}
+#aam-policy-assignee-root
+  .aam-policy-assignee-toggle
+  .components-base-control__field {
+  margin: 0;
+}
+#aam-policy-assignee-root
+  .aam-policy-assignee-toggle
+  .components-toggle-control__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+#aam-policy-assignee-root
+  .aam-policy-assignee-toggle
+  .components-form-toggle.is-checked
+  .components-form-toggle__track {
+  border-color: var(--aam-policy-purple);
+  background: var(--aam-policy-purple);
+}
+#aam-policy-assignee-root .aam-policy-assignee-more {
+  padding: 5px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--aam-policy-purple);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+  text-align: left;
+}
+#aam-policy-assignee-root .aam-policy-assignee-count,
+#aam-policy-assignee-root .aam-policy-assignee-empty {
+  color: #77707f;
+  font-size: 11px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-empty {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-global {
+  display: grid;
+  justify-items: start;
+  gap: 7px;
+  padding: 15px;
+  border: 1px solid #e7ddf2;
+  border-radius: 9px;
+  background: #fbf8ff;
+}
+#aam-policy-assignee-root .aam-policy-assignee-global > .dashicons {
+  color: #76539e;
+  font-size: 22px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-global strong {
+  font-size: 13px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-global p {
+  color: #696172;
+  font-size: 11px;
+}
+#aam-policy-assignee-root .aam-policy-assignee-global-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #e8dff0;
+  color: #51455f;
+  font-size: 11px;
+  font-weight: 650;
+}
+.aam-policy-assignee-toast-region {
+  position: fixed;
+  top: 48px;
+  right: 24px;
+  z-index: 100001;
+  width: min(400px, calc(100vw - 28px));
+}
+.aam-policy-assignee-toast-region .ar-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 13px;
+  border: 1px solid #d6dde0;
+  border-left: 4px solid #4b8a61;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 28px #19202d24;
+  color: #27312d;
+}
+.aam-policy-assignee-toast-region .ar-toast-error {
+  border-left-color: #b34343;
+}
+.aam-policy-assignee-toast-region .ar-toast-warning {
+  border-left-color: #ca8c2e;
+}
+.aam-policy-assignee-toast-region .ar-toast-icon {
+  flex: none;
+  color: #43875a;
+}
+.aam-policy-assignee-toast-region .ar-toast-error .ar-toast-icon {
+  color: #b34343;
+}
+.aam-policy-assignee-toast-region .ar-toast-warning .ar-toast-icon {
+  color: #ca8c2e;
+}
+.aam-policy-assignee-toast-region .ar-toast-text {
+  flex: 1;
+}
+.aam-policy-assignee-toast-region .ar-toast-close {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #667;
+  cursor: pointer;
+}

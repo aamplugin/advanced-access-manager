@@ -48,20 +48,6 @@ class AAM_Service_Core
     ];
 
     /**
-     * Collection of capabilities responsible for API password management
-     *
-     * @version 7.0.0
-     */
-    const APP_PASSWORD_CAPS = [
-        'create_app_password',
-        'list_app_passwords',
-        'read_app_password',
-        'edit_app_password',
-        'delete_app_passwords',
-        'delete_app_password'
-    ];
-
-    /**
      * Constructor
      *
      * @access protected
@@ -123,6 +109,18 @@ class AAM_Service_Core
             return esc_html($translation);
         });
 
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Settings_Service::register();
+            AAM_Backend_Feature_Settings_Core::register();
+            AAM_Backend_Feature_Settings_Content::register();
+        }, 1);
+
+        if (is_multisite()) {
+            add_action('aam_initialize_ui_action', function () {
+                AAM_Backend_Feature_Settings_Multisite::register();
+            });
+        }
+
         if (is_admin()) {
             $metabox_enabled = AAM::api()->config->get(
                 'core.settings.ui.render_access_metabox'
@@ -130,26 +128,27 @@ class AAM_Service_Core
 
             if ($metabox_enabled) {
                 add_action('edit_user_profile', function($user) {
-                    if (current_user_can('aam_manager')) {
+                    if (current_user_can('aam_manager')
+                        && current_user_can('aam_manage_users')
+                        && current_user_can('edit_user', $user->ID)) {
                         $this->_render_access_widget($user);
+                    }
+                });
+
+                add_action('admin_enqueue_scripts', function($hook) {
+                    if ($hook === 'user-edit.php' && current_user_can('aam_manager')
+                        && current_user_can('aam_manage_users')) {
+                        $path = AAM_BASEDIR . '/media/css/user-access-link.css';
+                        wp_enqueue_style(
+                            'aam-user-access-link',
+                            plugins_url('media/css/user-access-link.css', AAM_BASEDIR . '/aam.php'),
+                            [],
+                            filemtime($path) ?: AAM_VERSION
+                        );
                     }
                 });
             }
 
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Settings_Service::register();
-                AAM_Backend_Feature_Settings_Core::register();
-                AAM_Backend_Feature_Settings_Content::register();
-                AAM_Backend_Feature_Settings_ConfigPress::register();
-                AAM_Backend_Feature_Settings_Manager::register();
-            }, 1);
-
-            if (is_multisite()) {
-                add_action('aam_initialize_ui_action', function () {
-                    AAM_Backend_Feature_Settings_Multisite::register();
-                });
-            }
         }
 
         // Allow third-party plugins to use AAM user IP detection
@@ -285,16 +284,6 @@ class AAM_Service_Core
         add_filter('get_sample_permalink_html', function ($html) {
             return $this->_control_permalink_html($html);
         });
-
-        // Control the ability to manage application password
-        add_filter(
-            'wp_is_application_passwords_available_for_user',
-            function($response, $user) {
-                return $this->_is_app_passwords_available_for_user(
-                    $response, $user
-                );
-            }, 10, 2
-        );
 
         // Control access to the backend area
         $this->_control_admin_area_access();
@@ -844,26 +833,6 @@ class AAM_Service_Core
     }
 
     /**
-     * Determine if given user is allowed to manage application passwords
-     *
-     * @param bool    $response
-     * @param WP_User $user
-     *
-     * @return bool
-     * @access private
-     *
-     * @version 7.0.0
-     */
-    private function _is_app_passwords_available_for_user($response, $user)
-    {
-        if (AAM::api()->caps->exists('aam_manage_application_passwords')) {
-            $response = user_can($user, 'aam_manage_application_passwords');
-        }
-
-        return $response;
-    }
-
-    /**
      * Render "Access Manager" widget on the user/profile edit screen
      *
      * @param WP_User $user
@@ -904,10 +873,6 @@ class AAM_Service_Core
                         'page.capability',
                         'administrator'
                     );
-                }
-            } elseif (in_array($capability, self::APP_PASSWORD_CAPS, true)) {
-                if (!$this->_is_app_passwords_available_for_user(true, $user_id)) {
-                    array_push($caps, 'do_not_allow');
                 }
             }
         }

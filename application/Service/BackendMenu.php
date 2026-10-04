@@ -45,12 +45,11 @@ class AAM_Service_BackendMenu
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_BackendMenu::register();
-            });
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_BackendMenu::register();
+        });
 
+        if (is_admin()) {
             // Filter the admin menu only when we are not on the AAM page and user
             // does not have the ability to manage admin menu through AAM UI
             add_filter('parent_file', function($parent_file) {

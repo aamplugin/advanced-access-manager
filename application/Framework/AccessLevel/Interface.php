@@ -16,6 +16,9 @@
  *
  * @method AAM_Framework_Service_Urls urls(array $settings = [])
  * @method AAM_Framework_Service_ApiRoutes api_routes(array $settings = [])
+ * @method AAM_Framework_Service_Abilities abilities(array $settings = [])
+ * @method AAM_Framework_Service_McpServers mcp_servers(array $settings = [])
+ * @method AAM_Framework_Service_McpTools mcp_tools(array $settings = [])
  * @method AAM_Framework_Service_Jwts jwts(array $settings = [])
  * @method AAM_Framework_Service_LoginRedirect login_redirect(array $settings = [])
  * @method AAM_Framework_Service_LogoutRedirect logout_redirect(array $settings = [])

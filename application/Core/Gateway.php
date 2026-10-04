@@ -12,6 +12,11 @@
  *
  * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Abilities abilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpServers mcp_servers(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpTools mcp_tools(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpPrompts mcp_prompts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpResources mcp_resources(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])

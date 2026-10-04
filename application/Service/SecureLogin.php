@@ -73,12 +73,9 @@ class AAM_Service_SecureLogin
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Register additional tab for the Settings
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Settings_Security::register();
-            });
-        }
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Settings_Security::register();
+        });
 
         // Redefine the wp-login.php header message
         add_filter('login_message', function($message) {

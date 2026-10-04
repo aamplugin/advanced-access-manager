@@ -83,12 +83,11 @@ class AAM_Service_Widgets
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_Widget::register();
-            });
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_Widget::register();
+        });
 
+        if (is_admin()) {
             // Manager WordPress metaboxes
             add_action('in_admin_header', function () {
                 $screen = get_current_screen();
@@ -138,6 +137,7 @@ class AAM_Service_Widgets
             'area'          => $area,
             'title'         => base64_decode($widget['title']),
             'is_restricted' => $service->is_denied($widget),
+            'is_customized' => $service->is_customized($widget),
         ];
     }
 

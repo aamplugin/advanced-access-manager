@@ -28,7 +28,6 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
      *
      * @version 7.0.0
      */
-    const TEMPLATE = 'settings/core.php';
 
     /**
      * Get list of core options
@@ -48,8 +47,8 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'value'       => $config->get('service.capability.edit_caps')
             ),
             'core.settings.ui.render_access_metabox' => array(
-                'title'       => __('Render Access Manager Metabox', 'advanced-access-manager'),
-                'description' => __('Render "Access Manager" metabox on all post, term or user edit pages.', 'advanced-access-manager'),
+                'title'       => __('Show Access Controls metabox', 'advanced-access-manager'),
+                'description' => __('Show access controls on post, page and term edit screens, and access management tools on supported user screens. The term card previews premium controls when the add-on is unavailable.', 'advanced-access-manager'),
                 'value'       => $config->get('core.settings.ui.render_access_metabox'),
             ),
             'core.settings.ui.tips' => array(

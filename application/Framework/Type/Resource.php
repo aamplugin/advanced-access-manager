@@ -59,6 +59,37 @@ class AAM_Framework_Type_Resource
     const API_ROUTE = 'api_route';
 
     /**
+     * WordPress ability resource type
+     * 
+     * @version 8.0.0
+     */
+    const ABILITY = 'ability';
+
+    /**
+     * MCP server resource type
+     * 
+     * @version 8.0.0
+     */
+    const MCP_SERVER = 'mcp_server';
+
+    /**
+     * MCP tools resource type
+     * 
+     * @version 8.0.0
+     */
+    const MCP_TOOL = 'mcp_tool';
+
+    /** MCP prompt resource type.
+     * @version 8.0.0
+     */
+    const MCP_PROMPT = 'mcp_prompt';
+
+    /** MCP resource URI type.
+     * @version 8.0.0
+     */
+    const MCP_RESOURCE = 'mcp_resource';
+
+    /**
      * Resource type that represents WordPress backend menu
      *
      * @version 7.0.0

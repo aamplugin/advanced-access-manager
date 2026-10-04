@@ -42,7 +42,6 @@ class AAM_Backend_Feature
     public static function registerFeature($feature)
     {
         $response     = false;
-        $access_level = AAM_Backend_AccessLevel::get_instance();
 
         // Determine correct AAM UI capability
         if (empty($feature->capability)) {
@@ -64,55 +63,12 @@ class AAM_Backend_Feature
             $can = current_user_can($cap);
         }
 
-        if ($show && $can) {
-            if (is_object($feature->view)) {
-                self::$_features[get_class($feature->view)] = $feature;
-            } elseif (!is_a($feature->view, Closure::class)) {
-                self::$_features[$feature->view] = $feature;
-                // Initialize view manage so it can register any necessary hooks
-                $feature->view = new $feature->view($access_level);
-            }
-
+        if ($show && $can && !empty($feature->uid)) {
+            self::$_features[$feature->uid] = $feature;
             $response = true;
         }
 
         return $response;
-    }
-
-    /**
-     * Get feature view manager
-     *
-     * @param string $id
-     *
-     * @return object
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public static function getFeatureView($id)
-    {
-        if (self::isFeatureRegistered($id)) {
-            $view = self::$_features[$id]->view;
-        } else {
-            $view = null;
-        }
-
-        return $view;
-    }
-
-    /**
-     * Check if feature is registered
-     *
-     * @param string $id
-     *
-     * @return boolean
-     *
-     * @access public
-     * @version 6.0.0
-     */
-    public static function isFeatureRegistered($id)
-    {
-        return array_key_exists($id, self::$_features);
     }
 
     /**
@@ -137,7 +93,7 @@ class AAM_Backend_Feature
                 if (empty($feature->access_levels)
                     || in_array($access_level->type, $feature->access_levels, true)
                 ) {
-                    $response[] = self::initView($feature);
+                    $response[] = $feature;
                 }
             }
         }
@@ -180,27 +136,6 @@ class AAM_Backend_Feature
         }
 
         return ($count > 0);
-    }
-
-    /**
-     * Initiate the view controller
-     *
-     * @param object $feature
-     *
-     * @return array
-     *
-     * @access protected
-     * @version 6.0.0
-     */
-    protected static function initView($feature)
-    {
-        if (is_string($feature->view)) {
-            $feature->view = new $feature->view(
-                AAM_Backend_AccessLevel::get_instance()
-            );
-        }
-
-        return $feature;
     }
 
 }

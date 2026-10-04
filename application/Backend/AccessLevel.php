@@ -47,8 +47,13 @@ class AAM_Backend_AccessLevel
      *
      * @version 7.0.0
      */
-    protected function __construct()
+    protected function __construct($access_level = null)
     {
+        if ($access_level !== null) {
+            $this->_access_level = $access_level;
+            return;
+        }
+
         $access_level_type = strtolower(AAM::api()->misc->get(
             $_POST, 'access_level', ''
         ));
@@ -59,6 +64,17 @@ class AAM_Backend_AccessLevel
             $access_level_id = AAM::api()->misc->get($_POST, 'user_id');
         } else {
             $access_level_id = null;
+        }
+
+        if (empty($access_level_type) && isset($_GET['page'], $_GET['aam_level']) && $_GET['page'] === 'aam') {
+            $access_level_type = sanitize_key($_GET['aam_level']);
+            $access_level_id = $access_level_type === 'user' ? absint($_GET['aam_subject'] ?? 0)
+                : sanitize_text_field(wp_unslash($_GET['aam_subject'] ?? ''));
+            try {
+                AAM_Backend_React::validate_context($access_level_type, $access_level_id);
+            } catch (Throwable $e) {
+                wp_die(esc_html($e->getMessage()), '', ['response' => 403]);
+            }
         }
 
         if (empty($access_level_type)) {
@@ -153,6 +169,11 @@ class AAM_Backend_AccessLevel
         );
 
         if (!is_null($level)) {
+            $management_caps = ['role' => 'aam_manage_roles', 'user' => 'aam_manage_users',
+                'visitor' => 'aam_manage_visitors', 'default' => 'aam_manage_default'];
+            if (!isset($management_caps[$level['type']]) || !current_user_can($management_caps[$level['type']])) {
+                return null;
+            }
             // Verifying that access level exists and is accessible
             if ($level['type'] === 'role') {
                 if (!AAM::api()->roles->is_editable_role($level['id'])) {
@@ -203,7 +224,8 @@ class AAM_Backend_AccessLevel
     private function _init_fallback_access_level()
     {
         if (current_user_can('aam_manage_roles')) {
-            $roles = array_keys(get_editable_roles());
+            $roles = array_keys(AAM::api()->roles->get_editable_roles(true));
+            
             $this->_init_access_level(
                 AAM_Framework_Type_AccessLevel::ROLE, array_pop($roles)
             );
@@ -265,6 +287,20 @@ class AAM_Backend_AccessLevel
         return $this->_access_level;
     }
 
+    /** Select the access level supplied by a workspace REST request. */
+    public function set_access_level($access_level)
+    {
+        $this->_access_level = $access_level;
+        AAM::api()->cache->set(
+            'managed_access_level_by_' . get_current_user_id(),
+            [
+                'type' => $access_level->type,
+                'id' => $access_level->get_id()
+            ],
+            2592000 // 30 days
+        );
+    }
+
     /**
      * Bootstrap the object
      *
@@ -273,10 +309,13 @@ class AAM_Backend_AccessLevel
      *
      * @version 7.0.0
      */
-    public static function bootstrap()
+    public static function bootstrap($access_level = null)
     {
         if (is_null(self::$_instance)) {
-            self::$_instance = new self;
+            self::$_instance = new self($access_level);
+        }
+        if ($access_level !== null) {
+            self::$_instance->set_access_level($access_level);
         }
 
         return self::$_instance;

@@ -19,6 +19,11 @@
  *
  * @method AAM_Framework_Service_Urls urls(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_ApiRoutes api_routes(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_Abilities abilities(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpServers mcp_servers(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpTools mcp_tools(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpPrompts mcp_prompts(mixed $access_level = null, array $settings = [])
+ * @method AAM_Framework_Service_McpResources mcp_resources(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_Jwts jwts(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LoginRedirect login_redirect(mixed $access_level = null, array $settings = [])
  * @method AAM_Framework_Service_LogoutRedirect logout_redirect(mixed $access_level = null, array $settings = [])
@@ -247,6 +252,27 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
+     * Get resource's explicit permissions
+     * 
+     * Permissions set with AAM UI are considered explicit. Any other settings (e.g. defined
+     * in JSON access policies) are not
+     * 
+     * @param mixed $resource_identifier
+     * 
+     * @access public
+     * 
+     * @version 8.0.0
+     */
+    public function get_explicit_permissions($resource_identifier)
+    {
+        $id = $this->_get_resource_id($resource_identifier);
+
+        return isset($this->_explicit_permissions[$id])
+            && is_array($this->_explicit_permissions[$id])
+            ? $this->_explicit_permissions[$id] : [];
+    }
+
+    /**
      * @inheritDoc
      */
     public function reset($resource_identifier = null)
@@ -395,7 +421,15 @@ trait AAM_Framework_Resource_BaseTrait
     }
 
     /**
-     * @inheritDoc
+     * Remove permissions
+     * 
+     * @param mixed  $resource_identifier
+     * @param string $permission_key
+     * 
+     * @return bool
+     * @access public
+     * 
+     * @version 7.0.0
      */
     public function remove_permission(
         $resource_identifier,
@@ -690,7 +724,7 @@ trait AAM_Framework_Resource_BaseTrait
         $response = [];
 
         foreach($permissions as $key => $permission) {
-            $response[$key] = $this->_sanitize_permission($key, $permission);
+            $response[$key] = $this->_sanitize_permission($permission);
         }
 
         return $response;

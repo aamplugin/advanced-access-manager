@@ -111,10 +111,8 @@ class AAM_Framework_Service_ApiRoutes
         try {
             $result     = null;
             $resource   = $this->_get_resource();
-            $permission = $resource->get_permission(
-                $this->_normalize_resource_identifier($api_route),
-                'access'
-            );
+            $identifier = $this->_normalize_resource_identifier($api_route);
+            $permission = $resource->get_permission($identifier, 'access');
 
             // Step #1. Determine if route is explicitly restricted
             if (!empty($permission)) {
@@ -125,7 +123,7 @@ class AAM_Framework_Service_ApiRoutes
             $result = apply_filters(
                 'aam_api_route_is_denied_filter',
                 $result,
-                $api_route,
+                $identifier,
                 $resource
             );
 
@@ -155,7 +153,7 @@ class AAM_Framework_Service_ApiRoutes
         return is_bool($result) ? !$result : $result;
     }
 
-     /**
+    /**
      * Get resource
      *
      * @return AAM_Framework_Resource_ApiRoute

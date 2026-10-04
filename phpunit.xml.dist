@@ -36,7 +36,13 @@
             <directory suffix="Test.php">./tests/Core</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">application</directory>
+        </include>
+    </source>
     <php>
+        <ini name="memory_limit" value="256M" />
         <const name="DB_HOST" value="localhost:/Users/vasyl/Library/Application Support/Local/run/JI-Q6E_q6/mysql/mysqld.sock" />
         <const name="AAM_UNITTEST_DEFAULT_ADMIN_PASS" value="123456" />
     </php>

@@ -48,6 +48,7 @@ class AAM_Restful_AccessDeniedRedirect
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
+                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_AREAS,
                         'required'    => false
                     ]
                 ]
@@ -59,8 +60,9 @@ class AAM_Restful_AccessDeniedRedirect
                 'callback' => [ $this, 'set_redirect' ],
                 'args'     => [
                     'area' => [
-                        'description' => 'Access area (frontend,  backend or api)',
+                        'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
+                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_AREAS,
                         'required'    => true
                     ],
                     'type' => [
@@ -128,6 +130,7 @@ class AAM_Restful_AccessDeniedRedirect
                     'area' => [
                         'description' => 'Access area (frontend, backend or api)',
                         'type'        => 'string',
+                        'enum'        => AAM_Framework_Service_AccessDeniedRedirect::ALLOWED_AREAS,
                         'required'    => false
                     ]
                 ]
@@ -397,10 +400,12 @@ class AAM_Restful_AccessDeniedRedirect
     private function _validate_http_status_code($value, $request)
     {
         $type  = $request->get_param('type');
-        $code  = intval($value);
+        $code  = filter_var($value, FILTER_VALIDATE_INT);
         $valid = false;
 
-        if (in_array($type, ['default', 'custom_message'], true)) {
+        if ($code === false) {
+            $valid = false;
+        } elseif (in_array($type, ['default', 'custom_message'], true)) {
             $valid = ($code >= 400 && $code <= 499) || ($code >= 500 && $code <= 599);
         } elseif (in_array($type, ['page_redirect', 'url_redirect'], true)) {
             $valid = $code >= 300 && $code <= 399;

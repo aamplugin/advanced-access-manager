@@ -107,7 +107,7 @@ class AAM_Restful_Capability
                         'default'     => false
                     ],
                     'globally' => [
-                        'description' => 'Wether this change affect only this access level or all',
+                        'description' => 'Whether to rename this capability in every registered role',
                         'type'        => 'boolean',
                         'default'     => false
                     ]
@@ -123,7 +123,7 @@ class AAM_Restful_Capability
                 'callback' => array($this, 'delete_capability'),
                 'args'     => [
                     'globally' => [
-                        'description' => 'Wether this change affect only this access level or all',
+                        'description' => 'Remove the capability from every registered role',
                         'type'        => 'boolean',
                         'default'     => false
                     ]
@@ -227,7 +227,7 @@ class AAM_Restful_Capability
             $globally      = $request->get_param('globally');
 
             if ($globally) {
-                // Iterating over the list of all roles and replace capabilities
+                // Rename this capability in every registered role
                 foreach(array_keys(wp_roles()->role_names) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->replace(
                         $capability, $slug, $ignore_format
@@ -265,7 +265,7 @@ class AAM_Restful_Capability
             $globally   = $request->get_param('globally');
 
             if ($globally) {
-                // Iterating over the list of all roles and replace capabilities
+                // Remove this capability from every registered role
                 foreach(array_keys(wp_roles()->role_names) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->remove(
                         $capability
@@ -317,6 +317,14 @@ class AAM_Restful_Capability
     {
         $service = $this->_get_service($request);
         $fields  = $this->_determine_fields($request);
+        $access_level = $this->_determine_access_level($request);
+        $resource = $access_level->get_resource(
+            AAM_Framework_Type_Resource::CAPABILITY
+        );
+        $direct_capabilities = $access_level->type === AAM_Framework_Type_AccessLevel::USER
+            ? $access_level->caps
+            : ($access_level->type === AAM_Framework_Type_AccessLevel::ROLE
+                ? $access_level->capabilities : []);
 
         // Prepare the output model
         $output = [
@@ -325,7 +333,10 @@ class AAM_Restful_Capability
                 'aam_capability_description_filter', null, $capability
             ),
             'permissions' => $this->_prepare_permissions($capability, $service),
-            'is_granted'  => $service->is_allowed($capability)
+            'is_granted'  => $service->is_allowed($capability),
+            'is_direct'   => $resource->is_customized($capability)
+                || (is_array($direct_capabilities)
+                    && array_key_exists($capability, $direct_capabilities))
         ];
 
         // Prepare the final output

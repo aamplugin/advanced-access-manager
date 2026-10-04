@@ -574,6 +574,7 @@ class AAM_Restful_Identity
             'id'            => $role->slug,
             'name'          => $role->display_name,
             'permissions'   => $resource->get_permissions($role->get_core_instance()),
+            'explicit_permissions' => $resource->get_explicit_permissions($role->get_core_instance()),
             'is_customized' => $resource->is_customized($role->get_core_instance())
         ];
     }
@@ -610,6 +611,7 @@ class AAM_Restful_Identity
             'id'            => $user->ID,
             'display_name'  => $display_name,
             'permissions'   => $resource->get_permissions($user->get_core_instance()),
+            'explicit_permissions' => $resource->get_explicit_permissions($user->get_core_instance()),
             'is_customized' => $resource->is_customized($user->get_core_instance())
         ];
     }
