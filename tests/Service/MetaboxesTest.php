@@ -33,6 +33,10 @@ final class MetaboxesTest extends TestCase
 
         $user_a = $this->createUser([ 'role' => 'editor' ]);
 
+        // The admin-header hook expects a current screen in WordPress.
+        $previous_screen = get_current_screen();
+        set_current_screen('page');
+
         // Setting current user
         wp_set_current_user($user_a);
 
@@ -55,6 +59,12 @@ final class MetaboxesTest extends TestCase
         $this->assertEmpty($wp_meta_boxes['page']['side']['core']['pageparentdiv']);
         $this->assertEmpty($wp_meta_boxes['page']['side']['low']['postimagediv']);
         $this->assertEmpty($wp_meta_boxes['page']['normal']['core']['postcustom']);
+
+        if ($previous_screen) {
+            set_current_screen($previous_screen);
+        } else {
+            unset($GLOBALS['current_screen']);
+        }
     }
 
     /**

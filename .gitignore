@@ -1,7 +1,11 @@
 phpunit
 .phpunit.result.cache
+phpunit.ci.xml
+/release/
 .default.setup.json
 sami.phar
 build
 sonarqube
 .scannerwork
+__pycache__/
+frontend/node_modules/

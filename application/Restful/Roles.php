@@ -104,6 +104,13 @@ class AAM_Restful_Roles
                         'description' => 'Clone role settings',
                         'type'        => 'boolean'
                     ),
+                    'parent_role' => array(
+                        'description' => 'Optional parent role for the Complete Package',
+                        'type'        => 'string',
+                        'validate_callback' => function ($value) {
+                            return empty($value) || $this->_validate_role_accessibility($value);
+                        }
+                    ),
                     'fields' => array(
                         'description' => 'List of additional fields to return',
                         'type'        => 'string',

@@ -134,6 +134,23 @@ class AAM_Framework_Service_Widgets
         return is_bool($result) ? !$result : $result;
     }
 
+    /** Whether this widget has a rule on the selected access level. */
+    public function is_customized($widget = null)
+    {
+        try {
+            $resource = $this->_get_resource();
+            $result = is_null($widget)
+                ? $resource->is_customized()
+                : $resource->is_customized(
+                    $this->_normalize_resource_identifier($widget)
+                );
+        } catch (Exception $e) {
+            $result = $this->_handle_error($e);
+        }
+
+        return $result;
+    }
+
     /**
      * Get widget resource
      *

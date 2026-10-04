@@ -1,0 +1,111 @@
+.aam-user-access-card {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  max-width: 980px;
+  margin: 24px 0 28px;
+  padding: 19px 20px;
+  border: 1px solid #e5dced;
+  border-radius: 12px;
+  background: linear-gradient(115deg, #f8f4fc 0%, #fff 62%);
+  box-shadow: 0 3px 16px #3220480d;
+  box-sizing: border-box;
+}
+.aam-user-access-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #ede2f9;
+  color: #653c94;
+}
+.aam-user-access-icon .dashicons {
+  width: 23px;
+  height: 23px;
+  font-size: 23px;
+}
+.aam-user-access-content {
+  flex: 1;
+  min-width: 0;
+}
+.aam-user-access-eyebrow {
+  color: #714c94;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+.aam-user-access-content h2 {
+  margin: 3px 0 4px;
+  padding: 0;
+  color: #292331;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.aam-user-access-content p {
+  margin: 0;
+  color: #625a69;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.aam-user-access-action {
+  display: grid;
+  flex: none;
+  justify-items: center;
+  gap: 5px;
+}
+.aam-user-access-action a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #60358e;
+  border-radius: 7px;
+  background: #6337a6;
+  box-shadow: 0 2px 5px #50307a24;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.aam-user-access-action a:hover,
+.aam-user-access-action a:focus {
+  border-color: #4c2778;
+  background: #4f2b80;
+  color: #fff;
+}
+.aam-user-access-action a:focus {
+  outline: none;
+  box-shadow: none;
+}
+.aam-user-access-action a .dashicons {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+.aam-user-access-action > span {
+  color: #81788a;
+  font-size: 11px;
+}
+@media (max-width: 782px) {
+  .aam-user-access-card {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+  }
+  .aam-user-access-action {
+    justify-items: start;
+    width: 100%;
+    padding-left: 60px;
+  }
+}
+@media (max-width: 480px) {
+  .aam-user-access-action {
+    padding-left: 0;
+  }
+}

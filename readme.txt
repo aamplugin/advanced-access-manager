@@ -1,48 +1,117 @@
-=== Advanced Access Manager – Access Governance for WordPress ===
+=== Access Governance for WordPress (aka AAM) ===
 Contributors: vasyltech
 Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
-Requires PHP: 5.6.0
+Requires PHP: 8.0
 Tested up to: 7.1.0
-Stable tag: 7.1.3
+Stable tag: 8.0.0
 
-Access Governance for WordPress. Control roles, users, content, admin areas, and APIs to prevent broken access controls and excessive privileges.
+Access Governance for WordPress. Understand, control, and continuously govern who and what can access your WordPress website.
 
 == Description ==
 
-**Advanced Access Manager (AAM)** introduces **Access Governance for WordPress** - a systematic approach to securing your site by controlling who can access what, when, and why.
+**Advanced Access Manager (AAM)** is an **Access Governance platform for WordPress**. It helps you understand and control how users, roles, applications, APIs, and other identities interact with your website.
 
-Most WordPress security plugins focus on external threats like malware, firewalls, and brute-force attacks. AAM addresses the **root cause of the #1 WordPress security risk: broken access controls, excessive privileges, and misconfigured roles**.
+WordPress security is not only about stopping attackers at the perimeter. Security also depends on what authenticated users, applications, integrations, and automated systems are allowed to do once they have access.
 
-Instead of reacting to attacks, AAM helps you **design security into your WordPress site**.
+A user may have more capabilities than their job requires. An old account may still have administrative privileges. An Application Password may expose unnecessary API access. A plugin may introduce new capabilities or endpoints. An AI agent may be connected through an account with far more authority than it needs.
 
-= What Access Governance means in practice =
+These are **access governance problems**.
 
-- **Mitigate Broken Access Controls**. Ensure roles, users, and permissions are correctly configured to prevent unauthorized actions and privilege escalation.
-- **Eliminate Excessive Privileges**. Identify overpowered users and reduce access to critical functionality, admin areas, and APIs.
-- **Secure Content by Design**. Control who can view, edit, publish, or delete posts, pages, media, taxonomies, and custom content types.
-- **Govern Access with Policy**. Define access rules using JSON Access Policies — portable, auditable, and automation-friendly.
-- **Build Custom Security Logic**. Use the AAM PHP Framework to create advanced, programmatic access controls tailored to your application.
+AAM provides the tools to discover, define, enforce, and audit access across WordPress so you can reduce excessive privileges, prevent broken access controls, and build a security model based on the **principle of least privilege**.
+
+**Security starts from within.**
+
+= What is Access Governance? =
+
+Access Governance is the continuous practice of answering four fundamental questions:
+
+**Who has access?  
+What can they access?  
+Why do they have that access?  
+Should they still have it?**
+
+In WordPress, the answers are rarely determined by a user's role alone.
+
+Effective access can be influenced by roles, capabilities, direct user permissions, content-level rules, plugins, authentication methods, API endpoints, Application Passwords, integrations, and custom application logic.
+
+AAM brings these controls together so that WordPress access can be intentionally designed, consistently enforced, and periodically reviewed.
+
+= Access Governance with AAM =
+
+* **Discover Effective Access** – Understand how roles, capabilities, inherited permissions, and access rules determine what an identity can actually do.
+
+* **Enforce Least Privilege** – Give users, applications, and integrations only the access required to perform their legitimate responsibilities.
+
+* **Mitigate Broken Access Controls** – Reduce the risk of unauthorized actions caused by excessive permissions, misconfigured roles, exposed endpoints, or inconsistent access rules.
+
+* **Govern Users & Roles** – Manage WordPress roles, capabilities, user permissions, and access inheritance with greater precision.
+
+* **Protect WordPress Resources** – Control access to posts, pages, media, taxonomies, custom post types, administrative areas, and other WordPress resources.
+
+* **Govern API Access** – Control access to REST API endpoints, XML-RPC functionality, and other programmatic interfaces.
+
+* **Audit Access Continuously** – Identify excessive privileges, risky configurations, unnecessary credentials, and other access-related security concerns before they become incidents.
+
+* **Define Access as Policy** – Use JSON Access Policies to describe portable, auditable, and automation-friendly access rules.
+
+* **Build Custom Access Controls** – Use the AAM PHP Framework and developer APIs to implement application-specific authorization and governance requirements.
 
 = Key Features =
 
-- **Security Audit**. Detect risky role assignments, misconfigurations, and compromised accounts.
-- **Granular Access Control**. Manage permissions for any user, role, or visitor with precision.
-- **Role & Capability Management**. Customize WordPress roles and capabilities beyond defaults.
-- **Admin & Menu Control**. Restrict dashboard areas and tailor the admin experience per user or role.
-- **API & Endpoint Protection**. Secure REST and XML-RPC access with fine-grained controls.
-- **Modern Authentication Options**. Support passwordless and secure login flows.
-- **Developer-Ready Framework**. Extend WordPress security using AAM’s powerful SDK.
-- **Ad-Free & Transparent**. – No ads, no tracking, no bloat.
+* **Security Audit** – Evaluate WordPress for access-related security risks, configuration problems, excessive privileges, and other potential weaknesses.
 
-= Built for Security-Conscious WordPress Users =
+* **Role & Capability Management** – Create and manage roles and control WordPress capabilities beyond the default role system.
 
-AAM is trusted by **150,000+ websites** to deliver enterprise-grade access control without unnecessary complexity. Whether you’re a site owner, agency, developer, or security professional, AAM gives you **full control over WordPress access — by design**.
+* **User-Level Access Controls** – Refine access for individual users without creating unnecessary roles.
 
-Most core features are free. Advanced capabilities are available via premium add-ons.
+* **Content Access Governance** – Control who can view, edit, publish, delete, or otherwise interact with WordPress content.
 
-No hidden tracking. No data collection. No unwanted changes.
-Just **security you can reason about, audit, and trust**.
+* **Backend Access Control** – Restrict administrative functionality and control access to WordPress backend menus and features.
+
+* **Frontend Access Control** – Define access rules for visitors, authenticated users, roles, and individual accounts.
+
+* **API Access Control** – Govern access to REST API endpoints, XML-RPC, and programmatic WordPress functionality.
+
+* **Authentication & Identity Controls** – Manage authentication-related functionality and additional mechanisms for securely accessing WordPress.
+
+* **JSON Access Policies** – Define complex access requirements as structured, reusable policies.
+
+* **Developer Framework** – Extend AAM or build custom authorization logic using its PHP APIs, hooks, and services.
+
+= Beyond Roles and Capabilities =
+
+WordPress roles and capabilities are an important part of authorization, but they are only part of the complete access model.
+
+Modern WordPress websites may expose functionality through the admin dashboard, frontend requests, REST APIs, XML-RPC, Application Passwords, plugins, integrations, automation platforms, and AI agents.
+
+That means securing WordPress requires looking beyond the question:
+
+**"What role does this user have?"**
+
+The more important question is:
+
+**"What can this identity actually do?"**
+
+AAM is designed around this broader view of **effective access**.
+
+= Built for Modern WordPress Security =
+
+AAM is built for site owners, developers, agencies, and security professionals who need more than basic role management.
+
+Use AAM to establish a repeatable access governance process:
+
+**Discover → Evaluate → Define → Enforce → Verify → Audit**
+
+Whether you manage a single website or hundreds of client installations, the goal remains the same: maintain a clear, intentional, and defensible access model.
+
+AAM is used on **150,000+ WordPress websites** and has been developed specifically around WordPress authorization and access control for more than a decade.
+
+Most core functionality is available for free, with advanced capabilities available through premium extensions.
+
+**No ads. No hidden tracking. No unnecessary data collection.**
+
+Just access controls you can **understand, enforce, audit, and trust**.
 
 == Installation ==
 
@@ -56,14 +125,21 @@ Just **security you can reason about, audit, and trust**.
 3. Manage capabilities for roles and users
 4. Manage access to posts, pages, media or custom post types
 5. Posts and pages access options form
-6. Define access to posts and categories while editing them
-7. Manage access denied redirect rule
-8. Manage user login redirect
+6. Manage access denied redirect rule
+7. Manage user login redirect
+8. Manage user logout redirect
 9. Manage 404 redirect
-10. Create your own content teaser for limited content
-11. Improve your website security
+10. Manage access to API routes
+11. Manage access to any URL on your site
+12. Manage JWT tokens for any user
+13. Manage access to WordPress abilities, MCP servers and MCP primitives
 
 == Changelog ==
+
+= 8.0.0 =
+* New: Completely new UI
+* New: The Abilities & MCP service
+* New: Security Audit implementation
 
 = 7.1.3 =
 * Fixed: Login redirect drops scheme and trailing slash, breaking sites behind a reverse proxy [https://github.com/aamplugin/advanced-access-manager/issues/506](https://github.com/aamplugin/advanced-access-manager/issues/506)

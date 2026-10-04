@@ -28,7 +28,6 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
      *
      * @version 7.0.0
      */
-    const TEMPLATE = 'settings/service.php';
 
     /**
      * Get list of services
@@ -43,7 +42,7 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
         $response = apply_filters('aam_service_list_filter', [
             [
                 'title'       => __('Access Denied Redirect', 'advanced-access-manager'),
-                'description' => __('Manage the default access-denied redirect separately for the frontend and backend when access to any protected website resource is denied.', 'advanced-access-manager'),
+                'description' => __('Choose how denied access is handled in the frontend and admin area, and set a shared default, message, or PHP callback for REST, Ability, and MCP calls.', 'advanced-access-manager'),
                 'setting'     => AAM::SERVICES[AAM_Service_AccessDeniedRedirect::class]
             ],
             [
@@ -55,6 +54,11 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
                 'title'       => __('API Routes', 'advanced-access-manager'),
                 'description' => __('Manage access to any individual RESTful endpoint for any role, user or unauthenticated application request. The service works great with JWT service that authenticate requests with JWT Bearer token.', 'advanced-access-manager'),
                 'setting'     => AAM::SERVICES[AAM_Service_ApiRoute::class]
+            ],
+            [
+                'title'       => __('Abilities & MCP', 'advanced-access-manager'),
+                'description' => __('Control WordPress abilities and MCP servers, tools, resources, and prompts for each access level.', 'advanced-access-manager'),
+                'setting'     => AAM::SERVICES[AAM_Service_Ability::class]
             ],
             [
                 'title'       => __('Backend Menu', 'advanced-access-manager'),
@@ -95,6 +99,11 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
                 'title'       => __('Logout Redirect', 'advanced-access-manager'),
                 'description' => __('Manage the logout redirect for any group of users or individual users after they have successfully logged out.', 'advanced-access-manager'),
                 'setting'     => AAM::SERVICES[AAM_Service_LogoutRedirect::class]
+            ],
+            [
+                'title'       => __('Manage Application Passwords', 'advanced-access-manager'),
+                'description' => __('Control who can use WordPress application passwords and review accounts with application passwords on the Users screen.', 'advanced-access-manager'),
+                'setting'     => AAM::SERVICES[AAM_Service_ApplicationPasswords::class]
             ],
             [
                 'title'       => __('Metaboxes', 'advanced-access-manager'),
@@ -142,6 +151,13 @@ class AAM_Backend_Feature_Settings_Service extends AAM_Backend_Feature_Abstract
                 'setting'     => AAM::SERVICES[AAM_Service_Widgets::class]
             ]
         ]);
+
+        // Abilities were added in WordPress 6.9.
+        if (!function_exists('wp_get_abilities')) {
+            $response = array_values(array_filter($response, function($item) {
+                return $item['setting'] !== AAM::SERVICES[AAM_Service_Ability::class];
+            }));
+        }
 
         // Get each service status
         foreach ($response as &$item) {

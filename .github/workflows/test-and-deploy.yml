@@ -1,0 +1,138 @@
+name: Test and deploy
+
+on:
+  push:
+    branches:
+      - next
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test on WordPress
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install and test frontend
+        run: |
+          npm ci --prefix frontend
+          npm --prefix frontend run typecheck
+          npm --prefix frontend test
+          npm --prefix frontend run build
+
+      - name: Start WordPress and MySQL containers
+        run: |
+          npm install --global @wordpress/env@10.39.0
+          wp-env start
+
+      - name: Verify test plugins are active
+        run: |
+          wp-env run cli wp plugin is-active advanced-access-manager
+          wp-env run cli wp plugin is-active mcp-adapter
+
+      - name: Install PHP dependencies in the WordPress container
+        run: |
+          wp-env run cli --env-cwd=wp-content/plugins/advanced-access-manager \
+            composer -- install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Grant test administrator AAM management permissions
+        run: |
+          wp-env run cli wp cap add administrator \
+            aam_manager aam_list_roles aam_create_roles aam_edit_roles \
+            aam_delete_roles aam_manage_roles aam_manage_users \
+            aam_manage_capabilities aam_manage_settings aam_manage_configs \
+            aam_manage_backend_menu aam_manage_admin_toolbar \
+            aam_manage_metaboxes aam_manage_widgets aam_manage_content \
+            aam_manage_access_denied_redirect aam_manage_login_redirect \
+            aam_manage_logout_redirect aam_manage_url_access \
+            aam_manage_api_routes aam_manage_mcps aam_manage_abilities \
+            aam_manage_policies aam_manage_identities aam_manage_default \
+            aam_manage_visitors aam_trigger_audit
+
+      - name: Run PHPUnit in the WordPress container
+        run: |
+          # The default config points to a developer's local MySQL socket.
+          sed '/<const name="DB_HOST"/d' phpunit.xml.dist > phpunit.ci.xml
+          wp-env run cli --env-cwd=wp-content/plugins/advanced-access-manager \
+            phpunit -- -c phpunit.ci.xml --no-coverage
+
+      - name: Stop containers
+        if: always()
+        run: wp-env stop || true
+
+  deploy:
+    name: Deploy to WordPress.org
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: wordpress-org-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm release version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          plugin_version="$(sed -nE 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*([^[:space:]]+).*/\1/p' aam.php | head -1)"
+          stable_tag="$(sed -nE 's/^Stable tag:[[:space:]]*([^[:space:]]+).*/\1/p' readme.txt | head -1)"
+          if [[ ! "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+             [[ "$RELEASE_TAG" != "$plugin_version" ]] || \
+             [[ "$RELEASE_TAG" != "$stable_tag" ]]; then
+            echo "Release tag ($RELEASE_TAG), plugin version ($plugin_version), and readme stable tag ($stable_tag) must match." >&2
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          coverage: none
+
+      - name: Build release files
+        run: |
+          npm ci --prefix frontend
+          npm --prefix frontend run build
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+          mkdir -p release
+          cp -R application lang media vendor aam.php autoloader.php license.txt readme.txt release/
+          test -f release/media/js/react-admin.js
+          test -f release/vendor/autoload.php
+
+      - name: Verify release contents
+        run: |
+          expected=(application lang media vendor aam.php autoloader.php license.txt readme.txt)
+          mapfile -t actual < <(find release -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+          mapfile -t wanted < <(printf '%s\n' "${expected[@]}" | sort)
+          if [[ "${actual[*]}" != "${wanted[*]}" ]]; then
+            printf 'Unexpected release contents: %s\n' "${actual[*]}" >&2
+            exit 1
+          fi
+
+      - name: Deploy tested tag
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: advanced-access-manager
+          BUILD_DIR: release

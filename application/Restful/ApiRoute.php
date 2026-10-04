@@ -122,6 +122,15 @@ class AAM_Restful_ApiRoute
     {
         try {
             $result = $this->_get_route_list($this->_get_service($request));
+            $resource = $this->_determine_access_level($request)->get_resource(
+                AAM_Framework_Type_Resource::API_ROUTE
+            );
+            foreach ($result as &$route) {
+                $route['is_customized'] = $resource->is_customized(
+                    strtolower($route['method'] . ' ' . $route['endpoint'])
+                );
+            }
+            unset($route);
         } catch (Exception $e) {
             $result = $this->_prepare_error_response($e);
         }

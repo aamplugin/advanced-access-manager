@@ -76,6 +76,27 @@ class AAM_Restful_SecurityAudit
                 'callback' => array($this, 'generate_report')
             ], self::PERMISSIONS, false);
 
+            // Record a review decision without changing the raw audit result.
+            $this->_register_route('/audit/review', [
+                'methods'  => WP_REST_Server::CREATABLE,
+                'callback' => array($this, 'review_findings'),
+                'args'     => [
+                    'scope' => [
+                        'type' => 'string',
+                        'required' => true,
+                        'enum' => ['issue', 'step', 'all']
+                    ],
+                    'status' => [
+                        'type' => 'string',
+                        'required' => true,
+                        'enum' => ['open', 'acknowledged', 'resolved']
+                    ],
+                    'step' => ['type' => 'string'],
+                    'issue_id' => ['type' => 'string'],
+                    'note' => ['type' => 'string', 'maxLength' => 2000]
+                ]
+            ], self::PERMISSIONS, false);
+
             // Share complete report
             $this->_register_route('/audit/summary', [
                 'methods'  => WP_REST_Server::READABLE,
@@ -97,9 +118,32 @@ class AAM_Restful_SecurityAudit
     public function run_step(WP_REST_Request $request)
     {
         try {
-            $response = AAM_Service_SecurityAudit::get_instance()->execute(
-                $request->get_param('step'),
+            $service = AAM_Service_SecurityAudit::get_instance();
+            $step = $request->get_param('step');
+            $response = $service->execute(
+                $step,
                 $request->get_param('reset')
+            );
+            $response = $service->prepare_ui_result($step, $response);
+        } catch (Exception $ex) {
+            $response = $this->_prepare_error_response($ex);
+        }
+
+        return rest_ensure_response($response);
+    }
+
+    /**
+     * Acknowledge or resolve audit findings, with an optional issue note.
+     */
+    public function review_findings(WP_REST_Request $request)
+    {
+        try {
+            $response = AAM_Service_SecurityAudit::get_instance()->update_reviews(
+                $request->get_param('scope'),
+                $request->get_param('status'),
+                (string) $request->get_param('step'),
+                (string) $request->get_param('issue_id'),
+                (string) $request->get_param('note')
             );
         } catch (Exception $ex) {
             $response = $this->_prepare_error_response($ex);

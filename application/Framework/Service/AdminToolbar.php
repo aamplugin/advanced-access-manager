@@ -212,10 +212,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
         try {
             // Getting all the defined permissions
             $resource   = $this->_get_resource();
-            $permission = $resource->get_permission(
-                $this->_normalize_resource_identifier($slug),
-                'list'
-            );
+            $identifier = $this->_normalize_resource_identifier($slug);
+            $permission = $resource->get_permission($identifier, 'list');
 
             // Step #1. Checking if provided item has any access controls defined
             if (!empty($permission)) {
@@ -245,7 +243,7 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             $result = apply_filters(
                 'aam_admin_toolbar_is_denied_filter',
                 $result,
-                $slug,
+                $identifier,
                 $resource
             );
 
@@ -401,7 +399,8 @@ class AAM_Framework_Service_AdminToolbar implements AAM_Framework_Service_Interf
             'slug'          => $item['slug'],
             'uri'           => $this->_prepare_item_uri($item['href']),
             'name'          => base64_decode($item['title']),
-            'is_restricted' => $this->is_denied($item['slug'])
+            'is_restricted' => $this->is_denied($item['slug']),
+            'is_customized' => $this->_get_resource()->is_customized($item['slug'])
         ];
 
         if (!empty($item['parent_id'])) {

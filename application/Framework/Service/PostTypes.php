@@ -66,6 +66,8 @@ class AAM_Framework_Service_PostTypes
             $result = get_post_type_object($resource_identifier);
         } elseif (is_a($resource_identifier, WP_Post_Type::class)) {
             $result = $resource_identifier;
+        } else {
+            $result = null;
         }
 
         if (!is_a($result, WP_Post_Type::class)) {

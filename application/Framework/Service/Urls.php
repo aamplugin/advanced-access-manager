@@ -207,7 +207,9 @@ class AAM_Framework_Service_Urls implements AAM_Framework_Service_Interface
         // Step #2. Parsing the incoming URL and checking if there is the
         //          same URL without query params defined
         if (is_null($result)) {
-            $parsed_url = AAM_Framework_Manager::_()->misc->parse_url($identifier);
+            $parsed_url = AAM_Framework_Manager::_()->misc->parse_url(
+                $identifier
+            );
 
             if (!empty($parsed_url['path'])) {
                 $result = $this->_find_permission_by_url(

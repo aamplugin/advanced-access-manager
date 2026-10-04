@@ -1,0 +1,271 @@
+#aam-term-access-root {
+  --aam-term-purple: #673ab7;
+  --aam-term-ink: #292331;
+  --aam-term-muted: #696575;
+  margin: 18px 0 24px;
+  max-width: 850px;
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+#aam-term-access-root *,
+.aam-term-modal * {
+  box-sizing: border-box;
+}
+#aam-term-access-root .aam-term-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-height: 90px;
+  padding: 16px 18px;
+  border: 1px solid #ddd4eb;
+  border-left: 3px solid var(--aam-term-purple);
+  border-radius: 10px;
+  background: linear-gradient(105deg, #fbf9fe 0%, #fff 72%);
+  box-shadow: 0 2px 12px #40205b09;
+}
+#aam-term-access-root .aam-term-card-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border-radius: 10px;
+  background: #ece3f7;
+  color: var(--aam-term-purple);
+}
+#aam-term-access-root .aam-term-card-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+#aam-term-access-root .aam-term-card-copy strong {
+  color: var(--aam-term-ink);
+  font-size: 14px;
+}
+#aam-term-access-root .aam-term-card-copy span {
+  overflow: hidden;
+  color: #4c3f5d;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#aam-term-access-root .aam-term-card-copy small {
+  color: var(--aam-term-muted);
+  font-size: 11px;
+}
+#aam-term-access-root .aam-term-card .components-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  border-color: #d1bde6;
+  color: #56318d;
+  font-weight: 650;
+}
+#aam-term-access-root .aam-term-card .dashicons-arrow-right-alt {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+.aam-term-modal.components-modal__frame {
+  width: min(94vw, 1080px);
+  max-width: 1080px;
+  max-height: min(92vh, 950px);
+}
+.aam-term-modal .components-modal__content {
+  padding-bottom: 0;
+}
+.aam-term-modal .aam-term-editor-head small {
+  color: #7953a6;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .08em;
+}
+.aam-term-modal .aam-term-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 255px) minmax(0, 1fr);
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid #e5deec;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+}
+.aam-term-modal .aam-term-levels {
+  min-width: 0;
+  padding: 14px;
+  border-right: 1px solid #e5deec;
+  background: #faf8fc;
+}
+.aam-term-modal .aam-term-kind-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+.aam-term-modal .aam-term-kind-grid button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 37px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #625b6d;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.aam-term-modal .aam-term-kind-grid button:hover,
+.aam-term-modal .aam-term-people-list button:hover {
+  background: #eee7f6;
+}
+.aam-term-modal .aam-term-kind-grid button.is-active {
+  border-color: #d8c4eb;
+  background: #fff;
+  color: #673ab7;
+}
+.aam-term-modal .aam-term-kind-grid .dashicons {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+.aam-term-modal .aam-term-people {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+}
+.aam-term-modal .aam-term-people label {
+  color: #514b5c;
+  font-size: 11px;
+  font-weight: 700;
+}
+.aam-term-modal .aam-term-people input {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid #d8cce8;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.aam-term-modal .aam-term-people-list {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  max-height: 440px;
+  overflow-y: auto;
+}
+.aam-term-modal .aam-term-people-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.aam-term-modal .aam-term-people-list button.is-selected {
+  border-color: #d5bee9;
+  background: #ede4f7;
+}
+.aam-term-modal .aam-term-people-list button > .dashicons {
+  flex: none;
+  color: #76539d;
+}
+.aam-term-modal .aam-term-people-list button > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+.aam-term-modal .aam-term-people-list strong,
+.aam-term-modal .aam-term-people-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aam-term-modal .aam-term-people-list small,
+.aam-term-modal .aam-term-level-note,
+.aam-term-modal .aam-term-list-status {
+  color: #77707f;
+  font-size: 11px;
+}
+.aam-term-modal .aam-term-level-note {
+  margin-top: 18px;
+}
+.aam-term-modal .aam-term-list-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px;
+}
+.aam-term-modal .aam-term-editor {
+  min-width: 0;
+  padding: 18px 21px;
+}
+.aam-term-modal .aam-term-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ebe6ef;
+}
+.aam-term-modal .aam-term-editor-head > div {
+  display: grid;
+  gap: 2px;
+}
+.aam-term-modal .aam-term-editor-head strong {
+  color: #292331;
+  font-size: 16px;
+}
+.aam-term-modal .aam-term-editor-head > span {
+  padding: 5px 8px;
+  border-radius: 99px;
+  background: #f1f3f5;
+  color: #66616f;
+  font-size: 11px;
+  font-weight: 650;
+}
+.aam-term-modal .aam-term-editor-head > span.is-customized {
+  background: #eee4f9;
+  color: #6337a6;
+}
+.aam-term-modal .aam-term-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 180px;
+  color: #696575;
+}
+.aam-term-modal .aam-term-editor form {
+  margin-top: 15px;
+}
+.aam-term-modal .ar-content-controls {
+  margin-top: 13px;
+}
+.aam-term-toast-region {
+  position: fixed;
+  top: 42px;
+  right: 22px;
+  z-index: 1000010;
+}
+@media (max-width: 760px) {
+  .aam-term-modal .aam-term-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .aam-term-modal .aam-term-levels {
+    border-right: 0;
+    border-bottom: 1px solid #e5deec;
+  }
+  .aam-term-modal .aam-term-people-list {
+    max-height: 175px;
+  }
+}
+@media (max-width: 520px) {
+  #aam-term-access-root .aam-term-card {
+    flex-wrap: wrap;
+  }
+  #aam-term-access-root .aam-term-card .components-button {
+    margin-left: 54px;
+  }
+}

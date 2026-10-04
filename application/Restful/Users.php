@@ -69,6 +69,11 @@ class AAM_Restful_Users
                     'role'   => array(
                         'description' => 'Return users only for given role',
                         'type'        => 'string'
+                    ),
+                    'status' => array(
+                        'description' => 'Return users with the selected access status',
+                        'type'        => 'string',
+                        'enum'        => array('active', 'inactive')
                     )
                 )
             ], self::PERMISSIONS, false);
@@ -138,7 +143,7 @@ class AAM_Restful_Users
                                         'required' => true,
                                         'enum'     => AAM_Framework_Proxy_User::ALLOWED_EXPIRATION_TRIGGERS
                                     ],
-                                    'role' => [
+                                    'to_role' => [
                                         'type'              => 'string',
                                         'validate_callback' => function ($value) {
                                             return $this->_validate_role_accessibility(
@@ -201,6 +206,11 @@ class AAM_Restful_Users
                         'validate_callback' => function ($value) {
                             return $this->_validate_fields_input($value);
                         }
+                    ),
+                    'reset' => array(
+                        'description' => 'Limit reset to user access expiration',
+                        'type'        => 'string',
+                        'enum'        => [ 'expiration' ]
                     )
                 )
             ], self::PERMISSIONS, false);
@@ -230,7 +240,26 @@ class AAM_Restful_Users
             $role_filter = $request->get_param('role');
 
             if (!empty($role_filter)) {
-                $filters['role__in'] = $role_filter;
+                $filters['role__in'] = [$role_filter];
+            }
+
+            $status_filter = $request->get_param('status');
+
+            if ($status_filter === 'inactive') {
+                $filters['meta_query'] = [[
+                    'key'   => 'aam_user_status',
+                    'value' => 'locked'
+                ]];
+            } elseif ($status_filter === 'active') {
+                $filters['meta_query'] = [
+                    'relation' => 'OR',
+                    [ 'key' => 'aam_user_status', 'compare' => 'NOT EXISTS' ],
+                    [
+                        'key'     => 'aam_user_status',
+                        'value'   => 'locked',
+                        'compare' => '!='
+                    ]
+                ];
             }
 
             // Modify the search, if not empty
@@ -354,7 +383,7 @@ class AAM_Restful_Users
             $user = AAM::api()->users->get_user($request->get_param('id'));
 
             // Reset user
-            $user->reset();
+            $user->reset($request->get_param('reset') ?: null);
 
             $result = $this->_prepare_output(
                 $user, $this->_determine_additional_fields($request)
@@ -431,6 +460,7 @@ class AAM_Restful_Users
         $item = [
             'id'                    => $user->ID,
             'user_login'            => $user->user_login,
+            'user_email'            => $user->user_email,
             'display_name'          => $display_name,
             'user_level'            => intval($user->user_level),
             'roles'                 => $this->_prepare_user_roles($user->roles),

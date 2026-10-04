@@ -138,7 +138,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
      * @return AAM_Framework_Proxy_User
      * @access public
      *
-     * @version 7.0.0
+     * @version 8.0.0
      */
     public function update($data)
     {
@@ -149,7 +149,7 @@ class AAM_Framework_Proxy_User implements AAM_Framework_Proxy_Interface
                     $data['expiration']['expires_at']
                     :
                     DateTime::createFromFormat(
-                        DateTime::RFC3339, $data['expiration']['expires_at']
+                        'Y-m-d\TH:i:s.v\Z', $data['expiration']['expires_at']
                     )->getTimestamp()
             ];
 

@@ -45,12 +45,9 @@ class AAM_Service_ApiRoute
      */
     protected function initialize_hooks()
     {
-        if (is_admin()) {
-            // Hook that initialize the AAM UI part of the service
-            add_action('aam_initialize_ui_action', function () {
-                AAM_Backend_Feature_Main_ApiRoute::register();
-            });
-        }
+        add_action('aam_initialize_ui_action', function () {
+            AAM_Backend_Feature_Main_ApiRoute::register();
+        });
 
         // Register API manager is applicable
         add_filter('rest_pre_dispatch', function($result, $_, $request) {

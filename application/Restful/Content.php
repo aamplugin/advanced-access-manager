@@ -199,7 +199,144 @@ class AAM_Restful_Content
                     )
                 )
             ), self::PERMISSIONS);
+
+            // The legacy content form also manages post types, taxonomies and terms.
+            $resource_route = '/content/(?P<resource_type>post_type|taxonomy|term)/(?P<id>[\w-]+)';
+            $this->_register_route($resource_route, [
+                'methods'  => WP_REST_Server::READABLE,
+                'callback' => [ $this, 'get_content_resource' ]
+            ], self::PERMISSIONS);
+            $this->_register_route($resource_route, [
+                'methods'  => WP_REST_Server::EDITABLE,
+                'callback' => [ $this, 'update_content_permissions' ],
+                'args'     => [
+                    'permissions' => [
+                        'type'     => 'array',
+                        'required' => true,
+                        'items'    => [ 'type' => 'object' ]
+                    ]
+                ]
+            ], self::PERMISSIONS);
+            $this->_register_route($resource_route, [
+                'methods'  => WP_REST_Server::DELETABLE,
+                'callback' => [ $this, 'reset_content_resource' ]
+            ], self::PERMISSIONS);
         });
+    }
+
+    /** Resolve the same resource identifier and optional term scope as the legacy form. */
+    private function _resolve_content_resource(WP_REST_Request $request)
+    {
+        $type = $request->get_param('resource_type');
+        $id   = $request->get_param('id');
+
+        if ($type === AAM_Framework_Type_Resource::POST_TYPE) {
+            $identifier = get_post_type_object($id);
+        } elseif ($type === AAM_Framework_Type_Resource::TAXONOMY) {
+            $identifier = get_taxonomy($id);
+        } else {
+            $taxonomy = $request->get_param('taxonomy');
+            if (empty($taxonomy) || !taxonomy_exists($taxonomy) || !ctype_digit((string) $id)) {
+                throw new InvalidArgumentException('A valid term ID and taxonomy are required');
+            }
+            $identifier = get_term((int) $id, $taxonomy);
+            $post_type = $request->get_param('post_type');
+            if ($identifier instanceof WP_Term && $post_type) {
+                if (!post_type_exists($post_type)
+                    || !in_array($post_type, get_taxonomy($taxonomy)->object_type, true)) {
+                    throw new InvalidArgumentException('Post type is not registered for this taxonomy');
+                }
+                $identifier->post_type = $post_type;
+            }
+        }
+
+        if (!$identifier || is_wp_error($identifier)) {
+            throw new OutOfRangeException('Content resource not found');
+        }
+
+        $resource = $this->_determine_access_level($request)->get_resource($type);
+        return [ $resource, $identifier ];
+    }
+
+    private function _content_controls($resource, $identifier)
+    {
+        $controls = apply_filters(
+            'aam_content_access_controls_filter', [], $resource, $identifier
+        );
+        return is_array($controls) ? $controls : [];
+    }
+
+    private function _prepare_content_resource($resource, $identifier)
+    {
+        $controls = [];
+        foreach ($this->_content_controls($resource, $identifier) as $key => $settings) {
+            if (is_array($settings)) {
+                $controls[$key] = [
+                    'title'       => $settings['title'] ?? $key,
+                    'description' => $settings['description'] ?? ''
+                ];
+            }
+        }
+
+        return [
+            'permissions'   => $resource->get_permissions($identifier),
+            'explicit_permissions' => $resource->get_explicit_permissions($identifier),
+            'is_customized' => $resource->is_customized($identifier),
+            'controls'      => $controls
+        ];
+    }
+
+    public function get_content_resource(WP_REST_Request $request)
+    {
+        try {
+            [ $resource, $identifier ] = $this->_resolve_content_resource($request);
+            $result = $this->_prepare_content_resource($resource, $identifier);
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+        return rest_ensure_response($result);
+    }
+
+    public function update_content_permissions(WP_REST_Request $request)
+    {
+        try {
+            [ $resource, $identifier ] = $this->_resolve_content_resource($request);
+            $allowed = $this->_content_controls($resource, $identifier);
+            $changes = $request->get_json_params()['permissions'] ?? [];
+
+            foreach ($changes as $change) {
+                if (!is_array($change)
+                    || empty($change['permission'])
+                    || !array_key_exists($change['permission'], $allowed)
+                    || !in_array($change['effect'] ?? null, [ 'allow', 'deny' ], true)) {
+                    throw new InvalidArgumentException('Unsupported content permission');
+                }
+            }
+
+            foreach ($changes as $change) {
+                $permission = $change['permission'];
+                unset($change['permission']);
+                if (!$resource->set_permission($identifier, $permission, $change)) {
+                    throw new RuntimeException('Could not save content permission');
+                }
+            }
+
+            $result = $this->_prepare_content_resource($resource, $identifier);
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+        return rest_ensure_response($result);
+    }
+
+    public function reset_content_resource(WP_REST_Request $request)
+    {
+        try {
+            [ $resource, $identifier ] = $this->_resolve_content_resource($request);
+            $result = [ 'success' => $resource->reset($identifier) ];
+        } catch (Exception $e) {
+            $result = $this->_prepare_error_response($e);
+        }
+        return rest_ensure_response($result);
     }
 
     /**
@@ -453,16 +590,13 @@ class AAM_Restful_Content
                 AAM_Framework_Type_Resource::POST
             );
 
-            // Normalize array of permissions
-            $normalized = [];
-
             foreach($request->get_param('permissions') as $item) {
-                $normalized[$item['permission']] = array_filter($item, function($k) {
+                $permission = $item['permission'];
+                $settings = array_filter($item, function($k) {
                     return $k !== 'permission';
                 }, ARRAY_FILTER_USE_KEY);
+                $resource->set_permission($post, $permission, $settings);
             }
-
-            $resource->set_permissions($normalized, $post);
 
             $result = $this->_prepare_post_output($post, $access_level);
         } catch (Exception $e) {
@@ -566,6 +700,7 @@ class AAM_Restful_Content
         }
 
         $result['permissions']   = $resource->get_permissions($post);
+        $result['explicit_permissions'] = $resource->get_explicit_permissions($post);
         $result['is_customized'] = $resource->is_customized($post);
 
         return $result;
@@ -594,6 +729,7 @@ class AAM_Restful_Content
             'icon'            => $post_type->menu_icon,
             'is_hierarchical' => $post_type->hierarchical,
             'permissions'     => $resource->get_permissions($post_type),
+            'explicit_permissions' => $resource->get_explicit_permissions($post_type),
             'is_customized'   => $resource->is_customized($post_type)
         ];
     }
@@ -620,6 +756,7 @@ class AAM_Restful_Content
             'title'           => $taxonomy->label,
             'is_hierarchical' => $taxonomy->hierarchical,
             'permissions'     => $resource->get_permissions($taxonomy),
+            'explicit_permissions' => $resource->get_explicit_permissions($taxonomy),
             'is_customized'   => $resource->is_customized($taxonomy),
             'post_types'      => array_values($taxonomy->object_type)
         ];
@@ -646,6 +783,7 @@ class AAM_Restful_Content
             'taxonomy'        => $term->taxonomy,
             'is_hierarchical' => get_taxonomy($term->taxonomy)->hierarchical,
             'permissions'     => $resource->get_permissions($term),
+            'explicit_permissions' => $resource->get_explicit_permissions($term),
             'is_customized'   => $resource->is_customized($term)
         ];
 
