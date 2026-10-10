@@ -100,6 +100,10 @@ final class BackendMenuTest extends TestCase
      */
     public function testMenuCapabilityAvailability() : void
     {
+        global $post;
+
+        $post = null; // Making sure there are global post object, otherwise the capability check will fail for some menu items
+
         $this->_mockAdminMenu();
 
         $service = AAM::api()->backend_menu(AAM::api()->role('editor'));

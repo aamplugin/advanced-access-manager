@@ -549,8 +549,6 @@ class AAM_Framework_Service_Policies
     /**
      * Access policy tree for given access level
      *
-     * @param AAM_Framework_AccessLevel_Interface $access_level
-     *
      * @return array
      * @access private
      *
@@ -712,6 +710,8 @@ class AAM_Framework_Service_Policies
      * Get all statements associated with current access level
      *
      * This method dynamically replaces all the markers
+     * 
+     * @param array $args
      *
      * @return array
      * @access private
@@ -733,6 +733,8 @@ class AAM_Framework_Service_Policies
      * Get all params associated with current access level
      *
      * This method dynamically replaces all the markers
+     * 
+     * @param array $args
      *
      * @return array
      * @access private
@@ -915,14 +917,14 @@ class AAM_Framework_Service_Policies
      * @param bool  $type_cast [Optional]
      * @param array $args      [Optional]
      *
-     * @return array
+     * @return array|string
      * @access private
      *
      * @version 7.0.0
      */
     private function _replace_markers($data, $type_cast = false, $args = [])
     {
-        $replaced = array();
+        $replaced = [];
 
         if (is_scalar($data)) {
             $replaced = AAM_Framework_Policy_Marker::execute(

@@ -409,7 +409,7 @@ class AAM_Service_Content
      * After post SELECT query
      *
      * @param array    $clauses
-     * @param WP_Query $wpQuery
+     * @param WP_Query $wp_query
      *
      * @return array
      * @access private
