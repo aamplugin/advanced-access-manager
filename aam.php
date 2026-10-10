@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Advanced Access Manager – Access Governance for WordPress
  * Description: Powerfully robust WordPress plugin designed to help you control every aspect of your website, your way.
- * Version: 8.0.0
+ * Version: 8.0.1
  * Requires at least: 6.2
  * Requires PHP: 8.0
  * Author: VasylTech LLC <support@aamplugin.com>
@@ -289,7 +289,7 @@ if (defined('ABSPATH')) {
     // Define few common constants
     define('AAM_MEDIA', plugins_url('/media', __FILE__));
     define('AAM_KEY', 'advanced-access-manager');
-    define('AAM_VERSION', '8.0.0');
+    define('AAM_VERSION', '8.0.1');
     define('AAM_BASEDIR', __DIR__);
 
     // Load vendor

@@ -32,6 +32,10 @@ import { Abilities } from "./abilities";
 import { refreshAfterMutation } from "./resource-refresh.mjs";
 import { mutationToast } from "./mutation-toast.mjs";
 import {
+  installErrorHandling,
+  setErrorNotificationsEnabled,
+} from "./error-report.mjs";
+import {
   accessLevelStorageKey,
   readAccessLevel,
   rememberAccessLevel,
@@ -104,7 +108,7 @@ function Welcome({ id }: any) {
     {
       title: "Introduction to AAM",
       description: "See how access levels and services fit together.",
-      url: "https://aamporta.com/video/advanced-access-manager-ui-overview-for-wordpress/",
+      url: "https://aamportal.com/video/advanced-access-manager-ui-overview-for-wordpress/",
       icon: "welcome-learn-more",
     },
     {
@@ -141,7 +145,7 @@ function Welcome({ id }: any) {
         </div>
         <a
           className="ar-welcome-featured"
-          href="https://aamportal.com/video/introduction-to-aam"
+          href="https://aamportal.com/video/advanced-access-manager-ui-overview-for-wordpress/"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -400,6 +404,7 @@ function App() {
     const current = active.current;
     const next = await loadContext(current.subject, current.screen);
     setBoot(next);
+    return next;
   };
   const write = async (
     path: string,
@@ -420,6 +425,9 @@ function App() {
         );
       }
       refreshAfterMutation(path);
+      if (path === "/aam/v2/config/core.settings.ui.error_notifications")
+        setErrorNotificationsEnabled(!!data.value);
+      if (path === "/aam/v2/core/reset") setErrorNotificationsEnabled(true);
       if (active.current.screen === "settings") await refreshContext();
       if (!returnResponse) {
         const description = mutationToast(path, method, data, subject);
@@ -552,10 +560,20 @@ function App() {
                 aria-current={
                   x.active || boot.screen === x.id ? "page" : undefined
                 }
+                aria-label={
+                  x.id === "audit" && boot.auditFindingCount != null
+                    ? `${t("Security Audit")}, ${boot.auditFindingCount} ${t(boot.auditFindingCount === 1 ? "finding" : "findings")}`
+                    : undefined
+                }
                 disabled={busy || loading}
                 onClick={() => navigate(x.id)}
               >
                 {t(x.label)}
+                {x.id === "audit" && boot.auditFindingCount != null && (
+                  <span className="ar-audit-nav-badge" aria-hidden="true">
+                    {boot.auditFindingCount}
+                  </span>
+                )}
               </button>
             ))}
           <span className="ar-version">{boot.version}</span>
@@ -1012,6 +1030,10 @@ function App() {
     </Workspace.Provider>
   );
 }
+installErrorHandling({
+  scriptUrl: (document.currentScript as HTMLScriptElement | null)?.src,
+  showNotification: window.aamReactBootstrap?.errorNotifications !== false,
+});
 seed(window.aamReactBootstrap);
 wp.element.createRoot(document.getElementById("aam-react-root")).render(
   <FrontendErrorBoundary>

@@ -11,7 +11,7 @@
  * Framework service to manage access to the backend (admin) menu
  *
  * @package AAM
- * @version 7.0.0
+ * @version 8.0.0
  */
 class AAM_Framework_Service_BackendMenu
 {
@@ -490,6 +490,7 @@ class AAM_Framework_Service_BackendMenu
             'path'          => $this->_prepare_admin_uri($menu_item[2]),
             'name'          => $this->_filter_menu_name($menu_item[0]),
             'capability'    => $menu_item[1],
+            'has_required_capability' => $this->_has_menu_capability($menu_item[1]),
             'is_restricted' => $this->is_denied($slug),
             'is_customized' => $this->_get_resource()->is_customized($slug)
         );
@@ -650,8 +651,8 @@ class AAM_Framework_Service_BackendMenu
     /**
      * Filter menu name
      *
-     * Strip any HTML tags from the menu name and also remove the trailing
-     * numbers in case of Plugin or Comments menu name.
+     * Keep the visible label while excluding WordPress count badges and
+     * screen reader text from the stored menu markup.
      *
      * @param string $name
      *
@@ -662,13 +663,85 @@ class AAM_Framework_Service_BackendMenu
      */
     private function _filter_menu_name($name)
     {
-        if (is_string($name)) {
-            $filtered = trim(wp_strip_all_tags(base64_decode($name), true));
-        } else {
-            $filtered = '';
+        if (!is_string($name)) {
+            return '';
         }
 
-        return preg_replace('/([\d]+)$/', '', $filtered);
+        $markup = base64_decode($name, true);
+
+        if ($markup === false) {
+            return '';
+        }
+
+        if (class_exists('DOMDocument')) {
+            $previous = libxml_use_internal_errors(true);
+            try {
+                $document = new DOMDocument();
+                $loaded = $document->loadHTML(
+                    '<?xml encoding="utf-8" ?><div id="aam-menu-label">' .
+                    $markup . '</div>',
+                    LIBXML_NONET
+                );
+
+                if ($loaded) {
+                    $root = $document->getElementById('aam-menu-label');
+
+                    if ($root) {
+                        $xpath = new DOMXPath($document);
+                        $hidden = $xpath->query(
+                            './/*[@hidden or @aria-hidden="true" or ' .
+                            'contains(translate(@style," ",""),"display:none") or ' .
+                            'contains(translate(@style," ",""),"visibility:hidden") or ' .
+                            'contains(concat(" ",normalize-space(@class)," ")," screen-reader-text ") or ' .
+                            'contains(concat(" ",normalize-space(@class)," ")," awaiting-mod ") or ' .
+                            'contains(concat(" ",normalize-space(@class)," ")," menu-counter ") or ' .
+                            'contains(concat(" ",normalize-space(@class)," ")," update-plugins ")]',
+                            $root
+                        );
+
+                        foreach ($hidden as $element) {
+                            $element->parentNode->removeChild($element);
+                        }
+
+                        return trim(preg_replace('/\s+/u', ' ', $root->textContent));
+                    }
+                }
+            } finally {
+                libxml_clear_errors();
+                libxml_use_internal_errors($previous);
+            }
+        }
+
+        // A small fallback for installations without the DOM extension.
+        $markup = preg_replace(
+            '/<span\b[^>]*class=["\'][^"\']*(?:awaiting-mod|update-plugins)[^"\']*["\'][^>]*>.*?<\/span>\s*<\/span>|<span\b[^>]*class=["\'][^"\']*screen-reader-text[^"\']*["\'][^>]*>.*?<\/span>/is',
+            '',
+            $markup
+        );
+
+        return trim(preg_replace('/\s+/u', ' ', wp_strip_all_tags($markup, true)));
+    }
+
+    /**
+     * Whether a concrete role or user has the menu's required WordPress capability.
+     * Abstract access levels do not have a native capability set.
+     *
+     * @param string $capability
+     * @return bool|null
+     */
+    private function _has_menu_capability($capability)
+    {
+        $access_level = $this->_get_access_level();
+
+        if (!is_string($capability) || $capability === '' || !in_array(
+            $access_level->type,
+            [AAM_Framework_Type_AccessLevel::ROLE, AAM_Framework_Type_AccessLevel::USER],
+            true
+        )) {
+            return null;
+        }
+
+        return (bool) $access_level->has_cap($capability);
     }
 
     /**

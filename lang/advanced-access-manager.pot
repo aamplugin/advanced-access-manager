@@ -4866,11 +4866,6 @@ msgstr ""
 msgid "Read the guide"
 msgstr ""
 
-#. Source: frontend/src/settings.tsx:940
-#: media/js/react-admin.js
-msgid "Ready to act on these findings?"
-msgstr ""
-
 #. Source: frontend/src/settings.tsx:884
 #: media/js/react-admin.js
 msgid "Ready to review"
@@ -5376,11 +5371,6 @@ msgstr ""
 msgid "Review"
 msgstr ""
 
-#. Source: frontend/src/settings.tsx:949
-#: media/js/react-admin.js
-msgid "Review detailed findings"
-msgstr ""
-
 #. Source: frontend/src/settings.tsx:1271
 #. Source: frontend/src/settings.tsx:819
 #: media/js/react-admin.js
@@ -5395,12 +5385,6 @@ msgstr ""
 #. Source: frontend/src/settings.tsx:1300
 #: media/js/react-admin.js
 msgid "Review status"
-msgstr ""
-
-#. Source: frontend/src/settings.tsx:943
-#: media/js/react-admin.js
-msgid ""
-"Review the detailed checks below or discuss the plan with an AAM specialist."
 msgstr ""
 
 #. Source: frontend/src/core.tsx:413
@@ -5651,11 +5635,6 @@ msgstr ""
 #. Source: frontend/src/settings.tsx:690
 #: media/js/react-admin.js
 msgid "Scanning…"
-msgstr ""
-
-#. Source: frontend/src/settings.tsx:956
-#: media/js/react-admin.js
-msgid "Schedule a free consultation"
 msgstr ""
 
 #. Source: frontend/src/page-picker.tsx:100
@@ -6095,6 +6074,10 @@ msgstr ""
 #. Source: frontend/src/people.tsx:214
 #: media/js/react-admin.js
 msgid "Status"
+msgstr ""
+
+#: application/Backend/Feature/Settings/Security.php:56
+msgid "Store the time (UTC) and IP address of each user’s most recent access to the site in user metadata."
 msgstr ""
 
 #. Source: frontend/src/term-access.tsx:570
@@ -6618,6 +6601,10 @@ msgstr ""
 #. Source: frontend/src/abilities.tsx:518
 #: media/js/react-admin.js
 msgid "Tools"
+msgstr ""
+
+#: application/Backend/Feature/Settings/Security.php:55
+msgid "Track Last User Access"
 msgstr ""
 
 #. Source: frontend/src/rules.tsx:1346

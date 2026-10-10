@@ -56,6 +56,11 @@ class AAM_Backend_Feature_Settings_Core extends AAM_Backend_Feature_Abstract
                 'description' => __('Display helpful tooltips and notifications on the AAM UI page to educate about existing functionality.', 'advanced-access-manager'),
                 'value'       => $config->get('core.settings.ui.tips')
             ),
+            'core.settings.ui.error_notifications' => array(
+                'title'       => __('Show Error Notifications', 'advanced-access-manager'),
+                'description' => __('Show a report popup when an AAM screen encounters an error. Error recovery messages remain visible when this is off.', 'advanced-access-manager'),
+                'value'       => $config->get('core.settings.ui.error_notifications')
+            ),
             'core.settings.multi_access_levels' => array(
                 'title'       => __('Multiple Roles Support', 'advanced-access-manager'),
                 'description' => sprintf(__('Enable support for multiple roles per use. The final access settings will be combined based on the merging preferences. For more information refer to %sMultiple Roles Support%s page.', 'advanced-access-manager'), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/multi-role-support?ref=plugin">', '</a>'),

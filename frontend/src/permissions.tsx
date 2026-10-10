@@ -101,6 +101,12 @@ function ResourceDetails({ type, row }: { type: string; row: any }) {
     admin_menu: [
       [t("Menu identifier"), row.slug],
       [t("Required capability"), row.capability],
+      [
+        t("WordPress capability"),
+        row.has_required_capability === false
+          ? t("Missing for this access level")
+          : null,
+      ],
       [t("Admin destination"), row.path],
     ],
     toolbar: [
@@ -427,7 +433,13 @@ export function PermissionList({ id }: any) {
       )}
       <Resource resource={r}>
         {(data) => {
-          const rows = flatten(arr(data)).filter(
+          const allRows = flatten(arr(data));
+          const missingCapabilityCount =
+            id === "admin_menu"
+              ? allRows.filter((row) => row.has_required_capability === false)
+                  .length
+              : 0;
+          const rows = allRows.filter(
             (row) =>
               (!visitorWidgets || row.area === "frontend") &&
               JSON.stringify([
@@ -444,6 +456,26 @@ export function PermissionList({ id }: any) {
           );
           return (
             <>
+              {missingCapabilityCount > 0 && (
+                <div className="ar-menu-capability-summary" role="status">
+                  <span className="dashicons dashicons-lock" aria-hidden="true" />
+                  <span>
+                    <strong>
+                      {missingCapabilityCount === allRows.length
+                        ? t("No menu items have their required capabilities")
+                        : t("Some menu items need WordPress capabilities")}
+                    </strong>
+                    <span>
+                      {t(
+                        "The marked items are unavailable to this access level until their required capabilities are granted.",
+                      )}
+                    </span>
+                  </span>
+                  <span className="ar-menu-capability-count">
+                    {missingCapabilityCount}
+                  </span>
+                </div>
+              )}
               <div className="ar-table-wrap">
                 <table
                   className={
@@ -486,7 +518,15 @@ export function PermissionList({ id }: any) {
                         ? effect
                         : "inherit";
                       return (
-                        <tr key={String(key) + i}>
+                        <tr
+                          key={String(key) + i}
+                          className={
+                            id === "admin_menu" &&
+                            row.has_required_capability === false
+                              ? "ar-menu-missing-capability"
+                              : undefined
+                          }
+                        >
                           <td>
                             <div
                               className="ar-resource-name"
@@ -509,6 +549,19 @@ export function PermissionList({ id }: any) {
                               <div>
                                 <span className="ar-name-line">
                                   <strong>{name}</strong>
+                                  {id === "admin_menu" &&
+                                    row.has_required_capability === false && (
+                                      <span
+                                        className="ar-menu-capability-badge"
+                                        title={`${t("Required WordPress capability:")} ${row.capability}`}
+                                      >
+                                        <span
+                                          className="dashicons dashicons-lock"
+                                          aria-hidden="true"
+                                        />
+                                        {t("Missing capability")}
+                                      </span>
+                                    )}
                                   {id === "route" && (
                                     <span className="ar-state-icons">
                                       <AccessOutcome

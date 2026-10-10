@@ -6,11 +6,9 @@ import {
 import { resetResources } from "./reset-resources.mjs";
 import {
   apiFailure,
-  installErrorHandling,
   javascriptFailure,
   recordFailure,
 } from "./error-report.mjs";
-installErrorHandling();
 export const {
   useState,
   useEffect,

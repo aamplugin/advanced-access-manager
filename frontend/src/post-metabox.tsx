@@ -17,6 +17,7 @@ import {
 import { ContentCustomizations } from "./content";
 import { needsPageSelection } from "./page-picker.mjs";
 import { Toast } from "./toast";
+import { installErrorHandling } from "./error-report.mjs";
 import { AccessOutcome } from "./resource-visuals";
 import {
   accessLevelStorageKey,
@@ -892,6 +893,10 @@ function PostAccessMetabox({ postId, boot }: any) {
 
 const root = document.getElementById("aam-post-access-root");
 if (root) {
+  installErrorHandling({
+    scriptUrl: (document.currentScript as HTMLScriptElement | null)?.src,
+    showNotification: window.aamPostAccessBootstrap?.errorNotifications !== false,
+  });
   wp.element
     .createRoot(root)
     .render(

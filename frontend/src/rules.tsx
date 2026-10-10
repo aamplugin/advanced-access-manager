@@ -640,7 +640,7 @@ export function UrlRules() {
       <Resource resource={r}>
         {(data) =>
           arr(data).length ? (
-            <table className="ar-table">
+            <table className="ar-table ar-url-rules-table">
               <thead>
                 <tr>
                   <th>{t("URL pattern")}</th>
@@ -664,19 +664,34 @@ export function UrlRules() {
                       />
                     </td>
                     <td>
-                      <div className="ar-actions">
-                        <Button
-                          variant="secondary"
-                          onClick={() => setEdit(row)}
-                        >
-                          {t("Edit")}
-                        </Button>
-                        <Button
-                          variant="tertiary"
-                          onClick={() => setRemove(row)}
-                        >
-                          {t("Reset")}
-                        </Button>
+                      <div className="ar-actions ar-row-actions">
+                        <ActionTooltip text={t("Edit URL rule")}>
+                          <Button
+                            variant="tertiary"
+                            className="ar-table-icon-action"
+                            aria-label={t("Edit URL rule")}
+                            onClick={() => setEdit(row)}
+                          >
+                            <span
+                              className="dashicons dashicons-edit"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        </ActionTooltip>
+                        <ActionTooltip text={t("Delete URL rule")}>
+                          <Button
+                            isDestructive
+                            variant="tertiary"
+                            className="ar-table-icon-action"
+                            aria-label={t("Delete URL rule")}
+                            onClick={() => setRemove(row)}
+                          >
+                            <span
+                              className="dashicons dashicons-trash"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        </ActionTooltip>
                       </div>
                     </td>
                   </tr>
@@ -696,8 +711,8 @@ export function UrlRules() {
       {edit && <UrlEditor initial={edit} onClose={() => setEdit(null)} />}
       {remove && (
         <Confirm
-          title={t("Reset URL rule")}
-          confirmLabel={t("Reset rule")}
+          title={t("Delete URL rule")}
+          confirmLabel={t("Delete rule")}
           cancelLabel={t("Keep rule")}
           impact={t(
             "The inherited URL behavior will apply after this override is removed.",
@@ -705,8 +720,7 @@ export function UrlRules() {
           onClose={() => setRemove(null)}
           onConfirm={() => write("/url/" + base64Path(remove.id), "DELETE")}
         >
-          {t("Remove the explicit rule for")}{" "}
-          <strong>{remove.url_schema}</strong>?
+          {t("Delete the rule for")} <strong>{remove.url_schema}</strong>?
         </Confirm>
       )}
     </>
@@ -839,7 +853,7 @@ export function Policies() {
       <Resource resource={r}>
         {(data) =>
           arr(data).length ? (
-            <table className="ar-table">
+            <table className="ar-table ar-policy-table">
               <thead>
                 <tr>
                   <th>{t("Policy")}</th>
@@ -857,7 +871,7 @@ export function Policies() {
                       {row.excerpt && <small>{plain(row.excerpt)}</small>}
                     </td>
                     <td>
-                      <div className="ar-actions">
+                      <div className="ar-actions ar-row-actions">
                         <Button
                           variant="secondary"
                           disabled={
@@ -872,25 +886,39 @@ export function Policies() {
                           {row.is_attached ? t("Detach") : t("Attach")}
                         </Button>
                         {row.permissions?.includes("edit_policy") && (
-                          <Button
-                            variant="tertiary"
-                            href={
-                              boot.adminUrl +
-                              "post.php?action=edit&post=" +
-                              row.id
-                            }
-                          >
-                            {t("Edit")}
-                          </Button>
+                          <ActionTooltip text={t("Edit policy")}>
+                            <Button
+                              variant="tertiary"
+                              className="ar-table-icon-action"
+                              aria-label={t("Edit policy")}
+                              href={
+                                boot.adminUrl +
+                                "post.php?action=edit&post=" +
+                                row.id
+                              }
+                            >
+                              <span
+                                className="dashicons dashicons-edit"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                          </ActionTooltip>
                         )}
                         {row.permissions?.includes("delete_policy") && (
-                          <Button
-                            isDestructive
-                            variant="tertiary"
-                            onClick={() => setRemove(row)}
-                          >
-                            {t("Delete")}
-                          </Button>
+                          <ActionTooltip text={t("Delete policy")}>
+                            <Button
+                              isDestructive
+                              variant="tertiary"
+                              className="ar-table-icon-action"
+                              aria-label={t("Delete policy")}
+                              onClick={() => setRemove(row)}
+                            >
+                              <span
+                                className="dashicons dashicons-trash"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                          </ActionTooltip>
                         )}
                       </div>
                     </td>

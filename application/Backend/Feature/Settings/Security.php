@@ -51,6 +51,11 @@ class AAM_Backend_Feature_Settings_Security extends AAM_Backend_Feature_Abstract
                 'description' => sprintf(AAM_Backend_View_Helper::preparePhrase('Automatically reject login request if number of unsuccessful attempts exceeds 20 over the period of 2 minutes (both values are configurable). For more information refer to the %sBrute Force Lockout%s page.', 'strong', 'strong'), '<a href="https://aamportal.com/reference/advanced-access-manager/setting/bruteforce-lockout?ref=plugin" target="_blank">', '</a>'),
                 'value'       => $configs->get('service.secure_login.brute_force_lockout')
             ),
+            'service.secure_login.track_last_access' => array(
+                'title'       => __('Track Last User Access', 'advanced-access-manager'),
+                'description' => __('Store the time (UTC) and IP address of each user’s most recent access to the site in user metadata.', 'advanced-access-manager'),
+                'value'       => $configs->get('service.secure_login.track_last_access', true)
+            ),
         );
 
         return apply_filters('aam_settings_list_filter', $settings, 'security');

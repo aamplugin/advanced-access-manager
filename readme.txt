@@ -3,8 +3,8 @@ Contributors: vasyltech
 Tags: security, access governance, user roles, restricted content, api security
 Requires at least: 5.8.0
 Requires PHP: 8.0
-Tested up to: 7.1.0
-Stable tag: 8.0.0
+Tested up to: 7.1.3
+Stable tag: 8.0.1
 
 Access Governance for WordPress. Understand, control, and continuously govern who and what can access your WordPress website.
 
@@ -135,6 +135,11 @@ Just access controls you can **understand, enforce, audit, and trust**.
 13. Manage access to WordPress abilities, MCP servers and MCP primitives
 
 == Changelog ==
+
+= 8.0.1 =
+* Fixed: The Brute force feature returns WP_Error but still attempts to find correct user name after reached attempts [https://github.com/aamplugin/advanced-access-manager/issues/516](https://github.com/aamplugin/advanced-access-manager/issues/516)
+* Changed: Ability to turn off the frontend error handling [https://github.com/aamplugin/advanced-access-manager/issues/517](https://github.com/aamplugin/advanced-access-manager/issues/517)
+* New: Track user's last IP address and activity time [https://github.com/aamplugin/advanced-access-manager/issues/518](https://github.com/aamplugin/advanced-access-manager/issues/518)
 
 = 8.0.0 =
 * New: Completely new UI
