@@ -13,20 +13,36 @@ use Vectorface\Whip\Whip;
  * Secure Login service
  *
  * @package AAM
- * @version 7.0.0
+ * @version 8.0.1
  */
 class AAM_Service_SecureLogin
 {
+
     use AAM_Service_BaseTrait;
+
+    /**
+     * Last access time meta key
+     *
+     * @version 8.0.1
+     */
+    const LAST_ACCESS_TIME_META = 'aam_last_access_time';
+
+    /**
+     * Last access IP address meta key
+     * 
+     * @version 8.0.1
+     */
+    const LAST_ACCESS_IP_META = 'aam_last_access_ip';
 
     /**
      * Default configurations
      *
-     * @version 7.0.0
+     * @version 8.0.1
      */
     const DEFAULT_CONFIG = [
         'service.secure_login.single_session'      => false,
         'service.secure_login.brute_force_lockout' => false,
+        'service.secure_login.track_last_access'   => true,
         'service.secure_login.time_window'         => '+20 minutes',
         'service.secure_login.login_attempts'      => 5,
         'service.secure_login.login_message'       => 'Login to get access.'
@@ -85,7 +101,7 @@ class AAM_Service_SecureLogin
         // Security controls
         add_filter('authenticate', function($response) {
             return $this->_authenticate($response);
-        }, PHP_INT_MAX);
+        }, -9999);
 
         add_filter('auth_cookie', function($cookie, $user_id, $_, $__, $token) {
             return $this->_auth_cookie($cookie, $user_id, $token);
@@ -94,6 +110,38 @@ class AAM_Service_SecureLogin
         add_action('wp_login_failed', function() {
             $this->_wp_login_failed();
         });
+
+        if (is_user_logged_in()) {
+            $this->_record_last_access(wp_get_current_user());
+        }
+    }
+
+    /**
+     *  Record the most recent successful login in UTC. 
+     * 
+     * @param WP_User $user
+     * */
+    private function _record_last_access($user)
+    {
+        $configs = AAM::api()->config;
+        $enabled = $configs->get('service.secure_login.track_last_access');
+
+        if ($enabled) {
+            update_user_meta(
+                $user->ID, 
+                self::LAST_ACCESS_TIME_META, 
+                current_time('mysql', true)
+            );
+
+            $ip = apply_filters(
+                'aam_get_user_ip_address_filter',
+                $_SERVER['REMOTE_ADDR'] ?? ''
+            );
+
+            if (is_string($ip) && filter_var($ip, FILTER_VALIDATE_IP)) {
+                update_user_meta($user->ID, self::LAST_ACCESS_IP_META, $ip);
+            }
+        }
     }
 
     /**
@@ -184,10 +232,14 @@ class AAM_Service_SecureLogin
             $attempts  = AAM::api()->cache->get($this->_get_login_attempt_key());
 
             if ($attempts >= $threshold) {
-                $response = new WP_Error(
-                    405,
-                    __('Exceeded maximum number for login attempts.', 'advanced-access-manager')
-                );
+                // To ensure all ther authentication handlers are skipped, we
+                // return WP_User object with user ID of 0. This will be treated 
+                // as a failed login attempt
+                $response = new WP_User(0);
+
+                // $response = new WP_Error(405,
+                //      __('Exceeded maximum number for login attempts.', 'advanced-access-manager')
+                // );
             }
         }
 

@@ -934,30 +934,6 @@ function ExecutiveSummary({ summary }: { summary: any }) {
           </div>
         </div>
       )}
-
-      <div className="ar-executive-next">
-        <div>
-          <strong>{t("Ready to act on these findings?")}</strong>
-          <p>
-            {t(
-              "Review the detailed checks below or discuss the plan with an AAM specialist.",
-            )}
-          </p>
-        </div>
-        <div className="ar-executive-next-actions">
-          <a href="#ar-audit-findings">
-            {t("Review detailed findings")} <span aria-hidden="true">↓</span>
-          </a>
-          <a
-            href="https://aamportal.com/consultation/security-audit"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t("Schedule a free consultation")}{" "}
-            <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-      </div>
     </section>
   );
 }
@@ -1085,7 +1061,8 @@ export function Audit() {
       }
       if (!cancelled.current) {
         setMessage({ status: "success", text: t("Security audit completed.") });
-        await refreshContext();
+        const refreshed = await refreshContext();
+        if (!cancelled.current) setScore(refreshed.audit?.score ?? null);
       }
     } catch (e) {
       setMessage({ status: "error", text: e.message });

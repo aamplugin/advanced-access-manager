@@ -76,6 +76,51 @@ final class BackendMenuTest extends TestCase
     }
 
     /**
+     * WordPress puts counts and screen reader descriptions inside menu labels.
+     */
+    public function testMenuNamesContainOnlyVisibleLabel() : void
+    {
+        $this->_mockAdminMenu();
+
+        $service = AAM::api()->backend_menu();
+
+        $this->assertSame('Comments', $service->get_item('menu/edit-comments.php')['name']);
+        $this->assertSame('Plugins', $service->get_item('menu/plugins.php')['name']);
+        $this->assertSame('AAM', $service->get_item('menu/aam')['name']);
+
+        $filter = new \ReflectionMethod(AAM_Framework_Service_BackendMenu::class, '_filter_menu_name');
+        $this->assertSame(
+            'Version 2',
+            $filter->invoke($service, base64_encode('Version <strong>2</strong>'))
+        );
+    }
+
+    /**
+     * The menu model reports native capability availability for roles and users.
+     */
+    public function testMenuCapabilityAvailability() : void
+    {
+        $this->_mockAdminMenu();
+
+        $service = AAM::api()->backend_menu(AAM::api()->role('editor'));
+
+        $this->assertTrue($service->get_item('menu/edit.php')['has_required_capability']);
+        $this->assertFalse(
+            $service->get_item('menu/options-general.php')['has_required_capability']
+        );
+
+        $user = AAM::api()->user($this->createUser(['role' => 'editor']));
+        $user_service = AAM::api()->backend_menu($user);
+
+        $this->assertTrue(
+            $user_service->get_item('menu/edit.php')['has_required_capability']
+        );
+        $this->assertFalse(
+            $user_service->get_item('menu/options-general.php')['has_required_capability']
+        );
+    }
+
+    /**
      * Test that admin menu item permissions can be updated successfully
      *
      * @return void

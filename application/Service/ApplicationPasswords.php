@@ -43,7 +43,7 @@ class AAM_Service_ApplicationPasswords
         if (is_admin() && class_exists('WP_Application_Passwords')) {
             add_filter('manage_users_columns', [$this, 'add_users_column']);
             add_filter('manage_users_custom_column', [$this, 'render_users_column'], 10, 3);
-            add_action('restrict_manage_users', [$this, 'render_users_filter']);
+            add_action('manage_users_extra_tablenav', [$this, 'render_users_filter']);
             add_filter('users_list_table_query_args', [$this, 'filter_users_query']);
             add_action('admin_enqueue_scripts', [$this, 'enqueue_users_assets']);
         }
@@ -235,6 +235,7 @@ class AAM_Service_ApplicationPasswords
 
         $selected = $this->get_users_filter();
         ?>
+        <div class="alignleft actions">
         <label class="screen-reader-text" for="aam-ap-filter"><?php esc_html_e('Filter by application passwords', 'advanced-access-manager'); ?></label>
         <select name="aam_ap_filter" id="aam-ap-filter">
             <option value=""><?php esc_html_e('All application passwords', 'advanced-access-manager'); ?></option>
@@ -242,6 +243,7 @@ class AAM_Service_ApplicationPasswords
         </select>
         <?php
         submit_button(__('Filter', 'advanced-access-manager'), '', 'aam_ap_apply', false);
+        ?></div><?php
     }
 
     /**

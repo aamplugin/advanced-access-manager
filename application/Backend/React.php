@@ -1,8 +1,24 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'license.txt', which is part of this source code package.       *
+ * ======================================================================
+ */
+
+/**
+ * Backend UI interface for React-based access workspace.
+ *
+ * @package AAM
+ * @version 8.0.0
+ */
 class AAM_Backend_React
 {
 
+    /**
+     * RESTful API endpoints for React-based access workspace.
+     */
     const ENDPOINTS = [
         'admin_menu' => '/backend-menu',
         'toolbar' => '/admin-toolbar',
@@ -51,12 +67,19 @@ class AAM_Backend_React
         if (false !== $code_editor) {
             $dependencies[] = 'code-editor';
         }
-        $style_version = filemtime(AAM_BASEDIR . '/media/css/react-admin.css') ?: AAM_VERSION;
+        $style_version  = filemtime(AAM_BASEDIR . '/media/css/react-admin.css') ?: AAM_VERSION;
         $script_version = filemtime(AAM_BASEDIR . '/media/js/react-admin.js') ?: AAM_VERSION;
+
         self::enqueue_confirmation_style();
         self::enqueue_error_report_style();
+
         wp_enqueue_style('wp-components');
-        wp_enqueue_style('aam-react', $base . 'css/react-admin.css', ['aam-confirm-dialog'], $style_version);
+        wp_enqueue_style(
+            'aam-react', 
+            $base . 'css/react-admin.css', 
+            ['aam-confirm-dialog'], 
+            $style_version
+        );
         wp_enqueue_script(
             'aam-react',
             $base . 'js/react-admin.js',
@@ -64,9 +87,14 @@ class AAM_Backend_React
             $script_version,
             true
         );
-        wp_add_inline_script('aam-react', 'window.aamReactIniEditorEnabled = '
-            . (false !== $code_editor ? 'true' : 'false') . ';', 'before');
-        wp_set_script_translations('aam-react', 'advanced-access-manager', AAM_BASEDIR . '/lang');
+        wp_add_inline_script(
+            'aam-react', 'window.aamReactIniEditorEnabled = '
+            . (false !== $code_editor ? 'true' : 'false') . ';', 
+            'before'
+        );
+        wp_set_script_translations(
+            'aam-react', 'advanced-access-manager', AAM_BASEDIR . '/lang'
+        );
     }
 
     /** Load the post editor access controls. */
@@ -88,6 +116,7 @@ class AAM_Backend_React
         }
         $bootstrap = [
             'roles' => $roles,
+            'errorNotifications' => (bool) AAM::api()->config->get('core.settings.ui.error_notifications'),
             'blogId' => get_current_blog_id(),
             'viewerId' => get_current_user_id(),
             'levels' => [
@@ -139,6 +168,7 @@ class AAM_Backend_React
         }
         $bootstrap = apply_filters('aam_react_term_access_bootstrap_filter', [
             'roles' => $roles,
+            'errorNotifications' => (bool) AAM::api()->config->get('core.settings.ui.error_notifications'),
             'blogId' => get_current_blog_id(),
             'viewerId' => get_current_user_id(),
             'contentPremium' => self::content_premium_status(),
@@ -377,6 +407,7 @@ class AAM_Backend_React
         $premium_status = self::content_premium_status();
         $payload = [
             'version' => AAM_VERSION,
+            'errorNotifications' => (bool) AAM::api()->config->get('core.settings.ui.error_notifications'),
             'subject' => $subject,
             'screen' => $screen,
             'features' => $features,
@@ -398,6 +429,7 @@ class AAM_Backend_React
             'adminUrl' => admin_url(),
             'settings' => [],
             'audit' => null,
+            'auditFindingCount' => null,
             'preload' => null,
             'roleParentSupported' => (bool) apply_filters(
                 'aam_react_role_parent_supported_filter',
@@ -456,18 +488,28 @@ class AAM_Backend_React
                 }
             }
         }
-        if ($screen === 'audit' && $caps['trigger_audit']) {
+        if ($caps['trigger_audit']) {
             $audit = AAM_Service_SecurityAudit::get_instance();
             $report = $audit->read();
-            foreach ($report as $step => $result) {
-                $report[$step] = $audit->prepare_ui_result($step, $result);
+            if (!empty($report)) {
+                $count = 0;
+                foreach ($report as $result) {
+                    $count += is_array($result['issues'] ?? null)
+                        ? count($result['issues']) : 0;
+                }
+                $payload['auditFindingCount'] = $count;
             }
-            $payload['audit'] = [
-                'steps'   => $audit->get_steps(),
-                'report'  => $report,
-                'score'   => $audit->get_score(),
-                'summary' => $audit->get_summary()
-            ];
+            if ($screen === 'audit') {
+                foreach ($report as $step => $result) {
+                    $report[$step] = $audit->prepare_ui_result($step, $result);
+                }
+                $payload['audit'] = [
+                    'steps'   => $audit->get_steps(),
+                    'report'  => $report,
+                    'score'   => $audit->get_score(),
+                    'summary' => $audit->get_summary()
+                ];
+            }
         }
         $endpoint = self::ENDPOINTS[$screen] ?? null;
         if ($endpoint) {

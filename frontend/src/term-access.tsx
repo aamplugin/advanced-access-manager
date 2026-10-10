@@ -17,6 +17,7 @@ import {
 } from "./core";
 import { ScopedContentForm, ContentPremiumPrompt } from "./content";
 import { Toast } from "./toast";
+import { installErrorHandling } from "./error-report.mjs";
 import {
   accessLevelStorageKey,
   readAccessLevel,
@@ -614,6 +615,10 @@ function TermAccess({ termId, taxonomy, termName, boot }: any) {
 
 const root = document.getElementById("aam-term-access-root");
 if (root) {
+  installErrorHandling({
+    scriptUrl: (document.currentScript as HTMLScriptElement | null)?.src,
+    showNotification: window.aamTermAccessBootstrap?.errorNotifications !== false,
+  });
   wp.element
     .createRoot(root)
     .render(

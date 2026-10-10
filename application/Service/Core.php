@@ -34,6 +34,7 @@ class AAM_Service_Core
      */
     const DEFAULT_CONFIG = [
         'core.settings.ui.tips'                    => true,
+        'core.settings.ui.error_notifications'     => true,
         'core.settings.multi_access_levels'        => false,
         'core.settings.ui.render_access_metabox'   => false,
         'core.settings.xmlrpc_enabled'             => true,

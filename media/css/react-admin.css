@@ -92,6 +92,9 @@
   gap: 28px;
 }
 #aam-react-root .ar-topnav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
@@ -104,6 +107,27 @@
 #aam-react-root .ar-topnav button.is-active {
   color: var(--ar-purple);
   border-bottom-color: var(--ar-purple);
+}
+#aam-react-root .ar-audit-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid #e3d7f3;
+  border-radius: 999px;
+  background: #f3edfa;
+  color: #6337a6;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+#aam-react-root .ar-topnav button.is-active .ar-audit-nav-badge {
+  border-color: var(--ar-purple);
+  background: var(--ar-purple);
+  color: #fff;
 }
 #aam-react-root button:disabled {
   cursor: not-allowed;
@@ -1327,6 +1351,44 @@
   color: #787d87;
   font-size: 10px;
   margin-top: 3px;
+}
+#aam-react-root .ar-policy-table,
+#aam-react-root .ar-url-rules-table {
+  table-layout: fixed;
+}
+#aam-react-root .ar-policy-table th:last-child {
+  width: 190px;
+}
+#aam-react-root .ar-url-rules-table th:first-child {
+  width: 58%;
+}
+#aam-react-root .ar-url-rules-table th:last-child {
+  width: 106px;
+}
+#aam-react-root .ar-policy-table td:first-child,
+#aam-react-root .ar-url-rules-table td:first-child {
+  overflow-wrap: anywhere;
+}
+#aam-react-root .ar-row-actions {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+#aam-react-root .ar-row-actions .components-button {
+  flex: none;
+}
+#aam-react-root .ar-table-icon-action.components-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+#aam-react-root .ar-table-icon-action .dashicons {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
 }
 #aam-react-root .ar-capabilities-table {
   min-width: 680px;
@@ -2813,36 +2875,6 @@
 }
 #aam-react-root .ar-executive-references a {
   overflow-wrap: anywhere;
-}
-#aam-react-root .ar-executive-next {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  margin-top: 17px;
-  padding: 14px 16px;
-  border-radius: 7px;
-  background: #f7f4fa;
-}
-#aam-react-root .ar-executive-next strong {
-  color: #3c2e49;
-  font-size: 12px;
-}
-#aam-react-root .ar-executive-next p {
-  margin: 3px 0 0;
-  color: #6b6172;
-  font-size: 11px;
-}
-#aam-react-root .ar-executive-next a {
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-#aam-react-root .ar-executive-next-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 15px;
 }
 .ar-audit-consent .components-modal__content {
   box-sizing: border-box;
@@ -4984,6 +5016,61 @@
 }
 #aam-react-root .ar-resource-rule-table {
   min-width: 640px;
+}
+#aam-react-root .ar-menu-capability-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 0 0 12px;
+  padding: 11px 13px;
+  border: 1px solid #ead8ae;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #694c1d;
+}
+#aam-react-root .ar-menu-capability-summary > .dashicons {
+  flex: none;
+  margin-top: 1px;
+  color: #a66b11;
+}
+#aam-react-root .ar-menu-capability-summary > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+#aam-react-root .ar-menu-capability-summary strong {
+  color: #5f4318;
+}
+#aam-react-root .ar-menu-capability-count {
+  flex: none;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #f3e2bc;
+  color: #6b4a12;
+  font-weight: 700;
+}
+#aam-react-root .ar-menu-missing-capability td:first-child {
+  box-shadow: inset 3px 0 #d5a146;
+}
+#aam-react-root .ar-menu-capability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border: 1px solid #ead8ae;
+  border-radius: 99px;
+  background: #fff9e9;
+  color: #795118;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+#aam-react-root .ar-menu-capability-badge .dashicons {
+  width: 13px;
+  height: 13px;
+  font-size: 13px;
 }
 #aam-react-root .ar-resource-rule-table th:last-child,
 #aam-react-root .ar-resource-rule-table td:last-child {
