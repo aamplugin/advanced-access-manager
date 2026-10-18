@@ -1638,6 +1638,89 @@
 #aam-react-root .ar-content-entry-copy small {
   margin: 0;
 }
+#aam-react-root .ar-content-post-title {
+  display: block;
+  min-width: 0;
+  max-width: min(100%, 75ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#aam-react-root .ar-content-post-title.is-shortened {
+  cursor: help;
+}
+#aam-react-root .ar-content-post-title:focus-visible {
+  outline: 2px solid #6337a6;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+#aam-react-root .ar-content-post-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+  min-width: 0;
+}
+#aam-react-root .ar-content-post-details small {
+  color: #717784;
+}
+#aam-react-root .ar-content-post-details .ar-access-outcome {
+  gap: 3px;
+  padding: 1px 5px;
+  font-size: 10px;
+  line-height: 14px;
+}
+#aam-react-root .ar-content-post-details .ar-access-outcome .dashicons {
+  width: 11px;
+  height: 11px;
+  font-size: 11px;
+}
+#aam-react-root .ar-post-status {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 3px;
+  padding: 1px 5px 1px 4px;
+  border: 1px solid #dde0e5;
+  border-radius: 99px;
+  background: #f5f6f7;
+  color: #505760;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  white-space: nowrap;
+}
+#aam-react-root .ar-post-status .dashicons {
+  width: 11px;
+  height: 11px;
+  font-size: 11px;
+  line-height: 11px;
+}
+#aam-react-root .ar-post-status-published {
+  border-color: #cce7d5;
+  background: #edf8f0;
+  color: #216c3d;
+}
+#aam-react-root .ar-post-status-draft {
+  border-color: #dfe3e8;
+  background: #f3f5f7;
+  color: #505c69;
+}
+#aam-react-root .ar-post-status-pending {
+  border-color: #f0deae;
+  background: #fff7e6;
+  color: #805500;
+}
+#aam-react-root .ar-post-status-scheduled {
+  border-color: #cdddf3;
+  background: #eef5ff;
+  color: #285b91;
+}
+#aam-react-root .ar-post-status-private {
+  border-color: #e1d1f2;
+  background: #f6effd;
+  color: #69418a;
+}
 #aam-react-root .ar-content-entry-root .ar-resource-icon {
   width: 42px;
   height: 42px;
@@ -3881,6 +3964,27 @@
 }
 .ar-modal-picker-user {
   max-width: 760px;
+}
+.ar-modal-picker-user .ar-picker-results {
+  position: relative;
+  height: clamp(220px, 48vh, 520px);
+  overflow-y: auto;
+}
+.ar-modal-picker-user
+  .ar-picker-results.is-updating
+  .ar-picker-results-content {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ar-modal-picker-user .ar-picker-results-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  pointer-events: none;
 }
 .ar-modal .ar-two-column {
   display: grid;

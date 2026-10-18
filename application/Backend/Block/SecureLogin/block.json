@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "aam/secure-login",
+    "version": "8.0.2",
+    "title": "AAM Secure Login",
+    "category": "widgets",
+    "icon": "lock",
+    "description": "Display the AAM Secure Login form and signed-in account links.",
+    "textdomain": "advanced-access-manager",
+    "editorScript": "aam-secure-login-block",
+    "attributes": {
+        "loginTitle": {
+            "type": "string"
+        },
+        "userTitle": {
+            "type": "string"
+        },
+        "redirect": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "supports": {
+        "html": false
+    }
+}

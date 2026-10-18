@@ -175,6 +175,7 @@ class AAM_Service_SecurityAudit
             // These checks include the user's name and ID in their message.
             if (in_array($step, [
                 AAM_Audit_ApplicationPasswordCheck::ID,
+                AAM_Audit_InactiveAccountAndApplicationPasswordCheck::ID,
                 AAM_Audit_HighPrivilegeOrElevatedUserCheck::ID
             ], true) && !empty($issue['metadata']['id']) && !empty($issue['metadata']['name'])) {
                 $user_id = absint($issue['metadata']['id']);
@@ -393,6 +394,20 @@ class AAM_Service_SecurityAudit
             $report[$check]           = array_merge($current_result, $result);
             $report[$check]['issues'] = $issues;
 
+            // A paginated check may find issues before its final batch.
+            if (!empty($report[$check]['is_completed'])) {
+                $status = 'ok';
+                foreach ([ 'notice', 'warning', 'critical', 'error' ] as $severity) {
+                    foreach ($issues as $issue) {
+                        if ($issue['type'] === $severity) {
+                            $status = $severity;
+                            break;
+                        }
+                    }
+                }
+                $report[$check]['check_status'] = $status;
+            }
+
             AAM::api()->db->write(self::DB_OPTION, $report, false);
 
             // Acknowledgements keep their weight; resolved findings do not.
@@ -465,6 +480,14 @@ class AAM_Service_SecurityAudit
                 'description' => __('Lists accounts with application passwords, which can authenticate API requests without the account password. Review each integration and remove credentials no longer in use.', 'advanced-access-manager'),
                 'article'     => 'https://aamportal.com/article/wordpress-application-passwords-invisible-credentials-to-monitor'
             ),
+            AAM_Audit_InactiveAccountAndApplicationPasswordCheck::ID => [
+                'title'       => __('Identify Inactive Accounts & Aging Application Passwords', 'advanced-access-manager'),
+                'step'        => AAM_Audit_InactiveAccountAndApplicationPasswordCheck::ID,
+                'category'    => 'General Security Consideration',
+                'executor'    => AAM_Audit_InactiveAccountAndApplicationPasswordCheck::class,
+                'description' => __('Finds accounts and application passwords with no recorded use beyond their configured thresholds, and application passwords older than the rotation threshold. Accounts without an access record are evaluated from the later of registration or the start of access tracking.', 'advanced-access-manager'),
+                'article'     => 'https://aamportal.com/article/identify-inactive-accounts-aging-application-passwords/'
+            ],
             AAM_Audit_HighPrivilegeRoleCheck::ID => array(
                 'title'       => __('Detect High-Privilege Roles', 'advanced-access-manager'),
                 'step'        => AAM_Audit_HighPrivilegeRoleCheck::ID,

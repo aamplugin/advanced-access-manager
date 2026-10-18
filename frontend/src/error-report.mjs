@@ -39,11 +39,13 @@ function endpoint(path) {
 
 export function apiFailure(path, method, error) {
   if (error?.name === "AbortError") return null;
+  const status = Number(error?.status || error?.data?.status) || null;
+  if (status === null || status < 500 || status >= 600) return null;
   return {
     type: "http",
     method: String(method || "GET").toUpperCase(),
     endpoint: endpoint(path),
-    status: Number(error?.status || error?.data?.status) || null,
+    status,
     code: text(error?.code || "", 120),
     message: text(error?.message || error || "Request failed"),
   };

@@ -19,6 +19,9 @@ trait AAM_Restful_ServiceTrait
     /**
      * Map of REST & HTTP status codes
      *
+     * @var array
+     * @access private
+     * 
      * @version 7.0.0
      */
     private $_exception_map = [
@@ -123,6 +126,7 @@ trait AAM_Restful_ServiceTrait
                 'access_level' => [
                     'description' => 'Access level for the controls',
                     'type'        => 'string',
+                    'required'    => true,
                     'enum'        => $access_level_aware,
                     'validate_callback' => function ($value, $request) {
                         return $this->_validate_access_level($value, $request);

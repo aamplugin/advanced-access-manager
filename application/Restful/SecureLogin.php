@@ -133,7 +133,9 @@ class AAM_Restful_SecureLogin
         ));
 
         foreach($props as $prop) {
-            if (isset($user->{$prop})) {
+            if (isset($user->{$prop}) 
+                && !in_array($prop, [ 'user_pass', 'data' ], true)
+            ) {
                 $response[$prop] = $user->{$prop};
             }
         }

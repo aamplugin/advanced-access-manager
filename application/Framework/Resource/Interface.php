@@ -134,6 +134,20 @@ interface AAM_Framework_Resource_Interface
      */
     public function get_permission($resource_identifier, $permission_key);
 
+     /**
+     * Get resource's explicit permissions
+     * 
+     * Permissions set with AAM UI are considered explicit. Any other settings (e.g. defined
+     * in JSON access policies) are not
+     * 
+     * @param mixed $resource_identifier
+     * 
+     * @access public
+     * 
+     * @version 8.0.0
+     */
+    public function get_explicit_permissions($resource_identifier);
+
     /**
      * Remove a single permission
      *

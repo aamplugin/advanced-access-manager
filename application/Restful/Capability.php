@@ -228,7 +228,7 @@ class AAM_Restful_Capability
 
             if ($globally) {
                 // Rename this capability in every registered role
-                foreach(array_keys(wp_roles()->role_names) as $role_slug) {
+                foreach(array_keys(AAM::api()->roles->get_editable_roles(true)) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->replace(
                         $capability, $slug, $ignore_format
                     );
@@ -256,7 +256,7 @@ class AAM_Restful_Capability
      * @return WP_REST_Response
      * @access public
      *
-     * @version 7.0.0
+     * @version 8.0.2
      */
     public function delete_capability(WP_REST_Request $request)
     {
@@ -266,7 +266,7 @@ class AAM_Restful_Capability
 
             if ($globally) {
                 // Remove this capability from every registered role
-                foreach(array_keys(wp_roles()->role_names) as $role_slug) {
+                foreach(array_keys(AAM::api()->roles->get_editable_roles(true)) as $role_slug) {
                     AAM::api()->capabilities('role:' . $role_slug)->remove(
                         $capability
                     );

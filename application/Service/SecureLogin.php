@@ -13,7 +13,7 @@ use Vectorface\Whip\Whip;
  * Secure Login service
  *
  * @package AAM
- * @version 8.0.1
+ * @version 8.0.2
  */
 class AAM_Service_SecureLogin
 {
@@ -26,6 +26,13 @@ class AAM_Service_SecureLogin
      * @version 8.0.1
      */
     const LAST_ACCESS_TIME_META = 'aam_last_access_time';
+
+    /**
+     * Time when last-user-access tracking began
+     *
+     * @version 8.0.2
+     */
+    const TRACKER_STARTED_OPTION = 'aam_ua_tracker_started';
 
     /**
      * Last access IP address meta key
@@ -74,6 +81,9 @@ class AAM_Service_SecureLogin
             register_widget('AAM_Backend_Widget_Login');
         });
 
+        // Register the equivalent block for the block and site editors.
+        add_action('init', [ AAM_Backend_Block_SecureLogin::class, 'register' ]);
+
         add_action('init', function() {
             $this->initialize_hooks();
         }, PHP_INT_MAX);
@@ -85,10 +95,12 @@ class AAM_Service_SecureLogin
      * @return void
      * @access protected
      *
-     * @version 7.0.6
+     * @version 8.0.2
      */
     protected function initialize_hooks()
     {
+        $this->_initialize_tracker();
+
         add_action('aam_initialize_ui_action', function () {
             AAM_Backend_Feature_Settings_Security::register();
         });
@@ -113,6 +125,23 @@ class AAM_Service_SecureLogin
 
         if (is_user_logged_in()) {
             $this->_record_last_access(wp_get_current_user());
+        }
+    }
+
+    /**
+     * Establish the first reliable day of last-user-access tracking
+     *
+     * @return void
+     * @access private
+     *
+     * @version 8.0.2
+     */
+    private function _initialize_tracker()
+    {
+        if (AAM::api()->config->get('service.secure_login.track_last_access')
+            && get_option(self::TRACKER_STARTED_OPTION, null) === null
+        ) {
+            add_option(self::TRACKER_STARTED_OPTION, time(), '', true);
         }
     }
 

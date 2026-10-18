@@ -357,7 +357,8 @@ class AAM_Service_Core
 
         if (array_key_exists('policies', $dataset)) {
             foreach($dataset['policies'] as $policy) {
-                $insert = true;
+                $insert   = true;
+                $existing = null;
 
                 if (!empty($policy['slug'])) {
                     $existing = AAM::api()->misc->get_post_by_slug(
@@ -376,7 +377,7 @@ class AAM_Service_Core
                         'post_title'   => $policy['title'],
                         'post_excerpt' => $policy['excerpt']
                     ]);
-                } else {
+                } elseif (is_a($existing, WP_Post::class)) {
                     $policy_map[$policy['id']] = $existing->ID;
 
                     // Update existing policy with new imported content
@@ -441,6 +442,7 @@ class AAM_Service_Core
             AAM_Framework_Utility_Config::DB_OPTION,
             AAM_Framework_Utility_Cache::DB_OPTION,
             AAM_Service_Core::DB_OPTION,
+            AAM_Service_SecureLogin::TRACKER_STARTED_OPTION,
             AAM_Service_SecurityAudit::DB_OPTION,
             AAM_Service_SecurityAudit::DB_SCOPE_OPTION
         );
@@ -886,7 +888,7 @@ class AAM_Service_Core
      *
      * Check if user is locked or not
      *
-     * @param WP_Error $user
+     * @param WP_Error $result
      *
      * @return WP_Error|WP_User
      * @access public

@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
   useRef,
   useWorkspace,
   useResource,
@@ -14,6 +15,7 @@ import {
   EffectToggle,
   TableEmptyRow,
   Button,
+  Spinner,
   Modal,
   SelectControl,
   TextControl,
@@ -50,6 +52,35 @@ function UserExpirationBadge({ expiresAt }: any) {
     </ActionTooltip>
   );
 }
+function PeopleResults({
+  resource,
+  userPicker,
+  updatingResults,
+  resultsRef,
+  children,
+}: any) {
+  if (!userPicker) return <Resource resource={resource}>{children}</Resource>;
+  return (
+    <div
+      ref={resultsRef}
+      className={`ar-picker-results${updatingResults ? " is-updating" : ""}`}
+      aria-busy={resource.loading || updatingResults}
+    >
+      <div
+        className="ar-picker-results-content"
+        inert={updatingResults ? "" : undefined}
+      >
+        <Resource resource={resource}>{children}</Resource>
+      </div>
+      {updatingResults && (
+        <div className="ar-picker-results-loading" role="status">
+          <Spinner />
+          {t("Updating results…")}
+        </div>
+      )}
+    </div>
+  );
+}
 export function People({ type = "role", onSelect, onRoleCreated }: any) {
   const { boot, busy, navigate } = useWorkspace();
   const [search, setSearch] = useState("");
@@ -68,6 +99,18 @@ export function People({ type = "role", onSelect, onRoleCreated }: any) {
       : userListPath({ page, search, role: roleFilter, status: statusFilter }),
     false,
   );
+  const lastResults = useRef(null);
+  if (r.loaded && !r.error) lastResults.current = { type, data: r.data };
+  const userPicker = type === "user" && !!onSelect;
+  const resultsRef = useRef(null);
+  useEffect(() => {
+    if (userPicker && resultsRef.current) resultsRef.current.scrollTop = 0;
+  }, [userPicker, page, search, roleFilter, statusFilter]);
+  const updatingResults =
+    userPicker && r.loading && lastResults.current?.type === type;
+  const listResource = updatingResults
+    ? { ...r, data: lastResults.current.data, loading: false, loaded: true }
+    : r;
   const select = (row: any) => {
     const subject = {
       type,
@@ -189,7 +232,12 @@ export function People({ type = "role", onSelect, onRoleCreated }: any) {
           </Title>
         </>
       )}
-      <Resource resource={r}>
+      <PeopleResults
+        resource={listResource}
+        userPicker={userPicker}
+        updatingResults={updatingResults}
+        resultsRef={resultsRef}
+      >
         {(data) => {
           let rows = arr(data);
           const parentCounts =
@@ -493,7 +541,7 @@ export function People({ type = "role", onSelect, onRoleCreated }: any) {
             </>
           );
         }}
-      </Resource>
+      </PeopleResults>
       {edit && (
         <RoleEditor
           initial={edit}

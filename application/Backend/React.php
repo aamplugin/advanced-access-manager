@@ -8,7 +8,7 @@
  */
 
 /**
- * Backend UI interface for React-based access workspace.
+ * Backend UI interface for the React access workspace
  *
  * @package AAM
  * @version 8.0.0
@@ -17,7 +17,9 @@ class AAM_Backend_React
 {
 
     /**
-     * RESTful API endpoints for React-based access workspace.
+     * RESTful API endpoints for the React access workspace
+     *
+     * @version 8.0.0
      */
     const ENDPOINTS = [
         'admin_menu' => '/backend-menu',
@@ -38,16 +40,40 @@ class AAM_Backend_React
         'redirect' => '/redirect/access-denied?area=frontend'
     ];
 
+    /**
+     * Register the admin asset enqueue handler
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function boot()
     {
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue']);
     }
 
+    /**
+     * Determine if WordPress supports the React workspace
+     *
+     * @return bool
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function enabled()
     {
         return version_compare(get_bloginfo('version'), '6.2', '>=');
     }
 
+    /**
+     * Enqueue assets for the main access workspace
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function enqueue()
     {
         if (
@@ -97,7 +123,14 @@ class AAM_Backend_React
         );
     }
 
-    /** Load the post editor access controls. */
+    /**
+     * Enqueue access controls for the post editor
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function enqueue_post_metabox()
     {
         $base = plugins_url('media/', AAM_BASEDIR . '/aam.php');
@@ -151,7 +184,14 @@ class AAM_Backend_React
         wp_set_script_translations('aam-post-access', 'advanced-access-manager', AAM_BASEDIR . '/lang');
     }
 
-    /** Load the compact term editor entry point and its access dialog. */
+    /**
+     * Enqueue the term editor access controls
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function enqueue_term_access()
     {
         $base = plugins_url('media/', AAM_BASEDIR . '/aam.php');
@@ -168,7 +208,7 @@ class AAM_Backend_React
         }
         $bootstrap = apply_filters('aam_react_term_access_bootstrap_filter', [
             'roles' => $roles,
-            'errorNotifications' => (bool) AAM::api()->config->get('core.settings.ui.error_notifications'),
+            'errorNotifications' => AAM::api()->config->get('core.settings.ui.error_notifications'),
             'blogId' => get_current_blog_id(),
             'viewerId' => get_current_user_id(),
             'contentPremium' => self::content_premium_status(),
@@ -207,6 +247,14 @@ class AAM_Backend_React
         wp_set_script_translations('aam-term-access', 'advanced-access-manager', AAM_BASEDIR . '/lang');
     }
 
+    /**
+     * Get the Premium add-on status for content access controls
+     *
+     * @return array
+     * @access private
+     *
+     * @version 8.0.0
+     */
     private static function content_premium_status()
     {
         $active = defined('AAM_COMPLETE_PACKAGE');
@@ -237,6 +285,14 @@ class AAM_Backend_React
         ];
     }
 
+    /**
+     * Enqueue styles for confirmation dialogs
+     *
+     * @return void
+     * @access private
+     *
+     * @version 8.0.0
+     */
     private static function enqueue_confirmation_style()
     {
         $path = AAM_BASEDIR . '/media/css/confirmation-dialog.css';
@@ -248,7 +304,14 @@ class AAM_Backend_React
         );
     }
 
-    /** Load the shared frontend recovery notice for AAM screens. */
+    /**
+     * Enqueue the shared error recovery notice styles
+     *
+     * @return void
+     * @access private
+     *
+     * @version 8.0.0
+     */
     private static function enqueue_error_report_style()
     {
         $path = AAM_BASEDIR . '/media/css/error-report.css';
@@ -260,7 +323,16 @@ class AAM_Backend_React
         );
     }
 
-    /** Load the policy assignee selector on published access policies. */
+    /**
+     * Enqueue the policy assignee selector
+     *
+     * @param int $policy_id
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function enqueue_policy_assignee_metabox($policy_id)
     {
         $base = plugins_url('media/', AAM_BASEDIR . '/aam.php');
@@ -302,7 +374,18 @@ class AAM_Backend_React
         wp_set_script_translations('aam-policy-assignee', 'advanced-access-manager', AAM_BASEDIR . '/lang');
     }
 
-    /** Authorize context independently of navigation visibility. */
+    /**
+     * Validate access to the selected access level
+     *
+     * @param string $type
+     * @param mixed  $id
+     *
+     * @return void
+     * @throws RuntimeException
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function validate_context($type, $id)
     {
         $caps = [
@@ -325,6 +408,14 @@ class AAM_Backend_React
         }
     }
 
+    /**
+     * Render the access workspace
+     *
+     * @return void
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function render()
     {
         if (!current_user_can('aam_manager')) {
@@ -351,6 +442,17 @@ class AAM_Backend_React
         }
     }
 
+    /**
+     * Build the bootstrap data for the access workspace
+     *
+     * @param string $screen
+     * @param mixed  $access_level [Optional]
+     *
+     * @return array
+     * @access public
+     *
+     * @version 8.0.0
+     */
     public static function payload($screen, $access_level = null)
     {
         $context = AAM_Backend_AccessLevel::bootstrap($access_level);
@@ -523,6 +625,17 @@ class AAM_Backend_React
         return apply_filters('aam_react_bootstrap_filter', $payload, $al);
     }
 
+    /**
+     * Build the REST path for the selected access level
+     *
+     * @param string $endpoint
+     * @param array  $subject
+     *
+     * @return string
+     * @access private
+     *
+     * @version 8.0.0
+     */
     private static function context_path($endpoint, $subject)
     {
         $args = ['access_level' => $subject['type']];
@@ -531,7 +644,16 @@ class AAM_Backend_React
         return '/aam/v2' . $endpoint . (strpos($endpoint, '?') === false ? '?' : '&') . http_build_query($args, '', '&', PHP_QUERY_RFC3986);
     }
 
-    /** Internal dispatch retains route permission callbacks and validation. */
+    /**
+     * Dispatch a REST request with route permissions and validation
+     *
+     * @param string $path
+     *
+     * @return WP_REST_Response
+     * @access private
+     *
+     * @version 8.0.0
+     */
     private static function read_rest($path)
     {
         $parts = explode('?', $path, 2);

@@ -354,7 +354,6 @@ class AAM_Restful_Content
         try {
             $access_level = $this->_determine_access_level($request);
             $raw_list     = AAM::api()->content->get_post_types(
-                $access_level,
                 $request->get_param('return_all')
             );
 
@@ -686,11 +685,14 @@ class AAM_Restful_Content
         $resource   = $access_level->get_resource(
             AAM_Framework_Type_Resource::POST
         );
+        $status = get_post_status_object($post->post_status);
 
         $result = [
-            'id'              => $post->ID,
-            'icon'            => $post_type->menu_icon,
-            'is_hierarchical' => $post_type->hierarchical
+            'id'                => $post->ID,
+            'icon'              => $post_type->menu_icon,
+            'is_hierarchical'   => $post_type->hierarchical,
+            'post_status'       => $post->post_status,
+            'post_status_label' => $status ? $status->label : $post->post_status
         ];
 
         if ($post->post_type === 'nav_menu_item') {

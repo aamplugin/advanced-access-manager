@@ -10,22 +10,32 @@ import {
 
 test("API failures retain troubleshooting details without URL secrets", () => {
   const failure = apiFailure("/aam/v2/users?nonce=private&user_id=42", "post", {
-    status: 403,
-    code: "rest_forbidden",
-    message: "Access denied",
+    status: 500,
+    code: "internal_server_error",
+    message: "Server error",
   });
   assert.deepEqual(failure, {
     type: "http",
     method: "POST",
     endpoint: "/aam/v2/users",
-    status: 403,
-    code: "rest_forbidden",
-    message: "Access denied",
+    status: 500,
+    code: "internal_server_error",
+    message: "Server error",
   });
   assert.equal(
     apiFailure("/aam/v2/users", "GET", { name: "AbortError" }),
     null,
   );
+  for (const status of [400, 401, 403, 404, 422, 499, null]) {
+    assert.equal(
+      apiFailure("/aam/v2/user/20", "GET", {
+        status,
+        code: "rest_invalid_param",
+      }),
+      null,
+    );
+  }
+  assert.equal(apiFailure("/aam/v2/users", "GET", { status: 503 }).status, 503);
 });
 
 test("JavaScript failures keep stack locations but strip URL queries", () => {

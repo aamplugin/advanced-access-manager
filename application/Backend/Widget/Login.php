@@ -104,7 +104,9 @@ class AAM_Backend_Widget_Login extends WP_Widget
             );
         }
 
-        $instance['redirect'] = filter_input(INPUT_GET, 'redirect_to');
+        $redirect = filter_input(INPUT_GET, 'redirect_to');
+        $instance['redirect'] = !empty($redirect)
+            ? $redirect : (isset($instance['redirect']) ? $instance['redirect'] : '');
 
         return $instance;
     }

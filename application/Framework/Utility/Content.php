@@ -22,7 +22,7 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
     /**
      * Get collection of posts
      *
-     * @param array $args [Optional]
+     * @param array $query_args [Optional]
      *
      * @return Generator
      * @access public
@@ -35,7 +35,10 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
         $posts = get_posts(array_merge(
             [
                 'numberposts'    => 500,
-                'search_columns' => [ 'post_title' ]
+                'search_columns' => [ 'post_title' ],
+                'post_status'    => $this->_get_browsable_post_statuses(
+                    isset($query_args['post_type']) ? $query_args['post_type'] : 'post'
+                )
             ],
             $query_args,
             // Making sure that this attribute is not overwritten
@@ -160,7 +163,7 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
      * If $post_type_scope is defined, the array term resources will be scoped for
      * this give post type.
      *
-     * @param array  $args            [Optional]
+     * @param array  $query_args      [Optional]
      * @param string $post_type_scope [Optional]
      *
      * @return Generator
@@ -229,19 +232,28 @@ class AAM_Framework_Utility_Content implements AAM_Framework_Utility_Interface
             $args = array($post_type);
         }
 
-        if ($post_type === 'attachment') {
-            $query .= " AND ({$wpdb->posts}.post_status = %s)";
-            $args[] = 'inherit';
-        } else {
-            $statuses = get_post_stati(array('show_in_admin_all_list' => false));
-
-            foreach ($statuses as $status) {
-                $query .= " AND ({$wpdb->posts}.post_status <> %s)";
-                $args[] = $status;
-            }
-        }
+        $statuses = $this->_get_browsable_post_statuses($post_type);
+        $query   .= ' AND post_status IN (' . implode(', ', array_fill(0, count($statuses), '%s')) . ')';
+        $args     = array_merge($args, $statuses);
 
         return $wpdb->get_var($wpdb->prepare($query, $args));
+    }
+
+    /**
+     * Get the same statuses for browsing and counting posts.
+     *
+     * @param string $post_type
+     *
+     * @return array
+     * @access private
+     *
+     * @version 8.0.2
+     */
+    private function _get_browsable_post_statuses($post_type)
+    {
+        return $post_type === 'attachment'
+            ? [ 'inherit' ]
+            : get_post_stati([ 'show_in_admin_all_list' => true ]);
     }
 
     /**

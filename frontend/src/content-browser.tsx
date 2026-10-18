@@ -1,5 +1,7 @@
 import {
   useState,
+  useEffect,
+  useRef,
   useWorkspace,
   useResource,
   useWrite,
@@ -17,6 +19,66 @@ import {
 } from "./core";
 import { contentItemsPath } from "./content-query.mjs";
 import { ResourceIcon, ResourceOutcome } from "./resource-visuals";
+
+function PostStatusBadge({ status, label }: { status: string; label: string }) {
+  const styles: Record<string, { tone: string; icon: string }> = {
+    publish: { tone: "published", icon: "yes-alt" },
+    draft: { tone: "draft", icon: "edit" },
+    pending: { tone: "pending", icon: "clock" },
+    future: { tone: "scheduled", icon: "calendar-alt" },
+    private: { tone: "private", icon: "lock" },
+  };
+  const style = styles[status] || { tone: "other", icon: "marker" };
+
+  return (
+    <span className={`ar-post-status ar-post-status-${style.tone}`}>
+      <span className={`dashicons dashicons-${style.icon}`} aria-hidden="true" />
+      {label || status}
+    </span>
+  );
+}
+
+function shortPostTitle(title: string) {
+  const words = title.trim().split(/\s+/u);
+  return words.length > 12 ? `${words.slice(0, 12).join(" ")}…` : title;
+}
+
+function PostTitle({ title }: { title: string }) {
+  const visibleTitle = shortPostTitle(title);
+  const titleRef = useRef(null as HTMLSpanElement | null);
+  const [clipped, setClipped] = useState(false);
+
+  useEffect(() => {
+    const element = titleRef.current;
+    if (!element) return;
+
+    const measure = () => setClipped(element.scrollWidth > element.clientWidth + 1);
+    measure();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(element);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [visibleTitle]);
+
+  const shortened = visibleTitle !== title || clipped;
+
+  return (
+    <span
+      ref={titleRef}
+      className={`ar-content-post-title${shortened ? " is-shortened" : ""}`}
+      title={shortened ? title : undefined}
+      tabIndex={shortened ? 0 : undefined}
+      aria-label={shortened ? title : undefined}
+    >
+      <strong>{visibleTitle}</strong>
+    </span>
+  );
+}
 
 function ContentItems({ active, search, page, setPage, onEdit }: any) {
   const { boot } = useWorkspace();
@@ -48,6 +110,7 @@ function ContentItems({ active, search, page, setPage, onEdit }: any) {
                 const editLabel = isPosts
                   ? t("Edit post in WordPress")
                   : t("Edit term in WordPress");
+                const title = plain(row.title).trim() || t("(Untitled)");
                 return (
                   <tr key={row.id}>
                     <td>
@@ -64,9 +127,11 @@ function ContentItems({ active, search, page, setPage, onEdit }: any) {
                         />
                         <div className="ar-content-entry-copy">
                           <span className="ar-name-line">
-                            <strong>
-                              {plain(row.title) || t("(Untitled)")}
-                            </strong>
+                            {isPosts ? (
+                              <PostTitle title={title} />
+                            ) : (
+                              <strong>{title}</strong>
+                            )}
                             {!isPosts && row.is_default && (
                               <span
                                 className="ar-default-term"
@@ -79,12 +144,30 @@ function ContentItems({ active, search, page, setPage, onEdit }: any) {
                                 {t("Default")}
                               </span>
                             )}
-                            <ResourceOutcome
-                              permissions={row.permissions}
-                              customized={row.is_customized}
-                            />
+                            {!isPosts && (
+                              <ResourceOutcome
+                                permissions={row.permissions}
+                                customized={row.is_customized}
+                              />
+                            )}
                           </span>
-                          <small>#{row.id}</small>
+                          {isPosts ? (
+                            <span className="ar-content-post-details">
+                              {row.post_status && (
+                                <PostStatusBadge
+                                  status={row.post_status}
+                                  label={row.post_status_label}
+                                />
+                              )}
+                              <ResourceOutcome
+                                permissions={row.permissions}
+                                customized={row.is_customized}
+                              />
+                              <small>#{row.id}</small>
+                            </span>
+                          ) : (
+                            <small>#{row.id}</small>
+                          )}
                         </div>
                       </div>
                     </td>
