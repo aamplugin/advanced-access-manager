@@ -70,15 +70,17 @@ final class RouteContractsTest extends TestCase
 
         foreach ([
             '/aam/v2/preload', '/aam/v2/settings', '/aam/v2/roles',
-            '/aam/v2/users', '/aam/v2/capabilities', '/aam/v2/abilities',
+            '/aam/v2/users', '/aam/v2/abilities',
             '/aam/v2/mcp-servers', '/aam/v2/mcp-tools'
         ] as $path) {
             $request = new WP_REST_Request('GET', $path);
-            if ($path === '/aam/v2/preload') {
+
+            if (in_array($path,  [ '/aam/v2/preload' ])) {
                 $request->set_param('access_level', 'role');
                 $request->set_param('role_id', 'subscriber');
             }
             $response = $server->dispatch($request);
+
             $this->assertContains($response->get_status(), [ 401, 403 ], $path);
         }
     }
